@@ -58,6 +58,26 @@ extension FramingParserTests {
         }
     }
 
+    func testSingleQuoteInLine_CR_lineBreak() {
+        // RFC 3501 allows un-matched `"` in `text` parts, such as the text of an untagged OK response.
+        //
+        // Test that this:
+        //
+        // S: * OK Hello " foo
+        // S: * NO Hello bar
+        //
+        // gets parsed into the corresponding two frames / lines.
+        do {
+            var buffer: ByteBuffer = "* OK Hello \" foo\r"
+            XCTAssertEqual(try self.parser.appendAndFrameBuffer(&buffer), [.complete("* OK Hello \" foo\r")])
+        }
+        // Check that the next line parses:
+        do {
+            var buffer: ByteBuffer = "* NO Hello bar\r"
+            XCTAssertEqual(try self.parser.appendAndFrameBuffer(&buffer), [.complete("* NO Hello bar\r")])
+        }
+    }
+
     func testCommandWithQuoted() {
         var buffer: ByteBuffer = "A1 LOGIN \"foo\" \"bar\"\r\n"
         XCTAssertEqual(try self.parser.appendAndFrameBuffer(&buffer), [.complete("A1 LOGIN \"foo\" \"bar\"\r\n")])
