@@ -47,6 +47,15 @@ extension MailboxID: ExpressibleByStringLiteral {
     }
 }
 
+// MARK: - CustomDebugStringConvertible
+
+extension MailboxID: CustomDebugStringConvertible {
+    /// `value` as a `String`.
+    public var debugDescription: String {
+        "(\(String(self)))"
+    }
+}
+
 // MARK: - Encoding
 
 extension EncodeBuffer {

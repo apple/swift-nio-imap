@@ -51,9 +51,10 @@ extension MailboxAttribute_Tests {
                     unseenCount: 528028,
                     size: 680543,
                     highestModificationSequence: 797237,
-                    appendLimit: 86_254_193
+                    appendLimit: 86_254_193,
+                    mailboxID: "F2212ea87-6097-4256-9d51-71338625"
                 ),
-                "MESSAGES 133701 RECENT 255813 UIDNEXT 377003 UIDVALIDITY 427421 UNSEEN 528028 SIZE 680543 HIGHESTMODSEQ 797237 APPENDLIMIT 86254193",
+                "MESSAGES 133701 RECENT 255813 UIDNEXT 377003 UIDVALIDITY 427421 UNSEEN 528028 SIZE 680543 HIGHESTMODSEQ 797237 APPENDLIMIT 86254193 MAILBOXID (F2212ea87-6097-4256-9d51-71338625)",
                 #line
             ),
             (
