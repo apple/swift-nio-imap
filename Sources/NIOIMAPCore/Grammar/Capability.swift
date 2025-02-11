@@ -320,6 +320,10 @@ extension Capability {
     /// resources used by some client operations - RFC 4315.
     public static let uidPlus = Self(unchecked: "UIDPLUS")
 
+    /// Provides a command to retrieve UIDs that partition a mailbox's messages
+    /// into evenly sized batches
+    public static let uidBatches = Self(unchecked: "UIDBATCHES")
+
     /// Allows closing the current mailbox without expunging it - RFC 3691.
     public static let unselect = Self(unchecked: "UNSELECT")
 
