@@ -280,6 +280,7 @@ extension GrammarParser {
             case recent(Int)
             case highestModifierSequence(ModificationSequenceValue)
             case appendLimit(Int)
+            case mailboxID(MailboxID)
         }
 
         func parseStatusAttributeValue_messages(buffer: inout ParseBuffer, tracker: StackTracker) throws -> MailboxValue
@@ -333,6 +334,16 @@ extension GrammarParser {
             return .appendLimit(try self.parseNumber(buffer: &buffer, tracker: tracker))
         }
 
+        func parseStatusAttributeValue_mailboxID(
+            buffer: inout ParseBuffer,
+            tracker: StackTracker
+        ) throws -> MailboxValue {
+            try PL.parseFixedString("MAILBOXID (", buffer: &buffer, tracker: tracker)
+            let mailboxID = try self.parseMailboxID(buffer: &buffer, tracker: tracker)
+            try PL.parseFixedString(")", buffer: &buffer, tracker: tracker)
+            return .mailboxID(mailboxID)
+        }
+
         func parseStatusAttributeValue(buffer: inout ParseBuffer, tracker: StackTracker) throws -> MailboxValue {
             try PL.parseOneOf(
                 [
@@ -344,6 +355,7 @@ extension GrammarParser {
                     parseStatusAttributeValue_modificationSequence,
                     parseStatusAttributeValue_recent,
                     parseStatusAttributeValue_appendLimit,
+                    parseStatusAttributeValue_mailboxID,
                 ],
                 buffer: &buffer,
                 tracker: tracker
@@ -378,6 +390,8 @@ extension GrammarParser {
                     status.recentCount = recent
                 case .appendLimit(let limit):
                     status.appendLimit = limit
+                case .mailboxID(let id):
+                    status.mailboxID = id
                 }
             }
             return status
