@@ -90,6 +90,11 @@ public struct MailboxStatus: Hashable, Sendable {
     /// RFC 7889 per-mailbox `APPENDLIMIT`, i.e. maximum message upload size.
     public var appendLimit: Int?
 
+    /// `MAILBOXID`
+    ///
+    /// RFC 8474 object ID of the mailbox.
+    public var mailboxID: MailboxID?
+
     /// Creates a new `MailboxStatus`. All parameters default to `nil`.
     /// - parameter messageCount: RFC 3501: `MESSAGES` - The number of messages in the mailbox.
     /// - parameter recentCount: RFC 3501: `RECENT` - The number of messages with the \Recent flag set.
@@ -99,6 +104,7 @@ public struct MailboxStatus: Hashable, Sendable {
     /// - parameter size: RFC 8438: `SIZE` - The number of messages which do not have the `\Seen` flag set.
     /// - parameter highestModificationSequence: RFC 7162: `SIZE` - The total size of the mailbox in octets.
     /// - parameter appendLimit: RFC 7889 per-mailbox `APPENDLIMIT`, i.e. maximum message upload size.
+    /// - parameter mailboxID: RFC 8474 object ID of the mailbox.
     public init(
         messageCount: Int? = nil,
         recentCount: Int? = nil,
@@ -107,7 +113,8 @@ public struct MailboxStatus: Hashable, Sendable {
         unseenCount: Int? = nil,
         size: Int? = nil,
         highestModificationSequence: ModificationSequenceValue? = nil,
-        appendLimit: Int? = nil
+        appendLimit: Int? = nil,
+        mailboxID: MailboxID? = nil
     ) {
         self.messageCount = messageCount
         self.recentCount = recentCount
@@ -117,6 +124,7 @@ public struct MailboxStatus: Hashable, Sendable {
         self.size = size
         self.highestModificationSequence = highestModificationSequence
         self.appendLimit = appendLimit
+        self.mailboxID = mailboxID
     }
 }
 
@@ -156,6 +164,7 @@ extension EncodeBuffer {
         append(\.size, "SIZE")
         append(\.highestModificationSequence, "HIGHESTMODSEQ")
         append(\.appendLimit, "APPENDLIMIT")
+        append(\.mailboxID, "MAILBOXID")
 
         return self.writeArray(array, parenthesis: false) { (element, self) -> Int in
             self.writeString("\(element.0) \(element.1)")
