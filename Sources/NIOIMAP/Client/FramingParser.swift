@@ -343,22 +343,11 @@ extension FramingParser {
     private mutating func readByte_state_normalTraversal(lineFeedStrategy: LineFeedByteStrategy) -> FrameStatus {
         let byte = self.readByte()
         switch byte {
-        case CR:
-            self.readByte_state_foundCR()
-            return .parsedCompleteFrame
-
-        case LF:
-            switch lineFeedStrategy {
-            case .ignoreFirst:
-                precondition(self.frameLength == 1)
-                self.stepBackAndIgnoreByte()
-                self.state = .normalTraversal(.includeInFrame)
-                return .continueParsing
-            case .includeInFrame:
-                // if we weren't meant to ignore the LF then it
-                // must be the end of the current frame
-                return .parsedCompleteFrame
-            }
+        case CR, LF:
+            return processLineBreakByte_state(
+                byte: byte,
+                lineFeedStrategy: lineFeedStrategy
+            )
 
         case LITERAL_HEADER_START:
             self.state = .searchingForLiteralHeader(.findingBinaryFlag)
@@ -384,7 +373,10 @@ extension FramingParser {
             // parts (notably `text`) is allowed to have _any_ character
             // (except CR or LF).
             // Thus, fall through to “normal” state:
-            return readByte_state_normalTraversal(lineFeedStrategy: .includeInFrame)
+            return processLineBreakByte_state(
+                byte: byte,
+                lineFeedStrategy: .includeInFrame
+            )
 
         case (ESCAPE, .normal):
             self.state = .insideQuoted(.escaped)
@@ -400,6 +392,32 @@ extension FramingParser {
             // the current frame one byte longer.
             self.state = .insideQuoted(.normal)
             return .continueParsing
+        }
+    }
+
+    private mutating func processLineBreakByte_state(
+        byte: UInt8,
+        lineFeedStrategy: LineFeedByteStrategy
+    ) -> FrameStatus {
+        switch byte {
+        case CR:
+            self.readByte_state_foundCR()
+            return .parsedCompleteFrame
+
+        case LF:
+            switch lineFeedStrategy {
+            case .ignoreFirst:
+                precondition(self.frameLength == 1)
+                self.stepBackAndIgnoreByte()
+                self.state = .normalTraversal(.includeInFrame)
+                return .continueParsing
+            case .includeInFrame:
+                // if we weren't meant to ignore the LF then it
+                // must be the end of the current frame
+                return .parsedCompleteFrame
+            }
+        default:
+            fatalError()
         }
     }
 

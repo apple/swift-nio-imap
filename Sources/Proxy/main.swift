@@ -40,27 +40,30 @@ guard CommandLine.arguments.count == 5 else {
 
 let host = CommandLine.arguments[1]
 guard let port = Int(CommandLine.arguments[2]) else {
-    print("Invalid port, coudln't convert to an integer")
+    print("Invalid port, couldn't convert to an integer")
     exit(1)
 }
 
 let serverHost = CommandLine.arguments[3]
 guard let serverPort = Int(CommandLine.arguments[4]) else {
-    print("Invalid server port, coudln't convert to an integer")
+    print("Invalid server port, couldn't convert to an integer")
     exit(1)
 }
 
 // MARK: - Run
 
-try ServerBootstrap(group: eventLoopGroup).childChannelInitializer { channel -> EventLoopFuture<Void> in
-    channel.pipeline.addHandlers([
-        InboundPrintHandler(type: "CLIENT (Original)"),
-        OutboundPrintHandler(type: "SERVER (Decoded)"),
-        ByteToMessageHandler(FrameDecoder()),
-        IMAPServerHandler(),
-        MailClientToProxyHandler(serverHost: serverHost, serverPort: serverPort),
-    ])
-}
-.serverChannelOption(ChannelOptions.socket(SocketOptionLevel(SOL_SOCKET), SO_REUSEADDR), value: 1)
-.bind(host: host, port: port).wait()
-.closeFuture.wait()
+try ServerBootstrap(group: eventLoopGroup)
+    .childChannelInitializer { channel -> EventLoopFuture<Void> in
+        channel.eventLoop.makeCompletedFuture {
+            try! channel.pipeline.syncOperations.addHandlers([
+                InboundPrintHandler(type: "CLIENT (Original)"),
+                OutboundPrintHandler(type: "SERVER (Decoded)"),
+                ByteToMessageHandler(FrameDecoder()),
+                IMAPServerHandler(),
+                MailClientToProxyHandler(serverHost: serverHost, serverPort: serverPort),
+            ])
+        }
+    }
+    .serverChannelOption(ChannelOptions.socket(SocketOptionLevel(SOL_SOCKET), SO_REUSEADDR), value: 1)
+    .bind(host: host, port: port).wait()
+    .closeFuture.wait()
