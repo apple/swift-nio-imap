@@ -31,13 +31,17 @@ logger.info("Great! Connecting to \(hostname)")
 
 let sslContext = try NIOSSLContext(configuration: .clientDefault)
 let group = MultiThreadedEventLoopGroup(numberOfThreads: 1)
-let channel = try ClientBootstrap(group: group).channelInitializer { (channel) -> EventLoopFuture<Void> in
-    channel.pipeline.addHandlers([
-        try! NIOSSLClientHandler(context: sslContext, serverHostname: hostname),
-        ResponseRoundtripHandler(logger: logger),
-        CommandRoundtripHandler(logger: logger),
-    ])
-}.connect(host: hostname, port: 993).wait()
+let channel = try ClientBootstrap(group: group)
+    .channelInitializer { (channel) -> EventLoopFuture<Void> in
+        channel.eventLoop.makeCompletedFuture {
+            try! channel.pipeline.syncOperations.addHandlers([
+                try! NIOSSLClientHandler(context: sslContext, serverHostname: hostname),
+                ResponseRoundtripHandler(logger: logger),
+                CommandRoundtripHandler(logger: logger),
+            ])
+        }
+    }
+    .connect(host: hostname, port: 993).wait()
 
 _ = channel.closeFuture.always { result in
     switch result {
