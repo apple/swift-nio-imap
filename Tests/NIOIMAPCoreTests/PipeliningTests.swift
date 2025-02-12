@@ -545,13 +545,25 @@ extension PipeliningTests {
     }
 
     func testCatenatePart() {
-        // CATEANTE may reference other messages by UID:
+        // CATENATE may reference other messages by UID:
         let append = CommandStreamPart.append(.catenateURL(.joeURLFetch))
         XCTAssertEqual(append.pipeliningRequirements, [])
         XCTAssertEqual(
             append.pipeliningBehavior,
             [
                 .isUIDBased
+            ]
+        )
+    }
+
+    func testUIDBatches() {
+        let append = CommandStreamPart.tagged(.init(tag: "A1", command: .uidBatches(batchSize: 1_000)))
+        XCTAssertEqual(append.pipeliningRequirements, [])
+        XCTAssertEqual(
+            append.pipeliningBehavior,
+            [
+                .isUIDBased,
+                .mayTriggerUntaggedExpunge,
             ]
         )
     }
