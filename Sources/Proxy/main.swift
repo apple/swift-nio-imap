@@ -52,18 +52,18 @@ guard let serverPort = Int(CommandLine.arguments[4]) else {
 
 // MARK: - Run
 
-try ServerBootstrap(group: eventLoopGroup).childChannelInitializer { channel -> EventLoopFuture<Void> in
-    try! channel.pipeline.syncOperations.addHandlers([
-        InboundPrintHandler(type: "CLIENT (Original)"),
-        OutboundPrintHandler(type: "SERVER (Decoded)"),
-        ByteToMessageHandler(FrameDecoder()),
-        IMAPServerHandler(),
-        MailClientToProxyHandler(serverHost: serverHost, serverPort: serverPort),
-    ])
-    let p = eventLoopGroup.any().makePromise(of: Void.self)
-    p.succeed()
-    return p.futureResult
-}
-.serverChannelOption(ChannelOptions.socket(SocketOptionLevel(SOL_SOCKET), SO_REUSEADDR), value: 1)
-.bind(host: host, port: port).wait()
-.closeFuture.wait()
+try ServerBootstrap(group: eventLoopGroup)
+    .childChannelInitializer { channel -> EventLoopFuture<Void> in
+        channel.eventLoop.makeCompletedFuture {
+            try! channel.pipeline.syncOperations.addHandlers([
+                InboundPrintHandler(type: "CLIENT (Original)"),
+                OutboundPrintHandler(type: "SERVER (Decoded)"),
+                ByteToMessageHandler(FrameDecoder()),
+                IMAPServerHandler(),
+                MailClientToProxyHandler(serverHost: serverHost, serverPort: serverPort),
+            ])
+        }
+    }
+    .serverChannelOption(ChannelOptions.socket(SocketOptionLevel(SOL_SOCKET), SO_REUSEADDR), value: 1)
+    .bind(host: host, port: port).wait()
+    .closeFuture.wait()

@@ -62,11 +62,13 @@ final class ParserIntegrationTests: XCTestCase {
             server = try ServerBootstrap(group: group)
                 .serverChannelOption(ChannelOptions.socket(.init(SOL_SOCKET), .init(SO_REUSEADDR)), value: 1)
                 .childChannelInitializer { channel in
-                    channel.pipeline.addHandlers(
-                        ByteToMessageHandler(FrameDecoder()),
-                        IMAPServerHandler(),
-                        CollectEverythingHandler(collectionDonePromise: collectionDonePromise)
-                    )
+                    channel.eventLoop.makeCompletedFuture {
+                        try! channel.pipeline.syncOperations.addHandlers([
+                            ByteToMessageHandler(FrameDecoder()),
+                            IMAPServerHandler(),
+                            CollectEverythingHandler(collectionDonePromise: collectionDonePromise),
+                        ])
+                    }
                 }
                 .bind(to: .init(ipAddress: "127.0.0.1", port: 0))
                 .wait()
