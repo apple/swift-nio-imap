@@ -371,7 +371,7 @@ extension Capability {
         Self("APPENDLIMIT=\(count)")
     }
 
-    /// MESSAGELIMIT
+    /// RFC 9738 `MESSAGELIMIT`
     ///
     /// Allows servers to announce a limit on the number of messages that can be processed in a single command.
     public static func messageLimit(_ count: Int) -> Self {
