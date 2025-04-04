@@ -274,7 +274,7 @@ extension GrammarParser {
             case size(Int)
             case recent(Int)
             case highestModifierSequence(ModificationSequenceValue)
-            case appendLimit(Int)
+            case appendLimit(Int?)
         }
 
         func parseStatusAttributeValue_messages(buffer: inout ParseBuffer, tracker: StackTracker) throws -> MailboxValue
@@ -325,7 +325,29 @@ extension GrammarParser {
             tracker: StackTracker
         ) throws -> MailboxValue {
             try PL.parseFixedString("APPENDLIMIT ", buffer: &buffer, tracker: tracker)
-            return .appendLimit(try self.parseNumber(buffer: &buffer, tracker: tracker))
+
+            func parseStatusAttributeValue_appendLimit_nil(
+                buffer: inout ParseBuffer,
+                tracker: StackTracker
+            ) throws -> MailboxValue {
+                try self.parseNil(buffer: &buffer, tracker: tracker)
+                return .appendLimit(nil)
+            }
+            func parseStatusAttributeValue_appendLimit_number(
+                buffer: inout ParseBuffer,
+                tracker: StackTracker
+            ) throws -> MailboxValue {
+                return .appendLimit(try self.parseNumber(buffer: &buffer, tracker: tracker))
+            }
+
+            return try PL.parseOneOf(
+                [
+                    parseStatusAttributeValue_appendLimit_nil,
+                    parseStatusAttributeValue_appendLimit_number,
+                ],
+                buffer: &buffer,
+                tracker: tracker
+            )
         }
 
         func parseStatusAttributeValue(buffer: inout ParseBuffer, tracker: StackTracker) throws -> MailboxValue {

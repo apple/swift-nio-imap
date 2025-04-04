@@ -2753,6 +2753,7 @@ extension ParserUnitTests {
                     ), #line
                 ),
                 ("APPENDLIMIT 257890", ")", .init(appendLimit: 257_890), #line),
+                ("APPENDLIMIT NIL", ")", .init(appendLimit: nil), #line),
                 ("SIZE 81630", ")", .init(size: 81_630), #line),
                 (
                     "UIDNEXT 95604  HIGHESTMODSEQ 35227 APPENDLIMIT 81818  UIDVALIDITY 33682", ")",
