@@ -83,13 +83,12 @@ public final class IMAPServerHandler: ChannelDuplexHandler {
             context.read()
         }
         let outstanding = self.numberOfOutstandingContinuationRequests
-        if outstanding == 0 {
-            return
-        }
+        guard outstanding != 0 else { return }
 
         for _ in 0..<outstanding {
             context.write(self.wrapOutboundOut(self.continuationRequestBytes), promise: nil)
         }
+        self.numberOfOutstandingContinuationRequests = 0
         context.flush()
     }
 
