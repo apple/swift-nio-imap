@@ -183,6 +183,47 @@ class IMAPServerHandlerTests: XCTestCase {
         self.assertOutboundBuffer("A1 OK Success\r\n")
     }
 
+    func testAppend() {
+        self.handler = IMAPServerHandler(
+            continuationRequest: .responseText(ResponseText(text: "Ready for literal data"))
+        )
+        self.channel = EmbeddedChannel(handlers: [ByteToMessageHandler(FrameDecoder()), self.handler])
+
+        self.writeInbound("A1 APPEND saved-messages (\\Seen) {12}\r\n")
+        self.assertInbound(.append(.start(tag: "A1", appendingTo: MailboxName("saved-messages"))))
+        self.assertInbound(
+            .append(
+                .beginMessage(
+                    message: AppendMessage(
+                        options: AppendOptions(flagList: [.seen]),
+                        data: AppendData(byteCount: 12)
+                    )
+                )
+            )
+        )
+
+        self.channel.read()
+        self.assertOutboundBuffer("+ Ready for literal data\r\n")
+
+        self.writeInbound("012345678901")
+        self.assertInbound(.append(.messageBytes(ByteBuffer(string: "012345678901"))))
+
+        self.writeInbound("\r\n")
+        self.assertInbound(.append(.endMessage))
+        self.assertInbound(.append(.finish))
+
+        self.channel.read()
+        self.assertOutboundBufferEmpty()
+
+        self.writeOutbound(.tagged(TaggedResponse(tag: "A1", state: .ok(.init(text: "Done appending")))))
+        self.assertOutboundBuffer("A1 OK Done appending\r\n")
+
+        self.writeInbound("A2 NOOP\r\n")
+        self.assertInbound(.tagged(.init(tag: "A2", command: .noop)))
+        self.channel.read()
+        self.assertOutboundBufferEmpty()
+    }
+
     // MARK: - setup/tear down
 
     override func setUp() {
@@ -222,6 +263,12 @@ extension IMAPServerHandlerTests {
             return
         }
         XCTAssertEqual(buffer, read, "\(String(buffer: buffer)) != \(String(buffer: read))", line: line)
+    }
+
+    private func assertOutboundBufferEmpty(line: UInt = #line) {
+        var maybeRead: ByteBuffer?
+        XCTAssertNoThrow(maybeRead = try self.channel.readOutbound(), line: line)
+        XCTAssertNil(maybeRead.map { String(buffer: $0) })
     }
 
     private func assertOutboundString(_ string: String, line: UInt = #line) {
