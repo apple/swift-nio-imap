@@ -456,7 +456,11 @@ extension ClientStateMachine {
 
     private func makeEncodeBuffer(_ command: CommandStreamPart? = nil) -> CommandEncodeBuffer {
         let byteBuffer = self.allocator.buffer(capacity: 128)
-        var encodeBuffer = CommandEncodeBuffer(buffer: byteBuffer, options: self.encodingOptions.encodingOptions, loggingMode: false)
+        var encodeBuffer = CommandEncodeBuffer(
+            buffer: byteBuffer,
+            options: self.encodingOptions.encodingOptions,
+            loggingMode: false
+        )
         if let command = command {
             encodeBuffer.writeCommandStream(command)
         }
