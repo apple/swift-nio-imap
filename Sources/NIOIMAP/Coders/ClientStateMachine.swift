@@ -591,9 +591,15 @@ extension ClientStateMachine {
             return nil
         }
 
+        // Workaround: Using non-synchronizing literals is broken for APPEND.
+        var encodingOptions = self.encodingOptions.encodingOptions
+        encodingOptions.useSynchronizingLiteral = true
+        encodingOptions.useNonSynchronizingLiteralPlus = false
+        encodingOptions.useNonSynchronizingLiteralMinus = false
+
         var encodeBuffer = CommandEncodeBuffer(
             buffer: ByteBuffer(),
-            options: self.encodingOptions.encodingOptions,
+            options: encodingOptions,
             encodedAtLeastOneCatenateElement: appendingStateMachine.hasCatenatedAtLeastOneObject,
             loggingMode: false
         )
