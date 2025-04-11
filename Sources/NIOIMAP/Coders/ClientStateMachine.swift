@@ -130,11 +130,7 @@ struct ClientStateMachine {
         case error
     }
 
-    /// Capabilites are sent by an IMAP server. Once the desired capabilities have been
-    /// select from the server's response, update these encoding options to enable or disable
-    /// certain types of literal encodings.
-    /// - Note: Make sure to send `.enable` commands for applicable capabilities
-    var encodingOptions: CommandEncodingOptions
+    var encodingOptions: ClientEncodingOptions
 
     private var state: State = .expectingNormalResponse
     private var activeCommandTags: Set<String> = []
@@ -146,8 +142,10 @@ struct ClientStateMachine {
         initialCapacity: 16
     )
 
-    init(encodingOptions: CommandEncodingOptions) {
-        self.encodingOptions = encodingOptions
+    init(encodingOptions: IMAPClientHandler.EncodingOptions) {
+        self.encodingOptions = ClientEncodingOptions(
+            userOptions: encodingOptions
+        )
     }
 
     mutating func handlerAdded(_ allocator: ByteBufferAllocator) {
@@ -458,7 +456,11 @@ extension ClientStateMachine {
 
     private func makeEncodeBuffer(_ command: CommandStreamPart? = nil) -> CommandEncodeBuffer {
         let byteBuffer = self.allocator.buffer(capacity: 128)
-        var encodeBuffer = CommandEncodeBuffer(buffer: byteBuffer, options: self.encodingOptions, loggingMode: false)
+        var encodeBuffer = CommandEncodeBuffer(
+            buffer: byteBuffer,
+            options: self.encodingOptions.encodingOptions,
+            loggingMode: false
+        )
         if let command = command {
             encodeBuffer.writeCommandStream(command)
         }
@@ -594,7 +596,7 @@ extension ClientStateMachine {
         }
 
         // Workaround: Using non-synchronizing literals is broken for APPEND.
-        var encodingOptions = self.encodingOptions
+        var encodingOptions = self.encodingOptions.encodingOptions
         encodingOptions.useSynchronizingLiteral = true
         encodingOptions.useNonSynchronizingLiteralPlus = false
         encodingOptions.useNonSynchronizingLiteralMinus = false

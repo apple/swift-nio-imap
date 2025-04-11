@@ -25,7 +25,10 @@ public final class IMAPClientHandler: ChannelDuplexHandler {
     public typealias InboundOut = Response
 
     /// Commands are encoding into a ByteBuffer to send to a server.
-    public typealias OutboundIn = CommandStreamPart
+    public enum OutboundIn: Hashable, Sendable {
+        case part(CommandStreamPart)
+        case setEncodingOptions(EncodingOptions)
+    }
 
     /// After encoding the bytes may be sent further through the channel to, for example, a TLS handler.
     public typealias OutboundOut = ByteBuffer
@@ -34,27 +37,14 @@ public final class IMAPClientHandler: ChannelDuplexHandler {
 
     private var state: ClientStateMachine
 
-    private var lastKnownCapabilities = [Capability]()
-
-    /// This function is called by the `IMAPChannelHandler` upon receipt of a response containing capabilities.
-    /// The first argument is the capabilities that the server has sent. The second is a mutable set of encoding options.
-    /// The encoding options are pre-populated with what are considered to be the *best* settings for the given
-    /// capabilities.
-    var encodingChangeCallback: (OrderedDictionary<String, String?>, inout CommandEncodingOptions) -> Void
-
     public init(
-        encodingChangeCallback: @escaping (OrderedDictionary<String, String?>, inout CommandEncodingOptions) -> Void = {
-            _,
-            _ in
-        }
+        encodingOptions: EncodingOptions = .automatic
     ) {
-        self.state = .init(encodingOptions: CommandEncodingOptions(capabilities: self.lastKnownCapabilities))
+        self.state = .init(encodingOptions: encodingOptions)
         self.decoder = NIOSingleStepByteToMessageProcessor(
             ResponseDecoder(),
             maximumBufferSize: IMAPDefaults.lineLengthLimit
         )
-        self.encodingChangeCallback = encodingChangeCallback
-        self.lastKnownCapabilities = []
     }
 
     public func channelInactive(context: ChannelHandlerContext) {
@@ -93,16 +83,7 @@ public final class IMAPClientHandler: ChannelDuplexHandler {
         case .response(let response):
             try self.state.receiveResponse(response)
             context.fireChannelRead(self.wrapInboundOut(response))
-            switch response {
-            case .untagged(.capabilityData(let caps)):
-                self.lastKnownCapabilities = caps
-            case .untagged(.id(let info)):
-                var recomended = CommandEncodingOptions(capabilities: self.lastKnownCapabilities)
-                self.encodingChangeCallback(info, &recomended)
-                self.state.encodingOptions = recomended
-            default:
-                break
-            }
+            self.state.encodingOptions.updateAutomaticOptions(response: response)
         }
     }
 
@@ -132,14 +113,19 @@ public final class IMAPClientHandler: ChannelDuplexHandler {
     }
 
     public func write(context: ChannelHandlerContext, data: NIOAny, promise: EventLoopPromise<Void>?) {
-        let command = self.unwrapOutboundIn(data)
-        do {
-            if let chunk = try self.state.sendCommand(command, promise: promise) {
-                self.writeChunk(chunk, context: context)
+        switch self.unwrapOutboundIn(data) {
+        case .part(let command):
+            do {
+                if let chunk = try self.state.sendCommand(command, promise: promise) {
+                    self.writeChunk(chunk, context: context)
+                }
+            } catch {
+                context.fireErrorCaught(error)
+                promise?.fail(error)
             }
-        } catch {
-            context.fireErrorCaught(error)
-            promise?.fail(error)
+        case .setEncodingOptions(let options):
+            state.encodingOptions.userOptions = options
+            promise?.succeed()
         }
     }
 
@@ -163,5 +149,12 @@ public final class IMAPClientHandler: ChannelDuplexHandler {
     public func flush(context: ChannelHandlerContext) {
         self.state.flush()
         context.flush()
+    }
+}
+
+extension IMAPClientHandler {
+    public enum EncodingOptions: Hashable, Sendable {
+        case automatic
+        case fixed(CommandEncodingOptions)
     }
 }

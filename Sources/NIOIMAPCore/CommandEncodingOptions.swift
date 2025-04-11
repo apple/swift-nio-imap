@@ -33,21 +33,12 @@ public struct CommandEncodingOptions: Hashable, Sendable {
 
     public static let rfc3501: Self = .init()
 
-    /// Create RFC 3501 compliant encoding options, i.e. without any IMAP extensions.
-    public init() {
-        self.useQuotedString = true
-        self.useSynchronizingLiteral = true
-        self.useNonSynchronizingLiteralPlus = false
-        self.useNonSynchronizingLiteralMinus = false
-        self.useBinaryLiteral = false
-    }
-
     public init(
-        useQuotedString: Bool,
-        useSynchronizingLiteral: Bool,
-        useNonSynchronizingLiteralPlus: Bool,
-        useNonSynchronizingLiteralMinus: Bool,
-        useBinaryLiteral: Bool
+        useQuotedString: Bool = true,
+        useSynchronizingLiteral: Bool = true,
+        useNonSynchronizingLiteralPlus: Bool = false,
+        useNonSynchronizingLiteralMinus: Bool = false,
+        useBinaryLiteral: Bool = false
     ) {
         self.useQuotedString = useQuotedString
         self.useSynchronizingLiteral = useSynchronizingLiteral
