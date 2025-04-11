@@ -46,7 +46,7 @@ class MailClientToProxyHandler: ChannelInboundHandler {
                     sslHandler,
                     OutboundPrintHandler(type: "CLIENT (Encoded)"),
                     InboundPrintHandler(type: "SERVER (Original)"),
-                    IMAPClientHandler(encodingChangeCallback: { _, _ in }),
+                    IMAPClientHandler(),
                     ProxyToMailServerHandler(mailAppToProxyChannel: mailClientToProxyChannel),
                 ])
             }
@@ -64,8 +64,8 @@ class MailClientToProxyHandler: ChannelInboundHandler {
     }
 
     func channelRead(context: ChannelHandlerContext, data: NIOAny) {
-        let command = self.unwrapInboundIn(data)
-        self.clientChannel?.writeAndFlush(command, promise: nil)
+        let part = self.unwrapInboundIn(data)
+        self.clientChannel?.writeAndFlush(IMAPClientHandler.OutboundIn.part(part), promise: nil)
     }
 
     func errorCaught(context: ChannelHandlerContext, error: Error) {

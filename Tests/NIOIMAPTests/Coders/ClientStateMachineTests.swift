@@ -21,7 +21,7 @@ class ClientStateMachineTests: XCTestCase {
     var stateMachine: ClientStateMachine!
 
     override func setUp() {
-        self.stateMachine = ClientStateMachine(encodingOptions: .rfc3501)
+        self.stateMachine = ClientStateMachine(encodingOptions: .fixed(.rfc3501))
         self.stateMachine.handlerAdded(ByteBufferAllocator())
     }
 

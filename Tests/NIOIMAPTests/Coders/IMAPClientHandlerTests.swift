@@ -401,17 +401,47 @@ class IMAPClientHandlerTests: XCTestCase {
         self.assertInbound(.tagged(.init(tag: "A1", state: .ok(.init(text: "Success")))))
     }
 
-    func testCanChangeEncodingOnCallback() {
-        let turnOnLiteralPlusExpectation = XCTestExpectation(description: "Turn on literal +")
+    func testCanChangeEncodingToFixed() {
+        self.clientHandler = IMAPClientHandler()
+        self.channel = EmbeddedChannel(handler: self.clientHandler, loop: .init())
+        self.channel.pipeline.fireChannelActive()
 
-        self.clientHandler = IMAPClientHandler(encodingChangeCallback: { info, options in
-            if info["name"] == "NIOIMAP" {
-                turnOnLiteralPlusExpectation.fulfill()
-            } else {
-                XCTFail("No idea where this info was sent from, but we didn't send it")
-            }
-            options.useNonSynchronizingLiteralPlus = true
-        })
+        let f1 = self.writeOutbound(
+            .tagged(.init(tag: "A1", command: .login(username: "\\", password: "\\"))),
+            wait: false
+        )
+        self.assertOutboundString("A1 LOGIN {1}\r\n")
+        self.writeInbound("+ OK\r\n")
+        self.assertOutboundString("\\ {1}\r\n")
+        self.writeInbound("+ OK\r\n")
+        self.assertOutboundString("\\\r\n")
+        XCTAssertNoThrow(try f1.wait())
+
+        // Change the encoding options:
+        let f2 = self.writeOutbound(
+            .setEncodingOptions(
+                .fixed(
+                    CommandEncodingOptions(
+                        useSynchronizingLiteral: false,
+                        useNonSynchronizingLiteralPlus: true
+                    )
+                )
+            ),
+            wait: false
+        )
+        XCTAssertNoThrow(try f2.wait())
+
+        // now we should have literal+ turned on
+        let f3 = self.writeOutbound(
+            .tagged(.init(tag: "A3", command: .login(username: "\\", password: "\\"))),
+            wait: false
+        )
+        self.assertOutboundString("A3 LOGIN {1+}\r\n\\ {1+}\r\n\\\r\n")
+        XCTAssertNoThrow(try f3.wait())
+    }
+
+    func testCanChangeEncodingAutomatically() {
+        self.clientHandler = IMAPClientHandler()
         self.channel = EmbeddedChannel(handler: self.clientHandler, loop: .init())
         self.channel.pipeline.fireChannelActive()
 
@@ -427,18 +457,10 @@ class IMAPClientHandlerTests: XCTestCase {
         XCTAssertNoThrow(try f1.wait())
 
         // send some capabilities
-        self.writeInbound("A1 OK [CAPABILITY LITERAL+]\r\n")
-        self.assertInbound(.tagged(.init(tag: "A1", state: .ok(.init(code: .capability([.literalPlus]), text: "")))))
-
-        // send the server ID (client sends a noop
-        let f2 = self.writeOutbound(.tagged(.init(tag: "A2", command: .noop)), wait: false)
-        self.assertOutboundString("A2 NOOP\r\n")
-        self.writeInbound("* ID (\"name\" \"NIOIMAP\")\r\n")
-        self.assertInbound(.untagged(.id(["name": "NIOIMAP"])))
-        wait(for: [turnOnLiteralPlusExpectation], timeout: 1.0)
-        self.writeInbound("A2 OK NOOP complete\r\n")
-        self.assertInbound(.tagged(.init(tag: "A2", state: .ok(.init(text: "NOOP complete")))))
-        XCTAssertNoThrow(try f2.wait())
+        self.writeInbound("A1 OK [CAPABILITY IMAP4 LITERAL+]\r\n")
+        self.assertInbound(
+            .tagged(.init(tag: "A1", state: .ok(.init(code: .capability([.imap4, .literalPlus]), text: ""))))
+        )
 
         // now we should have literal+ turned on
         let f3 = self.writeOutbound(
@@ -572,14 +594,14 @@ class IMAPClientHandlerTests: XCTestCase {
         class PostTestHandler: ChannelDuplexHandler {
             typealias InboundIn = Response
             typealias OutboundIn = Response
-            typealias OutboundOut = CommandStreamPart
+            typealias OutboundOut = IMAPClientHandler.OutboundIn
 
             var callCount = 0
 
             func channelRead(context: ChannelHandlerContext, data: NIOAny) {
                 self.callCount += 1
                 if self.callCount == 1 {
-                    context.writeAndFlush(self.wrapOutboundOut(.continuationResponse("")), promise: nil)
+                    context.writeAndFlush(self.wrapOutboundOut(.part(.continuationResponse(""))), promise: nil)
                     context.triggerUserOutboundEvent(MyOutboundEvent(), promise: nil)
                 }
             }
@@ -690,8 +712,10 @@ class IMAPClientHandlerTests: XCTestCase {
 
         // writing a command that has a continuation
         let future = self.channel.writeAndFlush(
-            CommandStreamPart.tagged(
-                .init(tag: "A1", command: .rename(from: .init("\\"), to: .init("\\"), parameters: [:]))
+            IMAPClientHandler.OutboundIn.part(
+                CommandStreamPart.tagged(
+                    .init(tag: "A1", command: .rename(from: .init("\\"), to: .init("\\"), parameters: [:]))
+                )
             )
         )
         self.assertOutboundString("A1 RENAME {1}\r\n")
@@ -825,11 +849,20 @@ extension IMAPClientHandlerTests {
 
     @discardableResult
     private func writeOutbound(
-        _ command: CommandStreamPart,
+        _ part: CommandStreamPart,
         wait: Bool = true,
         line: UInt = #line
     ) -> EventLoopFuture<Void> {
-        let result = self.channel.writeAndFlush(command)
+        writeOutbound(.part(part), wait: wait, line: line)
+    }
+
+    @discardableResult
+    private func writeOutbound(
+        _ outboundIn: IMAPClientHandler.OutboundIn,
+        wait: Bool = true,
+        line: UInt = #line
+    ) -> EventLoopFuture<Void> {
+        let result = self.channel.writeAndFlush(outboundIn)
         if wait {
             XCTAssertNoThrow(try result.wait(), line: line)
         }
