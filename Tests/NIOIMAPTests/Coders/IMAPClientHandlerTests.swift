@@ -777,7 +777,7 @@ class IMAPClientHandlerTests: XCTestCase {
         XCTAssertNoThrow(try p7.wait())
     }
 
-    func testPromiseIsntLeakedOnUnexpectedResponse() {
+    func testPromiseIsNotLeakedOnUnexpectedResponse() {
         // We need to get into a state where we are
         // expecting a continuation, but actually
         // receive a response.
