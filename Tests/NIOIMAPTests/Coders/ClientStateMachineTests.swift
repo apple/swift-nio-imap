@@ -291,7 +291,7 @@ extension ClientStateMachineTests {
         XCTAssertEqual(expected.shouldSucceedPromise, result?.shouldSucceedPromise, line: line)
     }
 
-    func testAppendWorflow_normal() {
+    func testAppendWorkflow_normal() {
         // start the append command
         self.assert(
             .init(bytes: "A1 APPEND \"INBOX\"", promise: nil, shouldSucceedPromise: true),
@@ -373,7 +373,57 @@ extension ClientStateMachineTests {
         )
     }
 
-    func testAppeandPreloading() {
+    func testAppendWorkflow_receivingUntaggedResponses() throws {
+        // start the append command
+        self.assert(
+            .init(bytes: "A1 APPEND \"INBOX\"", promise: nil, shouldSucceedPromise: true),
+            try self.stateMachine.sendCommand(.append(.start(tag: "A1", appendingTo: .inbox)))
+        )
+
+        // append a message
+        self.assert(
+            .init(bytes: " {10}\r\n", promise: nil, shouldSucceedPromise: true),
+            try self.stateMachine.sendCommand(
+                .append(.beginMessage(message: .init(options: .init(), data: .init(byteCount: 10))))
+            )
+        )
+        XCTAssertNoThrow(
+            XCTAssertEqual(
+                try self.stateMachine.receiveContinuationRequest(.data("ready2")),
+                .sendChunks([])
+            )
+        )
+        self.assert(
+            .init(bytes: "0123456789", promise: nil, shouldSucceedPromise: true),
+            try self.stateMachine.sendCommand(.append(.messageBytes("0123456789")))
+        )
+        self.assert(
+            .init(bytes: "", promise: nil, shouldSucceedPromise: true),
+            try self.stateMachine.sendCommand(.append(.endMessage))
+        )
+
+        // Send an untagged EXISTS:
+        try self.stateMachine.receiveResponse(.untagged(.mailboxData(.exists(5_732))))
+
+        // Finish the append command, and then send another different command
+        self.assert(
+            .init(bytes: "\r\n", promise: nil, shouldSucceedPromise: true),
+            try self.stateMachine.sendCommand(.append(.finish))
+        )
+
+        // Send an untagged RECENT:
+        try self.stateMachine.receiveResponse(.untagged(.mailboxData(.recent(0))))
+
+        XCTAssertNoThrow(
+            try self.stateMachine.receiveResponse(.tagged(.init(tag: "A1", state: .ok(.init(code: nil, text: "OK")))))
+        )
+        self.assert(
+            .init(bytes: "A2 NOOP\r\n", promise: nil, shouldSucceedPromise: true),
+            try self.stateMachine.sendCommand(.tagged(.init(tag: "A2", command: .noop)))
+        )
+    }
+
+    func testAppendPreloading() {
         var result: OutgoingChunk?
         XCTAssertNoThrow(result = try self.stateMachine.sendCommand(.append(.start(tag: "A1", appendingTo: .inbox))))
         XCTAssertEqual(result, .init(bytes: "A1 APPEND \"INBOX\"", promise: nil, shouldSucceedPromise: true))
@@ -418,7 +468,7 @@ extension ClientStateMachineTests {
         )
     }
 
-    func testSendingAnAuthencationChallengeWhenUnexpectedThrows() {
+    func testSendingAnAuthenticationChallengeWhenUnexpectedThrows() {
         XCTAssertThrowsError(try self.stateMachine.receiveResponse(.authenticationChallenge("challenge"))) { e in
             XCTAssertTrue(e is UnexpectedResponse)
         }

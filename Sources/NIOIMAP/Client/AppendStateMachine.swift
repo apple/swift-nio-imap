@@ -65,9 +65,17 @@ extension ClientStateMachine {
             }
         }
 
-        // We don't expect any responses when appending other than the
-        // final tagged response.
+        // We don't expect any responses while appending other than
+        // 1. Untagged responses
+        // 2. The final tagged response.
         mutating func receiveResponse(_ response: Response) throws -> Bool {
+            switch response {
+            case .untagged:
+                return false
+            default:
+                break
+            }
+
             switch self.state {
             case .started, .waitingForAppendContinuationRequest, .sendingMessageBytes, .catenating,
                 .waitingForCatenateContinuationRequest, .sendingCatenateBytes, .finished:
