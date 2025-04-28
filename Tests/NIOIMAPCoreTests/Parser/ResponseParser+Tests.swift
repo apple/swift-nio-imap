@@ -1181,7 +1181,12 @@ extension ResponseParser_Tests {
     }
 
     func testAttributeLimit_failOnStreaming() {
-        var parser = ResponseParser(bufferLimit: 1000, messageAttributeLimit: 3)
+        var parser = ResponseParser(
+            options: ResponseParser.Options(
+                bufferLimit: 1000,
+                messageAttributeLimit: 3
+            )
+        )
         var buffer: ByteBuffer = "* 999 FETCH (FLAGS (\\Seen) UID 1 RFC822.SIZE 123 RFC822.TEXT {3}\r\n "
 
         // limit is 3, so let's parse the first 3
@@ -1203,7 +1208,12 @@ extension ResponseParser_Tests {
     }
 
     func testAttributeLimit_failOnSimple() {
-        var parser = ResponseParser(bufferLimit: 1000, messageAttributeLimit: 3)
+        var parser = ResponseParser(
+            options: ResponseParser.Options(
+                bufferLimit: 1000,
+                messageAttributeLimit: 3
+            )
+        )
         var buffer: ByteBuffer = "* 999 FETCH (FLAGS (\\Seen) UID 1 RFC822.SIZE 123 UID 2 "
 
         // limit is 3, so let's parse the first 3
@@ -1225,7 +1235,12 @@ extension ResponseParser_Tests {
     }
 
     func testRejectLargeBodies() {
-        var parser = ResponseParser(bufferLimit: 1000, bodySizeLimit: 10)
+        var parser = ResponseParser(
+            options: ResponseParser.Options(
+                bufferLimit: 1000,
+                bodySizeLimit: 10
+            )
+        )
         var buffer: ByteBuffer = "* 999 FETCH (RFC822.TEXT {3}\r\n123 RFC822.HEADER {11}\r\n "
         XCTAssertEqual(try parser.parseResponseStream(buffer: &buffer), .response(.fetch(.start(999))))
         XCTAssertEqual(
@@ -1241,7 +1256,12 @@ extension ResponseParser_Tests {
     }
 
     func testParseNoStringCache() {
-        var parser = ResponseParser(bufferLimit: 1000, bodySizeLimit: 10)
+        var parser = ResponseParser(
+            options: ResponseParser.Options(
+                bufferLimit: 1000,
+                bodySizeLimit: 10
+            )
+        )
         var buffer: ByteBuffer = "* 999 FETCH (FLAGS (\\Seen))\r\n"
         XCTAssertEqual(try parser.parseResponseStream(buffer: &buffer), .response(.fetch(.start(999))))
         XCTAssertEqual(
@@ -1254,12 +1274,16 @@ extension ResponseParser_Tests {
     // which will replace it with "nees", and therefore our
     // parse result should contain the flag "nees".
     func testParseWithStringCache() {
-        func testCache(string: String) -> String {
-            XCTAssertEqual(string.lowercased(), "seen")
-            return "nees"
-        }
-
-        var parser = ResponseParser(bufferLimit: 1000, bodySizeLimit: 10, parsedStringCache: testCache)
+        var parser = ResponseParser(
+            options: ResponseParser.Options(
+                bufferLimit: 1000,
+                bodySizeLimit: 10,
+                parsedStringCache: { string in
+                    XCTAssertEqual(string.lowercased(), "seen")
+                    return "nees"
+                }
+            )
+        )
         var buffer: ByteBuffer = "* 999 FETCH (FLAGS (\\Seen))\r\n"
         XCTAssertEqual(try parser.parseResponseStream(buffer: &buffer), .response(.fetch(.start(999))))
         XCTAssertEqual(
@@ -1271,7 +1295,13 @@ extension ResponseParser_Tests {
     // Even with a `literalSizeLimit` of 1 parsing a RFC822.TEXT should _not_ fail
     // if the `bodySizeLimit` is large enough.
     func testSeparateLiteralSizeLimit() {
-        var parser = ResponseParser(bufferLimit: 1000, bodySizeLimit: 10, literalSizeLimit: 1)
+        var parser = ResponseParser(
+            options: ResponseParser.Options(
+                bufferLimit: 1000,
+                bodySizeLimit: 10,
+                literalSizeLimit: 1
+            )
+        )
         var buffer: ByteBuffer = "* 999 FETCH (RFC822.TEXT {3}\r\n123 RFC822.HEADER {11}\r\n "
         XCTAssertEqual(try parser.parseResponseStream(buffer: &buffer), .response(.fetch(.start(999))))
         XCTAssertEqual(
