@@ -453,6 +453,32 @@ extension MessageIdentifierSet: SetAlgebra {
     }
 }
 
+// MARK: - Suffix
+
+extension MessageIdentifierSet {
+    public func suffix(_ maxLength: Int) -> MessageIdentifierSet {
+        precondition(0 <= maxLength)
+        guard 0 < maxLength else { return MessageIdentifierSet() }
+
+        var result = MessageIdentifierSet()
+        var resultCount = 0
+        for range in ranges.reversed() {
+            if resultCount + range.range.count <= maxLength {
+                resultCount += range.range.count
+                result.formUnion(MessageIdentifierSet(range))
+                guard resultCount < maxLength else { break }
+            } else {
+                let count = maxLength - resultCount
+                let tailRange = range.range.suffix(count)
+                let tail = MessageIdentifierRange(tailRange.first!...tailRange.last!)
+                result.formUnion(MessageIdentifierSet(tail))
+                break
+            }
+        }
+        return result
+    }
+}
+
 // MARK: - Conversion
 
 extension MessageIdentifierSet where IdentifierType == SequenceNumber {

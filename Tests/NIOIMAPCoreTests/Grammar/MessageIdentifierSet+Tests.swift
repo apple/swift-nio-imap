@@ -32,4 +32,33 @@ extension MessageIdentifierSet_Tests {
         let output = MessageIdentifierSet<UID>(input)
         XCTAssertEqual(output, [1...5, 10...15, 20...30])
     }
+
+    func testSuffix() {
+        XCTAssertEqual(UIDSet().suffix(0), [])
+        XCTAssertEqual(UIDSet([1]).suffix(0), [])
+        XCTAssertEqual(UIDSet([100, 200]).suffix(0), [])
+
+        XCTAssertEqual(UIDSet([100, 200]).suffix(1), [200])
+        XCTAssertEqual(UIDSet([100, 200]).suffix(2), [100, 200])
+        XCTAssertEqual(UIDSet([100, 200]).suffix(3), [100, 200])
+
+        XCTAssertEqual(UIDSet([200...299]).suffix(0), [])
+        XCTAssertEqual(UIDSet([200...299]).suffix(1), [299])
+        XCTAssertEqual(UIDSet([200...299]).suffix(2), [298...299])
+        XCTAssertEqual(UIDSet([200...299]).suffix(3), [297...299])
+
+        XCTAssertEqual(UIDSet([100, 200...299]).suffix(0), [])
+        XCTAssertEqual(UIDSet([100, 200...299]).suffix(1), [299])
+        XCTAssertEqual(UIDSet([100, 200...299]).suffix(2), [298...299])
+        XCTAssertEqual(UIDSet([100, 200...299]).suffix(3), [297...299])
+
+        XCTAssertEqual(UIDSet([100...102, 200...202]).suffix(0), [])
+        XCTAssertEqual(UIDSet([100...102, 200...202]).suffix(1), [202])
+        XCTAssertEqual(UIDSet([100...102, 200...202]).suffix(2), [201...202])
+        XCTAssertEqual(UIDSet([100...102, 200...202]).suffix(3), [200...202])
+        XCTAssertEqual(UIDSet([100...102, 200...202]).suffix(4), [102, 200...202])
+        XCTAssertEqual(UIDSet([100...102, 200...202]).suffix(5), [101...102, 200...202])
+        XCTAssertEqual(UIDSet([100...102, 200...202]).suffix(6), [100...102, 200...202])
+        XCTAssertEqual(UIDSet([100...102, 200...202]).suffix(7), [100...102, 200...202])
+    }
 }
