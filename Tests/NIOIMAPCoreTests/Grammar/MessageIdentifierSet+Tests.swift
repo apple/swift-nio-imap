@@ -60,5 +60,9 @@ extension MessageIdentifierSet_Tests {
         XCTAssertEqual(UIDSet([100...102, 200...202]).suffix(5), UIDSet([101...102, 200...202]))
         XCTAssertEqual(UIDSet([100...102, 200...202]).suffix(6), UIDSet([100...102, 200...202]))
         XCTAssertEqual(UIDSet([100...102, 200...202]).suffix(7), UIDSet([100...102, 200...202]))
+
+        XCTAssertEqual(UIDSet.all.suffix(0), UIDSet())
+        XCTAssertEqual(UIDSet.all.suffix(1), UIDSet([4_294_967_295]))
+        XCTAssertEqual(UIDSet.all.suffix(2), UIDSet([4_294_967_294...4_294_967_295]))
     }
 }
