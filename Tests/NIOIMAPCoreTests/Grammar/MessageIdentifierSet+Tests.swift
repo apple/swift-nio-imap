@@ -34,31 +34,31 @@ extension MessageIdentifierSet_Tests {
     }
 
     func testSuffix() {
-        XCTAssertEqual(UIDSet().suffix(0), [])
-        XCTAssertEqual(UIDSet([1]).suffix(0), [])
-        XCTAssertEqual(UIDSet([100, 200]).suffix(0), [])
+        XCTAssertEqual(UIDSet().suffix(0), UIDSet())
+        XCTAssertEqual(UIDSet([1]).suffix(0), UIDSet())
+        XCTAssertEqual(UIDSet([100, 200]).suffix(0), UIDSet())
 
-        XCTAssertEqual(UIDSet([100, 200]).suffix(1), [200])
-        XCTAssertEqual(UIDSet([100, 200]).suffix(2), [100, 200])
-        XCTAssertEqual(UIDSet([100, 200]).suffix(3), [100, 200])
+        XCTAssertEqual(UIDSet([100, 200]).suffix(1), UIDSet([200]))
+        XCTAssertEqual(UIDSet([100, 200]).suffix(2), UIDSet([100, 200]))
+        XCTAssertEqual(UIDSet([100, 200]).suffix(3), UIDSet([100, 200]))
 
-        XCTAssertEqual(UIDSet([200...299]).suffix(0), [])
-        XCTAssertEqual(UIDSet([200...299]).suffix(1), [299])
-        XCTAssertEqual(UIDSet([200...299]).suffix(2), [298...299])
-        XCTAssertEqual(UIDSet([200...299]).suffix(3), [297...299])
+        XCTAssertEqual(UIDSet([200...299]).suffix(0), UIDSet())
+        XCTAssertEqual(UIDSet([200...299]).suffix(1), UIDSet([299]))
+        XCTAssertEqual(UIDSet([200...299]).suffix(2), UIDSet([298...299]))
+        XCTAssertEqual(UIDSet([200...299]).suffix(3), UIDSet([297...299]))
 
-        XCTAssertEqual(UIDSet([100, 200...299]).suffix(0), [])
-        XCTAssertEqual(UIDSet([100, 200...299]).suffix(1), [299])
-        XCTAssertEqual(UIDSet([100, 200...299]).suffix(2), [298...299])
-        XCTAssertEqual(UIDSet([100, 200...299]).suffix(3), [297...299])
+        XCTAssertEqual(UIDSet([100, 200...299]).suffix(0), UIDSet())
+        XCTAssertEqual(UIDSet([100, 200...299]).suffix(1), UIDSet([299]))
+        XCTAssertEqual(UIDSet([100, 200...299]).suffix(2), UIDSet([298...299]))
+        XCTAssertEqual(UIDSet([100, 200...299]).suffix(3), UIDSet([297...299]))
 
-        XCTAssertEqual(UIDSet([100...102, 200...202]).suffix(0), [])
-        XCTAssertEqual(UIDSet([100...102, 200...202]).suffix(1), [202])
-        XCTAssertEqual(UIDSet([100...102, 200...202]).suffix(2), [201...202])
-        XCTAssertEqual(UIDSet([100...102, 200...202]).suffix(3), [200...202])
-        XCTAssertEqual(UIDSet([100...102, 200...202]).suffix(4), [102, 200...202])
-        XCTAssertEqual(UIDSet([100...102, 200...202]).suffix(5), [101...102, 200...202])
-        XCTAssertEqual(UIDSet([100...102, 200...202]).suffix(6), [100...102, 200...202])
-        XCTAssertEqual(UIDSet([100...102, 200...202]).suffix(7), [100...102, 200...202])
+        XCTAssertEqual(UIDSet([100...102, 200...202]).suffix(0), UIDSet())
+        XCTAssertEqual(UIDSet([100...102, 200...202]).suffix(1), UIDSet([202]))
+        XCTAssertEqual(UIDSet([100...102, 200...202]).suffix(2), UIDSet([201...202]))
+        XCTAssertEqual(UIDSet([100...102, 200...202]).suffix(3), UIDSet([200...202]))
+        XCTAssertEqual(UIDSet([100...102, 200...202]).suffix(4), UIDSet([102, 200...202]))
+        XCTAssertEqual(UIDSet([100...102, 200...202]).suffix(5), UIDSet([101...102, 200...202]))
+        XCTAssertEqual(UIDSet([100...102, 200...202]).suffix(6), UIDSet([100...102, 200...202]))
+        XCTAssertEqual(UIDSet([100...102, 200...202]).suffix(7), UIDSet([100...102, 200...202]))
     }
 }

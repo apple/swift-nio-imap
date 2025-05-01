@@ -463,17 +463,16 @@ extension MessageIdentifierSet {
         var result = MessageIdentifierSet()
         var resultCount = 0
         for range in ranges.reversed() {
-            if resultCount + range.range.count <= maxLength {
-                resultCount += range.range.count
-                result.formUnion(MessageIdentifierSet(range))
-                guard resultCount < maxLength else { break }
-            } else {
+            guard resultCount + range.range.count <= maxLength else {
                 let count = maxLength - resultCount
                 let tailRange = range.range.suffix(count)
                 let tail = MessageIdentifierRange(tailRange.first!...tailRange.last!)
                 result.formUnion(MessageIdentifierSet(tail))
                 break
             }
+            resultCount += range.range.count
+            result.formUnion(MessageIdentifierSet(range))
+            guard resultCount < maxLength else { break }
         }
         return result
     }
