@@ -75,6 +75,9 @@ public enum FetchAttribute: Hashable, Sendable {
 
     /// RFC 8474 message identifiers
     case emailID
+
+    /// RFC 8474 thread identifiers
+    case threadID
 }
 
 extension Array where Element == FetchAttribute {
@@ -166,6 +169,8 @@ extension EncodeBuffer {
             return self.writeFetchAttribute_preview(lazy)
         case .emailID:
             return self.writeFetchAttribute_emailID()
+        case .threadID:
+            return self.writeFetchAttribute_threadID()
         }
     }
 
@@ -252,5 +257,9 @@ extension EncodeBuffer {
 
     @discardableResult mutating func writeFetchAttribute_emailID() -> Int {
         return writeString("EMAILID")
+    }
+
+    @discardableResult mutating func writeFetchAttribute_threadID() -> Int {
+        return writeString("THREADID")
     }
 }
