@@ -53,6 +53,28 @@ public struct ResponseParser: Parser, Sendable {
         case attributeBytes(Int, attributeCount: Int)
     }
 
+    public struct Options: Sendable {
+        public var bufferLimit: Int
+        public var messageAttributeLimit: Int
+        public var bodySizeLimit: UInt64
+        public var literalSizeLimit: Int
+        public var parsedStringCache: (@Sendable (String) -> String)?
+
+        public init(
+            bufferLimit: Int = 8_192,
+            messageAttributeLimit: Int = .max,
+            bodySizeLimit: UInt64 = .max,
+            literalSizeLimit: Int = IMAPDefaults.literalSizeLimit,
+            parsedStringCache: (@Sendable (String) -> String)? = nil
+        ) {
+            self.bufferLimit = bufferLimit
+            self.messageAttributeLimit = messageAttributeLimit
+            self.bodySizeLimit = bodySizeLimit
+            self.literalSizeLimit = literalSizeLimit
+            self.parsedStringCache = parsedStringCache
+        }
+    }
+
     let parser: GrammarParser
     let bufferLimit: Int
     let messageAttributeLimit: Int
@@ -62,17 +84,16 @@ public struct ResponseParser: Parser, Sendable {
     /// Creates a new `ResponseParser`.
     /// - parameter bufferLimit: The maximum amount of data that may be buffered by the parser. If this limit is exceeded then an error will be thrown. Defaults to 1000 bytes.
     public init(
-        bufferLimit: Int = 8_192,
-        messageAttributeLimit: Int = .max,
-        bodySizeLimit: UInt64 = .max,
-        literalSizeLimit: Int = IMAPDefaults.literalSizeLimit,
-        parsedStringCache: ((String) -> String)? = nil
+        options: Options = Options()
     ) {
-        self.bufferLimit = bufferLimit
+        self.bufferLimit = options.bufferLimit
         self.mode = .response(.fetchOrNormal)
-        self.messageAttributeLimit = messageAttributeLimit
-        self.parser = GrammarParser(literalSizeLimit: literalSizeLimit, parsedStringCache: parsedStringCache)
-        self.bodySizeLimit = bodySizeLimit
+        self.messageAttributeLimit = options.messageAttributeLimit
+        self.parser = GrammarParser(
+            literalSizeLimit: options.literalSizeLimit,
+            parsedStringCache: options.parsedStringCache
+        )
+        self.bodySizeLimit = options.bodySizeLimit
     }
 
     /// Parses a `ResponseStream` and returns the result.
