@@ -451,7 +451,8 @@ extension FetchAttribute {
             .gmailMessageID,
             .gmailThreadID,
             .gmailLabels,
-            .preview:
+            .preview,
+            .emailID:
             return false
         }
     }
