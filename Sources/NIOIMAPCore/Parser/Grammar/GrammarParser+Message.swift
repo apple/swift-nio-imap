@@ -306,7 +306,8 @@ extension GrammarParser {
             )
         }
 
-        func parseMessageAttribute_emailID(buffer: inout ParseBuffer, tracker: StackTracker) throws -> MessageAttribute {
+        func parseMessageAttribute_emailID(buffer: inout ParseBuffer, tracker: StackTracker) throws -> MessageAttribute
+        {
             try PL.parseSpaces(buffer: &buffer, tracker: tracker)
             try PL.parseFixedString("(", buffer: &buffer, tracker: tracker)
             let objectID = try parseObjectID(buffer: &buffer, tracker: tracker)
@@ -314,8 +315,12 @@ extension GrammarParser {
             return .emailID(EmailID(objectID))
         }
 
-        func parseMessageAttribute_threadID(buffer: inout ParseBuffer, tracker: StackTracker) throws -> MessageAttribute {
-            func parseMessageAttribute_threadID_objectID(buffer: inout ParseBuffer, tracker: StackTracker) throws -> MessageAttribute {
+        func parseMessageAttribute_threadID(buffer: inout ParseBuffer, tracker: StackTracker) throws -> MessageAttribute
+        {
+            func parseMessageAttribute_threadID_objectID(
+                buffer: inout ParseBuffer,
+                tracker: StackTracker
+            ) throws -> MessageAttribute {
                 try PL.parseSpaces(buffer: &buffer, tracker: tracker)
                 try PL.parseFixedString("(", buffer: &buffer, tracker: tracker)
                 let objectID = try parseObjectID(buffer: &buffer, tracker: tracker)
@@ -323,7 +328,10 @@ extension GrammarParser {
                 return .threadID(ThreadID(objectID))
             }
 
-            func parseMessageAttribute_threadID_nil(buffer: inout ParseBuffer, tracker: StackTracker) throws -> MessageAttribute {
+            func parseMessageAttribute_threadID_nil(
+                buffer: inout ParseBuffer,
+                tracker: StackTracker
+            ) throws -> MessageAttribute {
                 try PL.parseSpaces(buffer: &buffer, tracker: tracker)
                 try self.parseNil(buffer: &buffer, tracker: tracker)
                 return .threadID(nil)

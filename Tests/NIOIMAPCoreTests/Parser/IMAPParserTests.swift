@@ -2760,7 +2760,10 @@ extension ParserUnitTests {
                     .init(nextUID: 95604, uidValidity: 33682, highestModificationSequence: 35227, appendLimit: 81818),
                     #line
                 ),
-                ("MAILBOXID (F2212ea87-6097-4256-9d51-71338625)", ")", .init(mailboxID: "F2212ea87-6097-4256-9d51-71338625"), #line),
+                (
+                    "MAILBOXID (F2212ea87-6097-4256-9d51-71338625)", ")",
+                    .init(mailboxID: "F2212ea87-6097-4256-9d51-71338625"), #line
+                ),
             ],
             parserErrorInputs: [
                 ("MESSAGES UNSEEN 3 RECENT 4", "\r", #line),

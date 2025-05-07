@@ -390,8 +390,8 @@ extension EncodeBuffer {
             return self.writeString("COMPRESSIONACTIVE")
         case .mailboxID(let mailboxID):
             return self.writeString("MAILBOXID (")
-            + self.writeMailboxID(mailboxID)
-            + self.writeString(")")
+                + self.writeMailboxID(mailboxID)
+                + self.writeString(")")
         case .uidRequired:
             return self.writeString("UIDREQUIRED")
         }
