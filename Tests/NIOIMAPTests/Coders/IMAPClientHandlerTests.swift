@@ -594,7 +594,7 @@ class IMAPClientHandlerTests: XCTestCase {
         class PostTestHandler: ChannelDuplexHandler {
             typealias InboundIn = Response
             typealias OutboundIn = Response
-            typealias OutboundOut = IMAPClientHandler.OutboundIn
+            typealias OutboundOut = IMAPClientHandler.Message
 
             var callCount = 0
 
@@ -712,7 +712,7 @@ class IMAPClientHandlerTests: XCTestCase {
 
         // writing a command that has a continuation
         let future = self.channel.writeAndFlush(
-            IMAPClientHandler.OutboundIn.part(
+            IMAPClientHandler.Message.part(
                 CommandStreamPart.tagged(
                     .init(tag: "A1", command: .rename(from: .init("\\"), to: .init("\\"), parameters: [:]))
                 )
@@ -858,7 +858,7 @@ extension IMAPClientHandlerTests {
 
     @discardableResult
     private func writeOutbound(
-        _ outboundIn: IMAPClientHandler.OutboundIn,
+        _ outboundIn: IMAPClientHandler.Message,
         wait: Bool = true,
         line: UInt = #line
     ) -> EventLoopFuture<Void> {
