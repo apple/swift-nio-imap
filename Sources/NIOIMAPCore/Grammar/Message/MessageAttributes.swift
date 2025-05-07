@@ -67,6 +67,9 @@ public enum MessageAttribute: Hashable, Sendable {
 
     /// An RFC 8474 object identifier for the message.
     case emailID(EmailID)
+
+    /// An RFC 8474 object identifier for the thread.
+    case threadID(ThreadID?)
 }
 
 extension MessageAttribute: CustomDebugStringConvertible {
@@ -116,6 +119,8 @@ extension EncodeBuffer {
             return self.writeMessageAttribute_preview(previewText)
         case .emailID(let id):
             return self.writeMessageAttribute_emailID(id)
+        case .threadID(let id):
+            return self.writeMessageAttribute_threadID(id)
         }
     }
 
@@ -206,5 +211,13 @@ extension EncodeBuffer {
 
     @discardableResult mutating func writeMessageAttribute_emailID(_ id: EmailID) -> Int {
         self.writeString("EMAILID (") + self.writeEmailID(id) + self.writeString(")")
+    }
+
+    @discardableResult mutating func writeMessageAttribute_threadID(_ id: ThreadID?) -> Int {
+        if let id {
+            self.writeString("THREADID (") + self.writeThreadID(id) + self.writeString(")")
+        } else {
+            self.writeString("THREADID NIL")
+        }
     }
 }
