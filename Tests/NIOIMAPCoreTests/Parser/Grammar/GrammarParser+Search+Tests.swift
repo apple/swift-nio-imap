@@ -124,6 +124,7 @@ extension GrammarParser_Search_Tests {
                 ("FILTER something", "\r", .filter("something"), #line),
                 ("MODSEQ 5", "\r", .modificationSequence(.init(extensions: [:], sequenceValue: 5)), #line),
                 ("EMAILID 123-456-789", "\r", .emailID(.init("123-456-789")!), #line),
+                ("THREADID 123-456-789", "\r", .threadID(.init("123-456-789")!), #line),
             ],
             parserErrorInputs: [],
             incompleteMessageInputs: []

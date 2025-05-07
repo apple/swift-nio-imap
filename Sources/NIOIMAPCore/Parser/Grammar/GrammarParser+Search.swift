@@ -359,6 +359,12 @@ extension GrammarParser {
             return .emailID(EmailID(objectID))
         }
 
+        func parseSearchKey_threadID(buffer: inout ParseBuffer, tracker: StackTracker) throws -> SearchKey {
+            try PL.parseFixedString("THREADID ", buffer: &buffer, tracker: tracker)
+            let objectID = try self.parseObjectID(buffer: &buffer, tracker: tracker)
+            return .threadID(ThreadID(objectID))
+        }
+
         return try PL.parseOneOf(
             [
                 parseSearchKey_older,
@@ -392,6 +398,7 @@ extension GrammarParser {
                 parseSearchKey_filter,
                 parseSearchKey_modificationSequence,
                 parseSearchKey_emailID,
+                parseSearchKey_threadID,
             ],
             buffer: &buffer,
             tracker: tracker
