@@ -123,6 +123,7 @@ extension GrammarParser_Search_Tests {
                 ("OLDER 45", "\r", .older(45), #line),
                 ("FILTER something", "\r", .filter("something"), #line),
                 ("MODSEQ 5", "\r", .modificationSequence(.init(extensions: [:], sequenceValue: 5)), #line),
+                ("EMAILID 123-456-789", "\r", .emailID(.init("123-456-789")!), #line),
             ],
             parserErrorInputs: [],
             incompleteMessageInputs: []
