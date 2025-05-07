@@ -84,6 +84,7 @@ extension SearchKeyTests {
                 .and([.or(.messageSizeSmaller(444), .messageSizeLarger(333)), .undeleted]),
                 "(OR SMALLER 444 LARGER 333) UNDELETED", #line
             ),
+            (.emailID(.init("123-456-789")!), "EMAILID 123-456-789", #line),
         ]
 
         for (test, expectedString, line) in inputs {
