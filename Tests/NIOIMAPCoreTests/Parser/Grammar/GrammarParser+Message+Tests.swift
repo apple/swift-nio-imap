@@ -285,6 +285,8 @@ extension GrammarParser_Message_Tests {
                 (#"X-GM-LABELS ("\\Important")"#, " ", .gmailLabels([GmailLabel(#"\Important"#)]), #line),
                 ("PREVIEW \"Lorem ipsum dolor sit amet\"", "", .preview(.init("Lorem ipsum dolor sit amet")), #line),
                 ("EMAILID (123-456-789)", " ", .emailID(.init("123-456-789")!), #line),
+                ("THREADID (123-456-789)", " ", .threadID(.init("123-456-789")!), #line),
+                ("THREADID NIL", " ", .threadID(nil), #line),
             ],
             parserErrorInputs: [],
             incompleteMessageInputs: []
