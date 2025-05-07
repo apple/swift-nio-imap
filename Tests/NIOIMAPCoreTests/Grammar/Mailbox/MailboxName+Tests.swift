@@ -193,10 +193,10 @@ extension MailboxName_Tests {
             return countBits(ma.hashValue ^ mb.hashValue)
         }
 
-        XCTAssertGreaterThanOrEqual(countChangedBits("A", "B"), 18)
-        XCTAssertGreaterThanOrEqual(countChangedBits("A", "AA"), 18)
-        XCTAssertGreaterThanOrEqual(countChangedBits("INBOX", "Drafts"), 18)
-        XCTAssertGreaterThanOrEqual(countChangedBits("Sent", "Drafts"), 18)
-        XCTAssertGreaterThanOrEqual(countChangedBits("Sent", "sent"), 18)
+        XCTAssertGreaterThanOrEqual(countChangedBits("A", "B"), 25)
+        XCTAssertGreaterThanOrEqual(countChangedBits("A", "AA"), 25)
+        XCTAssertGreaterThanOrEqual(countChangedBits("INBOX", "Drafts"), 25)
+        XCTAssertGreaterThanOrEqual(countChangedBits("Sent", "Drafts"), 25)
+        XCTAssertGreaterThanOrEqual(countChangedBits("Sent", "sent"), 25)
     }
 }

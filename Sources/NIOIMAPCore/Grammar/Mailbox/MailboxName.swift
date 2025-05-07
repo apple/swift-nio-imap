@@ -229,11 +229,9 @@ public struct MailboxName: Sendable {
             b = bytes
         }
         self.bytes = b
-        var hasher = Hasher()
-        b.withUnsafeBytes { buffer in
-            hasher.combine(bytes: buffer)
+        self._hashValue = b.withUnsafeBytes {
+            HashValue($0)
         }
-        self._hashValue = HashValue(hasher.finalize())
     }
 }
 
@@ -245,10 +243,10 @@ extension MailboxName {
         @usableFromInline
         let _value: UInt32
 
-        init(_ value: Int) {
-            let a = UInt(bitPattern: value)
-            let b = a ^ (a >> 32)
-            self._value = UInt32(truncatingIfNeeded: b)
+        init(_ bytes: UnsafeRawBufferPointer) {
+            self._value = bytes.withMemoryRebound(to: UInt8.self) {
+                murmur($0)
+            }
         }
 
         @inlinable
@@ -257,6 +255,76 @@ extension MailboxName {
             return Int(truncatingIfNeeded: Int64(bitPattern: (a << 32) | a))
         }
     }
+}
+
+private func murmur(_ bytes: UnsafeBufferPointer<UInt8>) -> UInt32 {
+    let c1: UInt64 = 0x87c3_7b91_1142_53d5
+    let c2: UInt64 = 0x4cf5_ad43_2745_937f
+
+    var byteIterator = bytes.makeIterator()
+    func next() -> UInt64? {
+        guard
+            let a = byteIterator.next()
+        else { return nil }
+        var result = UInt64(a)
+        for _ in 1..<8 {
+            guard let b = byteIterator.next() else { break }
+            result = result << 8 | UInt64(b)
+        }
+        return result
+    }
+
+    func rotl64(_ x: UInt64, _ r: UInt64) -> UInt64 {
+        (x << r) | (x >> (64 - r))
+    }
+
+    func fmix64(_ k: inout UInt64) {
+        k ^= k >> 33
+        k = k &* 0xff51_afd7_ed55_8ccd as UInt64
+        k ^= k >> 33
+        k = k &* 0xc4ce_b9fe_1a85_ec53 as UInt64
+        k ^= k >> 33
+    }
+
+    var h1: UInt64 = 0x220f_a127_22e8_87a4
+    var h2 = h1
+    while var k1 = next() {
+        var k2: UInt64 = next() ?? 0
+
+        k1 = k1 &* c1
+        k1 = rotl64(k1, 31)
+        k1 = k1 &* c2
+        h1 ^= k1
+
+        h1 = rotl64(h1, 27)
+        h1 = h1 &+ h2
+        h1 = h1 &* 5 &+ 0x52dc_e729
+
+        k2 = k2 &* c2
+        k2 = rotl64(k2, 33)
+        k2 = k2 &* c1
+        h2 ^= k2
+
+        h2 = rotl64(h2, 31)
+        h2 = h1 &+ h1
+        h2 = h2 &* 5 &+ 0x3849_5ab5
+    }
+
+    let len = UInt64(clamping: bytes.count)
+    h1 ^= len
+    h2 ^= len
+
+    h1 = h1 &+ h2
+    h2 = h2 &+ h1
+
+    fmix64(&h1)
+    fmix64(&h2)
+
+    h1 = h1 &+ h2
+    h2 = h2 &+ h1
+
+    let a = h1 ^ h2
+    return UInt32(truncatingIfNeeded: a ^ (a >> 32))
 }
 
 extension MailboxName {
