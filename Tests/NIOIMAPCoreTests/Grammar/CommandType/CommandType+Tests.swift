@@ -44,9 +44,16 @@ extension CommandType_Tests {
                 .login(username: "david evans", password: "great password"), CommandEncodingOptions(),
                 [#"LOGIN "david evans" "great password""#], #line
             ),
+            // Double-quote `"` and backslash `\` (quoted-specials) can not be part
+            // of `quoted` (without escaping) nor `1*ASTRING-CHAR`:
             (
-                .login(username: "\r\n", password: "\\\""), CommandEncodingOptions(),
-                ["LOGIN {2}\r\n", "\r\n {2}\r\n", "\\\""], #line
+                .login(username: #"foo\bar"#, password: #"pass"word"#), CommandEncodingOptions(),
+                [#"LOGIN {7}\#r\#n"#, #"foo\bar {9}\#r\#n"#, #"pass"word"#], #line
+            ),
+            // CR and LF need to use literal
+            (
+                .login(username: "\r\n", password: "\n"), CommandEncodingOptions(),
+                ["LOGIN {2}\r\n", "\r\n {1}\r\n", "\n"], #line
             ),
 
             (.select(MailboxName("Events")), CommandEncodingOptions(), [#"SELECT "Events""#], #line),
