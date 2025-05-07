@@ -85,6 +85,7 @@ extension SearchKeyTests {
                 "(OR SMALLER 444 LARGER 333) UNDELETED", #line
             ),
             (.emailID(.init("123-456-789")!), "EMAILID 123-456-789", #line),
+            (.threadID(.init("123-456-789")!), "THREADID 123-456-789", #line),
         ]
 
         for (test, expectedString, line) in inputs {

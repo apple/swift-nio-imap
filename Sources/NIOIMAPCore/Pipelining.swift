@@ -523,7 +523,8 @@ extension SearchKey {
             .uidBefore,
             .undraft,
             .younger,
-            .emailID:
+            .emailID,
+            .threadID:
             return false
         case .filter,  // Have to assume yes, since we can't know
             .sequenceNumbers:
@@ -575,7 +576,8 @@ extension SearchKey {
             .sequenceNumbers,
             .undraft,
             .younger,
-            .emailID:
+            .emailID,
+            .threadID:
             return false
         case .filter,  // Have to assume yes, since we can't know
             .uid,
@@ -619,7 +621,8 @@ extension SearchKey {
             .uidAfter,
             .uidBefore,
             .younger,
-            .emailID:
+            .emailID,
+            .threadID:
             return false
         case .answered,
             .deleted,

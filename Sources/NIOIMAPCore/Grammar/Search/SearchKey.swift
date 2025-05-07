@@ -144,6 +144,9 @@ public indirect enum SearchKey: Hashable, Sendable {
 
     /// RFC 8474: Messages with the given `EmailID`.
     case emailID(EmailID)
+
+    /// RFC 8474: Messages with the given `ThreadID`.
+    case threadID(ThreadID)
 }
 
 extension SearchKey {
@@ -184,7 +187,8 @@ extension SearchKey {
             .younger,
             .modificationSequence,
             .filter,
-            .emailID:
+            .emailID,
+            .threadID:
             return false
 
         case .bcc,
@@ -250,7 +254,8 @@ extension SearchKey {
             .younger,
             .modificationSequence,
             .filter,
-            .emailID:
+            .emailID,
+            .threadID:
             return 1
         case .not(let inner):
             return 1 + inner.count
@@ -424,6 +429,9 @@ extension EncodeBuffer {
 
         case .emailID(let id):
             return self.writeString("EMAILID ") + self.writeEmailID(id)
+
+        case .threadID(let id):
+            return self.writeString("THREADID ") + self.writeThreadID(id)
         }
     }
 }
