@@ -92,6 +92,7 @@ extension MessageAttributesTests {
             ),
             (.preview(.init("Lorem ipsum dolor sit amet")), "PREVIEW \"Lorem ipsum dolor sit amet\"", #line),
             (.preview(.init(#"A\B"#)), "PREVIEW {3}\r\nA\\B", #line),
+            (.emailID(.init("123-456-789")!), "EMAILID (123-456-789)", #line),
         ]
 
         for (test, expectedString, line) in inputs {
