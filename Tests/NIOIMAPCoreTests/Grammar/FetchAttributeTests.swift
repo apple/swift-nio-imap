@@ -46,6 +46,8 @@ extension FetchAttributeTests {
             (.gmailLabels, .rfc3501, "X-GM-LABELS", #line),
             (.preview(lazy: false), .rfc3501, "PREVIEW", #line),
             (.preview(lazy: true), .rfc3501, "PREVIEW (LAZY)", #line),
+            (.emailID, .rfc3501, "EMAILID", #line),
+            (.threadID, .rfc3501, "THREADID", #line),
         ]
         self.iterateInputs(
             inputs: inputs.map { ($0, $1, [$2], $3) },
@@ -84,6 +86,8 @@ extension FetchAttributeTests {
             (.gmailLabels, "X-GM-LABELS", #line),
             (.preview(lazy: false), "PREVIEW", #line),
             (.preview(lazy: true), "PREVIEW (LAZY)", #line),
+            (.emailID, "EMAILID", #line),
+            (.threadID, "THREADID", #line),
         ]
         for (attr, expected, line) in inputs {
             XCTAssertEqual(String(reflecting: attr), expected, line: line)

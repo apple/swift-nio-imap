@@ -57,6 +57,8 @@ extension GrammarParser_Fetch_Tests {
                 ("MODSEQ", " ", .modificationSequence, #line),
                 ("PREVIEW", " ", .preview(lazy: false), #line),
                 ("PREVIEW (LAZY)", " ", .preview(lazy: true), #line),
+                ("EMAILID", " ", .emailID, #line),
+                ("THREADID", " ", .threadID, #line),
             ],
             parserErrorInputs: [],
             incompleteMessageInputs: []

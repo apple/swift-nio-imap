@@ -74,6 +74,7 @@ extension Capability_Tests {
             (.move, "MOVE", #line),
             (.multiSearch, "MULTISEARCH", #line),
             (.namespace, "NAMESPACE", #line),
+            (.objectID, "OBJECTID", #line),
             (.partial, "PARTIAL", #line),
             (.partialURL, "URL-PARTIAL", #line),
             (.preview, "PREVIEW", #line),

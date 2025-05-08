@@ -87,6 +87,10 @@ extension GrammarParser_Response_Tests {
                 ("HIGHESTMODSEQ 1", "\r", .highestModificationSequence(.init(integerLiteral: 1)), #line),
                 ("INUSE", "\r", .inUse, #line),
                 ("LIMIT", "\r", .limit, #line),
+                (
+                    "MAILBOXID (F2212ea87-6097-4256-9d51-71338625)", "\r",
+                    .mailboxID("F2212ea87-6097-4256-9d51-71338625"), #line
+                ),
                 ("METADATA LONGENTRIES 456", "\r", .metadataLongEntries(456), #line),
                 ("METADATA MAXSIZE 123", "\r", .metadataMaxsize(123), #line),
                 ("METADATA NOPRIVATE", "\r", .metadataNoPrivate, #line),

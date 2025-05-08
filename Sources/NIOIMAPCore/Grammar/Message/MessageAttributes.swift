@@ -64,6 +64,12 @@ public enum MessageAttribute: Hashable, Sendable {
     ///
     /// - SeeAlso: RFC 8970 (IMAP4 Extension: Message Preview Generation)
     case preview(PreviewText?)
+
+    /// An RFC 8474 object identifier for the message.
+    case emailID(EmailID)
+
+    /// An RFC 8474 object identifier for the thread.
+    case threadID(ThreadID?)
 }
 
 extension MessageAttribute: CustomDebugStringConvertible {
@@ -111,6 +117,10 @@ extension EncodeBuffer {
             return self.writeMessageAttribute_gmailLabels(labels)
         case .preview(let previewText):
             return self.writeMessageAttribute_preview(previewText)
+        case .emailID(let id):
+            return self.writeMessageAttribute_emailID(id)
+        case .threadID(let id):
+            return self.writeMessageAttribute_threadID(id)
         }
     }
 
@@ -197,5 +207,17 @@ extension EncodeBuffer {
 
     @discardableResult mutating func writeMessageAttribute_preview(_ previewText: PreviewText?) -> Int {
         self.writeString("PREVIEW") + self.writeSpace() + self.writeNString(previewText.map { String($0) })
+    }
+
+    @discardableResult mutating func writeMessageAttribute_emailID(_ id: EmailID) -> Int {
+        self.writeString("EMAILID (") + self.writeEmailID(id) + self.writeString(")")
+    }
+
+    @discardableResult mutating func writeMessageAttribute_threadID(_ id: ThreadID?) -> Int {
+        if let id {
+            self.writeString("THREADID (") + self.writeThreadID(id) + self.writeString(")")
+        } else {
+            self.writeString("THREADID NIL")
+        }
     }
 }

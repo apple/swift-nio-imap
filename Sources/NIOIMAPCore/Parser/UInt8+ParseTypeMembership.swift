@@ -194,4 +194,13 @@ extension UInt8 {
             return false
         }
     }
+
+    var isObjectIDChar: Bool {
+        switch self {
+        case UInt8(ascii: "_"), UInt8(ascii: "-"):
+            return true
+        default:
+            return self.isAlphaNum
+        }
+    }
 }
