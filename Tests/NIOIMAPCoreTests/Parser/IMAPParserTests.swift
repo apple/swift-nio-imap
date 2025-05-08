@@ -757,6 +757,7 @@ extension ParserUnitTests {
                 ("MOVE", " ", .move, #line),
                 ("MULTISEARCH", " ", .multiSearch, #line),
                 ("NAMESPACE", " ", .namespace, #line),
+                ("OBJECTID", " ", .objectID, #line),
                 ("PARTIAL", " ", .partial, #line),
                 ("PREVIEW", " ", .preview, #line),
                 ("QRESYNC", " ", .qresync, #line),
