@@ -150,7 +150,8 @@ extension Command {
         case .uidCopy,
             .uidMove,
             .uidExpunge,
-            .expunge:
+            .expunge,
+            .uidBatches:
             return []
 
         case .store(_, _, let data):
@@ -398,6 +399,10 @@ extension Command {
             .setMetadata:
             // TODO: Metadata dependencies?
             return [.mayTriggerUntaggedExpunge]
+
+        case .uidBatches:
+            return [.isUIDBased, .mayTriggerUntaggedExpunge]
+
         case .custom:
             return [.barrier]
         }

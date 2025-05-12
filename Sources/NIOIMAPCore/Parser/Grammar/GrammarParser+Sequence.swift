@@ -58,10 +58,7 @@ extension GrammarParser {
             guard let id2 = id2 else {
                 return MessageIdentifierRange(id1)
             }
-            guard id1 <= id2 else {
-                throw ParserError(hint: "Invalid range, \(id1):\(id2)")
-            }
-            return MessageIdentifierRange(id1...id2)
+            return (id1 <= id2) ? MessageIdentifierRange(id1...id2) : MessageIdentifierRange(id2...id1)
         }
     }
 
