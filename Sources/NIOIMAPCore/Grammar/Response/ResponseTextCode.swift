@@ -266,6 +266,11 @@ public indirect enum ResponseTextCode: Hashable, Sendable {
     /// Compression is active.
     case compressionActive
 
+    /// RFC 8474 OBJECTID
+    ///
+    /// A unique identifier for a mailbox.
+    case mailboxID(MailboxID)
+
     /// RFC 9586 UIDONLY
     ///
     /// The client MUST NOT use message sequence numbers.
@@ -383,6 +388,10 @@ extension EncodeBuffer {
             return self.writeString("NONEXISTENT")
         case .compressionActive:
             return self.writeString("COMPRESSIONACTIVE")
+        case .mailboxID(let mailboxID):
+            return self.writeString("MAILBOXID (")
+                + self.writeMailboxID(mailboxID)
+                + self.writeString(")")
         case .uidRequired:
             return self.writeString("UIDREQUIRED")
         }

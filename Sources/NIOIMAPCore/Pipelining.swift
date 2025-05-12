@@ -451,7 +451,9 @@ extension FetchAttribute {
             .gmailMessageID,
             .gmailThreadID,
             .gmailLabels,
-            .preview:
+            .preview,
+            .emailID,
+            .threadID:
             return false
         }
     }
@@ -520,7 +522,9 @@ extension SearchKey {
             .uidAfter,
             .uidBefore,
             .undraft,
-            .younger:
+            .younger,
+            .emailID,
+            .threadID:
             return false
         case .filter,  // Have to assume yes, since we can't know
             .sequenceNumbers:
@@ -571,7 +575,9 @@ extension SearchKey {
             .sentSince,
             .sequenceNumbers,
             .undraft,
-            .younger:
+            .younger,
+            .emailID,
+            .threadID:
             return false
         case .filter,  // Have to assume yes, since we can't know
             .uid,
@@ -614,7 +620,9 @@ extension SearchKey {
             .uid,
             .uidAfter,
             .uidBefore,
-            .younger:
+            .younger,
+            .emailID,
+            .threadID:
             return false
         case .answered,
             .deleted,

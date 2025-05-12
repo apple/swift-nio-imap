@@ -167,6 +167,8 @@ extension GrammarParser {
             "BINARY": parseFetchAttribute_binary,
             "BINARY.PEEK": parseFetchAttribute_binaryPeek,
             "PREVIEW": parseFetchAttribute_preview,
+            "EMAILID": { _, _ in .emailID },
+            "THREADID": { _, _ in .threadID },
         ]
 
         // try to use the lookup table, however obviously an unknown number
