@@ -67,8 +67,15 @@ extension CommandType_Tests {
             ),
             (.examine(MailboxName("Events")), CommandEncodingOptions(), [#"EXAMINE "Events""#], #line),
             (
-                .examine(.inbox, [.basic(.init(key: "test", value: nil))]), CommandEncodingOptions(),
+                .examine(.inbox, [.basic(.init(key: "test", value: nil))]),
+                CommandEncodingOptions(),
                 [#"EXAMINE "INBOX" (test)"#], #line
+            ),
+            (
+                .expunge,
+                CommandEncodingOptions(),
+                [#"EXPUNGE"#],
+                #line
             ),
             (.move(.set([1]), .inbox), CommandEncodingOptions(), ["MOVE 1 \"INBOX\""], #line),
             (.id([:]), CommandEncodingOptions(), ["ID NIL"], #line),
@@ -118,6 +125,55 @@ extension CommandType_Tests {
                 .generateAuthorizedURL([
                     .init(urlRump: "rump2", mechanism: .internal), .init(urlRump: "rump3", mechanism: .init("test")),
                 ]), CommandEncodingOptions(), ["GENURLAUTH \"rump2\" INTERNAL \"rump3\" test"], #line
+            ),
+
+            (
+                .namespace,
+                CommandEncodingOptions(),
+                [#"NAMESPACE"#],
+                #line
+            ),
+            (
+                .uidCopy(.set(.init(range: 363...1860)), MailboxName("Drafts")),
+                CommandEncodingOptions(),
+                [#"UID COPY 363:1860 "Drafts""#],
+                #line
+            ),
+            (
+                .uidMove(.set(.init(range: 1554...1554)), .inbox),
+                CommandEncodingOptions(),
+                [#"UID MOVE 1554 "INBOX""#],
+                #line
+            ),
+            (
+                .uidFetch(.lastCommand, [.uid, .flags], [.changedSince(.init(modificationSequence: 66_306_787))]),
+                CommandEncodingOptions(),
+                [#"UID FETCH $ (UID FLAGS) (CHANGEDSINCE 66306787)"#],
+                #line
+            ),
+            (
+                .uidSearch(key: SearchKey.answered, charset: "UTF-8", returnOptions: [.count, .max]),
+                CommandEncodingOptions(),
+                [#"UID SEARCH RETURN (COUNT MAX) ANSWERED"#],
+                #line
+            ),
+            (
+                .uidStore(.set(.init(range: 4_306...6_866)), [], .flags(.add(silent: true, list: [.answered]))),
+                CommandEncodingOptions(),
+                [#"UID STORE 4306:6866 +FLAGS.SILENT (\Answered)"#],
+                #line
+            ),
+            (
+                .uidExpunge(.set(.init(range: 5...73))),
+                CommandEncodingOptions(),
+                [#"UID EXPUNGE 5:73"#],
+                #line
+            ),
+            (
+                .uidExpunge(.lastCommand),
+                CommandEncodingOptions(),
+                [#"UID EXPUNGE $"#],
+                #line
             ),
 
             (.urlFetch(["test"]), CommandEncodingOptions(), ["URLFETCH test"], #line),
