@@ -757,6 +757,7 @@ extension ParserUnitTests {
                 ("MOVE", " ", .move, #line),
                 ("MULTISEARCH", " ", .multiSearch, #line),
                 ("NAMESPACE", " ", .namespace, #line),
+                ("OBJECTID", " ", .objectID, #line),
                 ("PARTIAL", " ", .partial, #line),
                 ("PREVIEW", " ", .preview, #line),
                 ("QRESYNC", " ", .qresync, #line),
@@ -2785,6 +2786,10 @@ extension ParserUnitTests {
                     "UIDNEXT 95604  HIGHESTMODSEQ 35227 APPENDLIMIT 81818  UIDVALIDITY 33682", ")",
                     .init(nextUID: 95604, uidValidity: 33682, highestModificationSequence: 35227, appendLimit: 81818),
                     #line
+                ),
+                (
+                    "MAILBOXID (F2212ea87-6097-4256-9d51-71338625)", ")",
+                    .init(mailboxID: "F2212ea87-6097-4256-9d51-71338625"), #line
                 ),
             ],
             parserErrorInputs: [

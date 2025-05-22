@@ -41,6 +41,7 @@ extension ResponseTextCodeTests {
             (.highestModificationSequence(1), "HIGHESTMODSEQ 1", #line),
             (.inUse, "INUSE", #line),
             (.limit, "LIMIT", #line),
+            (.mailboxID("F2212ea87-6097-4256-9d51-71338625"), "MAILBOXID (F2212ea87-6097-4256-9d51-71338625)", #line),
             (.metadataLongEntries(456), "METADATA LONGENTRIES 456", #line),
             (.metadataMaxsize(123), "METADATA MAXSIZE 123", #line),
             (.metadataNoPrivate, "METADATA NOPRIVATE", #line),

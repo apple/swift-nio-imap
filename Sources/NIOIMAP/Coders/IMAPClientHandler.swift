@@ -24,25 +24,31 @@ public final class IMAPClientHandler: ChannelDuplexHandler {
     /// Converts a `ByteBuffer` into a `Response` by sending data through a parser.
     public typealias InboundOut = Response
 
-    /// Commands are encoding into a ByteBuffer to send to a server.
-    public enum OutboundIn: Hashable, Sendable {
-        case part(CommandStreamPart)
-        case setEncodingOptions(EncodingOptions)
-    }
+    /// Either `CommandStreamPart` or options.
+    public typealias OutboundIn = Message
 
     /// After encoding the bytes may be sent further through the channel to, for example, a TLS handler.
     public typealias OutboundOut = ByteBuffer
+
+    /// We can receive either `CommandStreamPart` or `EncodingOptions`.
+    public enum Message: Hashable, Sendable {
+        case part(CommandStreamPart)
+        case setEncodingOptions(EncodingOptions)
+    }
 
     private let decoder: NIOSingleStepByteToMessageProcessor<ResponseDecoder>
 
     private var state: ClientStateMachine
 
     public init(
-        encodingOptions: EncodingOptions = .automatic
+        encodingOptions: EncodingOptions = .automatic,
+        parserOptions: ResponseParser.Options = ResponseParser.Options()
     ) {
         self.state = .init(encodingOptions: encodingOptions)
         self.decoder = NIOSingleStepByteToMessageProcessor(
-            ResponseDecoder(),
+            ResponseDecoder(
+                options: parserOptions
+            ),
             maximumBufferSize: IMAPDefaults.lineLengthLimit
         )
     }

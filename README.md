@@ -66,5 +66,5 @@ let channel = try await ClientBootstrap(group).channelInitializer { channel in
     channel.pipeline.addHandler(IMAPClientHandler())
 }.connect(host: example.com, port: 143).get()
 
-try await channel.writeAndFlush(CommandStreamPart.tagged(TaggedCommand(tag: "a001", command: .login(username: "mrc", password: "secret"))), promise: nil)
+try await channel.writeAndFlush(.part(CommandStreamPart.tagged(TaggedCommand(tag: "a001", command: .login(username: "mrc", password: "secret")))), promise: nil)
 ```

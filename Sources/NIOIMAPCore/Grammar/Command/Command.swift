@@ -531,7 +531,7 @@ extension CommandEncodeBuffer {
     }
 
     private mutating func writeCommandKind_uidExpunge(_ set: LastCommandSet<UID>) -> Int {
-        self.buffer.writeString("EXPUNGE ") + self.buffer.writeLastCommandSet(set)
+        self.buffer.writeString("UID EXPUNGE ") + self.buffer.writeLastCommandSet(set)
     }
 
     private mutating func writeCommandKind_unselect() -> Int {

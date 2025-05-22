@@ -362,6 +362,14 @@ extension GrammarParser {
             .namespace(try self.parseNamespaceResponse(buffer: &buffer, tracker: tracker))
         }
 
+        func parseSuffix_mailboxID(buffer: inout ParseBuffer, tracker: StackTracker) throws -> ResponseTextCode {
+            try PL.parseSpaces(buffer: &buffer, tracker: tracker)
+            try PL.parseFixedString("(", buffer: &buffer, tracker: tracker)
+            let mailboxID = try parseMailboxID(buffer: &buffer, tracker: tracker)
+            try PL.parseFixedString(")", buffer: &buffer, tracker: tracker)
+            return .mailboxID(mailboxID)
+        }
+
         func parseResponseTextCode_atom(buffer: inout ParseBuffer, tracker: StackTracker) throws -> ResponseTextCode {
             let atom = try self.parseAtom(buffer: &buffer, tracker: tracker)
             let string = try PL.parseOptional(buffer: &buffer, tracker: tracker) { (buffer, tracker) -> String in
@@ -395,6 +403,7 @@ extension GrammarParser {
             "HIGHESTMODSEQ": parseSuffix_highestModifiedSequence,
             "INUSE": { _, _ in .inUse },
             "LIMIT": { _, _ in .limit },
+            "MAILBOXID": parseSuffix_mailboxID,
             "METADATA": parseSuffix_metadata,
             "MODIFIED": parseSuffix_modified,
             "NAMESPACE": parseSuffix_namespace,

@@ -290,6 +290,9 @@ extension Capability {
     /// Enables managing mailbox namespaces to provide support for shared mailboxes - RFC 4466.
     public static let namespace = Self(unchecked: "NAMESPACE")
 
+    /// The server supports object identifiers - RFC 8474.
+    public static let objectID = Self(unchecked: "OBJECTID")
+
     /// Each mailbox that supports persistent storage of mod-sequences, i.e., for which the server would
     /// send a HIGHESTMODSEQ untagged OK response code on a successful
     /// SELECT/EXAMINE, MUST increment the per-mailbox mod-sequence when one
