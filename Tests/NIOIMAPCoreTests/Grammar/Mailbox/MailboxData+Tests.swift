@@ -60,6 +60,37 @@ extension MailboxDataTests {
             (.search([1]), "SEARCH 1", #line),
             (.search([1, 2, 3, 4, 5]), "SEARCH 1 2 3 4 5", #line),
             (.search([20, 23], ModificationSequenceValue(917_162_500)), "SEARCH 20 23 (MODSEQ 917162500)", #line),
+            (
+                .uidBatches(
+                    UIDBatchesResponse(
+                        correlator: .init(tag: "A143"),
+                        batches: [
+                            99_695...215_295,
+                            20_350...99_696,
+                            7_829...20_351,
+                            1...7830,
+                        ]
+                    )
+                ),
+                #"UIDBATCHES (TAG "A143") 215295:99695,99696:20350,20351:7829,7830:1"#, #line
+            ),
+            (
+                .uidBatches(UIDBatchesResponse(correlator: .init(tag: "A143"), batches: [])),
+                #"UIDBATCHES (TAG "A143")"#, #line
+            ),
+            (
+                .uidBatches(UIDBatchesResponse(correlator: .init(tag: "A143"), batches: [99_695])),
+                #"UIDBATCHES (TAG "A143") 99695"#, #line
+            ),
+            (
+                .uidBatches(
+                    UIDBatchesResponse(
+                        correlator: .init(tag: "A143", mailbox: MailboxName("Drafts"), uidValidity: 4_889_695),
+                        batches: [99_695]
+                    )
+                ),
+                #"UIDBATCHES (TAG "A143" MAILBOX "Drafts" UIDVALIDITY 4889695) 99695"#, #line
+            ),
         ]
 
         for (test, expectedString, line) in inputs {

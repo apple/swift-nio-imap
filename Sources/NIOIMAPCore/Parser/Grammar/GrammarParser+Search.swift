@@ -88,7 +88,8 @@ extension GrammarParser {
         }
 
         return try PL.composite(buffer: &buffer, tracker: tracker) { (buffer, tracker) in
-            try PL.parseFixedString(" (", buffer: &buffer, tracker: tracker)
+            try PL.parseSpaces(buffer: &buffer, tracker: tracker)
+            try PL.parseFixedString("(", buffer: &buffer, tracker: tracker)
 
             try parseSearchCorrelator_once(buffer: &buffer, tracker: tracker)
             var result: SearchCorrelator

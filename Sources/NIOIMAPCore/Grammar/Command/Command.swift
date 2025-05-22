@@ -122,6 +122,11 @@ public enum Command: Hashable, Sendable {
     /// Retrieves the namespaces available to the user.
     case namespace
 
+    /// UIDBATCHES to get partition UIDs into batches.
+    ///
+    /// https://datatracker.ietf.org/doc/draft-ietf-mailmaint-imap-uidbatches/
+    case uidBatches(batchSize: Int, batchRange: ClosedRange<Int>?)
+
     /// Similar to `.copy`, but uses unique identifier instead of sequence numbers to identify messages.
     case uidCopy(LastCommandSet<UID>, MailboxName)
 
@@ -307,6 +312,8 @@ extension CommandEncodeBuffer {
             return self.writeCommandKind_urlFetch(urls: urls)
         case .compress(let kind):
             return self.writeCommandKind_compress(kind: kind)
+        case .uidBatches(batchSize: let size, batchRange: let range):
+            return self.writeCommandKind_uidBatches(batchSize: size, batchRange: range)
         case .custom(name: let name, payloads: let payloads):
             return self.writeCommandKind_custom(name: name, payloads: payloads)
         }
@@ -463,6 +470,20 @@ extension CommandEncodeBuffer {
 
     private mutating func writeCommandKind_compress(kind: Capability.CompressionKind) -> Int {
         self.buffer.writeString("COMPRESS \(kind.rawValue)")
+    }
+
+    private mutating func writeCommandKind_uidBatches(batchSize: Int, batchRange: ClosedRange<Int>?) -> Int {
+        self.buffer.writeString("UIDBATCHES \(batchSize)")
+            + self.buffer.writeIfExists(batchRange) {
+                let range =
+                    UnknownMessageIdentifier(exactly: $0.lowerBound)!...UnknownMessageIdentifier(
+                        exactly: $0.upperBound
+                    )!
+                return self.buffer
+                    .writeString(" ")
+                    + self.buffer
+                    .writeMessageIdentifierRange(range)
+            }
     }
 
     private mutating func writeCommandKind_custom(name: String, payloads: [Command.CustomCommandPayload]) -> Int {
@@ -651,6 +672,13 @@ extension CommandEncodeBuffer {
 // MARK: - Conveniences
 
 extension Command {
+    /// Convenience for creating a `UIDBATCHES` command.
+    ///
+    /// https://datatracker.ietf.org/doc/draft-ietf-mailmaint-imap-uidbatches/
+    public static func uidBatches(batchSize: Int) -> Command {
+        return .uidBatches(batchSize: batchSize, batchRange: nil)
+    }
+
     /// Convenience for creating a *UID MOVE* command.
     /// Pass in a `UIDSet`, and if that set is valid (i.e. non-empty) then a command is returned.
     /// - parameter messages: The set of message UIDs to use.

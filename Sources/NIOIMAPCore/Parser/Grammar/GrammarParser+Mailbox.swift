@@ -35,66 +35,104 @@ extension GrammarParser {
     //                    "STATUS" SP mailbox SP "(" [status-att-list] ")" /
     //                    number SP "EXISTS" / Namespace-Response
     func parseMailboxData(buffer: inout ParseBuffer, tracker: StackTracker) throws -> MailboxData {
-        func parseMailboxData_flags(buffer: inout ParseBuffer, tracker: StackTracker) throws -> MailboxData {
-            try PL.parseFixedString("FLAGS ", buffer: &buffer, tracker: tracker)
-            return .flags(try self.parseFlagList(buffer: &buffer, tracker: tracker))
-        }
-
-        func parseMailboxData_list(buffer: inout ParseBuffer, tracker: StackTracker) throws -> MailboxData {
-            try PL.parseFixedString("LIST ", buffer: &buffer, tracker: tracker)
-            return .list(try self.parseMailboxList(buffer: &buffer, tracker: tracker))
-        }
-
-        func parseMailboxData_lsub(buffer: inout ParseBuffer, tracker: StackTracker) throws -> MailboxData {
-            try PL.parseFixedString("LSUB ", buffer: &buffer, tracker: tracker)
-            return .lsub(try self.parseMailboxList(buffer: &buffer, tracker: tracker))
-        }
-
-        func parseMailboxData_extendedSearch(buffer: inout ParseBuffer, tracker: StackTracker) throws -> MailboxData {
-            let response = try self.parseExtendedSearchResponse(buffer: &buffer, tracker: tracker)
-            return .extendedSearch(response)
-        }
-
-        func parseMailboxData_search(buffer: inout ParseBuffer, tracker: StackTracker) throws -> MailboxData {
-            try PL.parseFixedString("SEARCH", buffer: &buffer, tracker: tracker)
-            let nums = try PL.parseZeroOrMore(buffer: &buffer, tracker: tracker) {
-                (buffer, tracker) -> UnknownMessageIdentifier in
+        /// Parse those sub-parses that have a fixed text prefix.
+        func parseMailboxData_withFixedPrefix(buffer: inout ParseBuffer, tracker: StackTracker) throws -> MailboxData {
+            func parseMailboxData_flags(buffer: inout ParseBuffer, tracker: StackTracker) throws -> MailboxData {
                 try PL.parseSpaces(buffer: &buffer, tracker: tracker)
-                let num = try self.parseNZNumber(buffer: &buffer, tracker: tracker)
-                guard let id = UnknownMessageIdentifier(exactly: num) else {
-                    throw ParserError(hint: "Can't make unknown message identfiier from \(num)")
-                }
-                return id
+                return .flags(try self.parseFlagList(buffer: &buffer, tracker: tracker))
             }
-            return .search(nums)
-        }
 
-        func parseMailboxData_searchSort(buffer: inout ParseBuffer, tracker: StackTracker) throws -> MailboxData {
-            try PL.parseFixedString("SEARCH", buffer: &buffer, tracker: tracker)
-            try PL.parseSpaces(buffer: &buffer, tracker: tracker)
-            var array = [try self.parseNZNumber(buffer: &buffer, tracker: tracker)]
-            try PL.parseZeroOrMore(
-                buffer: &buffer,
-                into: &array,
-                tracker: tracker,
-                parser: { (buffer, tracker) in
-                    try PL.parseSpaces(buffer: &buffer, tracker: tracker)
-                    return try self.parseNZNumber(buffer: &buffer, tracker: tracker)
+            func parseMailboxData_list(buffer: inout ParseBuffer, tracker: StackTracker) throws -> MailboxData {
+                try PL.parseSpaces(buffer: &buffer, tracker: tracker)
+                return .list(try self.parseMailboxList(buffer: &buffer, tracker: tracker))
+            }
+
+            func parseMailboxData_lsub(buffer: inout ParseBuffer, tracker: StackTracker) throws -> MailboxData {
+                try PL.parseSpaces(buffer: &buffer, tracker: tracker)
+                return .lsub(try self.parseMailboxList(buffer: &buffer, tracker: tracker))
+            }
+
+            func parseMailboxData_extendedSearch(buffer: inout ParseBuffer, tracker: StackTracker) throws -> MailboxData
+            {
+                let response = try self.parseExtendedSearchResponse(buffer: &buffer, tracker: tracker)
+                return .extendedSearch(response)
+            }
+
+            func parseMailboxData_search_combined(
+                buffer: inout ParseBuffer,
+                tracker: StackTracker
+            ) throws -> MailboxData {
+                func parseMailboxData_search(buffer: inout ParseBuffer, tracker: StackTracker) throws -> MailboxData {
+                    let nums = try PL.parseZeroOrMore(buffer: &buffer, tracker: tracker) {
+                        (buffer, tracker) -> UnknownMessageIdentifier in
+                        try PL.parseSpaces(buffer: &buffer, tracker: tracker)
+                        let num = try self.parseNZNumber(buffer: &buffer, tracker: tracker)
+                        guard let id = UnknownMessageIdentifier(exactly: num) else {
+                            throw ParserError(hint: "Can't make unknown message identfiier from \(num)")
+                        }
+                        return id
+                    }
+                    return .search(nums)
                 }
-            )
-            try PL.parseSpaces(buffer: &buffer, tracker: tracker)
-            let seq = try self.parseSearchSortModificationSequence(buffer: &buffer, tracker: tracker)
-            return .searchSort(.init(identifiers: array, modificationSequence: seq))
-        }
 
-        func parseMailboxData_status(buffer: inout ParseBuffer, tracker: StackTracker) throws -> MailboxData {
-            try PL.parseFixedString("STATUS ", buffer: &buffer, tracker: tracker)
-            let mailbox = try self.parseMailbox(buffer: &buffer, tracker: tracker)
-            try PL.parseSpaces(buffer: &buffer, tracker: tracker)
-            try PL.parseFixedString("(", buffer: &buffer, tracker: tracker)
-            let status = try PL.parseOptional(buffer: &buffer, tracker: tracker, parser: self.parseMailboxStatus)
-            try PL.parseFixedString(")", buffer: &buffer, tracker: tracker)
-            return .status(mailbox, status ?? .init())
+                func parseMailboxData_searchSort(buffer: inout ParseBuffer, tracker: StackTracker) throws -> MailboxData
+                {
+                    try PL.parseSpaces(buffer: &buffer, tracker: tracker)
+                    var array = [try self.parseNZNumber(buffer: &buffer, tracker: tracker)]
+                    try PL.parseZeroOrMore(
+                        buffer: &buffer,
+                        into: &array,
+                        tracker: tracker,
+                        parser: { (buffer, tracker) in
+                            try PL.parseSpaces(buffer: &buffer, tracker: tracker)
+                            return try self.parseNZNumber(buffer: &buffer, tracker: tracker)
+                        }
+                    )
+                    try PL.parseSpaces(buffer: &buffer, tracker: tracker)
+                    let seq = try self.parseSearchSortModificationSequence(buffer: &buffer, tracker: tracker)
+                    return .searchSort(.init(identifiers: array, modificationSequence: seq))
+                }
+
+                return try PL.parseOneOf(
+                    parseMailboxData_searchSort,
+                    parseMailboxData_search,
+                    buffer: &buffer,
+                    tracker: tracker
+                )
+            }
+
+            func parseMailboxData_status(buffer: inout ParseBuffer, tracker: StackTracker) throws -> MailboxData {
+                try PL.parseSpaces(buffer: &buffer, tracker: tracker)
+                let mailbox = try self.parseMailbox(buffer: &buffer, tracker: tracker)
+                try PL.parseSpaces(buffer: &buffer, tracker: tracker)
+                try PL.parseFixedString("(", buffer: &buffer, tracker: tracker)
+                let status = try PL.parseOptional(buffer: &buffer, tracker: tracker, parser: self.parseMailboxStatus)
+                try PL.parseFixedString(")", buffer: &buffer, tracker: tracker)
+                return .status(mailbox, status ?? .init())
+            }
+
+            func parseMailboxData_namespace(buffer: inout ParseBuffer, tracker: StackTracker) throws -> MailboxData {
+                .namespace(try self.parseNamespaceResponse(buffer: &buffer, tracker: tracker))
+            }
+
+            func parseMailboxData_uidBatchesResponse(
+                buffer: inout ParseBuffer,
+                tracker: StackTracker
+            ) throws -> MailboxData {
+                .uidBatches(try self.parseUIDBatchesResponse(buffer: &buffer, tracker: tracker))
+            }
+
+            let commandParsers: [String: (inout ParseBuffer, StackTracker) throws -> MailboxData] = [
+                "FLAGS": parseMailboxData_flags,
+                "LIST": parseMailboxData_list,
+                "LSUB": parseMailboxData_lsub,
+                "ESEARCH": parseMailboxData_extendedSearch,
+                "SEARCH": parseMailboxData_search_combined,
+                "STATUS": parseMailboxData_status,
+                "NAMESPACE": parseMailboxData_namespace,
+                "UIDBATCHES": parseMailboxData_uidBatchesResponse,
+            ]
+            return try parseFromLookupTable(buffer: &buffer, tracker: tracker, parsers: commandParsers)
         }
 
         func parseMailboxData_exists(buffer: inout ParseBuffer, tracker: StackTracker) throws -> MailboxData {
@@ -109,22 +147,11 @@ extension GrammarParser {
             return .recent(number)
         }
 
-        func parseMailboxData_namespace(buffer: inout ParseBuffer, tracker: StackTracker) throws -> MailboxData {
-            .namespace(try self.parseNamespaceResponse(buffer: &buffer, tracker: tracker))
-        }
-
         return try PL.parseOneOf(
             [
-                parseMailboxData_flags,
-                parseMailboxData_list,
-                parseMailboxData_lsub,
-                parseMailboxData_extendedSearch,
-                parseMailboxData_status,
+                parseMailboxData_withFixedPrefix,
                 parseMailboxData_exists,
                 parseMailboxData_recent,
-                parseMailboxData_searchSort,
-                parseMailboxData_search,
-                parseMailboxData_namespace,
             ],
             buffer: &buffer,
             tracker: tracker

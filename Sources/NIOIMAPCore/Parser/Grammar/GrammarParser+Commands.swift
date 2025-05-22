@@ -83,6 +83,7 @@ extension GrammarParser {
             "SETQUOTA": self.parseCommandSuffix_setQuota,
             "GETQUOTAROOT": self.parseCommandSuffix_getQuotaRoot,
             "COMPRESS": self.parseCommandSuffix_compress,
+            "UIDBATCHES": self.parseCommandSuffix_uidBatched,
         ]
         return try parseFromLookupTable(buffer: &buffer, tracker: tracker, parsers: commandParsers)
     }
@@ -537,14 +538,32 @@ extension GrammarParser {
         }
     }
 
-    // compress    = "COMPRESS" SP algorithm
-    // algorithm   = "DEFLATE" (or any atom)
     func parseCommandSuffix_compress(buffer: inout ParseBuffer, tracker: StackTracker) throws -> Command {
         try PL.composite(buffer: &buffer, tracker: tracker) { buffer, tracker -> Command in
             try PL.parseSpaces(buffer: &buffer, tracker: tracker)
             let rawAlg = try self.parseAtom(buffer: &buffer, tracker: tracker)
             let alg = Capability.CompressionKind(rawAlg)
             return .compress(alg)
+        }
+    }
+
+    // message-batches     = "UIDBATCHES" SP nz-number
+    //                       [SP nz-number ":" nz-number]
+    func parseCommandSuffix_uidBatched(buffer: inout ParseBuffer, tracker: StackTracker) throws -> Command {
+        try PL.composite(buffer: &buffer, tracker: tracker) { buffer, tracker -> Command in
+            try PL.parseSpaces(buffer: &buffer, tracker: tracker)
+            let size = try self.parseNZNumber(buffer: &buffer, tracker: tracker)
+            let range: MessageIdentifierRange<UnknownMessageIdentifier>? = try PL.parseOptional(
+                buffer: &buffer,
+                tracker: tracker
+            ) { buffer, tracker in
+                try PL.parseSpaces(buffer: &buffer, tracker: tracker)
+                return try self.parseMessageIdentifierRange(buffer: &buffer, tracker: tracker)
+            }
+            let batchRange = range.map {
+                Int($0.lowerBound)...Int($0.upperBound)
+            }
+            return .uidBatches(batchSize: Int(size), batchRange: batchRange)
         }
     }
 
