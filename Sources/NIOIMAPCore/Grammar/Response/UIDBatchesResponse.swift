@@ -17,7 +17,7 @@ import struct NIO.ByteBuffer
 /// Sent from a server in response to an extended search.
 public struct UIDBatchesResponse: Hashable, Sendable {
     /// The tag of the command that this search result is a response to.
-    public var correlator: String
+    public var correlator: SearchCorrelator
 
     /// Data returned from the search.
     public var batches: [UIDRange]
@@ -25,7 +25,7 @@ public struct UIDBatchesResponse: Hashable, Sendable {
     /// Creates a new `UIDBatchesResponse`.
     /// - parameter correlator: Identifies the command that resulted in this response.
     /// - parameter batches: The UID batches returned by the command.
-    public init(correlator: String, batches: [UIDRange]) {
+    public init(correlator: SearchCorrelator, batches: [UIDRange]) {
         self.correlator = correlator
         self.batches = batches
     }
@@ -35,7 +35,8 @@ public struct UIDBatchesResponse: Hashable, Sendable {
 
 extension EncodeBuffer {
     @discardableResult mutating func writeUIDBatchesResponse(_ response: UIDBatchesResponse) -> Int {
-        self.writeString(#"UIDBATCHES (TAG "\#(response.correlator)")"#)
+        self.writeString(#"UIDBATCHES"#)
+            + self.writeSearchCorrelator(response.correlator)
             + self.write(if: !response.batches.isEmpty) {
                 self.writeString(" ")
                     + self.writeArray(response.batches, separator: ",", parenthesis: false) { range, buffer -> Int in

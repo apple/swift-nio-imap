@@ -63,7 +63,7 @@ extension MailboxDataTests {
             (
                 .uidBatches(
                     UIDBatchesResponse(
-                        correlator: "A143",
+                        correlator: .init(tag: "A143"),
                         batches: [
                             99_695...215_295,
                             20_350...99_696,
@@ -75,12 +75,21 @@ extension MailboxDataTests {
                 #"UIDBATCHES (TAG "A143") 215295:99695,99696:20350,20351:7829,7830:1"#, #line
             ),
             (
-                .uidBatches(UIDBatchesResponse(correlator: "A143", batches: [])),
+                .uidBatches(UIDBatchesResponse(correlator: .init(tag: "A143"), batches: [])),
                 #"UIDBATCHES (TAG "A143")"#, #line
             ),
             (
-                .uidBatches(UIDBatchesResponse(correlator: "A143", batches: [99_695])),
+                .uidBatches(UIDBatchesResponse(correlator: .init(tag: "A143"), batches: [99_695])),
                 #"UIDBATCHES (TAG "A143") 99695"#, #line
+            ),
+            (
+                .uidBatches(
+                    UIDBatchesResponse(
+                        correlator: .init(tag: "A143", mailbox: MailboxName("Drafts"), uidValidity: 4_889_695),
+                        batches: [99_695]
+                    )
+                ),
+                #"UIDBATCHES (TAG "A143" MAILBOX "Drafts" UIDVALIDITY 4889695) 99695"#, #line
             ),
         ]
 

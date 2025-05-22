@@ -1487,15 +1487,25 @@ extension ParserUnitTests {
                 (
                     #" (TAG "A143") 215295:99695,99696:20350,20351:7829,7830:1"#, "\r",
                     .init(
-                        correlator: "A143",
+                        correlator: .init(tag: "A143"),
                         batches: [
                             99695...215295, 20350...99696, 7829...20351, 1...7830,
                         ]
                     ), #line
                 ),
-                (#" (TAG "A143")"#, "\r", .init(correlator: "A143", batches: []), #line),
-                (#" (TAG "A143") 99695"#, "\r", .init(correlator: "A143", batches: [99695...99695]), #line),
-                (#" (TAG "A143") 20350:20350"#, "\r", .init(correlator: "A143", batches: [20350...20350]), #line),
+                (#" (TAG "A143")"#, "\r", .init(correlator: .init(tag: "A143"), batches: []), #line),
+                (#" (TAG "A143") 99695"#, "\r", .init(correlator: .init(tag: "A143"), batches: [99695...99695]), #line),
+                (
+                    #" (TAG "A143") 20350:20350"#, "\r",
+                    .init(correlator: .init(tag: "A143"), batches: [20350...20350]), #line
+                ),
+                (
+                    #" (UIDVALIDITY 8389223 MAILBOX Sent TAG "A143") 8548912:3298065"#, "\r",
+                    .init(
+                        correlator: .init(tag: "A143", mailbox: MailboxName("Sent"), uidValidity: 8_389_223),
+                        batches: [3_298_065...8_548_912]
+                    ), #line
+                ),
             ],
             parserErrorInputs: [],
             incompleteMessageInputs: []

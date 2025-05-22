@@ -97,7 +97,7 @@ extension GrammarParser_Mailbox_Tests {
                 ),
                 (
                     #"UIDBATCHES (TAG "A143") 20351:7829,7830:1"#, "\r\n",
-                    .uidBatches(.init(correlator: "A143", batches: [7_829...20_351, 1...7_830])),
+                    .uidBatches(.init(correlator: .init(tag: "A143"), batches: [7_829...20_351, 1...7_830])),
                     #line
                 ),
             ],
