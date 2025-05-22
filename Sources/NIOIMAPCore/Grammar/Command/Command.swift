@@ -124,7 +124,7 @@ public enum Command: Hashable, Sendable {
 
     /// UIDBATCHES to get partition UIDs into batches.
     ///
-    /// TODO: Add link to RFC
+    /// https://datatracker.ietf.org/doc/draft-ietf-mailmaint-imap-uidbatches/
     case uidBatches(batchSize: Int, batchRange: ClosedRange<Int>?)
 
     /// Similar to `.copy`, but uses unique identifier instead of sequence numbers to identify messages.
@@ -674,7 +674,7 @@ extension CommandEncodeBuffer {
 extension Command {
     /// Convenience for creating a `UIDBATCHES` command.
     ///
-    /// TODO: Add link to RFC
+    /// https://datatracker.ietf.org/doc/draft-ietf-mailmaint-imap-uidbatches/
     public static func uidBatches(batchSize: Int) -> Command {
         return .uidBatches(batchSize: batchSize, batchRange: nil)
     }
