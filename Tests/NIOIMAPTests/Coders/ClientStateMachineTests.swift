@@ -35,7 +35,7 @@ class ClientStateMachineTests: XCTestCase {
         // LOGIN one continuation
         XCTAssertNoThrow(
             try self.stateMachine.sendCommand(
-                .tagged(.init(tag: "A3", command: .login(username: "\\", password: "hey")))
+                .tagged(.init(tag: "A3", command: .login(username: "å", password: "hey")))
             )
         )
         XCTAssertNoThrow(try self.stateMachine.receiveContinuationRequest(.data("OK")))
@@ -46,7 +46,7 @@ class ClientStateMachineTests: XCTestCase {
         // LOGIN two continuations
         XCTAssertNoThrow(
             try self.stateMachine.sendCommand(
-                .tagged(.init(tag: "A3", command: .login(username: "\\", password: "\\")))
+                .tagged(.init(tag: "A3", command: .login(username: "å", password: "ß")))
             )
         )
         XCTAssertNoThrow(try self.stateMachine.receiveContinuationRequest(.data("OK")))
@@ -86,21 +86,21 @@ class ClientStateMachineTests: XCTestCase {
     // so make sure the action we get back from
     // the state machine is telling us to chunk
     func testChunking() {
-        let command = TaggedCommand(tag: "A1", command: .login(username: "\\", password: "\\"))
+        let command = TaggedCommand(tag: "A1", command: .login(username: "å", password: "ß"))
 
         // send the command, the state machine should tell us to send the first chunk
         var result: OutgoingChunk?
         XCTAssertNoThrow(result = try self.stateMachine.sendCommand(.tagged(command)))
-        XCTAssertEqual(result?.bytes, "A1 LOGIN {1}\r\n")
+        XCTAssertEqual(result?.bytes, "A1 LOGIN {2}\r\n")
 
         // receive a continuation, we should then send another chunk
         var action: ClientStateMachine.ContinuationRequestAction!
         XCTAssertNoThrow(action = try self.stateMachine.receiveContinuationRequest(.data("OK")))
-        XCTAssertEqual(action, .sendChunks([.init(bytes: "\\ {1}\r\n", promise: nil, shouldSucceedPromise: false)]))
+        XCTAssertEqual(action, .sendChunks([.init(bytes: "å {2}\r\n", promise: nil, shouldSucceedPromise: false)]))
 
         // receive a continuation again
         XCTAssertNoThrow(action = try self.stateMachine.receiveContinuationRequest(.data("OK")))
-        XCTAssertEqual(action, .sendChunks([.init(bytes: "\\\r\n", promise: nil, shouldSucceedPromise: true)]))
+        XCTAssertEqual(action, .sendChunks([.init(bytes: "ß\r\n", promise: nil, shouldSucceedPromise: true)]))
 
         // this time we expect a tagged response, so let's send one
         XCTAssertNoThrow(
@@ -109,11 +109,11 @@ class ClientStateMachineTests: XCTestCase {
     }
 
     func testChunkingMultipleCommands() {
-        let command = TaggedCommand(tag: "A1", command: .login(username: "\\", password: "pass"))
+        let command = TaggedCommand(tag: "A1", command: .login(username: "å", password: "pass"))
 
         var result1: OutgoingChunk?
         XCTAssertNoThrow(result1 = try self.stateMachine.sendCommand(.tagged(command)))
-        XCTAssertEqual(result1!.bytes, "A1 LOGIN {1}\r\n")
+        XCTAssertEqual(result1!.bytes, "A1 LOGIN {2}\r\n")
 
         // We haven't yet continued the first command
         // so we shouldn't get anything back here.
@@ -127,7 +127,7 @@ class ClientStateMachineTests: XCTestCase {
         XCTAssertEqual(
             result3,
             .sendChunks([
-                .init(bytes: "\\ \"pass\"\r\n", promise: nil, shouldSucceedPromise: true),
+                .init(bytes: "å \"pass\"\r\n", promise: nil, shouldSucceedPromise: true),
                 .init(bytes: "A2 NOOP\r\n", promise: nil, shouldSucceedPromise: true),
             ])
         )

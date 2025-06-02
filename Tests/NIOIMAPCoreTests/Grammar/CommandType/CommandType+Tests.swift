@@ -48,7 +48,7 @@ extension CommandType_Tests {
             // of `quoted` (without escaping) nor `1*ASTRING-CHAR`:
             (
                 .login(username: #"foo\bar"#, password: #"pass"word"#), CommandEncodingOptions(),
-                [#"LOGIN {7}\#r\#n"#, #"foo\bar {9}\#r\#n"#, #"pass"word"#], #line
+                [#"LOGIN "foo\\bar" "pass\"word""#], #line
             ),
             // CR and LF need to use literal
             (

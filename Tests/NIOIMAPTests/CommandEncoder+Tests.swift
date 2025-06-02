@@ -116,7 +116,7 @@ extension CommandEncoder_Tests {
         let inputs: [(CommandStreamPart, ByteBuffer, UInt)] = [
             // LOGIN / AUTHENTICATE
             (
-                .tagged(.init(tag: "3", command: .login(username: "username", password: "\\pass"))),
+                .tagged(.init(tag: "3", command: .login(username: "username", password: "päss"))),
                 "3 LOGIN \"∅\" {5+}\r\n∅\r\n", #line
             ),
             (

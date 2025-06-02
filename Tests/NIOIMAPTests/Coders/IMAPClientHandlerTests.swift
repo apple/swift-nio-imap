@@ -78,7 +78,7 @@ class IMAPClientHandlerTests: XCTestCase {
                 TaggedCommand(
                     tag: "x",
                     command: .rename(
-                        from: .init("\\"),
+                        from: .init("å"),
                         to: .init("to"),
                         parameters: [:]
                     )
@@ -86,9 +86,9 @@ class IMAPClientHandlerTests: XCTestCase {
             ),
             wait: false
         )
-        self.assertOutboundString("x RENAME {1}\r\n")
+        self.assertOutboundString("x RENAME {2}\r\n")
         self.writeInbound("+ OK\r\n")
-        self.assertOutboundString("\\ \"to\"\r\n")
+        self.assertOutboundString("å \"to\"\r\n")
         XCTAssertNoThrow(try f.wait())
         self.writeInbound("x OK ok\r\n")
         self.assertInbound(
@@ -107,19 +107,19 @@ class IMAPClientHandlerTests: XCTestCase {
                 TaggedCommand(
                     tag: "x",
                     command: .rename(
-                        from: .init("\\"),
-                        to: .init("\""),
+                        from: .init("å"),
+                        to: .init("ß"),
                         parameters: [:]
                     )
                 )
             ),
             wait: false
         )
-        self.assertOutboundString("x RENAME {1}\r\n")
+        self.assertOutboundString("x RENAME {2}\r\n")
         self.writeInbound("+ OK\r\n")
-        self.assertOutboundString("\\ {1}\r\n")
+        self.assertOutboundString("å {2}\r\n")
         self.writeInbound("+ OK\r\n")
-        self.assertOutboundString("\"\r\n")
+        self.assertOutboundString("ß\r\n")
         XCTAssertNoThrow(try f.wait())
         self.writeInbound("x OK ok\r\n")
         self.assertInbound(
@@ -138,7 +138,7 @@ class IMAPClientHandlerTests: XCTestCase {
                 TaggedCommand(
                     tag: "x",
                     command: .rename(
-                        from: .init("\\"),
+                        from: .init("å"),
                         to: .init("to"),
                         parameters: [:]
                     )
@@ -152,21 +152,21 @@ class IMAPClientHandlerTests: XCTestCase {
                     tag: "y",
                     command: .rename(
                         from: .init("from"),
-                        to: .init("\\"),
+                        to: .init("ß"),
                         parameters: [:]
                     )
                 )
             ),
             wait: false
         )
-        self.assertOutboundString("x RENAME {1}\r\n")
+        self.assertOutboundString("x RENAME {2}\r\n")
         self.writeInbound("+ OK\r\n")
         XCTAssertNoThrow(try f1.wait())
-        self.assertOutboundString("\\ \"to\"\r\n")
-        self.assertOutboundString("y RENAME \"from\" {1}\r\n")
+        self.assertOutboundString("å \"to\"\r\n")
+        self.assertOutboundString("y RENAME \"from\" {2}\r\n")
         self.writeInbound("+ OK\r\n")
         XCTAssertNoThrow(try f2.wait())
-        self.assertOutboundString("\\\r\n")
+        self.assertOutboundString("ß\r\n")
         self.writeInbound("x OK ok\r\n")
         self.assertInbound(
             .tagged(
@@ -191,26 +191,26 @@ class IMAPClientHandlerTests: XCTestCase {
     // requests back to "simple" commands that can be written in one shot. This was a bug
     // in a previous implementation, so this test prevents regression.
     func testThreeContReqCommandsEnqueuedFollowedBy2BasicOnes() {
-        let f1 = self.writeOutbound(.tagged(.init(tag: "1", command: .create(.init("\\"), []))), wait: false)
-        let f2 = self.writeOutbound(.tagged(.init(tag: "2", command: .create(.init("\\"), []))), wait: false)
-        let f3 = self.writeOutbound(.tagged(.init(tag: "3", command: .create(.init("\\"), []))), wait: false)
+        let f1 = self.writeOutbound(.tagged(.init(tag: "1", command: .create(.init("å"), []))), wait: false)
+        let f2 = self.writeOutbound(.tagged(.init(tag: "2", command: .create(.init("ß"), []))), wait: false)
+        let f3 = self.writeOutbound(.tagged(.init(tag: "3", command: .create(.init("∂"), []))), wait: false)
         let f4 = self.writeOutbound(.tagged(.init(tag: "4", command: .create(.init("a"), []))), wait: false)
         let f5 = self.writeOutbound(.tagged(.init(tag: "5", command: .create(.init("b"), []))), wait: false)
 
-        self.assertOutboundString("1 CREATE {1}\r\n")
+        self.assertOutboundString("1 CREATE {2}\r\n")
         self.writeInbound("+ OK\r\n")
         XCTAssertNoThrow(try f1.wait())
-        self.assertOutboundString("\\\r\n")
+        self.assertOutboundString("å\r\n")
 
-        self.assertOutboundString("2 CREATE {1}\r\n")
+        self.assertOutboundString("2 CREATE {2}\r\n")
         self.writeInbound("+ OK\r\n")
         XCTAssertNoThrow(try f2.wait())
-        self.assertOutboundString("\\\r\n")
+        self.assertOutboundString("ß\r\n")
 
-        self.assertOutboundString("3 CREATE {1}\r\n")
+        self.assertOutboundString("3 CREATE {3}\r\n")
         self.writeInbound("+ OK\r\n")
         XCTAssertNoThrow(try f3.wait())
-        self.assertOutboundString("\\\r\n")
+        self.assertOutboundString("∂\r\n")
 
         self.assertOutboundString("4 CREATE \"a\"\r\n")
         XCTAssertNoThrow(try f4.wait())
@@ -407,14 +407,14 @@ class IMAPClientHandlerTests: XCTestCase {
         self.channel.pipeline.fireChannelActive()
 
         let f1 = self.writeOutbound(
-            .tagged(.init(tag: "A1", command: .login(username: "\\", password: "\\"))),
+            .tagged(.init(tag: "A1", command: .login(username: "å", password: "ß"))),
             wait: false
         )
-        self.assertOutboundString("A1 LOGIN {1}\r\n")
+        self.assertOutboundString("A1 LOGIN {2}\r\n")
         self.writeInbound("+ OK\r\n")
-        self.assertOutboundString("\\ {1}\r\n")
+        self.assertOutboundString("å {2}\r\n")
         self.writeInbound("+ OK\r\n")
-        self.assertOutboundString("\\\r\n")
+        self.assertOutboundString("ß\r\n")
         XCTAssertNoThrow(try f1.wait())
 
         // Change the encoding options:
@@ -433,10 +433,10 @@ class IMAPClientHandlerTests: XCTestCase {
 
         // now we should have literal+ turned on
         let f3 = self.writeOutbound(
-            .tagged(.init(tag: "A3", command: .login(username: "\\", password: "\\"))),
+            .tagged(.init(tag: "A3", command: .login(username: "å", password: "ß"))),
             wait: false
         )
-        self.assertOutboundString("A3 LOGIN {1+}\r\n\\ {1+}\r\n\\\r\n")
+        self.assertOutboundString("A3 LOGIN {2+}\r\nå {2+}\r\nß\r\n")
         XCTAssertNoThrow(try f3.wait())
     }
 
@@ -446,14 +446,14 @@ class IMAPClientHandlerTests: XCTestCase {
         self.channel.pipeline.fireChannelActive()
 
         let f1 = self.writeOutbound(
-            .tagged(.init(tag: "A1", command: .login(username: "\\", password: "\\"))),
+            .tagged(.init(tag: "A1", command: .login(username: "å", password: "ß"))),
             wait: false
         )
-        self.assertOutboundString("A1 LOGIN {1}\r\n")
+        self.assertOutboundString("A1 LOGIN {2}\r\n")
         self.writeInbound("+ OK\r\n")
-        self.assertOutboundString("\\ {1}\r\n")
+        self.assertOutboundString("å {2}\r\n")
         self.writeInbound("+ OK\r\n")
-        self.assertOutboundString("\\\r\n")
+        self.assertOutboundString("ß\r\n")
         XCTAssertNoThrow(try f1.wait())
 
         // send some capabilities
@@ -464,10 +464,10 @@ class IMAPClientHandlerTests: XCTestCase {
 
         // now we should have literal+ turned on
         let f3 = self.writeOutbound(
-            .tagged(.init(tag: "A3", command: .login(username: "\\", password: "\\"))),
+            .tagged(.init(tag: "A3", command: .login(username: "å", password: "ß"))),
             wait: false
         )
-        self.assertOutboundString("A3 LOGIN {1+}\r\n\\ {1+}\r\n\\\r\n")
+        self.assertOutboundString("A3 LOGIN {2+}\r\nå {2+}\r\nß\r\n")
         XCTAssertNoThrow(try f3.wait())
     }
 
@@ -519,14 +519,14 @@ class IMAPClientHandlerTests: XCTestCase {
         ).wait()
 
         // confirm it works for literals
-        self.writeOutbound(.tagged(.init(tag: "A1", command: .login(username: "\\", password: "\\"))), wait: false)
-        self.assertOutboundString("A1 LOGIN {1}\r\n")
+        self.writeOutbound(.tagged(.init(tag: "A1", command: .login(username: "å", password: "ß"))), wait: false)
+        self.assertOutboundString("A1 LOGIN {2}\r\n")
         self.writeInbound("+ 1\r\n")
         try! eventExpectation1.futureResult.wait()
-        self.assertOutboundString("\\ {1}\r\n")
+        self.assertOutboundString("å {2}\r\n")
         self.writeInbound("+ 2\r\n")
         try! eventExpectation2.futureResult.wait()
-        self.assertOutboundString("\\\r\n")
+        self.assertOutboundString("ß\r\n")
         self.writeInbound("A1 OK\r\n")
         self.assertInbound(.tagged(.init(tag: "A1", state: .ok(.init(code: nil, text: "")))))
 
@@ -545,7 +545,7 @@ class IMAPClientHandlerTests: XCTestCase {
     func testPromisesAreFailedOnChannelClose() {
         // p1 will be the active promise
         let p1 = self.writeOutbound(
-            .tagged(.init(tag: "A1", command: .login(username: "\\", password: "\\"))),
+            .tagged(.init(tag: "A1", command: .login(username: "å", password: "ß"))),
             wait: false
         )
 
@@ -553,7 +553,7 @@ class IMAPClientHandlerTests: XCTestCase {
         let p2 = self.writeOutbound(.tagged(.init(tag: "A2", command: .noop)), wait: false)
 
         // at this point we'll be held by the continuation requirement for p1
-        self.assertOutboundString("A1 LOGIN {1}\r\n")
+        self.assertOutboundString("A1 LOGIN {2}\r\n")
         self.channel.pipeline.fireChannelInactive()
         XCTAssertThrowsError(try p1.wait()) { e in
             XCTAssertEqual(e as? ChannelError, .ioOnClosedChannel)
@@ -666,7 +666,7 @@ class IMAPClientHandlerTests: XCTestCase {
     //            IMAPClientHandler(),
     //            PostTestHandler(),
     //        ]).wait())
-    //        self.writeOutbound(.command(.init(tag: "A1", command: .create(.init("\\"), []))), wait: false)
+    //        self.writeOutbound(.command(.init(tag: "A1", command: .create(.init("å"), []))), wait: false)
     //        self.writeOutbound(.command(.init(tag: "A2", command: .noop)), wait: true)
     //    }
 
@@ -684,7 +684,7 @@ class IMAPClientHandlerTests: XCTestCase {
 
         // writing a command that has a continuation
         var didComplete = NIOLoopBound(false, eventLoop: self.channel.eventLoop)
-        self.writeOutbound(.tagged(.init(tag: "A1", command: .create(.init("\\"), []))), wait: false).whenFailure {
+        self.writeOutbound(.tagged(.init(tag: "A1", command: .create(.init("å"), []))), wait: false).whenFailure {
             error in
             XCTAssertTrue(error is TestError)
             didComplete.value = true
@@ -714,11 +714,11 @@ class IMAPClientHandlerTests: XCTestCase {
         let future = self.channel.writeAndFlush(
             IMAPClientHandler.Message.part(
                 CommandStreamPart.tagged(
-                    .init(tag: "A1", command: .rename(from: .init("\\"), to: .init("\\"), parameters: [:]))
+                    .init(tag: "A1", command: .rename(from: .init("å"), to: .init("ß"), parameters: [:]))
                 )
             )
         )
-        self.assertOutboundString("A1 RENAME {1}\r\n")
+        self.assertOutboundString("A1 RENAME {2}\r\n")
 
         testHandler.failNextWrite = true
         self.writeInbound("+ OK\r\n")
@@ -782,10 +782,10 @@ class IMAPClientHandlerTests: XCTestCase {
         // expecting a continuation, but actually
         // receive a response.
         let promise = self.writeOutbound(
-            .tagged(.init(tag: "A1", command: .login(username: "\\", password: "test"))),
+            .tagged(.init(tag: "A1", command: .login(username: "å", password: "test"))),
             wait: false
         )
-        self.assertOutboundBuffer("A1 LOGIN {1}\r\n")
+        self.assertOutboundBuffer("A1 LOGIN {2}\r\n")
         XCTAssertThrowsError(try self.channel.writeInbound(ByteBuffer("A1 OK\r\n")))
         XCTAssertThrowsError(try promise.wait())
     }
