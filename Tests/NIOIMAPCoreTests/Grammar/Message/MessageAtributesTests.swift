@@ -91,7 +91,7 @@ extension MessageAttributesTests {
                 ]), "X-GM-LABELS (\\Inbox \\Sent \"Important\" \"Muy Importante\")", #line
             ),
             (.preview(.init("Lorem ipsum dolor sit amet")), "PREVIEW \"Lorem ipsum dolor sit amet\"", #line),
-            (.preview(.init(#"A\B"#)), "PREVIEW {3}\r\nA\\B", #line),
+            (.preview(.init(#"A\B"#)), #"PREVIEW "A\\B""#, #line),
             (.emailID(.init("123-456-789")!), "EMAILID (123-456-789)", #line),
             (.threadID(.init("123-456-789")!), "THREADID (123-456-789)", #line),
             (.threadID(nil), "THREADID NIL", #line),

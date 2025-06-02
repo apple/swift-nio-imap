@@ -26,8 +26,8 @@ extension Mailbox_Tests {
             (.inbox, "\"INBOX\"", #line),
             (.init(""), "\"\"", #line),
             (.init("box"), "\"box\"", #line),
-            (.init("\""), "{1}\r\n\"", #line),
-            (.init(ByteBuffer(string: "&ltFO9g-\\")), "{9}\r\n&ltFO9g-\\", #line),
+            (.init(#"a"b"#), #""a\"b""#, #line),
+            (.init(ByteBuffer(string: #"&ltFO9g-\"#)), #""&ltFO9g-\\""#, #line),
         ]
 
         for (test, expectedString, line) in inputs {
