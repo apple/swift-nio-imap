@@ -50,7 +50,7 @@ extension EncodeBuffer {
 
         switch stringEncoding(for: bytes) {
         case .quotedString:
-            return writeString("\"") + writeBytes(bytes) + writeString("\"")
+            return writeQuotedIMAPString(bytes)
         case .serverLiteral:
             return writeString("{\(bytes.count)}\r\n") + writeBytes(bytes)
         case .clientSynchronizingLiteral:
@@ -58,6 +58,25 @@ extension EncodeBuffer {
         case .clientNonSynchronizingLiteral:
             return writeString("{\(bytes.count)+}\r\n") + writeBytes(bytes)
         }
+    }
+
+    private mutating func writeQuotedIMAPString<T: Collection>(_ bytes: T) -> Int where T.Element == UInt8 {
+        guard !loggingMode else {
+            return self.buffer.writeString("[\(Array(bytes).count) bytes]")
+        }
+        var c = writeString(#"""#)
+        for byte in bytes {
+            switch byte {
+            case 0x5c:
+                c += self.buffer.writeBytes([0x5c, 0x5c])
+            case 0x22:
+                c += self.buffer.writeBytes([0x5c, 0x22])
+            default:
+                c += self.buffer.writeBytes(CollectionOfOne(byte))
+            }
+        }
+        c += writeString(#"""#)
+        return c
     }
 
     private mutating func writeIMAPStringLoggingMode<T: Collection>(_ bytes: T) -> Int where T.Element == UInt8 {
@@ -87,7 +106,7 @@ extension EncodeBuffer {
     private func stringEncoding<T: Collection>(for bytes: T) -> StringEncoding where T.Element == UInt8 {
         switch mode {
         case .client(options: let options):
-            if options.useQuotedString, canUseQuotedString(for: bytes) {
+            if options.useQuotedString, shouldUseQuotedString(for: bytes) {
                 return .quotedString
             } else if options.useNonSynchronizingLiteralPlus {
                 return .clientNonSynchronizingLiteral
@@ -97,17 +116,28 @@ extension EncodeBuffer {
                 return .clientSynchronizingLiteral
             }
         case .server(_, options: let options):
-            guard options.useQuotedString, canUseQuotedString(for: bytes) else {
+            guard options.useQuotedString, shouldUseQuotedString(for: bytes) else {
                 return .serverLiteral
             }
             return .quotedString
         }
     }
 
-    private func canUseQuotedString<T: Collection>(for bytes: T) -> Bool where T.Element == UInt8 {
-        // allSatisfy vs contains because IMO it's a little clearer
-        // if more than 70 bytes, always use a literal
-        bytes.count <= 70 && bytes.allSatisfy(\.isQuotedChar)
+    private func shouldUseQuotedString<T: Collection>(for bytes: T) -> Bool where T.Element == UInt8 {
+        // If more than 70 bytes, always use a literal:
+        guard bytes.count <= 70 else { return false }
+        // We’ll allow anything ASCII that’s not a control characters.
+        // But `\` and `"` will need quoting. If there are too many of those,
+        // fall back to using a literal.
+        var escapeCount = 0
+        return bytes.allSatisfy {
+            guard 0x20 <= $0 && $0 <= 0x7e else { return false }
+            guard $0 != 0x5c && $0 != 0x22 else {
+                escapeCount += 1
+                return escapeCount < 6
+            }
+            return true
+        }
     }
 
     /// Encodes the given bytes as a Base64 collection, and then writes to `self.`

@@ -25,14 +25,33 @@ extension ByteBufferWriteLiteralTests {
         let inputs: [(ByteBuffer, CommandEncodingOptions, [String], UInt)] = [
             ("", .rfc3501, ["\"\""], #line),
             ("", .noQuoted, ["{0}\r\n"], #line),
+            ("a", .rfc3501, [#""a""#], #line),
+            ("a", .literalPlus, [#""a""#], #line),
             ("abc", .rfc3501, [#""abc""#], #line),
-            (ByteBuffer(ByteBufferView(repeating: UInt8(ascii: "\""), count: 1)), .rfc3501, ["{1}\r\n", "\""], #line),
-            (ByteBuffer(ByteBufferView(repeating: UInt8(ascii: "\\"), count: 1)), .rfc3501, ["{1}\r\n", "\\"], #line),
-            (ByteBuffer(ByteBufferView(repeating: UInt8(ascii: "\\"), count: 1)), .literalPlus, ["{1+}\r\n\\"], #line),
-            ("\\\"", .rfc3501, ["{2}\r\n", "\\\""], #line),
-            ("a", .rfc3501, ["\"a\""], #line),
+            // Spaces are ok:
+            ("a b c", .rfc3501, [#""a b c""#], #line),
+            /// We’ll use quoted-string even if the input contains `\` and `"`, but those then need to be escaped.
+            (#"""#, .rfc3501, [#""\"""#], #line),
+            (#"""#, .literalPlus, [#""\"""#], #line),
+            (#"\"#, .rfc3501, [#""\\""#], #line),
+            (#"\"#, .literalPlus, [#""\\""#], #line),
+            (#"a\b"#, .rfc3501, [#""a\\b""#], #line),
+            (#"a\b"#, .literalPlus, [#""a\\b""#], #line),
+            (#"a"b"#, .rfc3501, [#""a\"b""#], #line),
+            (#"a"b"#, .literalPlus, [#""a\"b""#], #line),
+            (#"a"b\c"#, .rfc3501, [#""a\"b\\c""#], #line),
+            (#"a"b\c"#, .literalPlus, [#""a\"b\\c""#], #line),
+            /// But we’ll fall back to literals if there are too many `\` and/or `"` in the string:
+            (#"a""""b\\\\c"#, .rfc3501, ["{11}\r\n", #"a""""b\\\\c"#], #line),
+            // We’ll use literal (plus) if the string contains any non-ASCII:
             ("båd", .literalPlus, ["{4+}\r\nbåd"], #line),
             ("パリ", .literalPlus, ["{6+}\r\nパリ"], #line),
+            // Will also use literals if there are any control characters in the string:
+            ("a\u{007}b", .literalPlus, ["{3+}\r\na\u{007}b"], #line),
+            // Will also use literals if there are any control characters in the string:
+            ("a\nb", .literalPlus, ["{3+}\r\na\nb"], #line),
+
+            /// If the string is very long, we’ll always use literals:
             (
                 "01234567890123456789012345678901234567890123456789012345678901234567890",
                 .rfc3501,
@@ -59,9 +78,10 @@ extension ByteBufferWriteLiteralTests {
         let inputs: [(ByteBuffer, ResponseEncodingOptions, String, UInt)] = [
             ("", .rfc3501, "\"\"", #line),
             ("abc", .rfc3501, #""abc""#, #line),
-            (ByteBuffer(ByteBufferView(repeating: UInt8(ascii: "\""), count: 1)), .rfc3501, "{1}\r\n\"", #line),
-            (ByteBuffer(ByteBufferView(repeating: UInt8(ascii: "\\"), count: 1)), .rfc3501, "{1}\r\n\\", #line),
-            ("\\\"", .rfc3501, "{2}\r\n\\\"", #line),
+            (#"""#, .rfc3501, #""\"""#, #line),
+            (#"\"#, .rfc3501, #""\\""#, #line),
+            (#"\""#, .rfc3501, #""\\\"""#, #line),
+            (#"a""""b\\\\c"#, .rfc3501, #"{11}\#r\#na""""b\\\\c"#, #line),
             ("a", .rfc3501, "\"a\"", #line),
             ("båd", .rfc3501, "{4}\r\nbåd", #line),
             ("パリ", .rfc3501, "{6}\r\nパリ", #line),
