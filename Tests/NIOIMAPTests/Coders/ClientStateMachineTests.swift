@@ -247,7 +247,7 @@ class ClientStateMachineTests: XCTestCase {
         // ```
 
         XCTAssertThrowsError(
-            try self.stateMachine.receiveResponse(.tagged(.init(tag: "A1", state: .ok(.init(text: "Completed"))))),
+            try self.stateMachine.receiveResponse(.tagged(.init(tag: "A1", state: .ok(.init(text: "Completed")))))
         )
     }
 }
