@@ -55,6 +55,12 @@ public struct ServerMessageDate: Hashable, Sendable {
         )!
     }
 
+    public init(
+        _ rawValue: UInt64
+    ) {
+        self.rawValue = rawValue
+    }
+
     /// Creates a new `ServerMessageDate` from a given collection of `Components`
     /// - parameter components: The components containing a year, month, day, hour, minute, second, and timezone.
     public init(_ components: Components) {
@@ -74,7 +80,21 @@ public struct ServerMessageDate: Hashable, Sendable {
         store(UInt8(components.month), 12)
         store(UInt8(components.day), 31)
 
-        self.rawValue = rawValue
+        self.init(rawValue)
+    }
+}
+
+extension UInt64 {
+    public init(_ other: ServerMessageDate) {
+        self = other.rawValue
+    }
+}
+
+extension ServerMessageDate: CustomDebugStringConvertible {
+    public var debugDescription: String {
+        EncodeBuffer.makeDescription {
+            $0.writeInternalDate(self)
+        }
     }
 }
 
