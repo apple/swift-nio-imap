@@ -53,7 +53,19 @@ extension ClientStateMachine {
             case finished
         }
 
+        // The tag of the APPEND command
+        var tag: String
         var state: State = .started(canFinish: false)
+
+        var isWaitingForContinuationRequest: Bool {
+            switch state {
+            case .waitingForAppendContinuationRequest, .waitingForCatenateContinuationRequest:
+                true
+            case .started, .sendingMessageBytes, .catenating, .sendingCatenateBytes, .waitingForTaggedResponse,
+                .finished:
+                false
+            }
+        }
 
         var hasCatenatedAtLeastOneObject: Bool {
             switch self.state {
@@ -65,31 +77,39 @@ extension ClientStateMachine {
             }
         }
 
+        enum ReceiveResponseResult {
+            case continueAppending
+            case doneAppending
+        }
+
         // We don't expect any responses while appending other than
-        // 1. Untagged responses
+        // 1. Untagged responses (including untagged fetch responses)
         // 2. The final tagged response.
-        mutating func receiveResponse(_ response: Response) throws -> Bool {
+        mutating func receiveResponse(_ response: Response) throws -> ReceiveResponseResult {
             switch response {
-            case .untagged:
-                return false
-            default:
+            case .untagged, .fetch:
+                return .continueAppending
+            case .tagged(let tagged) where tagged.tag != self.tag:
+                // This is the completion for another (previous) command. Ignore.
+                return .continueAppending
+            case .tagged, .fatal, .authenticationChallenge, .idleStarted:
                 break
             }
 
             switch self.state {
             case .started, .waitingForAppendContinuationRequest, .sendingMessageBytes, .catenating,
                 .waitingForCatenateContinuationRequest, .sendingCatenateBytes, .finished:
-                throw UnexpectedContinuationRequest()
+                throw UnexpectedResponse(kind: .appendNotWaitingForTaggedResponse)
             case .waitingForTaggedResponse:
                 break
             }
 
             switch response {
             case .untagged, .fetch, .fatal, .authenticationChallenge, .idleStarted:
-                throw UnexpectedResponse(activePromise: nil)
+                throw UnexpectedResponse(kind: .appendWaitingForTaggedResponse)
             case .tagged:
                 self.state = .finished
-                return true
+                return .doneAppending
             }
         }
 
@@ -97,7 +117,7 @@ extension ClientStateMachine {
             switch self.state {
             case .started, .sendingMessageBytes, .catenating,
                 .sendingCatenateBytes, .finished, .waitingForTaggedResponse:
-                throw UnexpectedContinuationRequest()
+                throw UnexpectedContinuationRequest(kind: .append)
             case .waitingForAppendContinuationRequest:
                 self.state = .sendingMessageBytes
             case .waitingForCatenateContinuationRequest:
@@ -106,7 +126,7 @@ extension ClientStateMachine {
         }
 
         /// - returns: `true` if a continuation is required after this command is sent, otherwise `false`.
-        mutating func sendCommand(_ command: CommandStreamPart) -> Bool {
+        mutating func sendCommand(_ command: CommandStreamPart) {
             // we only care about append commands, obviously
             let appendCommand: AppendCommand
             switch command {
@@ -121,15 +141,13 @@ extension ClientStateMachine {
                 .waitingForCatenateContinuationRequest, .finished:
                 preconditionFailure("Invalid state: \(self.state)")
             case .started:
-                return self.sendCommand_startedState(appendCommand)
+                self.sendCommand_startedState(appendCommand)
             case .sendingMessageBytes:
                 self.sendCommand_sendingMessageBytesState(appendCommand)
-                return false
             case .catenating:
                 return self.sendCommand_catenatingState(appendCommand)
             case .sendingCatenateBytes:
                 self.sendCommand_sendingCatenateBytesState(appendCommand)
-                return false
             }
         }
     }
@@ -138,28 +156,24 @@ extension ClientStateMachine {
 // MARK: - Send
 
 extension ClientStateMachine.Append {
-    /// `true` if a continuation is required, otherwise `false`
-    private mutating func sendCommand_startedState(_ command: AppendCommand) -> Bool {
+    private mutating func sendCommand_startedState(_ command: AppendCommand) {
         switch command {
         case .start, .messageBytes, .endMessage, .catenateURL, .catenateData, .endCatenate:
             preconditionFailure("Invalid command for state: \(self.state)")
         case .beginMessage:
             self.state = .waitingForAppendContinuationRequest
-            return true
         case .beginCatenate:
             self.state = .catenating(sentFirstObject: false)
-            return false
         case .finish:
-            if self.state == .started(canFinish: true) {
-                self.state = .waitingForTaggedResponse
-                return false
-            } else {
+            guard
+                self.state == .started(canFinish: true)
+            else {
                 preconditionFailure("Invalid command for state: \(self.state)")
             }
+            self.state = .waitingForTaggedResponse
         }
     }
 
-    /// `true` if a continuation is required, otherwise `false`
     private mutating func sendCommand_sendingMessageBytesState(_ command: AppendCommand) {
         switch command {
         case .start, .beginMessage, .beginCatenate, .catenateURL, .catenateData, .endCatenate, .finish:
@@ -171,21 +185,17 @@ extension ClientStateMachine.Append {
         }
     }
 
-    /// `true` if a continuation is required, otherwise `false`
-    private mutating func sendCommand_catenatingState(_ command: AppendCommand) -> Bool {
+    private mutating func sendCommand_catenatingState(_ command: AppendCommand) {
         switch command {
         case .start, .beginMessage, .beginCatenate, .messageBytes, .endMessage, .finish, .catenateData(.bytes),
             .catenateData(.end):
             preconditionFailure("Invalid command for state: \(self.state)")
         case .catenateURL:
             self.state = .catenating(sentFirstObject: true)
-            return false
         case .catenateData(.begin):
             self.state = .waitingForCatenateContinuationRequest
-            return true
         case .endCatenate:
             self.state = .started(canFinish: true)
-            return false
         }
     }
 

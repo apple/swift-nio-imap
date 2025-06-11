@@ -46,7 +46,8 @@ extension ClientStateMachine {
         mutating func receiveResponse(_ response: Response) throws {
             switch self.state {
             case .waitingForConfirmation:
-                throw UnexpectedResponse(activePromise: nil)
+                // TODO: should ignore this
+                throw UnexpectedResponse(kind: .idleWaitingForConfirmation)
             case .idling:
                 try self.receiveResponse_idlingState(response)
             }
@@ -57,7 +58,7 @@ extension ClientStateMachine {
             case .waitingForConfirmation:
                 self.state = .idling
             case .idling:
-                throw UnexpectedContinuationRequest()
+                throw UnexpectedContinuationRequest(kind: .idle)
             }
         }
 
@@ -67,7 +68,7 @@ extension ClientStateMachine {
             case .untagged, .fetch:
                 break
             case .tagged, .fatal, .authenticationChallenge, .idleStarted:
-                throw UnexpectedResponse(activePromise: nil)
+                throw UnexpectedResponse(kind: .idleRunning)
             }
         }
     }
