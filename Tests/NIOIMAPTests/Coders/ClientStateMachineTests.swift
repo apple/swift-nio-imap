@@ -158,6 +158,98 @@ class ClientStateMachineTests: XCTestCase {
             XCTAssertTrue(e is DuplicateCommandTag)
         }
     }
+
+    func testReceivingUntaggedWhileExpectingLiteralContinuationRequest() {
+        let command = TaggedCommand(tag: "A1", command: .select(MailboxName(ByteBuffer(string: "äÿ")), []))
+
+        var result1: OutgoingChunk?
+        XCTAssertNoThrow(result1 = try self.stateMachine.sendCommand(.tagged(command)))
+        XCTAssertEqual(result1!.bytes, "A1 SELECT {4}\r\n")
+
+        // At this point, we’re waiting for a Continuation Request from the server.
+        // But we may end up getting an untagged response first.
+        // ```
+        // C: A1 SELECT {4}
+        // S: * 3 EXPUNGE
+        // S: + Ready for literal data
+        // C: äÿ
+        // ```
+
+        XCTAssertNoThrow(
+            try self.stateMachine.receiveResponse(.untagged(.messageData(.expunge(3)))),
+            "Should be ignored."
+        )
+        var resultAction: ClientStateMachine.ContinuationRequestAction!
+        XCTAssertNoThrow(
+            resultAction = try self.stateMachine.receiveContinuationRequest(.data("Ready for literal data"))
+        )
+        XCTAssertEqual(
+            resultAction,
+            .sendChunks([
+                .init(bytes: "äÿ\r\n", promise: nil, shouldSucceedPromise: true)
+            ])
+        )
+    }
+
+    func testReceivingTaggedWhileExpectingLiteralContinuationRequest() {
+        var result: OutgoingChunk?
+
+        // Send a command that we can complete later:
+        XCTAssertNoThrow(
+            result = try self.stateMachine.sendCommand(.tagged(.init(tag: "B2", command: .expunge)))
+        )
+        XCTAssertEqual(result!.bytes, "B2 EXPUNGE\r\n")
+
+        // Now send a command that will drop us into “expecting literal Continuation Request”:
+        let command = TaggedCommand(tag: "A1", command: .select(MailboxName(ByteBuffer(string: "äÿ")), []))
+        XCTAssertNoThrow(result = try self.stateMachine.sendCommand(.tagged(command)))
+        XCTAssertEqual(result!.bytes, "A1 SELECT {4}\r\n")
+
+        // At this point, we’re waiting for a Continuation Request from the server.
+        // But we may end up getting a (tagged) command completion first:
+        // ```
+        // C: A1 SELECT {4}
+        // S: B2 OK EXPUNGE completed
+        // S: + Ready for literal data
+        // C: äÿ
+        // ```
+
+        XCTAssertNoThrow(
+            try self.stateMachine.receiveResponse(
+                .tagged(.init(tag: "B2", state: .ok(.init(text: "EXPUNGE completed"))))
+            ),
+            "Should be ignored"
+        )
+        var resultAction: ClientStateMachine.ContinuationRequestAction!
+        XCTAssertNoThrow(
+            resultAction = try self.stateMachine.receiveContinuationRequest(.data("Ready for literal data"))
+        )
+        XCTAssertEqual(
+            resultAction,
+            .sendChunks([
+                .init(bytes: "äÿ\r\n", promise: nil, shouldSucceedPromise: true)
+            ])
+        )
+    }
+
+    func testReceivingTaggedForCurrentCommandWhileExpectingLiteralContinuationRequest() {
+        var result: OutgoingChunk?
+
+        // Send a command that will drop us into “expecting literal Continuation Request”:
+        let command = TaggedCommand(tag: "A1", command: .select(MailboxName(ByteBuffer(string: "äÿ")), []))
+        XCTAssertNoThrow(result = try self.stateMachine.sendCommand(.tagged(command)))
+        XCTAssertEqual(result!.bytes, "A1 SELECT {4}\r\n")
+
+        // If we receive a (tagged) completion for the current command, we need to throw an error:
+        // ```
+        // C: A1 SELECT {4}
+        // S: A1 OK Completed
+        // ```
+
+        XCTAssertThrowsError(
+            try self.stateMachine.receiveResponse(.tagged(.init(tag: "A1", state: .ok(.init(text: "Completed")))))
+        )
+    }
 }
 
 // MARK: - IDLE
@@ -435,6 +527,8 @@ extension ClientStateMachineTests {
         )
         XCTAssertEqual(result, .init(bytes: " {5}\r\n", promise: nil, shouldSucceedPromise: true))
 
+        // We’ll now enqueue a lot of CommandStreamPart that can’t be sent onto the wire, yet,
+        // because we’re still waiting for the Continuation Request from the server:
         XCTAssertNoThrow(result = try self.stateMachine.sendCommand(.append(.messageBytes("0"))))
         XCTAssertNil(result)
         XCTAssertNoThrow(result = try self.stateMachine.sendCommand(.append(.messageBytes("1"))))
@@ -451,9 +545,11 @@ extension ClientStateMachineTests {
         XCTAssertNil(result)
         self.stateMachine.flush()
 
+        // Now the Continuation Request comes in:
         var resultAction: ClientStateMachine.ContinuationRequestAction!
         XCTAssertNoThrow(resultAction = try self.stateMachine.receiveContinuationRequest(.data("OK")))
 
+        // We should send the pending chunks at this point:
         XCTAssertEqual(
             resultAction,
             .sendChunks([
@@ -466,6 +562,128 @@ extension ClientStateMachineTests {
                 .init(bytes: "\r\n", promise: nil, shouldSucceedPromise: true),
             ])
         )
+
+        // Complete the APPEND command:
+        XCTAssertNoThrow(try self.stateMachine.receiveResponse(.tagged(.init(tag: "A1", state: .ok(.init(text: ""))))))
+
+        guard
+            case .expectingNormalResponse = self.stateMachine.state
+        else {
+            XCTFail("\(self.stateMachine.state)")
+            return
+        }
+    }
+
+    func testAppendReceivingUntaggedWhileWaitingForContinuationRequest() {
+        var result: OutgoingChunk?
+        XCTAssertNoThrow(result = try self.stateMachine.sendCommand(.append(.start(tag: "A1", appendingTo: .inbox))))
+        XCTAssertEqual(result, .init(bytes: "A1 APPEND \"INBOX\"", promise: nil, shouldSucceedPromise: true))
+
+        XCTAssertNoThrow(
+            result = try self.stateMachine.sendCommand(
+                .append(.beginMessage(message: .init(options: .none, data: .init(byteCount: 6))))
+            )
+        )
+        XCTAssertEqual(result, .init(bytes: " {6}\r\n", promise: nil, shouldSucceedPromise: true))
+
+        // At this point, we’re waiting for a Continuation Request from the server.
+        // But we may end up getting an untagged response first.
+        // ```
+        // C: A003 APPEND saved-messages (\Seen) {5}
+        // S: * 3 EXPUNGE
+        // S: + Ready for literal data
+        // C: foobar
+        // ```
+
+        XCTAssertNoThrow(
+            try self.stateMachine.receiveResponse(.untagged(.messageData(.expunge(3)))),
+            "Should be ignored."
+        )
+        var resultAction: ClientStateMachine.ContinuationRequestAction!
+        XCTAssertNoThrow(
+            resultAction = try self.stateMachine.receiveContinuationRequest(.data("Ready for literal data"))
+        )
+        XCTAssertEqual(resultAction, .sendChunks([]))
+
+        XCTAssertNoThrow(result = try self.stateMachine.sendCommand(.append(.messageBytes("foobar"))))
+        XCTAssertEqual(result, .init(bytes: "foobar", promise: nil, shouldSucceedPromise: true))
+
+        XCTAssertNoThrow(result = try self.stateMachine.sendCommand(.append(.endMessage)))
+        XCTAssertEqual(result, .init(bytes: "", promise: nil, shouldSucceedPromise: true))
+
+        XCTAssertNoThrow(result = try self.stateMachine.sendCommand(.append(.finish)))
+        XCTAssertEqual(result, .init(bytes: "\r\n", promise: nil, shouldSucceedPromise: true))
+
+        // Complete the APPEND command:
+        XCTAssertNoThrow(try self.stateMachine.receiveResponse(.tagged(.init(tag: "A1", state: .ok(.init(text: ""))))))
+
+        guard
+            case .expectingNormalResponse = self.stateMachine.state
+        else {
+            XCTFail("\(self.stateMachine.state)")
+            return
+        }
+    }
+
+    func testAppendReceivingTtaggedWhileWaitingForContinuationRequest() {
+        var result: OutgoingChunk?
+
+        // Send a command that we can complete later:
+        XCTAssertNoThrow(
+            result = try self.stateMachine.sendCommand(.tagged(.init(tag: "B2", command: .expunge)))
+        )
+        XCTAssertEqual(result!.bytes, "B2 EXPUNGE\r\n")
+
+        // Now send the APPEND:
+        XCTAssertNoThrow(result = try self.stateMachine.sendCommand(.append(.start(tag: "A1", appendingTo: .inbox))))
+        XCTAssertEqual(result, .init(bytes: "A1 APPEND \"INBOX\"", promise: nil, shouldSucceedPromise: true))
+
+        XCTAssertNoThrow(
+            result = try self.stateMachine.sendCommand(
+                .append(.beginMessage(message: .init(options: .none, data: .init(byteCount: 6))))
+            )
+        )
+        XCTAssertEqual(result, .init(bytes: " {6}\r\n", promise: nil, shouldSucceedPromise: true))
+
+        // At this point, we’re waiting for a Continuation Request from the server.
+        // But we may end up getting an untagged response first.
+        // ```
+        // C: A003 APPEND saved-messages (\Seen) {5}
+        // S: B2 OK EXPUNGE completed
+        // S: + Ready for literal data
+        // C: foobar
+        // ```
+
+        XCTAssertNoThrow(
+            try self.stateMachine.receiveResponse(
+                .tagged(.init(tag: "B2", state: .ok(.init(text: "EXPUNGE completed"))))
+            ),
+            "Should be ignored"
+        )
+        var resultAction: ClientStateMachine.ContinuationRequestAction!
+        XCTAssertNoThrow(
+            resultAction = try self.stateMachine.receiveContinuationRequest(.data("Ready for literal data"))
+        )
+        XCTAssertEqual(resultAction, .sendChunks([]))
+
+        XCTAssertNoThrow(result = try self.stateMachine.sendCommand(.append(.messageBytes("foobar"))))
+        XCTAssertEqual(result, .init(bytes: "foobar", promise: nil, shouldSucceedPromise: true))
+
+        XCTAssertNoThrow(result = try self.stateMachine.sendCommand(.append(.endMessage)))
+        XCTAssertEqual(result, .init(bytes: "", promise: nil, shouldSucceedPromise: true))
+
+        XCTAssertNoThrow(result = try self.stateMachine.sendCommand(.append(.finish)))
+        XCTAssertEqual(result, .init(bytes: "\r\n", promise: nil, shouldSucceedPromise: true))
+
+        // Complete the APPEND command:
+        XCTAssertNoThrow(try self.stateMachine.receiveResponse(.tagged(.init(tag: "A1", state: .ok(.init(text: ""))))))
+
+        guard
+            case .expectingNormalResponse = self.stateMachine.state
+        else {
+            XCTFail("\(self.stateMachine.state)")
+            return
+        }
     }
 
     func testSendingAnAuthenticationChallengeWhenUnexpectedThrows() {

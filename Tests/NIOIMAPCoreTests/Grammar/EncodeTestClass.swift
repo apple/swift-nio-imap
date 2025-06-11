@@ -69,7 +69,13 @@ class EncodeTestClass: XCTestCase {
             )
             do {
                 let size = try encoder(test)
-                XCTAssertEqual(size, expectedStrings.reduce(0) { $0 + $1.utf8.count }, "Expected byte count", file: (file), line: line)
+                XCTAssertEqual(
+                    size,
+                    expectedStrings.reduce(0) { $0 + $1.utf8.count },
+                    "Expected byte count",
+                    file: file,
+                    line: line
+                )
                 XCTAssertEqual(self.testBufferStrings, expectedStrings, "Expected strings", file: (file), line: line)
             } catch {
                 XCTFail("\(error)", file: (file), line: line)
@@ -86,7 +92,13 @@ class EncodeTestClass: XCTestCase {
             do {
                 self.testBuffer.mode = .client(options: options)
                 let size = try encoder(test)
-                XCTAssertEqual(size, expectedStrings.reduce(0) { $0 + $1.utf8.count }, file: (file), line: line)
+                XCTAssertEqual(
+                    size,
+                    expectedStrings.reduce(0) { $0 + $1.utf8.count },
+                    "Expected byte count",
+                    file: file,
+                    line: line
+                )
                 XCTAssertEqual(self.testBufferStrings, expectedStrings, file: (file), line: line)
             } catch {
                 XCTFail("\(error)", file: (file), line: line)
