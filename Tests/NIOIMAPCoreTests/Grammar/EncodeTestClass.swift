@@ -89,7 +89,8 @@ class EncodeTestClass: XCTestCase {
                 XCTAssertEqual(
                     size,
                     expectedStrings.reduce(0) { $0 + $1.utf8.count },
-                    file: (file), line: line
+                    file: file,
+                    line: line
                 )
                 XCTAssertEqual(self.testBufferStrings, expectedStrings, file: (file), line: line)
             } catch {
