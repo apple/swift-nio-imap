@@ -39,6 +39,7 @@ extension InternalDateTests {
         XCTAssertEqual(c.minute, 2)
         XCTAssertEqual(c.second, 3)
         XCTAssertEqual(c.zoneMinutes, 620)
+        XCTAssertEqual(String(reflecting: date), #""25-Jun-1994 01:02:03 +1020""#)
     }
 
     func testInternalDateInit_2() {
@@ -60,6 +61,7 @@ extension InternalDateTests {
         XCTAssertEqual(c.minute, 0)
         XCTAssertEqual(c.second, 0)
         XCTAssertEqual(c.zoneMinutes, -959)
+        XCTAssertEqual(String(reflecting: date), #""1-Jan-1900 00:00:00 -1559""#)
     }
 
     func testInternalDateInit_3() {
@@ -81,5 +83,6 @@ extension InternalDateTests {
         XCTAssertEqual(c.minute, 59)
         XCTAssertEqual(c.second, 59)
         XCTAssertEqual(c.zoneMinutes, 959)
+        XCTAssertEqual(String(reflecting: date), #""31-Dec-2579 23:59:59 +1559""#)
     }
 }
