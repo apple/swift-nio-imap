@@ -542,6 +542,29 @@ class IMAPClientHandlerTests: XCTestCase {
         self.assertInbound(.tagged(.init(tag: "A2", state: .ok(.init(code: nil, text: "")))))
     }
 
+    func testSplitCRLF() {
+        self.writeOutbound(.tagged(.init(tag: "a", command: .uidFetch(messages: .all, attributes: [.uid], modifiers: [])!)))
+        self.assertOutboundString("a UID FETCH 1:* (UID)\r\n")
+
+        self.writeInbound("* 38001 FETCH (UID 114597)\r")
+        self.writeInbound("\n* 38045 FETCH (UID 114662)\r\n")
+        // complete the command so the channel can finish cleanly
+        self.writeInbound("a OK done\r\n")
+        // We should successfully parse responses; drain everything and ensure we saw some.
+        var count = 0
+        while true {
+            do {
+                let r: Response? = try self.channel.readInbound()
+                guard r != nil else { break }
+                count += 1
+            } catch {
+                XCTFail("Unexpected error: \(error)")
+                break
+            }
+        }
+        XCTAssertGreaterThanOrEqual(count, 3)
+    }
+
     func testPromisesAreFailedOnChannelClose() {
         // p1 will be the active promise
         let p1 = self.writeOutbound(

@@ -39,6 +39,7 @@ public final class IMAPClientHandler: ChannelDuplexHandler {
     private let decoder: NIOSingleStepByteToMessageProcessor<ResponseDecoder>
 
     private var state: ClientStateMachine
+    private var previousInboundBufferEndedWithCR: Bool = false
 
     public init(
         encodingOptions: EncodingOptions = .automatic,
@@ -60,11 +61,27 @@ public final class IMAPClientHandler: ChannelDuplexHandler {
     }
 
     public func channelRead(context: ChannelHandlerContext, data: NIOAny) {
-        let data = self.unwrapInboundIn(data)
+        var data = self.unwrapInboundIn(data)
+        // Capture whether this inbound buffer originally ended with a CR, before any parsing/mutation.
+        let lastByteIsCR: Bool = {
+            guard data.readableBytes > 0,
+                  let last: UInt8 = data.getInteger(at: data.readerIndex + data.readableBytes - 1, as: UInt8.self)
+            else { return false }
+            return last == UInt8(ascii: "\r")
+        }()
+        // If the previous inbound buffer ended with a CR and this buffer starts with an LF,
+        // ignore the leading LF to tolerate CRLF split across buffers.
+        if self.previousInboundBufferEndedWithCR,
+           let first: UInt8 = data.getInteger(at: data.readerIndex, as: UInt8.self),
+           first == UInt8(ascii: "\n") {
+            data.moveReaderIndex(forwardBy: 1)
+        }
         do {
             try self.decoder.process(buffer: data) { response in
                 try self.handleResponseOrContinuationRequest(response, context: context)
             }
+            // Remember if this inbound buffer ended with a CR so we can drop a leading LF next time.
+            self.previousInboundBufferEndedWithCR = lastByteIsCR
         } catch let error as UnexpectedResponse {
             error.activePromise?.fail(error)
             context.fireErrorCaught(error)
