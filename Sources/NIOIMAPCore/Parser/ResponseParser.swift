@@ -177,6 +177,9 @@ extension ResponseParser {
         }
 
         return try PL.composite(buffer: &buffer, tracker: tracker) { buffer, tracker in
+            // Tolerate and skip any leading blank lines which some servers may send
+            while ((try? PL.parseOptional(buffer: &buffer, tracker: tracker, parser: PL.parseNewline)) != nil) {}
+            // Also skip any leading spaces before the actual response
             try? PL.parseSpaces(buffer: &buffer, tracker: tracker)
             do {
                 let response = try PL.parseOneOf(
