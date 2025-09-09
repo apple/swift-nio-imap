@@ -319,6 +319,14 @@ extension GrammarParser {
     }
 
     func parseFetchResponse(buffer: inout ParseBuffer, tracker: StackTracker) throws -> _FetchResponse {
+        // Some servers insert stray CRLFs or spaces between attributes or before the closing ')'.
+        // Be tolerant and skip any number of leading newlines/spaces before attempting to parse
+        // the next fetch component.
+        try? PL.parseSpaces(buffer: &buffer, tracker: tracker)
+        while ((try? PL.parseOptional(buffer: &buffer, tracker: tracker, parser: PL.parseNewline)) != nil) {
+            try? PL.parseSpaces(buffer: &buffer, tracker: tracker)
+        }
+
         func parseFetchResponse_simpleAttribute(
             buffer: inout ParseBuffer,
             tracker: StackTracker
