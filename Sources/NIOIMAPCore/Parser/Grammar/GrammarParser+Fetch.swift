@@ -228,8 +228,12 @@ extension GrammarParser {
         let parsers: [String: (inout ParseBuffer, StackTracker) throws -> StreamingKind] = [
             "RFC822.TEXT": parseFetchStreamingResponse_rfc822Text,
             "RFC822.HEADER": parseFetchStreamingResponse_rfc822Header,
+            // Some servers echo PEEK in responses; accept both BODY and BODY.PEEK.
             "BODY": parseFetchStreamingResponse_bodySectionText,
+            "BODY.PEEK": parseFetchStreamingResponse_bodySectionText,
+            // Likewise for BINARY and BINARY.PEEK.
             "BINARY": parseFetchStreamingResponse_binary,
+            "BINARY.PEEK": parseFetchStreamingResponse_binary,
         ]
         return try self.parseFromLookupTable(buffer: &buffer, tracker: tracker, parsers: parsers)
     }
