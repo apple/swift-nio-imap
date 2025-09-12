@@ -14,8 +14,12 @@
 
 #if os(macOS) || os(iOS) || os(watchOS) || os(tvOS)
 import Darwin
-#elseif os(Linux) || os(FreeBSD) || os(Android)
+#elseif canImport(Glibc)
 import Glibc
+#elseif canImport(Musl)
+import Musl
+#elseif os(Windows)
+import ucrt
 #else
 let badOS = { fatalError("unsupported OS") }()
 #endif

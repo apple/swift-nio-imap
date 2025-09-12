@@ -18,9 +18,12 @@ import struct NIO.ByteBuffer
 #if os(macOS) || os(iOS) || os(watchOS) || os(tvOS)
 import func Darwin.isalnum
 import func Darwin.isalpha
-#elseif os(Linux) || os(FreeBSD) || os(Android)
+#elseif canImport(Glibc)
 import func Glibc.isalnum
 import func Glibc.isalpha
+#elseif canImport(Musl)
+import func Musl.isalnum
+import func Musl.isalpha
 #else
 let badOS = { fatalError("unsupported OS") }()
 #endif
