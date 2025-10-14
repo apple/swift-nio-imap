@@ -267,7 +267,15 @@ extension SearchKey {
     }
 }
 
-// MARK: - IMAP
+extension SearchKey: CustomDebugStringConvertible {
+    public var debugDescription: String {
+        EncodeBuffer.makeDescription {
+            _ = $0.writeSearchKey(self)
+        }
+    }
+}
+
+// MARK: - Encoding
 
 extension EncodeBuffer {
     @discardableResult mutating func writeSearchKey(_ key: SearchKey, encloseInParenthesisIfNeeded: Bool = false) -> Int

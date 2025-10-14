@@ -57,6 +57,14 @@ extension String {
     }
 }
 
+extension Flag: CustomDebugStringConvertible {
+    public var debugDescription: String {
+        EncodeBuffer.makeDescription {
+            _ = $0.writeFlag(self)
+        }
+    }
+}
+
 extension Flag {
     /// `\\Answered` - The message has been replied to.
     public static let answered = Self("\\Answered")
