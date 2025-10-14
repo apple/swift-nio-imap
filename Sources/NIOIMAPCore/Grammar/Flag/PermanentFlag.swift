@@ -23,6 +23,14 @@ public enum PermanentFlag: Hashable, Sendable {
     case wildcard
 }
 
+extension PermanentFlag: CustomDebugStringConvertible {
+    public var debugDescription: String {
+        EncodeBuffer.makeDescription {
+            _ = $0.writeFlagPerm(self)
+        }
+    }
+}
+
 // MARK: - Encoding
 
 extension EncodeBuffer {

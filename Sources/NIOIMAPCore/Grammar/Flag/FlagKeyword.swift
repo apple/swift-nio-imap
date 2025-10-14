@@ -70,6 +70,14 @@ extension String {
     }
 }
 
+extension Flag.Keyword: CustomDebugStringConvertible {
+    public var debugDescription: String {
+        EncodeBuffer.makeDescription {
+            _ = $0.writeFlagKeyword(self)
+        }
+    }
+}
+
 // MARK: - Convenience
 
 extension Flag.Keyword {
