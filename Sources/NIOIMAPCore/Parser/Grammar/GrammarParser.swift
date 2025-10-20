@@ -2038,52 +2038,6 @@ extension GrammarParser {
     // quoted-specials = DQUOTE / "\"
     func parseQuoted(buffer: inout ParseBuffer, tracker: StackTracker) throws -> ByteBuffer {
         try PL.composite(buffer: &buffer, tracker: tracker) { buffer, tracker -> ByteBuffer in
-            try PL.parseFixedString("\"", caseSensitive: true, buffer: &buffer, tracker: tracker)
-            var hasQuotedSpecial = false
-            var lastIsEscape = false
-            let data = try PL.parseZeroOrMoreCharacters(buffer: &buffer, tracker: tracker) { char in
-                if lastIsEscape {
-                    lastIsEscape = false
-                    return char.isQuotedSpecial
-                } else if char.isQuotedChar {
-                    lastIsEscape = false
-                    return true
-                } else if char == UInt8(ascii: "\\") {
-                    lastIsEscape = true
-                    hasQuotedSpecial = true
-                    return true
-                } else {
-                    return false
-                }
-            }
-            try PL.parseFixedString("\"", caseSensitive: true, buffer: &buffer, tracker: tracker)
-            guard hasQuotedSpecial else { return data }
-            // Replace '\\' with '\' and '\"' with '"':
-            var escaped = data
-            var unescaped = ByteBuffer()
-            while let next = escaped.readBytes(length: 1)?.first {
-                if next == UInt8(ascii: "\\") {
-                    guard
-                        let special = escaped.readBytes(length: 1)?.first,
-                        special.isQuotedSpecial
-                    else {
-                        throw ParserError(
-                            hint:
-                                "Invalid escape in quoted string '\(String(decoding: data.readableBytesView, as: Unicode.UTF8.self))'"
-                        )
-                    }
-                    unescaped.writeBytes([special])
-                } else {
-                    unescaped.writeBytes([next])
-                }
-            }
-            return unescaped
-        }
-    }
-
-    /// This is variant of `parseQuoted()` which allows non-ASCII characters.
-    func parseQuotedAllowingNonASCII(buffer: inout ParseBuffer, tracker: StackTracker) throws -> ByteBuffer {
-        try PL.composite(buffer: &buffer, tracker: tracker) { buffer, tracker -> ByteBuffer in
             try PL.parseFixedByte("\"", buffer: &buffer, tracker: tracker)
             var hasQuotedSpecial = false
             var lastIsEscape = false
@@ -2600,7 +2554,7 @@ extension GrammarParser {
     /// end up copying the non-ASCII values into e.g. `BODYSTRUCTURE` parameters.
     func parseStringAllowingNonASCII(buffer: inout ParseBuffer, tracker: StackTracker) throws -> ByteBuffer {
         try PL.parseOneOf(
-            self.parseQuotedAllowingNonASCII,
+            self.parseQuoted,
             self.parseLiteral,
             buffer: &buffer,
             tracker: tracker

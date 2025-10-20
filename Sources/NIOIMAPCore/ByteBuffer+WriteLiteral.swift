@@ -128,7 +128,9 @@ extension EncodeBuffer {
         guard bytes.count <= 70 else { return false }
         // We’ll allow anything ASCII that’s not a control characters.
         // But `\` and `"` will need quoting. If there are too many of those,
-        // fall back to using a literal.
+        // fall back to using a literal. We also don't allow non-ASCII
+        // UTF8, because the test would be very convoluted (we only
+        // see bytes here).
         var escapeCount = 0
         return bytes.allSatisfy {
             guard 0x20 <= $0 && $0 <= 0x7e else { return false }

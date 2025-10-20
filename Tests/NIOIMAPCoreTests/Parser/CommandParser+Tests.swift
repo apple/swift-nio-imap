@@ -179,13 +179,14 @@ extension CommandParser_Tests {
                 ByteBuffer(string: "foo"),
                 #line
             ),
-        ]
-        let invalidInputs: [(String, String, UInt)] = [
             (
                 #""aäb""#,
                 " ",
+                ByteBuffer(string: "aäb"),
                 #line
             ),
+        ]
+        let invalidInputs: [(String, String, UInt)] = [
             (
                 #"foo"#,
                 " ",

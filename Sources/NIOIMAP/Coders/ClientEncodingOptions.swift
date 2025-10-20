@@ -41,6 +41,8 @@ extension ClientEncodingOptions {
         switch response {
         case .untagged(.capabilityData(let c)):
             self.updateAutomaticOptions(capabilities: c)
+        case .untagged(.enableData(let c)):
+            self.updateEnabledOptions(capabilities: c)
         case .tagged(let tagged):
             switch tagged.state {
             case .ok(let r), .no(let r), .bad(let r):
@@ -60,5 +62,11 @@ extension ClientEncodingOptions {
         capabilities: [Capability]
     ) {
         automatic = CommandEncodingOptions(capabilities: capabilities)
+    }
+
+    mutating func updateEnabledOptions(
+        capabilities: [Capability]
+    ) {
+        automatic.updateEnabledOptions(capabilities: capabilities)
     }
 }

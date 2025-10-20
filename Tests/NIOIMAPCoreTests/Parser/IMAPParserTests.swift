@@ -491,6 +491,7 @@ extension ParserUnitTests {
             validInputs: [
                 ("(NIL NIL NIL NIL)", "", .init(personName: nil, sourceRoot: nil, mailbox: nil, host: nil), #line),
                 (#"("a" "b" "c" "d")"#, "", .init(personName: "a", sourceRoot: "b", mailbox: "c", host: "d"), #line),
+                (#"("å" "é" "ı" "ø")"#, "", .init(personName: "å", sourceRoot: "é", mailbox: "ı", host: "ø"), #line),
             ],
             parserErrorInputs: [
                 ("(NIL NIL NIL NIL ", "\r", #line)
@@ -1302,6 +1303,7 @@ extension ParserUnitTests {
             validInputs: [
                 ("ENABLED", "\r", [], #line),
                 ("ENABLED ENABLE", "\r", [.enable], #line),
+                ("ENABLED UTF8=ACCEPT", "\r", [.utf8(.accept)], #line),
                 ("ENABLED ENABLE CONDSTORE", "\r", [.enable, .condStore], #line),
             ],
             parserErrorInputs: [],
@@ -2447,6 +2449,7 @@ extension ParserUnitTests {
             testFunction: GrammarParser().parseNString,
             validInputs: [
                 ("NIL", "", nil, #line),
+                ("København", "", "København", #line),
                 ("{3}\r\nabc", "", "abc", #line),
                 ("{3+}\r\nabc", "", "abc", #line),
                 (#""abc""#, "", "abc", #line),

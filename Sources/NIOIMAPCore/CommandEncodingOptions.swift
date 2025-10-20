@@ -31,6 +31,12 @@ public struct CommandEncodingOptions: Hashable, Sendable {
     /// - SeeAlso: https://tools.ietf.org/html/rfc3516
     public var useBinaryLiteral: Bool
 
+    /// Specify search charset, which is required by 3501, discouraged by
+    /// 9051 and banned by 9755.
+    /// - SeeAlso: https://tools.ietf.org/html/rfc9051
+    /// - SeeAlso: https://tools.ietf.org/html/rfc9755
+    public var useSearchCharset: Bool
+
     public static let rfc3501: Self = .init()
 
     public init(
@@ -45,6 +51,10 @@ public struct CommandEncodingOptions: Hashable, Sendable {
         self.useNonSynchronizingLiteralPlus = useNonSynchronizingLiteralPlus
         self.useNonSynchronizingLiteralMinus = useNonSynchronizingLiteralMinus
         self.useBinaryLiteral = useBinaryLiteral
+	// set this to true instead of passing it from the caller, since
+	// it shouldn't be based on CAPABILITY, only modified based on
+        // ENABLED.
+        self.useSearchCharset = true
     }
 }
 
@@ -60,6 +70,13 @@ extension CommandEncodingOptions {
         }
         if capabilities.contains(.binary) {
             self.useBinaryLiteral = true
+        }
+    }
+
+    public mutating func updateEnabledOptions(capabilities: [Capability])
+    {
+        if capabilities.contains(.utf8(.accept)) {
+            self.useSearchCharset = false
         }
     }
 }

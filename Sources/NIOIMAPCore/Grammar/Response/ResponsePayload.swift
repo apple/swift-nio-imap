@@ -21,7 +21,7 @@ public enum ResponsePayload: Hashable, Sendable {
     /// Indicates if the command, or subcommand, executed successfully.
     case conditionalState(UntaggedStatus)
 
-    /// Contains information on a single mailbox, for example it's flags.
+    /// Contains information on a single mailbox, for example its flags.
     case mailboxData(MailboxData)
 
     /// Contains information on a message.
