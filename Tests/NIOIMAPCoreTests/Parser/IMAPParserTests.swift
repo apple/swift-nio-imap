@@ -2428,6 +2428,7 @@ extension ParserUnitTests {
                 (#""abc""#, "", "abc", #line),
                 (#""a\\bc""#, "", #"a\bc"#, #line),
                 (#""a\"bc""#, "", #"a"bc"#, #line),
+                (#""København""#, " ", "København", #line),
             ],
             parserErrorInputs: [
                 (#""a\bc""#, "", #line)
@@ -2449,12 +2450,12 @@ extension ParserUnitTests {
             testFunction: GrammarParser().parseNString,
             validInputs: [
                 ("NIL", "", nil, #line),
-                ("København", "", "København", #line),
                 ("{3}\r\nabc", "", "abc", #line),
                 ("{3+}\r\nabc", "", "abc", #line),
                 (#""abc""#, "", "abc", #line),
                 (#""a\\bc""#, "", #"a\bc"#, #line),
                 (#""a\"bc""#, "", #"a"bc"#, #line),
+                (#""København""#, "", "København", #line),
             ],
             parserErrorInputs: [
                 ("abc", " ", #line),
