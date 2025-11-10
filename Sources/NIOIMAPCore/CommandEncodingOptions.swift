@@ -51,8 +51,8 @@ public struct CommandEncodingOptions: Hashable, Sendable {
         self.useNonSynchronizingLiteralPlus = useNonSynchronizingLiteralPlus
         self.useNonSynchronizingLiteralMinus = useNonSynchronizingLiteralMinus
         self.useBinaryLiteral = useBinaryLiteral
-	// set this to true instead of passing it from the caller, since
-	// it shouldn't be based on CAPABILITY, only modified based on
+        // set this to true instead of passing it from the caller, since
+        // it shouldn't be based on CAPABILITY, only modified based on
         // ENABLED.
         self.useSearchCharset = true
     }
@@ -73,8 +73,7 @@ extension CommandEncodingOptions {
         }
     }
 
-    public mutating func updateEnabledOptions(capabilities: [Capability])
-    {
+    public mutating func updateEnabledOptions(capabilities: [Capability]) {
         if capabilities.contains(.utf8(.accept)) {
             self.useSearchCharset = false
         }
