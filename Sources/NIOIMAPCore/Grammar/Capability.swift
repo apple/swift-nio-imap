@@ -255,6 +255,9 @@ extension Capability {
     /// Default IMAP CAPABILITY - every server should advertise this.
     public static let imap4 = Self(unchecked: "IMAP4")
 
+    /// RFC 9698 - Access to JMAP
+    public static let jmapAccess = Self(unchecked: "JMAPACCESS")
+
     /// Allows the client and server to decide which language the server should use when sending human-readable text - RFC 5255.
     public static let language = Self(unchecked: "LANGUAGE")
 

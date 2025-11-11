@@ -62,6 +62,7 @@ extension Capability_Tests {
             (.gmailExtensions, "X-GM-EXT-1", #line),
             (.id, "ID", #line),
             (.idle, "IDLE", #line),
+            (.jmapAccess, "JMAPACCESS", #line),
             (.language, "LANGUAGE", #line),
             (.listStatus, "LIST-STATUS", #line),
             (.literalMinus, "LITERAL-", #line),

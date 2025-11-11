@@ -746,6 +746,7 @@ extension ParserUnitTests {
                 ("FILTERS", " ", .filters, #line),
                 ("ID", " ", .id, #line),
                 ("IDLE", " ", .idle, #line),
+                ("JMAPACCESS", " ", .jmapAccess, #line),
                 ("LANGUAGE", " ", .language, #line),
                 ("LIST-STATUS", " ", .listStatus, #line),
                 ("LITERAL+", " ", .literalPlus, #line),
