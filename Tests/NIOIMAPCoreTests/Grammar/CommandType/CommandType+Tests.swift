@@ -190,6 +190,7 @@ extension CommandType_Tests {
                 .uidBatches(batchSize: 1_000, batchRange: 10...20), CommandEncodingOptions(), ["UIDBATCHES 1000 10:20"],
                 #line
             ),
+            (.getJMAPAccess, CommandEncodingOptions(), ["GETJMAPACCESS"], #line),
 
             // Custom
 
