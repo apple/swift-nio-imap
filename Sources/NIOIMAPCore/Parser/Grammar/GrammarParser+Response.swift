@@ -183,6 +183,11 @@ extension GrammarParser {
             .metadata(try self.parseMetadataResponse(buffer: &buffer, tracker: tracker))
         }
 
+        func parseResponsePayload_jmapAccess(buffer: inout ParseBuffer, tracker: StackTracker) throws -> ResponsePayload
+        {
+            .jmapAccess(try self.parseJMAPAccess(buffer: &buffer, tracker: tracker))
+        }
+
         return try PL.parseOneOf(
             [
                 parseResponsePayload_mailboxData,
@@ -194,6 +199,7 @@ extension GrammarParser {
                 parseResponsePayload_quotaRoot,
                 parseResponsePayload_metadata,
                 parseResponsePayload_conditionalState,
+                parseResponsePayload_jmapAccess,
             ],
             buffer: &buffer,
             tracker: tracker

@@ -1701,6 +1701,27 @@ extension ParserUnitTests {
     }
 }
 
+// MARK: - parseJMAPAccess
+
+extension ParserUnitTests {
+    func testJMAPAccess_valid() {
+        TestUtilities.withParseBuffer(#"JMAPACCESS "https://example.com/.well-known/jmap""#) { (buffer) in
+            let url = try GrammarParser().parseJMAPAccess(buffer: &buffer, tracker: .testTracker)
+            XCTAssertEqual(url, URL(string: "https://example.com/.well-known/jmap")!)
+        }
+    }
+
+    func testJMAPAccess_nonHTTPS() {
+        var buffer = TestUtilities.makeParseBuffer(for: #"JMAPACCESS "http://example.com/.well-known/jmap""#)
+        XCTAssertThrowsError(try GrammarParser().parseJMAPAccess(buffer: &buffer, tracker: .testTracker))
+    }
+
+    func testJMAPAccess_notAURL() {
+        var buffer = TestUtilities.makeParseBuffer(for: #"JMAPACCESS "example.com""#)
+        XCTAssertThrowsError(try GrammarParser().parseJMAPAccess(buffer: &buffer, tracker: .testTracker))
+    }
+}
+
 // MARK: - id (parseID, parseIDResponse, parseIDParamsList)
 
 extension ParserUnitTests {

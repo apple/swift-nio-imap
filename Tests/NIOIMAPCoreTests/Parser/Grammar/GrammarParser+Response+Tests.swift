@@ -48,6 +48,12 @@ extension GrammarParser_Response_Tests {
                 ("ENABLED ENABLE", "\r", .enableData([.enable]), #line),
                 ("ID (\"key\" NIL)", "\r", .id(["key": nil]), #line),
                 ("METADATA INBOX a", "\r", .metadata(.list(list: ["a"], mailbox: .inbox)), #line),
+                (
+                    #"JMAPACCESS "https://example.com/.well-known/jmap""#,
+                    "\r",
+                    .jmapAccess(URL(string: "https://example.com/.well-known/jmap")!),
+                    #line
+                ),
             ],
             parserErrorInputs: [],
             incompleteMessageInputs: []
