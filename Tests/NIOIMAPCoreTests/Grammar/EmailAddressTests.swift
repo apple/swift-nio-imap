@@ -66,4 +66,12 @@ extension EmailAddressTests {
         XCTAssertEqual(size, expected.utf8.count)
         XCTAssertEqual(expected, self.testBufferString)
     }
+
+    func testUnicode() {
+        let address = EmailAddress(personName: nil, sourceRoot: nil, mailbox: "阿Q", host: "例子.中国")
+        let expected = "(NIL NIL {4}\r\n阿Q {13}\r\n例子.中国)"
+        let size = self.testBuffer.writeEmailAddress(address)
+        XCTAssertEqual(size, expected.utf8.count)
+        XCTAssertEqual(expected, self.testBufferString)
+    }
 }
