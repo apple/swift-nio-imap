@@ -88,6 +88,7 @@ extension GrammarParser {
             "GETQUOTAROOT": self.parseCommandSuffix_getQuotaRoot,
             "COMPRESS": self.parseCommandSuffix_compress,
             "UIDBATCHES": self.parseCommandSuffix_uidBatched,
+            "GETJMAPACCESS": { _, _ in .getJMAPAccess },
         ]
         return try parseFromLookupTable(buffer: &buffer, tracker: tracker, parsers: commandParsers)
     }

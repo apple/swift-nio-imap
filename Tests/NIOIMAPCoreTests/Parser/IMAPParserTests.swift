@@ -747,6 +747,7 @@ extension ParserUnitTests {
                 ("FILTERS", " ", .filters, #line),
                 ("ID", " ", .id, #line),
                 ("IDLE", " ", .idle, #line),
+                ("JMAPACCESS", " ", .jmapAccess, #line),
                 ("LANGUAGE", " ", .language, #line),
                 ("LIST-STATUS", " ", .listStatus, #line),
                 ("LITERAL+", " ", .literalPlus, #line),
@@ -1699,6 +1700,27 @@ extension ParserUnitTests {
         XCTAssertThrowsError(try GrammarParser().parseHeaderList(buffer: &buffer, tracker: .testTracker)) { e in
             XCTAssertTrue(e is ParserError)
         }
+    }
+}
+
+// MARK: - parseJMAPAccess
+
+extension ParserUnitTests {
+    func testJMAPAccess_valid() {
+        TestUtilities.withParseBuffer(#"JMAPACCESS "https://example.com/.well-known/jmap""#) { (buffer) in
+            let url = try GrammarParser().parseJMAPAccess(buffer: &buffer, tracker: .testTracker)
+            XCTAssertEqual(url, URL(string: "https://example.com/.well-known/jmap")!)
+        }
+    }
+
+    func testJMAPAccess_nonHTTPS() {
+        var buffer = TestUtilities.makeParseBuffer(for: #"JMAPACCESS "http://example.com/.well-known/jmap""#)
+        XCTAssertThrowsError(try GrammarParser().parseJMAPAccess(buffer: &buffer, tracker: .testTracker))
+    }
+
+    func testJMAPAccess_notAURL() {
+        var buffer = TestUtilities.makeParseBuffer(for: #"JMAPACCESS "example.com""#)
+        XCTAssertThrowsError(try GrammarParser().parseJMAPAccess(buffer: &buffer, tracker: .testTracker))
     }
 }
 

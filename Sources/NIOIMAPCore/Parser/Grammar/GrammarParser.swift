@@ -12,6 +12,12 @@
 //
 //===----------------------------------------------------------------------===//
 
+#if canImport(FoundationEssentials)
+import FoundationEssentials
+#else
+import Foundation
+#endif
+
 #if os(macOS) || os(iOS) || os(watchOS) || os(tvOS)
 import Darwin
 #elseif canImport(Glibc)
@@ -691,6 +697,28 @@ extension GrammarParser {
             }
             try PL.parseFixedString(")", buffer: &buffer, tracker: tracker)
             return output
+        }
+    }
+
+    // resp-jmapaccess = "JMAPACCESS" SP quoted
+    func parseJMAPAccess(buffer: inout ParseBuffer, tracker: StackTracker) throws -> URL {
+        try PL.composite(buffer: &buffer, tracker: tracker) { buffer, tracker -> URL in
+            try PL.parseFixedString("JMAPACCESS", buffer: &buffer, tracker: tracker)
+            try PL.parseSpaces(buffer: &buffer, tracker: tracker)
+            var buffer = try parseQuoted(buffer: &buffer, tracker: tracker)
+            guard let string = buffer.readString(length: buffer.readableBytes) else {
+                throw ParserError(hint: "Couldn't read string from buffer")
+            }
+            guard let components = URLComponents(string: string) else {
+                throw ParserError(hint: "Couldn't parse JMAPACCESS URL")
+            }
+            guard
+                components.scheme?.lowercased() == "https",
+                let url = components.url
+            else {
+                throw ParserError(hint: "Invalid JMAPACCESS URL")
+            }
+            return url
         }
     }
 

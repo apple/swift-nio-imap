@@ -37,6 +37,11 @@ extension ResponsePayload_Tests {
                 #line
             ),
             (.metadata(.list(list: ["a"], mailbox: .inbox)), "METADATA \"INBOX\" \"a\"", #line),
+            (
+                .jmapAccess(URL(string: "https://example.com/.well-known/jmap")!),
+                #"JMAPACCESS "https://example.com/.well-known/jmap""#,
+                #line
+            ),
         ]
         self.iterateInputs(inputs: inputs, encoder: { self.testBuffer.writeResponsePayload($0) })
     }

@@ -190,6 +190,9 @@ public enum Command: Hashable, Sendable {
     /// Instructs the server to use the named compression mechanism.
     case compress(Capability.CompressionKind)
 
+    /// RFC 9698: Retrieve the JMAP session URL
+    case getJMAPAccess
+
     /// A custom command that’s not defined in any RFC.
     ///
     /// If `payload` contains multiple elements, no spaces or other separators will be output
@@ -314,6 +317,8 @@ extension CommandEncodeBuffer {
             return self.writeCommandKind_compress(kind: kind)
         case .uidBatches(batchSize: let size, batchRange: let range):
             return self.writeCommandKind_uidBatches(batchSize: size, batchRange: range)
+        case .getJMAPAccess:
+            return self.writeCommandKind_getJMAPAccess()
         case .custom(name: let name, payloads: let payloads):
             return self.writeCommandKind_custom(name: name, payloads: payloads)
         }
@@ -666,6 +671,10 @@ extension CommandEncodeBuffer {
 
     private mutating func writeCommandKind_extendedSearch(options: ExtendedSearchOptions) -> Int {
         self.buffer.writeString("ESEARCH") + self.buffer.writeExtendedSearchOptions(options)
+    }
+
+    private mutating func writeCommandKind_getJMAPAccess() -> Int {
+        self.buffer.writeString("GETJMAPACCESS")
     }
 }
 

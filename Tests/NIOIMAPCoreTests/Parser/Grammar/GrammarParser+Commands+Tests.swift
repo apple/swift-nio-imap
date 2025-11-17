@@ -145,6 +145,7 @@ extension GrammarParser_Commands_Tests {
                 ("UIDBATCHES 1000 10:20", "\r", .uidBatches(batchSize: 1_000, batchRange: 10...20), #line),
                 ("UIDBATCHES 500 22:22", "\r", .uidBatches(batchSize: 500, batchRange: 22...22), #line),
                 ("UIDBATCHES 1000 1", "\r", .uidBatches(batchSize: 1_000, batchRange: 1...1), #line),
+                ("GETJMAPACCESS", "\r", .getJMAPAccess, #line),
             ],
             parserErrorInputs: [
                 ("123", "\r", #line),

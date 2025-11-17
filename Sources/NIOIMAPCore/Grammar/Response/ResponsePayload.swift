@@ -12,6 +12,14 @@
 //
 //===----------------------------------------------------------------------===//
 
+#if canImport(FoundationEssentials)
+import FoundationEssentials
+#elseif swift(<6.0)
+@preconcurrency import Foundation
+#else
+import Foundation
+#endif
+
 import struct NIO.ByteBuffer
 import struct OrderedCollections.OrderedDictionary
 
@@ -45,6 +53,9 @@ public enum ResponsePayload: Hashable, Sendable {
 
     /// Metadata for the specified mailbox.
     case metadata(MetadataResponse)
+
+    /// RFC 9698: JMAP Access
+    case jmapAccess(URL)
 }
 
 // MARK: - Encoding
@@ -70,6 +81,8 @@ extension EncodeBuffer {
             return self.writeQuotaResponse(quotaRoot: quotaRoot, resources: resources)
         case .metadata(let response):
             return self.writeMetadataResponse(response)
+        case .jmapAccess(let url):
+            return self.writeString("JMAPACCESS \"\(url)\"")
         }
     }
 }
