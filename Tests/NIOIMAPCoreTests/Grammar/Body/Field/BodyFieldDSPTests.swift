@@ -66,17 +66,16 @@ struct BodyFieldDSPTests {
     }
 }
 
-// MARK: - EncodeFixture Extension
+// MARK: -
 
-fileprivate extension EncodeFixture<BodyStructure.Disposition?> {
-    static func bodyDisposition(
+extension EncodeFixture<BodyStructure.Disposition?> {
+    fileprivate static func bodyDisposition(
         _ input: BodyStructure.Disposition?,
         _ expectedString: String
     ) -> Self {
         EncodeFixture(
             input: input,
-            bufferKind: .defaultServer,
-            expectedStrings: [expectedString],
+            expectedString: expectedString,
             encoder: { $0.writeBodyDisposition($1) }
         )
     }

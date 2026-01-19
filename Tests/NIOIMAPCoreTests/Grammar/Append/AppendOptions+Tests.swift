@@ -16,20 +16,6 @@ import NIO
 @_spi(NIOIMAPInternal) @testable import NIOIMAPCore
 import Testing
 
-extension EncodeFixture<AppendOptions> {
-    fileprivate static func appendOptions(
-        _ input: AppendOptions,
-        _ expectedString: String
-    ) -> Self {
-        .init(
-            input: input,
-            bufferKind: .client(.rfc3501),
-            expectedStrings: [expectedString],
-            encoder: { $0.writeAppendOptions($1) }
-        )
-    }
-}
-
 @Suite("AppendOptions")
 struct AppendOptionsTests {
     @Test(arguments: [
@@ -62,5 +48,21 @@ struct AppendOptionsTests {
     ])
     func encode(_ fixture: EncodeFixture<AppendOptions>) {
         fixture.checkEncoding()
+    }
+}
+
+// MARK: -
+
+extension EncodeFixture<AppendOptions> {
+    fileprivate static func appendOptions(
+        _ input: AppendOptions,
+        _ expectedString: String
+    ) -> Self {
+        .init(
+            input: input,
+            bufferKind: .client(.rfc3501),
+            expectedString: expectedString,
+            encoder: { $0.writeAppendOptions($1) }
+        )
     }
 }

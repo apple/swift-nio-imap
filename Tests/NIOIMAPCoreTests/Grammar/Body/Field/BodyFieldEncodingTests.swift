@@ -16,21 +16,6 @@ import NIO
 @_spi(NIOIMAPInternal) @testable import NIOIMAPCore
 import Testing
 
-// MARK: - Fixture
-
-extension EncodeFixture where T == BodyStructure.Encoding {
-    fileprivate static func bodyEncoding(_ input: T, _ expectedString: String) -> Self {
-        EncodeFixture(
-            input: input,
-            bufferKind: .defaultServer,
-            expectedStrings: [expectedString],
-            encoder: { $0.writeBodyEncoding($1) }
-        )
-    }
-}
-
-// MARK: - Tests
-
 @Suite("BodyStructure.Encoding")
 struct BodyFieldEncodingTests {
     @Test(arguments: [
@@ -43,5 +28,17 @@ struct BodyFieldEncodingTests {
     ])
     func encoding(_ fixture: EncodeFixture<BodyStructure.Encoding>) {
         fixture.checkEncoding()
+    }
+}
+
+// MARK: -
+
+extension EncodeFixture where T == BodyStructure.Encoding {
+    fileprivate static func bodyEncoding(_ input: T, _ expectedString: String) -> Self {
+        EncodeFixture(
+            input: input,
+            expectedString: expectedString,
+            encoder: { $0.writeBodyEncoding($1) }
+        )
     }
 }

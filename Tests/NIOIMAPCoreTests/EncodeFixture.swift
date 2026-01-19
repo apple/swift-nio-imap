@@ -28,11 +28,29 @@ extension EncodeFixtureBufferKind {
 /// A fixture for testing IMAP encoding operations.
 /// Captures the input value, encoding options, expected output, and encoder function.
 struct EncodeFixture<T>: Sendable where T: Hashable, T: Sendable {
-    let input: T
-    let bufferKind: EncodeFixtureBufferKind
-    let expectedStrings: [String]
-    let encoder: @Sendable (inout EncodeBuffer, T) -> Int
+    var input: T
+    var bufferKind: EncodeFixtureBufferKind = .defaultServer
+    var expectedStrings: [String]
+    var encoder: @Sendable (inout EncodeBuffer, T) -> Int
+}
 
+extension EncodeFixture {
+    init(
+        input: T,
+        bufferKind: EncodeFixtureBufferKind = .defaultServer,
+        expectedString: String,
+        encoder: @escaping @Sendable (inout EncodeBuffer, T) -> Int
+    ) {
+        self.init(
+            input: input,
+            bufferKind: bufferKind,
+            expectedStrings: [expectedString],
+            encoder: encoder
+        )
+    }
+}
+
+extension EncodeFixture {
     /// Performs the encoding test by creating a buffer, encoding the input,
     /// and verifying the output matches expectations.
     func checkEncoding(

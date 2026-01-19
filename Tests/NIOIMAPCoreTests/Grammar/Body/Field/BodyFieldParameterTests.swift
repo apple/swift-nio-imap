@@ -15,25 +15,28 @@
 import NIO
 @_spi(NIOIMAPInternal) @testable import NIOIMAPCore
 import OrderedCollections
-import XCTest
+import Testing
 
-class BodyFieldParameterTests: EncodeTestClass {}
+@Suite("BodyStructure.Parameters")
+struct BodyFieldParameterTests {
+    @Test(arguments: [
+        EncodeFixture.bodyParameterPairs([:], "NIL"),
+        EncodeFixture.bodyParameterPairs(["f1": "v1"], "(\"f1\" \"v1\")"),
+        EncodeFixture.bodyParameterPairs(["f1": "v1", "f2": "v2"], "(\"f1\" \"v1\" \"f2\" \"v2\")"),
+    ])
+    func encoding(_ fixture: EncodeFixture<OrderedDictionary<String, String>>) {
+        fixture.checkEncoding()
+    }
+}
 
-// MARK: - Encoding
+// MARK: -
 
-extension BodyFieldParameterTests {
-    func testEncode() {
-        let inputs: [(OrderedDictionary<String, String>, String, UInt)] = [
-            ([:], "NIL", #line),
-            (["f1": "v1"], "(\"f1\" \"v1\")", #line),
-            (["f1": "v1", "f2": "v2"], "(\"f1\" \"v1\" \"f2\" \"v2\")", #line),
-        ]
-
-        for (test, expectedString, line) in inputs {
-            self.testBuffer.clear()
-            let size = self.testBuffer.writeBodyParameterPairs(test)
-            XCTAssertEqual(size, expectedString.utf8.count, line: line)
-            XCTAssertEqual(self.testBufferString, expectedString, line: line)
-        }
+extension EncodeFixture where T == OrderedDictionary<String, String> {
+    fileprivate static func bodyParameterPairs(_ input: T, _ expectedString: String) -> Self {
+        EncodeFixture(
+            input: input,
+            expectedString: expectedString,
+            encoder: { $0.writeBodyParameterPairs($1) }
+        )
     }
 }
