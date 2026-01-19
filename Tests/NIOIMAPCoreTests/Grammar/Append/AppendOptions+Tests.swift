@@ -14,37 +14,53 @@
 
 import NIO
 @_spi(NIOIMAPInternal) @testable import NIOIMAPCore
-import XCTest
+import Testing
 
-class AppendOptions_Tests: EncodeTestClass {}
+extension EncodeFixture<AppendOptions> {
+    fileprivate static func appendOptions(
+        _ input: AppendOptions,
+        _ expectedString: String
+    ) -> Self {
+        .init(
+            input: input,
+            bufferKind: .client(.rfc3501),
+            expectedStrings: [expectedString],
+            encoder: { $0.writeAppendOptions($1) }
+        )
+    }
+}
 
-extension AppendOptions_Tests {
-    func testEncode() throws {
-        let components = ServerMessageDate.Components(
-            year: 1994,
-            month: 6,
-            day: 25,
-            hour: 1,
-            minute: 2,
-            second: 3,
-            timeZoneMinutes: 0
-        )!
-        let date = ServerMessageDate(components)
-
-        let inputs: [(AppendOptions, String, UInt)] = [
-            (.none, "", #line),
-            (.init(flagList: [.answered], internalDate: nil, extensions: [:]), " (\\Answered)", #line),
-            (
-                .init(flagList: [.answered], internalDate: date, extensions: [:]),
-                " (\\Answered) \"25-Jun-1994 01:02:03 +0000\"", #line
+@Suite("AppendOptions")
+struct AppendOptionsTests {
+    @Test(arguments: [
+        EncodeFixture.appendOptions(
+            .none,
+            ""
+        ),
+        EncodeFixture.appendOptions(
+            .init(flagList: [.answered], internalDate: nil, extensions: [:]),
+            " (\\Answered)"
+        ),
+        EncodeFixture.appendOptions(
+            .init(
+                flagList: [.answered],
+                internalDate: ServerMessageDate(
+                    ServerMessageDate.Components(
+                        year: 1994,
+                        month: 6,
+                        day: 25,
+                        hour: 1,
+                        minute: 2,
+                        second: 3,
+                        timeZoneMinutes: 0
+                    )!
+                ),
+                extensions: [:]
             ),
-        ]
-
-        for (test, expectedString, line) in inputs {
-            self.testBuffer.clear()
-            let size = self.testBuffer.writeAppendOptions(test)
-            XCTAssertEqual(size, expectedString.utf8.count, line: line)
-            XCTAssertEqual(self.testBufferString, expectedString, line: line)
-        }
+            " (\\Answered) \"25-Jun-1994 01:02:03 +0000\""
+        ),
+    ])
+    func encode(_ fixture: EncodeFixture<AppendOptions>) {
+        fixture.checkEncoding()
     }
 }

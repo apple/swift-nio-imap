@@ -14,19 +14,40 @@
 
 import NIO
 @_spi(NIOIMAPInternal) @testable import NIOIMAPCore
-import XCTest
+import Testing
 
-class AppendData_Tests: EncodeTestClass {}
+extension EncodeFixture<AppendData> {
+    fileprivate static func appendData(
+        _ input: AppendData,
+        _ options: CommandEncodingOptions,
+        _ expectedString: String
+    ) -> Self {
+        .init(
+            input: input,
+            bufferKind: .client(options),
+            expectedStrings: [expectedString],
+            encoder: { $0.writeAppendData($1) }
+        )
+    }
+}
 
-extension AppendData_Tests {
-    func testEncode() {
-        let inputs: [(AppendData, CommandEncodingOptions, [String], UInt)] = [
-            (.init(byteCount: 123), .rfc3501, ["{123}\r\n"], #line),
-            (.init(byteCount: 456, withoutContentTransferEncoding: true), .rfc3501, ["~{456}\r\n"], #line),
-            (.init(byteCount: 123), .literalPlus, ["{123+}\r\n"], #line),
-            (.init(byteCount: 456, withoutContentTransferEncoding: true), .literalPlus, ["~{456+}\r\n"], #line),
-        ]
-
-        self.iterateInputs(inputs: inputs, encoder: { self.testBuffer.writeAppendData($0) })
+@Suite("AppendData")
+struct AppendDataTests {
+    @Test(arguments: [
+        EncodeFixture.appendData(
+            .init(byteCount: 123), .rfc3501, "{123}\r\n"
+        ),
+        EncodeFixture.appendData(
+            .init(byteCount: 456, withoutContentTransferEncoding: true), .rfc3501, "~{456}\r\n"
+        ),
+        EncodeFixture.appendData(
+            .init(byteCount: 123), .literalPlus, "{123+}\r\n"
+        ),
+        EncodeFixture.appendData(
+            .init(byteCount: 456, withoutContentTransferEncoding: true), .literalPlus, "~{456+}\r\n"
+        ),
+    ])
+    func encode(_ fixture: EncodeFixture<AppendData>) {
+        fixture.checkEncoding()
     }
 }

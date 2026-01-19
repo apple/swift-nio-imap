@@ -14,28 +14,34 @@
 
 import NIO
 @_spi(NIOIMAPInternal) @testable import NIOIMAPCore
-import XCTest
+import Testing
 
-class BodyEncodingTests: EncodeTestClass {}
+// MARK: - Fixture
 
-// MARK: - Encoding
+extension EncodeFixture where T == BodyStructure.Encoding {
+    fileprivate static func bodyEncoding(_ input: T, _ expectedString: String) -> Self {
+        EncodeFixture(
+            input: input,
+            bufferKind: .defaultServer,
+            expectedStrings: [expectedString],
+            encoder: { $0.writeBodyEncoding($1) }
+        )
+    }
+}
 
-extension BodyEncodingTests {
-    func testEncode() {
-        let inputs: [(BodyStructure.Encoding, String, UInt)] = [
-            (.sevenBit, #""7BIT""#, #line),
-            (.eightBit, #""8BIT""#, #line),
-            (.binary, #""BINARY""#, #line),
-            (.base64, #""BASE64""#, #line),
-            (.quotedPrintable, #""QUOTED-PRINTABLE""#, #line),
-            (.init("some"), "\"SOME\"", #line),
-        ]
+// MARK: - Tests
 
-        for (test, expectedString, line) in inputs {
-            self.testBuffer.clear()
-            let size = self.testBuffer.writeBodyEncoding(test)
-            XCTAssertEqual(size, expectedString.utf8.count, line: line)
-            XCTAssertEqual(self.testBufferString, expectedString, line: line)
-        }
+@Suite("BodyStructure.Encoding")
+struct BodyFieldEncodingTests {
+    @Test(arguments: [
+        EncodeFixture.bodyEncoding(.sevenBit, #""7BIT""#),
+        EncodeFixture.bodyEncoding(.eightBit, #""8BIT""#),
+        EncodeFixture.bodyEncoding(.binary, #""BINARY""#),
+        EncodeFixture.bodyEncoding(.base64, #""BASE64""#),
+        EncodeFixture.bodyEncoding(.quotedPrintable, #""QUOTED-PRINTABLE""#),
+        EncodeFixture.bodyEncoding(.init("some"), "\"SOME\""),
+    ])
+    func encoding(_ fixture: EncodeFixture<BodyStructure.Encoding>) {
+        fixture.checkEncoding()
     }
 }
