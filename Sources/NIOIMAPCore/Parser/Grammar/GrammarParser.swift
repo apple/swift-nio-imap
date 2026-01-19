@@ -43,7 +43,10 @@ public struct ExceededLiteralSizeLimitError: Error {
 import struct NIO.ByteBuffer
 import struct OrderedCollections.OrderedDictionary
 
-struct GrammarParser {
+//
+// Note: The `parsedStringCache` is not (necessarily) sendable. We should fix this.
+//
+struct GrammarParser: @unchecked Sendable {
     static let defaultParsedStringCache: @Sendable (String) -> String = { str in
         str
     }

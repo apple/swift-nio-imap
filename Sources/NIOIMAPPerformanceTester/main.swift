@@ -217,16 +217,18 @@ let commands: [(String, Command)] = [
 
 // MARK: Test Harness
 
-var warning: String = ""
-assert(
-    {
-        print("======================================================")
-        print("= YOU ARE RUNNING NIOPerformanceTester IN DEBUG MODE =")
-        print("======================================================")
-        warning = " <<< DEBUG MODE >>>"
-        return true
-    }()
-)
+// TODO: Migrate this debug mode check.
+
+//var warning: String = ""
+//assert(
+//    {
+//        print("======================================================")
+//        print("= YOU ARE RUNNING NIOPerformanceTester IN DEBUG MODE =")
+//        print("======================================================")
+//        warning = " <<< DEBUG MODE >>>"
+//        return true
+//    }()
+//)
 
 func measure(_ fn: () throws -> Int) rethrows -> [TimeInterval] {
     func measureOne(_ fn: () throws -> Int) rethrows -> TimeInterval {
@@ -249,7 +251,7 @@ let limitSet = CommandLine.arguments.dropFirst()
 
 func measureAndPrint(desc: String, fn: () throws -> Int) rethrows {
     if limitSet.count == 0 || limitSet.contains(desc) {
-        print("measuring\(warning): \(desc): ", terminator: "")
+        print("measuring: \(desc): ", terminator: "")
         let measurements = try measure(fn)
         print(measurements.reduce("") { $0 + "\($1), " })
     } else {
