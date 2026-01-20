@@ -14,19 +14,41 @@
 
 import NIO
 @_spi(NIOIMAPInternal) @testable import NIOIMAPCore
-import XCTest
+import Testing
 
-class ScopeOption_Tests: EncodeTestClass {}
+@Suite("ScopeOption")
+struct ScopeOptionTests {
+    @Test(arguments: [
+        EncodeFixture.scopeOption(
+            .zero,
+            "DEPTH 0"
+        ),
+        EncodeFixture.scopeOption(
+            .one,
+            "DEPTH 1"
+        ),
+        EncodeFixture.scopeOption(
+            .infinity,
+            "DEPTH infinity"
+        ),
+    ])
+    func encode(_ fixture: EncodeFixture<ScopeOption>) {
+        fixture.checkEncoding()
+    }
+}
 
-// MARK: - Encoding
+// MARK: -
 
-extension ScopeOption_Tests {
-    func testEncode() {
-        let inputs: [(ScopeOption, String, UInt)] = [
-            (.zero, "DEPTH 0", #line),
-            (.one, "DEPTH 1", #line),
-            (.infinity, "DEPTH infinity", #line),
-        ]
-        self.iterateInputs(inputs: inputs, encoder: { self.testBuffer.writeScopeOption($0) })
+extension EncodeFixture<ScopeOption> {
+    fileprivate static func scopeOption(
+        _ input: ScopeOption,
+        _ expectedString: String
+    ) -> Self {
+        .init(
+            input: input,
+            bufferKind: .defaultServer,
+            expectedString: expectedString,
+            encoder: { $0.writeScopeOption($1) }
+        )
     }
 }

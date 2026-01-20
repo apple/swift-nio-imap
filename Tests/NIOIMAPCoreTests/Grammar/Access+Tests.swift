@@ -14,20 +14,45 @@
 
 import NIO
 @_spi(NIOIMAPInternal) @testable import NIOIMAPCore
-import XCTest
+import Testing
 
-class Access_Tests: EncodeTestClass {}
+@Suite("Access")
+struct AccessTests {
+    @Test(arguments: [
+        EncodeFixture.access(
+            .anonymous,
+            "anonymous"
+        ),
+        EncodeFixture.access(
+            .authenticateUser,
+            "authuser"
+        ),
+        EncodeFixture.access(
+            .submit(.init(data: "abc")),
+            "submit+abc"
+        ),
+        EncodeFixture.access(
+            .user(.init(data: "abc")),
+            "user+abc"
+        ),
+    ])
+    func encode(_ fixture: EncodeFixture<Access>) {
+        fixture.checkEncoding()
+    }
+}
 
-// MARK: - Encoding
+// MARK: -
 
-extension Access_Tests {
-    func testEncoding() {
-        let inputs: [(Access, String, UInt)] = [
-            (.anonymous, "anonymous", #line),
-            (.authenticateUser, "authuser", #line),
-            (.submit(.init(data: "abc")), "submit+abc", #line),
-            (.user(.init(data: "abc")), "user+abc", #line),
-        ]
-        self.iterateInputs(inputs: inputs, encoder: { self.testBuffer.writeAccess($0) })
+extension EncodeFixture<Access> {
+    fileprivate static func access(
+        _ input: Access,
+        _ expectedString: String
+    ) -> Self {
+        .init(
+            input: input,
+            bufferKind: .defaultServer,
+            expectedString: expectedString,
+            encoder: { $0.writeAccess($1) }
+        )
     }
 }

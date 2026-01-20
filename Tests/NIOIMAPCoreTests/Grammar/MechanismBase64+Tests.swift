@@ -14,18 +14,37 @@
 
 import NIO
 @_spi(NIOIMAPInternal) @testable import NIOIMAPCore
-import XCTest
+import Testing
 
-class MechanismBase64_Tests: EncodeTestClass {}
+@Suite("MechanismBase64")
+struct MechanismBase64Tests {
+    @Test(arguments: [
+        EncodeFixture.mechanismBase64(
+            .init(mechanism: .internal, base64: nil),
+            "INTERNAL"
+        ),
+        EncodeFixture.mechanismBase64(
+            .init(mechanism: .internal, base64: "base64"),
+            "INTERNAL=base64"
+        ),
+    ])
+    func encode(_ fixture: EncodeFixture<MechanismBase64>) {
+        fixture.checkEncoding()
+    }
+}
 
-// MARK: - Encoding
+// MARK: -
 
-extension MechanismBase64_Tests {
-    func testEncode() {
-        let inputs: [(MechanismBase64, String, UInt)] = [
-            (.init(mechanism: .internal, base64: nil), "INTERNAL", #line),
-            (.init(mechanism: .internal, base64: "base64"), "INTERNAL=base64", #line),
-        ]
-        self.iterateInputs(inputs: inputs, encoder: { self.testBuffer.writeMechanismBase64($0) })
+extension EncodeFixture<MechanismBase64> {
+    fileprivate static func mechanismBase64(
+        _ input: MechanismBase64,
+        _ expectedString: String
+    ) -> Self {
+        .init(
+            input: input,
+            bufferKind: .defaultServer,
+            expectedString: expectedString,
+            encoder: { $0.writeMechanismBase64($1) }
+        )
     }
 }

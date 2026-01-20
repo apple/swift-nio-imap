@@ -14,18 +14,37 @@
 
 import NIO
 @_spi(NIOIMAPInternal) @testable import NIOIMAPCore
-import XCTest
+import Testing
 
-class UAuthMechanism_Tests: EncodeTestClass {}
+@Suite("URLAuthenticationMechanism")
+struct URLAuthenticationMechanismTests {
+    @Test(arguments: [
+        EncodeFixture.urlAuthenticationMechanism(
+            .internal,
+            "INTERNAL"
+        ),
+        EncodeFixture.urlAuthenticationMechanism(
+            .init("test"),
+            "test"
+        ),
+    ])
+    func encode(_ fixture: EncodeFixture<URLAuthenticationMechanism>) {
+        fixture.checkEncoding()
+    }
+}
 
-// MARK: - Encoding
+// MARK: -
 
-extension UAuthMechanism_Tests {
-    func testEncode() {
-        let inputs: [(URLAuthenticationMechanism, String, UInt)] = [
-            (.internal, "INTERNAL", #line),
-            (.init("test"), "test", #line),
-        ]
-        self.iterateInputs(inputs: inputs, encoder: { self.testBuffer.writeURLAuthenticationMechanism($0) })
+extension EncodeFixture<URLAuthenticationMechanism> {
+    fileprivate static func urlAuthenticationMechanism(
+        _ input: URLAuthenticationMechanism,
+        _ expectedString: String
+    ) -> Self {
+        .init(
+            input: input,
+            bufferKind: .defaultServer,
+            expectedString: expectedString,
+            encoder: { $0.writeURLAuthenticationMechanism($1) }
+        )
     }
 }

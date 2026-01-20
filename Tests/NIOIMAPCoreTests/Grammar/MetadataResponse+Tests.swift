@@ -14,23 +14,41 @@
 
 import NIO
 @_spi(NIOIMAPInternal) @testable import NIOIMAPCore
-import XCTest
+import Testing
 
-class MetadataResponse_Tests: EncodeTestClass {}
+@Suite("MetadataResponse")
+struct MetadataResponseTests {
+    @Test(arguments: [
+        EncodeFixture.metadataResponse(
+            .list(list: ["a"], mailbox: .inbox),
+            "METADATA \"INBOX\" \"a\""
+        ),
+        EncodeFixture.metadataResponse(
+            .list(list: ["a", "b", "c"], mailbox: .inbox),
+            "METADATA \"INBOX\" \"a\" \"b\" \"c\""
+        ),
+        EncodeFixture.metadataResponse(
+            .values(values: ["a": .init(nil)], mailbox: .inbox),
+            "METADATA \"INBOX\" (\"a\" NIL)"
+        ),
+    ])
+    func encode(_ fixture: EncodeFixture<MetadataResponse>) {
+        fixture.checkEncoding()
+    }
+}
 
-// MARK: - IMAP
+// MARK: -
 
-extension MetadataResponse_Tests {
-    func testEncode() {
-        let inputs: [(MetadataResponse, String, UInt)] = [
-            (.list(list: ["a"], mailbox: .inbox), "METADATA \"INBOX\" \"a\"", #line),
-            (.list(list: ["a", "b", "c"], mailbox: .inbox), "METADATA \"INBOX\" \"a\" \"b\" \"c\"", #line),
-            (
-                .values(values: ["a": .init(nil)], mailbox: .inbox),
-                "METADATA \"INBOX\" (\"a\" NIL)",
-                #line
-            ),
-        ]
-        self.iterateInputs(inputs: inputs, encoder: { self.testBuffer.writeMetadataResponse($0) })
+extension EncodeFixture<MetadataResponse> {
+    fileprivate static func metadataResponse(
+        _ input: MetadataResponse,
+        _ expectedString: String
+    ) -> Self {
+        .init(
+            input: input,
+            bufferKind: .defaultServer,
+            expectedString: expectedString,
+            encoder: { $0.writeMetadataResponse($1) }
+        )
     }
 }

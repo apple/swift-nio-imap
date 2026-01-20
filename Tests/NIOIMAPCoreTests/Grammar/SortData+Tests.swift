@@ -14,18 +14,37 @@
 
 import NIO
 @_spi(NIOIMAPInternal) @testable import NIOIMAPCore
-import XCTest
+import Testing
 
-class SortData_Tests: EncodeTestClass {}
+@Suite("SortData")
+struct SortDataTests {
+    @Test(arguments: [
+        EncodeFixture.sortData(
+            nil,
+            "SORT"
+        ),
+        EncodeFixture.sortData(
+            .init(identifiers: [1], modificationSequence: 2),
+            "SORT 1 (MODSEQ 2)"
+        ),
+    ])
+    func encode(_ fixture: EncodeFixture<SortData?>) {
+        fixture.checkEncoding()
+    }
+}
 
-// MARK: - Encoding
+// MARK: -
 
-extension SortData_Tests {
-    func testEncode() {
-        let inputs: [(SortData?, String, UInt)] = [
-            (nil, "SORT", #line),
-            (.init(identifiers: [1], modificationSequence: 2), "SORT 1 (MODSEQ 2)", #line),
-        ]
-        self.iterateInputs(inputs: inputs, encoder: { self.testBuffer.writeSortData($0) })
+extension EncodeFixture<SortData?> {
+    fileprivate static func sortData(
+        _ input: SortData?,
+        _ expectedString: String
+    ) -> Self {
+        .init(
+            input: input,
+            bufferKind: .defaultServer,
+            expectedString: expectedString,
+            encoder: { $0.writeSortData($1) }
+        )
     }
 }
