@@ -13,18 +13,28 @@
 //===----------------------------------------------------------------------===//
 
 import NIO
+import Testing
 @_spi(NIOIMAPInternal) @testable import NIOIMAPCore
-import XCTest
 
-class EncodedSection_Tests: EncodeTestClass {}
+@Suite("EncodedSection")
+struct EncodedSectionTests {
+    @Test(arguments: [
+        EncodeFixture.encodedSection(.init(section: "hello"), "hello"),
+    ])
+    func encode(_ fixture: EncodeFixture<EncodedSection>) {
+        fixture.checkEncoding()
+    }
+}
 
-// MARK: - Encoding
+// MARK: -
 
-extension EncodedSection_Tests {
-    func testEncode() {
-        let inputs: [(EncodedSection, String, UInt)] = [
-            (.init(section: "hello"), "hello", #line)
-        ]
-        self.iterateInputs(inputs: inputs, encoder: { self.testBuffer.writeEncodedSection($0) })
+extension EncodeFixture where T == EncodedSection {
+    fileprivate static func encodedSection(_ input: T, _ expectedString: String) -> Self {
+        Self(
+            input: input,
+            bufferKind: .defaultServer,
+            expectedString: expectedString,
+            encoder: { $0.writeEncodedSection($1) }
+        )
     }
 }

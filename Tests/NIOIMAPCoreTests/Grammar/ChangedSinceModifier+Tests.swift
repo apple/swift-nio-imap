@@ -13,25 +13,48 @@
 //===----------------------------------------------------------------------===//
 
 import NIO
+import Testing
 @_spi(NIOIMAPInternal) @testable import NIOIMAPCore
-import XCTest
 
-class ChangedSinceModifier_Tests: EncodeTestClass {}
-
-// MARK: - Name/Values
-
-extension ChangedSinceModifier_Tests {
-    func testEncode() {
-        let inputs: [(ChangedSinceModifier, String, UInt)] = [
-            (.init(modificationSequence: 3), "CHANGEDSINCE 3", #line)
-        ]
-        self.iterateInputs(inputs: inputs, encoder: { self.testBuffer.writeChangedSinceModifier($0) })
+@Suite("ChangedSinceModifier")
+struct ChangedSinceModifierTests {
+    @Test(arguments: [
+        EncodeFixture.changedSinceModifier(.init(modificationSequence: 3), "CHANGEDSINCE 3"),
+        EncodeFixture.changedSinceModifier(.init(modificationSequence: 999999), "CHANGEDSINCE 999999"),
+    ])
+    func `encode changed since`(_ fixture: EncodeFixture<ChangedSinceModifier>) {
+        fixture.checkEncoding()
     }
 
-    func testEncode_unchanged() {
-        let inputs: [(UnchangedSinceModifier, String, UInt)] = [
-            (.init(modificationSequence: 3), "UNCHANGEDSINCE 3", #line)
-        ]
-        self.iterateInputs(inputs: inputs, encoder: { self.testBuffer.writeUnchangedSinceModifier($0) })
+    @Test(arguments: [
+        EncodeFixture.unchangedSinceModifier(.init(modificationSequence: 3), "UNCHANGEDSINCE 3"),
+        EncodeFixture.unchangedSinceModifier(.init(modificationSequence: 12345), "UNCHANGEDSINCE 12345"),
+    ])
+    func `encode unchanged since`(_ fixture: EncodeFixture<UnchangedSinceModifier>) {
+        fixture.checkEncoding()
+    }
+}
+
+// MARK: -
+
+extension EncodeFixture where T == ChangedSinceModifier {
+    fileprivate static func changedSinceModifier(_ input: T, _ expectedString: String) -> Self {
+        Self(
+            input: input,
+            bufferKind: .defaultServer,
+            expectedString: expectedString,
+            encoder: { $0.writeChangedSinceModifier($1) }
+        )
+    }
+}
+
+extension EncodeFixture where T == UnchangedSinceModifier {
+    fileprivate static func unchangedSinceModifier(_ input: T, _ expectedString: String) -> Self {
+        Self(
+            input: input,
+            bufferKind: .defaultServer,
+            expectedString: expectedString,
+            encoder: { $0.writeUnchangedSinceModifier($1) }
+        )
     }
 }

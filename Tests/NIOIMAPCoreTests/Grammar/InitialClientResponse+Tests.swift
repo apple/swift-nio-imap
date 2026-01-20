@@ -13,19 +13,30 @@
 //===----------------------------------------------------------------------===//
 
 import NIO
+import Testing
 @_spi(NIOIMAPInternal) @testable import NIOIMAPCore
-import XCTest
 
-class InitialResponse_Tests: EncodeTestClass {}
+@Suite("InitialResponse")
+struct InitialResponseTests {
+    @Test(arguments: [
+        EncodeFixture.initialResponse(.empty, "="),
+        EncodeFixture.initialResponse(.init("base64"), "YmFzZTY0"),
+        EncodeFixture.initialResponse(.init("response"), "cmVzcG9uc2U="),
+    ])
+    func encode(_ fixture: EncodeFixture<InitialResponse>) {
+        fixture.checkEncoding()
+    }
+}
 
-// MARK: - IMAP
+// MARK: -
 
-extension InitialResponse_Tests {
-    func testEncode() {
-        let inputs: [(InitialResponse, String, UInt)] = [
-            (.empty, "=", #line),
-            (.init("base64"), "YmFzZTY0", #line),
-        ]
-        self.iterateInputs(inputs: inputs, encoder: { self.testBuffer.writeInitialResponse($0) })
+extension EncodeFixture where T == InitialResponse {
+    fileprivate static func initialResponse(_ input: T, _ expectedString: String) -> Self {
+        Self(
+            input: input,
+            bufferKind: .defaultServer,
+            expectedString: expectedString,
+            encoder: { $0.writeInitialResponse($1) }
+        )
     }
 }

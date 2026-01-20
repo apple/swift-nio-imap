@@ -13,28 +13,32 @@
 //===----------------------------------------------------------------------===//
 
 import NIO
+import Testing
 @_spi(NIOIMAPInternal) @testable import NIOIMAPCore
-import XCTest
 
-class ReturnOption_Tests: EncodeTestClass {}
+@Suite("ReturnOption")
+struct ReturnOptionTests {
+    @Test(arguments: [
+        EncodeFixture.returnOption(.subscribed, "SUBSCRIBED"),
+        EncodeFixture.returnOption(.children, "CHILDREN"),
+        EncodeFixture.returnOption(.statusOption([.messageCount]), "STATUS (MESSAGES)"),
+        EncodeFixture.returnOption(.optionExtension(.init(key: .standard("atom"), value: nil)), "atom"),
+        EncodeFixture.returnOption(.specialUse, "SPECIAL-USE"),
+    ])
+    func encode(_ fixture: EncodeFixture<ReturnOption>) {
+        fixture.checkEncoding()
+    }
+}
 
-// MARK: - Encoding
+// MARK: -
 
-extension ReturnOption_Tests {
-    func testEncode() {
-        let inputs: [(ReturnOption, String, UInt)] = [
-            (.subscribed, "SUBSCRIBED", #line),
-            (.children, "CHILDREN", #line),
-            (.statusOption([.messageCount]), "STATUS (MESSAGES)", #line),
-            (.optionExtension(.init(key: .standard("atom"), value: nil)), "atom", #line),
-            (.specialUse, "SPECIAL-USE", #line),
-        ]
-
-        for (test, expectedString, line) in inputs {
-            self.testBuffer.clear()
-            let size = self.testBuffer.writeReturnOption(test)
-            XCTAssertEqual(size, expectedString.utf8.count, line: line)
-            XCTAssertEqual(self.testBufferString, expectedString, line: line)
-        }
+extension EncodeFixture where T == ReturnOption {
+    fileprivate static func returnOption(_ input: T, _ expectedString: String) -> Self {
+        Self(
+            input: input,
+            bufferKind: .defaultServer,
+            expectedString: expectedString,
+            encoder: { $0.writeReturnOption($1) }
+        )
     }
 }

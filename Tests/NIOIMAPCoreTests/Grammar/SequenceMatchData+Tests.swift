@@ -13,19 +13,29 @@
 //===----------------------------------------------------------------------===//
 
 import NIO
+import Testing
 @_spi(NIOIMAPInternal) @testable import NIOIMAPCore
-import XCTest
 
-class SequenceMatchData_Tests: EncodeTestClass {}
+@Suite("SequenceMatchData")
+struct SequenceMatchDataTests {
+    @Test(arguments: [
+        EncodeFixture.sequenceMatchData(.init(knownSequenceSet: .set(.all), knownUidSet: .set(.all)), "(1:* 1:*)"),
+        EncodeFixture.sequenceMatchData(.init(knownSequenceSet: .set([1, 2, 3]), knownUidSet: .set([4, 5, 6])), "(1:3 4:6)"),
+    ])
+    func encode(_ fixture: EncodeFixture<SequenceMatchData>) {
+        fixture.checkEncoding()
+    }
+}
 
-// MARK: - IMAP
+// MARK: -
 
-extension SequenceMatchData_Tests {
-    func testEncode() {
-        let inputs: [(SequenceMatchData, String, UInt)] = [
-            (.init(knownSequenceSet: .set(.all), knownUidSet: .set(.all)), "(1:* 1:*)", #line),
-            (.init(knownSequenceSet: .set([1, 2, 3]), knownUidSet: .set([4, 5, 6])), "(1:3 4:6)", #line),
-        ]
-        self.iterateInputs(inputs: inputs, encoder: { self.testBuffer.writeSequenceMatchData($0) })
+extension EncodeFixture where T == SequenceMatchData {
+    fileprivate static func sequenceMatchData(_ input: T, _ expectedString: String) -> Self {
+        Self(
+            input: input,
+            bufferKind: .defaultServer,
+            expectedString: expectedString,
+            encoder: { $0.writeSequenceMatchData($1) }
+        )
     }
 }

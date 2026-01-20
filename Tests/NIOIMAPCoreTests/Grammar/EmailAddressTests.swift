@@ -13,65 +13,73 @@
 //===----------------------------------------------------------------------===//
 
 import NIO
+import Testing
 @_spi(NIOIMAPInternal) @testable import NIOIMAPCore
-import XCTest
 
-class EmailAddressTests: EncodeTestClass {}
-
-// MARK: - Address init
-
-extension EmailAddressTests {
-    func testInit() {
+@Suite("EmailAddress")
+struct EmailAddressTestsSuite {
+    @Test func `address initialization with properties`() {
         let name: ByteBuffer? = "a"
         let adl: ByteBuffer? = "b"
         let mailbox: ByteBuffer? = "c"
         let host: ByteBuffer? = "d"
         let address = EmailAddress(personName: name, sourceRoot: adl, mailbox: mailbox, host: host)
 
-        XCTAssertEqual(address.personName, name)
-        XCTAssertEqual(address.sourceRoot, adl)
-        XCTAssertEqual(address.mailbox, mailbox)
-        XCTAssertEqual(address.host, host)
+        #expect(address.personName == name)
+        #expect(address.sourceRoot == adl)
+        #expect(address.mailbox == mailbox)
+        #expect(address.host == host)
+    }
+
+    @Test(arguments: [
+        EmailAddressFixture(
+            name: "all nil",
+            address: .init(personName: nil, sourceRoot: nil, mailbox: nil, host: nil),
+            expectedString: "(NIL NIL NIL NIL)"
+        ),
+        EmailAddressFixture(
+            name: "none nil",
+            address: .init(personName: "somename", sourceRoot: "someadl", mailbox: "somemailbox", host: "someaddress"),
+            expectedString: "(\"somename\" \"someadl\" \"somemailbox\" \"someaddress\")"
+        ),
+        EmailAddressFixture(
+            name: "mixed nil",
+            address: .init(personName: nil, sourceRoot: "some", mailbox: "thing", host: nil),
+            expectedString: "(NIL \"some\" \"thing\" NIL)"
+        ),
+        EmailAddressFixture(
+            name: "unicode",
+            address: .init(personName: nil, sourceRoot: nil, mailbox: "阿Q", host: "例子.中国"),
+            expectedString: "(NIL NIL {4}\r\n阿Q {13}\r\n例子.中国)"
+        ),
+    ])
+    func `encode email address`(_ fixture: EmailAddressFixture) {
+        fixture.checkEncoding()
     }
 }
 
-// MARK: - Address imapEncoded
+// MARK: -
 
-extension EmailAddressTests {
-    func testAllNil() {
-        let address = EmailAddress(personName: nil, sourceRoot: nil, mailbox: nil, host: nil)
-        let expected = "(NIL NIL NIL NIL)"
-        let size = self.testBuffer.writeEmailAddress(address)
-        XCTAssertEqual(size, expected.utf8.count)
-        XCTAssertEqual(expected, self.testBufferString)
-    }
+struct EmailAddressFixture: Sendable, CustomTestStringConvertible {
+    var name: String
+    var address: EmailAddress
+    var expectedString: String
 
-    func testNoneNil() {
-        let address = EmailAddress(
-            personName: "somename",
-            sourceRoot: "someadl",
-            mailbox: "somemailbox",
-            host: "someaddress"
+    var testDescription: String { name }
+
+    func checkEncoding() {
+        let buffer = EncodeBuffer.serverEncodeBuffer(
+            buffer: ByteBufferAllocator().buffer(capacity: 128),
+            options: ResponseEncodingOptions(),
+            loggingMode: false
         )
-        let expected = "(\"somename\" \"someadl\" \"somemailbox\" \"someaddress\")"
-        let size = self.testBuffer.writeEmailAddress(address)
-        XCTAssertEqual(size, expected.utf8.count)
-        XCTAssertEqual(expected, self.testBufferString)
-    }
+        var testBuffer = buffer
+        let size = testBuffer.writeEmailAddress(address)
+        var remaining = testBuffer
+        let chunk = remaining.nextChunk()
+        let actualString = String(buffer: chunk.bytes)
 
-    func testMixture() {
-        let address = EmailAddress(personName: nil, sourceRoot: "some", mailbox: "thing", host: nil)
-        let expected = "(NIL \"some\" \"thing\" NIL)"
-        let size = self.testBuffer.writeEmailAddress(address)
-        XCTAssertEqual(size, expected.utf8.count)
-        XCTAssertEqual(expected, self.testBufferString)
-    }
-
-    func testUnicode() {
-        let address = EmailAddress(personName: nil, sourceRoot: nil, mailbox: "阿Q", host: "例子.中国")
-        let expected = "(NIL NIL {4}\r\n阿Q {13}\r\n例子.中国)"
-        let size = self.testBuffer.writeEmailAddress(address)
-        XCTAssertEqual(size, expected.utf8.count)
-        XCTAssertEqual(expected, self.testBufferString)
+        #expect(size == expectedString.utf8.count)
+        #expect(actualString.mappingControlPictures() == expectedString.mappingControlPictures())
     }
 }
