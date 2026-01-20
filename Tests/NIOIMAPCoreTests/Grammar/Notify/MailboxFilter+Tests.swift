@@ -14,30 +14,61 @@
 
 import NIO
 @_spi(NIOIMAPInternal) @testable import NIOIMAPCore
-import XCTest
+import Testing
 
-class MailboxFilter_Tests: EncodeTestClass {}
+@Suite("MailboxFilter")
+struct MailboxFilterTests {
+    @Test(arguments: [
+        EncodeFixture.mailboxFilter(
+            .inboxes,
+            "inboxes"
+        ),
+        EncodeFixture.mailboxFilter(
+            .personal,
+            "personal"
+        ),
+        EncodeFixture.mailboxFilter(
+            .subscribed,
+            "subscribed"
+        ),
+        EncodeFixture.mailboxFilter(
+            .subtree(Mailboxes([.init("box1")])!),
+            "subtree (\"box1\")"
+        ),
+        EncodeFixture.mailboxFilter(
+            .mailboxes(Mailboxes([.init("box1")])!),
+            "mailboxes (\"box1\")"
+        ),
+        EncodeFixture.mailboxFilter(
+            .selected,
+            "selected"
+        ),
+        EncodeFixture.mailboxFilter(
+            .selectedDelayed,
+            "selected-delayed"
+        ),
+        EncodeFixture.mailboxFilter(
+            .subtreeOne(Mailboxes([.init("box1")])!),
+            "subtree-one (\"box1\")"
+        ),
+    ])
+    func encode(_ fixture: EncodeFixture<MailboxFilter>) {
+        fixture.checkEncoding()
+    }
+}
 
-// MARK: - Encoding
+// MARK: -
 
-extension MailboxFilter_Tests {
-    func testEncode() {
-        let inputs: [(MailboxFilter, String, UInt)] = [
-            (.inboxes, "inboxes", #line),
-            (.personal, "personal", #line),
-            (.subscribed, "subscribed", #line),
-            (.subtree(Mailboxes([.init("box1")])!), "subtree (\"box1\")", #line),
-            (.mailboxes(Mailboxes([.init("box1")])!), "mailboxes (\"box1\")", #line),
-            (.selected, "selected", #line),
-            (.selectedDelayed, "selected-delayed", #line),
-            (.subtreeOne(Mailboxes([.init("box1")])!), "subtree-one (\"box1\")", #line),
-        ]
-
-        for (test, expectedString, line) in inputs {
-            self.testBuffer.clear()
-            let size = self.testBuffer.writeMailboxFilter(test)
-            XCTAssertEqual(size, expectedString.utf8.count, line: line)
-            XCTAssertEqual(self.testBufferString, expectedString, line: line)
-        }
+extension EncodeFixture<MailboxFilter> {
+    fileprivate static func mailboxFilter(
+        _ input: MailboxFilter,
+        _ expectedString: String
+    ) -> Self {
+        .init(
+            input: input,
+            bufferKind: .defaultServer,
+            expectedString: expectedString,
+            encoder: { $0.writeMailboxFilter($1) }
+        )
     }
 }

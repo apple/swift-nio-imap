@@ -14,43 +14,47 @@
 
 import NIO
 @_spi(NIOIMAPInternal) @testable import NIOIMAPCore
-import XCTest
+import Testing
 
-class ExtendedSearchSourceOptions_Tests: EncodeTestClass {}
+@Suite("ExtendedSearchSourceOptions")
+struct ExtendedSearchSourceOptionsTests {
+    @Test(arguments: [
+        EncodeFixture.extendedSearchSourceOptions(
+            ExtendedSearchSourceOptions(sourceMailbox: [.inboxes])!,
+            "IN (inboxes)"
+        ),
+        EncodeFixture.extendedSearchSourceOptions(
+            ExtendedSearchSourceOptions(
+                sourceMailbox: [.inboxes],
+                scopeOptions: ExtendedSearchScopeOptions(["test": nil])
+            )!,
+            "IN (inboxes (test))"
+        ),
+        EncodeFixture.extendedSearchSourceOptions(
+            ExtendedSearchSourceOptions(
+                sourceMailbox: [.inboxes, .personal],
+                scopeOptions: ExtendedSearchScopeOptions(["test": nil])
+            )!,
+            "IN (inboxes personal (test))"
+        ),
+    ])
+    func encode(_ fixture: EncodeFixture<ExtendedSearchSourceOptions>) {
+        fixture.checkEncoding()
+    }
+}
 
-// MARK: - Encoding
+// MARK: -
 
-extension ExtendedSearchSourceOptions_Tests {
-    func testEncode() {
-        let inputs: [(ExtendedSearchSourceOptions, String, UInt)] = [
-            (
-                ExtendedSearchSourceOptions(sourceMailbox: [.inboxes])!,
-                "IN (inboxes)",
-                #line
-            ),
-            (
-                ExtendedSearchSourceOptions(
-                    sourceMailbox: [.inboxes],
-                    scopeOptions: ExtendedSearchScopeOptions(["test": nil])
-                )!,
-                "IN (inboxes (test))",
-                #line
-            ),
-            (
-                ExtendedSearchSourceOptions(
-                    sourceMailbox: [.inboxes, .personal],
-                    scopeOptions: ExtendedSearchScopeOptions(["test": nil])
-                )!,
-                "IN (inboxes personal (test))",
-                #line
-            ),
-        ]
-
-        for (test, expectedString, line) in inputs {
-            self.testBuffer.clear()
-            let size = self.testBuffer.writeExtendedSearchSourceOptions(test)
-            XCTAssertEqual(size, expectedString.utf8.count, line: line)
-            XCTAssertEqual(self.testBufferString, expectedString, line: line)
-        }
+extension EncodeFixture<ExtendedSearchSourceOptions> {
+    fileprivate static func extendedSearchSourceOptions(
+        _ input: ExtendedSearchSourceOptions,
+        _ expectedString: String
+    ) -> Self {
+        .init(
+            input: input,
+            bufferKind: .defaultServer,
+            expectedString: expectedString,
+            encoder: { $0.writeExtendedSearchSourceOptions($1) }
+        )
     }
 }

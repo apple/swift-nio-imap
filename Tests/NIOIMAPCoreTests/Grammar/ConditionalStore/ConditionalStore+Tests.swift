@@ -14,13 +14,21 @@
 
 import NIO
 @_spi(NIOIMAPInternal) @testable import NIOIMAPCore
-import XCTest
+import Testing
 
-class ConditionalStore_Tests: EncodeTestClass {
-    func testConditionalStoreParameter_encode() {
+@Suite("ConditionalStoreParameter")
+struct ConditionalStoreTests {
+    @Test
+    func `encodes to CONDSTORE`() {
         let expected = "CONDSTORE"
-        let size = self.testBuffer.writeConditionalStoreParameter()
-        XCTAssertEqual(size, expected.utf8.count)
-        XCTAssertEqual(self.testBufferString, expected)
+        var buffer = EncodeBuffer.serverEncodeBuffer(
+            buffer: ByteBufferAllocator().buffer(capacity: 128),
+            options: ResponseEncodingOptions(),
+            loggingMode: false
+        )
+        let size = buffer.writeConditionalStoreParameter()
+        #expect(size == expected.utf8.count)
+        let chunk = buffer.nextChunk()
+        #expect(String(buffer: chunk.bytes) == expected)
     }
 }

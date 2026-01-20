@@ -14,20 +14,50 @@
 
 import NIO
 @_spi(NIOIMAPInternal) @testable import NIOIMAPCore
-import XCTest
+import Testing
 
-class MetadataValue_Tests: EncodeTestClass {}
+@Suite("MetadataValue")
+struct MetadataValueTests {
+    @Test(arguments: [
+        EncodeFixture.metadataValue(
+            .init(nil),
+            .rfc3501,
+            ["NIL"]
+        ),
+        EncodeFixture.metadataValue(
+            .init("test"),
+            .rfc3501,
+            ["~{4}\r\n", "test"]
+        ),
+        EncodeFixture.metadataValue(
+            .init("\\"),
+            .rfc3501,
+            ["~{1}\r\n", "\\"]
+        ),
+        EncodeFixture.metadataValue(
+            .init("\0"),
+            .init(capabilities: [.binary]),
+            ["~{1}\r\n", "\0"]
+        ),
+    ])
+    func encode(_ fixture: EncodeFixture<MetadataValue>) {
+        fixture.checkEncoding()
+    }
+}
 
-// MARK: - IMAP
+// MARK: -
 
-extension MetadataValue_Tests {
-    func testEncode() {
-        let inputs: [(MetadataValue, CommandEncodingOptions, [String], UInt)] = [
-            (.init(nil), .rfc3501, ["NIL"], #line),
-            (.init("test"), .rfc3501, ["~{4}\r\n", "test"], #line),
-            (.init("\\"), .rfc3501, ["~{1}\r\n", "\\"], #line),
-            (.init("\0"), .init(capabilities: [.binary]), ["~{1}\r\n", "\0"], #line),
-        ]
-        self.iterateInputs(inputs: inputs, encoder: { self.testBuffer.writeMetadataValue($0) })
+extension EncodeFixture<MetadataValue> {
+    fileprivate static func metadataValue(
+        _ input: MetadataValue,
+        _ options: CommandEncodingOptions,
+        _ expectedStrings: [String]
+    ) -> Self {
+        .init(
+            input: input,
+            bufferKind: .client(options),
+            expectedStrings: expectedStrings,
+            encoder: { $0.writeMetadataValue($1) }
+        )
     }
 }

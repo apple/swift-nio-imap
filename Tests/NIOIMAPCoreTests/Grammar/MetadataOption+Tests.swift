@@ -14,27 +14,69 @@
 
 import NIO
 @_spi(NIOIMAPInternal) @testable import NIOIMAPCore
-import XCTest
+import Testing
 
-class MetadataOption_Tests: EncodeTestClass {}
-
-// MARK: - Encoding
-
-extension MetadataOption_Tests {
-    func testEncode() {
-        let inputs: [(MetadataOption, String, UInt)] = [
-            (.maxSize(123), "MAXSIZE 123", #line),
-            (.scope(.one), "DEPTH 1", #line),
-            (.other(.init(key: "param", value: nil)), "param", #line),
-        ]
-        self.iterateInputs(inputs: inputs, encoder: { self.testBuffer.writeMetadataOption($0) })
+@Suite("MetadataOption")
+struct MetadataOptionTests {
+    @Test(arguments: [
+        EncodeFixture.metadataOption(
+            .maxSize(123),
+            "MAXSIZE 123"
+        ),
+        EncodeFixture.metadataOption(
+            .scope(.one),
+            "DEPTH 1"
+        ),
+        EncodeFixture.metadataOption(
+            .other(.init(key: "param", value: nil)),
+            "param"
+        ),
+    ])
+    func `encodes single metadata option`(_ fixture: EncodeFixture<MetadataOption>) {
+        fixture.checkEncoding()
     }
 
-    func testEncode_array() {
-        let inputs: [([MetadataOption], String, UInt)] = [
-            ([.maxSize(123)], "(MAXSIZE 123)", #line),
-            ([.maxSize(1), .scope(.one)], "(MAXSIZE 1 DEPTH 1)", #line),
-        ]
-        self.iterateInputs(inputs: inputs, encoder: { self.testBuffer.writeMetadataOptions($0) })
+    @Test(arguments: [
+        EncodeFixture.metadataOptions(
+            [.maxSize(123)],
+            "(MAXSIZE 123)"
+        ),
+        EncodeFixture.metadataOptions(
+            [.maxSize(1), .scope(.one)],
+            "(MAXSIZE 1 DEPTH 1)"
+        ),
+    ])
+    func `encodes array of metadata options`(_ fixture: EncodeFixture<[MetadataOption]>) {
+        fixture.checkEncoding()
+    }
+}
+
+// MARK: -
+
+extension EncodeFixture<MetadataOption> {
+    fileprivate static func metadataOption(
+        _ input: MetadataOption,
+        _ expectedString: String
+    ) -> Self {
+        .init(
+            input: input,
+            bufferKind: .defaultServer,
+            expectedString: expectedString,
+            encoder: { $0.writeMetadataOption($1) }
+        )
+    }
+}
+
+extension EncodeFixture<[MetadataOption]> {
+    fileprivate static func metadataOptions(
+        _ input: [MetadataOption],
+        _ expectedString: String
+    ) -> Self {
+        .init(
+            input: input,
+            bufferKind: .defaultServer,
+            expectedString: expectedString,
+            encoder: { $0.writeMetadataOptions($1) }
+        )
     }
 }

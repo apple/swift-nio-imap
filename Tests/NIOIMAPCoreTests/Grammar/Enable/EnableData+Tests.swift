@@ -14,22 +14,45 @@
 
 import NIO
 @_spi(NIOIMAPInternal) @testable import NIOIMAPCore
-import XCTest
+import Testing
 
-class EnableData_Tests: EncodeTestClass {
-    func testEncoding() {
-        let inputs: [([Capability], String, UInt)] = [
-            ([], "ENABLED", #line),
-            ([.enable], "ENABLED ENABLE", #line),
-            ([.enable, .condStore], "ENABLED ENABLE CONDSTORE", #line),
-            ([.enable, .condStore, .authenticate(.init("some"))], "ENABLED ENABLE CONDSTORE AUTH=SOME", #line),
-        ]
+@Suite("EnableData")
+struct EnableDataTests {
+    @Test(arguments: [
+        EncodeFixture.enableData(
+            [],
+            "ENABLED"
+        ),
+        EncodeFixture.enableData(
+            [.enable],
+            "ENABLED ENABLE"
+        ),
+        EncodeFixture.enableData(
+            [.enable, .condStore],
+            "ENABLED ENABLE CONDSTORE"
+        ),
+        EncodeFixture.enableData(
+            [.enable, .condStore, .authenticate(.init("some"))],
+            "ENABLED ENABLE CONDSTORE AUTH=SOME"
+        ),
+    ])
+    func encode(_ fixture: EncodeFixture<[Capability]>) {
+        fixture.checkEncoding()
+    }
+}
 
-        for (input, expectedString, line) in inputs {
-            self.testBuffer.clear()
-            let size = self.testBuffer.writeEnableData(input)
-            XCTAssertEqual(size, expectedString.utf8.count, line: line)
-            XCTAssertEqual(self.testBufferString, expectedString, line: line)
-        }
+// MARK: -
+
+extension EncodeFixture<[Capability]> {
+    fileprivate static func enableData(
+        _ input: [Capability],
+        _ expectedString: String
+    ) -> Self {
+        .init(
+            input: input,
+            bufferKind: .defaultServer,
+            expectedString: expectedString,
+            encoder: { $0.writeEnableData($1) }
+        )
     }
 }
