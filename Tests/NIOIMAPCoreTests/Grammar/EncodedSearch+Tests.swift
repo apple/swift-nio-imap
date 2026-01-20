@@ -13,18 +13,28 @@
 //===----------------------------------------------------------------------===//
 
 import NIO
+import Testing
 @_spi(NIOIMAPInternal) @testable import NIOIMAPCore
-import XCTest
 
-class EncodedSearch_Tests: EncodeTestClass {}
+@Suite("EncodedSearch")
+struct EncodedSearchTests {
+    @Test(arguments: [
+        EncodeFixture.encodedSearch(.init(query: "hello"), "hello"),
+    ])
+    func encode(_ fixture: EncodeFixture<EncodedSearch>) {
+        fixture.checkEncoding()
+    }
+}
 
-// MARK: - Encoding
+// MARK: -
 
-extension EncodedSearch_Tests {
-    func testEncode() {
-        let inputs: [(EncodedSearch, String, UInt)] = [
-            (.init(query: "hello"), "hello", #line)
-        ]
-        self.iterateInputs(inputs: inputs, encoder: { self.testBuffer.writeEncodedSearch($0) })
+extension EncodeFixture where T == EncodedSearch {
+    fileprivate static func encodedSearch(_ input: T, _ expectedString: String) -> Self {
+        Self(
+            input: input,
+            bufferKind: .defaultServer,
+            expectedString: expectedString,
+            encoder: { $0.writeEncodedSearch($1) }
+        )
     }
 }

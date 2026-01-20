@@ -13,16 +13,28 @@
 //===----------------------------------------------------------------------===//
 
 import NIO
+import Testing
 @_spi(NIOIMAPInternal) @testable import NIOIMAPCore
-import XCTest
 
-class InternetMessageDate_Tests: EncodeTestClass {}
+@Suite("InternetMessageDate")
+struct InternetMessageDateTests {
+    @Test(arguments: [
+        EncodeFixture.internetMessageDate(.init("test"), "test"),
+    ])
+    func encode(_ fixture: EncodeFixture<InternetMessageDate>) {
+        fixture.checkEncoding()
+    }
+}
 
-extension InternetMessageDate_Tests {
-    func testEncode() {
-        self.iterateInputs(
-            inputs: [(.init("test"), "test", #line)],
-            encoder: { self.testBuffer.writeInternetMessageDate($0) }
+// MARK: -
+
+extension EncodeFixture where T == InternetMessageDate {
+    fileprivate static func internetMessageDate(_ input: T, _ expectedString: String) -> Self {
+        Self(
+            input: input,
+            bufferKind: .defaultServer,
+            expectedString: expectedString,
+            encoder: { $0.writeInternetMessageDate($1) }
         )
     }
 }

@@ -13,18 +13,28 @@
 //===----------------------------------------------------------------------===//
 
 import NIO
+import Testing
 @_spi(NIOIMAPInternal) @testable import NIOIMAPCore
-import XCTest
 
-class EncodedMailbox_Tests: EncodeTestClass {}
+@Suite("EncodedMailbox")
+struct EncodedMailboxTests {
+    @Test(arguments: [
+        EncodeFixture.encodedMailbox(.init(mailbox: "hello"), "hello"),
+    ])
+    func encode(_ fixture: EncodeFixture<EncodedMailbox>) {
+        fixture.checkEncoding()
+    }
+}
 
-// MARK: - Encoding
+// MARK: -
 
-extension EncodedMailbox_Tests {
-    func testEncode() {
-        let inputs: [(EncodedMailbox, String, UInt)] = [
-            (.init(mailbox: "hello"), "hello", #line)
-        ]
-        self.iterateInputs(inputs: inputs, encoder: { self.testBuffer.writeEncodedMailbox($0) })
+extension EncodeFixture where T == EncodedMailbox {
+    fileprivate static func encodedMailbox(_ input: T, _ expectedString: String) -> Self {
+        Self(
+            input: input,
+            bufferKind: .defaultServer,
+            expectedString: expectedString,
+            encoder: { $0.writeEncodedMailbox($1) }
+        )
     }
 }

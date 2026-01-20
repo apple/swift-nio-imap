@@ -13,67 +13,102 @@
 //===----------------------------------------------------------------------===//
 
 import NIO
-@_spi(NIOIMAPInternal) @testable import NIOIMAPCore
+import Testing
 import OrderedCollections
-import XCTest
+@_spi(NIOIMAPInternal) @testable import NIOIMAPCore
 
-class Entry_Tests: EncodeTestClass {}
-
-// MARK: - Encoding
-
-extension Entry_Tests {
-    func testEncode() {
-        let inputs: [(KeyValue<MetadataEntryName, MetadataValue>, String, UInt)] = [
-            (.init(key: "name", value: .init("value")), "\"name\" ~{5}\r\nvalue", #line)
-        ]
-        self.iterateInputs(inputs: inputs, encoder: { self.testBuffer.writeEntry($0) })
+@Suite("Entry")
+struct EntryTests {
+    @Test(arguments: [
+        EncodeFixture.entry(.init(key: "name", value: .init("value")), "\"name\" ~{5}\r\nvalue"),
+    ])
+    func `encode single entry`(_ fixture: EncodeFixture<KeyValue<MetadataEntryName, MetadataValue>>) {
+        fixture.checkEncoding()
     }
 
-    func testEncode_entryValues() {
-        let inputs: [(OrderedDictionary<MetadataEntryName, MetadataValue>, String, UInt)] = [
-            (
-                ["name": .init("value")],
-                "(\"name\" ~{5}\r\nvalue)",
-                #line
-            ),
-            (
-                ["name1": .init("value1"), "name2": .init("value2")],
-                "(\"name1\" ~{6}\r\nvalue1 \"name2\" ~{6}\r\nvalue2)",
-                #line
-            ),
-        ]
-        self.iterateInputs(inputs: inputs, encoder: { self.testBuffer.writeEntryValues($0) })
+    @Test(arguments: [
+        EncodeFixture.entryValues(
+            ["name": .init("value")],
+            "(\"name\" ~{5}\r\nvalue)"
+        ),
+        EncodeFixture.entryValues(
+            ["name1": .init("value1"), "name2": .init("value2")],
+            "(\"name1\" ~{6}\r\nvalue1 \"name2\" ~{6}\r\nvalue2)"
+        ),
+    ])
+    func `encode entry values`(_ fixture: EncodeFixture<OrderedDictionary<MetadataEntryName, MetadataValue>>) {
+        fixture.checkEncoding()
     }
 
-    func testEncode_entries() {
-        let inputs: [([MetadataEntryName], String, UInt)] = [
-            (
-                ["name"],
-                "(\"name\")",
-                #line
-            ),
-            (
-                ["name1", "name2"],
-                "(\"name1\" \"name2\")",
-                #line
-            ),
-        ]
-        self.iterateInputs(inputs: inputs, encoder: { self.testBuffer.writeEntries($0) })
+    @Test(arguments: [
+        EncodeFixture.entries(
+            ["name"],
+            "(\"name\")"
+        ),
+        EncodeFixture.entries(
+            ["name1", "name2"],
+            "(\"name1\" \"name2\")"
+        ),
+    ])
+    func `encode entries list`(_ fixture: EncodeFixture<[MetadataEntryName]>) {
+        fixture.checkEncoding()
     }
 
-    func testEncode_entryList() {
-        let inputs: [([MetadataEntryName], String, UInt)] = [
-            (
-                ["name"],
-                "\"name\"",
-                #line
-            ),
-            (
-                ["name1", "name2"],
-                "\"name1\" \"name2\"",
-                #line
-            ),
-        ]
-        self.iterateInputs(inputs: inputs, encoder: { self.testBuffer.writeEntryList($0) })
+    @Test(arguments: [
+        EncodeFixture.entryList(
+            ["name"],
+            "\"name\""
+        ),
+        EncodeFixture.entryList(
+            ["name1", "name2"],
+            "\"name1\" \"name2\""
+        ),
+    ])
+    func `encode entry list`(_ fixture: EncodeFixture<[MetadataEntryName]>) {
+        fixture.checkEncoding()
+    }
+}
+
+// MARK: -
+
+extension EncodeFixture where T == KeyValue<MetadataEntryName, MetadataValue> {
+    fileprivate static func entry(_ input: T, _ expectedString: String) -> Self {
+        Self(
+            input: input,
+            bufferKind: .defaultServer,
+            expectedString: expectedString,
+            encoder: { $0.writeEntry($1) }
+        )
+    }
+}
+
+extension EncodeFixture where T == OrderedDictionary<MetadataEntryName, MetadataValue> {
+    fileprivate static func entryValues(_ input: T, _ expectedString: String) -> Self {
+        Self(
+            input: input,
+            bufferKind: .defaultServer,
+            expectedString: expectedString,
+            encoder: { $0.writeEntryValues($1) }
+        )
+    }
+}
+
+extension EncodeFixture where T == [MetadataEntryName] {
+    fileprivate static func entries(_ input: T, _ expectedString: String) -> Self {
+        Self(
+            input: input,
+            bufferKind: .defaultServer,
+            expectedString: expectedString,
+            encoder: { $0.writeEntries($1) }
+        )
+    }
+
+    fileprivate static func entryList(_ input: T, _ expectedString: String) -> Self {
+        Self(
+            input: input,
+            bufferKind: .defaultServer,
+            expectedString: expectedString,
+            encoder: { $0.writeEntryList($1) }
+        )
     }
 }

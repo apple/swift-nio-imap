@@ -13,36 +13,79 @@
 //===----------------------------------------------------------------------===//
 
 import NIO
+import Testing
 @_spi(NIOIMAPInternal) @testable import NIOIMAPCore
-import XCTest
 
-class FullDateTime_Tests: EncodeTestClass {}
-
-// MARK: - IMAP
-
-extension FullDateTime_Tests {
-    func testEncode_fullDateTime() {
-        let inputs: [(FullDateTime, String, UInt)] = [
-            (
-                .init(date: .init(year: 1, month: 2, day: 3), time: .init(hour: 4, minute: 5, second: 6)),
-                "0001-02-03T04:05:06", #line
-            )
-        ]
-        self.iterateInputs(inputs: inputs, encoder: { self.testBuffer.writeFullDateTime($0) })
+@Suite("FullDateTime")
+struct FullDateTimeTests {
+    @Test(arguments: [
+        EncodeFixture.fullDateTime(.init(date: .init(year: 1, month: 2, day: 3), time: .init(hour: 4, minute: 5, second: 6)), "0001-02-03T04:05:06"),
+        EncodeFixture.fullDateTime(.init(date: .init(year: 2025, month: 1, day: 1), time: .init(hour: 0, minute: 0, second: 0)), "2025-01-01T00:00:00"),
+        EncodeFixture.fullDateTime(.init(date: .init(year: 2025, month: 12, day: 31), time: .init(hour: 23, minute: 59, second: 59)), "2025-12-31T23:59:59"),
+        EncodeFixture.fullDateTime(.init(date: .init(year: 2024, month: 6, day: 15), time: .init(hour: 12, minute: 30, second: 45)), "2024-06-15T12:30:45"),
+        EncodeFixture.fullDateTime(.init(date: .init(year: 9999, month: 12, day: 31), time: .init(hour: 23, minute: 59, second: 59)), "9999-12-31T23:59:59"),
+    ])
+    func `encode full date time`(_ fixture: EncodeFixture<FullDateTime>) {
+        fixture.checkEncoding()
     }
 
-    func testEncode_fullDate() {
-        let inputs: [(FullDate, String, UInt)] = [
-            (.init(year: 1, month: 2, day: 3), "0001-02-03", #line)
-        ]
-        self.iterateInputs(inputs: inputs, encoder: { self.testBuffer.writeFullDate($0) })
+    @Test(arguments: [
+        EncodeFixture.fullDate(.init(year: 1, month: 2, day: 3), "0001-02-03"),
+        EncodeFixture.fullDate(.init(year: 2025, month: 1, day: 1), "2025-01-01"),
+        EncodeFixture.fullDate(.init(year: 2025, month: 12, day: 31), "2025-12-31"),
+        EncodeFixture.fullDate(.init(year: 2024, month: 2, day: 29), "2024-02-29"),
+        EncodeFixture.fullDate(.init(year: 2024, month: 6, day: 15), "2024-06-15"),
+        EncodeFixture.fullDate(.init(year: 9999, month: 12, day: 31), "9999-12-31"),
+    ])
+    func `encode full date`(_ fixture: EncodeFixture<FullDate>) {
+        fixture.checkEncoding()
     }
 
-    func testEncode_fullTime() {
-        let inputs: [(FullTime, String, UInt)] = [
-            (.init(hour: 1, minute: 2, second: 3), "01:02:03", #line),
-            (.init(hour: 1, minute: 2, second: 3, fraction: 4), "01:02:03.4", #line),
-        ]
-        self.iterateInputs(inputs: inputs, encoder: { self.testBuffer.writeFullTime($0) })
+    @Test(arguments: [
+        EncodeFixture.fullTime(.init(hour: 0, minute: 0, second: 0), "00:00:00"),
+        EncodeFixture.fullTime(.init(hour: 1, minute: 2, second: 3), "01:02:03"),
+        EncodeFixture.fullTime(.init(hour: 12, minute: 30, second: 45), "12:30:45"),
+        EncodeFixture.fullTime(.init(hour: 23, minute: 59, second: 59), "23:59:59"),
+        EncodeFixture.fullTime(.init(hour: 1, minute: 2, second: 3, fraction: 4), "01:02:03.4"),
+        EncodeFixture.fullTime(.init(hour: 12, minute: 30, second: 45, fraction: 123), "12:30:45.123"),
+        EncodeFixture.fullTime(.init(hour: 0, minute: 0, second: 0, fraction: 1), "00:00:00.1"),
+    ])
+    func `encode full time`(_ fixture: EncodeFixture<FullTime>) {
+        fixture.checkEncoding()
+    }
+}
+
+// MARK: -
+
+extension EncodeFixture where T == FullDateTime {
+    fileprivate static func fullDateTime(_ input: T, _ expectedString: String) -> Self {
+        Self(
+            input: input,
+            bufferKind: .defaultServer,
+            expectedString: expectedString,
+            encoder: { $0.writeFullDateTime($1) }
+        )
+    }
+}
+
+extension EncodeFixture where T == FullDate {
+    fileprivate static func fullDate(_ input: T, _ expectedString: String) -> Self {
+        Self(
+            input: input,
+            bufferKind: .defaultServer,
+            expectedString: expectedString,
+            encoder: { $0.writeFullDate($1) }
+        )
+    }
+}
+
+extension EncodeFixture where T == FullTime {
+    fileprivate static func fullTime(_ input: T, _ expectedString: String) -> Self {
+        Self(
+            input: input,
+            bufferKind: .defaultServer,
+            expectedString: expectedString,
+            encoder: { $0.writeFullTime($1) }
+        )
     }
 }

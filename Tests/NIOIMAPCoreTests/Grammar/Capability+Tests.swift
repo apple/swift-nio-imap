@@ -13,111 +13,123 @@
 //===----------------------------------------------------------------------===//
 
 import NIO
+import Testing
 @_spi(NIOIMAPInternal) @testable import NIOIMAPCore
-import XCTest
 
-class Capability_Tests: EncodeTestClass {}
+@Suite("Capability")
+struct CapabilityTests {
+    @Test(arguments: [
+        CapabilityFixture(name: "ACL", capability: .acl, expectedName: "ACL", expectedValue: nil),
+        CapabilityFixture(name: "STATUS", capability: .status(.size), expectedName: "STATUS", expectedValue: "SIZE"),
+    ])
+    func `name and value properties`(_ fixture: CapabilityFixture) {
+        #expect(fixture.capability.name == fixture.expectedName)
+        #expect(fixture.capability.value == fixture.expectedValue)
+    }
 
-// MARK: - Name/Values
+    @Test(arguments: [
+        EncodeFixture.capability(.acl, "ACL"),
+        EncodeFixture.capability(.annotateExperiment1, "ANNOTATE-EXPERIMENT-1"),
+        EncodeFixture.capability(.appendLimit(11_206_521), "APPENDLIMIT=11206521"),
+        EncodeFixture.capability(.authenticate(.pToken), "AUTH=PTOKEN"),
+        EncodeFixture.capability(.authenticate(.plain), "AUTH=PLAIN"),
+        EncodeFixture.capability(.authenticate(.token), "AUTH=TOKEN"),
+        EncodeFixture.capability(.authenticate(.weToken), "AUTH=WETOKEN"),
+        EncodeFixture.capability(.authenticate(.wsToken), "AUTH=WSTOKEN"),
+        EncodeFixture.capability(.authenticatedURL, "URLAUTH"),
+        EncodeFixture.capability(.binary, "BINARY"),
+        EncodeFixture.capability(.catenate, "CATENATE"),
+        EncodeFixture.capability(.children, "CHILDREN"),
+        EncodeFixture.capability(.compression(.deflate), "COMPRESS=DEFLATE"),
+        EncodeFixture.capability(.condStore, "CONDSTORE"),
+        EncodeFixture.capability(.context(.search), "CONTEXT=SEARCH"),
+        EncodeFixture.capability(.context(.sort), "CONTEXT=SORT"),
+        EncodeFixture.capability(.createSpecialUse, "CREATE-SPECIAL-USE"),
+        EncodeFixture.capability(.enable, "ENABLE"),
+        EncodeFixture.capability(.esort, "ESORT"),
+        EncodeFixture.capability(.extendedSearch, "ESEARCH"),
+        EncodeFixture.capability(.filters, "FILTERS"),
+        EncodeFixture.capability(.gmailExtensions, "X-GM-EXT-1"),
+        EncodeFixture.capability(.id, "ID"),
+        EncodeFixture.capability(.idle, "IDLE"),
+        EncodeFixture.capability(.jmapAccess, "JMAPACCESS"),
+        EncodeFixture.capability(.language, "LANGUAGE"),
+        EncodeFixture.capability(.listStatus, "LIST-STATUS"),
+        EncodeFixture.capability(.literalMinus, "LITERAL-"),
+        EncodeFixture.capability(.literalPlus, "LITERAL+"),
+        EncodeFixture.capability(.loginReferrals, "LOGIN-REFERRALS"),
+        EncodeFixture.capability(.mailboxSpecificAppendLimit, "APPENDLIMIT"),
+        EncodeFixture.capability(.messageLimit(1_234), "MESSAGELIMIT=1234"),
+        EncodeFixture.capability(.metadata, "METADATA"),
+        EncodeFixture.capability(.metadataServer, "METADATA-SERVER"),
+        EncodeFixture.capability(.move, "MOVE"),
+        EncodeFixture.capability(.multiSearch, "MULTISEARCH"),
+        EncodeFixture.capability(.namespace, "NAMESPACE"),
+        EncodeFixture.capability(.objectID, "OBJECTID"),
+        EncodeFixture.capability(.partial, "PARTIAL"),
+        EncodeFixture.capability(.partialURL, "URL-PARTIAL"),
+        EncodeFixture.capability(.preview, "PREVIEW"),
+        EncodeFixture.capability(.qresync, "QRESYNC"),
+        EncodeFixture.capability(.quota, "QUOTA"),
+        EncodeFixture.capability(.rights(.tekx), "RIGHTS=TEKX"),
+        EncodeFixture.capability(.saslIR, "SASL-IR"),
+        EncodeFixture.capability(.saveLimit(64_152), "SAVELIMIT=64152"),
+        EncodeFixture.capability(.searchRes, "SEARCHRES"),
+        EncodeFixture.capability(.sort(.display), "SORT=DISPLAY"),
+        EncodeFixture.capability(.sort(nil), "SORT"),
+        EncodeFixture.capability(.specialUse, "SPECIAL-USE"),
+        EncodeFixture.capability(.status(.size), "STATUS=SIZE"),
+        EncodeFixture.capability(.thread(.orderedSubject), "THREAD=ORDEREDSUBJECT"),
+        EncodeFixture.capability(.thread(.references), "THREAD=REFERENCES"),
+        EncodeFixture.capability(.uidOnly, "UIDONLY"),
+        EncodeFixture.capability(.uidPlus, "UIDPLUS"),
+        EncodeFixture.capability(.unselect, "UNSELECT"),
+        EncodeFixture.capability(.utf8(.accept), "UTF8=ACCEPT"),
+        EncodeFixture.capability(.within, "WITHIN"),
+        EncodeFixture.capability(.yahooMailHighestModificationSequence, "XYMHIGHESTMODSEQ"),
+    ])
+    func `encode single capability`(_ fixture: EncodeFixture<Capability>) {
+        fixture.checkEncoding()
+    }
 
-extension Capability_Tests {
-    func testNameValues() {
-        let inputs: [(Capability, String, String?, UInt)] = [
-            (.acl, "ACL", nil, #line),
-            (.status(.size), "STATUS", "SIZE", #line),
-        ]
-        for (capability, name, value, line) in inputs {
-            XCTAssertEqual(capability.name, name, line: line)
-            XCTAssertEqual(capability.value, value, line: line)
-        }
+    @Test(arguments: [
+        EncodeFixture.capabilities([.condStore], "CAPABILITY CONDSTORE"),
+        EncodeFixture.capabilities([.condStore, .enable, .filters], "CAPABILITY CONDSTORE ENABLE FILTERS"),
+    ])
+    func `encode multiple capabilities`(_ fixture: EncodeFixture<[Capability]>) {
+        fixture.checkEncoding()
     }
 }
 
-// MARK: - Encoding
+// MARK: -
 
-extension Capability_Tests {
-    func testEncode() {
-        let tests: [(Capability, String, UInt)] = [
-            (.acl, "ACL", #line),
-            (.annotateExperiment1, "ANNOTATE-EXPERIMENT-1", #line),
-            (.appendLimit(11_206_521), "APPENDLIMIT=11206521", #line),
-            (.authenticate(.pToken), "AUTH=PTOKEN", #line),
-            (.authenticate(.plain), "AUTH=PLAIN", #line),
-            (.authenticate(.token), "AUTH=TOKEN", #line),
-            (.authenticate(.weToken), "AUTH=WETOKEN", #line),
-            (.authenticate(.wsToken), "AUTH=WSTOKEN", #line),
-            (.authenticatedURL, "URLAUTH", #line),
-            (.binary, "BINARY", #line),
-            (.catenate, "CATENATE", #line),
-            (.children, "CHILDREN", #line),
-            (.compression(.deflate), "COMPRESS=DEFLATE", #line),
-            (.condStore, "CONDSTORE", #line),
-            (.context(.search), "CONTEXT=SEARCH", #line),
-            (.context(.sort), "CONTEXT=SORT", #line),
-            (.createSpecialUse, "CREATE-SPECIAL-USE", #line),
-            (.enable, "ENABLE", #line),
-            (.esort, "ESORT", #line),
-            (.extendedSearch, "ESEARCH", #line),
-            (.filters, "FILTERS", #line),
-            (.gmailExtensions, "X-GM-EXT-1", #line),
-            (.id, "ID", #line),
-            (.idle, "IDLE", #line),
-            (.jmapAccess, "JMAPACCESS", #line),
-            (.language, "LANGUAGE", #line),
-            (.listStatus, "LIST-STATUS", #line),
-            (.literalMinus, "LITERAL-", #line),
-            (.literalPlus, "LITERAL+", #line),
-            (.loginReferrals, "LOGIN-REFERRALS", #line),
-            (.mailboxSpecificAppendLimit, "APPENDLIMIT", #line),
-            (.messageLimit(1_234), "MESSAGELIMIT=1234", #line),
-            (.metadata, "METADATA", #line),
-            (.metadataServer, "METADATA-SERVER", #line),
-            (.move, "MOVE", #line),
-            (.multiSearch, "MULTISEARCH", #line),
-            (.namespace, "NAMESPACE", #line),
-            (.objectID, "OBJECTID", #line),
-            (.partial, "PARTIAL", #line),
-            (.partialURL, "URL-PARTIAL", #line),
-            (.preview, "PREVIEW", #line),
-            (.qresync, "QRESYNC", #line),
-            (.quota, "QUOTA", #line),
-            (.rights(.tekx), "RIGHTS=TEKX", #line),
-            (.saslIR, "SASL-IR", #line),
-            (.saveLimit(64_152), "SAVELIMIT=64152", #line),
-            (.searchRes, "SEARCHRES", #line),
-            (.sort(.display), "SORT=DISPLAY", #line),
-            (.sort(nil), "SORT", #line),
-            (.specialUse, "SPECIAL-USE", #line),
-            (.status(.size), "STATUS=SIZE", #line),
-            (.thread(.orderedSubject), "THREAD=ORDEREDSUBJECT", #line),
-            (.thread(.references), "THREAD=REFERENCES", #line),
-            (.uidOnly, "UIDONLY", #line),
-            (.uidPlus, "UIDPLUS", #line),
-            (.unselect, "UNSELECT", #line),
-            (.utf8(.accept), "UTF8=ACCEPT", #line),
-            (.within, "WITHIN", #line),
-            (.yahooMailHighestModificationSequence, "XYMHIGHESTMODSEQ", #line),
-        ]
+struct CapabilityFixture: Sendable, CustomTestStringConvertible {
+    var name: String
+    var capability: Capability
+    var expectedName: String
+    var expectedValue: String?
 
-        for (capability, expectedString, line) in tests {
-            self.testBuffer.clear()
-            let size = self.testBuffer.writeCapability(capability)
-            XCTAssertEqual(size, expectedString.utf8.count, line: line)
-            XCTAssertEqual(self.testBufferString, expectedString, line: line)
-        }
+    var testDescription: String { name }
+}
+
+extension EncodeFixture where T == Capability {
+    fileprivate static func capability(_ input: T, _ expectedString: String) -> Self {
+        Self(
+            input: input,
+            bufferKind: .defaultServer,
+            expectedString: expectedString,
+            encoder: { $0.writeCapability($1) }
+        )
     }
+}
 
-    func testEncode_multiple() {
-        let tests: [([Capability], String, UInt)] = [
-            ([.condStore], "CAPABILITY CONDSTORE", #line),
-            ([.condStore, .enable, .filters], "CAPABILITY CONDSTORE ENABLE FILTERS", #line),
-        ]
-
-        for (data, expectedString, line) in tests {
-            self.testBuffer.clear()
-            let size = self.testBuffer.writeCapabilityData(data)
-            XCTAssertEqual(size, expectedString.utf8.count, line: line)
-            XCTAssertEqual(self.testBufferString, expectedString, line: line)
-        }
+extension EncodeFixture where T == [Capability] {
+    fileprivate static func capabilities(_ input: T, _ expectedString: String) -> Self {
+        Self(
+            input: input,
+            bufferKind: .defaultServer,
+            expectedString: expectedString,
+            encoder: { $0.writeCapabilityData($1) }
+        )
     }
 }
