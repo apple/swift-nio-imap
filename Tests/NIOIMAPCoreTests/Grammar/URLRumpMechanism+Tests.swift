@@ -14,17 +14,32 @@
 
 import NIO
 @_spi(NIOIMAPInternal) @testable import NIOIMAPCore
-import XCTest
+import Testing
 
-class URLRumpMechanism_Tests: EncodeTestClass {}
+@Suite("RumpURLAndMechanism")
+struct RumpURLAndMechanismTests {
+    @Test(arguments: [
+        EncodeFixture.rumpURLAndMechanism(
+            .init(urlRump: "test", mechanism: .internal),
+            "\"test\" INTERNAL"
+        ),
+        EncodeFixture.rumpURLAndMechanism(
+            .init(urlRump: "server.example.com", mechanism: .internal),
+            "\"server.example.com\" INTERNAL"
+        ),
+    ])
+    func encode(_ fixture: EncodeFixture<RumpURLAndMechanism>) {
+        fixture.checkEncoding()
+    }
+}
 
-// MARK: - Encoding
-
-extension URLRumpMechanism_Tests {
-    func testEncode() {
-        let inputs: [(RumpURLAndMechanism, String, UInt)] = [
-            (.init(urlRump: "test", mechanism: .internal), "\"test\" INTERNAL", #line)
-        ]
-        self.iterateInputs(inputs: inputs, encoder: { self.testBuffer.writeURLRumpMechanism($0) })
+extension EncodeFixture where T == RumpURLAndMechanism {
+    fileprivate static func rumpURLAndMechanism(_ input: T, _ expectedString: String) -> Self {
+        .init(
+            input: input,
+            bufferKind: .defaultServer,
+            expectedStrings: [expectedString],
+            encoder: { $0.writeURLRumpMechanism($1) }
+        )
     }
 }

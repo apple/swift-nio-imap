@@ -14,25 +14,40 @@
 
 import NIO
 @_spi(NIOIMAPInternal) @testable import NIOIMAPCore
-import XCTest
+import Testing
 
-class RelativeIMAPURL_Tests: EncodeTestClass {}
-
-// MARK: - IMAP
-
-extension RelativeIMAPURL_Tests {
-    func testEncode() {
-        let inputs: [(RelativeIMAPURL, String, UInt)] = [
-            (
-                .absolutePath(
-                    .init(
-                        command: .messageList(.init(mailboxUIDValidity: .init(encodeMailbox: .init(mailbox: "test"))))
-                    )
-                ), "/test", #line
+@Suite("RelativeIMAPURL")
+struct RelativeIMAPURLTests {
+    @Test(arguments: [
+        EncodeFixture.relativeIMAPURL(
+            .absolutePath(
+                .init(
+                    command: .messageList(.init(mailboxUIDValidity: .init(encodeMailbox: .init(mailbox: "test"))))
+                )
             ),
-            (.networkPath(.init(server: .init(host: "localhost"), query: nil)), "//localhost/", #line),
-            (.empty, "", #line),
-        ]
-        self.iterateInputs(inputs: inputs, encoder: { self.testBuffer.writeRelativeIMAPURL($0) })
+            "/test"
+        ),
+        EncodeFixture.relativeIMAPURL(
+            .networkPath(.init(server: .init(host: "localhost"), query: nil)),
+            "//localhost/"
+        ),
+        EncodeFixture.relativeIMAPURL(
+            .empty,
+            ""
+        ),
+    ])
+    func encode(_ fixture: EncodeFixture<RelativeIMAPURL>) {
+        fixture.checkEncoding()
+    }
+}
+
+extension EncodeFixture where T == RelativeIMAPURL {
+    fileprivate static func relativeIMAPURL(_ input: T, _ expectedString: String) -> Self {
+        .init(
+            input: input,
+            bufferKind: .defaultServer,
+            expectedStrings: [expectedString],
+            encoder: { $0.writeRelativeIMAPURL($1) }
+        )
     }
 }

@@ -14,20 +14,32 @@
 
 import NIO
 @_spi(NIOIMAPInternal) @testable import NIOIMAPCore
-import XCTest
+import Testing
 
-class AbsoluteMessagePath_Tests: EncodeTestClass {}
+@Suite("AbsoluteMessagePath")
+struct AbsoluteMessagePathTests {
+    @Test(arguments: [
+        EncodeFixture.absoluteMessagePath(
+            .init(command: .messageList(.init(mailboxUIDValidity: .init(encodeMailbox: .init(mailbox: "test"))))),
+            "/test"
+        ),
+        EncodeFixture.absoluteMessagePath(
+            .init(command: .messageList(.init(mailboxUIDValidity: .init(encodeMailbox: .init(mailbox: "INBOX"))))),
+            "/INBOX"
+        ),
+    ])
+    func encode(_ fixture: EncodeFixture<AbsoluteMessagePath>) {
+        fixture.checkEncoding()
+    }
+}
 
-// MARK: - IMAP
-
-extension AbsoluteMessagePath_Tests {
-    func testEncode() {
-        let inputs: [(AbsoluteMessagePath, String, UInt)] = [
-            (
-                .init(command: .messageList(.init(mailboxUIDValidity: .init(encodeMailbox: .init(mailbox: "test"))))),
-                "/test", #line
-            )
-        ]
-        self.iterateInputs(inputs: inputs, encoder: { self.testBuffer.writeAbsoluteMessagePath($0) })
+extension EncodeFixture where T == AbsoluteMessagePath {
+    fileprivate static func absoluteMessagePath(_ input: T, _ expectedString: String) -> Self {
+        .init(
+            input: input,
+            bufferKind: .defaultServer,
+            expectedStrings: [expectedString],
+            encoder: { $0.writeAbsoluteMessagePath($1) }
+        )
     }
 }

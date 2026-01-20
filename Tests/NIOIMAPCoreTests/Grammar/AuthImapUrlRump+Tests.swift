@@ -14,30 +14,50 @@
 
 import NIO
 @_spi(NIOIMAPInternal) @testable import NIOIMAPCore
-import XCTest
+import Testing
 
-class AuthIMAPURLRump_Tests: EncodeTestClass {}
-
-// MARK: - Encoding
-
-extension AuthIMAPURLRump_Tests {
-    func testEncoding() {
-        let inputs: [(RumpAuthenticatedURL, String, UInt)] = [
-            (
-                .init(
-                    authenticatedURL: .init(
-                        server: .init(host: "localhost"),
-                        messagePath: .init(
-                            mailboxReference: .init(encodeMailbox: .init(mailbox: "test")),
-                            iUID: .init(uid: 123)
-                        )
-                    ),
-                    authenticatedURLRump: .init(access: .anonymous)
+@Suite("RumpAuthenticatedURL")
+struct RumpAuthenticatedURLTests {
+    @Test(arguments: [
+        EncodeFixture.rumpAuthenticatedURL(
+            .init(
+                authenticatedURL: .init(
+                    server: .init(host: "localhost"),
+                    messagePath: .init(
+                        mailboxReference: .init(encodeMailbox: .init(mailbox: "test")),
+                        iUID: .init(uid: 123)
+                    )
                 ),
-                "imap://localhost/test/;UID=123;URLAUTH=anonymous",
-                #line
-            )
-        ]
-        self.iterateInputs(inputs: inputs, encoder: { self.testBuffer.writeAuthIMAPURLRump($0) })
+                authenticatedURLRump: .init(access: .anonymous)
+            ),
+            "imap://localhost/test/;UID=123;URLAUTH=anonymous"
+        ),
+        EncodeFixture.rumpAuthenticatedURL(
+            .init(
+                authenticatedURL: .init(
+                    server: .init(host: "mail.example.com"),
+                    messagePath: .init(
+                        mailboxReference: .init(encodeMailbox: .init(mailbox: "INBOX")),
+                        iUID: .init(uid: 456)
+                    )
+                ),
+                authenticatedURLRump: .init(access: .user(.init(data: "testuser")))
+            ),
+            "imap://mail.example.com/INBOX/;UID=456;URLAUTH=user+testuser"
+        ),
+    ])
+    func encode(_ fixture: EncodeFixture<RumpAuthenticatedURL>) {
+        fixture.checkEncoding()
+    }
+}
+
+extension EncodeFixture where T == RumpAuthenticatedURL {
+    fileprivate static func rumpAuthenticatedURL(_ input: T, _ expectedString: String) -> Self {
+        .init(
+            input: input,
+            bufferKind: .defaultServer,
+            expectedStrings: [expectedString],
+            encoder: { $0.writeAuthIMAPURLRump($1) }
+        )
     }
 }

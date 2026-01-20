@@ -14,17 +14,32 @@
 
 import NIO
 @_spi(NIOIMAPInternal) @testable import NIOIMAPCore
-import XCTest
+import Testing
 
-class FetchModifiedResponse_Tests: EncodeTestClass {}
+@Suite("FetchModificationResponse")
+struct FetchModificationResponseTests {
+    @Test(arguments: [
+        EncodeFixture.fetchModificationResponse(
+            .init(modifierSequenceValue: 3),
+            "MODSEQ (3)"
+        ),
+        EncodeFixture.fetchModificationResponse(
+            .init(modifierSequenceValue: 12345),
+            "MODSEQ (12345)"
+        ),
+    ])
+    func encode(_ fixture: EncodeFixture<FetchModificationResponse>) {
+        fixture.checkEncoding()
+    }
+}
 
-// MARK: - IMAP
-
-extension FetchModifiedResponse_Tests {
-    func testEncode() {
-        let inputs: [(FetchModificationResponse, String, UInt)] = [
-            (.init(modifierSequenceValue: 3), "MODSEQ (3)", #line)
-        ]
-        self.iterateInputs(inputs: inputs, encoder: { self.testBuffer.writeFetchModificationResponse($0) })
+extension EncodeFixture where T == FetchModificationResponse {
+    fileprivate static func fetchModificationResponse(_ input: T, _ expectedString: String) -> Self {
+        .init(
+            input: input,
+            bufferKind: .defaultServer,
+            expectedStrings: [expectedString],
+            encoder: { $0.writeFetchModificationResponse($1) }
+        )
     }
 }

@@ -14,18 +14,32 @@
 
 import NIO
 @_spi(NIOIMAPInternal) @testable import NIOIMAPCore
-import XCTest
+import Testing
 
-class MessagePathByteRange_Tests: EncodeTestClass {}
+@Suite("MessagePath.ByteRange")
+struct MessagePathByteRangeTests {
+    @Test(arguments: [
+        EncodeFixture.messagePathByteRange(
+            .init(range: .init(offset: 1, length: nil)),
+            "/;PARTIAL=1"
+        ),
+        EncodeFixture.messagePathByteRange(
+            .init(range: .init(offset: 1, length: 2)),
+            "/;PARTIAL=1.2"
+        ),
+    ])
+    func encode(_ fixture: EncodeFixture<MessagePath.ByteRange>) {
+        fixture.checkEncoding()
+    }
+}
 
-// MARK: - Encoding
-
-extension MessagePathByteRange_Tests {
-    func testEncode_MessagePathByteRange() {
-        let inputs: [(MessagePath.ByteRange, String, UInt)] = [
-            (.init(range: .init(offset: 1, length: nil)), "/;PARTIAL=1", #line),
-            (.init(range: .init(offset: 1, length: 2)), "/;PARTIAL=1.2", #line),
-        ]
-        self.iterateInputs(inputs: inputs, encoder: { self.testBuffer.writeMessagePathByteRange($0) })
+extension EncodeFixture where T == MessagePath.ByteRange {
+    fileprivate static func messagePathByteRange(_ input: T, _ expectedString: String) -> Self {
+        .init(
+            input: input,
+            bufferKind: .defaultServer,
+            expectedStrings: [expectedString],
+            encoder: { $0.writeMessagePathByteRange($1) }
+        )
     }
 }

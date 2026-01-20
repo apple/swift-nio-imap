@@ -14,17 +14,26 @@
 
 import NIO
 @_spi(NIOIMAPInternal) @testable import NIOIMAPCore
-import XCTest
+import Testing
 
-class EncodedURLAuth_Tests: EncodeTestClass {}
+@Suite("EncodedAuthenticatedURL")
+struct EncodedAuthenticatedURLTests {
+    @Test(arguments: [
+        EncodeFixture.encodedAuthenticationURL(.init(data: "1F"), "1F"),
+        EncodeFixture.encodedAuthenticationURL(.init(data: "ABC123"), "ABC123"),
+    ])
+    func encode(_ fixture: EncodeFixture<EncodedAuthenticatedURL>) {
+        fixture.checkEncoding()
+    }
+}
 
-// MARK: - Encoding
-
-extension EncodedURLAuth_Tests {
-    func testEncode() {
-        let inputs: [(EncodedAuthenticatedURL, String, UInt)] = [
-            (.init(data: "1F"), "1F", #line)
-        ]
-        self.iterateInputs(inputs: inputs, encoder: { self.testBuffer.writeEncodedAuthenticationURL($0) })
+extension EncodeFixture where T == EncodedAuthenticatedURL {
+    fileprivate static func encodedAuthenticationURL(_ input: T, _ expectedString: String) -> Self {
+        .init(
+            input: input,
+            bufferKind: .defaultServer,
+            expectedStrings: [expectedString],
+            encoder: { $0.writeEncodedAuthenticationURL($1) }
+        )
     }
 }

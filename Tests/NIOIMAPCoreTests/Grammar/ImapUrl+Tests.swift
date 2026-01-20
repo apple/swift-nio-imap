@@ -14,17 +14,32 @@
 
 import NIO
 @_spi(NIOIMAPInternal) @testable import NIOIMAPCore
-import XCTest
+import Testing
 
-class IMAPURL_Tests: EncodeTestClass {}
+@Suite("IMAPURL")
+struct IMAPURLTests {
+    @Test(arguments: [
+        EncodeFixture.imapURL(
+            .init(server: .init(host: "localhost"), query: nil),
+            "imap://localhost/"
+        ),
+        EncodeFixture.imapURL(
+            .init(server: .init(host: "mail.example.com"), query: nil),
+            "imap://mail.example.com/"
+        ),
+    ])
+    func encode(_ fixture: EncodeFixture<IMAPURL>) {
+        fixture.checkEncoding()
+    }
+}
 
-// MARK: - IMAP
-
-extension IMAPURL_Tests {
-    func testEncode() {
-        let inputs: [(IMAPURL, String, UInt)] = [
-            (.init(server: .init(host: "localhost"), query: nil), "imap://localhost/", #line)
-        ]
-        self.iterateInputs(inputs: inputs, encoder: { self.testBuffer.writeIMAPURL($0) })
+extension EncodeFixture where T == IMAPURL {
+    fileprivate static func imapURL(_ input: T, _ expectedString: String) -> Self {
+        .init(
+            input: input,
+            bufferKind: .defaultServer,
+            expectedStrings: [expectedString],
+            encoder: { $0.writeIMAPURL($1) }
+        )
     }
 }
