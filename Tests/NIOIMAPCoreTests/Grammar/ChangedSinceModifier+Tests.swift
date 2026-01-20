@@ -37,7 +37,7 @@ struct ChangedSinceModifierTests {
 
 // MARK: -
 
-extension EncodeFixture where T == ChangedSinceModifier {
+extension EncodeFixture<ChangedSinceModifier> {
     fileprivate static func changedSinceModifier(_ input: T, _ expectedString: String) -> Self {
         Self(
             input: input,
@@ -48,7 +48,7 @@ extension EncodeFixture where T == ChangedSinceModifier {
     }
 }
 
-extension EncodeFixture where T == UnchangedSinceModifier {
+extension EncodeFixture<UnchangedSinceModifier> {
     fileprivate static func unchangedSinceModifier(_ input: T, _ expectedString: String) -> Self {
         Self(
             input: input,

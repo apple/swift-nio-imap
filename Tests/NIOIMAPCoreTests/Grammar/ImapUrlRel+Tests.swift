@@ -41,7 +41,7 @@ struct RelativeIMAPURLTests {
     }
 }
 
-extension EncodeFixture where T == RelativeIMAPURL {
+extension EncodeFixture<RelativeIMAPURL> {
     fileprivate static func relativeIMAPURL(_ input: T, _ expectedString: String) -> Self {
         .init(
             input: input,

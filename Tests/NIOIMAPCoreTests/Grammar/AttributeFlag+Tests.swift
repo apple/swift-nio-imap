@@ -39,7 +39,7 @@ struct AttributeFlagTests {
 
 // MARK: -
 
-extension EncodeFixture where T == AttributeFlag {
+extension EncodeFixture<AttributeFlag> {
     fileprivate static func attributeFlag(_ input: T, _ expectedString: String) -> Self {
         Self(
             input: input,

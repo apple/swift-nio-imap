@@ -40,7 +40,7 @@ struct ListSelectOptionTests {
 
 // MARK: -
 
-extension EncodeFixture where T == ListSelectOption {
+extension EncodeFixture<ListSelectOption> {
     fileprivate static func listSelectOption(_ input: T, _ expectedString: String) -> Self {
         Self(
             input: input,
@@ -51,7 +51,7 @@ extension EncodeFixture where T == ListSelectOption {
     }
 }
 
-extension EncodeFixture where T == ListSelectOptions? {
+extension EncodeFixture<ListSelectOptions?> {
     fileprivate static func listSelectOptions(_ input: T, _ expectedString: String) -> Self {
         Self(
             input: input,

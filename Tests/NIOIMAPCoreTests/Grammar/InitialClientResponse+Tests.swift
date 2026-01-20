@@ -30,7 +30,7 @@ struct InitialResponseTests {
 
 // MARK: -
 
-extension EncodeFixture where T == InitialResponse {
+extension EncodeFixture<InitialResponse> {
     fileprivate static func initialResponse(_ input: T, _ expectedString: String) -> Self {
         Self(
             input: input,

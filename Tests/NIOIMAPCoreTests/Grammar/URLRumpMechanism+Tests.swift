@@ -33,7 +33,7 @@ struct RumpURLAndMechanismTests {
     }
 }
 
-extension EncodeFixture where T == RumpURLAndMechanism {
+extension EncodeFixture<RumpURLAndMechanism> {
     fileprivate static func rumpURLAndMechanism(_ input: T, _ expectedString: String) -> Self {
         .init(
             input: input,

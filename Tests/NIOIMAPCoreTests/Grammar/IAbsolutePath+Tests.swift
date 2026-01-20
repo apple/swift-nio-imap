@@ -33,7 +33,7 @@ struct AbsoluteMessagePathTests {
     }
 }
 
-extension EncodeFixture where T == AbsoluteMessagePath {
+extension EncodeFixture<AbsoluteMessagePath> {
     fileprivate static func absoluteMessagePath(_ input: T, _ expectedString: String) -> Self {
         .init(
             input: input,

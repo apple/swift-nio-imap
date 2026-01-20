@@ -33,7 +33,7 @@ struct MessagePathByteRangeTests {
     }
 }
 
-extension EncodeFixture where T == MessagePath.ByteRange {
+extension EncodeFixture<MessagePath.ByteRange> {
     fileprivate static func messagePathByteRange(_ input: T, _ expectedString: String) -> Self {
         .init(
             input: input,

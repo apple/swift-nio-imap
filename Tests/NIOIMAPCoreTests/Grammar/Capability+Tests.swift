@@ -112,7 +112,7 @@ struct CapabilityFixture: Sendable, CustomTestStringConvertible {
     var testDescription: String { name }
 }
 
-extension EncodeFixture where T == Capability {
+extension EncodeFixture<Capability> {
     fileprivate static func capability(_ input: T, _ expectedString: String) -> Self {
         Self(
             input: input,
@@ -123,7 +123,7 @@ extension EncodeFixture where T == Capability {
     }
 }
 
-extension EncodeFixture where T == [Capability] {
+extension EncodeFixture<[Capability]> {
     fileprivate static func capabilities(_ input: T, _ expectedString: String) -> Self {
         Self(
             input: input,

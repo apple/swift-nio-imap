@@ -47,7 +47,7 @@ struct UseAttributeTests {
 
 // MARK: -
 
-extension EncodeFixture where T == UseAttribute {
+extension EncodeFixture<UseAttribute> {
     fileprivate static func useAttribute(_ input: T, _ expectedString: String) -> Self {
         Self(
             input: input,

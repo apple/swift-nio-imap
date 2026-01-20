@@ -33,7 +33,7 @@ struct BodyFieldEncodingTests {
 
 // MARK: -
 
-extension EncodeFixture where T == BodyStructure.Encoding {
+extension EncodeFixture<BodyStructure.Encoding> {
     fileprivate static func bodyEncoding(_ input: T, _ expectedString: String) -> Self {
         EncodeFixture(
             input: input,

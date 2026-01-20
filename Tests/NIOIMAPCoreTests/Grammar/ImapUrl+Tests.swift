@@ -33,7 +33,7 @@ struct IMAPURLTests {
     }
 }
 
-extension EncodeFixture where T == IMAPURL {
+extension EncodeFixture<IMAPURL> {
     fileprivate static func imapURL(_ input: T, _ expectedString: String) -> Self {
         .init(
             input: input,

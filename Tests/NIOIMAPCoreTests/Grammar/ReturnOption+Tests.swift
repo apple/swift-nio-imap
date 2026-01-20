@@ -32,7 +32,7 @@ struct ReturnOptionTests {
 
 // MARK: -
 
-extension EncodeFixture where T == ReturnOption {
+extension EncodeFixture<ReturnOption> {
     fileprivate static func returnOption(_ input: T, _ expectedString: String) -> Self {
         Self(
             input: input,

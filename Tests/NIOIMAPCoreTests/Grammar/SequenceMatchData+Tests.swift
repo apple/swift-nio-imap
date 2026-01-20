@@ -29,7 +29,7 @@ struct SequenceMatchDataTests {
 
 // MARK: -
 
-extension EncodeFixture where T == SequenceMatchData {
+extension EncodeFixture<SequenceMatchData> {
     fileprivate static func sequenceMatchData(_ input: T, _ expectedString: String) -> Self {
         Self(
             input: input,

@@ -28,7 +28,7 @@ struct EncodedAuthenticationTypeTests {
 
 // MARK: -
 
-extension EncodeFixture where T == EncodedAuthenticationType {
+extension EncodeFixture<EncodedAuthenticationType> {
     fileprivate static func encodedAuthenticationType(_ input: T, _ expectedString: String) -> Self {
         Self(
             input: input,

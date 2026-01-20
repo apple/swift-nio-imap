@@ -41,7 +41,7 @@ struct ByteRangeTests {
 
 // MARK: -
 
-extension EncodeFixture where T == ClosedRange<UInt32> {
+extension EncodeFixture<ClosedRange<UInt32>> {
     fileprivate static func byteRange(_ input: T, _ expectedString: String) -> Self {
         Self(
             input: input,
@@ -52,7 +52,7 @@ extension EncodeFixture where T == ClosedRange<UInt32> {
     }
 }
 
-extension EncodeFixture where T == ByteRange {
+extension EncodeFixture<ByteRange> {
     fileprivate static func byteRangeStruct(_ input: T, _ expectedString: String) -> Self {
         Self(
             input: input,

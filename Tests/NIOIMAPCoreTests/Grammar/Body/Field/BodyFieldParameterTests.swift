@@ -31,7 +31,7 @@ struct BodyFieldParameterTests {
 
 // MARK: -
 
-extension EncodeFixture where T == OrderedDictionary<String, String> {
+extension EncodeFixture<OrderedDictionary<String, String>> {
     fileprivate static func bodyParameterPairs(_ input: T, _ expectedString: String) -> Self {
         EncodeFixture(
             input: input,

@@ -27,7 +27,7 @@ struct EncodedUserTests {
     }
 }
 
-extension EncodeFixture where T == EncodedUser {
+extension EncodeFixture<EncodedUser> {
     fileprivate static func encodedUser(_ input: T, _ expectedString: String) -> Self {
         .init(
             input: input,

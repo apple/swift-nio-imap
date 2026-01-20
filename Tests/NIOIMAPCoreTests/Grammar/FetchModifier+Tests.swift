@@ -50,7 +50,7 @@ struct FetchModifierTests {
 
 // MARK: -
 
-extension EncodeFixture where T == FetchModifier {
+extension EncodeFixture<FetchModifier> {
     fileprivate static func fetchModifier(_ input: T, _ expectedString: String) -> Self {
         Self(
             input: input,
@@ -61,7 +61,7 @@ extension EncodeFixture where T == FetchModifier {
     }
 }
 
-extension EncodeFixture where T == [FetchModifier] {
+extension EncodeFixture<[FetchModifier]> {
     fileprivate static func fetchModifiers(_ input: T, _ expectedString: String) -> Self {
         Self(
             input: input,

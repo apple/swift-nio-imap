@@ -33,7 +33,7 @@ struct FetchModificationResponseTests {
     }
 }
 
-extension EncodeFixture where T == FetchModificationResponse {
+extension EncodeFixture<FetchModificationResponse> {
     fileprivate static func fetchModificationResponse(_ input: T, _ expectedString: String) -> Self {
         .init(
             input: input,

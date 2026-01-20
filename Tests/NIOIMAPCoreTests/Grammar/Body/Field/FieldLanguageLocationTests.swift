@@ -35,7 +35,7 @@ struct FieldLanguageLocationTests {
 
 // MARK: -
 
-extension EncodeFixture where T == BodyStructure.LanguageLocation {
+extension EncodeFixture<BodyStructure.LanguageLocation> {
     fileprivate static func languageLocation(_ input: T, _ expectedString: String) -> Self {
         EncodeFixture(
             input: input,

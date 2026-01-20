@@ -57,7 +57,7 @@ struct FullAuthenticatedURLTests {
     }
 }
 
-extension EncodeFixture where T == FullAuthenticatedURL {
+extension EncodeFixture<FullAuthenticatedURL> {
     fileprivate static func fullAuthenticatedURL(_ input: T, _ expectedString: String) -> Self {
         .init(
             input: input,

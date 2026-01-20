@@ -71,7 +71,7 @@ struct EntryTests {
 
 // MARK: -
 
-extension EncodeFixture where T == KeyValue<MetadataEntryName, MetadataValue> {
+extension EncodeFixture<KeyValue<MetadataEntryName, MetadataValue>> {
     fileprivate static func entry(_ input: T, _ expectedString: String) -> Self {
         Self(
             input: input,
@@ -82,7 +82,7 @@ extension EncodeFixture where T == KeyValue<MetadataEntryName, MetadataValue> {
     }
 }
 
-extension EncodeFixture where T == OrderedDictionary<MetadataEntryName, MetadataValue> {
+extension EncodeFixture<OrderedDictionary<MetadataEntryName, MetadataValue>> {
     fileprivate static func entryValues(_ input: T, _ expectedString: String) -> Self {
         Self(
             input: input,
@@ -93,7 +93,7 @@ extension EncodeFixture where T == OrderedDictionary<MetadataEntryName, Metadata
     }
 }
 
-extension EncodeFixture where T == [MetadataEntryName] {
+extension EncodeFixture<[MetadataEntryName]> {
     fileprivate static func entries(_ input: T, _ expectedString: String) -> Self {
         Self(
             input: input,

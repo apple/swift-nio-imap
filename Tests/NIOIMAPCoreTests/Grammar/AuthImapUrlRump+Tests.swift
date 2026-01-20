@@ -51,7 +51,7 @@ struct RumpAuthenticatedURLTests {
     }
 }
 
-extension EncodeFixture where T == RumpAuthenticatedURL {
+extension EncodeFixture<RumpAuthenticatedURL> {
     fileprivate static func rumpAuthenticatedURL(_ input: T, _ expectedString: String) -> Self {
         .init(
             input: input,

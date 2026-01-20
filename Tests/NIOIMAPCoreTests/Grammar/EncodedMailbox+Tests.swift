@@ -28,7 +28,7 @@ struct EncodedMailboxTests {
 
 // MARK: -
 
-extension EncodeFixture where T == EncodedMailbox {
+extension EncodeFixture<EncodedMailbox> {
     fileprivate static func encodedMailbox(_ input: T, _ expectedString: String) -> Self {
         Self(
             input: input,

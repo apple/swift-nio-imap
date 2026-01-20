@@ -30,7 +30,7 @@ struct FieldLocationExtensionTests {
 
 // MARK: -
 
-extension EncodeFixture where T == BodyStructure.LocationAndExtensions {
+extension EncodeFixture<BodyStructure.LocationAndExtensions> {
     fileprivate static func locationAndExtensions(_ input: T, _ expectedString: String) -> Self {
         EncodeFixture(
             input: input,

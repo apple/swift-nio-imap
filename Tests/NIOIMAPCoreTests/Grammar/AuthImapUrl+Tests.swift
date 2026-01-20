@@ -47,7 +47,7 @@ struct AuthImapUrlTests {
 
 // MARK: -
 
-extension EncodeFixture where T == NetworkMessagePath {
+extension EncodeFixture<NetworkMessagePath> {
     fileprivate static func authenticatedURL(_ input: T, _ expectedString: String) -> Self {
         Self(
             input: input,

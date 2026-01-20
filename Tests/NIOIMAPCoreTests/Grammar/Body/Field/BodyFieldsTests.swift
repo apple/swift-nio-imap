@@ -37,7 +37,7 @@ struct BodyFieldsTests {
 
 // MARK: -
 
-extension EncodeFixture where T == BodyStructure.Fields {
+extension EncodeFixture<BodyStructure.Fields> {
     fileprivate static func bodyFields(_ input: T, _ expectedString: String) -> Self {
         EncodeFixture(
             input: input,

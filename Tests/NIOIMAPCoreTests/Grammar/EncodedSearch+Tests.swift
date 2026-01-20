@@ -28,7 +28,7 @@ struct EncodedSearchTests {
 
 // MARK: -
 
-extension EncodeFixture where T == EncodedSearch {
+extension EncodeFixture<EncodedSearch> {
     fileprivate static func encodedSearch(_ input: T, _ expectedString: String) -> Self {
         Self(
             input: input,

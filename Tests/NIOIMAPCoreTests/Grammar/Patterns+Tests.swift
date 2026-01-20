@@ -29,7 +29,7 @@ struct PatternsTests {
 
 // MARK: -
 
-extension EncodeFixture where T == [ByteBuffer] {
+extension EncodeFixture<[ByteBuffer]> {
     fileprivate static func patterns(_ input: T, _ expectedString: String) -> Self {
         Self(
             input: input,

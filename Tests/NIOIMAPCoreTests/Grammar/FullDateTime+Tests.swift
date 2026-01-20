@@ -57,7 +57,7 @@ struct FullDateTimeTests {
 
 // MARK: -
 
-extension EncodeFixture where T == FullDateTime {
+extension EncodeFixture<FullDateTime> {
     fileprivate static func fullDateTime(_ input: T, _ expectedString: String) -> Self {
         Self(
             input: input,
@@ -68,7 +68,7 @@ extension EncodeFixture where T == FullDateTime {
     }
 }
 
-extension EncodeFixture where T == FullDate {
+extension EncodeFixture<FullDate> {
     fileprivate static func fullDate(_ input: T, _ expectedString: String) -> Self {
         Self(
             input: input,
@@ -79,7 +79,7 @@ extension EncodeFixture where T == FullDate {
     }
 }
 
-extension EncodeFixture where T == FullTime {
+extension EncodeFixture<FullTime> {
     fileprivate static func fullTime(_ input: T, _ expectedString: String) -> Self {
         Self(
             input: input,

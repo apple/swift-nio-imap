@@ -30,7 +30,7 @@ struct BodyFieldLanguageTests {
 
 // MARK: -
 
-extension EncodeFixture where T == [String] {
+extension EncodeFixture<[String]> {
     fileprivate static func bodyLanguages(_ input: T, _ expectedString: String) -> Self {
         EncodeFixture(
             input: input,

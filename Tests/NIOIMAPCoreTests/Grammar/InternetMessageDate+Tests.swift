@@ -28,7 +28,7 @@ struct InternetMessageDateTests {
 
 // MARK: -
 
-extension EncodeFixture where T == InternetMessageDate {
+extension EncodeFixture<InternetMessageDate> {
     fileprivate static func internetMessageDate(_ input: T, _ expectedString: String) -> Self {
         Self(
             input: input,
