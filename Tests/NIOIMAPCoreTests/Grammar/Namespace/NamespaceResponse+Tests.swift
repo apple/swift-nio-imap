@@ -14,23 +14,41 @@
 
 import NIO
 @_spi(NIOIMAPInternal) @testable import NIOIMAPCore
-import XCTest
+import Testing
 
-class NamespaceResponse_Tests: EncodeTestClass {}
+@Suite("NamespaceResponse")
+struct NamespaceResponseTests {
+    @Test(arguments: [
+        EncodeFixture.namespaceResponse(
+            .init(userNamespace: [], otherUserNamespace: [], sharedNamespace: []),
+            "NAMESPACE NIL NIL NIL"
+        ),
+        EncodeFixture.namespaceResponse(
+            .init(
+                userNamespace: [NamespaceDescription(string: "", responseExtensions: [:])],
+                otherUserNamespace: [NamespaceDescription(string: "#shared/", char: "/", responseExtensions: [:])],
+                sharedNamespace: [NamespaceDescription(string: "Public Folders/", responseExtensions: [:])],
+            ),
+            "NAMESPACE ((\"\" NIL)) ((\"#shared/\" \"/\")) ((\"Public Folders/\" NIL))"
+        ),
+    ])
+    func encode(_ fixture: EncodeFixture<NamespaceResponse>) {
+        fixture.checkEncoding()
+    }
+}
 
-// MARK: - Encoding
+// MARK: -
 
-extension NamespaceResponse_Tests {
-    func testEncode() {
-        let inputs: [(NamespaceResponse, String, UInt)] = [
-            (.init(userNamespace: [], otherUserNamespace: [], sharedNamespace: []), "NAMESPACE NIL NIL NIL", #line)
-        ]
-
-        for (test, expectedString, line) in inputs {
-            self.testBuffer.clear()
-            let size = self.testBuffer.writeNamespaceResponse(test)
-            XCTAssertEqual(size, expectedString.utf8.count, line: line)
-            XCTAssertEqual(self.testBufferString, expectedString, line: line)
-        }
+extension EncodeFixture<NamespaceResponse> {
+    fileprivate static func namespaceResponse(
+        _ input: NamespaceResponse,
+        _ expectedString: String
+    ) -> Self {
+        EncodeFixture(
+            input: input,
+            bufferKind: .defaultServer,
+            expectedString: expectedString,
+            encoder: { $0.writeNamespaceResponse($1) }
+        )
     }
 }

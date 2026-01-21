@@ -27,7 +27,7 @@ extension EncodeFixtureBufferKind {
 
 /// A fixture for testing IMAP encoding operations.
 /// Captures the input value, encoding options, expected output, and encoder function.
-struct EncodeFixture<T>: Sendable where T: Hashable, T: Sendable {
+struct EncodeFixture<T>: Sendable where T: Sendable {
     var input: T
     var bufferKind: EncodeFixtureBufferKind = .defaultServer
     var expectedStrings: [String]
@@ -106,7 +106,7 @@ extension EncodeFixture: CustomTestStringConvertible {
     }
 }
 
-extension EncodeFixture: CustomTestArgumentEncodable {
+extension EncodeFixture: CustomTestArgumentEncodable where T: Hashable {
     func encodeTestArgument(to encoder: some Encoder) throws {
         // This is a bit of a hack.
         var c = encoder.unkeyedContainer()

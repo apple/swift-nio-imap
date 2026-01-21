@@ -14,23 +14,33 @@
 
 import NIO
 @_spi(NIOIMAPInternal) @testable import NIOIMAPCore
-import XCTest
+import Testing
 
-class TaggedExtension_Tests: EncodeTestClass {}
+@Suite("TaggedExtension")
+struct TaggedExtensionTests {
+    @Test(arguments: [
+        EncodeFixture.taggedExtension(
+            .init(key: "label", value: .sequence(.set([1]))),
+            "label 1"
+        ),
+    ])
+    func encode(_ fixture: EncodeFixture<KeyValue<String, ParameterValue>>) {
+        fixture.checkEncoding()
+    }
+}
 
-// MARK: - Encoding
+// MARK: -
 
-extension TaggedExtension_Tests {
-    func testEncode() {
-        let inputs: [(KeyValue<String, ParameterValue>, String, UInt)] = [
-            (.init(key: "label", value: .sequence(.set([1]))), "label 1", #line)
-        ]
-
-        for (test, expectedString, line) in inputs {
-            self.testBuffer.clear()
-            let size = self.testBuffer.writeTaggedExtension(test)
-            XCTAssertEqual(size, expectedString.utf8.count, line: line)
-            XCTAssertEqual(self.testBufferString, expectedString, line: line)
-        }
+extension EncodeFixture<KeyValue<String, ParameterValue>> {
+    fileprivate static func taggedExtension(
+        _ input: KeyValue<String, ParameterValue>,
+        _ expectedString: String
+    ) -> Self {
+        EncodeFixture(
+            input: input,
+            bufferKind: .defaultServer,
+            expectedString: expectedString,
+            encoder: { $0.writeTaggedExtension($1) }
+        )
     }
 }

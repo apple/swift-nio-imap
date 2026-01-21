@@ -14,23 +14,32 @@
 
 import NIO
 @_spi(NIOIMAPInternal) @testable import NIOIMAPCore
-import XCTest
+import Testing
 
-class ResponseFatalTests: EncodeTestClass {}
+@Suite("ResponseText Fatal")
+struct ResponseFatalTests {
+    @Test(arguments: [
+        EncodeFixture.responseFatal(.init(code: .alert, text: "error"), "* BYE [ALERT] error\r\n"),
+        EncodeFixture.responseFatal(.init(code: .serverBug, text: "Oops"), "* BYE [SERVERBUG] Oops\r\n"),
+        EncodeFixture.responseFatal(.init(code: nil, text: "Oh, no"), "* BYE Oh, no\r\n"),
+    ])
+    func encode(_ fixture: EncodeFixture<ResponseText>) {
+        fixture.checkEncoding()
+    }
+}
 
-// MARK: - Encoding
+// MARK: -
 
-extension ResponseFatalTests {
-    func testEncode() {
-        let inputs: [(ResponseText, String, UInt)] = [
-            (.init(code: .alert, text: "error"), "* BYE [ALERT] error\r\n", #line)
-        ]
-
-        for (test, expectedString, line) in inputs {
-            self.testBuffer.clear()
-            let size = self.testBuffer.writeResponseFatal(test)
-            XCTAssertEqual(size, expectedString.utf8.count, line: line)
-            XCTAssertEqual(self.testBufferString, expectedString, line: line)
-        }
+extension EncodeFixture<ResponseText> {
+    fileprivate static func responseFatal(
+        _ input: ResponseText,
+        _ expectedString: String
+    ) -> Self {
+        EncodeFixture(
+            input: input,
+            bufferKind: .defaultServer,
+            expectedString: expectedString,
+            encoder: { $0.writeResponseFatal($1) }
+        )
     }
 }

@@ -14,23 +14,31 @@
 
 import NIO
 @_spi(NIOIMAPInternal) @testable import NIOIMAPCore
-import XCTest
+import Testing
 
-class ResponseDataTests: EncodeTestClass {}
+@Suite("ResponsePayload")
+struct ResponseDataTests {
+    @Test(arguments: [
+        EncodeFixture.responsePayload(.messageData(.expunge(3)), "* 3 EXPUNGE\r\n"),
+        EncodeFixture.responsePayload(.messageData(.vanished([42, 77])), "* VANISHED 42,77\r\n"),
+    ])
+    func encode(_ fixture: EncodeFixture<ResponsePayload>) {
+        fixture.checkEncoding()
+    }
+}
 
-// MARK: - Encoding
+// MARK: -
 
-extension ResponseDataTests {
-    func testEncode() {
-        let inputs: [(ResponsePayload, String, UInt)] = [
-            (.messageData(.expunge(3)), "* 3 EXPUNGE\r\n", #line)
-        ]
-
-        for (test, expectedString, line) in inputs {
-            self.testBuffer.clear()
-            let size = self.testBuffer.writeResponseData(test)
-            XCTAssertEqual(size, expectedString.utf8.count, line: line)
-            XCTAssertEqual(self.testBufferString, expectedString, line: line)
-        }
+extension EncodeFixture<ResponsePayload> {
+    fileprivate static func responsePayload(
+        _ input: ResponsePayload,
+        _ expectedString: String
+    ) -> Self {
+        EncodeFixture(
+            input: input,
+            bufferKind: .defaultServer,
+            expectedString: expectedString,
+            encoder: { $0.writeResponseData($1) }
+        )
     }
 }

@@ -14,26 +14,37 @@
 
 import NIO
 @_spi(NIOIMAPInternal) @testable import NIOIMAPCore
-import XCTest
+import Testing
 
-class TaggedResponse_Tests: EncodeTestClass {}
+@Suite("TaggedResponse")
+struct TaggedResponseTests {
+    @Test(arguments: [
+        EncodeFixture.taggedResponse(
+            TaggedResponse(tag: "tag", state: .bad(.init(code: .parse, text: "something"))),
+            "tag BAD [PARSE] something\r\n"
+        ),
+        EncodeFixture.taggedResponse(
+            TaggedResponse(tag: "A82", state: .ok(.init(code: nil, text: "LIST completed"))),
+            "A82 OK LIST completed\r\n"
+        ),
+    ])
+    func encode(_ fixture: EncodeFixture<TaggedResponse>) {
+        fixture.checkEncoding()
+    }
+}
 
-// MARK: - Encoding
+// MARK: -
 
-extension TaggedResponse_Tests {
-    func testEncode() {
-        let inputs: [(TaggedResponse, String, UInt)] = [
-            (
-                TaggedResponse(tag: "tag", state: .bad(.init(code: .parse, text: "something"))),
-                "tag BAD [PARSE] something\r\n", #line
-            )
-        ]
-
-        for (test, expectedString, line) in inputs {
-            self.testBuffer.clear()
-            let size = self.testBuffer.writeTaggedResponse(test)
-            XCTAssertEqual(size, expectedString.utf8.count, line: line)
-            XCTAssertEqual(self.testBufferString, expectedString, line: line)
-        }
+extension EncodeFixture<TaggedResponse> {
+    fileprivate static func taggedResponse(
+        _ input: TaggedResponse,
+        _ expectedString: String
+    ) -> Self {
+        EncodeFixture(
+            input: input,
+            bufferKind: .defaultServer,
+            expectedString: expectedString,
+            encoder: { $0.writeTaggedResponse($1) }
+        )
     }
 }
