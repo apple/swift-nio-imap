@@ -14,18 +14,28 @@
 
 import NIO
 @_spi(NIOIMAPInternal) @testable import NIOIMAPCore
-import XCTest
+import Testing
 
-class IMAPURLAuthenticationMechanism_Tests: EncodeTestClass {}
+@Suite("IMAPURLAuthenticationMechanism")
+struct IMAPURLAuthenticationMechanismTests {
+    @Test(arguments: [
+        EncodeFixture.imapURLAuthenticationMechanism(.any, ";AUTH=*"),
+        EncodeFixture.imapURLAuthenticationMechanism(.type(.init(authenticationType: "data")), ";AUTH=data"),
+    ])
+    func encode(_ fixture: EncodeFixture<IMAPURLAuthenticationMechanism>) {
+        fixture.checkEncoding()
+    }
+}
 
-// MARK: - IMAP
+// MARK: -
 
-extension IMAPURLAuthenticationMechanism_Tests {
-    func testEncode() {
-        let inputs: [(IMAPURLAuthenticationMechanism, String, UInt)] = [
-            (.any, ";AUTH=*", #line),
-            (.type(.init(authenticationType: "data")), ";AUTH=data", #line),
-        ]
-        self.iterateInputs(inputs: inputs, encoder: { self.testBuffer.writeIMAPURLAuthenticationMechanism($0) })
+extension EncodeFixture<IMAPURLAuthenticationMechanism> {
+    fileprivate static func imapURLAuthenticationMechanism(_ input: IMAPURLAuthenticationMechanism, _ expectedString: String) -> Self {
+        EncodeFixture(
+            input: input,
+            bufferKind: .defaultServer,
+            expectedString: expectedString,
+            encoder: { $0.writeIMAPURLAuthenticationMechanism($1) }
+        )
     }
 }

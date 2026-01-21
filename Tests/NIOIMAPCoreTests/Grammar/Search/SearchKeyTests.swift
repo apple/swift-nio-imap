@@ -14,85 +14,79 @@
 
 import NIO
 @_spi(NIOIMAPInternal) @testable import NIOIMAPCore
-import XCTest
+import Testing
 
-class SearchKeyTests: EncodeTestClass {}
+@Suite("SearchKey")
+struct SearchKeyTests {
+    @Test(arguments: [
+        EncodeFixture.searchKey(.all, "ALL"),
+        EncodeFixture.searchKey(.answered, "ANSWERED"),
+        EncodeFixture.searchKey(.deleted, "DELETED"),
+        EncodeFixture.searchKey(.flagged, "FLAGGED"),
+        EncodeFixture.searchKey(.new, "NEW"),
+        EncodeFixture.searchKey(.old, "OLD"),
+        EncodeFixture.searchKey(.recent, "RECENT"),
+        EncodeFixture.searchKey(.seen, "SEEN"),
+        EncodeFixture.searchKey(.unanswered, "UNANSWERED"),
+        EncodeFixture.searchKey(.undeleted, "UNDELETED"),
+        EncodeFixture.searchKey(.unflagged, "UNFLAGGED"),
+        EncodeFixture.searchKey(.unseen, "UNSEEN"),
+        EncodeFixture.searchKey(.draft, "DRAFT"),
+        EncodeFixture.searchKey(.undraft, "UNDRAFT"),
+        EncodeFixture.searchKey(.bcc("hello@hello.co.uk"), "BCC \"hello@hello.co.uk\""),
+        EncodeFixture.searchKey(.before(IMAPCalendarDay(year: 1994, month: 6, day: 25)!), "BEFORE 25-Jun-1994"),
+        EncodeFixture.searchKey(.body("some body"), "BODY \"some body\""),
+        EncodeFixture.searchKey(.cc("tim@apple.com"), "CC \"tim@apple.com\""),
+        EncodeFixture.searchKey(.from("tim@apple.com"), "FROM \"tim@apple.com\""),
+        EncodeFixture.searchKey(.keyword(Flag.Keyword(unchecked: "somekeyword")), "KEYWORD somekeyword"),
+        EncodeFixture.searchKey(.on(IMAPCalendarDay(year: 1999, month: 9, day: 16)!), "ON 16-Sep-1999"),
+        EncodeFixture.searchKey(.since(IMAPCalendarDay(year: 1984, month: 1, day: 17)!), "SINCE 17-Jan-1984"),
+        EncodeFixture.searchKey(.subject("some subject"), "SUBJECT \"some subject\""),
+        EncodeFixture.searchKey(.text("some text"), "TEXT \"some text\""),
+        EncodeFixture.searchKey(.to("theboss@apple.com"), "TO \"theboss@apple.com\""),
+        EncodeFixture.searchKey(.unkeyword(Flag.Keyword(unchecked: "nokeyword")), "UNKEYWORD nokeyword"),
+        EncodeFixture.searchKey(.header("header", "value"), "HEADER \"header\" \"value\""),
+        EncodeFixture.searchKey(.messageSizeLarger(333), "LARGER 333"),
+        EncodeFixture.searchKey(.not(.messageSizeLarger(444)), "NOT LARGER 444"),
+        EncodeFixture.searchKey(.or(.messageSizeSmaller(444), .messageSizeLarger(666)), "OR SMALLER 444 LARGER 666"),
+        EncodeFixture.searchKey(.sentOn(IMAPCalendarDay(year: 2018, month: 12, day: 7)!), "SENTON 7-Dec-2018"),
+        EncodeFixture.searchKey(.sentBefore(IMAPCalendarDay(year: 2018, month: 12, day: 7)!), "SENTBEFORE 7-Dec-2018"),
+        EncodeFixture.searchKey(.sentSince(IMAPCalendarDay(year: 2018, month: 12, day: 7)!), "SENTSINCE 7-Dec-2018"),
+        EncodeFixture.searchKey(.messageSizeSmaller(555), "SMALLER 555"),
+        EncodeFixture.searchKey(.uid(.set(MessageIdentifierSetNonEmpty(set: MessageIdentifierSet<UID>(333...444))!)), "UID 333:444"),
+        EncodeFixture.searchKey(.sequenceNumbers(.range(1...222)), "1:222"),
+        EncodeFixture.searchKey(.sequenceNumbers(.range(222...)), "222:*"),
+        EncodeFixture.searchKey(.and([]), "()"),
+        EncodeFixture.searchKey(.and([.messageSizeSmaller(444), .messageSizeLarger(333)]), "SMALLER 444 LARGER 333"),
+        EncodeFixture.searchKey(.filter("name"), "FILTER name"),
+        EncodeFixture.searchKey(.modificationSequence(.init(extensions: [:], sequenceValue: 5)), "MODSEQ 5"),
+        EncodeFixture.searchKey(.uidAfter(.id(222)), "UIDAFTER 222"),
+        EncodeFixture.searchKey(.uidAfter(.lastCommand), "UIDAFTER $"),
+        EncodeFixture.searchKey(.uidBefore(.id(62_659)), "UIDBEFORE 62659"),
+        EncodeFixture.searchKey(.uidBefore(.lastCommand), "UIDBEFORE $"),
+        EncodeFixture.searchKey(.and([.messageSizeSmaller(444)]), "SMALLER 444"),
+        EncodeFixture.searchKey(.not(.and([.messageSizeSmaller(444)])), "NOT SMALLER 444"),
+        EncodeFixture.searchKey(.not(.and([.messageSizeSmaller(444), .messageSizeLarger(333)])), "NOT (SMALLER 444 LARGER 333)"),
+        EncodeFixture.searchKey(.or(.not(.messageSizeSmaller(444)), .messageSizeLarger(333)), "OR (NOT SMALLER 444) LARGER 333"),
+        EncodeFixture.searchKey(.or(.not(.and([.messageSizeSmaller(444), .messageSizeLarger(333)])), .undeleted), "OR (NOT (SMALLER 444 LARGER 333)) UNDELETED"),
+        EncodeFixture.searchKey(.and([.or(.messageSizeSmaller(444), .messageSizeLarger(333)), .undeleted]), "(OR SMALLER 444 LARGER 333) UNDELETED"),
+        EncodeFixture.searchKey(.emailID(.init("123-456-789")!), "EMAILID 123-456-789"),
+        EncodeFixture.searchKey(.threadID(.init("123-456-789")!), "THREADID 123-456-789"),
+    ])
+    func encode(_ fixture: EncodeFixture<SearchKey>) {
+        fixture.checkEncoding()
+    }
+}
 
-// MARK: - IMAP
+// MARK: -
 
-extension SearchKeyTests {
-    func testEncode() {
-        let inputs: [(SearchKey, String, UInt)] = [
-            (.all, "ALL", #line),
-            (.answered, "ANSWERED", #line),
-            (.deleted, "DELETED", #line),
-            (.flagged, "FLAGGED", #line),
-            (.new, "NEW", #line),
-            (.old, "OLD", #line),
-            (.recent, "RECENT", #line),
-            (.seen, "SEEN", #line),
-            (.unanswered, "UNANSWERED", #line),
-            (.undeleted, "UNDELETED", #line),
-            (.unflagged, "UNFLAGGED", #line),
-            (.unseen, "UNSEEN", #line),
-            (.draft, "DRAFT", #line),
-            (.undraft, "UNDRAFT", #line),
-            (.bcc("hello@hello.co.uk"), "BCC \"hello@hello.co.uk\"", #line),
-            (.before(IMAPCalendarDay(year: 1994, month: 6, day: 25)!), "BEFORE 25-Jun-1994", #line),
-            (.body("some body"), "BODY \"some body\"", #line),
-            (.cc("tim@apple.com"), "CC \"tim@apple.com\"", #line),
-            (.from("tim@apple.com"), "FROM \"tim@apple.com\"", #line),
-            (.keyword(Flag.Keyword(unchecked: "somekeyword")), "KEYWORD somekeyword", #line),
-            (.on(IMAPCalendarDay(year: 1999, month: 9, day: 16)!), "ON 16-Sep-1999", #line),
-            (.since(IMAPCalendarDay(year: 1984, month: 1, day: 17)!), "SINCE 17-Jan-1984", #line),
-            (.subject("some subject"), "SUBJECT \"some subject\"", #line),
-            (.text("some text"), "TEXT \"some text\"", #line),
-            (.to("theboss@apple.com"), "TO \"theboss@apple.com\"", #line),
-            (.unkeyword(Flag.Keyword(unchecked: "nokeyword")), "UNKEYWORD nokeyword", #line),
-            (.header("header", "value"), "HEADER \"header\" \"value\"", #line),
-            (.messageSizeLarger(333), "LARGER 333", #line),
-            (.not(.messageSizeLarger(444)), "NOT LARGER 444", #line),
-            (.or(.messageSizeSmaller(444), .messageSizeLarger(666)), "OR SMALLER 444 LARGER 666", #line),
-            (.sentOn(IMAPCalendarDay(year: 2018, month: 12, day: 7)!), "SENTON 7-Dec-2018", #line),
-            (.sentBefore(IMAPCalendarDay(year: 2018, month: 12, day: 7)!), "SENTBEFORE 7-Dec-2018", #line),
-            (.sentSince(IMAPCalendarDay(year: 2018, month: 12, day: 7)!), "SENTSINCE 7-Dec-2018", #line),
-            (.messageSizeSmaller(555), "SMALLER 555", #line),
-            (
-                .uid(.set(MessageIdentifierSetNonEmpty(set: MessageIdentifierSet<UID>(333...444))!)), "UID 333:444",
-                #line
-            ),
-            (.sequenceNumbers(.range(1...222)), "1:222", #line),
-            (.sequenceNumbers(.range(222...)), "222:*", #line),
-            (.and([]), "()", #line),
-            (.and([.messageSizeSmaller(444), .messageSizeLarger(333)]), "SMALLER 444 LARGER 333", #line),
-            (.filter("name"), "FILTER name", #line),
-            (.modificationSequence(.init(extensions: [:], sequenceValue: 5)), "MODSEQ 5", #line),
-            (.uidAfter(.id(222)), "UIDAFTER 222", #line),
-            (.uidAfter(.lastCommand), "UIDAFTER $", #line),
-            (.uidBefore(.id(62_659)), "UIDBEFORE 62659", #line),
-            (.uidBefore(.lastCommand), "UIDBEFORE $", #line),
-
-            (.and([.messageSizeSmaller(444)]), "SMALLER 444", #line),
-            (.not(.and([.messageSizeSmaller(444)])), "NOT SMALLER 444", #line),
-            (.not(.and([.messageSizeSmaller(444), .messageSizeLarger(333)])), "NOT (SMALLER 444 LARGER 333)", #line),
-            (.or(.not(.messageSizeSmaller(444)), .messageSizeLarger(333)), "OR (NOT SMALLER 444) LARGER 333", #line),
-            (
-                .or(.not(.and([.messageSizeSmaller(444), .messageSizeLarger(333)])), .undeleted),
-                "OR (NOT (SMALLER 444 LARGER 333)) UNDELETED", #line
-            ),
-            (
-                .and([.or(.messageSizeSmaller(444), .messageSizeLarger(333)), .undeleted]),
-                "(OR SMALLER 444 LARGER 333) UNDELETED", #line
-            ),
-            (.emailID(.init("123-456-789")!), "EMAILID 123-456-789", #line),
-            (.threadID(.init("123-456-789")!), "THREADID 123-456-789", #line),
-        ]
-
-        for (test, expectedString, line) in inputs {
-            self.testBuffer.clear()
-            let size = self.testBuffer.writeSearchKey(test)
-            XCTAssertEqual(size, expectedString.utf8.count, line: line)
-            XCTAssertEqual(self.testBufferString, expectedString, line: line)
-        }
+extension EncodeFixture<SearchKey> {
+    fileprivate static func searchKey(_ input: SearchKey, _ expectedString: String) -> Self {
+        EncodeFixture(
+            input: input,
+            bufferKind: .defaultServer,
+            expectedString: expectedString,
+            encoder: { $0.writeSearchKey($1) }
+        )
     }
 }

@@ -14,19 +14,29 @@
 
 import NIO
 @_spi(NIOIMAPInternal) @testable import NIOIMAPCore
-import XCTest
+import Testing
 
-class ListSelectIndependentOption_Tests: EncodeTestClass {}
+@Suite("ListSelectIndependentOption")
+struct ListSelectIndependentOptionTests {
+    @Test(arguments: [
+        EncodeFixture.listSelectIndependentOption(.remote, "REMOTE"),
+        EncodeFixture.listSelectIndependentOption(.option(.init(key: .standard("test"), value: nil)), "test"),
+        EncodeFixture.listSelectIndependentOption(.specialUse, "SPECIAL-USE"),
+    ])
+    func encode(_ fixture: EncodeFixture<ListSelectIndependentOption>) {
+        fixture.checkEncoding()
+    }
+}
 
-// MARK: - Encoding
+// MARK: -
 
-extension ListSelectIndependentOption_Tests {
-    func testEncode() {
-        let inputs: [(ListSelectIndependentOption, String, UInt)] = [
-            (.remote, "REMOTE", #line),
-            (.option(.init(key: .standard("test"), value: nil)), "test", #line),
-            (.specialUse, "SPECIAL-USE", #line),
-        ]
-        self.iterateInputs(inputs: inputs, encoder: { self.testBuffer.writeListSelectIndependentOption($0) })
+extension EncodeFixture<ListSelectIndependentOption> {
+    fileprivate static func listSelectIndependentOption(_ input: ListSelectIndependentOption, _ expectedString: String) -> Self {
+        EncodeFixture(
+            input: input,
+            bufferKind: .defaultServer,
+            expectedString: expectedString,
+            encoder: { $0.writeListSelectIndependentOption($1) }
+        )
     }
 }
