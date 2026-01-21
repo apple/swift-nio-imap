@@ -14,146 +14,124 @@
 
 import NIO
 @_spi(NIOIMAPInternal) @testable import NIOIMAPCore
-import XCTest
+import Testing
 
-class Flag_Tests: EncodeTestClass {}
+@Suite("Flag")
+struct FlagTests {
+    @Test
+    func `keyword initialization`() {
+        #expect(Flag.Keyword("Redirected").map { String($0) } == "Redirected")
+        #expect(Flag.Keyword("redirected").map { String($0) } == "redirected")
+        #expect(Flag.Keyword("$MailFlagBit0").map { String($0) } == "$MailFlagBit0")
+        #expect(Flag.Keyword("OIB-Seen-[Gmail]/Trash").map { String($0) } == "OIB-Seen-[Gmail]/Trash")
 
-// MARK: - init
-
-extension Flag_Tests {
-    func testKeywordInit() {
-        XCTAssertEqual(Flag.Keyword("Redirected").map { String($0) }, "Redirected")
-        XCTAssertEqual(Flag.Keyword("redirected").map { String($0) }, "redirected")
-        XCTAssertEqual(Flag.Keyword("$MailFlagBit0").map { String($0) }, "$MailFlagBit0")
-        XCTAssertEqual(Flag.Keyword("OIB-Seen-[Gmail]/Trash").map { String($0) }, "OIB-Seen-[Gmail]/Trash")
-
-        XCTAssertNil(Flag.Keyword(#"a"b"#))
-        XCTAssertNil(Flag.Keyword(#"a(b"#))
-        XCTAssertNil(Flag.Keyword(#"a)b"#))
-        XCTAssertNil(Flag.Keyword(#"a{b"#))
-        XCTAssertNil(Flag.Keyword(#"a b"#))
-        XCTAssertNil(Flag.Keyword(#"a%b"#))
-        XCTAssertNil(Flag.Keyword(#"a*b"#))
+        #expect(Flag.Keyword(#"a"b"#) == nil)
+        #expect(Flag.Keyword(#"a(b"#) == nil)
+        #expect(Flag.Keyword(#"a)b"#) == nil)
+        #expect(Flag.Keyword(#"a{b"#) == nil)
+        #expect(Flag.Keyword(#"a b"#) == nil)
+        #expect(Flag.Keyword(#"a%b"#) == nil)
+        #expect(Flag.Keyword(#"a*b"#) == nil)
     }
 
-    // test a couple of cases to make sure that extensions are converted into non-extensions when appropriate
-    // test that casing doesn't matter
-    func testInit_extension() {
-        let inputs: [(Flag, Flag, UInt)] = [
-            (.extension("\\ANSWERED"), .answered, #line),
-            (.extension("\\answered"), .answered, #line),
-            (.extension("\\deleted"), .deleted, #line),
-            (.extension("\\seen"), .seen, #line),
-            (.extension("\\draft"), .draft, #line),
-            (.extension("\\flagged"), .flagged, #line),
-        ]
-
-        for (test, expected, line) in inputs {
-            XCTAssertEqual(test, expected, line: line)
-        }
+    @Test(arguments: [
+        (Flag.extension("\\ANSWERED"), Flag.answered),
+        (Flag.extension("\\answered"), Flag.answered),
+        (Flag.extension("\\deleted"), Flag.deleted),
+        (Flag.extension("\\seen"), Flag.seen),
+        (Flag.extension("\\draft"), Flag.draft),
+        (Flag.extension("\\flagged"), Flag.flagged),
+    ])
+    func `extension initialization`(_ input: Flag, _ expected: Flag) {
+        #expect(input == expected)
     }
 
-    func testEquality() {
-        func AssertEqualAndEqualHash(_ flagA: Flag, _ flagB: Flag, line: UInt = #line) {
-            func hash(_ flag: Flag) -> Int {
-                var hasher = Hasher()
-                flag.hash(into: &hasher)
-                return hasher.finalize()
-            }
-            XCTAssertEqual(flagA, flagB, line: line)
-            XCTAssertEqual(flagA.hashValue, flagB.hashValue, "hashValue", line: line)
-            XCTAssertEqual(hash(flagA), hash(flagB), "hash(into:)", line: line)
-        }
-
-        AssertEqualAndEqualHash(.answered, .answered)
-        AssertEqualAndEqualHash(.flagged, .flagged)
-        AssertEqualAndEqualHash(.deleted, .deleted)
-        AssertEqualAndEqualHash(.seen, .seen)
-        AssertEqualAndEqualHash(.draft, .draft)
-        AssertEqualAndEqualHash(.keyword(.colorBit0), .keyword(.colorBit0))
-        AssertEqualAndEqualHash(.keyword(.junk), .keyword(.junk))
-        AssertEqualAndEqualHash(.keyword(.unregistered_junk), .keyword(.unregistered_junk))
-        AssertEqualAndEqualHash(.keyword(Flag.Keyword("FooBar")!), .keyword(Flag.Keyword("FooBar")!))
-        AssertEqualAndEqualHash(.extension("\\FooBar"), .extension("\\FooBar"))
-        AssertEqualAndEqualHash(.answered, .extension("\\Answered"))
+    @Test
+    func `equality checks`() {
+        expectEqualAndEqualHash(Flag.answered, .answered)
+        expectEqualAndEqualHash(Flag.flagged, .flagged)
+        expectEqualAndEqualHash(Flag.deleted, .deleted)
+        expectEqualAndEqualHash(Flag.seen, .seen)
+        expectEqualAndEqualHash(Flag.draft, .draft)
+        expectEqualAndEqualHash(Flag.keyword(.colorBit0), .keyword(.colorBit0))
+        expectEqualAndEqualHash(Flag.keyword(.junk), .keyword(.junk))
+        expectEqualAndEqualHash(Flag.keyword(.unregistered_junk), .keyword(.unregistered_junk))
+        expectEqualAndEqualHash(Flag.keyword(Flag.Keyword("FooBar")!), .keyword(Flag.Keyword("FooBar")!))
+        expectEqualAndEqualHash(Flag.extension("\\FooBar"), .extension("\\FooBar"))
+        expectEqualAndEqualHash(Flag.answered, .extension("\\Answered"))
 
         // Case-insensitive:
-        AssertEqualAndEqualHash(.answered, .extension("\\ANSWERED"))
-        AssertEqualAndEqualHash(.answered, .extension("\\answered"))
-        AssertEqualAndEqualHash(.keyword(Flag.Keyword("foobar")!), .keyword(Flag.Keyword("FOOBAR")!))
-        AssertEqualAndEqualHash(.keyword(Flag.Keyword("FOOBAR")!), .keyword(Flag.Keyword("foobar")!))
-        AssertEqualAndEqualHash(.keyword(Flag.Keyword("FOOBAR")!), .keyword(Flag.Keyword("FooBar")!))
-        AssertEqualAndEqualHash(.extension("\\foobar"), .extension("\\FOOBAR"))
-        AssertEqualAndEqualHash(.extension("\\FOOBAR"), .extension("\\foobar"))
-        AssertEqualAndEqualHash(.extension("\\FOOBAR"), .extension("\\FooBar"))
+        expectEqualAndEqualHash(Flag.answered, .extension("\\ANSWERED"))
+        expectEqualAndEqualHash(Flag.answered, .extension("\\answered"))
+        expectEqualAndEqualHash(Flag.keyword(Flag.Keyword("foobar")!), .keyword(Flag.Keyword("FOOBAR")!))
+        expectEqualAndEqualHash(Flag.keyword(Flag.Keyword("FOOBAR")!), .keyword(Flag.Keyword("foobar")!))
+        expectEqualAndEqualHash(Flag.keyword(Flag.Keyword("FOOBAR")!), .keyword(Flag.Keyword("FooBar")!))
+        expectEqualAndEqualHash(Flag.extension("\\foobar"), .extension("\\FOOBAR"))
+        expectEqualAndEqualHash(Flag.extension("\\FOOBAR"), .extension("\\foobar"))
+        expectEqualAndEqualHash(Flag.extension("\\FOOBAR"), .extension("\\FooBar"))
     }
 
-    func testInequality() {
-        func AssertNotEqual(_ flagA: Flag, _ flagB: Flag, line: UInt = #line) {
-            XCTAssertNotEqual(flagA, flagB, line: line)
-        }
+    @Test
+    func `inequality checks`() {
+        #expect(Flag.answered != .flagged)
+        #expect(Flag.answered != .deleted)
+        #expect(Flag.answered != .seen)
+        #expect(Flag.answered != .draft)
+        #expect(Flag.answered != .keyword(.colorBit0))
+        #expect(Flag.answered != .keyword(.junk))
+        #expect(Flag.answered != .keyword(.unregistered_junk))
+        #expect(Flag.answered != .keyword(Flag.Keyword("FooBar")!))
+        #expect(Flag.answered != .extension("\\FooBar"))
 
-        AssertNotEqual(.answered, .flagged)
-        AssertNotEqual(.answered, .deleted)
-        AssertNotEqual(.answered, .seen)
-        AssertNotEqual(.answered, .draft)
-        AssertNotEqual(.answered, .keyword(.colorBit0))
-        AssertNotEqual(.answered, .keyword(.junk))
-        AssertNotEqual(.answered, .keyword(.unregistered_junk))
-        AssertNotEqual(.answered, .keyword(Flag.Keyword("FooBar")!))
-        AssertNotEqual(.answered, .extension("\\FooBar"))
+        #expect(Flag.extension("\\Baz") != .answered)
+        #expect(Flag.extension("\\Baz") != .flagged)
+        #expect(Flag.extension("\\Baz") != .deleted)
+        #expect(Flag.extension("\\Baz") != .seen)
+        #expect(Flag.extension("\\Baz") != .draft)
+        #expect(Flag.extension("\\Baz") != .keyword(.colorBit0))
+        #expect(Flag.extension("\\Baz") != .keyword(.junk))
+        #expect(Flag.extension("\\Baz") != .keyword(.unregistered_junk))
+        #expect(Flag.extension("\\Baz") != .keyword(Flag.Keyword("FooBar")!))
+        #expect(Flag.extension("\\Baz") != .extension("\\FooBar"))
+        #expect(Flag.extension("\\Baz") != .extension("\\Answered"))
 
-        AssertNotEqual(.extension("\\Baz"), .answered)
-        AssertNotEqual(.extension("\\Baz"), .flagged)
-        AssertNotEqual(.extension("\\Baz"), .deleted)
-        AssertNotEqual(.extension("\\Baz"), .seen)
-        AssertNotEqual(.extension("\\Baz"), .draft)
-        AssertNotEqual(.extension("\\Baz"), .keyword(.colorBit0))
-        AssertNotEqual(.extension("\\Baz"), .keyword(.junk))
-        AssertNotEqual(.extension("\\Baz"), .keyword(.unregistered_junk))
-        AssertNotEqual(.extension("\\Baz"), .keyword(Flag.Keyword("FooBar")!))
-        AssertNotEqual(.extension("\\Baz"), .extension("\\FooBar"))
-        AssertNotEqual(.extension("\\Baz"), .extension("\\Answered"))
+        #expect(Flag.keyword(.notJunk) != .answered)
+        #expect(Flag.keyword(.notJunk) != .flagged)
+        #expect(Flag.keyword(.notJunk) != .deleted)
+        #expect(Flag.keyword(.notJunk) != .seen)
+        #expect(Flag.keyword(.notJunk) != .draft)
+        #expect(Flag.keyword(.notJunk) != .keyword(.colorBit0))
+        #expect(Flag.keyword(.notJunk) != .keyword(.junk))
+        #expect(Flag.keyword(.notJunk) != .keyword(.unregistered_junk))
+        #expect(Flag.keyword(.notJunk) != .keyword(Flag.Keyword("FooBar")!))
+        #expect(Flag.keyword(.notJunk) != .extension("\\FooBar"))
+        #expect(Flag.keyword(.notJunk) != .extension("\\Answered"))
+    }
 
-        AssertNotEqual(.keyword(.notJunk), .answered)
-        AssertNotEqual(.keyword(.notJunk), .flagged)
-        AssertNotEqual(.keyword(.notJunk), .deleted)
-        AssertNotEqual(.keyword(.notJunk), .seen)
-        AssertNotEqual(.keyword(.notJunk), .draft)
-        AssertNotEqual(.keyword(.notJunk), .keyword(.colorBit0))
-        AssertNotEqual(.keyword(.notJunk), .keyword(.junk))
-        AssertNotEqual(.keyword(.notJunk), .keyword(.unregistered_junk))
-        AssertNotEqual(.keyword(.notJunk), .keyword(Flag.Keyword("FooBar")!))
-        AssertNotEqual(.keyword(.notJunk), .extension("\\FooBar"))
-        AssertNotEqual(.keyword(.notJunk), .extension("\\Answered"))
+    @Test(arguments: [
+        EncodeFixture.flag(.answered, "\\Answered"),
+        EncodeFixture.flag(.deleted, "\\Deleted"),
+        EncodeFixture.flag(.draft, "\\Draft"),
+        EncodeFixture.flag(.flagged, "\\Flagged"),
+        EncodeFixture.flag(.seen, "\\Seen"),
+        EncodeFixture.flag(.keyword(.forwarded), "$Forwarded"),
+        // Case insensitive, but case preserving:
+        EncodeFixture.flag(.extension("\\extension"), "\\extension"),
+        EncodeFixture.flag(.extension("\\Extension"), "\\Extension"),
+        EncodeFixture.flag(.extension("\\EXTENSION"), "\\EXTENSION"),
+        EncodeFixture.flag(.keyword(Flag.Keyword("$extension")!), "$extension"),
+        EncodeFixture.flag(.keyword(Flag.Keyword("$Extension")!), "$Extension"),
+        EncodeFixture.flag(.keyword(Flag.Keyword("$EXTENSION")!), "$EXTENSION"),
+    ])
+    func encode(_ fixture: EncodeFixture<Flag>) {
+        fixture.checkEncoding()
     }
 }
 
-// MARK: - Encoding
+// MARK: -
 
-extension Flag_Tests {
-    func testEncode() {
-        let inputs: [(Flag, String, UInt)] = [
-            (.answered, "\\Answered", #line),
-            (.deleted, "\\Deleted", #line),
-            (.draft, "\\Draft", #line),
-            (.flagged, "\\Flagged", #line),
-            (.seen, "\\Seen", #line),
-            (.keyword(.forwarded), "$Forwarded", #line),
-            // Case insensitive, but case preserving:
-            (.extension("\\extension"), "\\extension", #line),
-            (.extension("\\Extension"), "\\Extension", #line),
-            (.extension("\\EXTENSION"), "\\EXTENSION", #line),
-            (.keyword(Flag.Keyword("$extension")!), "$extension", #line),
-            (.keyword(Flag.Keyword("$Extension")!), "$Extension", #line),
-            (.keyword(Flag.Keyword("$EXTENSION")!), "$EXTENSION", #line),
-        ]
-
-        for (test, expectedString, line) in inputs {
-            self.testBuffer.clear()
-            let size = self.testBuffer.writeFlag(test)
-            XCTAssertEqual(size, expectedString.utf8.count, line: line)
-            XCTAssertEqual(self.testBufferString, expectedString, line: line)
-        }
+extension EncodeFixture<Flag> {
+    fileprivate static func flag(_ input: Flag, _ expectedString: String) -> Self {
+        EncodeFixture(input: input, bufferKind: .defaultServer, expectedString: expectedString, encoder: { $0.writeFlag($1) })
     }
 }

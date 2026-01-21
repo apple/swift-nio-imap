@@ -14,227 +14,106 @@
 
 import NIO
 @_spi(NIOIMAPInternal) @testable import NIOIMAPCore
-import XCTest
+import Testing
 
-class CommandType_Tests: EncodeTestClass {}
+@Suite("CommandType")
+struct CommandTypeTests {
+    @Test(arguments: [
+        CommandEncodeFixture.command(.list(nil, reference: .init(""), .mailbox(""), []), "LIST \"\" \"\""),
+        CommandEncodeFixture.command(.list(nil, reference: .init(""), .mailbox("")), "LIST \"\" \"\""),
+        CommandEncodeFixture.command(.list(nil, reference: .init(""), .mailbox("")), "LIST \"\" \"\""),
+        CommandEncodeFixture.command(.list(nil, reference: .inbox, .mailbox(""), [.children]), "LIST \"INBOX\" \"\" RETURN (CHILDREN)"),
 
-// MARK: - Encoding
+        CommandEncodeFixture.command(.namespace, "NAMESPACE"),
 
-extension CommandType_Tests {
-    func testEncode() {
-        let inputs: [(Command, CommandEncodingOptions, [String], UInt)] = [
-            (.list(nil, reference: .init(""), .mailbox(""), []), CommandEncodingOptions(), ["LIST \"\" \"\""], #line),
-            (.list(nil, reference: .init(""), .mailbox("")), CommandEncodingOptions(), ["LIST \"\" \"\""], #line),
-            // no ret-opts but has capability
-            (.list(nil, reference: .init(""), .mailbox("")), CommandEncodingOptions(), ["LIST \"\" \"\""], #line),
-            (
-                .list(nil, reference: .inbox, .mailbox(""), [.children]), CommandEncodingOptions(),
-                ["LIST \"INBOX\" \"\" RETURN (CHILDREN)"], #line
-            ),  // ret-opts with capability
+        CommandEncodeFixture.command(.login(username: "username", password: "password"), #"LOGIN "username" "password""#),
+        CommandEncodeFixture.command(.login(username: "david evans", password: "great password"), #"LOGIN "david evans" "great password""#),
+        CommandEncodeFixture.command(.login(username: #"foo\bar"#, password: #"pass"word"#), #"LOGIN "foo\\bar" "pass\"word""#),
+        CommandEncodeFixture.command(.login(username: "\r\n", password: "\n"), expectedStrings: ["LOGIN {2}\r\n", "\r\n {1}\r\n", "\n"]),
 
-            (.namespace, CommandEncodingOptions(), ["NAMESPACE"], #line),
+        CommandEncodeFixture.command(.select(MailboxName("Events")), #"SELECT "Events""#),
+        CommandEncodeFixture.command(.select(.inbox, [.basic(.init(key: "test", value: nil))]), #"SELECT "INBOX" (test)"#),
+        CommandEncodeFixture.command(.select(.inbox, [.basic(.init(key: "test1", value: nil)), .basic(.init(key: "test2", value: nil))]), #"SELECT "INBOX" (test1 test2)"#),
+        CommandEncodeFixture.command(.examine(MailboxName("Events")), #"EXAMINE "Events""#),
+        CommandEncodeFixture.command(.examine(.inbox, [.basic(.init(key: "test", value: nil))]), #"EXAMINE "INBOX" (test)"#),
+        CommandEncodeFixture.command(.expunge, #"EXPUNGE"#),
+        CommandEncodeFixture.command(.move(.set([1]), .inbox), "MOVE 1 \"INBOX\""),
+        CommandEncodeFixture.command(.id([:]), "ID NIL"),
+        CommandEncodeFixture.command(.getMetadata(options: [], mailbox: .inbox, entries: ["a"]), "GETMETADATA \"INBOX\" (\"a\")"),
+        CommandEncodeFixture.command(.getMetadata(options: [.maxSize(123)], mailbox: .inbox, entries: ["a"]), "GETMETADATA (MAXSIZE 123) \"INBOX\" (\"a\")"),
+        CommandEncodeFixture.command(.setMetadata(mailbox: .inbox, entries: ["a": nil]), "SETMETADATA \"INBOX\" (\"a\" NIL)"),
 
-            // MARK: Login
+        CommandEncodeFixture.command(.fetch(.set([1...40]), [.uid, .internalDate], []), "FETCH 1:40 (UID INTERNALDATE)"),
+        CommandEncodeFixture.command(.fetch(.set([77]), [.uid, .bodySection(peek: true, .header, nil)], [.changedSince(.init(modificationSequence: 707_484_939_116_871_680))]), "FETCH 77 (UID BODY.PEEK[HEADER]) (CHANGEDSINCE 707484939116871680)"),
 
-            (
-                .login(username: "username", password: "password"), CommandEncodingOptions(),
-                [#"LOGIN "username" "password""#], #line
-            ),
-            (
-                .login(username: "david evans", password: "great password"), CommandEncodingOptions(),
-                [#"LOGIN "david evans" "great password""#], #line
-            ),
-            // Double-quote `"` and backslash `\` (quoted-specials) can not be part
-            // of `quoted` (without escaping) nor `1*ASTRING-CHAR`:
-            (
-                .login(username: #"foo\bar"#, password: #"pass"word"#), CommandEncodingOptions(),
-                [#"LOGIN "foo\\bar" "pass\"word""#], #line
-            ),
-            // CR and LF need to use literal
-            (
-                .login(username: "\r\n", password: "\n"), CommandEncodingOptions(),
-                ["LOGIN {2}\r\n", "\r\n {1}\r\n", "\n"], #line
-            ),
+        CommandEncodeFixture.command(.resetKey(mailbox: nil, mechanisms: []), "RESETKEY"),
+        CommandEncodeFixture.command(.resetKey(mailbox: nil, mechanisms: [.internal]), "RESETKEY"),
+        CommandEncodeFixture.command(.resetKey(mailbox: .inbox, mechanisms: [.internal]), "RESETKEY \"INBOX\" INTERNAL"),
+        CommandEncodeFixture.command(.resetKey(mailbox: .inbox, mechanisms: [.internal, .init("test")]), "RESETKEY \"INBOX\" INTERNAL test"),
 
-            (.select(MailboxName("Events")), CommandEncodingOptions(), [#"SELECT "Events""#], #line),
-            (
-                .select(.inbox, [.basic(.init(key: "test", value: nil))]), CommandEncodingOptions(),
-                [#"SELECT "INBOX" (test)"#], #line
-            ),
-            (
-                .select(.inbox, [.basic(.init(key: "test1", value: nil)), .basic(.init(key: "test2", value: nil))]),
-                CommandEncodingOptions(), [#"SELECT "INBOX" (test1 test2)"#], #line
-            ),
-            (.examine(MailboxName("Events")), CommandEncodingOptions(), [#"EXAMINE "Events""#], #line),
-            (
-                .examine(.inbox, [.basic(.init(key: "test", value: nil))]),
-                CommandEncodingOptions(),
-                [#"EXAMINE "INBOX" (test)"#], #line
-            ),
-            (
-                .expunge,
-                CommandEncodingOptions(),
-                [#"EXPUNGE"#],
-                #line
-            ),
-            (.move(.set([1]), .inbox), CommandEncodingOptions(), ["MOVE 1 \"INBOX\""], #line),
-            (.id([:]), CommandEncodingOptions(), ["ID NIL"], #line),
-            (
-                .getMetadata(options: [], mailbox: .inbox, entries: ["a"]), CommandEncodingOptions(),
-                ["GETMETADATA \"INBOX\" (\"a\")"], #line
-            ),
-            (
-                .getMetadata(options: [.maxSize(123)], mailbox: .inbox, entries: ["a"]), CommandEncodingOptions(),
-                ["GETMETADATA (MAXSIZE 123) \"INBOX\" (\"a\")"], #line
-            ),
-            (
-                .setMetadata(mailbox: .inbox, entries: ["a": nil]), CommandEncodingOptions(),
-                ["SETMETADATA \"INBOX\" (\"a\" NIL)"], #line
-            ),
+        CommandEncodeFixture.command(.generateAuthorizedURL([.init(urlRump: "rump1", mechanism: .internal)]), "GENURLAUTH \"rump1\" INTERNAL"),
+        CommandEncodeFixture.command(.generateAuthorizedURL([.init(urlRump: "rump2", mechanism: .internal), .init(urlRump: "rump3", mechanism: .init("test"))]), "GENURLAUTH \"rump2\" INTERNAL \"rump3\" test"),
 
-            (
-                .fetch(.set([1...40]), [.uid, .internalDate], []), CommandEncodingOptions(),
-                ["FETCH 1:40 (UID INTERNALDATE)"], #line
-            ),
-            (
-                .fetch(
-                    .set([77]),
-                    [.uid, .bodySection(peek: true, .header, nil)],
-                    [.changedSince(.init(modificationSequence: 707_484_939_116_871_680))]
-                ), CommandEncodingOptions(), ["FETCH 77 (UID BODY.PEEK[HEADER]) (CHANGEDSINCE 707484939116871680)"],
-                #line
-            ),
+        CommandEncodeFixture.command(.namespace, #"NAMESPACE"#),
+        CommandEncodeFixture.command(.uidCopy(.set(.init(range: 363...1860)), MailboxName("Drafts")), #"UID COPY 363:1860 "Drafts""#),
+        CommandEncodeFixture.command(.uidMove(.set(.init(range: 1554...1554)), .inbox), #"UID MOVE 1554 "INBOX""#),
+        CommandEncodeFixture.command(.uidFetch(.lastCommand, [.uid, .flags], [.changedSince(.init(modificationSequence: 66_306_787))]), #"UID FETCH $ (UID FLAGS) (CHANGEDSINCE 66306787)"#),
+        CommandEncodeFixture.command(.uidSearch(key: SearchKey.answered, charset: "UTF-8", returnOptions: [.count, .max]), #"UID SEARCH RETURN (COUNT MAX) ANSWERED"#),
+        CommandEncodeFixture.command(.uidStore(.set(.init(range: 4_306...6_866)), [], .flags(.add(silent: true, list: [.answered]))), #"UID STORE 4306:6866 +FLAGS.SILENT (\Answered)"#),
+        CommandEncodeFixture.command(.uidExpunge(.set(.init(range: 5...73))), #"UID EXPUNGE 5:73"#),
+        CommandEncodeFixture.command(.uidExpunge(.lastCommand), #"UID EXPUNGE $"#),
 
-            (.resetKey(mailbox: nil, mechanisms: []), CommandEncodingOptions(), ["RESETKEY"], #line),
-            // no mailbox, so no mechanisms written
-            (.resetKey(mailbox: nil, mechanisms: [.internal]), CommandEncodingOptions(), ["RESETKEY"], #line),
-            (
-                .resetKey(mailbox: .inbox, mechanisms: [.internal]), CommandEncodingOptions(),
-                ["RESETKEY \"INBOX\" INTERNAL"], #line
-            ),
-            (
-                .resetKey(mailbox: .inbox, mechanisms: [.internal, .init("test")]), CommandEncodingOptions(),
-                ["RESETKEY \"INBOX\" INTERNAL test"], #line
-            ),
+        CommandEncodeFixture.command(.urlFetch(["test"]), "URLFETCH test"),
+        CommandEncodeFixture.command(.urlFetch(["test1", "test2"]), "URLFETCH test1 test2"),
 
-            (
-                .generateAuthorizedURL([.init(urlRump: "rump1", mechanism: .internal)]), CommandEncodingOptions(),
-                ["GENURLAUTH \"rump1\" INTERNAL"], #line
-            ),
-            (
-                .generateAuthorizedURL([
-                    .init(urlRump: "rump2", mechanism: .internal), .init(urlRump: "rump3", mechanism: .init("test")),
-                ]), CommandEncodingOptions(), ["GENURLAUTH \"rump2\" INTERNAL \"rump3\" test"], #line
-            ),
+        CommandEncodeFixture.command(.create(.inbox, []), "CREATE \"INBOX\""),
+        CommandEncodeFixture.command(.create(.inbox, [.attributes([.archive, .drafts, .flagged])]), "CREATE \"INBOX\" (USE (\\Archive \\Drafts \\Flagged))"),
+        CommandEncodeFixture.command(.compress(.deflate), "COMPRESS DEFLATE"),
+        CommandEncodeFixture.command(.uidBatches(batchSize: 2_000), "UIDBATCHES 2000"),
+        CommandEncodeFixture.command(.uidBatches(batchSize: 1_000, batchRange: 10...20), "UIDBATCHES 1000 10:20"),
+        CommandEncodeFixture.command(.getJMAPAccess, "GETJMAPACCESS"),
 
-            (
-                .namespace,
-                CommandEncodingOptions(),
-                [#"NAMESPACE"#],
-                #line
-            ),
-            (
-                .uidCopy(.set(.init(range: 363...1860)), MailboxName("Drafts")),
-                CommandEncodingOptions(),
-                [#"UID COPY 363:1860 "Drafts""#],
-                #line
-            ),
-            (
-                .uidMove(.set(.init(range: 1554...1554)), .inbox),
-                CommandEncodingOptions(),
-                [#"UID MOVE 1554 "INBOX""#],
-                #line
-            ),
-            (
-                .uidFetch(.lastCommand, [.uid, .flags], [.changedSince(.init(modificationSequence: 66_306_787))]),
-                CommandEncodingOptions(),
-                [#"UID FETCH $ (UID FLAGS) (CHANGEDSINCE 66306787)"#],
-                #line
-            ),
-            (
-                .uidSearch(key: SearchKey.answered, charset: "UTF-8", returnOptions: [.count, .max]),
-                CommandEncodingOptions(),
-                [#"UID SEARCH RETURN (COUNT MAX) ANSWERED"#],
-                #line
-            ),
-            (
-                .uidStore(.set(.init(range: 4_306...6_866)), [], .flags(.add(silent: true, list: [.answered]))),
-                CommandEncodingOptions(),
-                [#"UID STORE 4306:6866 +FLAGS.SILENT (\Answered)"#],
-                #line
-            ),
-            (
-                .uidExpunge(.set(.init(range: 5...73))),
-                CommandEncodingOptions(),
-                [#"UID EXPUNGE 5:73"#],
-                #line
-            ),
-            (
-                .uidExpunge(.lastCommand),
-                CommandEncodingOptions(),
-                [#"UID EXPUNGE $"#],
-                #line
-            ),
-
-            (.urlFetch(["test"]), CommandEncodingOptions(), ["URLFETCH test"], #line),
-            (.urlFetch(["test1", "test2"]), CommandEncodingOptions(), ["URLFETCH test1 test2"], #line),
-
-            (.create(.inbox, []), CommandEncodingOptions(), ["CREATE \"INBOX\""], #line),
-            (
-                .create(.inbox, [.attributes([.archive, .drafts, .flagged])]), CommandEncodingOptions(),
-                ["CREATE \"INBOX\" (USE (\\Archive \\Drafts \\Flagged))"], #line
-            ),
-            (.compress(.deflate), CommandEncodingOptions(), ["COMPRESS DEFLATE"], #line),
-            (.uidBatches(batchSize: 2_000), CommandEncodingOptions(), ["UIDBATCHES 2000"], #line),
-            (
-                .uidBatches(batchSize: 1_000, batchRange: 10...20), CommandEncodingOptions(), ["UIDBATCHES 1000 10:20"],
-                #line
-            ),
-            (.getJMAPAccess, CommandEncodingOptions(), ["GETJMAPACCESS"], #line),
-
-            // Custom
-
-            (.custom(name: "FOOBAR", payloads: []), CommandEncodingOptions(), ["FOOBAR"], #line),
-            (
-                .custom(name: "FOOBAR", payloads: [.verbatim(.init(string: "A B C"))]), CommandEncodingOptions(),
-                ["FOOBAR A B C"], #line
-            ),
-            (
-                .custom(name: "FOOBAR", payloads: [.verbatim(.init(string: "A")), .verbatim(.init(string: "B"))]),
-                CommandEncodingOptions(), ["FOOBAR AB"], #line
-            ),
-            (
-                .custom(name: "FOOBAR", payloads: [.literal(.init(string: "A"))]), CommandEncodingOptions(),
-                [#"FOOBAR "A""#], #line
-            ),
-            (
-                .custom(name: "FOOBAR", payloads: [.literal(.init(string: "A B C"))]), CommandEncodingOptions(),
-                [#"FOOBAR "A B C""#], #line
-            ),
-            (
-                .custom(name: "FOOBAR", payloads: [.literal(.init(string: "A")), .literal(.init(string: "B"))]),
-                CommandEncodingOptions(), [#"FOOBAR "A""B""#], #line
-            ),
-            (
-                .custom(
-                    name: "FOOBAR",
-                    payloads: [
-                        .literal(.init(string: "A")), .verbatim(.init(string: " ")), .literal(.init(string: "B")),
-                    ]
-                ), CommandEncodingOptions(), [#"FOOBAR "A" "B""#], #line
-            ),
-            (
-                .custom(name: "FOOBAR", payloads: [.literal(.init(string: "¶"))]), CommandEncodingOptions(),
-                ["FOOBAR {2}\r\n", "¶"], #line
-            ),
-        ]
-
-        for (test, options, expectedStrings, line) in inputs {
-            var encodeBuffer = CommandEncodeBuffer(buffer: ByteBuffer(), options: options, loggingMode: false)
-            let size = encodeBuffer.writeCommand(test)
-            self.testBuffer = encodeBuffer.buffer
-            XCTAssertEqual(size, expectedStrings.reduce(0) { $0 + $1.utf8.count }, line: line)
-            XCTAssertEqual(self.testBufferStrings, expectedStrings, line: line)
-        }
+        CommandEncodeFixture.command(.custom(name: "FOOBAR", payloads: []), "FOOBAR"),
+        CommandEncodeFixture.command(.custom(name: "FOOBAR", payloads: [.verbatim(.init(string: "A B C"))]), "FOOBAR A B C"),
+        CommandEncodeFixture.command(.custom(name: "FOOBAR", payloads: [.verbatim(.init(string: "A")), .verbatim(.init(string: "B"))]), "FOOBAR AB"),
+        CommandEncodeFixture.command(.custom(name: "FOOBAR", payloads: [.literal(.init(string: "A"))]), #"FOOBAR "A""#),
+        CommandEncodeFixture.command(.custom(name: "FOOBAR", payloads: [.literal(.init(string: "A B C"))]), #"FOOBAR "A B C""#),
+        CommandEncodeFixture.command(.custom(name: "FOOBAR", payloads: [.literal(.init(string: "A")), .literal(.init(string: "B"))]), #"FOOBAR "A""B""#),
+        CommandEncodeFixture.command(.custom(name: "FOOBAR", payloads: [.literal(.init(string: "A")), .verbatim(.init(string: " ")), .literal(.init(string: "B"))]), #"FOOBAR "A" "B""#),
+        CommandEncodeFixture.command(.custom(name: "FOOBAR", payloads: [.literal(.init(string: "¶"))]), expectedStrings: ["FOOBAR {2}\r\n", "¶"]),
+    ])
+    func encode(_ fixture: CommandEncodeFixture<Command>) {
+        fixture.checkEncoding()
     }
 }
+
+// MARK: -
+
+extension CommandEncodeFixture<Command> {
+    fileprivate static func command(
+        _ input: Command,
+        _ expectedString: String,
+        options: CommandEncodingOptions = CommandEncodingOptions()
+    ) -> Self {
+        CommandEncodeFixture(
+            input: input,
+            options: options,
+            expectedString: expectedString,
+            encoder: { $0.writeCommand($1) }
+        )
+    }
+
+    fileprivate static func command(
+        _ input: Command,
+        expectedStrings: [String],
+        options: CommandEncodingOptions = CommandEncodingOptions()
+    ) -> Self {
+        CommandEncodeFixture(
+            input: input,
+            options: options,
+            expectedStrings: expectedStrings,
+            encoder: { $0.writeCommand($1) }
+        )
+    }
+}
+

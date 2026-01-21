@@ -15,7 +15,23 @@
 import Foundation
 import NIO
 @testable import NIOIMAPCore
+import Testing
 import XCTest
+
+func expectEqualAndEqualHash<T>(
+    _ a: T,
+    _ b: T,
+    sourceLocation: SourceLocation = #_sourceLocation
+) where T: Hashable {
+    func hash(_ value: T) -> Int {
+        var hasher = Hasher()
+        value.hash(into: &hasher)
+        return hasher.finalize()
+    }
+    #expect(a == b, sourceLocation: sourceLocation)
+    #expect(a.hashValue == b.hashValue, sourceLocation: sourceLocation)
+    #expect(hash(a) == hash(b), sourceLocation: sourceLocation)
+}
 
 enum TestUtilities {}
 

@@ -14,60 +14,62 @@
 
 import NIO
 @_spi(NIOIMAPInternal) @testable import NIOIMAPCore
-import XCTest
+import Testing
 
-class MailboxAttribute_Tests: EncodeTestClass {}
-
-// MARK: - Encoding
-
-extension MailboxAttribute_Tests {
-    func testEncode() {
-        let inputs: [([MailboxAttribute], String, UInt)] = [
-            ([], "", #line),
-            ([MailboxAttribute.messageCount, .recentCount, .unseenCount], "MESSAGES RECENT UNSEEN", #line),
-            ([MailboxAttribute.appendLimit, .uidNext, .uidValidity], "APPENDLIMIT UIDNEXT UIDVALIDITY", #line),
-            ([MailboxAttribute.size], "SIZE", #line),
-            ([MailboxAttribute.highestModificationSequence, .messageCount], "HIGHESTMODSEQ MESSAGES", #line),
-            ([MailboxAttribute.mailboxID], "MAILBOXID", #line),
-        ]
-
-        for (test, expectedString, line) in inputs {
-            self.testBuffer.clear()
-            let size = self.testBuffer.writeMailboxAttributes(test)
-            XCTAssertEqual(size, expectedString.utf8.count, line: line)
-            XCTAssertEqual(self.testBufferString, expectedString, line: line)
-        }
+@Suite("MailboxAttribute")
+struct MailboxAttributeTests {
+    @Test(arguments: [
+        EncodeFixture.mailboxAttributes([], ""),
+        EncodeFixture.mailboxAttributes([MailboxAttribute.messageCount, .recentCount, .unseenCount], "MESSAGES RECENT UNSEEN"),
+        EncodeFixture.mailboxAttributes([MailboxAttribute.appendLimit, .uidNext, .uidValidity], "APPENDLIMIT UIDNEXT UIDVALIDITY"),
+        EncodeFixture.mailboxAttributes([MailboxAttribute.size], "SIZE"),
+        EncodeFixture.mailboxAttributes([MailboxAttribute.highestModificationSequence, .messageCount], "HIGHESTMODSEQ MESSAGES"),
+        EncodeFixture.mailboxAttributes([MailboxAttribute.mailboxID], "MAILBOXID"),
+    ])
+    func `encode attributes`(_ fixture: EncodeFixture<[MailboxAttribute]>) {
+        fixture.checkEncoding()
     }
 
-    func testEncode_status() {
-        let inputs: [(MailboxStatus, String, UInt)] = [
-            (.init(), "", #line),
-            (
-                .init(
-                    messageCount: 133701,
-                    recentCount: 255813,
-                    nextUID: 377003,
-                    uidValidity: 427421,
-                    unseenCount: 528028,
-                    size: 680543,
-                    highestModificationSequence: 797237,
-                    appendLimit: 86_254_193,
-                    mailboxID: "F2212ea87-6097-4256-9d51-71338625"
-                ),
-                "MESSAGES 133701 RECENT 255813 UIDNEXT 377003 UIDVALIDITY 427421 UNSEEN 528028 SIZE 680543 HIGHESTMODSEQ 797237 APPENDLIMIT 86254193 MAILBOXID (F2212ea87-6097-4256-9d51-71338625)",
-                #line
+    @Test(arguments: [
+        EncodeFixture.mailboxStatus(.init(), ""),
+        EncodeFixture.mailboxStatus(
+            .init(
+                messageCount: 133_701,
+                recentCount: 255_813,
+                nextUID: 377_003,
+                uidValidity: 427_421,
+                unseenCount: 528_028,
+                size: 680_543,
+                highestModificationSequence: 797_237,
+                appendLimit: 86_254_193,
+                mailboxID: "F2212ea87-6097-4256-9d51-71338625"
             ),
-            (
-                .init(messageCount: 133701, nextUID: 377003, uidValidity: 427421, appendLimit: 86_254_193),
-                "MESSAGES 133701 UIDNEXT 377003 UIDVALIDITY 427421 APPENDLIMIT 86254193",
-                #line
-            ),
-            (
-                .init(nextUID: 377003),
-                "UIDNEXT 377003",
-                #line
-            ),
-        ]
-        self.iterateInputs(inputs: inputs, encoder: { self.testBuffer.writeMailboxStatus($0) })
+            "MESSAGES 133701 RECENT 255813 UIDNEXT 377003 UIDVALIDITY 427421 UNSEEN 528028 SIZE 680543 HIGHESTMODSEQ 797237 APPENDLIMIT 86254193 MAILBOXID (F2212ea87-6097-4256-9d51-71338625)"
+        ),
+        EncodeFixture.mailboxStatus(
+            .init(messageCount: 133_701, nextUID: 377_003, uidValidity: 427_421, appendLimit: 86_254_193),
+            "MESSAGES 133701 UIDNEXT 377003 UIDVALIDITY 427421 APPENDLIMIT 86254193"
+        ),
+        EncodeFixture.mailboxStatus(
+            .init(nextUID: 377_003),
+            "UIDNEXT 377003"
+        ),
+    ])
+    func `encode status`(_ fixture: EncodeFixture<MailboxStatus>) {
+        fixture.checkEncoding()
+    }
+}
+
+// MARK: -
+
+extension EncodeFixture<[MailboxAttribute]> {
+    fileprivate static func mailboxAttributes(_ input: [MailboxAttribute], _ expectedString: String) -> Self {
+        EncodeFixture(input: input, bufferKind: .defaultServer, expectedString: expectedString, encoder: { $0.writeMailboxAttributes($1) })
+    }
+}
+
+extension EncodeFixture<MailboxStatus> {
+    fileprivate static func mailboxStatus(_ input: MailboxStatus, _ expectedString: String) -> Self {
+        EncodeFixture(input: input, bufferKind: .defaultServer, expectedString: expectedString, encoder: { $0.writeMailboxStatus($1) })
     }
 }

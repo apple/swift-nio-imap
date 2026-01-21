@@ -14,27 +14,26 @@
 
 import NIO
 @_spi(NIOIMAPInternal) @testable import NIOIMAPCore
-import XCTest
+import Testing
 
-class BodyExtensionTests: EncodeTestClass {}
+@Suite("BodyExtension")
+struct BodyExtensionTests {
+    @Test(arguments: [
+        EncodeFixture.bodyExtensions([.number(1)], "(1)"),
+        EncodeFixture.bodyExtensions([.string("apple")], "(\"apple\")"),
+        EncodeFixture.bodyExtensions([.string(nil)], "(NIL)"),
+        EncodeFixture.bodyExtensions([.number(1), .number(2), .string("three")], "(1 2 \"three\")"),
+        EncodeFixture.bodyExtensions([.number(1), .number(2), .string("three"), .string("four")], "(1 2 \"three\" \"four\")"),
+    ])
+    func encode(_ fixture: EncodeFixture<[BodyExtension]>) {
+        fixture.checkEncoding()
+    }
+}
 
-// MARK: - Encoding
+// MARK: -
 
-extension BodyExtensionTests {
-    func testEncode() {
-        let inputs: [([BodyExtension], String, UInt)] = [
-            ([.number(1)], "(1)", #line),
-            ([.string("apple")], "(\"apple\")", #line),
-            ([.string(nil)], "(NIL)", #line),
-            ([.number(1), .number(2), .string("three")], "(1 2 \"three\")", #line),
-            ([.number(1), .number(2), .string("three"), .string("four")], "(1 2 \"three\" \"four\")", #line),
-        ]
-
-        for (test, expectedString, line) in inputs {
-            self.testBuffer.clear()
-            let size = self.testBuffer.writeBodyExtensions(test)
-            XCTAssertEqual(size, expectedString.utf8.count, line: line)
-            XCTAssertEqual(self.testBufferString, expectedString, line: line)
-        }
+extension EncodeFixture<[BodyExtension]> {
+    fileprivate static func bodyExtensions(_ input: [BodyExtension], _ expectedString: String) -> Self {
+        EncodeFixture(input: input, bufferKind: .defaultServer, expectedString: expectedString, encoder: { $0.writeBodyExtensions($1) })
     }
 }
