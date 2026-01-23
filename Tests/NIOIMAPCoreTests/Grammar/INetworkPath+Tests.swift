@@ -14,21 +14,46 @@
 
 import NIO
 @_spi(NIOIMAPInternal) @testable import NIOIMAPCore
-import XCTest
+import Testing
 
-class NetworkPath_Tests: EncodeTestClass {}
+@Suite("NetworkPath")
+struct NetworkPathTests {
+    @Test(arguments: [
+        EncodeFixture.networkPath(
+            .init(server: .init(host: "localhost"), query: nil),
+            "//localhost/"
+        ),
+        EncodeFixture.networkPath(
+            .init(
+                server: .init(
+                    userAuthenticationMechanism: .init(encodedUser: .init(data: "user"), authenticationMechanism: nil),
+                    host: "mail.example.com"
+                ),
+                query: .messageList(.init(
+                    mailboxUIDValidity: .init(encodeMailbox: .init(mailbox: "INBOX"), uidValidity: nil),
+                    encodedSearch: nil
+                ))
+            ),
+            "//user@mail.example.com/INBOX"
+        ),
+    ])
+    func encode(_ fixture: EncodeFixture<NetworkPath>) {
+        fixture.checkEncoding()
+    }
+}
 
-// MARK: - IMAP
+// MARK: -
 
-extension NetworkPath_Tests {
-    func testEncode() {
-        let inputs: [(NetworkPath, String, UInt)] = [
-            (
-                .init(server: .init(host: "localhost"), query: nil),
-                "//localhost/",
-                #line
-            )
-        ]
-        self.iterateInputs(inputs: inputs, encoder: { self.testBuffer.writeNetworkPath($0) })
+extension EncodeFixture<NetworkPath> {
+    fileprivate static func networkPath(
+        _ input: NetworkPath,
+        _ expectedString: String
+    ) -> Self {
+        EncodeFixture(
+            input: input,
+            bufferKind: .defaultServer,
+            expectedString: expectedString,
+            encoder: { $0.writeNetworkPath($1) }
+        )
     }
 }

@@ -14,22 +14,43 @@
 
 import NIO
 @_spi(NIOIMAPInternal) @testable import NIOIMAPCore
-import XCTest
+import Testing
 
-class IURLAuth_Tests: EncodeTestClass {}
+@Suite("AuthenticatedURL")
+struct AuthenticatedURLTests {
+    @Test(arguments: [
+        EncodeFixture.authenticatedURL(
+            .init(
+                authenticatedURL: .init(access: .anonymous),
+                verifier: .init(urlAuthMechanism: .internal, encodedAuthenticationURL: .init(data: "test"))
+            ),
+            ";URLAUTH=anonymous:INTERNAL:test"
+        ),
+        EncodeFixture.authenticatedURL(
+            .init(
+                authenticatedURL: .init(access: .user(.init(data: "alice"))),
+                verifier: .init(urlAuthMechanism: .internal, encodedAuthenticationURL: .init(data: "verifier456"))
+            ),
+            ";URLAUTH=user+alice:INTERNAL:verifier456"
+        ),
+    ])
+    func encode(_ fixture: EncodeFixture<AuthenticatedURL>) {
+        fixture.checkEncoding()
+    }
+}
 
-// MARK: - IMAP
+// MARK: -
 
-extension IURLAuth_Tests {
-    func testEncode() {
-        let inputs: [(AuthenticatedURL, String, UInt)] = [
-            (
-                .init(
-                    authenticatedURL: .init(access: .anonymous),
-                    verifier: .init(urlAuthMechanism: .internal, encodedAuthenticationURL: .init(data: "test"))
-                ), ";URLAUTH=anonymous:INTERNAL:test", #line
-            )
-        ]
-        self.iterateInputs(inputs: inputs, encoder: { self.testBuffer.writeIAuthenticatedURL($0) })
+extension EncodeFixture<AuthenticatedURL> {
+    fileprivate static func authenticatedURL(
+        _ input: AuthenticatedURL,
+        _ expectedString: String
+    ) -> Self {
+        EncodeFixture(
+            input: input,
+            bufferKind: .defaultServer,
+            expectedString: expectedString,
+            encoder: { $0.writeIAuthenticatedURL($1) }
+        )
     }
 }

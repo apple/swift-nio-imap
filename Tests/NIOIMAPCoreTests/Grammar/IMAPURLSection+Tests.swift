@@ -14,24 +14,49 @@
 
 import NIO
 @_spi(NIOIMAPInternal) @testable import NIOIMAPCore
-import XCTest
+import Testing
 
-class URLMessageSection_Tests: EncodeTestClass {}
-
-// MARK: - IMAP
-
-extension URLMessageSection_Tests {
-    func testEncode_URLMessageSection() {
-        let inputs: [(URLMessageSection, String, UInt)] = [
-            (.init(encodedSection: .init(section: "test")), "/;SECTION=test", #line)
-        ]
-        self.iterateInputs(inputs: inputs, encoder: { self.testBuffer.writeURLMessageSection($0) })
+@Suite("URLMessageSection")
+struct URLMessageSectionTests {
+    @Test(arguments: [
+        EncodeFixture.urlMessageSection(.init(encodedSection: .init(section: "test")), "/;SECTION=test")
+    ])
+    func `encode URL message section`(_ fixture: EncodeFixture<URLMessageSection>) {
+        fixture.checkEncoding()
     }
 
-    func testEncode_URLMessageSectionOnly() {
-        let inputs: [(URLMessageSection, String, UInt)] = [
-            (.init(encodedSection: .init(section: "test")), ";SECTION=test", #line)
-        ]
-        self.iterateInputs(inputs: inputs, encoder: { self.testBuffer.writeURLMessageSectionOnly($0) })
+    @Test(arguments: [
+        EncodeFixture.urlMessageSectionOnly(.init(encodedSection: .init(section: "test")), ";SECTION=test")
+    ])
+    func `encode URL message section only`(_ fixture: EncodeFixture<URLMessageSection>) {
+        fixture.checkEncoding()
+    }
+}
+
+// MARK: -
+
+extension EncodeFixture<URLMessageSection> {
+    fileprivate static func urlMessageSection(
+        _ input: URLMessageSection,
+        _ expectedString: String
+    ) -> Self {
+        EncodeFixture(
+            input: input,
+            bufferKind: .defaultServer,
+            expectedString: expectedString,
+            encoder: { $0.writeURLMessageSection($1) }
+        )
+    }
+
+    fileprivate static func urlMessageSectionOnly(
+        _ input: URLMessageSection,
+        _ expectedString: String
+    ) -> Self {
+        EncodeFixture(
+            input: input,
+            bufferKind: .defaultServer,
+            expectedString: expectedString,
+            encoder: { $0.writeURLMessageSectionOnly($1) }
+        )
     }
 }

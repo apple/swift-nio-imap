@@ -14,17 +14,37 @@
 
 import NIO
 @_spi(NIOIMAPInternal) @testable import NIOIMAPCore
-import XCTest
+import Testing
 
-class AuthenticatedURLVerifier_Tests: EncodeTestClass {}
+@Suite("AuthenticatedURLVerifier")
+struct AuthenticatedURLVerifierTests {
+    @Test(arguments: [
+        EncodeFixture.authenticatedURLVerifier(
+            .init(urlAuthMechanism: .internal, encodedAuthenticationURL: .init(data: "test")),
+            ":INTERNAL:test"
+        ),
+        EncodeFixture.authenticatedURLVerifier(
+            .init(urlAuthMechanism: .internal, encodedAuthenticationURL: .init(data: "verifier123")),
+            ":INTERNAL:verifier123"
+        ),
+    ])
+    func encode(_ fixture: EncodeFixture<AuthenticatedURLVerifier>) {
+        fixture.checkEncoding()
+    }
+}
 
-// MARK: - IMAP
+// MARK: -
 
-extension AuthenticatedURLVerifier_Tests {
-    func testEncode() {
-        let inputs: [(AuthenticatedURLVerifier, String, UInt)] = [
-            (.init(urlAuthMechanism: .internal, encodedAuthenticationURL: .init(data: "test")), ":INTERNAL:test", #line)
-        ]
-        self.iterateInputs(inputs: inputs, encoder: { self.testBuffer.writeAuthenticatedURLVerifier($0) })
+extension EncodeFixture<AuthenticatedURLVerifier> {
+    fileprivate static func authenticatedURLVerifier(
+        _ input: AuthenticatedURLVerifier,
+        _ expectedString: String
+    ) -> Self {
+        EncodeFixture(
+            input: input,
+            bufferKind: .defaultServer,
+            expectedString: expectedString,
+            encoder: { $0.writeAuthenticatedURLVerifier($1) }
+        )
     }
 }

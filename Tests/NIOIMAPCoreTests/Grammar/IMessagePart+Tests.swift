@@ -14,56 +14,65 @@
 
 import NIO
 @_spi(NIOIMAPInternal) @testable import NIOIMAPCore
-import XCTest
+import Testing
 
-class MessagePath_Tests: EncodeTestClass {}
+@Suite("MessagePath")
+struct MessagePathTests {
+    @Test(arguments: [
+        EncodeFixture.messagePath(
+            .init(
+                mailboxReference: .init(encodeMailbox: .init(mailbox: "test")),
+                iUID: .init(uid: 123),
+                section: nil,
+                range: nil
+            ),
+            "test/;UID=123"
+        ),
+        EncodeFixture.messagePath(
+            .init(
+                mailboxReference: .init(encodeMailbox: .init(mailbox: "test")),
+                iUID: .init(uid: 123),
+                section: .init(encodedSection: .init(section: "section")),
+                range: nil
+            ),
+            "test/;UID=123/;SECTION=section"
+        ),
+        EncodeFixture.messagePath(
+            .init(
+                mailboxReference: .init(encodeMailbox: .init(mailbox: "test")),
+                iUID: .init(uid: 123),
+                section: nil,
+                range: .init(range: .init(offset: 123, length: 4))
+            ),
+            "test/;UID=123/;PARTIAL=123.4"
+        ),
+        EncodeFixture.messagePath(
+            .init(
+                mailboxReference: .init(encodeMailbox: .init(mailbox: "test")),
+                iUID: .init(uid: 123),
+                section: .init(encodedSection: .init(section: "section")),
+                range: .init(range: .init(offset: 123, length: 4))
+            ),
+            "test/;UID=123/;SECTION=section/;PARTIAL=123.4"
+        ),
+    ])
+    func encode(_ fixture: EncodeFixture<MessagePath>) {
+        fixture.checkEncoding()
+    }
+}
 
-// MARK: - IMAP
+// MARK: -
 
-extension MessagePath_Tests {
-    func testEncode() {
-        let inputs: [(MessagePath, String, UInt)] = [
-            (
-                .init(
-                    mailboxReference: .init(encodeMailbox: .init(mailbox: "test")),
-                    iUID: .init(uid: 123),
-                    section: nil,
-                    range: nil
-                ),
-                "test/;UID=123",
-                #line
-            ),
-            (
-                .init(
-                    mailboxReference: .init(encodeMailbox: .init(mailbox: "test")),
-                    iUID: .init(uid: 123),
-                    section: .init(encodedSection: .init(section: "section")),
-                    range: nil
-                ),
-                "test/;UID=123/;SECTION=section",
-                #line
-            ),
-            (
-                .init(
-                    mailboxReference: .init(encodeMailbox: .init(mailbox: "test")),
-                    iUID: .init(uid: 123),
-                    section: nil,
-                    range: .init(range: .init(offset: 123, length: 4))
-                ),
-                "test/;UID=123/;PARTIAL=123.4",
-                #line
-            ),
-            (
-                .init(
-                    mailboxReference: .init(encodeMailbox: .init(mailbox: "test")),
-                    iUID: .init(uid: 123),
-                    section: .init(encodedSection: .init(section: "section")),
-                    range: .init(range: .init(offset: 123, length: 4))
-                ),
-                "test/;UID=123/;SECTION=section/;PARTIAL=123.4",
-                #line
-            ),
-        ]
-        self.iterateInputs(inputs: inputs, encoder: { self.testBuffer.writeMessagePath($0) })
+extension EncodeFixture<MessagePath> {
+    fileprivate static func messagePath(
+        _ input: MessagePath,
+        _ expectedString: String
+    ) -> Self {
+        EncodeFixture(
+            input: input,
+            bufferKind: .defaultServer,
+            expectedString: expectedString,
+            encoder: { $0.writeMessagePath($1) }
+        )
     }
 }

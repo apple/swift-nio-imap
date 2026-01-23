@@ -14,30 +14,45 @@
 
 import NIO
 @_spi(NIOIMAPInternal) @testable import NIOIMAPCore
-import XCTest
+import Testing
 
-class AuthenticatedURLRump_Tests: EncodeTestClass {}
-
-// MARK: - IMAP
-
-extension AuthenticatedURLRump_Tests {
-    func testEncode() {
-        let inputs: [(AuthenticatedURLRump, String, UInt)] = [
-            (.init(access: .anonymous), ";URLAUTH=anonymous", #line),
-            (
-                .init(
-                    expire: .init(
-                        dateTime: .init(
-                            date: .init(year: 1234, month: 12, day: 23),
-                            time: .init(hour: 12, minute: 34, second: 56)
-                        )
-                    ),
-                    access: .authenticateUser
+@Suite("AuthenticatedURLRump")
+struct AuthenticatedURLRumpTests {
+    @Test(arguments: [
+        EncodeFixture.authenticatedURLRump(
+            .init(access: .anonymous),
+            ";URLAUTH=anonymous"
+        ),
+        EncodeFixture.authenticatedURLRump(
+            .init(
+                expire: .init(
+                    dateTime: .init(
+                        date: .init(year: 1234, month: 12, day: 23),
+                        time: .init(hour: 12, minute: 34, second: 56)
+                    )
                 ),
-                ";EXPIRE=1234-12-23T12:34:56;URLAUTH=authuser",
-                #line
+                access: .authenticateUser
             ),
-        ]
-        self.iterateInputs(inputs: inputs, encoder: { self.testBuffer.writeAuthenticatedURLRump($0) })
+            ";EXPIRE=1234-12-23T12:34:56;URLAUTH=authuser"
+        ),
+    ])
+    func encode(_ fixture: EncodeFixture<AuthenticatedURLRump>) {
+        fixture.checkEncoding()
+    }
+}
+
+// MARK: -
+
+extension EncodeFixture<AuthenticatedURLRump> {
+    fileprivate static func authenticatedURLRump(
+        _ input: AuthenticatedURLRump,
+        _ expectedString: String
+    ) -> Self {
+        EncodeFixture(
+            input: input,
+            bufferKind: .defaultServer,
+            expectedString: expectedString,
+            encoder: { $0.writeAuthenticatedURLRump($1) }
+        )
     }
 }

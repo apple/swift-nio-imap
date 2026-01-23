@@ -14,19 +14,41 @@
 
 import NIO
 @_spi(NIOIMAPInternal) @testable import NIOIMAPCore
-import XCTest
+import Testing
 
-class UserAuthenticationMechanism_Tests: EncodeTestClass {}
+@Suite("UserAuthenticationMechanism")
+struct UserAuthenticationMechanismTests {
+    @Test(arguments: [
+        EncodeFixture.userAuthenticationMechanism(
+            .init(encodedUser: .init(data: "test"), authenticationMechanism: .any),
+            "test;AUTH=*"
+        ),
+        EncodeFixture.userAuthenticationMechanism(
+            .init(encodedUser: .init(data: "test"), authenticationMechanism: nil),
+            "test"
+        ),
+        EncodeFixture.userAuthenticationMechanism(
+            .init(encodedUser: nil, authenticationMechanism: .any),
+            ";AUTH=*"
+        ),
+    ])
+    func encode(_ fixture: EncodeFixture<UserAuthenticationMechanism>) {
+        fixture.checkEncoding()
+    }
+}
 
-// MARK: - IMAP
+// MARK: -
 
-extension UserAuthenticationMechanism_Tests {
-    func testEncode() {
-        let inputs: [(UserAuthenticationMechanism, String, UInt)] = [
-            (.init(encodedUser: .init(data: "test"), authenticationMechanism: .any), "test;AUTH=*", #line),
-            (.init(encodedUser: .init(data: "test"), authenticationMechanism: nil), "test", #line),
-            (.init(encodedUser: nil, authenticationMechanism: .any), ";AUTH=*", #line),
-        ]
-        self.iterateInputs(inputs: inputs, encoder: { self.testBuffer.writeUserAuthenticationMechanism($0) })
+extension EncodeFixture<UserAuthenticationMechanism> {
+    fileprivate static func userAuthenticationMechanism(
+        _ input: UserAuthenticationMechanism,
+        _ expectedString: String
+    ) -> Self {
+        EncodeFixture(
+            input: input,
+            bufferKind: .defaultServer,
+            expectedString: expectedString,
+            encoder: { $0.writeUserAuthenticationMechanism($1) }
+        )
     }
 }
