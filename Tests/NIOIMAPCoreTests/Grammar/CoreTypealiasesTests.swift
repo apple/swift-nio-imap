@@ -14,25 +14,31 @@
 
 import NIO
 @_spi(NIOIMAPInternal) @testable import NIOIMAPCore
-import XCTest
+import Testing
 
-class CoreTypealiasesTests: EncodeTestClass {}
-
-// MARK: - nstring imapEncoded
-
-extension CoreTypealiasesTests {
-    func testNil() {
-        let expected = "NIL"
-        let input: String? = nil
-        let size = self.testBuffer.writeNString(input)
-        XCTAssertEqual(size, expected.utf8.count)
-        XCTAssertEqual(expected, self.testBufferString)
+@Suite("Core Type Aliases")
+struct CoreTypealiasesTests {
+    @Test(arguments: [
+        EncodeFixture.nstring(nil, "NIL"),
+        EncodeFixture.nstring("hello", #""hello""#),
+    ])
+    func encode(_ fixture: EncodeFixture<String?>) {
+        fixture.checkEncoding()
     }
+}
 
-    func testNotNil() {
-        let expected = "\"hello\""
-        let size = self.testBuffer.writeNString("hello")
-        XCTAssertEqual(size, expected.utf8.count)
-        XCTAssertEqual(expected, self.testBufferString)
+// MARK: -
+
+extension EncodeFixture<String?> {
+    fileprivate static func nstring(
+        _ input: String?,
+        _ expectedString: String
+    ) -> Self {
+        EncodeFixture(
+            input: input,
+            bufferKind: .defaultServer,
+            expectedString: expectedString,
+            encoder: { $0.writeNString($1) }
+        )
     }
 }

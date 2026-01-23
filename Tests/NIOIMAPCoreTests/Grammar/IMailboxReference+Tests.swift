@@ -14,18 +14,37 @@
 
 import NIO
 @_spi(NIOIMAPInternal) @testable import NIOIMAPCore
-import XCTest
+import Testing
 
-class EncodedMailboxUIDValidity_Tests: EncodeTestClass {}
+@Suite("Mailbox UID Validity")
+struct EncodedMailboxUIDValidityTests {
+    @Test(arguments: [
+        EncodeFixture.mailboxUIDValidity(
+            .init(encodeMailbox: .init(mailbox: "mailbox"), uidValidity: nil),
+            "mailbox"
+        ),
+        EncodeFixture.mailboxUIDValidity(
+            .init(encodeMailbox: .init(mailbox: "mailbox"), uidValidity: 123),
+            "mailbox;UIDVALIDITY=123"
+        ),
+    ])
+    func encode(_ fixture: EncodeFixture<MailboxUIDValidity>) {
+        fixture.checkEncoding()
+    }
+}
 
-// MARK: - IMAP
+// MARK: -
 
-extension EncodedMailboxUIDValidity_Tests {
-    func testEncode() {
-        let inputs: [(MailboxUIDValidity, String, UInt)] = [
-            (.init(encodeMailbox: .init(mailbox: "mailbox"), uidValidity: nil), "mailbox", #line),
-            (.init(encodeMailbox: .init(mailbox: "mailbox"), uidValidity: 123), "mailbox;UIDVALIDITY=123", #line),
-        ]
-        self.iterateInputs(inputs: inputs, encoder: { self.testBuffer.writeEncodedMailboxUIDValidity($0) })
+extension EncodeFixture<MailboxUIDValidity> {
+    fileprivate static func mailboxUIDValidity(
+        _ input: MailboxUIDValidity,
+        _ expectedString: String
+    ) -> Self {
+        EncodeFixture(
+            input: input,
+            bufferKind: .defaultServer,
+            expectedString: expectedString,
+            encoder: { $0.writeEncodedMailboxUIDValidity($1) }
+        )
     }
 }

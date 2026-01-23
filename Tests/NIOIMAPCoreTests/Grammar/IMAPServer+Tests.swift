@@ -14,31 +14,46 @@
 
 import NIO
 @_spi(NIOIMAPInternal) @testable import NIOIMAPCore
-import XCTest
+import Testing
 
-class IMAPServer_Tests: EncodeTestClass {}
-
-// MARK: - IMAP
-
-extension IMAPServer_Tests {
-    func testEncode() {
-        let inputs: [(IMAPServer, String, UInt)] = [
-            (.init(host: "localhost"), "localhost", #line),
-            (
-                .init(
-                    userAuthenticationMechanism: .init(encodedUser: nil, authenticationMechanism: .any),
-                    host: "localhost"
-                ), ";AUTH=*@localhost", #line
+@Suite("IMAP Server")
+struct IMAPServerTests {
+    @Test(arguments: [
+        EncodeFixture.imapServer(.init(host: "localhost"), "localhost"),
+        EncodeFixture.imapServer(
+            .init(
+                userAuthenticationMechanism: .init(encodedUser: nil, authenticationMechanism: .any),
+                host: "localhost"
             ),
-            (.init(host: "localhost", port: 1234), "localhost:1234", #line),
-            (
-                .init(
-                    userAuthenticationMechanism: .init(encodedUser: nil, authenticationMechanism: .any),
-                    host: "localhost",
-                    port: 1234
-                ), ";AUTH=*@localhost:1234", #line
+            ";AUTH=*@localhost"
+        ),
+        EncodeFixture.imapServer(.init(host: "localhost", port: 1234), "localhost:1234"),
+        EncodeFixture.imapServer(
+            .init(
+                userAuthenticationMechanism: .init(encodedUser: nil, authenticationMechanism: .any),
+                host: "localhost",
+                port: 1234
             ),
-        ]
-        self.iterateInputs(inputs: inputs, encoder: { self.testBuffer.writeIMAPServer($0) })
+            ";AUTH=*@localhost:1234"
+        ),
+    ])
+    func encode(_ fixture: EncodeFixture<IMAPServer>) {
+        fixture.checkEncoding()
+    }
+}
+
+// MARK: -
+
+extension EncodeFixture<IMAPServer> {
+    fileprivate static func imapServer(
+        _ input: IMAPServer,
+        _ expectedString: String
+    ) -> Self {
+        EncodeFixture(
+            input: input,
+            bufferKind: .defaultServer,
+            expectedString: expectedString,
+            encoder: { $0.writeIMAPServer($1) }
+        )
     }
 }

@@ -14,15 +14,32 @@
 
 import NIO
 @_spi(NIOIMAPInternal) @testable import NIOIMAPCore
-import XCTest
+import Testing
 
-class EntryTypeRequest_Tests: EncodeTestClass {
-    func testEncoding() {
-        let inputs: [(EntryKindRequest, String, UInt)] = [
-            (.all, "all", #line),
-            (.private, "priv", #line),
-            (.shared, "shared", #line),
-        ]
-        self.iterateInputs(inputs: inputs, encoder: { self.testBuffer.writeEntryKindRequest($0) })
+@Suite("Entry Type Request")
+struct EntryTypeRequestTests {
+    @Test(arguments: [
+        EncodeFixture.entryKindRequest(.all, "all"),
+        EncodeFixture.entryKindRequest(.private, "priv"),
+        EncodeFixture.entryKindRequest(.shared, "shared"),
+    ])
+    func encode(_ fixture: EncodeFixture<EntryKindRequest>) {
+        fixture.checkEncoding()
+    }
+}
+
+// MARK: -
+
+extension EncodeFixture<EntryKindRequest> {
+    fileprivate static func entryKindRequest(
+        _ input: EntryKindRequest,
+        _ expectedString: String
+    ) -> Self {
+        EncodeFixture(
+            input: input,
+            bufferKind: .defaultServer,
+            expectedString: expectedString,
+            encoder: { $0.writeEntryKindRequest($1) }
+        )
     }
 }

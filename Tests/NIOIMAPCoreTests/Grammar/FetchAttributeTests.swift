@@ -14,116 +14,146 @@
 
 import NIO
 @_spi(NIOIMAPInternal) @testable import NIOIMAPCore
-import XCTest
+import Testing
 
-class FetchAttributeTests: EncodeTestClass {}
+@Suite("FetchAttribute")
+struct FetchAttributeTests {
+    @Test(arguments: [
+        EncodeFixture.fetchAttribute(.envelope, "ENVELOPE"),
+        EncodeFixture.fetchAttribute(.flags, "FLAGS"),
+        EncodeFixture.fetchAttribute(.uid, "UID"),
+        EncodeFixture.fetchAttribute(.internalDate, "INTERNALDATE"),
+        EncodeFixture.fetchAttribute(.rfc822Header, "RFC822.HEADER"),
+        EncodeFixture.fetchAttribute(.rfc822Size, "RFC822.SIZE"),
+        EncodeFixture.fetchAttribute(.rfc822Text, "RFC822.TEXT"),
+        EncodeFixture.fetchAttribute(.rfc822, "RFC822"),
+        EncodeFixture.fetchAttribute(.bodyStructure(extensions: false), "BODY"),
+        EncodeFixture.fetchAttribute(.bodyStructure(extensions: true), "BODYSTRUCTURE"),
+        EncodeFixture.fetchAttribute(.bodySection(peek: false, .init(kind: .header), nil), "BODY[HEADER]"),
+        EncodeFixture.fetchAttribute(.bodySection(peek: true, .init(kind: .header), nil), "BODY.PEEK[HEADER]"),
+        EncodeFixture.fetchAttribute(.binarySize(section: [1]), "BINARY.SIZE[1]"),
+        EncodeFixture.fetchAttribute(.binary(peek: true, section: [1, 2, 3], partial: nil), "BINARY.PEEK[1.2.3]"),
+        EncodeFixture.fetchAttribute(.binary(peek: false, section: [3, 4, 5], partial: nil), "BINARY[3.4.5]"),
+        EncodeFixture.fetchAttribute(.modificationSequenceValue(.zero), "0"),
+        EncodeFixture.fetchAttribute(.modificationSequenceValue(3), "3"),
+        EncodeFixture.fetchAttribute(.modificationSequence, "MODSEQ"),
+        EncodeFixture.fetchAttribute(.gmailMessageID, "X-GM-MSGID"),
+        EncodeFixture.fetchAttribute(.gmailThreadID, "X-GM-THRID"),
+        EncodeFixture.fetchAttribute(.gmailLabels, "X-GM-LABELS"),
+        EncodeFixture.fetchAttribute(.preview(lazy: false), "PREVIEW"),
+        EncodeFixture.fetchAttribute(.preview(lazy: true), "PREVIEW (LAZY)"),
+        EncodeFixture.fetchAttribute(.emailID, "EMAILID"),
+        EncodeFixture.fetchAttribute(.threadID, "THREADID"),
+    ])
+    func encode(_ fixture: EncodeFixture<FetchAttribute>) {
+        fixture.checkEncoding()
+    }
 
-// MARK: - IMAP
+    @Test(arguments: [
+        ReflectionFixture<FetchAttribute>(sut: .envelope, expected: "ENVELOPE"),
+        ReflectionFixture<FetchAttribute>(sut: .flags, expected: "FLAGS"),
+        ReflectionFixture<FetchAttribute>(sut: .uid, expected: "UID"),
+        ReflectionFixture<FetchAttribute>(sut: .internalDate, expected: "INTERNALDATE"),
+        ReflectionFixture<FetchAttribute>(sut: .rfc822Header, expected: "RFC822.HEADER"),
+        ReflectionFixture<FetchAttribute>(sut: .rfc822Size, expected: "RFC822.SIZE"),
+        ReflectionFixture<FetchAttribute>(sut: .rfc822Text, expected: "RFC822.TEXT"),
+        ReflectionFixture<FetchAttribute>(sut: .rfc822, expected: "RFC822"),
+        ReflectionFixture<FetchAttribute>(sut: .bodyStructure(extensions: false), expected: "BODY"),
+        ReflectionFixture<FetchAttribute>(sut: .bodyStructure(extensions: true), expected: "BODYSTRUCTURE"),
+        ReflectionFixture<FetchAttribute>(sut: .bodySection(peek: false, .init(kind: .header), nil), expected: "BODY[HEADER]"),
+        ReflectionFixture<FetchAttribute>(sut: .bodySection(peek: false, .init(kind: .header), nil), expected: "BODY[HEADER]"),
+        ReflectionFixture<FetchAttribute>(
+            sut: .bodySection(peek: true, .init(kind: .headerFields(["message-id", "in-reply-to"])), nil),
+            expected: #"BODY.PEEK[HEADER.FIELDS ("message-id" "in-reply-to")]"#
+        ),
+        ReflectionFixture<FetchAttribute>(sut: .binarySize(section: [1]), expected: "BINARY.SIZE[1]"),
+        ReflectionFixture<FetchAttribute>(sut: .binary(peek: true, section: [1, 2, 3], partial: nil), expected: "BINARY.PEEK[1.2.3]"),
+        ReflectionFixture<FetchAttribute>(sut: .binary(peek: false, section: [3, 4, 5], partial: nil), expected: "BINARY[3.4.5]"),
+        ReflectionFixture<FetchAttribute>(sut: .modificationSequenceValue(.zero), expected: "0"),
+        ReflectionFixture<FetchAttribute>(sut: .modificationSequenceValue(3), expected: "3"),
+        ReflectionFixture<FetchAttribute>(sut: .modificationSequence, expected: "MODSEQ"),
+        ReflectionFixture<FetchAttribute>(sut: .gmailMessageID, expected: "X-GM-MSGID"),
+        ReflectionFixture<FetchAttribute>(sut: .gmailThreadID, expected: "X-GM-THRID"),
+        ReflectionFixture<FetchAttribute>(sut: .gmailLabels, expected: "X-GM-LABELS"),
+        ReflectionFixture<FetchAttribute>(sut: .preview(lazy: false), expected: "PREVIEW"),
+        ReflectionFixture<FetchAttribute>(sut: .preview(lazy: true), expected: "PREVIEW (LAZY)"),
+        ReflectionFixture<FetchAttribute>(sut: .emailID, expected: "EMAILID"),
+        ReflectionFixture<FetchAttribute>(sut: .threadID, expected: "THREADID"),
+    ])
+    func `custom debug string convertible`(_ fixture: ReflectionFixture<FetchAttribute>) {
+        fixture.check()
+    }
 
-extension FetchAttributeTests {
-    func testEncode() {
-        let inputs: [(FetchAttribute, CommandEncodingOptions, String, UInt)] = [
-            (.envelope, .rfc3501, "ENVELOPE", #line),
-            (.flags, .rfc3501, "FLAGS", #line),
-            (.uid, .rfc3501, "UID", #line),
-            (.internalDate, .rfc3501, "INTERNALDATE", #line),
-            (.rfc822Header, .rfc3501, "RFC822.HEADER", #line),
-            (.rfc822Size, .rfc3501, "RFC822.SIZE", #line),
-            (.rfc822Text, .rfc3501, "RFC822.TEXT", #line),
-            (.rfc822, .rfc3501, "RFC822", #line),
-            (.bodyStructure(extensions: false), .rfc3501, "BODY", #line),
-            (.bodyStructure(extensions: true), .rfc3501, "BODYSTRUCTURE", #line),
-            (.bodySection(peek: false, .init(kind: .header), nil), .rfc3501, "BODY[HEADER]", #line),
-            (.bodySection(peek: true, .init(kind: .header), nil), .rfc3501, "BODY.PEEK[HEADER]", #line),
-            (.binarySize(section: [1]), .rfc3501, "BINARY.SIZE[1]", #line),
-            (.binary(peek: true, section: [1, 2, 3], partial: nil), .rfc3501, "BINARY.PEEK[1.2.3]", #line),
-            (.binary(peek: false, section: [3, 4, 5], partial: nil), .rfc3501, "BINARY[3.4.5]", #line),
-            (.modificationSequenceValue(.zero), .rfc3501, "0", #line),
-            (.modificationSequenceValue(3), .rfc3501, "3", #line),
-            (.modificationSequence, .rfc3501, "MODSEQ", #line),
-            (.gmailMessageID, .rfc3501, "X-GM-MSGID", #line),
-            (.gmailThreadID, .rfc3501, "X-GM-THRID", #line),
-            (.gmailLabels, .rfc3501, "X-GM-LABELS", #line),
-            (.preview(lazy: false), .rfc3501, "PREVIEW", #line),
-            (.preview(lazy: true), .rfc3501, "PREVIEW (LAZY)", #line),
-            (.emailID, .rfc3501, "EMAILID", #line),
-            (.threadID, .rfc3501, "THREADID", #line),
-        ]
-        self.iterateInputs(
-            inputs: inputs.map { ($0, $1, [$2], $3) },
-            encoder: { self.testBuffer.writeFetchAttribute($0) }
+    @Test(arguments: [
+        EncodeFixture.fetchAttributeList([.envelope], "(ENVELOPE)"),
+        EncodeFixture.fetchAttributeList([.flags, .internalDate, .rfc822Size], "FAST"),
+        EncodeFixture.fetchAttributeList([.internalDate, .rfc822Size, .flags], "FAST"),
+        EncodeFixture.fetchAttributeList([.flags, .internalDate, .rfc822Size, .envelope], "ALL"),
+        EncodeFixture.fetchAttributeList([.rfc822Size, .flags, .envelope, .internalDate], "ALL"),
+        EncodeFixture.fetchAttributeList(
+            [.flags, .internalDate, .rfc822Size, .envelope, .bodyStructure(extensions: false)],
+            "FULL"
+        ),
+        EncodeFixture.fetchAttributeList(
+            [.flags, .bodyStructure(extensions: false), .rfc822Size, .internalDate, .envelope],
+            "FULL"
+        ),
+        EncodeFixture.fetchAttributeList(
+            [.flags, .bodyStructure(extensions: true), .rfc822Size, .internalDate, .envelope],
+            "(FLAGS BODYSTRUCTURE RFC822.SIZE INTERNALDATE ENVELOPE)"
+        ),
+        EncodeFixture.fetchAttributeList(
+            [.flags, .bodyStructure(extensions: false), .rfc822Size, .internalDate, .envelope, .uid],
+            "(FLAGS BODY RFC822.SIZE INTERNALDATE ENVELOPE UID)"
+        ),
+        EncodeFixture.fetchAttributeList([.gmailLabels, .gmailMessageID, .gmailThreadID], "(X-GM-LABELS X-GM-MSGID X-GM-THRID)"),
+        EncodeFixture.fetchAttributeList([.preview(lazy: false)], "(PREVIEW)"),
+        EncodeFixture.fetchAttributeList([.preview(lazy: true)], "(PREVIEW (LAZY))"),
+    ])
+    func `encode list`(_ fixture: EncodeFixture<[FetchAttribute]>) {
+        fixture.checkEncoding()
+    }
+}
+
+// MARK: -
+
+struct ReflectionFixture<T: Sendable>: Sendable, CustomTestStringConvertible {
+    let sut: T
+    let expected: String
+
+    var testDescription: String { expected }
+
+    func check() {
+        #expect(String(reflecting: sut) == expected)
+    }
+}
+
+extension EncodeFixture<FetchAttribute> {
+    fileprivate static func fetchAttribute(
+        _ input: FetchAttribute,
+        _ expectedString: String,
+        options: CommandEncodingOptions = CommandEncodingOptions()
+    ) -> Self {
+        EncodeFixture(
+            input: input,
+            bufferKind: .client(options),
+            expectedString: expectedString,
+            encoder: { $0.writeFetchAttribute($1) }
         )
     }
+}
 
-    // Some tests may have empty fields as debug strings should use
-    // the logging mode.
-    func testCustomDebugStringConvertible() {
-        let inputs: [(FetchAttribute, String, UInt)] = [
-            (.envelope, "ENVELOPE", #line),
-            (.flags, "FLAGS", #line),
-            (.uid, "UID", #line),
-            (.internalDate, "INTERNALDATE", #line),
-            (.rfc822Header, "RFC822.HEADER", #line),
-            (.rfc822Size, "RFC822.SIZE", #line),
-            (.rfc822Text, "RFC822.TEXT", #line),
-            (.rfc822, "RFC822", #line),
-            (.bodyStructure(extensions: false), "BODY", #line),
-            (.bodyStructure(extensions: true), "BODYSTRUCTURE", #line),
-            (.bodySection(peek: false, .init(kind: .header), nil), "BODY[HEADER]", #line),
-            (.bodySection(peek: false, .init(kind: .header), nil), "BODY[HEADER]", #line),
-            (
-                .bodySection(peek: true, .init(kind: .headerFields(["message-id", "in-reply-to"])), nil),
-                #"BODY.PEEK[HEADER.FIELDS ("message-id" "in-reply-to")]"#, #line
-            ),
-            (.binarySize(section: [1]), "BINARY.SIZE[1]", #line),
-            (.binary(peek: true, section: [1, 2, 3], partial: nil), "BINARY.PEEK[1.2.3]", #line),
-            (.binary(peek: false, section: [3, 4, 5], partial: nil), "BINARY[3.4.5]", #line),
-            (.modificationSequenceValue(.zero), "0", #line),
-            (.modificationSequenceValue(3), "3", #line),
-            (.modificationSequence, "MODSEQ", #line),
-            (.gmailMessageID, "X-GM-MSGID", #line),
-            (.gmailThreadID, "X-GM-THRID", #line),
-            (.gmailLabels, "X-GM-LABELS", #line),
-            (.preview(lazy: false), "PREVIEW", #line),
-            (.preview(lazy: true), "PREVIEW (LAZY)", #line),
-            (.emailID, "EMAILID", #line),
-            (.threadID, "THREADID", #line),
-        ]
-        for (attr, expected, line) in inputs {
-            XCTAssertEqual(String(reflecting: attr), expected, line: line)
-        }
-    }
-
-    func testEncodeList() {
-        let inputs: [([FetchAttribute], CommandEncodingOptions, String, UInt)] = [
-            ([.envelope], .rfc3501, "(ENVELOPE)", #line),
-            ([.flags, .internalDate, .rfc822Size], .rfc3501, "FAST", #line),
-            ([.internalDate, .rfc822Size, .flags], .rfc3501, "FAST", #line),
-            ([.flags, .internalDate, .rfc822Size, .envelope], .rfc3501, "ALL", #line),
-            ([.rfc822Size, .flags, .envelope, .internalDate], .rfc3501, "ALL", #line),
-            (
-                [.flags, .internalDate, .rfc822Size, .envelope, .bodyStructure(extensions: false)], .rfc3501, "FULL",
-                #line
-            ),
-            (
-                [.flags, .bodyStructure(extensions: false), .rfc822Size, .internalDate, .envelope], .rfc3501, "FULL",
-                #line
-            ),
-            (
-                [.flags, .bodyStructure(extensions: true), .rfc822Size, .internalDate, .envelope], .rfc3501,
-                "(FLAGS BODYSTRUCTURE RFC822.SIZE INTERNALDATE ENVELOPE)", #line
-            ),
-            (
-                [.flags, .bodyStructure(extensions: false), .rfc822Size, .internalDate, .envelope, .uid], .rfc3501,
-                "(FLAGS BODY RFC822.SIZE INTERNALDATE ENVELOPE UID)", #line
-            ),
-            ([.gmailLabels, .gmailMessageID, .gmailThreadID], .rfc3501, "(X-GM-LABELS X-GM-MSGID X-GM-THRID)", #line),
-            ([.preview(lazy: false)], .rfc3501, "(PREVIEW)", #line),
-            ([.preview(lazy: true)], .rfc3501, "(PREVIEW (LAZY))", #line),
-        ]
-        self.iterateInputs(
-            inputs: inputs.map { ($0, $1, [$2], $3) },
-            encoder: { self.testBuffer.writeFetchAttributeList($0) }
+extension EncodeFixture<[FetchAttribute]> {
+    fileprivate static func fetchAttributeList(
+        _ input: [FetchAttribute],
+        _ expectedString: String,
+        options: CommandEncodingOptions = CommandEncodingOptions()
+    ) -> Self {
+        EncodeFixture(
+            input: input,
+            bufferKind: .client(options),
+            expectedString: expectedString,
+            encoder: { $0.writeFetchAttributeList($1) }
         )
     }
 }

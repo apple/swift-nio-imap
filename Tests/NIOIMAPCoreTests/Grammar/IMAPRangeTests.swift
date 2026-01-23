@@ -14,46 +14,49 @@
 
 import NIO
 @_spi(NIOIMAPInternal) @testable import NIOIMAPCore
-import XCTest
+import Testing
 
-class IMAPRangeTests: EncodeTestClass {}
-
-// MARK: - IMAP
-
-extension IMAPRangeTests {
-    func testIMAPEncoded_from() {
-        let expected = "5:*"
-        let size = self.testBuffer.writeSequenceRange(MessageIdentifierRange<SequenceNumber>(5...))
-        XCTAssertEqual(size, expected.utf8.count)
-        XCTAssertEqual(expected, self.testBufferString)
+@Suite("IMAP Range")
+struct IMAPRangeTests {
+    @Test(arguments: [
+        EncodeFixture.sequenceRange(MessageIdentifierRange<SequenceNumber>(5...), "5:*"),
+        EncodeFixture.sequenceRange(MessageIdentifierRange<SequenceNumber>(2...4), "2:4"),
+    ])
+    func encode(_ fixture: EncodeFixture<MessageIdentifierRange<SequenceNumber>>) {
+        fixture.checkEncoding()
     }
 
-    func testIMAPEncoded_range() {
-        let expected = "2:4"
-        let size = self.testBuffer.writeSequenceRange(MessageIdentifierRange<SequenceNumber>(2...4))
-        XCTAssertEqual(size, expected.utf8.count)
-        XCTAssertEqual(expected, self.testBufferString)
+    @Test func `range from`() {
+        let sut = MessageIdentifierRange<SequenceNumber>(7...)
+        #expect(sut.range.lowerBound == 7)
+        #expect(sut.range.upperBound == .max)
+    }
+
+    @Test func `range to`() {
+        let sut = MessageIdentifierRange<SequenceNumber>(...7)
+        #expect(sut.range.lowerBound == 1)
+        #expect(sut.range.upperBound == 7)
+    }
+
+    @Test func `range closed`() {
+        let sut = MessageIdentifierRange<SequenceNumber>(3...4)
+        #expect(sut.range.lowerBound == 3)
+        #expect(sut.range.upperBound == 4)
     }
 }
 
-// MARK: - Range operators
+// MARK: -
 
-extension IMAPRangeTests {
-    func testRange_from() {
-        let sut = MessageIdentifierRange<SequenceNumber>(7...)
-        XCTAssertEqual(sut.range.lowerBound, 7)
-        XCTAssertEqual(sut.range.upperBound, .max)
-    }
-
-    func testRange_to() {
-        let sut = MessageIdentifierRange<SequenceNumber>(...7)
-        XCTAssertEqual(sut.range.lowerBound, 1)
-        XCTAssertEqual(sut.range.upperBound, 7)
-    }
-
-    func testRange_closed() {
-        let sut = MessageIdentifierRange<SequenceNumber>(3...4)
-        XCTAssertEqual(sut.range.lowerBound, 3)
-        XCTAssertEqual(sut.range.upperBound, 4)
+extension EncodeFixture<MessageIdentifierRange<SequenceNumber>> {
+    fileprivate static func sequenceRange(
+        _ input: MessageIdentifierRange<SequenceNumber>,
+        _ expectedString: String
+    ) -> Self {
+        EncodeFixture(
+            input: input,
+            bufferKind: .defaultServer,
+            expectedString: expectedString,
+            encoder: { $0.writeSequenceRange($1) }
+        )
     }
 }

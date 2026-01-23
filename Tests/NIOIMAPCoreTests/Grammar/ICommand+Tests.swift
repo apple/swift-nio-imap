@@ -14,35 +14,53 @@
 
 import NIO
 @_spi(NIOIMAPInternal) @testable import NIOIMAPCore
-import XCTest
+import Testing
 
-class URLCommand_Tests: EncodeTestClass {}
-
-// MARK: - IMAP
-
-extension URLCommand_Tests {
-    func testEncode() {
-        let inputs: [(URLCommand, String, UInt)] = [
-            (.messageList(.init(mailboxUIDValidity: .init(encodeMailbox: .init(mailbox: "test")))), "test", #line),
-            (
-                .fetch(
-                    path: .init(mailboxReference: .init(encodeMailbox: .init(mailbox: "test")), iUID: .init(uid: 123)),
-                    authenticatedURL: nil
-                ), "test/;UID=123", #line
+@Suite("URL Command")
+struct URLCommandTests {
+    @Test(arguments: [
+        EncodeFixture.urlCommand(
+            .messageList(.init(mailboxUIDValidity: .init(encodeMailbox: .init(mailbox: "test")))),
+            "test"
+        ),
+        EncodeFixture.urlCommand(
+            .fetch(
+                path: .init(mailboxReference: .init(encodeMailbox: .init(mailbox: "test")), iUID: .init(uid: 123)),
+                authenticatedURL: nil
             ),
-            (
-                .fetch(
-                    path: .init(mailboxReference: .init(encodeMailbox: .init(mailbox: "test")), iUID: .init(uid: 123)),
-                    authenticatedURL: .init(
-                        authenticatedURL: .init(access: .anonymous),
-                        verifier: .init(
-                            urlAuthMechanism: .internal,
-                            encodedAuthenticationURL: .init(data: "01234567890123456789012345678901")
-                        )
+            "test/;UID=123"
+        ),
+        EncodeFixture.urlCommand(
+            .fetch(
+                path: .init(mailboxReference: .init(encodeMailbox: .init(mailbox: "test")), iUID: .init(uid: 123)),
+                authenticatedURL: .init(
+                    authenticatedURL: .init(access: .anonymous),
+                    verifier: .init(
+                        urlAuthMechanism: .internal,
+                        encodedAuthenticationURL: .init(data: "01234567890123456789012345678901")
                     )
-                ), "test/;UID=123;URLAUTH=anonymous:INTERNAL:01234567890123456789012345678901", #line
+                )
             ),
-        ]
-        self.iterateInputs(inputs: inputs, encoder: { self.testBuffer.writeURLCommand($0) })
+            "test/;UID=123;URLAUTH=anonymous:INTERNAL:01234567890123456789012345678901"
+        ),
+    ])
+    func encode(_ fixture: EncodeFixture<URLCommand>) {
+        fixture.checkEncoding()
+    }
+}
+
+// MARK: -
+
+extension EncodeFixture<URLCommand> {
+    fileprivate static func urlCommand(
+        _ input: URLCommand,
+        _ expectedString: String
+    ) -> Self {
+        EncodeFixture(
+            input: input,
+            bufferKind: .defaultServer,
+            expectedString: expectedString,
+            encoder: { $0.writeURLCommand($1) }
+        )
     }
 }
