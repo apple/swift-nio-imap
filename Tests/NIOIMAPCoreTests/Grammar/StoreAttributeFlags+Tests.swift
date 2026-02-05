@@ -14,28 +14,32 @@
 
 import NIO
 @_spi(NIOIMAPInternal) @testable import NIOIMAPCore
-import XCTest
+import Testing
 
-class StoreAttributeFlags_Tests: EncodeTestClass {}
+@Suite("StoreFlags")
+struct StoreAttributeFlagsTests {
+    @Test(arguments: [
+        EncodeFixture.storeFlags(.add(silent: true, list: [.answered]), "+FLAGS.SILENT (\\Answered)"),
+        EncodeFixture.storeFlags(.add(silent: false, list: [.draft]), "+FLAGS (\\Draft)"),
+        EncodeFixture.storeFlags(.remove(silent: true, list: [.deleted]), "-FLAGS.SILENT (\\Deleted)"),
+        EncodeFixture.storeFlags(.remove(silent: false, list: [.flagged]), "-FLAGS (\\Flagged)"),
+        EncodeFixture.storeFlags(.replace(silent: true, list: [.seen]), "FLAGS.SILENT (\\Seen)"),
+        EncodeFixture.storeFlags(.replace(silent: false, list: [.deleted]), "FLAGS (\\Deleted)"),
+    ])
+    func encode(_ fixture: EncodeFixture<StoreFlags>) {
+        fixture.checkEncoding()
+    }
+}
 
-// MARK: - Encoding
+// MARK: -
 
-extension StoreAttributeFlags_Tests {
-    func testEncode() {
-        let inputs: [(StoreFlags, String, UInt)] = [
-            (.add(silent: true, list: [.answered]), "+FLAGS.SILENT (\\Answered)", #line),
-            (.add(silent: false, list: [.draft]), "+FLAGS (\\Draft)", #line),
-            (.remove(silent: true, list: [.deleted]), "-FLAGS.SILENT (\\Deleted)", #line),
-            (.remove(silent: false, list: [.flagged]), "-FLAGS (\\Flagged)", #line),
-            (.replace(silent: true, list: [.seen]), "FLAGS.SILENT (\\Seen)", #line),
-            (.replace(silent: false, list: [.deleted]), "FLAGS (\\Deleted)", #line),
-        ]
-
-        for (test, expectedString, line) in inputs {
-            self.testBuffer.clear()
-            let size = self.testBuffer.writeStoreAttributeFlags(test)
-            XCTAssertEqual(size, expectedString.utf8.count, line: line)
-            XCTAssertEqual(self.testBufferString, expectedString, line: line)
-        }
+extension EncodeFixture<StoreFlags> {
+    fileprivate static func storeFlags(_ input: StoreFlags, _ expectedString: String) -> Self {
+        EncodeFixture(
+            input: input,
+            bufferKind: .defaultServer,
+            expectedString: expectedString,
+            encoder: { $0.writeStoreAttributeFlags($1) }
+        )
     }
 }

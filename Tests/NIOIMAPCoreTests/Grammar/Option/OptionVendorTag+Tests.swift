@@ -14,23 +14,30 @@
 
 import NIO
 @_spi(NIOIMAPInternal) @testable import NIOIMAPCore
-import XCTest
+import Testing
 
-class OptionVendorTag_Tests: EncodeTestClass {}
+@Suite("KeyValue<String, String>")
+struct OptionVendorTagTests {
+    @Test(arguments: [
+        EncodeFixture.optionVendorTag(.init(key: "some", value: "thing"), "some-thing"),
+    ])
+    func encode(_ fixture: EncodeFixture<KeyValue<String, String>>) {
+        fixture.checkEncoding()
+    }
+}
 
-// MARK: - Encoding
+// MARK: -
 
-extension OptionVendorTag_Tests {
-    func testEncode() {
-        let inputs: [(KeyValue<String, String>, String, UInt)] = [
-            (.init(key: "some", value: "thing"), "some-thing", #line)
-        ]
-
-        for (test, expectedString, line) in inputs {
-            self.testBuffer.clear()
-            let size = self.testBuffer.writeOptionVendorTag(test)
-            XCTAssertEqual(size, expectedString.utf8.count, line: line)
-            XCTAssertEqual(self.testBufferString, expectedString, line: line)
-        }
+extension EncodeFixture<KeyValue<String, String>> {
+    fileprivate static func optionVendorTag(
+        _ input: KeyValue<String, String>,
+        _ expectedString: String
+    ) -> Self {
+        EncodeFixture(
+            input: input,
+            bufferKind: .defaultServer,
+            expectedString: expectedString,
+            encoder: { $0.writeOptionVendorTag($1) }
+        )
     }
 }

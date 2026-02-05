@@ -14,23 +14,29 @@
 
 import NIO
 @_spi(NIOIMAPInternal) @testable import NIOIMAPCore
-import XCTest
+import Testing
 
-class OptionValue_Tests: EncodeTestClass {}
+@Suite("OptionValueComp")
+struct OptionValueTests {
+    @Test(arguments: [
+        EncodeFixture.optionValue(.string("test"), #"("test")"#),
+        EncodeFixture.optionValue(.array([.string("a"), .string("b")]), #"(("a" "b"))"#),
+        EncodeFixture.optionValue(.array([.string("a"), .array([.string("E"), .string("F")]), .string("b")]), #"(("a" ("E" "F") "b"))"#),
+    ])
+    func encode(_ fixture: EncodeFixture<OptionValueComp>) {
+        fixture.checkEncoding()
+    }
+}
 
-// MARK: - Encoding
+// MARK: -
 
-extension OptionValue_Tests {
-    func testEncode() {
-        let inputs: [(OptionValueComp, String, UInt)] = [
-            (.string("test"), "(\"test\")", #line)
-        ]
-
-        for (test, expectedString, line) in inputs {
-            self.testBuffer.clear()
-            let size = self.testBuffer.writeOptionValue(test)
-            XCTAssertEqual(size, expectedString.utf8.count, line: line)
-            XCTAssertEqual(self.testBufferString, expectedString, line: line)
-        }
+extension EncodeFixture<OptionValueComp> {
+    fileprivate static func optionValue(_ input: OptionValueComp, _ expectedString: String) -> Self {
+        EncodeFixture(
+            input: input,
+            bufferKind: .defaultServer,
+            expectedString: expectedString,
+            encoder: { $0.writeOptionValue($1) }
+        )
     }
 }

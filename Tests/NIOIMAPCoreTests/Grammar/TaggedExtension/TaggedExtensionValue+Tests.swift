@@ -14,24 +14,30 @@
 
 import NIO
 @_spi(NIOIMAPInternal) @testable import NIOIMAPCore
-import XCTest
+import Testing
 
-class TaggedExtensionValue_Tests: EncodeTestClass {}
+@Suite("ParameterValue")
+struct TaggedExtensionValueTests {
+    @Test(arguments: [
+        EncodeFixture.parameterValue(.sequence(.set([123])), "123"),
+        EncodeFixture.parameterValue(.sequence(.set([123, 124, 125])), "123:125"),
+        EncodeFixture.parameterValue(.sequence(.set([316_999, 810_120, 880_169])), "316999,810120,880169"),
+        EncodeFixture.parameterValue(.comp(["testComp"]), "((\"testComp\"))"),
+    ])
+    func encode(_ fixture: EncodeFixture<ParameterValue>) {
+        fixture.checkEncoding()
+    }
+}
 
-// MARK: - Encoding
+// MARK: -
 
-extension TaggedExtensionValue_Tests {
-    func testEncode() {
-        let inputs: [(ParameterValue, String, UInt)] = [
-            (.sequence(.set([123])), "123", #line),
-            (.comp(["testComp"]), "((\"testComp\"))", #line),
-        ]
-
-        for (test, expectedString, line) in inputs {
-            self.testBuffer.clear()
-            let size = self.testBuffer.writeParameterValue(test)
-            XCTAssertEqual(size, expectedString.utf8.count, line: line)
-            XCTAssertEqual(self.testBufferString, expectedString, line: line)
-        }
+extension EncodeFixture<ParameterValue> {
+    fileprivate static func parameterValue(_ input: ParameterValue, _ expectedString: String) -> Self {
+        EncodeFixture(
+            input: input,
+            bufferKind: .defaultServer,
+            expectedString: expectedString,
+            encoder: { $0.writeParameterValue($1) }
+        )
     }
 }
