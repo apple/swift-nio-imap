@@ -14,108 +14,128 @@
 
 import NIO
 @_spi(NIOIMAPInternal) @testable import NIOIMAPCore
-import XCTest
+import Testing
 
-class BodySinglepartTests: EncodeTestClass {}
-
-// MARK: - Encoding
+@Suite("BodyStructure.Singlepart")
+struct BodySinglepartTests {}
 
 extension BodySinglepartTests {
-    func testEncode() {
-        let inputs: [(BodyStructure.Singlepart, String, UInt)] = [
-            (
-                .init(
-                    kind: .basic(.init(topLevel: .application, sub: "jpeg")),
-                    fields: .init(parameters: [:], id: nil, contentDescription: nil, encoding: .base64, octetCount: 6),
-                    extension: nil
-                ),
-                #""APPLICATION" "JPEG" NIL NIL NIL "BASE64" 6"#,
-                #line
+    @Test(arguments: [
+        EncodeFixture.bodySinglepart(
+            .init(
+                kind: .basic(.init(topLevel: .application, sub: "jpeg")),
+                fields: .init(parameters: [:], id: nil, contentDescription: nil, encoding: .base64, octetCount: 6),
+                extension: nil
             ),
-            (
-                .init(
-                    kind: .basic(.init(topLevel: .application, sub: "jpeg")),
-                    fields: .init(parameters: [:], id: nil, contentDescription: nil, encoding: .base64, octetCount: 7),
-                    extension: .init(digest: "md5", dispositionAndLanguage: nil)
-                ),
-                #""APPLICATION" "JPEG" NIL NIL NIL "BASE64" 7 "md5""#,
-                #line
+            #""APPLICATION" "JPEG" NIL NIL NIL "BASE64" 6"#
+        ),
+        EncodeFixture.bodySinglepart(
+            .init(
+                kind: .basic(.init(topLevel: .application, sub: "jpeg")),
+                fields: .init(parameters: [:], id: nil, contentDescription: nil, encoding: .base64, octetCount: 7),
+                extension: .init(digest: "md5", dispositionAndLanguage: nil)
             ),
-            (
-                .init(
-                    kind: .text(.init(mediaSubtype: "html", lineCount: 5)),
-                    fields: .init(parameters: [:], id: nil, contentDescription: nil, encoding: .base64, octetCount: 6),
-                    extension: nil
-                ),
-                #""TEXT" "HTML" NIL NIL NIL "BASE64" 6 5"#,
-                #line
+            #""APPLICATION" "JPEG" NIL NIL NIL "BASE64" 7 "md5""#
+        ),
+        EncodeFixture.bodySinglepart(
+            .init(
+                kind: .text(.init(mediaSubtype: "html", lineCount: 5)),
+                fields: .init(parameters: [:], id: nil, contentDescription: nil, encoding: .base64, octetCount: 6),
+                extension: nil
             ),
-            (
-                .init(
-                    kind: .message(
-                        .init(
-                            message: .rfc822,
-                            envelope: .init(
-                                date: "date",
-                                subject: nil,
-                                from: [],
-                                sender: [],
-                                reply: [],
-                                to: [],
-                                cc: [],
-                                bcc: [],
-                                inReplyTo: nil,
-                                messageID: nil
-                            ),
-                            body: .singlepart(
-                                .init(
-                                    kind: .text(.init(mediaSubtype: "subtype", lineCount: 5)),
-                                    fields: .init(
-                                        parameters: [:],
-                                        id: nil,
-                                        contentDescription: nil,
-                                        encoding: .base64,
-                                        octetCount: 6
-                                    ),
-                                    extension: nil
-                                )
-                            ),
-                            lineCount: 8
-                        )
-                    ),
-                    fields: .init(parameters: [:], id: nil, contentDescription: nil, encoding: .base64, octetCount: 6),
-                    extension: nil
+            #""TEXT" "HTML" NIL NIL NIL "BASE64" 6 5"#
+        ),
+        EncodeFixture.bodySinglepart(
+            .init(
+                kind: .message(
+                    .init(
+                        message: .rfc822,
+                        envelope: .init(
+                            date: "date",
+                            subject: nil,
+                            from: [],
+                            sender: [],
+                            reply: [],
+                            to: [],
+                            cc: [],
+                            bcc: [],
+                            inReplyTo: nil,
+                            messageID: nil
+                        ),
+                        body: .singlepart(
+                            .init(
+                                kind: .text(.init(mediaSubtype: "subtype", lineCount: 5)),
+                                fields: .init(
+                                    parameters: [:],
+                                    id: nil,
+                                    contentDescription: nil,
+                                    encoding: .base64,
+                                    octetCount: 6
+                                ),
+                                extension: nil
+                            )
+                        ),
+                        lineCount: 8
+                    )
                 ),
-                #""MESSAGE" "RFC822" NIL NIL NIL "BASE64" 6 ("date" NIL NIL NIL NIL NIL NIL NIL NIL NIL) ("TEXT" "SUBTYPE" NIL NIL NIL "BASE64" 6 5) 8"#,
-                #line
+                fields: .init(parameters: [:], id: nil, contentDescription: nil, encoding: .base64, octetCount: 6),
+                extension: nil
             ),
-        ]
-
-        for (test, expectedString, line) in inputs {
-            self.testBuffer.clear()
-            let size = self.testBuffer.writeBodySinglepart(test)
-            XCTAssertEqual(size, expectedString.utf8.count, line: line)
-            XCTAssertEqual(self.testBufferString, expectedString, line: line)
-        }
+            #""MESSAGE" "RFC822" NIL NIL NIL "BASE64" 6 ("date" NIL NIL NIL NIL NIL NIL NIL NIL NIL) ("TEXT" "SUBTYPE" NIL NIL NIL "BASE64" 6 5) 8"#
+        ),
+    ])
+    func encode(_ fixture: EncodeFixture<BodyStructure.Singlepart>) {
+        fixture.checkEncoding()
     }
 
-    func testEncode_extension() {
-        let inputs: [(BodyStructure.Singlepart.Extension, String, UInt)] = [
-            (.init(digest: nil, dispositionAndLanguage: nil), "NIL", #line),
-            (.init(digest: "md5", dispositionAndLanguage: nil), "\"md5\"", #line),
-            (
-                .init(
-                    digest: "md5",
-                    dispositionAndLanguage: .init(disposition: .init(kind: "string", parameters: [:]), language: nil)
-                ), "\"md5\" (\"string\" NIL)", #line
+    @Test(arguments: [
+        EncodeFixture.bodySinglepartExtension(
+            .init(digest: nil, dispositionAndLanguage: nil),
+            "NIL"
+        ),
+        EncodeFixture.bodySinglepartExtension(
+            .init(digest: "md5", dispositionAndLanguage: nil),
+            "\"md5\""
+        ),
+        EncodeFixture.bodySinglepartExtension(
+            .init(
+                digest: "md5",
+                dispositionAndLanguage: .init(disposition: .init(kind: "string", parameters: [:]), language: nil)
             ),
-        ]
+            "\"md5\" (\"string\" NIL)"
+        ),
+    ])
+    func `encode extension`(_ fixture: EncodeFixture<BodyStructure.Singlepart.Extension>) {
+        fixture.checkEncoding()
+    }
+}
 
-        for (test, expectedString, line) in inputs {
-            self.testBuffer.clear()
-            let size = self.testBuffer.writeBodyExtensionSinglePart(test)
-            XCTAssertEqual(size, expectedString.utf8.count, line: line)
-            XCTAssertEqual(self.testBufferString, expectedString, line: line)
-        }
+// MARK: -
+
+extension EncodeFixture<BodyStructure.Singlepart> {
+    fileprivate static func bodySinglepart(
+        _ input: BodyStructure.Singlepart,
+        _ expectedString: String
+    ) -> Self {
+        EncodeFixture(
+            input: input,
+            bufferKind: .defaultServer,
+            expectedString: expectedString,
+            encoder: { $0.writeBodySinglepart($1) }
+        )
+    }
+}
+
+extension EncodeFixture<BodyStructure.Singlepart.Extension> {
+    fileprivate static func bodySinglepartExtension(
+        _ input: BodyStructure.Singlepart.Extension,
+        _ expectedString: String
+    ) -> Self {
+        EncodeFixture(
+            input: input,
+            bufferKind: .defaultServer,
+            expectedString: expectedString,
+            encoder: { $0.writeBodyExtensionSinglePart($1) }
+        )
     }
 }
