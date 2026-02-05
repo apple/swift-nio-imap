@@ -14,22 +14,19 @@
 
 import NIO
 @_spi(NIOIMAPInternal) @testable import NIOIMAPCore
-import XCTest
+import Testing
 
-class MessageIdentifierRange_Tests: EncodeTestClass {}
-
-// MARK: - Conversion
-
-extension MessageIdentifierRange_Tests {
-    func testConvert_sequenceNumber() {
+@Suite("MessageIdentifierRange")
+struct MessageIdentifierRangeTests {
+    @Test func `convert to sequence number`() {
         let input = MessageIdentifierRange<UnknownMessageIdentifier>(UnknownMessageIdentifier(1)...2)
         let output = MessageIdentifierRange<SequenceNumber>(input)
-        XCTAssertEqual(output, 1...2)
+        #expect(output == 1...2)
     }
 
-    func testConvert_uid() {
+    @Test func `convert to UID`() {
         let input = MessageIdentifierRange<UnknownMessageIdentifier>(UnknownMessageIdentifier(5)...6)
         let output = MessageIdentifierRange<UID>(input)
-        XCTAssertEqual(output, 5...6)
+        #expect(output == 5...6)
     }
 }

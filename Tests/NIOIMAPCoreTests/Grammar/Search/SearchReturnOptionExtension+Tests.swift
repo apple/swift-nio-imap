@@ -14,24 +14,37 @@
 
 import NIO
 @_spi(NIOIMAPInternal) @testable import NIOIMAPCore
-import XCTest
+import Testing
 
-class SearchReturnOptionExtension_Tests: EncodeTestClass {}
+@Suite("SearchReturnOptionExtension")
+struct SearchReturnOptionExtensionTests {
+    @Test(arguments: [
+        EncodeFixture.searchReturnOptionExtension(
+            .init(key: "modifier", value: nil),
+            "modifier"
+        ),
+        EncodeFixture.searchReturnOptionExtension(
+            .init(key: "modifier", value: .sequence(.set([4]))),
+            "modifier 4"
+        ),
+    ])
+    func encode(_ fixture: EncodeFixture<KeyValue<String, ParameterValue?>>) {
+        fixture.checkEncoding()
+    }
+}
 
-// MARK: - Encoding
+// MARK: -
 
-extension SearchReturnOptionExtension_Tests {
-    func testEncode() {
-        let inputs: [(KeyValue<String, ParameterValue?>, String, UInt)] = [
-            (.init(key: "modifier", value: nil), "modifier", #line),
-            (.init(key: "modifier", value: .sequence(.set([4]))), "modifier 4", #line),
-        ]
-
-        for (test, expectedString, line) in inputs {
-            self.testBuffer.clear()
-            let size = self.testBuffer.writeSearchReturnOptionExtension(test)
-            XCTAssertEqual(size, expectedString.utf8.count, line: line)
-            XCTAssertEqual(self.testBufferString, expectedString, line: line)
-        }
+extension EncodeFixture<KeyValue<String, ParameterValue?>> {
+    fileprivate static func searchReturnOptionExtension(
+        _ input: KeyValue<String, ParameterValue?>,
+        _ expectedString: String
+    ) -> Self {
+        EncodeFixture(
+            input: input,
+            bufferKind: .defaultServer,
+            expectedString: expectedString,
+            encoder: { $0.writeSearchReturnOptionExtension($1) }
+        )
     }
 }

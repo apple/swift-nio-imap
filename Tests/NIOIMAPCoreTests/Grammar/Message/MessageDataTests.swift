@@ -14,27 +14,34 @@
 
 import NIO
 @_spi(NIOIMAPInternal) @testable import NIOIMAPCore
-import XCTest
+import Testing
 
-class MessageDataTests: EncodeTestClass {}
+@Suite("MessageData")
+struct MessageDataTests {
+    @Test(arguments: [
+        EncodeFixture.messageData(.expunge(123), "123 EXPUNGE"),
+        EncodeFixture.messageData(.vanished(.all), "VANISHED 1:*"),
+        EncodeFixture.messageData(.vanishedEarlier(.all), "VANISHED (EARLIER) 1:*"),
+        EncodeFixture.messageData(.generateAuthorizedURL(["test"]), #"GENURLAUTH "test""#),
+        EncodeFixture.messageData(.generateAuthorizedURL(["test1", "test2"]), #"GENURLAUTH "test1" "test2""#),
+    ])
+    func encode(_ fixture: EncodeFixture<MessageData>) {
+        fixture.checkEncoding()
+    }
+}
 
-// MARK: - Encoding
+// MARK: -
 
-extension MessageDataTests {
-    func testEncode() {
-        let inputs: [(MessageData, String, UInt)] = [
-            (.expunge(123), "123 EXPUNGE", #line),
-            (.vanished(.all), "VANISHED 1:*", #line),
-            (.vanishedEarlier(.all), "VANISHED (EARLIER) 1:*", #line),
-            (.generateAuthorizedURL(["test"]), "GENURLAUTH \"test\"", #line),
-            (.generateAuthorizedURL(["test1", "test2"]), "GENURLAUTH \"test1\" \"test2\"", #line),
-        ]
-
-        for (test, expectedString, line) in inputs {
-            self.testBuffer.clear()
-            let size = self.testBuffer.writeMessageData(test)
-            XCTAssertEqual(size, expectedString.utf8.count, line: line)
-            XCTAssertEqual(self.testBufferString, expectedString, line: line)
-        }
+extension EncodeFixture<MessageData> {
+    fileprivate static func messageData(
+        _ input: MessageData,
+        _ expectedString: String
+    ) -> Self {
+        EncodeFixture(
+            input: input,
+            bufferKind: .defaultServer,
+            expectedString: expectedString,
+            encoder: { $0.writeMessageData($1) }
+        )
     }
 }

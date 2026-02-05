@@ -14,29 +14,49 @@
 
 import NIO
 @_spi(NIOIMAPInternal) @testable import NIOIMAPCore
-import XCTest
+import Testing
 
-class ModifierSequenceValue_Tests: EncodeTestClass {
-    func testLossyConversionFromInteger() {
-        XCTAssertEqual(ModificationSequenceValue(exactly: 0)?.value, 0)
-        XCTAssertEqual(ModificationSequenceValue(exactly: 100 as Int64)?.value, 100)
-        XCTAssertEqual(ModificationSequenceValue(exactly: 100 as UInt64)?.value, 100)
-        XCTAssertEqual(ModificationSequenceValue(exactly: Int64.max)?.value, UInt64(Int64.max))
+@Suite("ModificationSequenceValue")
+struct ModificationSequenceValueTests {
+    @Test func `lossy conversion from integer`() {
+        #expect(ModificationSequenceValue(exactly: 0)?.value == 0)
+        #expect(ModificationSequenceValue(exactly: 100 as Int64)?.value == 100)
+        #expect(ModificationSequenceValue(exactly: 100 as UInt64)?.value == 100)
+        #expect(ModificationSequenceValue(exactly: Int64.max)?.value == UInt64(Int64.max))
 
-        XCTAssertNil(ModificationSequenceValue(exactly: -1))
-        XCTAssertNil(ModificationSequenceValue(exactly: UInt64(Int64.max) + 1))
-        XCTAssertNil(ModificationSequenceValue(exactly: UInt64.max))
+        #expect(ModificationSequenceValue(exactly: -1) == nil)
+        #expect(ModificationSequenceValue(exactly: UInt64(Int64.max) + 1) == nil)
+        #expect(ModificationSequenceValue(exactly: UInt64.max) == nil)
     }
 
-    func testModifierSequenceValue_encode() {
-        let inputs: [(ModificationSequenceValue, String)] = ClosedRange(uncheckedBounds: (0, 10000)).map { num in
-            (.init(integerLiteral: num), "\(num)")
-        }
+    @Test(arguments: [
+        EncodeFixture.modificationSequenceValue(.init(integerLiteral: 0), "0"),
+        EncodeFixture.modificationSequenceValue(.init(integerLiteral: 1), "1"),
+        EncodeFixture.modificationSequenceValue(.init(integerLiteral: 10), "10"),
+        EncodeFixture.modificationSequenceValue(.init(integerLiteral: 100), "100"),
+        EncodeFixture.modificationSequenceValue(.init(integerLiteral: 1000), "1000"),
+        EncodeFixture.modificationSequenceValue(.init(integerLiteral: 5000), "5000"),
+        EncodeFixture.modificationSequenceValue(.init(integerLiteral: 9999), "9999"),
+        EncodeFixture.modificationSequenceValue(.init(integerLiteral: 10000), "10000"),
+        EncodeFixture.modificationSequenceValue(ModificationSequenceValue(UInt64(Int64.max)), "\(Int64.max)"),
+    ])
+    func encode(_ fixture: EncodeFixture<ModificationSequenceValue>) {
+        fixture.checkEncoding()
+    }
+}
 
-        for (test, expectedString) in inputs {
-            self.testBuffer.clear()
-            self.testBuffer.writeModificationSequenceValue(test)
-            XCTAssertEqual(self.testBufferString, expectedString)
-        }
+// MARK: -
+
+extension EncodeFixture<ModificationSequenceValue> {
+    fileprivate static func modificationSequenceValue(
+        _ input: ModificationSequenceValue,
+        _ expectedString: String
+    ) -> Self {
+        EncodeFixture(
+            input: input,
+            bufferKind: .defaultServer,
+            expectedString: expectedString,
+            encoder: { $0.writeModificationSequenceValue($1) }
+        )
     }
 }
