@@ -14,168 +14,171 @@
 
 import NIO
 @testable import NIOIMAPCore
-import XCTest
+import Testing
 
-class MailboxName_Tests: EncodeTestClass {}
-
-// MARK: - MailboxPath
-
-extension MailboxName_Tests {
-    func testInit() {
+@Suite("MailboxPath")
+private struct MailboxPathTests {
+    @Test func `initialization with various path separator options`() {
         let test1 = try! MailboxPath(name: .init("box"), pathSeparator: nil)
-        XCTAssertEqual(test1.name, .init("box"))
-        XCTAssertEqual(test1.pathSeparator, nil)
+        #expect(test1.name == .init("box"))
+        #expect(test1.pathSeparator == nil)
 
         let test2 = try! MailboxPath(name: .init("box"))
-        XCTAssertEqual(test2.name, .init("box"))
-        XCTAssertEqual(test2.pathSeparator, nil)
+        #expect(test2.name == .init("box"))
+        #expect(test2.pathSeparator == nil)
 
         let test3 = try! MailboxPath(name: .init("box"), pathSeparator: "/")
-        XCTAssertEqual(test3.name, .init("box"))
-        XCTAssertEqual(test3.pathSeparator, "/")
+        #expect(test3.name == .init("box"))
+        #expect(test3.pathSeparator == "/")
     }
 
-    func testMakeSubMailboxWithDisplayName() {
-        let inputs: [(MailboxPath, String, MailboxPath, UInt)] = [
-            (
-                try! .init(name: .init("box"), pathSeparator: "/"),
-                "£",
-                try! .init(name: .init("box/&AKM-"), pathSeparator: "/"),
-                #line
-            )
-        ]
-        for (path, newName, newPath, line) in inputs {
-            XCTAssertEqual(try path.makeSubMailbox(displayName: newName), newPath, line: line)
-        }
+    @Test(arguments: [
+        SubMailboxFixture(
+            path: try! .init(name: .init("box"), pathSeparator: "/"),
+            newName: "£",
+            expected: try! .init(name: .init("box/&AKM-"), pathSeparator: "/")
+        ),
+    ])
+    func `make sub-mailbox with display name`(_ fixture: SubMailboxFixture) throws {
+        #expect(try fixture.path.makeSubMailbox(displayName: fixture.newName) == fixture.expected)
+    }
 
-        // sad path test make sure that mailbox size limit is enforced
-        XCTAssertThrowsError(
+    @Test func `make sub-mailbox enforces size limit`() {
+        #expect(throws: MailboxTooBigError.self) {
             try MailboxPath(name: .init(ByteBuffer(string: String(repeating: "a", count: 999))), pathSeparator: "/")
                 .makeSubMailbox(displayName: "1")
-        ) { error in
-            XCTAssertEqual(error as! MailboxTooBigError, MailboxTooBigError(maximumSize: 1000, actualSize: 1001))
         }
     }
 
-    func testMakeRootMailboxWithDisplayName() {
-        let inputs: [(String, Character?, MailboxPath, UInt)] = [
-            (
-                "box2",
-                nil,
-                try! .init(name: .init("box2"), pathSeparator: nil),
-                #line
-            ),
-            (
-                "£",
-                "/",
-                try! .init(name: .init("&AKM-"), pathSeparator: "/"),
-                #line
-            ),
-        ]
-        for (newName, separator, newPath, line) in inputs {
-            XCTAssertEqual(
-                try MailboxPath.makeRootMailbox(displayName: newName, pathSeparator: separator),
-                newPath,
-                line: line
-            )
-        }
+    @Test(arguments: [
+        RootMailboxFixture(
+            displayName: "box2",
+            pathSeparator: nil,
+            expected: try! .init(name: .init("box2"), pathSeparator: nil)
+        ),
+        RootMailboxFixture(
+            displayName: "£",
+            pathSeparator: "/",
+            expected: try! .init(name: .init("&AKM-"), pathSeparator: "/")
+        ),
+    ])
+    func `make root mailbox with display name`(_ fixture: RootMailboxFixture) throws {
+        #expect(
+            try MailboxPath.makeRootMailbox(displayName: fixture.displayName, pathSeparator: fixture.pathSeparator) == fixture.expected
+        )
+    }
 
-        // sad path test make sure that mailbox size limit is enforced
-        XCTAssertThrowsError(
+    @Test func `make root mailbox enforces size limit`() {
+        #expect(throws: MailboxTooBigError.self) {
             try MailboxPath.makeRootMailbox(displayName: String(repeating: "a", count: 1001))
-        ) { error in
-            XCTAssertEqual(error as! MailboxTooBigError, MailboxTooBigError(maximumSize: 1000, actualSize: 1001))
         }
     }
 
-    func testSplitting() {
-        let inputs: [(MailboxPath, Bool, [String], UInt)] = [
-            (try! .init(name: .init("ABC"), pathSeparator: "B"), true, ["A", "C"], #line),
-            (try! .init(name: .init("ABC"), pathSeparator: "D"), true, ["ABC"], #line),
-            (try! .init(name: .init(""), pathSeparator: "D"), true, [], #line),
-            (
-                try! .init(name: .init("some/real/mailbox"), pathSeparator: "/"), true, ["some", "real", "mailbox"],
-                #line
-            ),
-            (try! .init(name: .init("mailbox#test"), pathSeparator: "#"), true, ["mailbox", "test"], #line),
-            (try! .init(name: .init("//test1//test2//"), pathSeparator: "/"), true, ["test1", "test2"], #line),
-            (
-                try! .init(name: .init("//test1//test2//"), pathSeparator: "/"), false,
-                ["", "", "test1", "", "test2", "", ""], #line
-            ),
-        ]
-        for (path, ommitEmpty, expected, line) in inputs {
-            XCTAssertEqual(path.displayStringComponents(omittingEmptySubsequences: ommitEmpty), expected, line: line)
-        }
+    @Test(arguments: [
+        SplittingFixture(
+            path: try! .init(name: .init("ABC"), pathSeparator: "B"),
+            omitEmpty: true,
+            expected: ["A", "C"]
+        ),
+        SplittingFixture(
+            path: try! .init(name: .init("ABC"), pathSeparator: "D"),
+            omitEmpty: true,
+            expected: ["ABC"]
+        ),
+        SplittingFixture(
+            path: try! .init(name: .init(""), pathSeparator: "D"),
+            omitEmpty: true,
+            expected: []
+        ),
+        SplittingFixture(
+            path: try! .init(name: .init("some/real/mailbox"), pathSeparator: "/"),
+            omitEmpty: true,
+            expected: ["some", "real", "mailbox"]
+        ),
+        SplittingFixture(
+            path: try! .init(name: .init("mailbox#test"), pathSeparator: "#"),
+            omitEmpty: true,
+            expected: ["mailbox", "test"]
+        ),
+        SplittingFixture(
+            path: try! .init(name: .init("//test1//test2//"), pathSeparator: "/"),
+            omitEmpty: true,
+            expected: ["test1", "test2"]
+        ),
+        SplittingFixture(
+            path: try! .init(name: .init("//test1//test2//"), pathSeparator: "/"),
+            omitEmpty: false,
+            expected: ["", "", "test1", "", "test2", "", ""]
+        ),
+    ])
+    func `splitting mailbox path components`(_ fixture: SplittingFixture) {
+        #expect(fixture.path.displayStringComponents(omittingEmptySubsequences: fixture.omitEmpty) == fixture.expected)
     }
 
-    func testCreateSubmailboxWithoutPathSeparatorThrows() {
+    @Test func `create submailbox without path separator throws`() {
         let mailbox = try! MailboxPath(name: .inbox, pathSeparator: nil)
-        XCTAssertThrowsError(try mailbox.makeSubMailbox(displayName: "sub")) { e in
-            XCTAssertTrue(e is InvalidPathSeparatorError)
+        #expect(throws: InvalidPathSeparatorError.self) {
+            try mailbox.makeSubMailbox(displayName: "sub")
         }
     }
 
-    func testCustomDebugStringConvertible() {
-        let inputs: [(MailboxName, String, UInt)] = [
-            (.inbox, "INBOX", #line),
-            (.init(ByteBuffer()), "", #line),
-            (.init(ByteBuffer("Food")), "Food", #line),
-            (.init(ByteBuffer("food")), "food", #line),
-            (.init(ByteBuffer("FOOD")), "FOOD", #line),
-            (.init(ByteBuffer("box/&AKM-")), "box/&AKM-", #line),
-            (.init(ByteBuffer("a\u{11}b")), "a\u{11}b", #line),
-            (.init(ByteBuffer("båd")), "båd", #line),
-        ]
-        for (name, expected, line) in inputs {
-            XCTAssertEqual(name.debugDescription, expected, line: line)
-        }
+    @Test(arguments: [
+        DebugStringFixture(sut: MailboxName.inbox, expected: "INBOX"),
+        DebugStringFixture(sut: .init(ByteBuffer()), expected: ""),
+        DebugStringFixture(sut: .init(ByteBuffer("Food")), expected: "Food"),
+        DebugStringFixture(sut: .init(ByteBuffer("food")), expected: "food"),
+        DebugStringFixture(sut: .init(ByteBuffer("FOOD")), expected: "FOOD"),
+        DebugStringFixture(sut: .init(ByteBuffer("box/&AKM-")), expected: "box/&AKM-"),
+        DebugStringFixture(sut: .init(ByteBuffer("a\u{11}b")), expected: "a\u{11}b"),
+        DebugStringFixture(sut: .init(ByteBuffer("båd")), expected: "båd"),
+    ])
+    func `custom debug string convertible`(_ fixture: DebugStringFixture<MailboxName>) {
+        fixture.check()
     }
 }
 
-// MARK: - MailboxName
-
-extension MailboxName_Tests {
-    func testMailboxNameInitInbox() {
+@Suite("MailboxName")
+struct MailboxNameTests {
+    @Test func `initialization normalizes INBOX to uppercase`() {
         let test1 = MailboxName("INBOX")
-        XCTAssertEqual(test1.bytes, Array("INBOX".utf8))
-        XCTAssertTrue(test1.isInbox)
+        #expect(test1.bytes == Array("INBOX".utf8))
+        #expect(test1.isInbox)
 
         let test2 = MailboxName("inbox")
-        XCTAssertEqual(test2.bytes, Array("INBOX".utf8))
-        XCTAssertTrue(test2.isInbox)
+        #expect(test2.bytes == Array("INBOX".utf8))
+        #expect(test2.isInbox)
 
         let test3 = MailboxName("Inbox")
-        XCTAssertEqual(test3.bytes, Array("INBOX".utf8))
-        XCTAssertTrue(test3.isInbox)
+        #expect(test3.bytes == Array("INBOX".utf8))
+        #expect(test3.isInbox)
 
         let test4 = MailboxName("notinbox")
-        XCTAssertEqual(test4.bytes, Array("notinbox".utf8))
-        XCTAssertFalse(test4.isInbox)
+        #expect(test4.bytes == Array("notinbox".utf8))
+        #expect(!test4.isInbox)
 
         let test5 = MailboxName("inBox2")
-        XCTAssertEqual(test5.bytes, Array("inBox2".utf8))
-        XCTAssertFalse(test5.isInbox)
+        #expect(test5.bytes == Array("inBox2".utf8))
+        #expect(!test5.isInbox)
     }
 
-    func testMailboxNameInitNonUTF8() {
+    @Test func `initialization with non-UTF8 bytes`() {
         let hexBytes: [UInt8] = [0x80]
         let test1 = MailboxName(.init(bytes: hexBytes))
-        XCTAssertEqual(test1.bytes, hexBytes)
-        XCTAssertFalse(test1.isInbox)
+        #expect(test1.bytes == hexBytes)
+        #expect(!test1.isInbox)
     }
 
-    func testEquality() {
-        // Since we’re using a custom implementation of Hashable.
+    @Test func `equality comparison`() {
+        // Since we're using a custom implementation of Hashable.
 
-        XCTAssertEqual(MailboxName("INBOX"), MailboxName("inbox"))
-        XCTAssertEqual(MailboxName("AA"), MailboxName("AA"))
-        XCTAssertNotEqual(MailboxName("A"), MailboxName("B"))
-        XCTAssertNotEqual(MailboxName("Sent"), MailboxName("Drafts"))
+        #expect(MailboxName("INBOX") == MailboxName("inbox"))
+        #expect(MailboxName("AA") == MailboxName("AA"))
+        #expect(MailboxName("A") != MailboxName("B"))
+        #expect(MailboxName("Sent") != MailboxName("Drafts"))
     }
 
-    func testHashValue() {
-        // Since we’re using a custom implementation of Hashable.
+    @Test func `hash value distribution`() {
+        // Since we're using a custom implementation of Hashable.
 
         func countBits(_ v: Int) -> Int {
             var value = UInt(bitPattern: v)
@@ -193,10 +196,36 @@ extension MailboxName_Tests {
             return countBits(ma.hashValue ^ mb.hashValue)
         }
 
-        XCTAssertGreaterThanOrEqual(countChangedBits("A", "B"), 25)
-        XCTAssertGreaterThanOrEqual(countChangedBits("A", "AA"), 25)
-        XCTAssertGreaterThanOrEqual(countChangedBits("INBOX", "Drafts"), 25)
-        XCTAssertGreaterThanOrEqual(countChangedBits("Sent", "Drafts"), 25)
-        XCTAssertGreaterThanOrEqual(countChangedBits("Sent", "sent"), 25)
+        #expect(countChangedBits("A", "B") >= 25)
+        #expect(countChangedBits("A", "AA") >= 25)
+        #expect(countChangedBits("INBOX", "Drafts") >= 25)
+        #expect(countChangedBits("Sent", "Drafts") >= 25)
+        #expect(countChangedBits("Sent", "sent") >= 25)
     }
+}
+
+// MARK: -
+
+private struct SubMailboxFixture: Sendable, CustomTestStringConvertible {
+    let path: MailboxPath
+    let newName: String
+    let expected: MailboxPath
+
+    var testDescription: String { "\(path.name) + \(newName) -> \(expected.name)" }
+}
+
+private struct RootMailboxFixture: Sendable, CustomTestStringConvertible {
+    let displayName: String
+    let pathSeparator: Character?
+    let expected: MailboxPath
+
+    var testDescription: String { displayName }
+}
+
+private struct SplittingFixture: Sendable, CustomTestStringConvertible {
+    let path: MailboxPath
+    let omitEmpty: Bool
+    let expected: [String]
+
+    var testDescription: String { "\(path.name) omitEmpty:\(omitEmpty) -> \(expected)" }
 }
