@@ -14,33 +14,41 @@
 
 import NIO
 @_spi(NIOIMAPInternal) @testable import NIOIMAPCore
-import XCTest
+import Testing
 
-class ResponseText_Tests: EncodeTestClass {}
-
-// MARK: - Encoding
-
-extension ResponseText_Tests {
-    func testEncode() {
-        let inputs: [(ResponseText, String, UInt)] = [
-            (.init(code: nil, text: "buffer"), "buffer", #line),
-            (.init(code: .alert, text: "buffer"), "[ALERT] buffer", #line),
-
-            // Must insert an additional space to make it standard conformant:
-            (.init(code: nil, text: ""), " ", #line),
-            (.init(code: .alert, text: ""), "[ALERT]  ", #line),
-        ]
-        self.iterateInputs(inputs: inputs, encoder: { self.testBuffer.writeResponseText($0) })
+@Suite("ResponseText")
+struct ResponseTextTests {
+    @Test(arguments: [
+        EncodeFixture.responseText(.init(code: nil, text: "buffer"), "buffer"),
+        EncodeFixture.responseText(.init(code: .alert, text: "buffer"), "[ALERT] buffer"),
+        EncodeFixture.responseText(.init(code: nil, text: ""), " "),
+        EncodeFixture.responseText(.init(code: .alert, text: ""), "[ALERT]  "),
+    ])
+    func encode(_ fixture: EncodeFixture<ResponseText>) {
+        fixture.checkEncoding()
     }
 
-    func testDebugDescription() {
-        XCTAssertEqual(
-            ResponseText(code: nil, text: "buffer").debugDescription,
-            "buffer"
-        )
-        XCTAssertEqual(
-            ResponseText(code: .alert, text: "buffer").debugDescription,
-            "[ALERT] buffer"
+    @Test(arguments: [
+        DebugStringFixture(sut: ResponseText(code: nil, text: "buffer"), expected: "buffer"),
+        DebugStringFixture(sut: ResponseText(code: .alert, text: "buffer"), expected: "[ALERT] buffer"),
+    ])
+    func `custom debug string convertible`(_ fixture: DebugStringFixture<ResponseText>) {
+        fixture.check()
+    }
+}
+
+// MARK: -
+
+extension EncodeFixture<ResponseText> {
+    fileprivate static func responseText(
+        _ input: ResponseText,
+        _ expectedString: String
+    ) -> Self {
+        EncodeFixture(
+            input: input,
+            bufferKind: .defaultServer,
+            expectedString: expectedString,
+            encoder: { $0.writeResponseText($1) }
         )
     }
 }

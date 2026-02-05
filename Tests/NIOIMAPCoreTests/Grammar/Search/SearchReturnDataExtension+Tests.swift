@@ -14,23 +14,30 @@
 
 import NIO
 @_spi(NIOIMAPInternal) @testable import NIOIMAPCore
-import XCTest
+import Testing
 
-class SearchReturnDataExtension_Tests: EncodeTestClass {}
+@Suite("SearchReturnDataExtension")
+struct SearchReturnDataExtensionTests {
+    @Test(arguments: [
+        EncodeFixture.searchReturnDataExtension(.init(key: "modifier", value: .sequence(.set([123]))), "modifier 123"),
+    ])
+    func encode(_ fixture: EncodeFixture<KeyValue<String, ParameterValue>>) {
+        fixture.checkEncoding()
+    }
+}
 
-// MARK: - Encoding
+// MARK: -
 
-extension SearchReturnDataExtension_Tests {
-    func testEncode() {
-        let inputs: [(KeyValue<String, ParameterValue>, String, UInt)] = [
-            (.init(key: "modifier", value: .sequence(.set([123]))), "modifier 123", #line)
-        ]
-
-        for (test, expectedString, line) in inputs {
-            self.testBuffer.clear()
-            let size = self.testBuffer.writeSearchReturnDataExtension(test)
-            XCTAssertEqual(size, expectedString.utf8.count, line: line)
-            XCTAssertEqual(self.testBufferString, expectedString, line: line)
-        }
+extension EncodeFixture<KeyValue<String, ParameterValue>> {
+    fileprivate static func searchReturnDataExtension(
+        _ input: KeyValue<String, ParameterValue>,
+        _ expectedString: String
+    ) -> Self {
+        EncodeFixture(
+            input: input,
+            bufferKind: .defaultServer,
+            expectedString: expectedString,
+            encoder: { $0.writeSearchReturnDataExtension($1) }
+        )
     }
 }

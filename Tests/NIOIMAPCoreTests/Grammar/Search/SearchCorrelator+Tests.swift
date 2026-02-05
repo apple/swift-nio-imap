@@ -14,27 +14,34 @@
 
 import NIO
 @_spi(NIOIMAPInternal) @testable import NIOIMAPCore
-import XCTest
+import Testing
 
-class SearchCorrelator_Tests: EncodeTestClass {}
+@Suite("SearchCorrelator")
+struct SearchCorrelatorTests {
+    @Test(arguments: [
+        EncodeFixture.searchCorrelator(SearchCorrelator(tag: "A543"), #" (TAG "A543")"#),
+        EncodeFixture.searchCorrelator(
+            SearchCorrelator(tag: "some", mailbox: MailboxName("mb"), uidValidity: 5),
+            #" (TAG "some" MAILBOX "mb" UIDVALIDITY 5)"#
+        ),
+    ])
+    func encode(_ fixture: EncodeFixture<SearchCorrelator>) {
+        fixture.checkEncoding()
+    }
+}
 
-// MARK: - Encoding
+// MARK: -
 
-extension SearchCorrelator_Tests {
-    func testEncode() {
-        let inputs: [(SearchCorrelator, String, UInt)] = [
-            (SearchCorrelator(tag: "some"), " (TAG \"some\")", #line),
-            (
-                SearchCorrelator(tag: "some", mailbox: MailboxName("mb"), uidValidity: 5),
-                " (TAG \"some\" MAILBOX \"mb\" UIDVALIDITY 5)", #line
-            ),
-        ]
-
-        for (test, expectedString, line) in inputs {
-            self.testBuffer.clear()
-            let size = self.testBuffer.writeSearchCorrelator(test)
-            XCTAssertEqual(size, expectedString.utf8.count, line: line)
-            XCTAssertEqual(self.testBufferString, expectedString, line: line)
-        }
+extension EncodeFixture<SearchCorrelator> {
+    fileprivate static func searchCorrelator(
+        _ input: SearchCorrelator,
+        _ expectedString: String
+    ) -> Self {
+        EncodeFixture(
+            input: input,
+            bufferKind: .defaultServer,
+            expectedString: expectedString,
+            encoder: { $0.writeSearchCorrelator($1) }
+        )
     }
 }

@@ -14,26 +14,31 @@
 
 import NIO
 @_spi(NIOIMAPInternal) @testable import NIOIMAPCore
-import XCTest
+import Testing
 
-class PermanentFlagTests: EncodeTestClass {}
-
-// MARK: - Encoding
-
-extension PermanentFlagTests {
-    func testEncoding_wildcard() {
-        let expected = #"\*"#
-        let flag = PermanentFlag.wildcard
-        let size = self.testBuffer.writeFlagPerm(flag)
-        XCTAssertEqual(size, expected.utf8.count)
-        XCTAssertEqual(self.testBufferString, expected)
+@Suite("PermanentFlag")
+struct PermanentFlagTests {
+    @Test(arguments: [
+        EncodeFixture.permanentFlag(.wildcard, #"\*"#),
+        EncodeFixture.permanentFlag(.flag(.answered), #"\Answered"#),
+    ])
+    func encode(_ fixture: EncodeFixture<PermanentFlag>) {
+        fixture.checkEncoding()
     }
+}
 
-    func testEncoding_flag() {
-        let expected = "\\Answered"
-        let flag = PermanentFlag.flag(.answered)
-        let size = self.testBuffer.writeFlagPerm(flag)
-        XCTAssertEqual(size, expected.utf8.count)
-        XCTAssertEqual(self.testBufferString, expected)
+// MARK: -
+
+extension EncodeFixture<PermanentFlag> {
+    fileprivate static func permanentFlag(
+        _ input: PermanentFlag,
+        _ expectedString: String
+    ) -> Self {
+        EncodeFixture(
+            input: input,
+            bufferKind: .defaultServer,
+            expectedString: expectedString,
+            encoder: { $0.writeFlagPerm($1) }
+        )
     }
 }

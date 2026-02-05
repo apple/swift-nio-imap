@@ -14,24 +14,32 @@
 
 import NIO
 @_spi(NIOIMAPInternal) @testable import NIOIMAPCore
-import XCTest
+import Testing
 
-class SectionBinary_Tests: EncodeTestClass {}
+@Suite("SectionBinary")
+struct SectionBinaryTests {
+    @Test(arguments: [
+        EncodeFixture.sectionBinary([], "[]"),
+        EncodeFixture.sectionBinary([123], "[123]"),
+        EncodeFixture.sectionBinary([1, 2, 3], "[1.2.3]"),
+    ])
+    func encode(_ fixture: EncodeFixture<SectionSpecifier.Part>) {
+        fixture.checkEncoding()
+    }
+}
 
-// MARK: - Encoding
+// MARK: -
 
-extension SectionBinary_Tests {
-    func testEncode() {
-        let inputs: [(SectionSpecifier.Part, String, UInt)] = [
-            ([], "[]", #line),
-            ([1, 2, 3], "[1.2.3]", #line),
-        ]
-
-        for (test, expectedString, line) in inputs {
-            self.testBuffer.clear()
-            let size = self.testBuffer.writeSectionBinary(test)
-            XCTAssertEqual(size, expectedString.utf8.count, line: line)
-            XCTAssertEqual(self.testBufferString, expectedString, line: line)
-        }
+extension EncodeFixture<SectionSpecifier.Part> {
+    fileprivate static func sectionBinary(
+        _ input: SectionSpecifier.Part,
+        _ expectedString: String
+    ) -> Self {
+        EncodeFixture(
+            input: input,
+            bufferKind: .defaultServer,
+            expectedString: expectedString,
+            encoder: { $0.writeSectionBinary($1) }
+        )
     }
 }
