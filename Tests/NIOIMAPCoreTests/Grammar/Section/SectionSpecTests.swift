@@ -14,208 +14,229 @@
 
 import NIO
 @_spi(NIOIMAPInternal) @testable import NIOIMAPCore
-import XCTest
+import Testing
 
-class SectionSpecifierTests: EncodeTestClass {}
-
-// MARK: - SectionSpecifierTests imapEncoded
-
-extension SectionSpecifierTests {
-    func testIMAPEncoded_optional_none() {
-        let expected = ""
-        let size = self.testBuffer.writeSectionSpecifier(nil)
-        XCTAssertEqual(size, expected.utf8.count)
-        XCTAssertEqual(expected, self.testBufferString)
+@Suite("SectionSpecifier")
+private struct SectionSpecifierTests {
+    @Test(arguments: [
+        EncodeFixture.sectionSpecifier(nil, ""),
+        EncodeFixture.sectionSpecifier(.init(kind: .header), "HEADER"),
+        EncodeFixture.sectionSpecifier(.init(part: [1, 2, 3, 4], kind: .complete), "1.2.3.4"),
+        EncodeFixture.sectionSpecifier(.init(part: [1, 2, 3, 4], kind: .header), "1.2.3.4.HEADER"),
+    ])
+    func encode(_ fixture: EncodeFixture<SectionSpecifier?>) {
+        fixture.checkEncoding()
     }
 
-    func testIMAPEncoded_text() {
-        let expected = "HEADER"
-        let size = self.testBuffer.writeSectionSpecifier(.init(kind: .header))
-        XCTAssertEqual(size, expected.utf8.count)
-        XCTAssertEqual(expected, self.testBufferString)
+    @Test(arguments: [
+        ComparableFixture<SectionSpecifier>(lhs: .init(kind: .header), rhs: .init(kind: .text), expected: true),
+        ComparableFixture<SectionSpecifier>(lhs: .init(kind: .text), rhs: .init(kind: .text), expected: false),
+        ComparableFixture<SectionSpecifier>(
+            lhs: .init(part: [1], kind: .complete),
+            rhs: .init(part: [1], kind: .complete),
+            expected: false
+        ),
+        ComparableFixture<SectionSpecifier>(
+            lhs: .init(part: [1, 2], kind: .complete),
+            rhs: .init(part: [1], kind: .complete),
+            expected: false
+        ),
+        ComparableFixture<SectionSpecifier>(
+            lhs: .init(part: [1, 2], kind: .complete),
+            rhs: .init(part: [1, 2, 3], kind: .complete),
+            expected: true
+        ),
+        ComparableFixture<SectionSpecifier>(
+            lhs: .init(part: [1, 2, 3], kind: .complete),
+            rhs: .init(part: [1, 2, 3], kind: .text),
+            expected: true
+        ),
+        ComparableFixture<SectionSpecifier>(
+            lhs: .init(part: [1, 2], kind: .text),
+            rhs: .init(part: [1, 2, 3], kind: .header),
+            expected: true
+        ),
+    ])
+    func `comparable SectionSpecifier`(_ fixture: ComparableFixture<SectionSpecifier>) {
+        #expect((fixture.lhs < fixture.rhs) == fixture.expected)
     }
 
-    func testIMAPEncoded_part_notext() {
-        let expected = "1.2.3.4"
-        let size = self.testBuffer.writeSectionSpecifier(.init(part: [1, 2, 3, 4], kind: .complete))
-        XCTAssertEqual(size, expected.utf8.count)
-        XCTAssertEqual(expected, self.testBufferString)
+    @Test(arguments: [
+        ComparableFixture<SectionSpecifier.Kind>(lhs: .complete, rhs: .complete, expected: false),
+        ComparableFixture<SectionSpecifier.Kind>(lhs: .complete, rhs: .header, expected: true),
+        ComparableFixture<SectionSpecifier.Kind>(lhs: .complete, rhs: .headerFields([]), expected: true),
+        ComparableFixture<SectionSpecifier.Kind>(lhs: .complete, rhs: .headerFieldsNot([]), expected: true),
+        ComparableFixture<SectionSpecifier.Kind>(lhs: .complete, rhs: .MIMEHeader, expected: true),
+        ComparableFixture<SectionSpecifier.Kind>(lhs: .complete, rhs: .text, expected: true),
+        ComparableFixture<SectionSpecifier.Kind>(lhs: .header, rhs: .complete, expected: true),
+        ComparableFixture<SectionSpecifier.Kind>(lhs: .header, rhs: .header, expected: true),
+        ComparableFixture<SectionSpecifier.Kind>(lhs: .header, rhs: .headerFields([]), expected: true),
+        ComparableFixture<SectionSpecifier.Kind>(lhs: .header, rhs: .headerFieldsNot([]), expected: true),
+        ComparableFixture<SectionSpecifier.Kind>(lhs: .header, rhs: .MIMEHeader, expected: true),
+        ComparableFixture<SectionSpecifier.Kind>(lhs: .header, rhs: .text, expected: true),
+        ComparableFixture<SectionSpecifier.Kind>(lhs: .headerFields([]), rhs: .complete, expected: false),
+        ComparableFixture<SectionSpecifier.Kind>(lhs: .headerFields([]), rhs: .header, expected: false),
+        ComparableFixture<SectionSpecifier.Kind>(lhs: .headerFields([]), rhs: .headerFields([]), expected: false),
+        ComparableFixture<SectionSpecifier.Kind>(lhs: .headerFields([]), rhs: .headerFieldsNot([]), expected: false),
+        ComparableFixture<SectionSpecifier.Kind>(lhs: .headerFields([]), rhs: .MIMEHeader, expected: false),
+        ComparableFixture<SectionSpecifier.Kind>(lhs: .headerFields([]), rhs: .text, expected: true),
+        ComparableFixture<SectionSpecifier.Kind>(lhs: .headerFieldsNot([]), rhs: .complete, expected: false),
+        ComparableFixture<SectionSpecifier.Kind>(lhs: .headerFieldsNot([]), rhs: .header, expected: false),
+        ComparableFixture<SectionSpecifier.Kind>(lhs: .headerFieldsNot([]), rhs: .headerFields([]), expected: false),
+        ComparableFixture<SectionSpecifier.Kind>(lhs: .headerFieldsNot([]), rhs: .headerFieldsNot([]), expected: false),
+        ComparableFixture<SectionSpecifier.Kind>(lhs: .headerFieldsNot([]), rhs: .MIMEHeader, expected: false),
+        ComparableFixture<SectionSpecifier.Kind>(lhs: .headerFieldsNot([]), rhs: .text, expected: true),
+        ComparableFixture<SectionSpecifier.Kind>(lhs: .MIMEHeader, rhs: .complete, expected: false),
+        ComparableFixture<SectionSpecifier.Kind>(lhs: .MIMEHeader, rhs: .header, expected: true),
+        ComparableFixture<SectionSpecifier.Kind>(lhs: .MIMEHeader, rhs: .headerFields([]), expected: true),
+        ComparableFixture<SectionSpecifier.Kind>(lhs: .MIMEHeader, rhs: .headerFieldsNot([]), expected: true),
+        ComparableFixture<SectionSpecifier.Kind>(lhs: .MIMEHeader, rhs: .MIMEHeader, expected: false),
+        ComparableFixture<SectionSpecifier.Kind>(lhs: .MIMEHeader, rhs: .text, expected: true),
+        ComparableFixture<SectionSpecifier.Kind>(lhs: .text, rhs: .complete, expected: false),
+        ComparableFixture<SectionSpecifier.Kind>(lhs: .text, rhs: .header, expected: false),
+        ComparableFixture<SectionSpecifier.Kind>(lhs: .text, rhs: .headerFields([]), expected: false),
+        ComparableFixture<SectionSpecifier.Kind>(lhs: .text, rhs: .headerFieldsNot([]), expected: false),
+        ComparableFixture<SectionSpecifier.Kind>(lhs: .text, rhs: .MIMEHeader, expected: false),
+        ComparableFixture<SectionSpecifier.Kind>(lhs: .text, rhs: .text, expected: false),
+    ])
+    func `comparable SectionSpecifier Kind`(_ fixture: ComparableFixture<SectionSpecifier.Kind>) {
+        #expect((fixture.lhs < fixture.rhs) == fixture.expected)
     }
 
-    func testIMAPEncoded_part_sometext() {
-        let expected = "1.2.3.4.HEADER"
-        let size = self.testBuffer.writeSectionSpecifier(.init(part: [1, 2, 3, 4], kind: .header))
-        XCTAssertEqual(size, expected.utf8.count)
-        XCTAssertEqual(expected, self.testBufferString)
+    @Test(arguments: [
+        ComparableFixture<SectionSpecifier.Part>(lhs: [1], rhs: [1], expected: false),
+        ComparableFixture<SectionSpecifier.Part>(lhs: [1], rhs: [1, 2], expected: true),
+        ComparableFixture<SectionSpecifier.Part>(lhs: [1, 2], rhs: [1], expected: false),
+        ComparableFixture<SectionSpecifier.Part>(lhs: [1, 2, 3, 4], rhs: [1, 2, 3, 4], expected: false),
+        ComparableFixture<SectionSpecifier.Part>(lhs: [1, 2, 3, 4], rhs: [1, 2, 3, 4, 5, 6], expected: true),
+        ComparableFixture<SectionSpecifier.Part>(lhs: [1, 2, 3, 4, 5, 6], rhs: [1, 2, 3], expected: false),
+    ])
+    func `comparable SectionSpecifier Part`(_ fixture: ComparableFixture<SectionSpecifier.Part>) {
+        #expect((fixture.lhs < fixture.rhs) == fixture.expected)
+    }
+
+    @Test(arguments: [
+        PartHelperFixture(part: [], expected: []),
+        PartHelperFixture(part: [5], expected: []),
+        PartHelperFixture(part: [5, 3], expected: [3]),
+        PartHelperFixture(part: [5, 3, 8], expected: [3, 8]),
+    ])
+    func `Part dropFirst`(_ fixture: PartHelperFixture) {
+        #expect(fixture.part.dropFirst() == fixture.expected)
+    }
+
+    @Test(arguments: [
+        PartHelperFixture(part: [], expected: []),
+        PartHelperFixture(part: [5], expected: []),
+        PartHelperFixture(part: [5, 3], expected: [5]),
+        PartHelperFixture(part: [5, 3, 8], expected: [5, 3]),
+    ])
+    func `Part dropLast`(_ fixture: PartHelperFixture) {
+        #expect(fixture.part.dropLast() == fixture.expected)
+    }
+
+    @Test(arguments: [
+        PartAppendingFixture(part: [], new: 1, expected: [1]),
+        PartAppendingFixture(part: [5, 3, 8], new: 4, expected: [5, 3, 8, 4]),
+    ])
+    func `Part appending`(_ fixture: PartAppendingFixture) {
+        #expect(fixture.part.appending(fixture.new) == fixture.expected)
+    }
+
+    @Test(arguments: [
+        PartRelationFixture(part: [], other: [], expected: false, relation: .isSubPart),
+        PartRelationFixture(part: [2, 3], other: [2, 3], expected: false, relation: .isSubPart),
+        PartRelationFixture(part: [2, 3, 1], other: [2, 3], expected: true, relation: .isSubPart),
+        PartRelationFixture(part: [2, 3], other: [2, 3, 1], expected: false, relation: .isSubPart),
+        PartRelationFixture(part: [2, 3, 1, 7], other: [2, 3], expected: true, relation: .isSubPart),
+        PartRelationFixture(part: [2, 3, 1, 7], other: [2, 3, 1], expected: true, relation: .isSubPart),
+        PartRelationFixture(part: [2, 4, 1, 7], other: [2, 3], expected: false, relation: .isSubPart),
+        PartRelationFixture(part: [5, 3, 1, 7], other: [2, 3], expected: false, relation: .isSubPart),
+        PartRelationFixture(part: [], other: [], expected: false, relation: .isChildPart),
+        PartRelationFixture(part: [], other: [1], expected: false, relation: .isChildPart),
+        PartRelationFixture(part: [], other: [8], expected: false, relation: .isChildPart),
+        PartRelationFixture(part: [1], other: [], expected: true, relation: .isChildPart),
+        PartRelationFixture(part: [8], other: [], expected: true, relation: .isChildPart),
+        PartRelationFixture(part: [2, 3], other: [2, 3], expected: false, relation: .isChildPart),
+        PartRelationFixture(part: [2, 3, 1], other: [2, 3], expected: true, relation: .isChildPart),
+        PartRelationFixture(part: [2, 3, 1], other: [4, 3], expected: false, relation: .isChildPart),
+        PartRelationFixture(part: [2, 3, 1], other: [2, 7], expected: false, relation: .isChildPart),
+        PartRelationFixture(part: [2, 3, 1, 4], other: [2, 3], expected: false, relation: .isChildPart),
+        PartRelationFixture(part: [2, 3], other: [2, 3, 1], expected: false, relation: .isChildPart),
+        PartRelationFixture(part: [2, 3, 1, 7], other: [2, 3], expected: false, relation: .isChildPart),
+        PartRelationFixture(part: [2, 3, 1, 7], other: [2, 3, 1], expected: true, relation: .isChildPart),
+        PartRelationFixture(part: [2, 4, 1, 7], other: [2, 3], expected: false, relation: .isChildPart),
+        PartRelationFixture(part: [5, 3, 1, 7], other: [2, 3], expected: false, relation: .isChildPart),
+    ])
+    func `Part relation`(_ fixture: PartRelationFixture) {
+        switch fixture.relation {
+        case .isSubPart:
+            #expect(fixture.part.isSubPart(of: fixture.other) == fixture.expected)
+        case .isChildPart:
+            #expect(fixture.part.isChildPart(of: fixture.other) == fixture.expected)
+        }
+    }
+
+    @Test(arguments: [
+        DebugStringFixture(sut: SectionSpecifier.Part([]), expected: ""),
+        DebugStringFixture(sut: SectionSpecifier.Part([1]), expected: "1"),
+        DebugStringFixture(sut: SectionSpecifier.Part([1, 2]), expected: "1.2"),
+        DebugStringFixture(sut: SectionSpecifier.Part([1, 2, 3, 4]), expected: "1.2.3.4"),
+    ])
+    func `Part custom debug string`(_ fixture: DebugStringFixture<SectionSpecifier.Part>) {
+        fixture.check()
     }
 }
 
-// MARK: - Comparable
+// MARK: -
 
-extension SectionSpecifierTests {
-    func testComparable() {
-        let inputs: [(SectionSpecifier, SectionSpecifier, Bool, UInt)] = [
-            (.init(kind: .header), .init(kind: .text), true, #line),
-            (.init(kind: .text), .init(kind: .text), false, #line),
-            (.init(part: [1], kind: .complete), .init(part: [1], kind: .complete), false, #line),
-            (.init(part: [1, 2], kind: .complete), .init(part: [1], kind: .complete), false, #line),
-            (.init(part: [1, 2], kind: .complete), .init(part: [1, 2, 3], kind: .complete), true, #line),
-            (.init(part: [1, 2, 3], kind: .complete), .init(part: [1, 2, 3], kind: .text), true, #line),
-            (.init(part: [1, 2], kind: .text), .init(part: [1, 2, 3], kind: .header), true, #line),
-        ]
-        inputs.forEach { (lhs, rhs, expected, line) in
-            XCTAssertEqual(lhs < rhs, expected, line: line)
-        }
-    }
-
-    func testComparable_kind() {
-        let inputs: [(SectionSpecifier.Kind, SectionSpecifier.Kind, Bool, UInt)] = [
-            (.complete, .complete, false, #line),
-            (.complete, .header, true, #line),
-            (.complete, .headerFields([]), true, #line),
-            (.complete, .headerFieldsNot([]), true, #line),
-            (.complete, .MIMEHeader, true, #line),
-            (.complete, .text, true, #line),
-            (.header, .complete, true, #line),
-            (.header, .header, true, #line),
-            (.header, .headerFields([]), true, #line),
-            (.header, .headerFieldsNot([]), true, #line),
-            (.header, .MIMEHeader, true, #line),
-            (.header, .text, true, #line),
-            (.headerFields([]), .complete, false, #line),
-            (.headerFields([]), .header, false, #line),
-            (.headerFields([]), .headerFields([]), false, #line),
-            (.headerFields([]), .headerFieldsNot([]), false, #line),
-            (.headerFields([]), .MIMEHeader, false, #line),
-            (.headerFields([]), .text, true, #line),
-            (.headerFieldsNot([]), .complete, false, #line),
-            (.headerFieldsNot([]), .header, false, #line),
-            (.headerFieldsNot([]), .headerFields([]), false, #line),
-            (.headerFieldsNot([]), .headerFieldsNot([]), false, #line),
-            (.headerFieldsNot([]), .MIMEHeader, false, #line),
-            (.headerFieldsNot([]), .text, true, #line),
-            (.MIMEHeader, .complete, false, #line),
-            (.MIMEHeader, .header, true, #line),
-            (.MIMEHeader, .headerFields([]), true, #line),
-            (.MIMEHeader, .headerFieldsNot([]), true, #line),
-            (.MIMEHeader, .MIMEHeader, false, #line),
-            (.MIMEHeader, .text, true, #line),
-            (.text, .complete, false, #line),
-            (.text, .header, false, #line),
-            (.text, .headerFields([]), false, #line),
-            (.text, .headerFieldsNot([]), false, #line),
-            (.text, .MIMEHeader, false, #line),
-            (.text, .text, false, #line),
-        ]
-        inputs.forEach { (lhs, rhs, expected, line) in
-            XCTAssertEqual(lhs < rhs, expected, line: line)
-        }
-    }
-
-    func testComparable_part() {
-        let inputs: [(SectionSpecifier.Part, SectionSpecifier.Part, Bool, UInt)] = [
-            ([1], [1], false, #line),
-            ([1], [1, 2], true, #line),
-            ([1, 2], [1], false, #line),
-            ([1, 2, 3, 4], [1, 2, 3, 4], false, #line),
-            ([1, 2, 3, 4], [1, 2, 3, 4, 5, 6], true, #line),
-            ([1, 2, 3, 4, 5, 6], [1, 2, 3], false, #line),
-        ]
-        inputs.forEach { (lhs, rhs, expected, line) in
-            XCTAssertEqual(lhs < rhs, expected, line: line)
-        }
+extension EncodeFixture<SectionSpecifier?> {
+    fileprivate static func sectionSpecifier(
+        _ input: SectionSpecifier?,
+        _ expectedString: String
+    ) -> Self {
+        EncodeFixture(
+            input: input,
+            bufferKind: .defaultServer,
+            expectedString: expectedString,
+            encoder: { $0.writeSectionSpecifier($1) }
+        )
     }
 }
 
-// MARK: - Helpers
+private struct ComparableFixture<T>: Sendable, CustomTestStringConvertible where T: Comparable, T: Sendable {
+    let lhs: T
+    let rhs: T
+    let expected: Bool
 
-extension SectionSpecifierTests {
-    func testDropFirst() {
-        let inputs: [(SectionSpecifier.Part, SectionSpecifier.Part, UInt)] = [
-            ([], [], #line),
-            ([5], [], #line),
-            ([5, 3], [3], #line),
-            ([5, 3, 8], [3, 8], #line),
-        ]
-        inputs.forEach { (part, expected, line) in
-            XCTAssertEqual(part.dropFirst(), expected, line: line)
-        }
-    }
-
-    func testDropLast() {
-        let inputs: [(SectionSpecifier.Part, SectionSpecifier.Part, UInt)] = [
-            ([], [], #line),
-            ([5], [], #line),
-            ([5, 3], [5], #line),
-            ([5, 3, 8], [5, 3], #line),
-        ]
-        inputs.forEach { (part, expected, line) in
-            XCTAssertEqual(part.dropLast(), expected, line: line)
-        }
-    }
-
-    func testAppending() {
-        let inputs: [(SectionSpecifier.Part, Int, SectionSpecifier.Part, UInt)] = [
-            ([], 1, [1], #line),
-            ([5, 3, 8], 4, [5, 3, 8, 4], #line),
-        ]
-        inputs.forEach { (part, new, expected, line) in
-            XCTAssertEqual(part.appending(new), expected, line: line)
-        }
-    }
-
-    func testIsSubPartOf() {
-        let inputs: [(SectionSpecifier.Part, SectionSpecifier.Part, Bool, UInt)] = [
-            ([], [], false, #line),
-            ([2, 3], [2, 3], false, #line),
-            ([2, 3, 1], [2, 3], true, #line),
-            ([2, 3], [2, 3, 1], false, #line),
-            ([2, 3, 1, 7], [2, 3], true, #line),
-            ([2, 3, 1, 7], [2, 3, 1], true, #line),
-            ([2, 4, 1, 7], [2, 3], false, #line),
-            ([5, 3, 1, 7], [2, 3], false, #line),
-        ]
-        inputs.forEach { (part, other, expected, line) in
-            XCTAssertEqual(part.isSubPart(of: other), expected, line: line)
-        }
-    }
-
-    func testIsChildPartOf() {
-        let inputs: [(SectionSpecifier.Part, SectionSpecifier.Part, Bool, UInt)] = [
-            ([], [], false, #line),
-            ([], [1], false, #line),
-            ([], [8], false, #line),
-            ([1], [], true, #line),
-            ([8], [], true, #line),
-            ([2, 3], [2, 3], false, #line),
-            ([2, 3, 1], [2, 3], true, #line),
-            ([2, 3, 1], [4, 3], false, #line),
-            ([2, 3, 1], [2, 7], false, #line),
-            ([2, 3, 1, 4], [2, 3], false, #line),
-            ([2, 3], [2, 3, 1], false, #line),
-            ([2, 3, 1, 7], [2, 3], false, #line),
-            ([2, 3, 1, 7], [2, 3, 1], true, #line),
-            ([2, 4, 1, 7], [2, 3], false, #line),
-            ([5, 3, 1, 7], [2, 3], false, #line),
-        ]
-        inputs.forEach { (part, other, expected, line) in
-            XCTAssertEqual(part.isChildPart(of: other), expected, line: line)
-        }
-    }
+    var testDescription: String { "\(lhs) < \(rhs)" }
 }
 
-// MARK: - CustomDebugStringConvertible
+private struct PartHelperFixture: Sendable, CustomTestStringConvertible {
+    let part: SectionSpecifier.Part
+    let expected: SectionSpecifier.Part
 
-extension SectionSpecifierTests {
-    func testCustomDebugStringConvertible_part() {
-        let inputs: [(SectionSpecifier.Part, String, UInt)] = [
-            ([], "", #line),
-            ([1], "1", #line),
-            ([1, 2], "1.2", #line),
-            ([1, 2, 3, 4], "1.2.3.4", #line),
-        ]
-        inputs.forEach { (part, expected, line) in
-            XCTAssertEqual("\(part)", expected, line: line)
-        }
+    var testDescription: String { "'\(part)'" }
+}
+
+private struct PartAppendingFixture: Sendable, CustomTestStringConvertible {
+    let part: SectionSpecifier.Part
+    let new: Int
+    let expected: SectionSpecifier.Part
+
+    var testDescription: String { "'\(part)' + \(new)" }
+}
+
+private struct PartRelationFixture: Sendable, CustomTestStringConvertible {
+    let part: SectionSpecifier.Part
+    let other: SectionSpecifier.Part
+    let expected: Bool
+    let relation: Relation
+
+    enum Relation: Sendable {
+        case isSubPart
+        case isChildPart
     }
+
+    var testDescription: String { "'\(part)' \(relation) of '\(other)'" }
 }

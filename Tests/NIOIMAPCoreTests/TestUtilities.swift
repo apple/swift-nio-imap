@@ -116,9 +116,33 @@ extension ByteBuffer: ExpressibleByStringLiteral {
 #endif
 
 extension TestUtilities {
+    @available(*, deprecated, message: "Use checkCodableRoundTrips() instead.")
     static func roundTripCodable<A>(_ value: A) throws -> A where A: Codable {
         let encoder = JSONEncoder()
         let decoder = JSONDecoder()
         return try decoder.decode(A.self, from: encoder.encode(value))
     }
+}
+
+func checkCodableRoundTrips<A>(
+    _ a: A,
+    sourceLocation: SourceLocation = #_sourceLocation
+) where A: Codable, A: Equatable {
+    let encoder = JSONEncoder()
+    let data: Data
+    do {
+        data = try encoder.encode(a)
+    } catch {
+        Issue.record("Failed to encode: \(error)", sourceLocation: sourceLocation)
+        return
+    }
+    let decoder = JSONDecoder()
+    let decoded: A
+    do {
+        decoded = try decoder.decode(A.self, from: data)
+    } catch {
+        Issue.record("Failed to decode: \(error)", sourceLocation: sourceLocation)
+        return
+    }
+    #expect(decoded == a, sourceLocation: sourceLocation)
 }
