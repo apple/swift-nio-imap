@@ -17,7 +17,7 @@ import NIO
 import Testing
 
 @Suite("CommandStreamPart")
-struct CommandStreamTests {
+private struct CommandStreamTests {
     @Test(arguments: [
         CommandEncodeFixture.commandStream(.append(.start(tag: "1", appendingTo: .inbox)), "1 APPEND \"INBOX\""),
         CommandEncodeFixture.commandStream(
@@ -296,9 +296,9 @@ extension CommandEncodeFixture<CommandStreamPart> {
     }
 }
 
-struct PIIFixture: Sendable, CustomTestStringConvertible {
+private struct PIIFixture: Sendable, CustomTestStringConvertible {
     let input: CommandStreamPart
     let expected: String
 
-    var testDescription: String { expected }
+    var testDescription: String { expected.mappingControlPictures() }
 }
