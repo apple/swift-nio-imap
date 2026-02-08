@@ -43,6 +43,22 @@ struct ModificationSequenceValueTests {
     func encode(_ fixture: EncodeFixture<ModificationSequenceValue>) {
         fixture.checkEncoding()
     }
+
+    @Test(arguments: [
+        ParseFixture.modificationSequenceValue("1", " ", expected: .success(1)),
+        ParseFixture.modificationSequenceValue("123", " ", expected: .success(123)),
+        ParseFixture.modificationSequenceValue("12345", " ", expected: .success(12345)),
+        ParseFixture.modificationSequenceValue("1234567", " ", expected: .success(1_234_567)),
+        ParseFixture.modificationSequenceValue("123456789", " ", expected: .success(123_456_789)),
+        ParseFixture.modificationSequenceValue("0", " ", expected: .success(.zero)),
+        ParseFixture.modificationSequenceValue("9223372036854775807", " ", expected: .success(9_223_372_036_854_775_807)),
+        ParseFixture.modificationSequenceValue("9223372036854775808", " ", expected: .failure),
+        ParseFixture.modificationSequenceValue("13853076851840262211", " ", expected: .failure),
+        ParseFixture.modificationSequenceValue("18446744073709551615", " ", expected: .failure),
+    ])
+    func parse(_ fixture: ParseFixture<ModificationSequenceValue>) {
+        fixture.checkParsing()
+    }
 }
 
 // MARK: -
@@ -57,6 +73,21 @@ extension EncodeFixture<ModificationSequenceValue> {
             bufferKind: .defaultServer,
             expectedString: expectedString,
             encoder: { $0.writeModificationSequenceValue($1) }
+        )
+    }
+}
+
+extension ParseFixture<ModificationSequenceValue> {
+    fileprivate static func modificationSequenceValue(
+        _ input: String,
+        _ terminator: String = "\r",
+        expected: Expected
+    ) -> Self {
+        ParseFixture(
+            input: input,
+            terminator: terminator,
+            expected: expected,
+            parser: GrammarParser().parseModificationSequenceValue
         )
     }
 }
