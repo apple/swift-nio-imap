@@ -46,6 +46,32 @@ struct FetchModifierTests {
     func `encode multiple modifiers`(_ fixture: EncodeFixture<[FetchModifier]>) {
         fixture.checkEncoding()
     }
+
+    @Test(arguments: [
+        ParseFixture.fetchModifier("CHANGEDSINCE 2", " ", expected: .success(.changedSince(.init(modificationSequence: 2)))),
+        ParseFixture.fetchModifier("PARTIAL -735:-88032", " ", expected: .success(.partial(.last(735...88_032)))),
+        ParseFixture.fetchModifier("test", "\r", expected: .success(.other(.init(key: "test", value: nil)))),
+        ParseFixture.fetchModifier("test 1", " ", expected: .success(.other(.init(key: "test", value: .sequence(.set([1])))))),
+        ParseFixture.fetchModifier("1", " ", expected: .failure),
+        ParseFixture.fetchModifier("CHANGEDSINCE 1", "", expected: .incompleteMessage),
+        ParseFixture.fetchModifier("test 1", "", expected: .incompleteMessage),
+    ])
+    func parse(_ fixture: ParseFixture<FetchModifier>) {
+        fixture.checkParsing()
+    }
+
+    @Test(arguments: [
+        ParseFixture.fetchModifiers(" (CHANGEDSINCE 2)", " ", expected: .success([.changedSince(.init(modificationSequence: 2))])),
+        ParseFixture.fetchModifiers(" (PARTIAL -735:-88032)", " ", expected: .success([.partial(.last(735...88_032))])),
+        ParseFixture.fetchModifiers(
+            " (PARTIAL -1:-30 CHANGEDSINCE 98305)",
+            " ",
+            expected: .success([.partial(.last(1...30)), .changedSince(.init(modificationSequence: 98305))])
+        ),
+    ])
+    func `parse multiple modifiers`(_ fixture: ParseFixture<[FetchModifier]>) {
+        fixture.checkParsing()
+    }
 }
 
 // MARK: -
@@ -68,6 +94,36 @@ extension EncodeFixture<[FetchModifier]> {
             bufferKind: .defaultServer,
             expectedString: expectedString,
             encoder: { $0.writeFetchModifiers($1) }
+        )
+    }
+}
+
+extension ParseFixture<FetchModifier> {
+    fileprivate static func fetchModifier(
+        _ input: String,
+        _ terminator: String,
+        expected: Expected
+    ) -> Self {
+        ParseFixture(
+            input: input,
+            terminator: terminator,
+            expected: expected,
+            parser: GrammarParser().parseFetchModifier
+        )
+    }
+}
+
+extension ParseFixture<[FetchModifier]> {
+    fileprivate static func fetchModifiers(
+        _ input: String,
+        _ terminator: String = " ",
+        expected: Expected
+    ) -> Self {
+        ParseFixture(
+            input: input,
+            terminator: terminator,
+            expected: expected,
+            parser: GrammarParser().parseFetchModifiers
         )
     }
 }

@@ -59,6 +59,90 @@ struct MailboxDataTests {
     func `parse search/sort modification sequence`(_ fixture: ParseFixture<ModificationSequenceValue>) {
         fixture.checkParsing()
     }
+
+    @Test(arguments: [
+        ParseFixture.mailboxData("FLAGS (\\seen \\draft)", " ", expected: .success(.flags([.seen, .draft]))),
+        ParseFixture.mailboxData(
+            "LIST (\\oflag1 \\oflag2) NIL inbox",
+            "\r\n",
+            expected: .success(
+                .list(
+                    .init(
+                        attributes: [.init("\\oflag1"), .init("\\oflag2")],
+                        path: try! .init(name: .inbox),
+                        extensions: [:]
+                    )
+                )
+            )
+        ),
+        ParseFixture.mailboxData(
+            #"LSUB () "." #news.comp.mail.misc"#,
+            "\r\n",
+            expected: .success(
+                .lsub(
+                    MailboxInfo(
+                        attributes: [],
+                        path: try! .init(name: MailboxName("#news.comp.mail.misc"), pathSeparator: "."),
+                        extensions: [:]
+                    )
+                )
+            )
+        ),
+        ParseFixture.mailboxData(
+            "ESEARCH MIN 1 MAX 2",
+            "\r\n",
+            expected: .success(.extendedSearch(.init(correlator: nil, kind: .sequenceNumber, returnData: [.min(1), .max(2)])))
+        ),
+        ParseFixture.mailboxData("ESEARCH", "\r", expected: .success(.extendedSearch(.init(correlator: nil, kind: .sequenceNumber, returnData: [])))),
+        ParseFixture.mailboxData("1234 EXISTS", "\r\n", expected: .success(.exists(1234))),
+        ParseFixture.mailboxData("5678 RECENT", "\r\n", expected: .success(.recent(5678))),
+        ParseFixture.mailboxData("STATUS INBOX ()", "\r\n", expected: .success(.status(.inbox, .init()))),
+        ParseFixture.mailboxData("STATUS INBOX (MESSAGES 2)", "\r\n", expected: .success(.status(.inbox, .init(messageCount: 2)))),
+        ParseFixture.mailboxData(
+            "LSUB (\\seen \\draft) NIL inbox",
+            "\r\n",
+            expected: .success(
+                .lsub(
+                    .init(
+                        attributes: [.init("\\seen"), .init("\\draft")],
+                        path: try! .init(name: .inbox),
+                        extensions: [:]
+                    )
+                )
+            )
+        ),
+        ParseFixture.mailboxData("SEARCH", "\r\n", expected: .success(.search([]))),
+        ParseFixture.mailboxData("SEARCH 1", "\r\n", expected: .success(.search([1]))),
+        ParseFixture.mailboxData("SEARCH 1 2 3 4 5", "\r\n", expected: .success(.search([1, 2, 3, 4, 5]))),
+        ParseFixture.mailboxData(
+            "NAMESPACE NIL NIL NIL",
+            "\r\n",
+            expected: .success(.namespace(.init(userNamespace: [], otherUserNamespace: [], sharedNamespace: [])))
+        ),
+        ParseFixture.mailboxData(
+            "SEARCH 1 2 3 (MODSEQ 4)",
+            "\r\n",
+            expected: .success(.searchSort(.init(identifiers: [1, 2, 3], modificationSequence: 4)))
+        ),
+        ParseFixture.mailboxData(
+            "SEARCH 1 (MODSEQ 2)",
+            "\r\n",
+            expected: .success(.searchSort(.init(identifiers: [1], modificationSequence: 2)))
+        ),
+        ParseFixture.mailboxData(
+            "NAMESPACE NIL NIL NIL",
+            "\r\n",
+            expected: .success(.namespace(.init(userNamespace: [], otherUserNamespace: [], sharedNamespace: [])))
+        ),
+        ParseFixture.mailboxData(
+            #"UIDBATCHES (TAG "A143") 20351:7829,7830:1"#,
+            "\r\n",
+            expected: .success(.uidBatches(.init(correlator: .init(tag: "A143"), batches: [7_829...20_351, 1...7_830])))
+        ),
+    ])
+    func parse(_ fixture: ParseFixture<MailboxData>) {
+        fixture.checkParsing()
+    }
 }
 
 // MARK: -
@@ -96,6 +180,21 @@ extension ParseFixture<ModificationSequenceValue> {
             terminator: terminator,
             expected: expected,
             parser: GrammarParser().parseSearchSortModificationSequence
+        )
+    }
+}
+
+extension ParseFixture<MailboxData> {
+    fileprivate static func mailboxData(
+        _ input: String,
+        _ terminator: String,
+        expected: Expected
+    ) -> Self {
+        ParseFixture(
+            input: input,
+            terminator: terminator,
+            expected: expected,
+            parser: GrammarParser().parseMailboxData
         )
     }
 }

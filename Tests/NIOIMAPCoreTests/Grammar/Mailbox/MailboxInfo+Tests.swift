@@ -70,6 +70,47 @@ struct MailboxInfoTests {
     func `encode flags`(_ fixture: EncodeFixture<[MailboxInfo.Attribute]>) {
         fixture.checkEncoding()
     }
+
+    @Test(arguments: [
+        ParseFixture.mailboxInfo("() NIL inbox", "\r", expected: .success(.init(attributes: [], path: try! .init(name: .inbox), extensions: [:]))),
+        ParseFixture.mailboxInfo(#"() "d" inbox"#, "\r", expected: .success(.init(attributes: [], path: try! .init(name: .inbox, pathSeparator: "d"), extensions: [:]))),
+        ParseFixture.mailboxInfo(
+            "(\\oflag1 \\oflag2) NIL inbox",
+            "\r",
+            expected: .success(
+                .init(
+                    attributes: [.init("\\oflag1"), .init("\\oflag2")],
+                    path: try! .init(name: .inbox),
+                    extensions: [:]
+                )
+            )
+        ),
+        ParseFixture.mailboxInfo(
+            #"(\oflag1 \oflag2) "d" inbox"#,
+            "\r",
+            expected: .success(
+                .init(
+                    attributes: [.init("\\oflag1"), .init("\\oflag2")],
+                    path: try! .init(name: .inbox, pathSeparator: "d"),
+                    extensions: [:]
+                )
+            )
+        ),
+        ParseFixture.mailboxInfo(#"() ""#, "", expected: .incompleteMessageIgnoringBufferModifications),
+        ParseFixture.mailboxInfo(#"() "\" inbox"#, "", expected: .failureIgnoringBufferModifications),
+    ])
+    func parse(_ fixture: ParseFixture<MailboxInfo>) {
+        fixture.checkParsing()
+    }
+
+    @Test(arguments: [
+        ParseFixture.mailboxListFlags("\\marked", "\r", expected: .success([.marked])),
+        ParseFixture.mailboxListFlags("\\marked \\remote", "\r", expected: .success([.marked, .remote])),
+        ParseFixture.mailboxListFlags("\\marked \\o1 \\o2", "\r", expected: .success([.marked, .init("\\o1"), .init("\\o2")])),
+    ])
+    func `parse flags`(_ fixture: ParseFixture<[MailboxInfo.Attribute]>) {
+        fixture.checkParsing()
+    }
 }
 
 // MARK: -
@@ -98,6 +139,36 @@ extension EncodeFixture<[MailboxInfo.Attribute]> {
             bufferKind: .defaultServer,
             expectedString: expectedString,
             encoder: { $0.writeMailboxListFlags($1) }
+        )
+    }
+}
+
+extension ParseFixture<MailboxInfo> {
+    fileprivate static func mailboxInfo(
+        _ input: String,
+        _ terminator: String,
+        expected: Expected
+    ) -> Self {
+        ParseFixture(
+            input: input,
+            terminator: terminator,
+            expected: expected,
+            parser: GrammarParser().parseMailboxList
+        )
+    }
+}
+
+extension ParseFixture<[MailboxInfo.Attribute]> {
+    fileprivate static func mailboxListFlags(
+        _ input: String,
+        _ terminator: String = "\r",
+        expected: Expected
+    ) -> Self {
+        ParseFixture(
+            input: input,
+            terminator: terminator,
+            expected: expected,
+            parser: GrammarParser().parseMailboxListFlags
         )
     }
 }

@@ -113,6 +113,48 @@ struct FetchAttributeTests {
     func `encode list`(_ fixture: EncodeFixture<[FetchAttribute]>) {
         fixture.checkEncoding()
     }
+
+    @Test(arguments: [
+        ParseFixture.fetchAttribute("ENVELOPE", " ", expected: .success(.envelope)),
+        ParseFixture.fetchAttribute("FLAGS", " ", expected: .success(.flags)),
+        ParseFixture.fetchAttribute("INTERNALDATE", " ", expected: .success(.internalDate)),
+        ParseFixture.fetchAttribute("RFC822.HEADER", " ", expected: .success(.rfc822Header)),
+        ParseFixture.fetchAttribute("RFC822.SIZE", " ", expected: .success(.rfc822Size)),
+        ParseFixture.fetchAttribute("RFC822.TEXT", " ", expected: .success(.rfc822Text)),
+        ParseFixture.fetchAttribute("RFC822", " ", expected: .success(.rfc822)),
+        ParseFixture.fetchAttribute("BODY", " ", expected: .success(.bodyStructure(extensions: false))),
+        ParseFixture.fetchAttribute("BODYSTRUCTURE", " ", expected: .success(.bodyStructure(extensions: true))),
+        ParseFixture.fetchAttribute("UID", " ", expected: .success(.uid)),
+        ParseFixture.fetchAttribute(
+            "BODY[1]<1.2>",
+            " ",
+            expected: .success(.bodySection(peek: false, .init(part: [1], kind: .complete), 1...2 as ClosedRange))
+        ),
+        ParseFixture.fetchAttribute("BODY[1.TEXT]", " ", expected: .success(.bodySection(peek: false, .init(part: [1], kind: .text), nil))),
+        ParseFixture.fetchAttribute("BODY[4.2.TEXT]", " ", expected: .success(.bodySection(peek: false, .init(part: [4, 2], kind: .text), nil))),
+        ParseFixture.fetchAttribute("BODY[HEADER]", " ", expected: .success(.bodySection(peek: false, .init(kind: .header), nil))),
+        ParseFixture.fetchAttribute(
+            "BODY.PEEK[HEADER]<3.4>",
+            " ",
+            expected: .success(.bodySection(peek: true, .init(kind: .header), 3...6 as ClosedRange))
+        ),
+        ParseFixture.fetchAttribute("BODY.PEEK[HEADER]", " ", expected: .success(.bodySection(peek: true, .init(kind: .header), nil))),
+        ParseFixture.fetchAttribute("BINARY.PEEK[1]", " ", expected: .success(.binary(peek: true, section: [1], partial: nil))),
+        ParseFixture.fetchAttribute("BINARY.PEEK[1]<3.4>", " ", expected: .success(.binary(peek: true, section: [1], partial: 3...6 as ClosedRange))),
+        ParseFixture.fetchAttribute("BINARY[2]<4.5>", " ", expected: .success(.binary(peek: false, section: [2], partial: 4...8 as ClosedRange))),
+        ParseFixture.fetchAttribute("BINARY.SIZE[5]", " ", expected: .success(.binarySize(section: [5]))),
+        ParseFixture.fetchAttribute("X-GM-MSGID", " ", expected: .success(.gmailMessageID)),
+        ParseFixture.fetchAttribute("X-GM-THRID", " ", expected: .success(.gmailThreadID)),
+        ParseFixture.fetchAttribute("X-GM-LABELS", " ", expected: .success(.gmailLabels)),
+        ParseFixture.fetchAttribute("MODSEQ", " ", expected: .success(.modificationSequence)),
+        ParseFixture.fetchAttribute("PREVIEW", " ", expected: .success(.preview(lazy: false))),
+        ParseFixture.fetchAttribute("PREVIEW (LAZY)", " ", expected: .success(.preview(lazy: true))),
+        ParseFixture.fetchAttribute("EMAILID", " ", expected: .success(.emailID)),
+        ParseFixture.fetchAttribute("THREADID", " ", expected: .success(.threadID)),
+    ])
+    func parse(_ fixture: ParseFixture<FetchAttribute>) {
+        fixture.checkParsing()
+    }
 }
 
 // MARK: -
@@ -154,6 +196,21 @@ extension EncodeFixture<[FetchAttribute]> {
             bufferKind: .client(options),
             expectedString: expectedString,
             encoder: { $0.writeFetchAttributeList($1) }
+        )
+    }
+}
+
+extension ParseFixture<FetchAttribute> {
+    fileprivate static func fetchAttribute(
+        _ input: String,
+        _ terminator: String = " ",
+        expected: Expected
+    ) -> Self {
+        ParseFixture(
+            input: input,
+            terminator: terminator,
+            expected: expected,
+            parser: GrammarParser().parseFetchAttribute
         )
     }
 }
