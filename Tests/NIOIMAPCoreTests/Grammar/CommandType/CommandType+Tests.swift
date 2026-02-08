@@ -85,9 +85,91 @@ struct CommandTypeTests {
     func encode(_ fixture: CommandEncodeFixture<Command>) {
         fixture.checkEncoding()
     }
+
+    @Test(arguments: [
+        ParseFixture.command("CAPABILITY", expected: .success(.capability)),
+        ParseFixture.command("LOGOUT", expected: .success(.logout)),
+        ParseFixture.command("NOOP", expected: .success(.noop)),
+        ParseFixture.command("STARTTLS", expected: .success(.startTLS)),
+        ParseFixture.command("CHECK", expected: .success(.check)),
+        ParseFixture.command("CLOSE", expected: .success(.close)),
+        ParseFixture.command("EXPUNGE", expected: .success(.expunge)),
+        ParseFixture.command("UNSELECT", expected: .success(.unselect)),
+        ParseFixture.command("IDLE", expected: .success(.idleStart)),
+        ParseFixture.command("NAMESPACE", expected: .success(.namespace)),
+        ParseFixture.command("ID NIL", expected: .success(.id(.init()))),
+        ParseFixture.command("ENABLE BINARY", expected: .success(.enable([.binary]))),
+        ParseFixture.command("GETMETADATA INBOX (test)", expected: .success(.getMetadata(options: [], mailbox: .inbox, entries: ["test"]))),
+        ParseFixture.command("SETMETADATA INBOX (test NIL)", expected: .success(.setMetadata(mailbox: .inbox, entries: ["test": nil]))),
+        ParseFixture.command("RESETKEY INBOX INTERNAL", expected: .success(.resetKey(mailbox: .inbox, mechanisms: [.internal]))),
+        ParseFixture.command("GENURLAUTH rump INTERNAL", expected: .success(.generateAuthorizedURL([.init(urlRump: "rump", mechanism: .internal)]))),
+        ParseFixture.command("URLFETCH test", expected: .success(.urlFetch(["test"]))),
+        ParseFixture.command("COPY 1 INBOX", expected: .success(.copy(.set([1]), .inbox))),
+        ParseFixture.command("DELETE INBOX", expected: .success(.delete(.inbox))),
+        ParseFixture.command("MOVE $ INBOX", expected: .success(.move(.lastCommand, .inbox))),
+        ParseFixture.command("SEARCH ALL", expected: .success(.search(key: .all, charset: nil, returnOptions: []))),
+        ParseFixture.command("ESEARCH ALL", expected: .success(.extendedSearch(.init(key: .all)))),
+        ParseFixture.command("STORE $ +FLAGS \\Answered", expected: .success(.store(.lastCommand, [], .flags(.add(silent: false, list: [.answered]))))),
+        ParseFixture.command("EXAMINE INBOX", expected: .success(.examine(.inbox, .init()))),
+        ParseFixture.command("LIST INBOX test", expected: .success(.list(nil, reference: .inbox, .mailbox("test"), []))),
+        ParseFixture.command("LSUB INBOX test", expected: .success(.lsub(reference: .inbox, pattern: "test"))),
+        ParseFixture.command("RENAME INBOX inbox2", expected: .success(.rename(from: .inbox, to: .init("inbox2"), parameters: .init()))),
+        ParseFixture.command("SELECT INBOX", expected: .success(.select(.inbox, []))),
+        ParseFixture.command("STATUS INBOX (SIZE)", expected: .success(.status(.inbox, [.size]))),
+        ParseFixture.command("SUBSCRIBE INBOX", expected: .success(.subscribe(.inbox))),
+        ParseFixture.command("UNSUBSCRIBE INBOX", expected: .success(.unsubscribe(.inbox))),
+        ParseFixture.command("UID EXPUNGE 1:2", expected: .success(.uidExpunge(.set([1...2])))),
+        ParseFixture.command("FETCH $ (FLAGS)", expected: .success(.fetch(.lastCommand, [.flags], .init()))),
+        ParseFixture.command("LOGIN \"user\" \"password\"", expected: .success(.login(username: "user", password: "password"))),
+        ParseFixture.command("AUTHENTICATE GSSAPI", expected: .success(.authenticate(mechanism: AuthenticationMechanism("GSSAPI"), initialResponse: nil))),
+        ParseFixture.command("CREATE test", expected: .success(.create(.init("test"), []))),
+        ParseFixture.command("GETQUOTA root", expected: .success(.getQuota(.init("root")))),
+        ParseFixture.command("GETQUOTAROOT INBOX", expected: .success(.getQuotaRoot(.inbox))),
+        ParseFixture.command("SETQUOTA ROOT (resource 123)", expected: .success(.setQuota(.init("ROOT"), [.init(resourceName: "resource", limit: 123)]))),
+        ParseFixture.command("COMPRESS DEFLATE", expected: .success(.compress(.deflate))),
+        ParseFixture.command("UIDBATCHES 2000", expected: .success(.uidBatches(batchSize: 2_000, batchRange: nil))),
+        ParseFixture.command("UIDBATCHES 1000 10:20", expected: .success(.uidBatches(batchSize: 1_000, batchRange: 10...20))),
+        ParseFixture.command("UIDBATCHES 500 22:22", expected: .success(.uidBatches(batchSize: 500, batchRange: 22...22))),
+        ParseFixture.command("UIDBATCHES 1000 1", expected: .success(.uidBatches(batchSize: 1_000, batchRange: 1...1))),
+        ParseFixture.command("GETJMAPACCESS", expected: .success(.getJMAPAccess)),
+        ParseFixture.command("123", expected: .failure),
+        ParseFixture.command("NOTHING", expected: .failure),
+        ParseFixture.command("...", expected: .failure),
+        ParseFixture.command("CAPABILITY", "", expected: .incompleteMessage),
+        ParseFixture.command("CHECK", "", expected: .incompleteMessage),
+    ])
+    func parse(_ fixture: ParseFixture<Command>) {
+        fixture.checkParsing()
+    }
+
+    @Test func `parser literal length limit`() throws {
+        let parser = GrammarParser(literalSizeLimit: 5)
+        var b1 = ParseBuffer("{5}\r\nabcde")
+        #expect(try parser.parseLiteral(buffer: &b1, tracker: .makeNewDefault) == "abcde")
+
+        var b2 = ParseBuffer("{6}\r\nabcdef")
+        #expect(throws: ExceededLiteralSizeLimitError.self) {
+            try parser.parseLiteral(buffer: &b2, tracker: .makeNewDefault)
+        }
+    }
 }
 
 // MARK: -
+
+extension ParseFixture<Command> {
+    fileprivate static func command(
+        _ input: String,
+        _ terminator: String = "\r",
+        expected: Expected
+    ) -> Self {
+        ParseFixture(
+            input: input,
+            terminator: terminator,
+            expected: expected,
+            parser: GrammarParser().parseCommand
+        )
+    }
+}
 
 extension CommandEncodeFixture<Command> {
     fileprivate static func command(

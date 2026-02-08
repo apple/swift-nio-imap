@@ -56,6 +56,126 @@ struct EmailAddressTestsSuite {
     func `encode email address`(_ fixture: EmailAddressFixture) {
         fixture.checkEncoding()
     }
+
+    @Test(arguments: [
+        EnvelopeGroupingFixture(
+            addresses: [],
+            expected: []
+        ),
+        EnvelopeGroupingFixture(
+            addresses: [.init(personName: "a", sourceRoot: "a", mailbox: "a", host: "a")],
+            expected: [.singleAddress(.init(personName: "a", sourceRoot: "a", mailbox: "a", host: "a"))]
+        ),
+        EnvelopeGroupingFixture(
+            addresses: [
+                .init(personName: "a", sourceRoot: "a", mailbox: "a", host: "a"),
+                .init(personName: "b", sourceRoot: "b", mailbox: "b", host: "b"),
+            ],
+            expected: [
+                .singleAddress(.init(personName: "a", sourceRoot: "a", mailbox: "a", host: "a")),
+                .singleAddress(.init(personName: "b", sourceRoot: "b", mailbox: "b", host: "b")),
+            ]
+        ),
+        EnvelopeGroupingFixture(
+            addresses: [
+                .init(personName: nil, sourceRoot: nil, mailbox: "group", host: nil),
+                .init(personName: "a", sourceRoot: "a", mailbox: "a", host: "a"),
+                .init(personName: nil, sourceRoot: nil, mailbox: nil, host: nil),
+            ],
+            expected: [
+                .group(
+                    .init(
+                        groupName: "group",
+                        sourceRoot: nil,
+                        children: [.singleAddress(.init(personName: "a", sourceRoot: "a", mailbox: "a", host: "a"))]
+                    )
+                )
+            ]
+        ),
+        EnvelopeGroupingFixture(
+            addresses: [
+                .init(personName: nil, sourceRoot: nil, mailbox: nil, host: nil)
+            ],
+            expected: [
+                .singleAddress(.init(personName: nil, sourceRoot: nil, mailbox: nil, host: nil))
+            ]
+        ),
+        EnvelopeGroupingFixture(
+            addresses: [
+                .init(personName: nil, sourceRoot: nil, mailbox: "group", host: nil),
+                .init(personName: "a", sourceRoot: "a", mailbox: "a", host: "a"),
+                .init(personName: "b", sourceRoot: "b", mailbox: "b", host: "b"),
+                .init(personName: "c", sourceRoot: "c", mailbox: "c", host: "c"),
+                .init(personName: nil, sourceRoot: nil, mailbox: nil, host: nil),
+            ],
+            expected: [
+                .group(
+                    .init(
+                        groupName: "group",
+                        sourceRoot: nil,
+                        children: [
+                            .singleAddress(.init(personName: "a", sourceRoot: "a", mailbox: "a", host: "a")),
+                            .singleAddress(.init(personName: "b", sourceRoot: "b", mailbox: "b", host: "b")),
+                            .singleAddress(.init(personName: "c", sourceRoot: "c", mailbox: "c", host: "c")),
+                        ]
+                    )
+                )
+            ]
+        ),
+        EnvelopeGroupingFixture(
+            addresses: [
+                .init(personName: nil, sourceRoot: nil, mailbox: "group1", host: nil),
+                .init(personName: "a", sourceRoot: "a", mailbox: "a", host: "a"),
+                .init(personName: nil, sourceRoot: nil, mailbox: "group2", host: nil),
+                .init(personName: "b", sourceRoot: "b", mailbox: "b", host: "b"),
+                .init(personName: nil, sourceRoot: nil, mailbox: "group3", host: nil),
+                .init(personName: "c", sourceRoot: "c", mailbox: "c", host: "c"),
+                .init(personName: nil, sourceRoot: nil, mailbox: nil, host: nil),
+                .init(personName: nil, sourceRoot: nil, mailbox: nil, host: nil),
+                .init(personName: nil, sourceRoot: nil, mailbox: nil, host: nil),
+            ],
+            expected: [
+                .group(
+                    .init(
+                        groupName: "group1",
+                        sourceRoot: nil,
+                        children: [
+                            .singleAddress(.init(personName: "a", sourceRoot: "a", mailbox: "a", host: "a")),
+                            .group(
+                                .init(
+                                    groupName: "group2",
+                                    sourceRoot: nil,
+                                    children: [
+                                        .singleAddress(.init(personName: "b", sourceRoot: "b", mailbox: "b", host: "b")),
+                                        .group(
+                                            .init(
+                                                groupName: "group3",
+                                                sourceRoot: nil,
+                                                children: [
+                                                    .singleAddress(
+                                                        .init(
+                                                            personName: "c",
+                                                            sourceRoot: "c",
+                                                            mailbox: "c",
+                                                            host: "c"
+                                                        )
+                                                    )
+                                                ]
+                                            )
+                                        ),
+                                    ]
+                                )
+                            ),
+                        ]
+                    )
+                )
+            ]
+        ),
+    ])
+    func `parse envelope email address groups`(_ fixture: EnvelopeGroupingFixture) {
+        let actual = GrammarParser().parseEnvelopeEmailAddressGroups(fixture.addresses)
+        #expect(actual == fixture.expected)
+    }
 }
 
 // MARK: -
@@ -81,5 +201,14 @@ struct EmailAddressFixture: Sendable, CustomTestStringConvertible {
 
         #expect(size == expectedString.utf8.count)
         #expect(actualString.mappingControlPictures() == expectedString.mappingControlPictures())
+    }
+}
+
+struct EnvelopeGroupingFixture: Sendable, CustomTestStringConvertible {
+    var addresses: [EmailAddress]
+    var expected: [EmailAddressListElement]
+
+    var testDescription: String {
+        "grouping \(addresses.count) addresses into \(expected.count) elements"
     }
 }
