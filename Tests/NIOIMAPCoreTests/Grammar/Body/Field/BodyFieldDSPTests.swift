@@ -64,6 +64,21 @@ struct BodyFieldDSPTests {
     func filenameProperty(_ fixture: FilenameFixture) {
         #expect(fixture.disposition.filename == fixture.expected)
     }
+
+    @Test(arguments: [
+        ParseFixture.bodyDisposition(
+            #"("astring" ("f1" "v1"))"#,
+            expected: .success(BodyStructure.Disposition(kind: "astring", parameters: ["f1": "v1"]))
+        ),
+        ParseFixture.bodyDisposition(
+            #"NIL"#,
+            "",
+            expected: .success(nil)
+        ),
+    ])
+    func parse(_ fixture: ParseFixture<BodyStructure.Disposition?>) {
+        fixture.checkParsing()
+    }
 }
 
 // MARK: -
@@ -77,6 +92,21 @@ extension EncodeFixture<BodyStructure.Disposition?> {
             input: input,
             expectedString: expectedString,
             encoder: { $0.writeBodyDisposition($1) }
+        )
+    }
+}
+
+extension ParseFixture<BodyStructure.Disposition?> {
+    fileprivate static func bodyDisposition(
+        _ input: String,
+        _ terminator: String = "\r",
+        expected: Expected
+    ) -> Self {
+        ParseFixture(
+            input: input,
+            terminator: terminator,
+            expected: expected,
+            parser: GrammarParser().parseBodyFieldDsp
         )
     }
 }

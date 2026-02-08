@@ -33,6 +33,25 @@ struct BodyFieldsTests {
     func encoding(_ fixture: EncodeFixture<BodyStructure.Fields>) {
         fixture.checkEncoding()
     }
+
+    @Test(arguments: [
+        ParseFixture.bodyFields(
+            #"("f1" "v1") "id" "desc" "8BIT" 1234"#,
+            " ",
+            expected: .success(
+                BodyStructure.Fields(
+                    parameters: ["f1": "v1"],
+                    id: "id",
+                    contentDescription: "desc",
+                    encoding: .eightBit,
+                    octetCount: 1234
+                )
+            )
+        ),
+    ])
+    func parse(_ fixture: ParseFixture<BodyStructure.Fields>) {
+        fixture.checkParsing()
+    }
 }
 
 // MARK: -
@@ -43,6 +62,21 @@ extension EncodeFixture<BodyStructure.Fields> {
             input: input,
             expectedString: expectedString,
             encoder: { $0.writeBodyFields($1) }
+        )
+    }
+}
+
+extension ParseFixture<BodyStructure.Fields> {
+    fileprivate static func bodyFields(
+        _ input: String,
+        _ terminator: String,
+        expected: Expected
+    ) -> Self {
+        ParseFixture(
+            input: input,
+            terminator: terminator,
+            expected: expected,
+            parser: GrammarParser().parseBodyFields
         )
     }
 }

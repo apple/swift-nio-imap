@@ -108,6 +108,114 @@ extension BodySinglepartTests {
     func `encode extension`(_ fixture: EncodeFixture<BodyStructure.Singlepart.Extension>) {
         fixture.checkEncoding()
     }
+
+    @Test(arguments: [
+        ParseFixture.bodySinglepart(
+            #""AUDIO" "alternative" NIL NIL NIL "BASE64" 1"#,
+            "\r\n",
+            expected: .success(
+                .init(
+                    kind: .basic(.init(topLevel: .audio, sub: .alternative)),
+                    fields: .init(parameters: [:], id: nil, contentDescription: nil, encoding: .base64, octetCount: 1),
+                    extension: nil
+                )
+            )
+        ),
+        ParseFixture.bodySinglepart(
+            #""APPLICATION" "mixed" NIL "id" "description" "7BIT" 2"#,
+            "\r\n",
+            expected: .success(
+                .init(
+                    kind: .basic(.init(topLevel: .application, sub: .mixed)),
+                    fields: .init(
+                        parameters: [:],
+                        id: "id",
+                        contentDescription: "description",
+                        encoding: .sevenBit,
+                        octetCount: 2
+                    ),
+                    extension: nil
+                )
+            )
+        ),
+        ParseFixture.bodySinglepart(
+            #""VIDEO" "related" ("f1" "v1") NIL NIL "8BIT" 3"#,
+            "\r\n",
+            expected: .success(
+                .init(
+                    kind: .basic(.init(topLevel: .video, sub: .related)),
+                    fields: .init(
+                        parameters: ["f1": "v1"],
+                        id: nil,
+                        contentDescription: nil,
+                        encoding: .eightBit,
+                        octetCount: 3
+                    ),
+                    extension: nil
+                )
+            )
+        ),
+        ParseFixture.bodySinglepart(
+            #""MESSAGE" "RFC822" NIL NIL NIL "BASE64" 4 (NIL NIL NIL NIL NIL NIL NIL NIL NIL NIL) ("IMAGE" "related" NIL NIL NIL "BINARY" 5) 8"#,
+            "\r\n",
+            expected: .success(
+                .init(
+                    kind: .message(
+                        .init(
+                            message: .rfc822,
+                            envelope: Envelope(
+                                date: nil,
+                                subject: nil,
+                                from: [],
+                                sender: [],
+                                reply: [],
+                                to: [],
+                                cc: [],
+                                bcc: [],
+                                inReplyTo: nil,
+                                messageID: nil
+                            ),
+                            body: .singlepart(
+                                .init(
+                                    kind: .basic(.init(topLevel: .image, sub: .related)),
+                                    fields: .init(
+                                        parameters: [:],
+                                        id: nil,
+                                        contentDescription: nil,
+                                        encoding: .binary,
+                                        octetCount: 5
+                                    )
+                                )
+                            ),
+                            lineCount: 8
+                        )
+                    ),
+                    fields: .init(parameters: [:], id: nil, contentDescription: nil, encoding: .base64, octetCount: 4),
+                    extension: nil
+                )
+            )
+        ),
+        ParseFixture.bodySinglepart(
+            #""TEXT" "media" NIL NIL NIL "QUOTED-PRINTABLE" 1 2"#,
+            "\r\n",
+            expected: .success(
+                .init(
+                    kind: .text(.init(mediaSubtype: "media", lineCount: 2)),
+                    fields: .init(
+                        parameters: [:],
+                        id: nil,
+                        contentDescription: nil,
+                        encoding: .quotedPrintable,
+                        octetCount: 1
+                    ),
+                    extension: nil
+                )
+            )
+        ),
+    ])
+    func parse(_ fixture: ParseFixture<BodyStructure.Singlepart>) {
+        fixture.checkParsing()
+    }
 }
 
 // MARK: -
@@ -136,6 +244,21 @@ extension EncodeFixture<BodyStructure.Singlepart.Extension> {
             bufferKind: .defaultServer,
             expectedString: expectedString,
             encoder: { $0.writeBodyExtensionSinglePart($1) }
+        )
+    }
+}
+
+extension ParseFixture<BodyStructure.Singlepart> {
+    fileprivate static func bodySinglepart(
+        _ input: String,
+        _ terminator: String,
+        expected: Expected
+    ) -> Self {
+        ParseFixture(
+            input: input,
+            terminator: terminator,
+            expected: expected,
+            parser: GrammarParser().parseBodyKindSinglePart
         )
     }
 }
