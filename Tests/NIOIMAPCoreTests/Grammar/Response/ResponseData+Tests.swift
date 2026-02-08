@@ -25,6 +25,20 @@ struct ResponseDataTests {
     func encode(_ fixture: EncodeFixture<ResponsePayload>) {
         fixture.checkEncoding()
     }
+
+    @Test(arguments: [
+        ParseFixture.responseData(
+            "* CAPABILITY ENABLE\r\n",
+            expected: .success(.capabilityData([.enable]))
+        ),
+        ParseFixture.responseData(
+            "* 3 EXPUNGE\r\n",
+            expected: .success(.messageData(.expunge(3)))
+        ),
+    ])
+    func parse(_ fixture: ParseFixture<ResponsePayload>) {
+        fixture.checkParsing()
+    }
 }
 
 // MARK: -
@@ -39,6 +53,21 @@ extension EncodeFixture<ResponsePayload> {
             bufferKind: .defaultServer,
             expectedString: expectedString,
             encoder: { $0.writeResponseData($1) }
+        )
+    }
+}
+
+extension ParseFixture<ResponsePayload> {
+    fileprivate static func responseData(
+        _ input: String,
+        _ terminator: String = " ",
+        expected: Expected
+    ) -> Self {
+        ParseFixture(
+            input: input,
+            terminator: terminator,
+            expected: expected,
+            parser: GrammarParser().parseResponseData
         )
     }
 }

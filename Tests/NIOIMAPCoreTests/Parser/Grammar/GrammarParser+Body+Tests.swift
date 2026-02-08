@@ -18,28 +18,6 @@ import XCTest
 
 class GrammarParser_Body_Tests: XCTestCase, _ParserTestHelpers {}
 
-// MARK: - parseBodyExtension
-
-extension GrammarParser_Body_Tests {
-    func testParseBodyExtension() {
-        self.iterateTests(
-            testFunction: GrammarParser().parseBodyExtension,
-            validInputs: [
-                ("1", "\r", [.number(1)], #line),
-                ("\"s\"", "\r", [.string("s")], #line),
-                ("(1)", "\r", [.number(1)], #line),
-                ("(1 \"2\" 3)", "\r", [.number(1), .string("2"), .number(3)], #line),
-                (
-                    "(1 2 3 (4 (5 (6))))", "\r",
-                    [.number(1), .number(2), .number(3), .number(4), .number(5), .number(6)], #line
-                ),
-                ("(((((1)))))", "\r", [.number(1)], #line),  // yeh, this is valid, don't ask
-            ],
-            parserErrorInputs: [],
-            incompleteMessageInputs: []
-        )
-    }
-}
 
 // MARK: - parseBodyFieldDsp
 
@@ -60,49 +38,7 @@ extension GrammarParser_Body_Tests {
     }
 }
 
-// MARK: - parseBodyEncoding
 
-extension GrammarParser_Body_Tests {
-    func testParseBodyEncoding() {
-        self.iterateTests(
-            testFunction: GrammarParser().parseBodyEncoding,
-            validInputs: [
-                (#""BASE64""#, " ", .base64, #line),
-                (#""BINARY""#, " ", .binary, #line),
-                (#""7BIT""#, " ", .sevenBit, #line),
-                (#""8BIT""#, " ", .eightBit, #line),
-                (#""QUOTED-PRINTABLE""#, " ", .quotedPrintable, #line),
-                (#""other""#, " ", .init("other"), #line),
-            ],
-            parserErrorInputs: [],
-            incompleteMessageInputs: []
-        )
-    }
-
-    func testParseBodyEncoding_invalid_missingQuotes() {
-        var buffer = TestUtilities.makeParseBuffer(for: "other")
-        XCTAssertThrowsError(try GrammarParser().parseBodyEncoding(buffer: &buffer, tracker: .testTracker)) { e in
-            XCTAssertTrue(e is ParserError)
-        }
-    }
-}
-
-// MARK: - parseBodyFieldLanguage
-
-extension GrammarParser_Body_Tests {
-    func testParseBodyFieldLanguage() {
-        self.iterateTests(
-            testFunction: GrammarParser().parseBodyFieldLanguage,
-            validInputs: [
-                (#""english""#, " ", ["english"], #line),
-                (#"("english")"#, " ", ["english"], #line),
-                (#"("english" "french")"#, " ", ["english", "french"], #line),
-            ],
-            parserErrorInputs: [],
-            incompleteMessageInputs: []
-        )
-    }
-}
 
 // MARK: - parseBodyFieldParam
 

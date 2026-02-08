@@ -26,6 +26,15 @@ struct BodyFieldLanguageTests {
     func encoding(_ fixture: EncodeFixture<[String]>) {
         fixture.checkEncoding()
     }
+
+    @Test(arguments: [
+        ParseFixture.bodyFieldLanguage(#""english""#, expected: .success(["english"])),
+        ParseFixture.bodyFieldLanguage(#"("english")"#, expected: .success(["english"])),
+        ParseFixture.bodyFieldLanguage(#"("english" "french")"#, expected: .success(["english", "french"])),
+    ])
+    func parse(_ fixture: ParseFixture<[String]>) {
+        fixture.checkParsing()
+    }
 }
 
 // MARK: -
@@ -36,6 +45,21 @@ extension EncodeFixture<[String]> {
             input: input,
             expectedString: expectedString,
             encoder: { $0.writeBodyLanguages($1) }
+        )
+    }
+}
+
+extension ParseFixture<[String]> {
+    fileprivate static func bodyFieldLanguage(
+        _ input: String,
+        _ terminator: String = " ",
+        expected: Expected
+    ) -> Self {
+        ParseFixture(
+            input: input,
+            terminator: terminator,
+            expected: expected,
+            parser: GrammarParser().parseBodyFieldLanguage
         )
     }
 }

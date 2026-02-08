@@ -28,6 +28,18 @@ struct BodyExtensionTests {
     func encode(_ fixture: EncodeFixture<[BodyExtension]>) {
         fixture.checkEncoding()
     }
+
+    @Test(arguments: [
+        ParseFixture.bodyExtension("1", expected: .success([.number(1)])),
+        ParseFixture.bodyExtension(#""s""#, expected: .success([.string("s")])),
+        ParseFixture.bodyExtension("(1)", expected: .success([.number(1)])),
+        ParseFixture.bodyExtension("(1 \"2\" 3)", expected: .success([.number(1), .string("2"), .number(3)])),
+        ParseFixture.bodyExtension("(1 2 3 (4 (5 (6))))", expected: .success([.number(1), .number(2), .number(3), .number(4), .number(5), .number(6)])),
+        ParseFixture.bodyExtension("(((((1)))))", expected: .success([.number(1)])),
+    ])
+    func parse(_ fixture: ParseFixture<[BodyExtension]>) {
+        fixture.checkParsing()
+    }
 }
 
 // MARK: -
@@ -35,5 +47,20 @@ struct BodyExtensionTests {
 extension EncodeFixture<[BodyExtension]> {
     fileprivate static func bodyExtensions(_ input: [BodyExtension], _ expectedString: String) -> Self {
         EncodeFixture(input: input, bufferKind: .defaultServer, expectedString: expectedString, encoder: { $0.writeBodyExtensions($1) })
+    }
+}
+
+extension ParseFixture<[BodyExtension]> {
+    fileprivate static func bodyExtension(
+        _ input: String,
+        _ terminator: String = "\r",
+        expected: Expected
+    ) -> Self {
+        ParseFixture(
+            input: input,
+            terminator: terminator,
+            expected: expected,
+            parser: GrammarParser().parseBodyExtension
+        )
     }
 }

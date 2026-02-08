@@ -29,6 +29,21 @@ struct ResponseTextTests {
     }
 
     @Test(arguments: [
+        ParseFixture.responseText("", expected: .success(.init(code: nil, text: ""))),
+        ParseFixture.responseText(" ", expected: .success(.init(code: nil, text: ""))),
+        ParseFixture.responseText("text", expected: .success(.init(code: nil, text: "text"))),
+        ParseFixture.responseText(" text", expected: .success(.init(code: nil, text: "text"))),
+        ParseFixture.responseText("[UNSEEN 1]", expected: .success(.init(code: .unseen(1), text: ""))),
+        ParseFixture.responseText("[UNSEEN 2] ", expected: .success(.init(code: .unseen(2), text: ""))),
+        ParseFixture.responseText("[UNSEEN 2] some text", expected: .success(.init(code: .unseen(2), text: "some text"))),
+        ParseFixture.responseText("[UIDVALIDITY 1561789793]", expected: .success(.init(code: .uidValidity(1_561_789_793), text: ""))),
+        ParseFixture.responseText("[UIDNEXT 171]", expected: .success(.init(code: .uidNext(171), text: ""))),
+    ])
+    func parse(_ fixture: ParseFixture<ResponseText>) {
+        fixture.checkParsing()
+    }
+
+    @Test(arguments: [
         DebugStringFixture(sut: ResponseText(code: nil, text: "buffer"), expected: "buffer"),
         DebugStringFixture(sut: ResponseText(code: .alert, text: "buffer"), expected: "[ALERT] buffer"),
     ])
@@ -49,6 +64,21 @@ extension EncodeFixture<ResponseText> {
             bufferKind: .defaultServer,
             expectedString: expectedString,
             encoder: { $0.writeResponseText($1) }
+        )
+    }
+}
+
+extension ParseFixture<ResponseText> {
+    fileprivate static func responseText(
+        _ input: String,
+        _ terminator: String = "\r",
+        expected: Expected
+    ) -> Self {
+        ParseFixture(
+            input: input,
+            terminator: terminator,
+            expected: expected,
+            parser: GrammarParser().parseResponseText
         )
     }
 }

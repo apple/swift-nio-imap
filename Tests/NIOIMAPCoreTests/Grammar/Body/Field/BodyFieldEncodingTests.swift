@@ -29,6 +29,18 @@ struct BodyFieldEncodingTests {
     func encoding(_ fixture: EncodeFixture<BodyStructure.Encoding>) {
         fixture.checkEncoding()
     }
+
+    @Test(arguments: [
+        ParseFixture.bodyEncoding(#""BASE64""#, expected: .success(.base64)),
+        ParseFixture.bodyEncoding(#""BINARY""#, expected: .success(.binary)),
+        ParseFixture.bodyEncoding(#""7BIT""#, expected: .success(.sevenBit)),
+        ParseFixture.bodyEncoding(#""8BIT""#, expected: .success(.eightBit)),
+        ParseFixture.bodyEncoding(#""QUOTED-PRINTABLE""#, expected: .success(.quotedPrintable)),
+        ParseFixture.bodyEncoding(#""other""#, expected: .success(.init("other"))),
+    ])
+    func parse(_ fixture: ParseFixture<BodyStructure.Encoding?>) {
+        fixture.checkParsing()
+    }
 }
 
 // MARK: -
@@ -39,6 +51,21 @@ extension EncodeFixture<BodyStructure.Encoding> {
             input: input,
             expectedString: expectedString,
             encoder: { $0.writeBodyEncoding($1) }
+        )
+    }
+}
+
+extension ParseFixture<BodyStructure.Encoding?> {
+    fileprivate static func bodyEncoding(
+        _ input: String,
+        _ terminator: String = " ",
+        expected: Expected
+    ) -> Self {
+        ParseFixture(
+            input: input,
+            terminator: terminator,
+            expected: expected,
+            parser: GrammarParser().parseBodyEncoding
         )
     }
 }

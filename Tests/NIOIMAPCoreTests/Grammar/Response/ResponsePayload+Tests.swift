@@ -45,6 +45,24 @@ struct ResponsePayloadTests {
     func encode(_ fixture: EncodeFixture<ResponsePayload>) {
         fixture.checkEncoding()
     }
+
+    @Test(arguments: [
+        ParseFixture.responsePayload("CAPABILITY ENABLE", expected: .success(.capabilityData([.enable]))),
+        ParseFixture.responsePayload("BYE test", expected: .success(.conditionalState(.bye(.init(code: nil, text: "test"))))),
+        ParseFixture.responsePayload("OK test", expected: .success(.conditionalState(.ok(.init(code: nil, text: "test"))))),
+        ParseFixture.responsePayload("1 EXISTS", expected: .success(.mailboxData(.exists(1)))),
+        ParseFixture.responsePayload("2 EXPUNGE", expected: .success(.messageData(.expunge(2)))),
+        ParseFixture.responsePayload("ENABLED ENABLE", expected: .success(.enableData([.enable]))),
+        ParseFixture.responsePayload("ID (\"key\" NIL)", expected: .success(.id(["key": nil]))),
+        ParseFixture.responsePayload("METADATA INBOX a", expected: .success(.metadata(.list(list: ["a"], mailbox: .inbox)))),
+        ParseFixture.responsePayload(
+            #"JMAPACCESS "https://example.com/.well-known/jmap""#,
+            expected: .success(.jmapAccess(URL(string: "https://example.com/.well-known/jmap")!))
+        ),
+    ])
+    func parse(_ fixture: ParseFixture<ResponsePayload>) {
+        fixture.checkParsing()
+    }
 }
 
 // MARK: -
@@ -52,5 +70,20 @@ struct ResponsePayloadTests {
 extension EncodeFixture<ResponsePayload> {
     fileprivate static func responsePayload(_ input: ResponsePayload, _ expectedString: String) -> Self {
         EncodeFixture(input: input, bufferKind: .defaultServer, expectedString: expectedString, encoder: { $0.writeResponsePayload($1) })
+    }
+}
+
+extension ParseFixture<ResponsePayload> {
+    fileprivate static func responsePayload(
+        _ input: String,
+        _ terminator: String = "\r",
+        expected: Expected
+    ) -> Self {
+        ParseFixture(
+            input: input,
+            terminator: terminator,
+            expected: expected,
+            parser: GrammarParser().parseResponsePayload
+        )
     }
 }
