@@ -29,8 +29,18 @@ struct ParseFixture<T>: Sendable where T: Sendable {
         case success(T)
         /// The input is valid, but only a partial message. Waiting for more input.
         case incompleteMessage
+        /// The input is valid, but only a partial message. Waiting for more input.
+        /// We don’t expect the buffer to remain unchanged.
+        /// This is for parsers that don't save+restore on failure because they’re expected
+        /// to only be used from within another parser that does so.
+        case incompleteMessageIgnoringBufferModifications
         /// The input is invalid.
         case failure
+        /// The input is invalid.
+        /// We don’t expect the buffer to remain unchanged.
+        /// This is for parsers that don't save+restore on failure because they’re expected
+        /// to only be used from within another parser that does so.
+        case failureIgnoringBufferModifications
     }
 }
 
@@ -59,7 +69,7 @@ extension ParseFixture {
             ParseBuffer.withBuffer(
                 input,
                 terminator: terminator,
-                shouldRemainUnchanged: false,
+                finalBufferExpectation: .terminatorOnly,
                 sourceLocation: sourceLocation
             ) { buffer in
                 #expect(
@@ -79,7 +89,23 @@ extension ParseFixture {
             ParseBuffer.withBuffer(
                 input,
                 terminator: terminator,
-                shouldRemainUnchanged: true,
+                finalBufferExpectation: .initialCondition,
+                sourceLocation: sourceLocation
+            ) { buffer in
+                #expect(
+                    throws: IncompleteMessage.self,
+                    "The input buffer is incomplete. Should throw IncompleteMessage.",
+                    sourceLocation: sourceLocation,
+                    performing: {
+                        try parser(&buffer, .testTracker)
+                    }
+                )
+            }
+        case .incompleteMessageIgnoringBufferModifications:
+            ParseBuffer.withBuffer(
+                input,
+                terminator: terminator,
+                finalBufferExpectation: .ignore,
                 sourceLocation: sourceLocation
             ) { buffer in
                 #expect(
@@ -95,7 +121,23 @@ extension ParseFixture {
             ParseBuffer.withBuffer(
                 input,
                 terminator: terminator,
-                shouldRemainUnchanged: true,
+                finalBufferExpectation: .initialCondition,
+                sourceLocation: sourceLocation
+            ) { buffer in
+                #expect(
+                    "Parsing should throw an error",
+                    sourceLocation: sourceLocation,
+                    performing: {
+                        try parser(&buffer, .testTracker)
+                    },
+                    throws: { _ in true }
+                )
+            }
+        case .failureIgnoringBufferModifications:
+            ParseBuffer.withBuffer(
+                input,
+                terminator: terminator,
+                finalBufferExpectation: .ignore,
                 sourceLocation: sourceLocation
             ) { buffer in
                 #expect(
@@ -112,10 +154,20 @@ extension ParseFixture {
 }
 
 extension ParseBuffer {
+    /// What do we expect the buffer to look like _after_ parsing
+    enum FinalBufferExpectation: Hashable, Sendable {
+        /// The buffer should only have the passed-in terminator (and data trailing it) in it.
+        case terminatorOnly
+        /// Buffer should be identical to its state before parsing
+        case initialCondition
+        /// Don’t check the buffer.
+        case ignore
+    }
+
     static func withBuffer(
         _ string: String,
         terminator: String,
-        shouldRemainUnchanged: Bool,
+        finalBufferExpectation: FinalBufferExpectation,
         sourceLocation: SourceLocation,
         _ body: (inout ParseBuffer) -> Void
     ) {
@@ -135,22 +187,21 @@ extension ParseBuffer {
 
         var parseBuffer = ParseBuffer(inputBuffer)
 
-        defer {
-            let expectedString = String(buffer: expected)
-            let remaining =
-            (try? PL.parseBytes(
-                buffer: &parseBuffer,
-                tracker: .makeNewDefault,
-                upTo: .max
-            )) ?? ByteBuffer()
-            let remainingString = String(buffer: remaining)
-            if shouldRemainUnchanged {
-                #expect(String(buffer: beforeRunningBody) == remainingString, "Input buffer should remain unchanged.", sourceLocation: sourceLocation)
-            } else {
-                #expect(remainingString == expectedString, "Terminator should remain in input buffer, nothing else.", sourceLocation: sourceLocation)
-            }
-        }
-
         body(&parseBuffer)
+
+        let remaining = (try? PL.parseBytes(
+            buffer: &parseBuffer,
+            tracker: .makeNewDefault,
+            upTo: .max
+        )).map { String(buffer: $0) } ?? ""
+        switch finalBufferExpectation {
+        case .terminatorOnly:
+            let expectedString = String(buffer: expected)
+            #expect(remaining == expectedString, "Terminator (and trailing) should remain in input buffer, nothing else.", sourceLocation: sourceLocation)
+        case .initialCondition:
+            #expect(String(buffer: beforeRunningBody) == remaining, "Input buffer should remain unchanged.", sourceLocation: sourceLocation)
+        case .ignore:
+            break
+        }
     }
 }

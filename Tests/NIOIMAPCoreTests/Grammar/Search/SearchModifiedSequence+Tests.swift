@@ -27,6 +27,27 @@ struct SearchModifiedSequenceTests {
     func encode(_ fixture: EncodeFixture<SearchModificationSequence>) {
         fixture.checkEncoding()
     }
+
+    @Test(arguments: [
+        ParseFixture.searchModificationSequence("MODSEQ 4", expected: .success(.init(extensions: [:], sequenceValue: 4))),
+        ParseFixture.searchModificationSequence(
+            #"MODSEQ "/flags/\\Answered" priv 4"#,
+            expected: .success(.init(extensions: [.init(flag: .answered): .private], sequenceValue: 4))
+        ),
+        ParseFixture.searchModificationSequence(
+            #"MODSEQ "/flags/\\Answered" priv "/flags/\\Seen" shared 4"#,
+            expected: .success(.init(
+                extensions: [
+                    .init(flag: .answered): .private,
+                    .init(flag: .seen): .shared,
+                ],
+                sequenceValue: 4
+            ))
+        ),
+    ])
+    func parse(_ fixture: ParseFixture<SearchModificationSequence>) {
+        fixture.checkParsing()
+    }
 }
 
 // MARK: -
@@ -38,6 +59,20 @@ extension EncodeFixture<SearchModificationSequence> {
             bufferKind: .defaultServer,
             expectedString: expectedString,
             encoder: { $0.writeSearchModificationSequence($1) }
+        )
+    }
+}
+
+extension ParseFixture<SearchModificationSequence> {
+    fileprivate static func searchModificationSequence(
+        _ input: String,
+        expected: Expected
+    ) -> Self {
+        ParseFixture(
+            input: input,
+            terminator: " ",
+            expected: expected,
+            parser: GrammarParser().parseSearchModificationSequence
         )
     }
 }

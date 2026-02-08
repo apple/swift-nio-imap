@@ -76,6 +76,60 @@ struct SearchKeyTests {
     func encode(_ fixture: EncodeFixture<SearchKey>) {
         fixture.checkEncoding()
     }
+
+    @Test(arguments: [
+        ParseFixture.searchKey("ALL", expected: .success(.all)),
+        ParseFixture.searchKey("ANSWERED", expected: .success(.answered)),
+        ParseFixture.searchKey("DELETED", expected: .success(.deleted)),
+        ParseFixture.searchKey("FLAGGED", expected: .success(.flagged)),
+        ParseFixture.searchKey("NEW", expected: .success(.new)),
+        ParseFixture.searchKey("OLD", expected: .success(.old)),
+        ParseFixture.searchKey("RECENT", expected: .success(.recent)),
+        ParseFixture.searchKey("SEEN", expected: .success(.seen)),
+        ParseFixture.searchKey("UNANSWERED", expected: .success(.unanswered)),
+        ParseFixture.searchKey("UNDELETED", expected: .success(.undeleted)),
+        ParseFixture.searchKey("UNFLAGGED", expected: .success(.unflagged)),
+        ParseFixture.searchKey("UNSEEN", expected: .success(.unseen)),
+        ParseFixture.searchKey("UNDRAFT", expected: .success(.undraft)),
+        ParseFixture.searchKey("DRAFT", expected: .success(.draft)),
+        ParseFixture.searchKey("ON 25-jun-1994", expected: .success(.on(IMAPCalendarDay(year: 1994, month: 6, day: 25)!))),
+        ParseFixture.searchKey("SINCE 01-jan-2001", expected: .success(.since(IMAPCalendarDay(year: 2001, month: 1, day: 1)!))),
+        ParseFixture.searchKey("SENTON 02-jan-2002", expected: .success(.sentOn(IMAPCalendarDay(year: 2002, month: 1, day: 2)!))),
+        ParseFixture.searchKey("SENTBEFORE 03-jan-2003", expected: .success(.sentBefore(IMAPCalendarDay(year: 2003, month: 1, day: 3)!))),
+        ParseFixture.searchKey("SENTSINCE 04-jan-2004", expected: .success(.sentSince(IMAPCalendarDay(year: 2004, month: 1, day: 4)!))),
+        ParseFixture.searchKey("BEFORE 05-jan-2005", expected: .success(.before(IMAPCalendarDay(year: 2005, month: 1, day: 5)!))),
+        ParseFixture.searchKey("LARGER 1234", expected: .success(.messageSizeLarger(1234))),
+        ParseFixture.searchKey("SMALLER 5678", expected: .success(.messageSizeSmaller(5678))),
+        ParseFixture.searchKey("BCC data1", expected: .success(.bcc("data1"))),
+        ParseFixture.searchKey("BODY data2", expected: .success(.body("data2"))),
+        ParseFixture.searchKey("CC data3", expected: .success(.cc("data3"))),
+        ParseFixture.searchKey("FROM data4", expected: .success(.from("data4"))),
+        ParseFixture.searchKey("SUBJECT data5", expected: .success(.subject("data5"))),
+        ParseFixture.searchKey("TEXT data6", expected: .success(.text("data6"))),
+        ParseFixture.searchKey("TO data7", expected: .success(.to("data7"))),
+        ParseFixture.searchKey("KEYWORD key1", expected: .success(.keyword(Flag.Keyword("key1")!))),
+        ParseFixture.searchKey("HEADER some value", expected: .success(.header("some", "value"))),
+        ParseFixture.searchKey("UNKEYWORD key2", expected: .success(.unkeyword(Flag.Keyword("key2")!))),
+        ParseFixture.searchKey("NOT LARGER 1234", expected: .success(.not(.messageSizeLarger(1234)))),
+        ParseFixture.searchKey("OR LARGER 6 SMALLER 4", expected: .success(.or(.messageSizeLarger(6), .messageSizeSmaller(4)))),
+        ParseFixture.searchKey("UID 2:4", expected: .success(.uid(.set(MessageIdentifierSetNonEmpty(set: MessageIdentifierSet<UID>(2...4))!)))),
+        ParseFixture.searchKey("UIDAFTER 33875", expected: .success(.uidAfter(.id(33_875)))),
+        ParseFixture.searchKey("UIDAFTER $", expected: .success(.uidAfter(.lastCommand))),
+        ParseFixture.searchKey("UIDBEFORE 44371", expected: .success(.uidBefore(.id(44_371)))),
+        ParseFixture.searchKey("UIDBEFORE $", expected: .success(.uidBefore(.lastCommand))),
+        ParseFixture.searchKey("2:4", expected: .success(.sequenceNumbers(.set([2...4])))),
+        ParseFixture.searchKey("(LARGER 1)", expected: .success(.messageSizeLarger(1))),
+        ParseFixture.searchKey("(LARGER 1 SMALLER 5 KEYWORD hello)", expected: .success(.and([.messageSizeLarger(1), .messageSizeSmaller(5), .keyword(Flag.Keyword("hello")!)]))),
+        ParseFixture.searchKey("YOUNGER 34", expected: .success(.younger(34))),
+        ParseFixture.searchKey("OLDER 45", expected: .success(.older(45))),
+        ParseFixture.searchKey("FILTER something", expected: .success(.filter("something"))),
+        ParseFixture.searchKey("MODSEQ 5", expected: .success(.modificationSequence(.init(extensions: [:], sequenceValue: 5)))),
+        ParseFixture.searchKey("EMAILID 123-456-789", expected: .success(.emailID(.init("123-456-789")!))),
+        ParseFixture.searchKey("THREADID 123-456-789", expected: .success(.threadID(.init("123-456-789")!))),
+    ])
+    func parse(_ fixture: ParseFixture<SearchKey>) {
+        fixture.checkParsing()
+    }
 }
 
 // MARK: -
@@ -87,6 +141,20 @@ extension EncodeFixture<SearchKey> {
             bufferKind: .defaultServer,
             expectedString: expectedString,
             encoder: { $0.writeSearchKey($1) }
+        )
+    }
+}
+
+extension ParseFixture<SearchKey> {
+    fileprivate static func searchKey(
+        _ input: String,
+        expected: Expected
+    ) -> Self {
+        ParseFixture(
+            input: input,
+            terminator: "\r",
+            expected: expected,
+            parser: GrammarParser().parseSearchKey
         )
     }
 }

@@ -27,6 +27,17 @@ struct UIDValidityTests {
         fixture.checkEncoding()
     }
 
+    @Test(arguments: [
+        ParseFixture.uidValidity("1", " ", expected: .success(1)),
+        ParseFixture.uidValidity("12", " ", expected: .success(12)),
+        ParseFixture.uidValidity("123", " ", expected: .success(123)),
+        ParseFixture.uidValidity("0", " ", expected: .failure),
+        ParseFixture.uidValidity("1", "", expected: .incompleteMessage),
+    ])
+    func parse(_ fixture: ParseFixture<UIDValidity>) {
+        fixture.checkParsing()
+    }
+
     @Test
     func `valid range`() {
         #expect(UIDValidity(exactly: 0) == nil)
@@ -41,5 +52,20 @@ struct UIDValidityTests {
 extension EncodeFixture<UIDValidity> {
     fileprivate static func uidValidity(_ input: UIDValidity, _ expectedString: String) -> Self {
         EncodeFixture(input: input, bufferKind: .defaultServer, expectedString: expectedString, encoder: { $0.writeUIDValidity($1) })
+    }
+}
+
+extension ParseFixture<UIDValidity> {
+    fileprivate static func uidValidity(
+        _ input: String,
+        _ terminator: String,
+        expected: Expected
+    ) -> Self {
+        ParseFixture(
+            input: input,
+            terminator: terminator,
+            expected: expected,
+            parser: GrammarParser().parseUIDValidity
+        )
     }
 }

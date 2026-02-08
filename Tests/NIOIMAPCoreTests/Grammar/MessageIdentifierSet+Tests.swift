@@ -18,6 +18,30 @@ import Testing
 
 @Suite("MessageIdentifierSet")
 struct MessageIdentifierSetTests {
+    @Test(arguments: [
+        ParseFixture.messageIdentifierSet("1234", "\r\n", expected: .success(MessageIdentifierSet(1234 as UID))),
+        ParseFixture.messageIdentifierSet("12:34", "\r\n", expected: .success(MessageIdentifierSet(MessageIdentifierRange<UID>(12...34)))),
+        ParseFixture.messageIdentifierSet(
+            "1,2,34:56,78:910,11",
+            "\r\n",
+            expected: .success(MessageIdentifierSet([
+                MessageIdentifierRange<UID>(1),
+                MessageIdentifierRange<UID>(2),
+                MessageIdentifierRange<UID>(34...56),
+                MessageIdentifierRange<UID>(78...910),
+                MessageIdentifierRange<UID>(11),
+            ]))
+        ),
+        ParseFixture.messageIdentifierSet("*", "\r\n", expected: .success(MessageIdentifierSet(MessageIdentifierRange<UID>(.max)))),
+        ParseFixture.messageIdentifierSet("1:*", "\r\n", expected: .success(.all)),
+        ParseFixture.messageIdentifierSet("a", " ", expected: .failure),
+        ParseFixture.messageIdentifierSet("1234", "", expected: .incompleteMessage),
+        ParseFixture.messageIdentifierSet("", "", expected: .incompleteMessage),
+    ])
+    func parse(_ fixture: ParseFixture<MessageIdentifierSet<UID>>) {
+        fixture.checkParsing()
+    }
+
     @Test func `convert to sequence number`() {
         let input = MessageIdentifierSet<UnknownMessageIdentifier>([1...5, 10...15, 20...30])
         let output = MessageIdentifierSet<SequenceNumber>(input)
@@ -61,5 +85,22 @@ struct MessageIdentifierSetTests {
         #expect(UIDSet.all.suffix(0) == UIDSet())
         #expect(UIDSet.all.suffix(1) == UIDSet([4_294_967_295]))
         #expect(UIDSet.all.suffix(2) == UIDSet([4_294_967_294...4_294_967_295]))
+    }
+}
+
+// MARK: -
+
+extension ParseFixture<MessageIdentifierSet<UID>> {
+    fileprivate static func messageIdentifierSet(
+        _ input: String,
+        _ terminator: String,
+        expected: Expected
+    ) -> Self {
+        ParseFixture(
+            input: input,
+            terminator: terminator,
+            expected: expected,
+            parser: GrammarParser().parseUIDSet
+        )
     }
 }

@@ -82,4 +82,41 @@ struct InternalDateTests {
         #expect(c.zoneMinutes == 959)
         #expect(String(reflecting: date) == #""31-Dec-2579 23:59:59 +1559""#)
     }
+
+    @Test(arguments: [
+        ParseFixture.internalDate(#""25-Jun-1994 01:02:03 +1020""#, "\r", expected: .success(
+            ServerMessageDate(ServerMessageDate.Components(year: 1994, month: 6, day: 25, hour: 1, minute: 2, second: 3, timeZoneMinutes: 620)!)
+        )),
+        ParseFixture.internalDate(#""01-Jan-1900 00:00:00 -1559""#, "\r", expected: .success(
+            ServerMessageDate(ServerMessageDate.Components(year: 1900, month: 1, day: 1, hour: 0, minute: 0, second: 0, timeZoneMinutes: -959)!)
+        )),
+        ParseFixture.internalDate(#""31-Dec-2579 23:59:59 +1559""#, "\r", expected: .success(
+            ServerMessageDate(ServerMessageDate.Components(year: 2579, month: 12, day: 31, hour: 23, minute: 59, second: 59, timeZoneMinutes: 959)!)
+        )),
+        ParseFixture.internalDate(#""25-Jun-1994 01"#, "", expected: .incompleteMessageIgnoringBufferModifications),
+        ParseFixture.internalDate(#""25-Jun-199401:02:03+1020""#, "", expected: .failureIgnoringBufferModifications),
+        ParseFixture.internalDate(#""25-Jun-1994 01:02:03 +12345678\n""#, "", expected: .failureIgnoringBufferModifications),
+        ParseFixture.internalDate(#""25-Jun-1994 01:02:03 +12""#, "", expected: .failureIgnoringBufferModifications),
+        ParseFixture.internalDate(#""25-Jun-1994 01:02:03 abc""#, "", expected: .failureIgnoringBufferModifications),
+    ])
+    func parse(_ fixture: ParseFixture<ServerMessageDate>) {
+        fixture.checkParsing()
+    }
+}
+
+// MARK: -
+
+extension ParseFixture<ServerMessageDate> {
+    fileprivate static func internalDate(
+        _ input: String,
+        _ terminator: String,
+        expected: Expected
+    ) -> Self {
+        ParseFixture(
+            input: input,
+            terminator: terminator,
+            expected: expected,
+            parser: GrammarParser().parseInternalDate
+        )
+    }
 }
