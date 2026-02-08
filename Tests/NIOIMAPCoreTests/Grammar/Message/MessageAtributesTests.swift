@@ -110,6 +110,260 @@ struct MessageAttributeTests {
     func `custom debug string convertible`(_ fixture: DebugStringFixture<MessageAttribute>) {
         fixture.check()
     }
+
+    @Test(arguments: Self.parseMessageAttributeFixtures())
+    func parse(_ fixture: ParseFixture<MessageAttribute>) {
+        fixture.checkParsing()
+    }
+
+    private static func parseMessageAttributeFixtures() -> [ParseFixture<MessageAttribute>] {
+        let components1 = ServerMessageDate.Components(
+            year: 1994,
+            month: 6,
+            day: 25,
+            hour: 1,
+            minute: 2,
+            second: 3,
+            timeZoneMinutes: 0
+        )
+        let date1 = ServerMessageDate(components1!)
+        let components2 = ServerMessageDate.Components(
+            year: 2023,
+            month: 3,
+            day: 8,
+            hour: 12,
+            minute: 16,
+            second: 47,
+            timeZoneMinutes: 8 * 60
+        )
+        let date2 = ServerMessageDate(components2!)
+
+        return [
+            ParseFixture.messageAttribute(#"FLAGS (\seen)"#, " ", expected: .success(.flags([.seen]))),
+            ParseFixture.messageAttribute(#"FLAGS (\Answered \Flagged \Draft)"#, " ", expected: .success(.flags([.answered, .flagged, .draft]))),
+            ParseFixture.messageAttribute("UID 1234", " ", expected: .success(.uid(1234))),
+            ParseFixture.messageAttribute("RFC822.SIZE 1234", " ", expected: .success(.rfc822Size(1234))),
+            ParseFixture.messageAttribute("BINARY.SIZE[3] 4", " ", expected: .success(.binarySize(section: [3], size: 4))),
+            ParseFixture.messageAttribute(#"INTERNALDATE "25-jun-1994 01:02:03 +0000""#, " ", expected: .success(.internalDate(date1))),
+            ParseFixture.messageAttribute(#"INTERNALDATE "8-Mar-2023 12:16:47 +0800""#, " ", expected: .success(.internalDate(date2))),
+            ParseFixture.messageAttribute(#"INTERNALDATE "08-Mar-2023 12:16:47 +0800""#, " ", expected: .success(.internalDate(date2))),
+            ParseFixture.messageAttribute(
+                #"ENVELOPE ("date" "subject" (("from1" "from2" "from3" "from4")) (("sender1" "sender2" "sender3" "sender4")) (("reply1" "reply2" "reply3" "reply4")) (("to1" "to2" "to3" "to4")) (("cc1" "cc2" "cc3" "cc4")) (("bcc1" "bcc2" "bcc3" "bcc4")) "inreplyto" "messageid")"#,
+                " ",
+                expected: .success(
+                    .envelope(
+                        Envelope(
+                            date: "date",
+                            subject: "subject",
+                            from: [
+                                .singleAddress(
+                                    .init(personName: "from1", sourceRoot: "from2", mailbox: "from3", host: "from4")
+                                )
+                            ],
+                            sender: [
+                                .singleAddress(
+                                    .init(
+                                        personName: "sender1",
+                                        sourceRoot: "sender2",
+                                        mailbox: "sender3",
+                                        host: "sender4"
+                                    )
+                                )
+                            ],
+                            reply: [
+                                .singleAddress(
+                                    .init(personName: "reply1", sourceRoot: "reply2", mailbox: "reply3", host: "reply4")
+                                )
+                            ],
+                            to: [
+                                .singleAddress(.init(personName: "to1", sourceRoot: "to2", mailbox: "to3", host: "to4"))
+                            ],
+                            cc: [
+                                .singleAddress(.init(personName: "cc1", sourceRoot: "cc2", mailbox: "cc3", host: "cc4"))
+                            ],
+                            bcc: [
+                                .singleAddress(
+                                    .init(personName: "bcc1", sourceRoot: "bcc2", mailbox: "bcc3", host: "bcc4")
+                                )
+                            ],
+                            inReplyTo: "inreplyto",
+                            messageID: "messageid"
+                        )
+                    )
+                )
+            ),
+            ParseFixture.messageAttribute(
+                #"BODY (("TEXT" "PLAIN" ("CHARSET" "utf-8") NIL NIL "QUOTED-PRINTABLE" 1772 47 NIL NIL NIL NIL)("TEXT" "HTML" ("CHARSET" "utf-8") NIL NIL "QUOTED-PRINTABLE" 2778 40 NIL NIL NIL NIL) "ALTERNATIVE" ("BOUNDARY" "Apple-Mail=_0D97185D-4FF1-42FE-9B8F-A0759D299015") NIL NIL NIL)"#,
+                " ",
+                expected: .success(
+                    .body(
+                        .valid(
+                            .multipart(
+                                .init(
+                                    parts: [
+                                        .singlepart(
+                                            .init(
+                                                kind: .text(.init(mediaSubtype: "PLAIN", lineCount: 47)),
+                                                fields: .init(
+                                                    parameters: ["CHARSET": "utf-8"],
+                                                    id: nil,
+                                                    contentDescription: nil,
+                                                    encoding: .quotedPrintable,
+                                                    octetCount: 1772
+                                                ),
+                                                extension: .init(
+                                                    digest: nil,
+                                                    dispositionAndLanguage: .init(
+                                                        disposition: nil,
+                                                        language: .init(
+                                                            languages: [],
+                                                            location: .init(location: nil, extensions: [])
+                                                        )
+                                                    )
+                                                )
+                                            )
+                                        ),
+                                        .singlepart(
+                                            .init(
+                                                kind: .text(.init(mediaSubtype: "HTML", lineCount: 40)),
+                                                fields: .init(
+                                                    parameters: ["CHARSET": "utf-8"],
+                                                    id: nil,
+                                                    contentDescription: nil,
+                                                    encoding: .quotedPrintable,
+                                                    octetCount: 2778
+                                                ),
+                                                extension: .init(
+                                                    digest: nil,
+                                                    dispositionAndLanguage: .init(
+                                                        disposition: nil,
+                                                        language: .init(
+                                                            languages: [],
+                                                            location: .init(location: nil, extensions: [])
+                                                        )
+                                                    )
+                                                )
+                                            )
+                                        ),
+                                    ],
+                                    mediaSubtype: .alternative,
+                                    extension: .init(
+                                        parameters: ["BOUNDARY": "Apple-Mail=_0D97185D-4FF1-42FE-9B8F-A0759D299015"],
+                                        dispositionAndLanguage: .init(
+                                            disposition: nil,
+                                            language: .init(
+                                                languages: [],
+                                                location: .init(location: nil, extensions: [])
+                                            )
+                                        )
+                                    )
+                                )
+                            )
+                        ),
+                        hasExtensionData: false
+                    )
+                )
+            ),
+            ParseFixture.messageAttribute(
+                #"BODYSTRUCTURE (("TEXT" "PLAIN" ("CHARSET" "utf-8") NIL NIL "QUOTED-PRINTABLE" 1772 47 NIL NIL NIL NIL)("TEXT" "HTML" ("CHARSET" "utf-8") NIL NIL "QUOTED-PRINTABLE" 2778 40 NIL NIL NIL NIL) "ALTERNATIVE" ("BOUNDARY" "Apple-Mail=_0D97185D-4FF1-42FE-9B8F-A0759D299015") NIL NIL NIL)"#,
+                " ",
+                expected: .success(
+                    .body(
+                        .valid(
+                            .multipart(
+                                .init(
+                                    parts: [
+                                        .singlepart(
+                                            .init(
+                                                kind: .text(.init(mediaSubtype: "PLAIN", lineCount: 47)),
+                                                fields: .init(
+                                                    parameters: ["CHARSET": "utf-8"],
+                                                    id: nil,
+                                                    contentDescription: nil,
+                                                    encoding: .quotedPrintable,
+                                                    octetCount: 1772
+                                                ),
+                                                extension: .init(
+                                                    digest: nil,
+                                                    dispositionAndLanguage: .init(
+                                                        disposition: nil,
+                                                        language: .init(
+                                                            languages: [],
+                                                            location: .init(location: nil, extensions: [])
+                                                        )
+                                                    )
+                                                )
+                                            )
+                                        ),
+                                        .singlepart(
+                                            .init(
+                                                kind: .text(.init(mediaSubtype: "HTML", lineCount: 40)),
+                                                fields: .init(
+                                                    parameters: ["CHARSET": "utf-8"],
+                                                    id: nil,
+                                                    contentDescription: nil,
+                                                    encoding: .quotedPrintable,
+                                                    octetCount: 2778
+                                                ),
+                                                extension: .init(
+                                                    digest: nil,
+                                                    dispositionAndLanguage: .init(
+                                                        disposition: nil,
+                                                        language: .init(
+                                                            languages: [],
+                                                            location: .init(location: nil, extensions: [])
+                                                        )
+                                                    )
+                                                )
+                                            )
+                                        ),
+                                    ],
+                                    mediaSubtype: .alternative,
+                                    extension: .init(
+                                        parameters: ["BOUNDARY": "Apple-Mail=_0D97185D-4FF1-42FE-9B8F-A0759D299015"],
+                                        dispositionAndLanguage: .init(
+                                            disposition: nil,
+                                            language: .init(
+                                                languages: [],
+                                                location: .init(location: nil, extensions: [])
+                                            )
+                                        )
+                                    )
+                                )
+                            )
+                        ),
+                        hasExtensionData: true
+                    )
+                )
+            ),
+            ParseFixture.messageAttribute(#"BODYSTRUCTURE ("text")"#, " ", expected: .success(.body(.invalid, hasExtensionData: true))),
+            ParseFixture.messageAttribute("RFC822.TEXT NIL", " ", expected: .success(.nilBody(.rfc822Text))),
+            ParseFixture.messageAttribute("RFC822.HEADER NIL", " ", expected: .success(.nilBody(.rfc822Header))),
+            ParseFixture.messageAttribute("BINARY[4]<5> NIL", " ", expected: .success(.nilBody(.binary(section: [4], offset: 5)))),
+            ParseFixture.messageAttribute("BODY[4.TEXT]<5> NIL", " ", expected: .success(.nilBody(.body(section: .init(part: [4], kind: .text), offset: 5)))),
+            ParseFixture.messageAttribute("MODSEQ (3)", " ", expected: .success(.fetchModificationResponse(.init(modifierSequenceValue: 3)))),
+            ParseFixture.messageAttribute("X-GM-MSGID 1278455344230334865", " ", expected: .success(.gmailMessageID(1_278_455_344_230_334_865))),
+            ParseFixture.messageAttribute("X-GM-THRID 1278455344230334865", " ", expected: .success(.gmailThreadID(1_278_455_344_230_334_865))),
+            ParseFixture.messageAttribute(
+                "X-GM-LABELS (\\Inbox \\Sent Important \"Muy Importante\")",
+                " ",
+                expected: .success(
+                    .gmailLabels([
+                        GmailLabel("\\Inbox"), GmailLabel("\\Sent"), GmailLabel("Important"),
+                        GmailLabel("Muy Importante"),
+                    ])
+                )
+            ),
+            ParseFixture.messageAttribute("X-GM-LABELS (foo)", " ", expected: .success(.gmailLabels([GmailLabel("foo")]))),
+            ParseFixture.messageAttribute("X-GM-LABELS ()", " ", expected: .success(.gmailLabels([]))),
+            ParseFixture.messageAttribute(#"X-GM-LABELS (\Drafts)"#, " ", expected: .success(.gmailLabels([GmailLabel(#"\Drafts"#)]))),
+            ParseFixture.messageAttribute(#"X-GM-LABELS ("\\Important")"#, " ", expected: .success(.gmailLabels([GmailLabel(#"\Important"#)]))),
+            ParseFixture.messageAttribute("PREVIEW \"Lorem ipsum dolor sit amet\"", "", expected: .success(.preview(.init("Lorem ipsum dolor sit amet")))),
+            ParseFixture.messageAttribute("EMAILID (123-456-789)", " ", expected: .success(.emailID(.init("123-456-789")!))),
+            ParseFixture.messageAttribute("THREADID (123-456-789)", " ", expected: .success(.threadID(.init("123-456-789")!))),
+            ParseFixture.messageAttribute("THREADID NIL", " ", expected: .success(.threadID(nil))),
+        ]
+    }
 }
 
 // MARK: -
@@ -123,5 +377,20 @@ extension EncodeFixture<MessageAttribute> {
 extension EncodeFixture<[MessageAttribute]> {
     fileprivate static func messageAttributes(_ input: [MessageAttribute], _ expectedString: String) -> Self {
         EncodeFixture(input: input, bufferKind: .defaultServer, expectedString: expectedString, encoder: { $0.writeMessageAttributes($1) })
+    }
+}
+
+extension ParseFixture<MessageAttribute> {
+    fileprivate static func messageAttribute(
+        _ input: String,
+        _ terminator: String,
+        expected: Expected
+    ) -> Self {
+        ParseFixture(
+            input: input,
+            terminator: terminator,
+            expected: expected,
+            parser: GrammarParser().parseMessageAttribute
+        )
     }
 }

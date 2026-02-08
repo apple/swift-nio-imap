@@ -67,6 +67,73 @@ struct EntryTests {
     func `encode entry list`(_ fixture: EncodeFixture<[MetadataEntryName]>) {
         fixture.checkEncoding()
     }
+
+    @Test(arguments: [
+        ParseFixture.entryValue(
+            "\"name\" \"value\"",
+            "",
+            expected: .success(.init(key: "name", value: .init("value")))
+        ),
+        ParseFixture.entryValue(
+            "\"name\" NIL",
+            "",
+            expected: .success(.init(key: "name", value: .init(nil)))
+        ),
+    ])
+    func `parse entry value`(_ fixture: ParseFixture<KeyValue<MetadataEntryName, MetadataValue>>) {
+        fixture.checkParsing()
+    }
+
+    @Test(arguments: [
+        ParseFixture.entryValues(
+            "(\"name\" \"value\")",
+            "",
+            expected: .success(["name": .init("value")])
+        ),
+        ParseFixture.entryValues(
+            "(\"name1\" \"value1\" \"name2\" \"value2\")",
+            "",
+            expected: .success(["name1": .init("value1"), "name2": .init("value2")])
+        ),
+    ])
+    func `parse entry values`(_ fixture: ParseFixture<OrderedDictionary<MetadataEntryName, MetadataValue>>) {
+        fixture.checkParsing()
+    }
+
+    @Test(arguments: [
+        ParseFixture.entries(
+            "\"name\"",
+            "",
+            expected: .success(["name"])
+        ),
+        ParseFixture.entries(
+            "(\"name\")",
+            "",
+            expected: .success(["name"])
+        ),
+        ParseFixture.entries(
+            "(\"name1\" \"name2\")",
+            "",
+            expected: .success(["name1", "name2"])
+        ),
+    ])
+    func `parse entries`(_ fixture: ParseFixture<[MetadataEntryName]>) {
+        fixture.checkParsing()
+    }
+
+    @Test(arguments: [
+        ParseFixture.entryList(
+            "\"name\"",
+            expected: .success(["name"])
+        ),
+        ParseFixture.entryList(
+            "\"name1\" \"name2\"",
+            expected: .success(["name1", "name2"])
+        ),
+    ])
+    func `parse entry list`(_ fixture: ParseFixture<[MetadataEntryName]>) {
+        fixture.checkParsing()
+    }
 }
 
 // MARK: -
@@ -109,6 +176,64 @@ extension EncodeFixture<[MetadataEntryName]> {
             bufferKind: .defaultServer,
             expectedString: expectedString,
             encoder: { $0.writeEntryList($1) }
+        )
+    }
+}
+
+extension ParseFixture<KeyValue<MetadataEntryName, MetadataValue>> {
+    fileprivate static func entryValue(
+        _ input: String,
+        _ terminator: String,
+        expected: Expected
+    ) -> Self {
+        ParseFixture(
+            input: input,
+            terminator: terminator,
+            expected: expected,
+            parser: GrammarParser().parseEntryValue
+        )
+    }
+}
+
+extension ParseFixture<OrderedDictionary<MetadataEntryName, MetadataValue>> {
+    fileprivate static func entryValues(
+        _ input: String,
+        _ terminator: String,
+        expected: Expected
+    ) -> Self {
+        ParseFixture(
+            input: input,
+            terminator: terminator,
+            expected: expected,
+            parser: GrammarParser().parseEntryValues
+        )
+    }
+}
+
+extension ParseFixture<[MetadataEntryName]> {
+    fileprivate static func entries(
+        _ input: String,
+        _ terminator: String,
+        expected: Expected
+    ) -> Self {
+        ParseFixture(
+            input: input,
+            terminator: terminator,
+            expected: expected,
+            parser: GrammarParser().parseEntries
+        )
+    }
+
+    fileprivate static func entryList(
+        _ input: String,
+        _ terminator: String = "\r",
+        expected: Expected
+    ) -> Self {
+        ParseFixture(
+            input: input,
+            terminator: terminator,
+            expected: expected,
+            parser: GrammarParser().parseEntryList
         )
     }
 }

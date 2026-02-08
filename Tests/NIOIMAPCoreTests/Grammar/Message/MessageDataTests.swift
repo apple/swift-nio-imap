@@ -28,6 +28,26 @@ struct MessageDataTests {
     func encode(_ fixture: EncodeFixture<MessageData>) {
         fixture.checkEncoding()
     }
+
+    @Test(arguments: [
+        ParseFixture.messageData("3 EXPUNGE", expected: .success(.expunge(3))),
+        ParseFixture.messageData("VANISHED 1:3", expected: .success(.vanished([1...3]))),
+        ParseFixture.messageData("VANISHED (EARLIER) 1:3", expected: .success(.vanishedEarlier([1...3]))),
+        ParseFixture.messageData("GENURLAUTH test", expected: .success(.generateAuthorizedURL(["test"]))),
+        ParseFixture.messageData("GENURLAUTH test1 test2", expected: .success(.generateAuthorizedURL(["test1", "test2"]))),
+        ParseFixture.messageData("URLFETCH url NIL", expected: .success(.urlFetch([.init(url: "url", data: nil)]))),
+        ParseFixture.messageData(
+            "URLFETCH url1 NIL url2 NIL url3 \"data\"",
+            expected: .success(
+                .urlFetch([
+                    .init(url: "url1", data: nil), .init(url: "url2", data: nil), .init(url: "url3", data: "data"),
+                ])
+            )
+        ),
+    ])
+    func parse(_ fixture: ParseFixture<MessageData>) {
+        fixture.checkParsing()
+    }
 }
 
 // MARK: -
@@ -42,6 +62,21 @@ extension EncodeFixture<MessageData> {
             bufferKind: .defaultServer,
             expectedString: expectedString,
             encoder: { $0.writeMessageData($1) }
+        )
+    }
+}
+
+extension ParseFixture<MessageData> {
+    fileprivate static func messageData(
+        _ input: String,
+        _ terminator: String = "\r",
+        expected: Expected
+    ) -> Self {
+        ParseFixture(
+            input: input,
+            terminator: terminator,
+            expected: expected,
+            parser: GrammarParser().parseMessageData
         )
     }
 }

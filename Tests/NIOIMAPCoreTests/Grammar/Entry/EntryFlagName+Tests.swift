@@ -26,6 +26,27 @@ struct EntryFlagNameTests {
     func encoding(_ fixture: EncodeFixture<EntryFlagName>) {
         fixture.checkEncoding()
     }
+
+    @Test(arguments: [
+        ParseFixture.entryFlagName(
+            "\"/flags/\\\\Answered\"",
+            "",
+            expected: .success(.init(flag: .answered))
+        ),
+        ParseFixture.entryFlagName(
+            "/flags/\\Answered",
+            "",
+            expected: .failure
+        ),
+        ParseFixture.entryFlagName(
+            "\"/flags",
+            "",
+            expected: .incompleteMessage
+        ),
+    ])
+    func parse(_ fixture: ParseFixture<EntryFlagName>) {
+        fixture.checkParsing()
+    }
 }
 
 // MARK: -
@@ -37,6 +58,21 @@ extension EncodeFixture<EntryFlagName> {
             bufferKind: .defaultServer,
             expectedString: expectedString,
             encoder: { $0.writeEntryFlagName($1) }
+        )
+    }
+}
+
+extension ParseFixture<EntryFlagName> {
+    fileprivate static func entryFlagName(
+        _ input: String,
+        _ terminator: String,
+        expected: Expected
+    ) -> Self {
+        ParseFixture(
+            input: input,
+            terminator: terminator,
+            expected: expected,
+            parser: GrammarParser().parseEntryFlagName
         )
     }
 }

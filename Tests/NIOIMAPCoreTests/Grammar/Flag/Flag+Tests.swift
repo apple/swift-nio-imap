@@ -126,6 +126,25 @@ struct FlagTests {
     func encode(_ fixture: EncodeFixture<Flag>) {
         fixture.checkEncoding()
     }
+
+    @Test(arguments: [
+        ParseFixture.flag(#"\Answered"#, expected: .success(.answered)),
+        ParseFixture.flag(#"\flagged"#, expected: .success(.flagged)),
+        ParseFixture.flag(#"\deleted"#, expected: .success(.deleted)),
+        ParseFixture.flag(#"\seen"#, expected: .success(.seen)),
+        ParseFixture.flag(#"\Draft"#, expected: .success(.draft)),
+        ParseFixture.flag(#"\extension"#, expected: .success(.extension(#"\extension"#))),
+        ParseFixture.flag(#"$Forwarded"#, expected: .success("$Forwarded")),
+        ParseFixture.flag(#"Forwarded"#, expected: .success("Forwarded")),
+        ParseFixture.flag(#"$MailFlagBit0"#, expected: .success("$MailFlagBit0")),
+        ParseFixture.flag(#"$MailFlagBit2"#, expected: .success("$MailFlagBit2")),
+        ParseFixture.flag(#"OIB-Seen-INBOX"#, expected: .success("OIB-Seen-INBOX")),
+        ParseFixture.flag(#"OIB-Seen-Unsubscribe"#, expected: .success("OIB-Seen-Unsubscribe")),
+        ParseFixture.flag(#"OIB-Seen-[Gmail]/Trash"#, expected: .success("OIB-Seen-[Gmail]/Trash")),
+    ])
+    func parse(_ fixture: ParseFixture<Flag>) {
+        fixture.checkParsing()
+    }
 }
 
 // MARK: -
@@ -133,5 +152,20 @@ struct FlagTests {
 extension EncodeFixture<Flag> {
     fileprivate static func flag(_ input: Flag, _ expectedString: String) -> Self {
         EncodeFixture(input: input, bufferKind: .defaultServer, expectedString: expectedString, encoder: { $0.writeFlag($1) })
+    }
+}
+
+extension ParseFixture<Flag> {
+    fileprivate static func flag(
+        _ input: String,
+        _ terminator: String = " ",
+        expected: Expected
+    ) -> Self {
+        ParseFixture(
+            input: input,
+            terminator: terminator,
+            expected: expected,
+            parser: GrammarParser().parseFlag
+        )
     }
 }

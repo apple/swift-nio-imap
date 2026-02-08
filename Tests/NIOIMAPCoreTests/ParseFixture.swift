@@ -19,9 +19,15 @@ import Testing
 /// A fixture for testing IMAP parsing.
 /// Captures the input value, encoding options, expected output, and encoder function.
 struct ParseFixture<T>: Sendable where T: Sendable {
+    /// The input to be parsed.
     var input: String
+    /// A terminator string to be appended after the input.
+    ///
+    /// The expectation is that (successful) parsing would stop at this terminator.
     var terminator: String
+    /// Should parsing succeed, fail, etc.?
     var expected: Expected
+    /// The parser being tested.
     var parser: @Sendable (inout ParseBuffer, StackTracker) throws -> T
     
     enum Expected: Sendable {
