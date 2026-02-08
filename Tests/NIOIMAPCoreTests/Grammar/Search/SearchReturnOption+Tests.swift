@@ -67,6 +67,23 @@ struct SearchReturnOptionTests {
     func parse(_ fixture: ParseFixture<SearchReturnOption>) {
         fixture.checkParsing()
     }
+
+    @Test(arguments: [
+        ParseFixture.searchReturnOptions(" RETURN (ALL)", expected: .success([.all])),
+        ParseFixture.searchReturnOptions(" RETURN (MIN MAX COUNT)", expected: .success([.min, .max, .count])),
+        ParseFixture.searchReturnOptions(
+            " RETURN (m1 m2)",
+            expected: .success([
+                .optionExtension(.init(key: "m1", value: nil)),
+                .optionExtension(.init(key: "m2", value: nil)),
+            ])
+        ),
+        ParseFixture.searchReturnOptions(" RETURN (PARTIAL 23500:24000)", expected: .success([.partial(.first(23_500...24_000))])),
+        ParseFixture.searchReturnOptions(" RETURN (MIN PARTIAL -1:-100 MAX)", expected: .success([.min, .partial(.last(1...100)), .max])),
+    ])
+    func `parse multiple`(_ fixture: ParseFixture<[SearchReturnOption]>) {
+        fixture.checkParsing()
+    }
 }
 
 // MARK: -
@@ -94,6 +111,21 @@ extension ParseFixture<SearchReturnOption> {
             terminator: terminator,
             expected: expected,
             parser: GrammarParser().parseSearchReturnOption
+        )
+    }
+}
+
+extension ParseFixture<[SearchReturnOption]> {
+    fileprivate static func searchReturnOptions(
+        _ input: String,
+        _ terminator: String = "\r",
+        expected: Expected
+    ) -> Self {
+        ParseFixture(
+            input: input,
+            terminator: terminator,
+            expected: expected,
+            parser: GrammarParser().parseSearchReturnOptions
         )
     }
 }

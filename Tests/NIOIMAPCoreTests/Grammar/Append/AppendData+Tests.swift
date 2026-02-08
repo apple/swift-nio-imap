@@ -35,6 +35,22 @@ struct AppendDataTests {
     func encode(_ fixture: EncodeFixture<AppendData>) {
         fixture.checkEncoding()
     }
+
+    @Test(arguments: [
+        ParseFixture.appendData("{123}\r\n", "hello", expected: .success(.init(byteCount: 123))),
+        ParseFixture.appendData("~{456}\r\n", "hello", expected: .success(.init(byteCount: 456, withoutContentTransferEncoding: true))),
+        ParseFixture.appendData("{0}\r\n", "hello", expected: .success(.init(byteCount: 0))),
+        ParseFixture.appendData("~{\(Int.max)}\r\n", "hello", expected: .success(.init(byteCount: .max, withoutContentTransferEncoding: true))),
+        ParseFixture.appendData("{123+}\r\n", "hello", expected: .success(.init(byteCount: 123))),
+        ParseFixture.appendData("~{456+}\r\n", "hello", expected: .success(.init(byteCount: 456, withoutContentTransferEncoding: true))),
+        ParseFixture.appendData("{0+}\r\n", "hello", expected: .success(.init(byteCount: 0))),
+        ParseFixture.appendData("~{\(Int.max)+}\r\n", "hello", expected: .success(.init(byteCount: .max, withoutContentTransferEncoding: true))),
+        ParseFixture.appendData("{-1}\r\n", "hello", expected: .failureIgnoringBufferModifications),
+        ParseFixture.appendData("{\(UInt(Int.max) + 1)}\r\n", "hello", expected: .failureIgnoringBufferModifications),
+    ])
+    func parse(_ fixture: ParseFixture<AppendData>) {
+        fixture.checkParsing()
+    }
 }
 
 // MARK: -
@@ -50,6 +66,21 @@ extension EncodeFixture<AppendData> {
             bufferKind: .client(options),
             expectedString: expectedString,
             encoder: { $0.writeAppendData($1) }
+        )
+    }
+}
+
+extension ParseFixture<AppendData> {
+    fileprivate static func appendData(
+        _ input: String,
+        _ terminator: String,
+        expected: Expected
+    ) -> Self {
+        ParseFixture(
+            input: input,
+            terminator: terminator,
+            expected: expected,
+            parser: GrammarParser().parseAppendData
         )
     }
 }

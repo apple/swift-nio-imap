@@ -49,6 +49,16 @@ struct MailboxDataTests {
     func `encode search/sort`(_ fixture: EncodeFixture<MailboxData.SearchSort?>) {
         fixture.checkEncoding()
     }
+
+    @Test(arguments: [
+        ParseFixture.searchSortModificationSequence("(MODSEQ 123)", "\r", expected: .success(123)),
+        ParseFixture.searchSortModificationSequence("(MODSEQ a)", "", expected: .failure),
+        ParseFixture.searchSortModificationSequence("(MODSEQ ", "", expected: .incompleteMessage),
+        ParseFixture.searchSortModificationSequence("(MODSEQ 111", "", expected: .incompleteMessage),
+    ])
+    func `parse search/sort modification sequence`(_ fixture: ParseFixture<ModificationSequenceValue>) {
+        fixture.checkParsing()
+    }
 }
 
 // MARK: -
@@ -71,6 +81,21 @@ extension EncodeFixture<MailboxData.SearchSort?> {
             bufferKind: .defaultServer,
             expectedString: expectedString,
             encoder: { $0.writeMailboxDataSearchSort($1) }
+        )
+    }
+}
+
+extension ParseFixture<ModificationSequenceValue> {
+    fileprivate static func searchSortModificationSequence(
+        _ input: String,
+        _ terminator: String,
+        expected: Expected
+    ) -> Self {
+        ParseFixture(
+            input: input,
+            terminator: terminator,
+            expected: expected,
+            parser: GrammarParser().parseSearchSortModificationSequence
         )
     }
 }

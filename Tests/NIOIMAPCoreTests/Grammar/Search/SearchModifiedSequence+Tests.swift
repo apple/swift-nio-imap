@@ -48,6 +48,17 @@ struct SearchModifiedSequenceTests {
     func parse(_ fixture: ParseFixture<SearchModificationSequence>) {
         fixture.checkParsing()
     }
+
+    @Test(arguments: [
+        ParseFixture.searchModificationSequenceExtension(
+            #" "/flags/\\Seen" all"#,
+            "",
+            expected: .success(.init(key: .init(flag: .seen), value: .all))
+        ),
+    ])
+    func `parse extension`(_ fixture: ParseFixture<KeyValue<EntryFlagName, EntryKindRequest>>) {
+        fixture.checkParsing()
+    }
 }
 
 // MARK: -
@@ -73,6 +84,21 @@ extension ParseFixture<SearchModificationSequence> {
             terminator: " ",
             expected: expected,
             parser: GrammarParser().parseSearchModificationSequence
+        )
+    }
+}
+
+extension ParseFixture<KeyValue<EntryFlagName, EntryKindRequest>> {
+    fileprivate static func searchModificationSequenceExtension(
+        _ input: String,
+        _ terminator: String,
+        expected: Expected
+    ) -> Self {
+        ParseFixture(
+            input: input,
+            terminator: terminator,
+            expected: expected,
+            parser: GrammarParser().parseSearchModificationSequenceExtension
         )
     }
 }

@@ -85,6 +85,28 @@ struct AppendMessageTests {
     func encode(_ fixture: EncodeFixture<AppendMessage>) {
         fixture.checkEncoding()
     }
+
+    @Test(arguments: [
+        ParseFixture.appendMessage(
+            " (\\Answered) {123}\r\n",
+            "test",
+            expected: .success(.init(
+                options: .init(flagList: [.answered], internalDate: nil, extensions: [:]),
+                data: .init(byteCount: 123)
+            ))
+        ),
+        ParseFixture.appendMessage(
+            " (\\Answered) ~{456}\r\n",
+            "test",
+            expected: .success(.init(
+                options: .init(flagList: [.answered], internalDate: nil, extensions: [:]),
+                data: .init(byteCount: 456, withoutContentTransferEncoding: true)
+            ))
+        ),
+    ])
+    func parse(_ fixture: ParseFixture<AppendMessage>) {
+        fixture.checkParsing()
+    }
 }
 
 // MARK: -
@@ -100,6 +122,21 @@ extension EncodeFixture<AppendMessage> {
             bufferKind: .client(options),
             expectedString: expectedString,
             encoder: { $0.writeAppendMessage($1) }
+        )
+    }
+}
+
+extension ParseFixture<AppendMessage> {
+    fileprivate static func appendMessage(
+        _ input: String,
+        _ terminator: String,
+        expected: Expected
+    ) -> Self {
+        ParseFixture(
+            input: input,
+            terminator: terminator,
+            expected: expected,
+            parser: GrammarParser().parseAppendMessage
         )
     }
 }

@@ -31,6 +31,30 @@ struct SearchReturnDataTests {
     func encode(_ fixture: EncodeFixture<SearchReturnData>) {
         fixture.checkEncoding()
     }
+
+    @Test(arguments: [
+        ParseFixture.searchReturnData("MIN 1", expected: .success(.min(1))),
+        ParseFixture.searchReturnData("MAX 2", expected: .success(.max(2))),
+        ParseFixture.searchReturnData("ALL 3", expected: .success(.all(.set([3])))),
+        ParseFixture.searchReturnData("ALL 3,4,5", expected: .success(.all(.set([3, 4, 5])))),
+        ParseFixture.searchReturnData("COUNT 4", expected: .success(.count(4))),
+        ParseFixture.searchReturnData("MODSEQ 4", expected: .success(.modificationSequence(4))),
+        ParseFixture.searchReturnData("PARTIAL (1:10 108595)", expected: .success(.partial(.first(1...10), [108595]))),
+        ParseFixture.searchReturnData("PARTIAL (-2:-20 20:24,108595)", expected: .success(.partial(.last(2...20), [20...24, 108595]))),
+        ParseFixture.searchReturnData("PARTIAL (1:10 NIL)", expected: .success(.partial(.first(1...10), []))),
+        ParseFixture.searchReturnData("modifier 5", expected: .success(.dataExtension(.init(key: "modifier", value: .sequence(.set([5])))))),
+    ])
+    func parse(_ fixture: ParseFixture<SearchReturnData>) {
+        fixture.checkParsing()
+    }
+
+    @Test(arguments: [
+        ParseFixture.searchReturnDataPartial("PARTIAL (23500:24000 67,100:102)", expected: .success(.partial(.first(23_500...24_000), [67, 100...102]))),
+        ParseFixture.searchReturnDataPartial("PARTIAL (-55:-700 NIL)", expected: .success(.partial(.last(55...700), []))),
+    ])
+    func `parse partial`(_ fixture: ParseFixture<SearchReturnData>) {
+        fixture.checkParsing()
+    }
 }
 
 // MARK: -
@@ -45,6 +69,34 @@ extension EncodeFixture<SearchReturnData> {
             bufferKind: .defaultServer,
             expectedString: expectedString,
             encoder: { $0.writeSearchReturnData($1) }
+        )
+    }
+}
+
+extension ParseFixture<SearchReturnData> {
+    fileprivate static func searchReturnData(
+        _ input: String,
+        _ terminator: String = "\r",
+        expected: Expected
+    ) -> Self {
+        ParseFixture(
+            input: input,
+            terminator: terminator,
+            expected: expected,
+            parser: GrammarParser().parseSearchReturnData
+        )
+    }
+
+    fileprivate static func searchReturnDataPartial(
+        _ input: String,
+        _ terminator: String = "\r",
+        expected: Expected
+    ) -> Self {
+        ParseFixture(
+            input: input,
+            terminator: terminator,
+            expected: expected,
+            parser: GrammarParser().parseSearchReturnData_partial
         )
     }
 }
