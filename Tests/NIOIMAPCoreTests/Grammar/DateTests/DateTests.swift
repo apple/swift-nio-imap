@@ -88,6 +88,16 @@ extension DateTests {
     func encode(_ fixture: EncodeFixture<IMAPCalendarDay>) {
         fixture.checkEncoding()
     }
+
+    @Test(arguments: [
+        ParseFixture.date("25-Jun-1994", " ", expected: .success(IMAPCalendarDay(year: 1994, month: 6, day: 25)!)),
+        ParseFixture.date("\"25-Jun-1994\"", "\r", expected: .success(IMAPCalendarDay(year: 1994, month: 6, day: 25)!)),
+        ParseFixture.date("\"25-Jun-1994 ", "\r", expected: .failure),
+        ParseFixture.date("\"\"", "\r", expected: .failure),
+    ])
+    func parse(_ fixture: ParseFixture<IMAPCalendarDay>) {
+        fixture.checkParsing()
+    }
 }
 
 // MARK: -
@@ -102,6 +112,21 @@ extension EncodeFixture<IMAPCalendarDay> {
             bufferKind: .defaultServer,
             expectedString: expectedString,
             encoder: { $0.writeDate($1) }
+        )
+    }
+}
+
+extension ParseFixture<IMAPCalendarDay> {
+    fileprivate static func date(
+        _ input: String,
+        _ terminator: String,
+        expected: Expected
+    ) -> Self {
+        ParseFixture(
+            input: input,
+            terminator: terminator,
+            expected: expected,
+            parser: GrammarParser().parseDate
         )
     }
 }

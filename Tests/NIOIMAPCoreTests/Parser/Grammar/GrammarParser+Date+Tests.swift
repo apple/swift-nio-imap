@@ -18,38 +18,6 @@ import XCTest
 
 class GrammarParser_Date_Tests: XCTestCase, _ParserTestHelpers {}
 
-// MARK: - date
-
-extension GrammarParser_Date_Tests {
-    func testDate_valid_plain() {
-        TestUtilities.withParseBuffer("25-Jun-1994", terminator: " ") { (buffer) in
-            let day = try GrammarParser().parseDate(buffer: &buffer, tracker: .testTracker)
-            XCTAssertEqual(day, IMAPCalendarDay(year: 1994, month: 6, day: 25))
-        }
-    }
-
-    func testDate_valid_quoted() {
-        TestUtilities.withParseBuffer("\"25-Jun-1994\"") { (buffer) in
-            let day = try GrammarParser().parseDate(buffer: &buffer, tracker: .testTracker)
-            XCTAssertEqual(day, IMAPCalendarDay(year: 1994, month: 6, day: 25))
-        }
-    }
-
-    func testDate_invalid_quoted_missing_end_quote() {
-        var buffer = TestUtilities.makeParseBuffer(for: "\"25-Jun-1994 ")
-        XCTAssertThrowsError(try GrammarParser().parseDate(buffer: &buffer, tracker: .testTracker)) { e in
-            XCTAssertTrue(e is ParserError)
-        }
-    }
-
-    func testDate_invalid_quoted_missing_date() {
-        var buffer = TestUtilities.makeParseBuffer(for: "\"\"")
-        XCTAssertThrowsError(try GrammarParser().parseDate(buffer: &buffer, tracker: .testTracker)) { e in
-            XCTAssertTrue(e is ParserError)
-        }
-    }
-}
-
 // MARK: - date-day
 
 extension GrammarParser_Date_Tests {

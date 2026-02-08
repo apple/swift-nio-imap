@@ -18,52 +18,6 @@ import XCTest
 
 class GrammarParser_Search_Tests: XCTestCase, _ParserTestHelpers {}
 
-// MARK: - parseSearchCorrelator
-
-extension GrammarParser_Search_Tests {
-    func testParseSearchCorrelator() {
-        self.iterateTests(
-            testFunction: GrammarParser().parseSearchCorrelator,
-            validInputs: [
-                (" (TAG \"test1\")", "\r", SearchCorrelator(tag: "test1"), #line),
-                (" (tag \"test2\")", "\r", SearchCorrelator(tag: "test2"), #line),
-                (
-                    " (TAG \"test1\" MAILBOX \"mb\" UIDVALIDITY 5)", "\r",
-                    SearchCorrelator(tag: "test1", mailbox: MailboxName("mb"), uidValidity: 5), #line
-                ),
-                (
-                    " (MAILBOX \"mb\" UIDVALIDITY 5 TAG \"test1\")", "\r",
-                    SearchCorrelator(tag: "test1", mailbox: MailboxName("mb"), uidValidity: 5), #line
-                ),
-            ],
-            parserErrorInputs: [
-                (" (TAG \"test1\" MAILBOX \"mb\" )", "\r", #line),
-                (" (TAG \"test1\" MAILBOX \"mb\")", "\r", #line),
-                (" (TAG \"test1\" MAILBOX \"mb\" MAILBOX \"mb\")", "\r", #line),
-                (" (MAILBOX \"mb\")", "\r", #line),
-                (" (UIDVALIDITY 5)", "\r", #line),
-            ],
-            incompleteMessageInputs: []
-        )
-    }
-}
-
-// MARK: - `search-criteria` parseSearchCriteria
-
-extension GrammarParser_Search_Tests {
-    func testParseSearchCriteria() {
-        self.iterateTests(
-            testFunction: GrammarParser().parseSearchCriteria,
-            validInputs: [
-                ("ALL", "\r", [.all], #line),
-                ("ALL ANSWERED DELETED", "\r", [.all, .answered, .deleted], #line),
-            ],
-            parserErrorInputs: [],
-            incompleteMessageInputs: []
-        )
-    }
-}
-
 // MARK: - `search-key` parseSearchKey
 
 extension GrammarParser_Search_Tests {
@@ -237,38 +191,6 @@ extension GrammarParser_Search_Tests {
             validInputs: [
                 ("PARTIAL (23500:24000 67,100:102)", "\r", .partial(.first(23_500...24_000), [67, 100...102]), #line),
                 ("PARTIAL (-55:-700 NIL)", "\r", .partial(.last(55...700), []), #line),
-            ],
-            parserErrorInputs: [],
-            incompleteMessageInputs: []
-        )
-    }
-}
-
-// MARK: - `search-ret-opt` parseSearchReturnOption
-
-extension GrammarParser_Search_Tests {
-    func testParseSearchReturnOption() {
-        self.iterateTests(
-            testFunction: GrammarParser().parseSearchReturnOption,
-            validInputs: [
-                ("MIN", "\r", .min, #line),
-                ("min", "\r", .min, #line),
-                ("mIn", "\r", .min, #line),
-                ("MAX", "\r", .max, #line),
-                ("max", "\r", .max, #line),
-                ("mAx", "\r", .max, #line),
-                ("ALL", "\r", .all, #line),
-                ("all", "\r", .all, #line),
-                ("AlL", "\r", .all, #line),
-                ("COUNT", "\r", .count, #line),
-                ("count", "\r", .count, #line),
-                ("COunt", "\r", .count, #line),
-                ("SAVE", "\r", .save, #line),
-                ("save", "\r", .save, #line),
-                ("saVE", "\r", .save, #line),
-                ("PARTIAL 23500:24000", "\r", .partial(.first(23_500...24_000)), #line),
-                ("partial -1:-100", "\r", .partial(.last(1...100)), #line),
-                ("modifier", "\r", .optionExtension(.init(key: "modifier", value: nil)), #line),
             ],
             parserErrorInputs: [],
             incompleteMessageInputs: []

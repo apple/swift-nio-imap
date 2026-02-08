@@ -25,6 +25,14 @@ struct SearchCriteriaTests {
     func encode(_ fixture: EncodeFixture<[SearchKey]>) {
         fixture.checkEncoding()
     }
+
+    @Test(arguments: [
+        ParseFixture.searchCriteria("ALL", expected: .success([.all])),
+        ParseFixture.searchCriteria("ALL ANSWERED DELETED", expected: .success([.all, .answered, .deleted])),
+    ])
+    func parse(_ fixture: ParseFixture<[SearchKey]>) {
+        fixture.checkParsing()
+    }
 }
 
 // MARK: -
@@ -39,6 +47,21 @@ extension EncodeFixture<[SearchKey]> {
             bufferKind: .defaultServer,
             expectedString: expectedString,
             encoder: { $0.writeSearchCriteria($1) }
+        )
+    }
+}
+
+extension ParseFixture<[SearchKey]> {
+    fileprivate static func searchCriteria(
+        _ input: String,
+        _ terminator: String = "\r",
+        expected: Expected
+    ) -> Self {
+        ParseFixture(
+            input: input,
+            terminator: terminator,
+            expected: expected,
+            parser: GrammarParser().parseSearchCriteria
         )
     }
 }

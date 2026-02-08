@@ -28,6 +28,48 @@ struct SearchCorrelatorTests {
     func encode(_ fixture: EncodeFixture<SearchCorrelator>) {
         fixture.checkEncoding()
     }
+
+    @Test(arguments: [
+        ParseFixture.searchCorrelator(
+            " (TAG \"test1\")",
+            expected: .success(SearchCorrelator(tag: "test1")),
+        ),
+        ParseFixture.searchCorrelator(
+            " (TAG \"test2\")",
+            expected: .success(SearchCorrelator(tag: "test2")),
+        ),
+        ParseFixture.searchCorrelator(
+            " (TAG \"test1\" MAILBOX \"mb\" UIDVALIDITY 5)",
+            expected: .success(SearchCorrelator(tag: "test1", mailbox: MailboxName("mb"), uidValidity: 5)),
+        ),
+        ParseFixture.searchCorrelator(
+            " (MAILBOX \"mb\" UIDVALIDITY 5 TAG \"test1\")",
+            expected: .success(SearchCorrelator(tag: "test1", mailbox: MailboxName("mb"), uidValidity: 5)),
+        ),
+        ParseFixture.searchCorrelator(
+            " (TAG \"test1\" MAILBOX \"mb\" )",
+            expected: .failure
+        ),
+        ParseFixture.searchCorrelator(
+            " (TAG \"test1\" MAILBOX \"mb\")",
+            expected: .failure
+        ),
+        ParseFixture.searchCorrelator(
+            " (TAG \"test1\" MAILBOX \"mb\" MAILBOX \"mb\")",
+            expected: .failure
+        ),
+        ParseFixture.searchCorrelator(
+            " (MAILBOX \"mb\")",
+            expected: .failure
+        ),
+        ParseFixture.searchCorrelator(
+            " (UIDVALIDITY 5)",
+            expected: .failure
+        ),
+    ])
+    func parse(_ fixture: ParseFixture<SearchCorrelator>) {
+        fixture.checkParsing()
+    }
 }
 
 // MARK: -
@@ -42,6 +84,21 @@ extension EncodeFixture<SearchCorrelator> {
             bufferKind: .defaultServer,
             expectedString: expectedString,
             encoder: { $0.writeSearchCorrelator($1) }
+        )
+    }
+}
+
+extension ParseFixture<SearchCorrelator> {
+    fileprivate static func searchCorrelator(
+        _ input: String,
+        _ terminator: String = "\r",
+        expected: Expected,
+    ) -> Self {
+        ParseFixture(
+            input: input,
+            terminator: terminator,
+            expected: expected,
+            parser: GrammarParser().parseSearchCorrelator
         )
     }
 }

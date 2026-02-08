@@ -43,6 +43,30 @@ struct SearchReturnOptionTests {
     func `encode multiple`(_ fixture: EncodeFixture<[SearchReturnOption]>) {
         fixture.checkEncoding()
     }
+
+    @Test(arguments: [
+        ParseFixture.searchReturnOption("MIN", expected: .success(.min)),
+        ParseFixture.searchReturnOption("min", expected: .success(.min)),
+        ParseFixture.searchReturnOption("mIn", expected: .success(.min)),
+        ParseFixture.searchReturnOption("MAX", expected: .success(.max)),
+        ParseFixture.searchReturnOption("max", expected: .success(.max)),
+        ParseFixture.searchReturnOption("mAx", expected: .success(.max)),
+        ParseFixture.searchReturnOption("ALL", expected: .success(.all)),
+        ParseFixture.searchReturnOption("all", expected: .success(.all)),
+        ParseFixture.searchReturnOption("AlL", expected: .success(.all)),
+        ParseFixture.searchReturnOption("COUNT", expected: .success(.count)),
+        ParseFixture.searchReturnOption("count", expected: .success(.count)),
+        ParseFixture.searchReturnOption("COunt", expected: .success(.count)),
+        ParseFixture.searchReturnOption("SAVE", expected: .success(.save)),
+        ParseFixture.searchReturnOption("save", expected: .success(.save)),
+        ParseFixture.searchReturnOption("saVE", expected: .success(.save)),
+        ParseFixture.searchReturnOption("PARTIAL 23500:24000", expected: .success(.partial(.first(23_500...24_000)))),
+        ParseFixture.searchReturnOption("partial -1:-100", expected: .success(.partial(.last(1...100)))),
+        ParseFixture.searchReturnOption("modifier", expected: .success(.optionExtension(.init(key: "modifier", value: nil)))),
+    ])
+    func parse(_ fixture: ParseFixture<SearchReturnOption>) {
+        fixture.checkParsing()
+    }
 }
 
 // MARK: -
@@ -56,5 +80,20 @@ extension EncodeFixture<SearchReturnOption> {
 extension EncodeFixture<[SearchReturnOption]> {
     fileprivate static func searchReturnOptions(_ input: [SearchReturnOption], _ expectedString: String) -> Self {
         EncodeFixture(input: input, bufferKind: .defaultServer, expectedString: expectedString, encoder: { $0.writeSearchReturnOptions($1) })
+    }
+}
+
+extension ParseFixture<SearchReturnOption> {
+    fileprivate static func searchReturnOption(
+        _ input: String,
+        _ terminator: String = "\r",
+        expected: Expected
+    ) -> Self {
+        ParseFixture(
+            input: input,
+            terminator: terminator,
+            expected: expected,
+            parser: GrammarParser().parseSearchReturnOption
+        )
     }
 }
