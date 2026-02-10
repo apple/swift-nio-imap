@@ -14,54 +14,76 @@
 
 import NIO
 @_spi(NIOIMAPInternal) @testable import NIOIMAPCore
-import XCTest
+import Testing
 
-class PartialRange_Tests: EncodeTestClass, _ParserTestHelpers {}
-
-// MARK: - Encoding
-
-extension PartialRange_Tests {
-    func testEncode() {
-        let inputs: [(PartialRange, String, UInt)] = [
-            (.first(1...1), "1:1", #line),
-            (.first(100...200), "100:200", #line),
-            (.last(1...1), "-1:-1", #line),
-            (.last(100...200), "-100:-200", #line),
-        ]
-        self.iterateInputs(inputs: inputs, encoder: { self.testBuffer.writePartialRange($0) })
+@Suite("PartialRange")
+struct PartialRangeTests {
+    @Test(arguments: [
+        EncodeFixture.partialRange(.first(1...1), "1:1"),
+        EncodeFixture.partialRange(.first(100...200), "100:200"),
+        EncodeFixture.partialRange(.last(1...1), "-1:-1"),
+        EncodeFixture.partialRange(.last(100...200), "-100:-200"),
+    ])
+    func encode(_ fixture: EncodeFixture<PartialRange>) {
+        fixture.checkEncoding()
     }
 
-    func testParse() {
-        self.iterateTests(
-            testFunction: GrammarParser().parsePartialRange,
-            validInputs: [
-                ("1:2", " ", .first(1...2), #line),
-                ("1:1", " ", .first(1...1), #line),
-                ("100:200", " ", .first(100...200), #line),
-                ("200:100", " ", .first(100...200), #line),
-                ("333:333", " ", .first(333...333), #line),
-                ("1234567:2345678", " ", .first(1_234_567...2_345_678), #line),
-                ("-1:-2", " ", .last(1...2), #line),
-                ("-1:-1", " ", .last(1...1), #line),
-                ("-100:-200", " ", .last(100...200), #line),
-                ("-200:-100", " ", .last(100...200), #line),
-                ("-333:-333", " ", .last(333...333), #line),
-                ("-1234567:-2345678", " ", .last(1_234_567...2_345_678), #line),
-            ],
-            parserErrorInputs: [
-                ("1", " ", #line),
-                ("1:", " ", #line),
-                ("10:-20", " ", #line),
-                ("-10:20", " ", #line),
-                ("1:*", " ", #line),
-                ("*", " ", #line),
-                ("a", " ", #line),
-            ],
-            incompleteMessageInputs: [
-                ("1", "", #line),
-                ("1:", "", #line),
-                ("1:2", "", #line),
-            ]
+    @Test(arguments: [
+        ParseFixture.partialRange("1:2", " ", expected: .success(.first(1...2))),
+        ParseFixture.partialRange("1:1", " ", expected: .success(.first(1...1))),
+        ParseFixture.partialRange("100:200", " ", expected: .success(.first(100...200))),
+        ParseFixture.partialRange("200:100", " ", expected: .success(.first(100...200))),
+        ParseFixture.partialRange("333:333", " ", expected: .success(.first(333...333))),
+        ParseFixture.partialRange("1234567:2345678", " ", expected: .success(.first(1_234_567...2_345_678))),
+        ParseFixture.partialRange("-1:-2", " ", expected: .success(.last(1...2))),
+        ParseFixture.partialRange("-1:-1", " ", expected: .success(.last(1...1))),
+        ParseFixture.partialRange("-100:-200", " ", expected: .success(.last(100...200))),
+        ParseFixture.partialRange("-200:-100", " ", expected: .success(.last(100...200))),
+        ParseFixture.partialRange("-333:-333", " ", expected: .success(.last(333...333))),
+        ParseFixture.partialRange("-1234567:-2345678", " ", expected: .success(.last(1_234_567...2_345_678))),
+        ParseFixture.partialRange("1", " ", expected: .failure),
+        ParseFixture.partialRange("1:", " ", expected: .failure),
+        ParseFixture.partialRange("10:-20", " ", expected: .failure),
+        ParseFixture.partialRange("-10:20", " ", expected: .failure),
+        ParseFixture.partialRange("1:*", " ", expected: .failure),
+        ParseFixture.partialRange("*", " ", expected: .failure),
+        ParseFixture.partialRange("a", " ", expected: .failure),
+        ParseFixture.partialRange("1", "", expected: .incompleteMessage),
+        ParseFixture.partialRange("1:", "", expected: .incompleteMessage),
+        ParseFixture.partialRange("1:2", "", expected: .incompleteMessage),
+    ])
+    func parse(_ fixture: ParseFixture<PartialRange>) {
+        fixture.checkParsing()
+    }
+}
+
+// MARK: -
+
+extension EncodeFixture<PartialRange> {
+    fileprivate static func partialRange(
+        _ input: PartialRange,
+        _ expectedString: String
+    ) -> Self {
+        EncodeFixture(
+            input: input,
+            bufferKind: .defaultServer,
+            expectedString: expectedString,
+            encoder: { $0.writePartialRange($1) }
+        )
+    }
+}
+
+extension ParseFixture<PartialRange> {
+    fileprivate static func partialRange(
+        _ input: String,
+        _ terminator: String,
+        expected: Expected
+    ) -> Self {
+        ParseFixture(
+            input: input,
+            terminator: terminator,
+            expected: expected,
+            parser: GrammarParser().parsePartialRange
         )
     }
 }

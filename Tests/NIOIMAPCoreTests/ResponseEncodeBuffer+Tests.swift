@@ -14,14 +14,12 @@
 
 import NIO
 @testable import NIOIMAPCore
-import XCTest
+import Testing
 
-class ResponseEncodeBuffer_Tests: XCTestCase {}
-
-extension ResponseEncodeBuffer_Tests {
-    // we previously had a bug where spaces weren't inserted between attributes
-    // this test will prevent regression
-    func testCorrectlyStreamsManySimpleAttributes() {
+@Suite("ResponseEncodeBuffer")
+struct ResponseEncodeBufferTests {
+    @Test func `correctly streams many simple attributes with spaces`() {
+        // Previously had a bug where spaces weren't inserted between attributes
         var buffer = ResponseEncodeBuffer(buffer: ByteBuffer(string: ""), options: .rfc3501, loggingMode: false)
         buffer.writeFetchResponse(.start(1))
         buffer.writeFetchResponse(.simpleAttribute(.flags([.answered])))
@@ -30,11 +28,10 @@ extension ResponseEncodeBuffer_Tests {
         buffer.writeFetchResponse(.finish)
 
         let outputString = String(buffer: buffer.readBytes())
-        let expectedString = "* 1 FETCH (FLAGS (\\Answered) UID 999 BINARY.SIZE[1] 665)\r\n"
-        XCTAssertEqual(outputString, expectedString)
+        #expect(outputString == "* 1 FETCH (FLAGS (\\Answered) UID 999 BINARY.SIZE[1] 665)\r\n")
     }
 
-    func testFetchStreaming() {
+    @Test func `correctly handles fetch streaming with literal data`() {
         var buffer = ResponseEncodeBuffer(buffer: ByteBuffer(string: ""), options: .rfc3501, loggingMode: false)
         buffer.writeFetchResponse(.start(1))
         buffer.writeFetchResponse(.streamingBegin(kind: .body(section: .complete, offset: nil), byteCount: 10))
@@ -43,7 +40,6 @@ extension ResponseEncodeBuffer_Tests {
         buffer.writeFetchResponse(.finish)
 
         let outputString = String(buffer: buffer.readBytes())
-        let expectedString = "* 1 FETCH (BODY[] {10}\r\n0123456789)\r\n"
-        XCTAssertEqual(outputString, expectedString)
+        #expect(outputString == "* 1 FETCH (BODY[] {10}\r\n0123456789)\r\n")
     }
 }

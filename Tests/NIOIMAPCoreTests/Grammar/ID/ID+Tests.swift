@@ -15,57 +15,49 @@
 import NIO
 @_spi(NIOIMAPInternal) @testable import NIOIMAPCore
 import OrderedCollections
-import XCTest
+import Testing
 
-class ID_Tests: EncodeTestClass, _ParserTestHelpers {}
-
-// MARK: - Encoding
-
-extension ID_Tests {
-    func testEncode() {
-        let inputs: [(OrderedDictionary<String, String?>, String, UInt)] = [
-            ([:], "NIL", #line),
-            (["key": "value"], #"("key" "value")"#, #line),
-        ]
-        self.iterateInputs(inputs: inputs, encoder: { self.testBuffer.writeIDParameters($0) })
+@Suite("ID")
+struct IDTests {
+    @Test(arguments: [
+        EncodeFixture.idParameters([:], "NIL"),
+        EncodeFixture.idParameters(["key": "value"], #"("key" "value")"#),
+    ])
+    func encode(_ fixture: EncodeFixture<OrderedDictionary<String, String?>>) {
+        fixture.checkEncoding()
     }
 
-    func testParse() {
-        self.iterateTests(
-            testFunction: GrammarParser().parseResponsePayload,
-            validInputs: [
-                (#"ID NIL"#, "\r", .id([:]), #line),
-                (#"ID ("key" NIL)"#, "\r", .id(["key": nil]), #line),
-                (#"ID ("name" "Imap" "version" "1.5")"#, "\r", .id(["name": "Imap", "version": "1.5"]), #line),
-                (
-                    #"ID ("name" "Imap" "version" "1.5" "os" "centos" "os-version" "5.5" "support-url" "mailto:admin@xgen.in")"#,
-                    "\r",
-                    .id([
-                        "name": "Imap", "version": "1.5", "os": "centos", "os-version": "5.5",
-                        "support-url": "mailto:admin@xgen.in",
-                    ]), #line
-                ),
-                // datamail.in appends a `+` to the ID response:
-                (
-                    #"ID ("name" "Imap" "version" "1.5" "os" "centos" "os-version" "5.5" "support-url" "mailto:admin@xgen.in")+"#,
-                    "\r",
-                    .id([
-                        "name": "Imap", "version": "1.5", "os": "centos", "os-version": "5.5",
-                        "support-url": "mailto:admin@xgen.in",
-                    ]), #line
-                ),
-            ],
-            parserErrorInputs: [],
-            incompleteMessageInputs: []
-        )
+    @Test(arguments: [
+        ParseFixture.idResponsePayload(#"ID NIL"#, expected: .success(.id([:]))),
+        ParseFixture.idResponsePayload(#"ID ("key" NIL)"#, expected: .success(.id(["key": nil]))),
+        ParseFixture.idResponsePayload(
+            #"ID ("name" "Imap" "version" "1.5")"#,
+            expected: .success(.id(["name": "Imap", "version": "1.5"]))
+        ),
+        ParseFixture.idResponsePayload(
+            #"ID ("name" "Imap" "version" "1.5" "os" "centos" "os-version" "5.5" "support-url" "mailto:admin@xgen.in")"#,
+            expected: .success(.id([
+                "name": "Imap", "version": "1.5", "os": "centos", "os-version": "5.5",
+                "support-url": "mailto:admin@xgen.in",
+            ]))
+        ),
+        // datamail.in appends a `+` to the ID response:
+        ParseFixture.idResponsePayload(
+            #"ID ("name" "Imap" "version" "1.5" "os" "centos" "os-version" "5.5" "support-url" "mailto:admin@xgen.in")+"#,
+            expected: .success(.id([
+                "name": "Imap", "version": "1.5", "os": "centos", "os-version": "5.5",
+                "support-url": "mailto:admin@xgen.in",
+            ]))
+        ),
+    ])
+    func parse(_ fixture: ParseFixture<ResponsePayload>) {
+        fixture.checkParsing()
     }
-}
 
-extension ID_Tests {
-    func testThatAnIDResponseDoesNotGetRedactedForLogging() {
+    @Test func `ID response does not get redacted for logging`() {
         let id = Response.untagged(ResponsePayload.id(["name": "A"]))
-        XCTAssertEqual(
-            "\(Response.descriptionWithoutPII([id]))",
+        #expect(
+            "\(Response.descriptionWithoutPII([id]))" ==
             #"""
             * ID ("name" "A")\#r
 
@@ -73,14 +65,45 @@ extension ID_Tests {
         )
     }
 
-    func testThatAnIDCommandDoesNotGetRedactedForLogging() {
+    @Test func `ID command does not get redacted for logging`() {
         let part = CommandStreamPart.tagged(TaggedCommand(tag: "A1", command: .id(["name": "A"])))
-        XCTAssertEqual(
-            "\(CommandStreamPart.descriptionWithoutPII([part]))",
+        #expect(
+            "\(CommandStreamPart.descriptionWithoutPII([part]))" ==
             #"""
             A1 ID ("name" "A")\#r
 
             """#
+        )
+    }
+}
+
+// MARK: -
+
+extension EncodeFixture<OrderedDictionary<String, String?>> {
+    fileprivate static func idParameters(
+        _ input: OrderedDictionary<String, String?>,
+        _ expectedString: String
+    ) -> Self {
+        EncodeFixture(
+            input: input,
+            bufferKind: .defaultServer,
+            expectedString: expectedString,
+            encoder: { $0.writeIDParameters($1) }
+        )
+    }
+}
+
+extension ParseFixture<ResponsePayload> {
+    fileprivate static func idResponsePayload(
+        _ input: String,
+        _ terminator: String = "\r",
+        expected: Expected
+    ) -> Self {
+        ParseFixture(
+            input: input,
+            terminator: terminator,
+            expected: expected,
+            parser: GrammarParser().parseResponsePayload
         )
     }
 }

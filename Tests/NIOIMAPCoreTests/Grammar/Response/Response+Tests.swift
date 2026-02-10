@@ -152,7 +152,7 @@ extension EncodeFixture<Response> {
     ) -> Self {
         EncodeFixture(
             input: input,
-            bufferKind: .client(.rfc3501),
+            bufferKind: .server(ResponseEncodingOptions()),
             expectedString: expectedString,
             encoder: {
                 var encoder = ResponseEncodeBuffer(
