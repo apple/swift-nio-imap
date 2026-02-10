@@ -141,3 +141,30 @@ extension CommandEncodingOptions {
 extension ResponseEncodingOptions {
     static var rfc3501: ResponseEncodingOptions { ResponseEncodingOptions() }
 }
+
+extension String {
+    /// Maps control characters to their visual representations in the Control Pictures Unicode block.
+    /// - 0x00-0x1F are mapped to U+2400-U+241F
+    /// - 0x20 (space) is mapped to U+2423 (OPEN BOX)
+    /// - All other characters pass through unchanged
+    func mappingControlPictures() -> String {
+        var result = ""
+        for scalar in unicodeScalars {
+            guard
+                scalar.isASCII,
+                scalar.value <= 0x20
+            else {
+                result.unicodeScalars.append(scalar)
+                continue
+            }
+            if scalar.value == 0x20 {
+                // Map space to OPEN BOX
+                result.unicodeScalars.append(UnicodeScalar(0x2423)!)
+            } else {
+                // Map control characters to Control Pictures block
+                result.unicodeScalars.append(UnicodeScalar(0x2400 + scalar.value)!)
+            }
+        }
+        return result
+    }
+}
