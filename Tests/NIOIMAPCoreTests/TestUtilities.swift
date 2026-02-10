@@ -87,40 +87,11 @@ extension TestUtilities {
     }
 }
 
-#if swift(>=5.8)
-#if hasFeature(RetroactiveAttribute)
 extension ByteBuffer: @retroactive ExpressibleByStringLiteral {
     public init(stringLiteral value: String) {
         let allocator = ByteBufferAllocator()
         self = allocator.buffer(capacity: 0)
         self.writeString(value)
-    }
-}
-#else
-extension ByteBuffer: ExpressibleByStringLiteral {
-    public init(stringLiteral value: String) {
-        let allocator = ByteBufferAllocator()
-        self = allocator.buffer(capacity: 0)
-        self.writeString(value)
-    }
-}
-#endif
-#else
-extension ByteBuffer: ExpressibleByStringLiteral {
-    public init(stringLiteral value: String) {
-        let allocator = ByteBufferAllocator()
-        self = allocator.buffer(capacity: 0)
-        self.writeString(value)
-    }
-}
-#endif
-
-extension TestUtilities {
-    @available(*, deprecated, message: "Use checkCodableRoundTrips() instead.")
-    static func roundTripCodable<A>(_ value: A) throws -> A where A: Codable {
-        let encoder = JSONEncoder()
-        let decoder = JSONDecoder()
-        return try decoder.decode(A.self, from: encoder.encode(value))
     }
 }
 
@@ -145,4 +116,28 @@ func checkCodableRoundTrips<A>(
         return
     }
     #expect(decoded == a, sourceLocation: sourceLocation)
+}
+
+extension CommandEncodingOptions {
+    static var literalPlus: CommandEncodingOptions {
+        var o = CommandEncodingOptions()
+        o.useNonSynchronizingLiteralPlus = true
+        return o
+    }
+
+    static var literalMinus: CommandEncodingOptions {
+        var o = CommandEncodingOptions()
+        o.useNonSynchronizingLiteralMinus = true
+        return o
+    }
+
+    static var noQuoted: CommandEncodingOptions {
+        var o = CommandEncodingOptions()
+        o.useQuotedString = false
+        return o
+    }
+}
+
+extension ResponseEncodingOptions {
+    static var rfc3501: ResponseEncodingOptions { ResponseEncodingOptions() }
 }
