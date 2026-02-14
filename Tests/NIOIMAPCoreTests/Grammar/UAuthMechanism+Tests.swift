@@ -31,6 +31,22 @@ struct URLAuthenticationMechanismTests {
     func encode(_ fixture: EncodeFixture<URLAuthenticationMechanism>) {
         fixture.checkEncoding()
     }
+
+    @Test(arguments: [
+        ParseFixture.urlAuthenticationMechanism(
+            "INTERNAL",
+            " ",
+            expected: .success(.internal)
+        ),
+        ParseFixture.urlAuthenticationMechanism(
+            "abcdEFG0123456789",
+            " ",
+            expected: .success(.init("abcdEFG0123456789"))
+        ),
+    ])
+    func parse(_ fixture: ParseFixture<URLAuthenticationMechanism>) {
+        fixture.checkParsing()
+    }
 }
 
 // MARK: -
@@ -45,6 +61,21 @@ extension EncodeFixture<URLAuthenticationMechanism> {
             bufferKind: .defaultServer,
             expectedString: expectedString,
             encoder: { $0.writeURLAuthenticationMechanism($1) }
+        )
+    }
+}
+
+extension ParseFixture<URLAuthenticationMechanism> {
+    fileprivate static func urlAuthenticationMechanism(
+        _ input: String,
+        _ terminator: String,
+        expected: Expected
+    ) -> Self {
+        ParseFixture(
+            input: input,
+            terminator: terminator,
+            expected: expected,
+            parser: GrammarParser().parseUAuthMechanism
         )
     }
 }

@@ -50,6 +50,36 @@ struct ExpireTests {
     func encode(_ fixture: EncodeFixture<Expire>) {
         fixture.checkEncoding()
     }
+
+    @Test(arguments: [
+        ParseFixture.expire(
+            ";EXPIRE=1234-12-20T12:34:56",
+            "\r",
+            expected: .success(
+                Expire(
+                    dateTime: FullDateTime(
+                        date: FullDate(year: 1234, month: 12, day: 20),
+                        time: FullTime(hour: 12, minute: 34, second: 56)
+                    )
+                )
+            )
+        ),
+        ParseFixture.expire(
+            ";EXPIRE=1234-12-20t12:34:56",
+            "\r",
+            expected: .success(
+                Expire(
+                    dateTime: FullDateTime(
+                        date: FullDate(year: 1234, month: 12, day: 20),
+                        time: FullTime(hour: 12, minute: 34, second: 56)
+                    )
+                )
+            )
+        ),
+    ])
+    func parse(_ fixture: ParseFixture<Expire>) {
+        fixture.checkParsing()
+    }
 }
 
 // MARK: -
@@ -64,6 +94,21 @@ extension EncodeFixture<Expire> {
             bufferKind: .defaultServer,
             expectedString: expectedString,
             encoder: { $0.writeExpire($1) }
+        )
+    }
+}
+
+extension ParseFixture<Expire> {
+    fileprivate static func expire(
+        _ input: String,
+        _ terminator: String,
+        expected: Expected
+    ) -> Self {
+        ParseFixture(
+            input: input,
+            terminator: terminator,
+            expected: expected,
+            parser: GrammarParser().parseExpire
         )
     }
 }

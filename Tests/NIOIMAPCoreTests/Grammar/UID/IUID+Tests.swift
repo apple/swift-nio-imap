@@ -31,6 +31,28 @@ struct IUIDTests {
     func `encode UID only`(_ fixture: EncodeFixture<IUID>) {
         fixture.checkEncoding()
     }
+
+    @Test(arguments: [
+        ParseFixture.parseWithSlash("/;UID=1", " ", expected: .success(.init(uid: 1))),
+        ParseFixture.parseWithSlash("/;UID=12", " ", expected: .success(.init(uid: 12))),
+        ParseFixture.parseWithSlash("/;UID=123", " ", expected: .success(.init(uid: 123))),
+        ParseFixture.parseWithSlash("a", " ", expected: .failure),
+        ParseFixture.parseWithSlash("/;UID=1", "", expected: .incompleteMessage),
+    ])
+    func `parse with slash`(_ fixture: ParseFixture<IUID>) {
+        fixture.checkParsing()
+    }
+
+    @Test(arguments: [
+        ParseFixture.parseWithoutSlash(";UID=1", " ", expected: .success(.init(uid: 1))),
+        ParseFixture.parseWithoutSlash(";UID=12", " ", expected: .success(.init(uid: 12))),
+        ParseFixture.parseWithoutSlash(";UID=123", " ", expected: .success(.init(uid: 123))),
+        ParseFixture.parseWithoutSlash("a", " ", expected: .failure),
+        ParseFixture.parseWithoutSlash(";UID=1", "", expected: .incompleteMessage),
+    ])
+    func `parse without slash`(_ fixture: ParseFixture<IUID>) {
+        fixture.checkParsing()
+    }
 }
 
 // MARK: -
@@ -57,6 +79,34 @@ extension EncodeFixture<IUID> {
             bufferKind: .defaultServer,
             expectedString: expectedString,
             encoder: { $0.writeIUIDOnly($1) }
+        )
+    }
+}
+
+extension ParseFixture<IUID> {
+    fileprivate static func parseWithSlash(
+        _ input: String,
+        _ terminator: String = " ",
+        expected: Expected
+    ) -> Self {
+        ParseFixture(
+            input: input,
+            terminator: terminator,
+            expected: expected,
+            parser: GrammarParser().parseIUID
+        )
+    }
+
+    fileprivate static func parseWithoutSlash(
+        _ input: String,
+        _ terminator: String = " ",
+        expected: Expected
+    ) -> Self {
+        ParseFixture(
+            input: input,
+            terminator: terminator,
+            expected: expected,
+            parser: GrammarParser().parseIUIDOnly
         )
     }
 }

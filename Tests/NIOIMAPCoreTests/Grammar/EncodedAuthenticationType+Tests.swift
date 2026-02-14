@@ -24,6 +24,17 @@ struct EncodedAuthenticationTypeTests {
     func encode(_ fixture: EncodeFixture<EncodedAuthenticationType>) {
         fixture.checkEncoding()
     }
+
+    @Test(arguments: [
+        ParseFixture.encodedAuthenticationType(
+            "hello%FF",
+            " ",
+            expected: .success(.init(authenticationType: "hello%FF"))
+        ),
+    ])
+    func parse(_ fixture: ParseFixture<EncodedAuthenticationType>) {
+        fixture.checkParsing()
+    }
 }
 
 // MARK: -
@@ -35,6 +46,21 @@ extension EncodeFixture<EncodedAuthenticationType> {
             bufferKind: .defaultServer,
             expectedString: expectedString,
             encoder: { $0.writeEncodedAuthenticationType($1) }
+        )
+    }
+}
+
+extension ParseFixture<EncodedAuthenticationType> {
+    fileprivate static func encodedAuthenticationType(
+        _ input: String,
+        _ terminator: String,
+        expected: Expected
+    ) -> Self {
+        ParseFixture(
+            input: input,
+            terminator: terminator,
+            expected: expected,
+            parser: GrammarParser().parseEncodedAuthenticationType
         )
     }
 }

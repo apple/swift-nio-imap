@@ -39,6 +39,32 @@ struct AccessTests {
     func encode(_ fixture: EncodeFixture<Access>) {
         fixture.checkEncoding()
     }
+
+    @Test(arguments: [
+        ParseFixture.access(
+            "authuser",
+            "",
+            expected: .success(.authenticateUser)
+        ),
+        ParseFixture.access(
+            "anonymous",
+            "",
+            expected: .success(.anonymous)
+        ),
+        ParseFixture.access(
+            "submit+abc",
+            " ",
+            expected: .success(.submit(.init(data: "abc")))
+        ),
+        ParseFixture.access(
+            "user+abc",
+            " ",
+            expected: .success(.user(.init(data: "abc")))
+        ),
+    ])
+    func parse(_ fixture: ParseFixture<Access>) {
+        fixture.checkParsing()
+    }
 }
 
 // MARK: -
@@ -53,6 +79,21 @@ extension EncodeFixture<Access> {
             bufferKind: .defaultServer,
             expectedString: expectedString,
             encoder: { $0.writeAccess($1) }
+        )
+    }
+}
+
+extension ParseFixture<Access> {
+    fileprivate static func access(
+        _ input: String,
+        _ terminator: String,
+        expected: Expected
+    ) -> Self {
+        ParseFixture(
+            input: input,
+            terminator: terminator,
+            expected: expected,
+            parser: GrammarParser().parseAccess
         )
     }
 }

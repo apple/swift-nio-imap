@@ -25,6 +25,14 @@ struct IMAPURLAuthenticationMechanismTests {
     func encode(_ fixture: EncodeFixture<IMAPURLAuthenticationMechanism>) {
         fixture.checkEncoding()
     }
+
+    @Test(arguments: [
+        ParseFixture.imapURLAuthenticationMechanism(";AUTH=*", " ", expected: .success(.any)),
+        ParseFixture.imapURLAuthenticationMechanism(";AUTH=test", " ", expected: .success(.type(.init(authenticationType: "test")))),
+    ])
+    func parse(_ fixture: ParseFixture<IMAPURLAuthenticationMechanism>) {
+        fixture.checkParsing()
+    }
 }
 
 // MARK: -
@@ -36,6 +44,21 @@ extension EncodeFixture<IMAPURLAuthenticationMechanism> {
             bufferKind: .defaultServer,
             expectedString: expectedString,
             encoder: { $0.writeIMAPURLAuthenticationMechanism($1) }
+        )
+    }
+}
+
+extension ParseFixture<IMAPURLAuthenticationMechanism> {
+    fileprivate static func imapURLAuthenticationMechanism(
+        _ input: String,
+        _ terminator: String = " ",
+        expected: Expected
+    ) -> Self {
+        ParseFixture(
+            input: input,
+            terminator: terminator,
+            expected: expected,
+            parser: GrammarParser().parseIMAPURLAuthenticationMechanism
         )
     }
 }

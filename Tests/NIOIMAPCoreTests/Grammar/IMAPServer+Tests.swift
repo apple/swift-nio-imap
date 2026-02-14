@@ -40,6 +40,40 @@ struct IMAPServerTests {
     func encode(_ fixture: EncodeFixture<IMAPServer>) {
         fixture.checkEncoding()
     }
+
+    @Test(arguments: [
+        ParseFixture.imapServer(
+            "localhost",
+            " ",
+            expected: .success(.init(userAuthenticationMechanism: nil, host: "localhost", port: nil))
+        ),
+        ParseFixture.imapServer(
+            ";AUTH=*@localhost",
+            " ",
+            expected: .success(.init(
+                userAuthenticationMechanism: .init(encodedUser: nil, authenticationMechanism: .any),
+                host: "localhost",
+                port: nil
+            ))
+        ),
+        ParseFixture.imapServer(
+            "localhost:1234",
+            " ",
+            expected: .success(.init(userAuthenticationMechanism: nil, host: "localhost", port: 1234))
+        ),
+        ParseFixture.imapServer(
+            ";AUTH=*@localhost:1234",
+            " ",
+            expected: .success(.init(
+                userAuthenticationMechanism: .init(encodedUser: nil, authenticationMechanism: .any),
+                host: "localhost",
+                port: 1234
+            ))
+        ),
+    ])
+    func parse(_ fixture: ParseFixture<IMAPServer>) {
+        fixture.checkParsing()
+    }
 }
 
 // MARK: -
@@ -54,6 +88,21 @@ extension EncodeFixture<IMAPServer> {
             bufferKind: .defaultServer,
             expectedString: expectedString,
             encoder: { $0.writeIMAPServer($1) }
+        )
+    }
+}
+
+extension ParseFixture<IMAPServer> {
+    fileprivate static func imapServer(
+        _ input: String,
+        _ terminator: String,
+        expected: Expected
+    ) -> Self {
+        ParseFixture(
+            input: input,
+            terminator: terminator,
+            expected: expected,
+            parser: GrammarParser().parseIMAPServer
         )
     }
 }

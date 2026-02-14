@@ -25,6 +25,17 @@ struct EncodedUserTests {
     func encode(_ fixture: EncodeFixture<EncodedUser>) {
         fixture.checkEncoding()
     }
+
+    @Test(arguments: [
+        ParseFixture.encodedUser(
+            "query%FF",
+            " ",
+            expected: .success(.init(data: "query%FF"))
+        ),
+    ])
+    func parse(_ fixture: ParseFixture<EncodedUser>) {
+        fixture.checkParsing()
+    }
 }
 
 extension EncodeFixture<EncodedUser> {
@@ -34,6 +45,21 @@ extension EncodeFixture<EncodedUser> {
             bufferKind: .defaultServer,
             expectedStrings: [expectedString],
             encoder: { $0.writeEncodedUser($1) }
+        )
+    }
+}
+
+extension ParseFixture<EncodedUser> {
+    fileprivate static func encodedUser(
+        _ input: String,
+        _ terminator: String,
+        expected: Expected
+    ) -> Self {
+        ParseFixture(
+            input: input,
+            terminator: terminator,
+            expected: expected,
+            parser: GrammarParser().parseEncodedUser
         )
     }
 }

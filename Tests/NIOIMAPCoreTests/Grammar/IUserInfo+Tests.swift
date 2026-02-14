@@ -35,6 +35,27 @@ struct UserAuthenticationMechanismTests {
     func encode(_ fixture: EncodeFixture<UserAuthenticationMechanism>) {
         fixture.checkEncoding()
     }
+
+    @Test(arguments: [
+        ParseFixture.userAuthenticationMechanism(
+            ";AUTH=*",
+            " ",
+            expected: .success(.init(encodedUser: nil, authenticationMechanism: .any))
+        ),
+        ParseFixture.userAuthenticationMechanism(
+            "test",
+            " ",
+            expected: .success(.init(encodedUser: .init(data: "test"), authenticationMechanism: nil))
+        ),
+        ParseFixture.userAuthenticationMechanism(
+            "test;AUTH=*",
+            " ",
+            expected: .success(.init(encodedUser: .init(data: "test"), authenticationMechanism: .any))
+        ),
+    ])
+    func parse(_ fixture: ParseFixture<UserAuthenticationMechanism>) {
+        fixture.checkParsing()
+    }
 }
 
 // MARK: -
@@ -49,6 +70,21 @@ extension EncodeFixture<UserAuthenticationMechanism> {
             bufferKind: .defaultServer,
             expectedString: expectedString,
             encoder: { $0.writeUserAuthenticationMechanism($1) }
+        )
+    }
+}
+
+extension ParseFixture<UserAuthenticationMechanism> {
+    fileprivate static func userAuthenticationMechanism(
+        _ input: String,
+        _ terminator: String,
+        expected: Expected
+    ) -> Self {
+        ParseFixture(
+            input: input,
+            terminator: terminator,
+            expected: expected,
+            parser: GrammarParser().parseUserAuthenticationMechanism
         )
     }
 }

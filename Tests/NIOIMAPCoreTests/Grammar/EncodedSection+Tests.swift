@@ -24,6 +24,17 @@ struct EncodedSectionTests {
     func encode(_ fixture: EncodeFixture<EncodedSection>) {
         fixture.checkEncoding()
     }
+
+    @Test(arguments: [
+        ParseFixture.encodedSection(
+            "query%FF",
+            " ",
+            expected: .success(.init(section: "query%FF"))
+        ),
+    ])
+    func parse(_ fixture: ParseFixture<EncodedSection>) {
+        fixture.checkParsing()
+    }
 }
 
 // MARK: -
@@ -35,6 +46,21 @@ extension EncodeFixture<EncodedSection> {
             bufferKind: .defaultServer,
             expectedString: expectedString,
             encoder: { $0.writeEncodedSection($1) }
+        )
+    }
+}
+
+extension ParseFixture<EncodedSection> {
+    fileprivate static func encodedSection(
+        _ input: String,
+        _ terminator: String,
+        expected: Expected
+    ) -> Self {
+        ParseFixture(
+            input: input,
+            terminator: terminator,
+            expected: expected,
+            parser: GrammarParser().parseEncodedSection
         )
     }
 }

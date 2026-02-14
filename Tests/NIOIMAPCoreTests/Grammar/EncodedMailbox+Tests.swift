@@ -24,6 +24,17 @@ struct EncodedMailboxTests {
     func encode(_ fixture: EncodeFixture<EncodedMailbox>) {
         fixture.checkEncoding()
     }
+
+    @Test(arguments: [
+        ParseFixture.encodedMailbox(
+            "hello%FF",
+            " ",
+            expected: .success(.init(mailbox: "hello%FF"))
+        ),
+    ])
+    func parse(_ fixture: ParseFixture<EncodedMailbox>) {
+        fixture.checkParsing()
+    }
 }
 
 // MARK: -
@@ -35,6 +46,21 @@ extension EncodeFixture<EncodedMailbox> {
             bufferKind: .defaultServer,
             expectedString: expectedString,
             encoder: { $0.writeEncodedMailbox($1) }
+        )
+    }
+}
+
+extension ParseFixture<EncodedMailbox> {
+    fileprivate static func encodedMailbox(
+        _ input: String,
+        _ terminator: String,
+        expected: Expected
+    ) -> Self {
+        ParseFixture(
+            input: input,
+            terminator: terminator,
+            expected: expected,
+            parser: GrammarParser().parseEncodedMailbox
         )
     }
 }

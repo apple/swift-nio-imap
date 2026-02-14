@@ -49,6 +49,26 @@ struct RumpAuthenticatedURLTests {
     func encode(_ fixture: EncodeFixture<RumpAuthenticatedURL>) {
         fixture.checkEncoding()
     }
+
+    @Test(arguments: [
+        ParseFixture.rumpAuthenticatedURL(
+            "imap://localhost/test/;UID=123;URLAUTH=anonymous",
+            " ",
+            expected: .success(.init(
+                authenticatedURL: .init(
+                    server: .init(host: "localhost"),
+                    messagePath: .init(
+                        mailboxReference: .init(encodeMailbox: .init(mailbox: "test")),
+                        iUID: .init(uid: 123)
+                    )
+                ),
+                authenticatedURLRump: .init(access: .anonymous)
+            ))
+        ),
+    ])
+    func parse(_ fixture: ParseFixture<RumpAuthenticatedURL>) {
+        fixture.checkParsing()
+    }
 }
 
 extension EncodeFixture<RumpAuthenticatedURL> {
@@ -58,6 +78,21 @@ extension EncodeFixture<RumpAuthenticatedURL> {
             bufferKind: .defaultServer,
             expectedStrings: [expectedString],
             encoder: { $0.writeAuthIMAPURLRump($1) }
+        )
+    }
+}
+
+extension ParseFixture<RumpAuthenticatedURL> {
+    fileprivate static func rumpAuthenticatedURL(
+        _ input: String,
+        _ terminator: String,
+        expected: Expected
+    ) -> Self {
+        ParseFixture(
+            input: input,
+            terminator: terminator,
+            expected: expected,
+            parser: GrammarParser().parseAuthIMAPURLRump
         )
     }
 }

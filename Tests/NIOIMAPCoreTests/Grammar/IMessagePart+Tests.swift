@@ -59,6 +59,67 @@ struct MessagePathTests {
     func encode(_ fixture: EncodeFixture<MessagePath>) {
         fixture.checkEncoding()
     }
+
+    @Test(arguments: [
+        ParseFixture.messagePath(
+            "test/;UID=123",
+            expected: .success(
+                .init(
+                    mailboxReference: .init(encodeMailbox: .init(mailbox: "test")),
+                    iUID: .init(uid: 123),
+                    section: nil,
+                    range: nil
+                )
+            )
+        ),
+        ParseFixture.messagePath(
+            "test/;UID=123/;SECTION=section",
+            expected: .success(
+                .init(
+                    mailboxReference: .init(encodeMailbox: .init(mailbox: "test")),
+                    iUID: .init(uid: 123),
+                    section: .init(encodedSection: .init(section: "section")),
+                    range: nil
+                )
+            )
+        ),
+        ParseFixture.messagePath(
+            "test/;UID=123/;PARTIAL=1.2",
+            expected: .success(
+                .init(
+                    mailboxReference: .init(encodeMailbox: .init(mailbox: "test")),
+                    iUID: .init(uid: 123),
+                    section: nil,
+                    range: .init(range: .init(offset: 1, length: 2))
+                )
+            )
+        ),
+        ParseFixture.messagePath(
+            "test/;UID=123/;SECTION=section/;PARTIAL=1.2",
+            expected: .success(
+                .init(
+                    mailboxReference: .init(encodeMailbox: .init(mailbox: "test")),
+                    iUID: .init(uid: 123),
+                    section: .init(encodedSection: .init(section: "section")),
+                    range: .init(range: .init(offset: 1, length: 2))
+                )
+            )
+        ),
+        ParseFixture.messagePath(
+            "test/;UIDVALIDITY=123/;UID=123/;SECTION=section/;PARTIAL=1.2",
+            expected: .success(
+                .init(
+                    mailboxReference: .init(encodeMailbox: .init(mailbox: "test/"), uidValidity: 123),
+                    iUID: .init(uid: 123),
+                    section: .init(encodedSection: .init(section: "section")),
+                    range: .init(range: .init(offset: 1, length: 2))
+                )
+            )
+        ),
+    ])
+    func parse(_ fixture: ParseFixture<MessagePath>) {
+        fixture.checkParsing()
+    }
 }
 
 // MARK: -
@@ -73,6 +134,21 @@ extension EncodeFixture<MessagePath> {
             bufferKind: .defaultServer,
             expectedString: expectedString,
             encoder: { $0.writeMessagePath($1) }
+        )
+    }
+}
+
+extension ParseFixture<MessagePath> {
+    fileprivate static func messagePath(
+        _ input: String,
+        _ terminator: String = " ",
+        expected: Expected
+    ) -> Self {
+        ParseFixture(
+            input: input,
+            terminator: terminator,
+            expected: expected,
+            parser: GrammarParser().parseMessagePath
         )
     }
 }

@@ -31,6 +31,20 @@ struct AuthenticatedURLVerifierTests {
     func encode(_ fixture: EncodeFixture<AuthenticatedURLVerifier>) {
         fixture.checkEncoding()
     }
+
+    @Test(arguments: [
+        ParseFixture.authenticatedURLVerifier(
+            ":INTERNAL:01234567890123456789012345678901",
+            " ",
+            expected: .success(.init(
+                urlAuthMechanism: .internal,
+                encodedAuthenticationURL: .init(data: "01234567890123456789012345678901")
+            ))
+        ),
+    ])
+    func parse(_ fixture: ParseFixture<AuthenticatedURLVerifier>) {
+        fixture.checkParsing()
+    }
 }
 
 // MARK: -
@@ -45,6 +59,21 @@ extension EncodeFixture<AuthenticatedURLVerifier> {
             bufferKind: .defaultServer,
             expectedString: expectedString,
             encoder: { $0.writeAuthenticatedURLVerifier($1) }
+        )
+    }
+}
+
+extension ParseFixture<AuthenticatedURLVerifier> {
+    fileprivate static func authenticatedURLVerifier(
+        _ input: String,
+        _ terminator: String,
+        expected: Expected
+    ) -> Self {
+        ParseFixture(
+            input: input,
+            terminator: terminator,
+            expected: expected,
+            parser: GrammarParser().parseAuthenticatedURLVerifier
         )
     }
 }

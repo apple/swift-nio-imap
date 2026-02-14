@@ -31,6 +31,27 @@ struct RumpURLAndMechanismTests {
     func encode(_ fixture: EncodeFixture<RumpURLAndMechanism>) {
         fixture.checkEncoding()
     }
+
+    @Test(arguments: [
+        ParseFixture.rumpURLAndMechanism(
+            "test INTERNAL",
+            " ",
+            expected: .success(.init(urlRump: "test", mechanism: .internal))
+        ),
+        ParseFixture.rumpURLAndMechanism(
+            "\"test\" INTERNAL",
+            " ",
+            expected: .success(.init(urlRump: "test", mechanism: .internal))
+        ),
+        ParseFixture.rumpURLAndMechanism(
+            "{4}\r\ntest INTERNAL",
+            " ",
+            expected: .success(.init(urlRump: "test", mechanism: .internal))
+        ),
+    ])
+    func parse(_ fixture: ParseFixture<RumpURLAndMechanism>) {
+        fixture.checkParsing()
+    }
 }
 
 extension EncodeFixture<RumpURLAndMechanism> {
@@ -40,6 +61,21 @@ extension EncodeFixture<RumpURLAndMechanism> {
             bufferKind: .defaultServer,
             expectedStrings: [expectedString],
             encoder: { $0.writeURLRumpMechanism($1) }
+        )
+    }
+}
+
+extension ParseFixture<RumpURLAndMechanism> {
+    fileprivate static func rumpURLAndMechanism(
+        _ input: String,
+        _ terminator: String,
+        expected: Expected
+    ) -> Self {
+        ParseFixture(
+            input: input,
+            terminator: terminator,
+            expected: expected,
+            parser: GrammarParser().parseURLRumpMechanism
         )
     }
 }

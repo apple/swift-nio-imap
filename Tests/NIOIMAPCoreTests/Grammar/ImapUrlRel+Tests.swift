@@ -39,6 +39,33 @@ struct RelativeIMAPURLTests {
     func encode(_ fixture: EncodeFixture<RelativeIMAPURL>) {
         fixture.checkEncoding()
     }
+
+    @Test(arguments: [
+        ParseFixture.relativeIMAPURL(
+            "/test",
+            " ",
+            expected: .success(.absolutePath(
+                .init(
+                    command: .messageList(
+                        .init(mailboxUIDValidity: .init(encodeMailbox: .init(mailbox: "test")))
+                    )
+                )
+            ))
+        ),
+        ParseFixture.relativeIMAPURL(
+            "//localhost/",
+            " ",
+            expected: .success(.networkPath(.init(server: .init(host: "localhost"), query: nil)))
+        ),
+        ParseFixture.relativeIMAPURL(
+            "",
+            " ",
+            expected: .success(.empty)
+        ),
+    ])
+    func parse(_ fixture: ParseFixture<RelativeIMAPURL>) {
+        fixture.checkParsing()
+    }
 }
 
 extension EncodeFixture<RelativeIMAPURL> {
@@ -48,6 +75,21 @@ extension EncodeFixture<RelativeIMAPURL> {
             bufferKind: .defaultServer,
             expectedStrings: [expectedString],
             encoder: { $0.writeRelativeIMAPURL($1) }
+        )
+    }
+}
+
+extension ParseFixture<RelativeIMAPURL> {
+    fileprivate static func relativeIMAPURL(
+        _ input: String,
+        _ terminator: String,
+        expected: Expected
+    ) -> Self {
+        ParseFixture(
+            input: input,
+            terminator: terminator,
+            expected: expected,
+            parser: GrammarParser().parseRelativeIMAPURL
         )
     }
 }

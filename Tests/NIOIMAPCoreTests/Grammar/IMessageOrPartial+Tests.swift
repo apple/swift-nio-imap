@@ -102,6 +102,125 @@ struct URLFetchTypeTests {
     func encode(_ fixture: EncodeFixture<URLFetchType>) {
         fixture.checkEncoding()
     }
+
+    @Test(arguments: [
+        ParseFixture.urlFetchType(
+            ";PARTIAL=1.2",
+            expected: .success(.partialOnly(.init(range: .init(offset: 1, length: 2))))
+        ),
+        ParseFixture.urlFetchType(
+            ";SECTION=test",
+            expected: .success(.sectionPartial(section: .init(encodedSection: .init(section: "test")), partial: nil))
+        ),
+        ParseFixture.urlFetchType(
+            ";SECTION=test/;PARTIAL=1.2",
+            expected: .success(
+                .sectionPartial(
+                    section: .init(encodedSection: .init(section: "test")),
+                    partial: .init(range: .init(offset: 1, length: 2))
+                )
+            )
+        ),
+    ])
+    func `parse - partial and section cases`(_ fixture: ParseFixture<URLFetchType>) {
+        fixture.checkParsing()
+    }
+
+    @Test(arguments: [
+        ParseFixture.urlFetchType(
+            ";UID=123",
+            expected: .success(.uidSectionPartial(uid: .init(uid: 123), section: nil, partial: nil))
+        ),
+        ParseFixture.urlFetchType(
+            ";UID=123/;SECTION=test",
+            expected: .success(
+                .uidSectionPartial(
+                    uid: .init(uid: 123),
+                    section: .init(encodedSection: .init(section: "test")),
+                    partial: nil
+                )
+            )
+        ),
+        ParseFixture.urlFetchType(
+            ";UID=123/;PARTIAL=1.2",
+            expected: .success(
+                .uidSectionPartial(
+                    uid: .init(uid: 123),
+                    section: nil,
+                    partial: .init(range: .init(offset: 1, length: 2))
+                )
+            )
+        ),
+        ParseFixture.urlFetchType(
+            ";UID=123/;SECTION=test/;PARTIAL=1.2",
+            expected: .success(
+                .uidSectionPartial(
+                    uid: .init(uid: 123),
+                    section: .init(encodedSection: .init(section: "test")),
+                    partial: .init(range: .init(offset: 1, length: 2))
+                )
+            )
+        ),
+    ])
+    func `parse - UID cases`(_ fixture: ParseFixture<URLFetchType>) {
+        fixture.checkParsing()
+    }
+
+    @Test(arguments: [
+        ParseFixture.urlFetchType(
+            "test;UID=123",
+            expected: .success(
+                .refUidSectionPartial(
+                    ref: .init(encodeMailbox: .init(mailbox: "test")),
+                    uid: .init(uid: 123),
+                    section: nil,
+                    partial: nil
+                )
+            )
+        ),
+        ParseFixture.urlFetchType(
+            "test;UID=123/;SECTION=section",
+            expected: .success(
+                .refUidSectionPartial(
+                    ref: .init(encodeMailbox: .init(mailbox: "test")),
+                    uid: .init(uid: 123),
+                    section: .init(encodedSection: .init(section: "section")),
+                    partial: nil
+                )
+            )
+        ),
+    ])
+    func `parse - ref cases 1`(_ fixture: ParseFixture<URLFetchType>) {
+        fixture.checkParsing()
+    }
+
+    @Test(arguments: [
+        ParseFixture.urlFetchType(
+            "test;UID=123/;PARTIAL=1.2",
+            expected: .success(
+                .refUidSectionPartial(
+                    ref: .init(encodeMailbox: .init(mailbox: "test")),
+                    uid: .init(uid: 123),
+                    section: nil,
+                    partial: .init(range: .init(offset: 1, length: 2))
+                )
+            )
+        ),
+        ParseFixture.urlFetchType(
+            "test;UID=123/;SECTION=section/;PARTIAL=1.2",
+            expected: .success(
+                .refUidSectionPartial(
+                    ref: .init(encodeMailbox: .init(mailbox: "test")),
+                    uid: .init(uid: 123),
+                    section: .init(encodedSection: .init(section: "section")),
+                    partial: .init(range: .init(offset: 1, length: 2))
+                )
+            )
+        ),
+    ])
+    func `parse - ref cases 2`(_ fixture: ParseFixture<URLFetchType>) {
+        fixture.checkParsing()
+    }
 }
 
 // MARK: -
@@ -116,6 +235,21 @@ extension EncodeFixture<URLFetchType> {
             bufferKind: .defaultServer,
             expectedString: expectedString,
             encoder: { $0.writeURLFetchType($1) }
+        )
+    }
+}
+
+extension ParseFixture<URLFetchType> {
+    fileprivate static func urlFetchType(
+        _ input: String,
+        _ terminator: String = " ",
+        expected: Expected
+    ) -> Self {
+        ParseFixture(
+            input: input,
+            terminator: terminator,
+            expected: expected,
+            parser: GrammarParser().parseURLFetchType
         )
     }
 }

@@ -24,6 +24,17 @@ struct EncodedSearchTests {
     func encode(_ fixture: EncodeFixture<EncodedSearch>) {
         fixture.checkEncoding()
     }
+
+    @Test(arguments: [
+        ParseFixture.encodedSearch(
+            "query%FF",
+            " ",
+            expected: .success(.init(query: "query%FF"))
+        ),
+    ])
+    func parse(_ fixture: ParseFixture<EncodedSearch>) {
+        fixture.checkParsing()
+    }
 }
 
 // MARK: -
@@ -35,6 +46,21 @@ extension EncodeFixture<EncodedSearch> {
             bufferKind: .defaultServer,
             expectedString: expectedString,
             encoder: { $0.writeEncodedSearch($1) }
+        )
+    }
+}
+
+extension ParseFixture<EncodedSearch> {
+    fileprivate static func encodedSearch(
+        _ input: String,
+        _ terminator: String,
+        expected: Expected
+    ) -> Self {
+        ParseFixture(
+            input: input,
+            terminator: terminator,
+            expected: expected,
+            parser: GrammarParser().parseEncodedSearch
         )
     }
 }

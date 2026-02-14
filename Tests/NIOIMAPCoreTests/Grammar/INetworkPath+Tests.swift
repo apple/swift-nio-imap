@@ -40,6 +40,31 @@ struct NetworkPathTests {
     func encode(_ fixture: EncodeFixture<NetworkPath>) {
         fixture.checkEncoding()
     }
+
+    @Test(arguments: [
+        ParseFixture.networkPath(
+            "//localhost/",
+            " ",
+            expected: .success(.init(server: .init(host: "localhost"), query: nil))
+        ),
+        ParseFixture.networkPath(
+            "//localhost/test/;UID=123",
+            " ",
+            expected: .success(.init(
+                server: .init(host: "localhost"),
+                query: .fetch(
+                    path: .init(
+                        mailboxReference: .init(encodeMailbox: .init(mailbox: "test")),
+                        iUID: .init(uid: 123)
+                    ),
+                    authenticatedURL: nil
+                )
+            ))
+        ),
+    ])
+    func parse(_ fixture: ParseFixture<NetworkPath>) {
+        fixture.checkParsing()
+    }
 }
 
 // MARK: -
@@ -54,6 +79,21 @@ extension EncodeFixture<NetworkPath> {
             bufferKind: .defaultServer,
             expectedString: expectedString,
             encoder: { $0.writeNetworkPath($1) }
+        )
+    }
+}
+
+extension ParseFixture<NetworkPath> {
+    fileprivate static func networkPath(
+        _ input: String,
+        _ terminator: String,
+        expected: Expected
+    ) -> Self {
+        ParseFixture(
+            input: input,
+            terminator: terminator,
+            expected: expected,
+            parser: GrammarParser().parseNetworkPath
         )
     }
 }

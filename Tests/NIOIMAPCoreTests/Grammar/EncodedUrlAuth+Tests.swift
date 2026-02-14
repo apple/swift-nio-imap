@@ -25,6 +25,27 @@ struct EncodedAuthenticatedURLTests {
     func encode(_ fixture: EncodeFixture<EncodedAuthenticatedURL>) {
         fixture.checkEncoding()
     }
+
+    @Test(arguments: [
+        ParseFixture.encodedAuthenticationURL(
+            "0123456789abcdef01234567890abcde",
+            "",
+            expected: .success(.init(data: "0123456789abcdef01234567890abcde"))
+        ),
+        ParseFixture.encodedAuthenticationURL(
+            "0123456789zbcdef01234567890abcde",
+            "",
+            expected: .failure
+        ),
+        ParseFixture.encodedAuthenticationURL(
+            "0123456789",
+            "",
+            expected: .incompleteMessage
+        ),
+    ])
+    func parse(_ fixture: ParseFixture<EncodedAuthenticatedURL>) {
+        fixture.checkParsing()
+    }
 }
 
 extension EncodeFixture<EncodedAuthenticatedURL> {
@@ -34,6 +55,21 @@ extension EncodeFixture<EncodedAuthenticatedURL> {
             bufferKind: .defaultServer,
             expectedStrings: [expectedString],
             encoder: { $0.writeEncodedAuthenticationURL($1) }
+        )
+    }
+}
+
+extension ParseFixture<EncodedAuthenticatedURL> {
+    fileprivate static func encodedAuthenticationURL(
+        _ input: String,
+        _ terminator: String,
+        expected: Expected
+    ) -> Self {
+        ParseFixture(
+            input: input,
+            terminator: terminator,
+            expected: expected,
+            parser: GrammarParser().parseEncodedURLAuth
         )
     }
 }

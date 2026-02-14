@@ -39,6 +39,30 @@ struct AuthenticatedURLRumpTests {
     func encode(_ fixture: EncodeFixture<AuthenticatedURLRump>) {
         fixture.checkEncoding()
     }
+
+    @Test(arguments: [
+        ParseFixture.authenticatedURLRump(
+            ";URLAUTH=anonymous",
+            " ",
+            expected: .success(.init(access: .anonymous))
+        ),
+        ParseFixture.authenticatedURLRump(
+            ";EXPIRE=1234-12-23T12:34:56;URLAUTH=anonymous",
+            " ",
+            expected: .success(.init(
+                expire: .init(
+                    dateTime: .init(
+                        date: .init(year: 1234, month: 12, day: 23),
+                        time: .init(hour: 12, minute: 34, second: 56)
+                    )
+                ),
+                access: .anonymous
+            ))
+        ),
+    ])
+    func parse(_ fixture: ParseFixture<AuthenticatedURLRump>) {
+        fixture.checkParsing()
+    }
 }
 
 // MARK: -
@@ -53,6 +77,21 @@ extension EncodeFixture<AuthenticatedURLRump> {
             bufferKind: .defaultServer,
             expectedString: expectedString,
             encoder: { $0.writeAuthenticatedURLRump($1) }
+        )
+    }
+}
+
+extension ParseFixture<AuthenticatedURLRump> {
+    fileprivate static func authenticatedURLRump(
+        _ input: String,
+        _ terminator: String,
+        expected: Expected
+    ) -> Self {
+        ParseFixture(
+            input: input,
+            terminator: terminator,
+            expected: expected,
+            parser: GrammarParser().parseAuthenticatedURLRump
         )
     }
 }

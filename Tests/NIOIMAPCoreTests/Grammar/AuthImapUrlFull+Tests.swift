@@ -55,6 +55,32 @@ struct FullAuthenticatedURLTests {
     func encode(_ fixture: EncodeFixture<FullAuthenticatedURL>) {
         fixture.checkEncoding()
     }
+
+    @Test(arguments: [
+        ParseFixture.fullAuthenticatedURL(
+            "imap://localhost/test/;UID=123;URLAUTH=anonymous:INTERNAL:01234567890123456789012345678901",
+            " ",
+            expected: .success(.init(
+                networkMessagePath: .init(
+                    server: .init(host: "localhost"),
+                    messagePath: .init(
+                        mailboxReference: .init(encodeMailbox: .init(mailbox: "test")),
+                        iUID: .init(uid: 123)
+                    )
+                ),
+                authenticatedURL: .init(
+                    authenticatedURL: .init(access: .anonymous),
+                    verifier: .init(
+                        urlAuthMechanism: .internal,
+                        encodedAuthenticationURL: .init(data: "01234567890123456789012345678901")
+                    )
+                )
+            ))
+        ),
+    ])
+    func parse(_ fixture: ParseFixture<FullAuthenticatedURL>) {
+        fixture.checkParsing()
+    }
 }
 
 extension EncodeFixture<FullAuthenticatedURL> {
@@ -64,6 +90,21 @@ extension EncodeFixture<FullAuthenticatedURL> {
             bufferKind: .defaultServer,
             expectedStrings: [expectedString],
             encoder: { $0.writeAuthIMAPURLFull($1) }
+        )
+    }
+}
+
+extension ParseFixture<FullAuthenticatedURL> {
+    fileprivate static func fullAuthenticatedURL(
+        _ input: String,
+        _ terminator: String,
+        expected: Expected
+    ) -> Self {
+        ParseFixture(
+            input: input,
+            terminator: terminator,
+            expected: expected,
+            parser: GrammarParser().parseAuthIMAPURLFull
         )
     }
 }

@@ -31,6 +31,22 @@ struct URLFetchDataTests {
     func encode(_ fixture: EncodeFixture<URLFetchData>) {
         fixture.checkEncoding()
     }
+
+    @Test(arguments: [
+        ParseFixture.urlFetchData(
+            "url NIL",
+            " ",
+            expected: .success(.init(url: "url", data: nil))
+        ),
+        ParseFixture.urlFetchData(
+            "url \"data\"",
+            " ",
+            expected: .success(.init(url: "url", data: "data"))
+        ),
+    ])
+    func parse(_ fixture: ParseFixture<URLFetchData>) {
+        fixture.checkParsing()
+    }
 }
 
 // MARK: -
@@ -45,6 +61,21 @@ extension EncodeFixture<URLFetchData> {
             bufferKind: .defaultServer,
             expectedString: expectedString,
             encoder: { $0.writeURLFetchData($1) }
+        )
+    }
+}
+
+extension ParseFixture<URLFetchData> {
+    fileprivate static func urlFetchData(
+        _ input: String,
+        _ terminator: String,
+        expected: Expected
+    ) -> Self {
+        ParseFixture(
+            input: input,
+            terminator: terminator,
+            expected: expected,
+            parser: GrammarParser().parseURLFetchData
         )
     }
 }

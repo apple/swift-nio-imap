@@ -31,6 +31,28 @@ struct MessagePathByteRangeTests {
     func encode(_ fixture: EncodeFixture<MessagePath.ByteRange>) {
         fixture.checkEncoding()
     }
+
+    @Test(arguments: [
+        ParseFixture.parseWithSlash("/;PARTIAL=1", expected: .success(.init(range: .init(offset: 1, length: nil)))),
+        ParseFixture.parseWithSlash("/;PARTIAL=1.2", expected: .success(.init(range: .init(offset: 1, length: 2)))),
+        ParseFixture.parseWithSlash("/;PARTIAL=a", expected: .failure),
+        ParseFixture.parseWithSlash("PARTIAL=a", expected: .failure),
+        ParseFixture.parseWithSlash("/;PARTIAL=1", "", expected: .incompleteMessage),
+    ])
+    func `parse with slash`(_ fixture: ParseFixture<MessagePath.ByteRange>) {
+        fixture.checkParsing()
+    }
+
+    @Test(arguments: [
+        ParseFixture.parseWithoutSlash(";PARTIAL=1", expected: .success(.init(range: .init(offset: 1, length: nil)))),
+        ParseFixture.parseWithoutSlash(";PARTIAL=1.2", expected: .success(.init(range: .init(offset: 1, length: 2)))),
+        ParseFixture.parseWithoutSlash(";PARTIAL=a", expected: .failure),
+        ParseFixture.parseWithoutSlash("PARTIAL=a", expected: .failure),
+        ParseFixture.parseWithoutSlash(";PARTIAL=1", "", expected: .incompleteMessage),
+    ])
+    func `parse without slash`(_ fixture: ParseFixture<MessagePath.ByteRange>) {
+        fixture.checkParsing()
+    }
 }
 
 extension EncodeFixture<MessagePath.ByteRange> {
@@ -40,6 +62,34 @@ extension EncodeFixture<MessagePath.ByteRange> {
             bufferKind: .defaultServer,
             expectedStrings: [expectedString],
             encoder: { $0.writeMessagePathByteRange($1) }
+        )
+    }
+}
+
+extension ParseFixture<MessagePath.ByteRange> {
+    fileprivate static func parseWithSlash(
+        _ input: String,
+        _ terminator: String = " ",
+        expected: Expected
+    ) -> Self {
+        ParseFixture(
+            input: input,
+            terminator: terminator,
+            expected: expected,
+            parser: GrammarParser().parseMessagePathByteRange
+        )
+    }
+
+    fileprivate static func parseWithoutSlash(
+        _ input: String,
+        _ terminator: String = " ",
+        expected: Expected
+    ) -> Self {
+        ParseFixture(
+            input: input,
+            terminator: terminator,
+            expected: expected,
+            parser: GrammarParser().parseMessagePathByteRangeOnly
         )
     }
 }
