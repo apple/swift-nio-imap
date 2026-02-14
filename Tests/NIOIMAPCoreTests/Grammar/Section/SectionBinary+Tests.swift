@@ -26,6 +26,21 @@ struct SectionBinaryTests {
     func encode(_ fixture: EncodeFixture<SectionSpecifier.Part>) {
         fixture.checkEncoding()
     }
+
+    @Test(arguments: [
+        ParseFixture.sectionBinary("[]", expected: .success([])),
+        ParseFixture.sectionBinary("[1]", expected: .success([1])),
+        ParseFixture.sectionBinary("[1.2.3]", expected: .success([1, 2, 3])),
+        ParseFixture.sectionBinary("[", expected: .failure),
+        ParseFixture.sectionBinary("1.2", expected: .failure),
+        ParseFixture.sectionBinary("[1.2", expected: .failure),
+        ParseFixture.sectionBinary("[", "", expected: .incompleteMessage),
+        ParseFixture.sectionBinary("[1.2", "", expected: .incompleteMessage),
+        ParseFixture.sectionBinary("[1.2.", "", expected: .incompleteMessage),
+    ])
+    func parse(_ fixture: ParseFixture<SectionSpecifier.Part>) {
+        fixture.checkParsing()
+    }
 }
 
 // MARK: -
@@ -40,6 +55,21 @@ extension EncodeFixture<SectionSpecifier.Part> {
             bufferKind: .defaultServer,
             expectedString: expectedString,
             encoder: { $0.writeSectionBinary($1) }
+        )
+    }
+}
+
+extension ParseFixture<SectionSpecifier.Part> {
+    fileprivate static func sectionBinary(
+        _ input: String,
+        _ terminator: String = "\r",
+        expected: Expected
+    ) -> Self {
+        ParseFixture(
+            input: input,
+            terminator: terminator,
+            expected: expected,
+            parser: GrammarParser().parseSectionBinary
         )
     }
 }

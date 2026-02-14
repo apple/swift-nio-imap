@@ -29,6 +29,22 @@ struct StoreAttributeFlagsTests {
     func encode(_ fixture: EncodeFixture<StoreFlags>) {
         fixture.checkEncoding()
     }
+
+    @Test(arguments: [
+        ParseFixture.storeFlags("+FLAGS ()", expected: .success(.add(silent: false, list: []))),
+        ParseFixture.storeFlags("-FLAGS ()", expected: .success(.remove(silent: false, list: []))),
+        ParseFixture.storeFlags("FLAGS ()", expected: .success(.replace(silent: false, list: []))),
+        ParseFixture.storeFlags("+FLAGS.SILENT ()", expected: .success(.add(silent: true, list: []))),
+        ParseFixture.storeFlags(#"+FLAGS.SILENT (\answered \seen)"#, expected: .success(.add(silent: true, list: [.answered, .seen]))),
+        ParseFixture.storeFlags(#"+FLAGS.SILENT \answered \seen"#, expected: .success(.add(silent: true, list: [.answered, .seen]))),
+        ParseFixture.storeFlags(#"FLAGS.SILEN \answered"#, expected: .failure),
+        ParseFixture.storeFlags("+FLAGS ", "", expected: .incompleteMessage),
+        ParseFixture.storeFlags("-FLAGS ", "", expected: .incompleteMessage),
+        ParseFixture.storeFlags("FLAGS ", "", expected: .incompleteMessage),
+    ])
+    func parse(_ fixture: ParseFixture<StoreFlags>) {
+        fixture.checkParsing()
+    }
 }
 
 // MARK: -
@@ -40,6 +56,21 @@ extension EncodeFixture<StoreFlags> {
             bufferKind: .defaultServer,
             expectedString: expectedString,
             encoder: { $0.writeStoreAttributeFlags($1) }
+        )
+    }
+}
+
+extension ParseFixture<StoreFlags> {
+    fileprivate static func storeFlags(
+        _ input: String,
+        _ terminator: String = "\r",
+        expected: Expected
+    ) -> Self {
+        ParseFixture(
+            input: input,
+            terminator: terminator,
+            expected: expected,
+            parser: GrammarParser().parseStoreFlags
         )
     }
 }

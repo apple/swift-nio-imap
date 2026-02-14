@@ -26,6 +26,17 @@ struct SectionPartTests {
     func encode(_ fixture: EncodeFixture<SectionSpecifier.Part>) {
         fixture.checkEncoding()
     }
+
+    @Test(arguments: [
+        ParseFixture.sectionPart("1", expected: .success([1])),
+        ParseFixture.sectionPart("1.2", expected: .success([1, 2])),
+        ParseFixture.sectionPart("1.2.3.4.5", expected: .success([1, 2, 3, 4, 5])),
+        ParseFixture.sectionPart("", expected: .failure),
+        ParseFixture.sectionPart("1.", "", expected: .incompleteMessage),
+    ])
+    func parse(_ fixture: ParseFixture<SectionSpecifier.Part>) {
+        fixture.checkParsing()
+    }
 }
 
 // MARK: -
@@ -40,6 +51,21 @@ extension EncodeFixture<SectionSpecifier.Part> {
             bufferKind: .defaultServer,
             expectedString: expectedString,
             encoder: { $0.writeSectionPart($1) }
+        )
+    }
+}
+
+extension ParseFixture<SectionSpecifier.Part> {
+    fileprivate static func sectionPart(
+        _ input: String,
+        _ terminator: String = "\r",
+        expected: Expected
+    ) -> Self {
+        ParseFixture(
+            input: input,
+            terminator: terminator,
+            expected: expected,
+            parser: GrammarParser().parseSectionPart
         )
     }
 }

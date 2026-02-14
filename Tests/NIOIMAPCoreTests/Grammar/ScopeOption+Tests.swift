@@ -35,6 +35,15 @@ struct ScopeOptionTests {
     func encode(_ fixture: EncodeFixture<ScopeOption>) {
         fixture.checkEncoding()
     }
+
+    @Test(arguments: [
+        ParseFixture.scopeOption("DEPTH 0", expected: .success(.zero)),
+        ParseFixture.scopeOption("DEPTH 1", expected: .success(.one)),
+        ParseFixture.scopeOption("DEPTH infinity", expected: .success(.infinity)),
+    ])
+    func parse(_ fixture: ParseFixture<ScopeOption>) {
+        fixture.checkParsing()
+    }
 }
 
 // MARK: -
@@ -49,6 +58,21 @@ extension EncodeFixture<ScopeOption> {
             bufferKind: .defaultServer,
             expectedString: expectedString,
             encoder: { $0.writeScopeOption($1) }
+        )
+    }
+}
+
+extension ParseFixture<ScopeOption> {
+    fileprivate static func scopeOption(
+        _ input: String,
+        _ terminator: String = "\r",
+        expected: Expected
+    ) -> Self {
+        ParseFixture(
+            input: input,
+            terminator: terminator,
+            expected: expected,
+            parser: GrammarParser().parseScopeOption
         )
     }
 }

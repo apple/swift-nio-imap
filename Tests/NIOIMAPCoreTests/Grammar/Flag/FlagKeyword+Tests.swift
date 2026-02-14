@@ -76,6 +76,13 @@ struct FlagKeywordTests {
     func encode(_ fixture: EncodeFixture<Flag.Keyword>) {
         fixture.checkEncoding()
     }
+
+    @Test(arguments: [
+        ParseFixture.flagKeyword("keyword", expected: .success(Flag.Keyword("keyword")!)),
+    ])
+    func parse(_ fixture: ParseFixture<Flag.Keyword>) {
+        fixture.checkParsing()
+    }
 }
 
 // MARK: -
@@ -90,6 +97,21 @@ extension EncodeFixture<Flag.Keyword> {
             bufferKind: .defaultServer,
             expectedString: expectedString,
             encoder: { $0.writeFlagKeyword($1) }
+        )
+    }
+}
+
+extension ParseFixture<Flag.Keyword> {
+    fileprivate static func flagKeyword(
+        _ input: String,
+        _ terminator: String = " ",
+        expected: Expected
+    ) -> Self {
+        ParseFixture(
+            input: input,
+            terminator: terminator,
+            expected: expected,
+            parser: GrammarParser().parseFlagKeyword
         )
     }
 }

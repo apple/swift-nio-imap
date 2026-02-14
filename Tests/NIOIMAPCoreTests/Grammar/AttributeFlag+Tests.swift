@@ -35,6 +35,14 @@ struct AttributeFlagTests {
         #expect(AttributeFlag("TEST").stringValue == "test")
         #expect(AttributeFlag("test").stringValue == "test")
     }
+
+    @Test(arguments: [
+        ParseFixture.attributeFlag(#"\\Answered"#, expected: .success(.answered)),
+        ParseFixture.attributeFlag("some", expected: .success(.init("some"))),
+    ])
+    func parse(_ fixture: ParseFixture<AttributeFlag>) {
+        fixture.checkParsing()
+    }
 }
 
 // MARK: -
@@ -46,6 +54,21 @@ extension EncodeFixture<AttributeFlag> {
             bufferKind: .defaultServer,
             expectedString: expectedString,
             encoder: { $0.writeAttributeFlag($1) }
+        )
+    }
+}
+
+extension ParseFixture<AttributeFlag> {
+    fileprivate static func attributeFlag(
+        _ input: String,
+        _ terminator: String = " ",
+        expected: Expected
+    ) -> Self {
+        ParseFixture(
+            input: input,
+            terminator: terminator,
+            expected: expected,
+            parser: GrammarParser().parseAttributeFlag
         )
     }
 }

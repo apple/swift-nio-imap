@@ -186,6 +186,47 @@ private struct SectionSpecifierTests {
     func `Part custom debug string`(_ fixture: DebugStringFixture<SectionSpecifier.Part>) {
         fixture.check()
     }
+
+    @Test(arguments: [
+        ParseFixture.section("[]", expected: .success(.complete)),
+        ParseFixture.section("[HEADER]", expected: .success(SectionSpecifier(kind: .header))),
+        ParseFixture.section("[", " ", expected: .failure),
+        ParseFixture.section("[HEADER", " ", expected: .failure),
+        ParseFixture.section("[", "", expected: .incompleteMessage),
+        ParseFixture.section("[HEADER", "", expected: .incompleteMessage),
+    ])
+    func `parse section`(_ fixture: ParseFixture<SectionSpecifier>) {
+        fixture.checkParsing()
+    }
+
+    @Test(arguments: [
+        ParseFixture.sectionSpecifier("HEADER", expected: .success(.init(kind: .header))),
+        ParseFixture.sectionSpecifier("1.2.3", expected: .success(.init(part: [1, 2, 3], kind: .complete))),
+        ParseFixture.sectionSpecifier("1.2.3.HEADER", expected: .success(.init(part: [1, 2, 3], kind: .header))),
+        ParseFixture.sectionSpecifier("MIME", expected: .failure),
+        ParseFixture.sectionSpecifier("", "", expected: .incompleteMessage),
+        ParseFixture.sectionSpecifier("1", "", expected: .incompleteMessage),
+        ParseFixture.sectionSpecifier("1.", "", expected: .incompleteMessage),
+    ])
+    func `parse section specifier`(_ fixture: ParseFixture<SectionSpecifier>) {
+        fixture.checkParsing()
+    }
+
+    @Test(arguments: [
+        ParseFixture.sectionSpecifierKind("MIME", expected: .success(.MIMEHeader)),
+        ParseFixture.sectionSpecifierKind("HEADER", expected: .success(.header)),
+        ParseFixture.sectionSpecifierKind("TEXT", expected: .success(.text)),
+        ParseFixture.sectionSpecifierKind("HEADER.FIELDS (f1)", expected: .success(.headerFields(["f1"]))),
+        ParseFixture.sectionSpecifierKind("HEADER.FIELDS (f1 f2 f3)", expected: .success(.headerFields(["f1", "f2", "f3"]))),
+        ParseFixture.sectionSpecifierKind("HEADER.FIELDS.NOT (f1)", expected: .success(.headerFieldsNot(["f1"]))),
+        ParseFixture.sectionSpecifierKind("HEADER.FIELDS.NOT (f1 f2 f3)", expected: .success(.headerFieldsNot(["f1", "f2", "f3"]))),
+        ParseFixture.sectionSpecifierKind("", expected: .success(.complete)),
+        ParseFixture.sectionSpecifierKind("HEADER.FIELDS ", "", expected: .incompleteMessage),
+        ParseFixture.sectionSpecifierKind("HEADER.FIELDS (f1 f2 f3 ", "", expected: .incompleteMessage),
+    ])
+    func `parse section specifier kind`(_ fixture: ParseFixture<SectionSpecifier.Kind>) {
+        fixture.checkParsing()
+    }
 }
 
 // MARK: -
@@ -200,6 +241,49 @@ extension EncodeFixture<SectionSpecifier?> {
             bufferKind: .defaultServer,
             expectedString: expectedString,
             encoder: { $0.writeSectionSpecifier($1) }
+        )
+    }
+}
+
+extension ParseFixture<SectionSpecifier> {
+    fileprivate static func section(
+        _ input: String,
+        _ terminator: String = "",
+        expected: Expected
+    ) -> Self {
+        ParseFixture(
+            input: input,
+            terminator: terminator,
+            expected: expected,
+            parser: GrammarParser().parseSection
+        )
+    }
+
+    fileprivate static func sectionSpecifier(
+        _ input: String,
+        _ terminator: String = "\r",
+        expected: Expected
+    ) -> Self {
+        ParseFixture(
+            input: input,
+            terminator: terminator,
+            expected: expected,
+            parser: GrammarParser().parseSectionSpecifier
+        )
+    }
+}
+
+extension ParseFixture<SectionSpecifier.Kind> {
+    fileprivate static func sectionSpecifierKind(
+        _ input: String,
+        _ terminator: String = " ",
+        expected: Expected
+    ) -> Self {
+        ParseFixture(
+            input: input,
+            terminator: terminator,
+            expected: expected,
+            parser: GrammarParser().parseSectionSpecifierKind
         )
     }
 }

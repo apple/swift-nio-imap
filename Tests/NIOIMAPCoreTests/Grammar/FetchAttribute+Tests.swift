@@ -155,6 +155,27 @@ struct FetchAttributeTests {
     func parse(_ fixture: ParseFixture<FetchAttribute>) {
         fixture.checkParsing()
     }
+
+    @Test(arguments: [
+        ParseFixture.partial("<0.1000000000>", expected: .success(ClosedRange(uncheckedBounds: (0, 999_999_999)))),
+        ParseFixture.partial("<0.4294967290>", expected: .success(ClosedRange(uncheckedBounds: (0, 4_294_967_289)))),
+        ParseFixture.partial("<1.2>", expected: .success(ClosedRange(uncheckedBounds: (1, 2)))),
+        ParseFixture.partial("<4294967290.2>", expected: .success(ClosedRange(uncheckedBounds: (4_294_967_290, 4_294_967_291)))),
+        ParseFixture.partial("<0.0>", expected: .failure),
+        ParseFixture.partial("<654.0>", expected: .failure),
+        ParseFixture.partial("<4294967296.2>", expected: .failure),
+        ParseFixture.partial("<4294967294.2>", expected: .failure),
+        ParseFixture.partial("<2.4294967294>", expected: .failure),
+        ParseFixture.partial("<4294967000.4294967000>", expected: .failure),
+        ParseFixture.partial("<2200000000.2200000000>", expected: .failure),
+        ParseFixture.partial("<", "", expected: .incompleteMessage),
+        ParseFixture.partial("<111111111", "", expected: .incompleteMessage),
+        ParseFixture.partial("<1.", "", expected: .incompleteMessage),
+        ParseFixture.partial("<1.22222222", "", expected: .incompleteMessage),
+    ])
+    func `parse partial`(_ fixture: ParseFixture<ClosedRange<UInt32>>) {
+        fixture.checkParsing()
+    }
 }
 
 // MARK: -
@@ -211,6 +232,21 @@ extension ParseFixture<FetchAttribute> {
             terminator: terminator,
             expected: expected,
             parser: GrammarParser().parseFetchAttribute
+        )
+    }
+}
+
+extension ParseFixture<ClosedRange<UInt32>> {
+    fileprivate static func partial(
+        _ input: String,
+        _ terminator: String = " ",
+        expected: Expected
+    ) -> Self {
+        ParseFixture(
+            input: input,
+            terminator: terminator,
+            expected: expected,
+            parser: GrammarParser().parsePartial
         )
     }
 }

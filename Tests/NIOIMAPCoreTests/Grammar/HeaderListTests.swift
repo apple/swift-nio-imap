@@ -25,6 +25,15 @@ struct HeaderListsTests {
     func encode(_ fixture: EncodeFixture<[String]>) {
         fixture.checkEncoding()
     }
+
+    @Test(arguments: [
+        ParseFixture.headerList(#"("field")"#, expected: .success(["field"])),
+        ParseFixture.headerList(#"("first" "second" "third")"#, expected: .success(["first", "second", "third"])),
+        ParseFixture.headerList("()", "\r", expected: .failureIgnoringBufferModifications),
+    ])
+    func parse(_ fixture: ParseFixture<[String]>) {
+        fixture.checkParsing()
+    }
 }
 
 // MARK: -
@@ -39,6 +48,21 @@ extension EncodeFixture<[String]> {
             bufferKind: .defaultServer,
             expectedString: expectedString,
             encoder: { $0.writeHeaderList($1) }
+        )
+    }
+}
+
+extension ParseFixture<[String]> {
+    fileprivate static func headerList(
+        _ input: String,
+        _ terminator: String = "\r",
+        expected: Expected
+    ) -> Self {
+        ParseFixture(
+            input: input,
+            terminator: terminator,
+            expected: expected,
+            parser: GrammarParser().parseHeaderList
         )
     }
 }

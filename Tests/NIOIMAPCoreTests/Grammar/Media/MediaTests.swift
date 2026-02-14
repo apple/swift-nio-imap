@@ -71,6 +71,35 @@ struct MediaTests {
     func `encode subtype`(_ fixture: EncodeFixture<Media.Subtype>) {
         fixture.checkEncoding()
     }
+
+    @Test(arguments: [
+        ParseFixture.mediaType(#""APPLICATION" "mixed""#, expected: .success(Media.MediaType(topLevel: .application, sub: .mixed))),
+        ParseFixture.mediaType(#""STRING" "related""#, expected: .success(Media.MediaType(topLevel: .init("STRING"), sub: .related))),
+        ParseFixture.mediaType(#"hey "something""#, "\r", expected: .failureIgnoringBufferModifications),
+    ])
+    func `parse media type`(_ fixture: ParseFixture<Media.MediaType>) {
+        fixture.checkParsing()
+    }
+
+    @Test(arguments: [
+        ParseFixture.mediaMessage(#""MESSAGE" "RFC822""#, expected: .success(.rfc822)),
+        ParseFixture.mediaMessage(#""messAGE" "RfC822""#, expected: .success(.rfc822)),
+        ParseFixture.mediaMessage("abcdefghijklmnopqrstuvwxyz\n", "\n", expected: .failureIgnoringBufferModifications),
+        ParseFixture.mediaMessage(#""messAGE""#, "", expected: .incompleteMessageIgnoringBufferModifications),
+    ])
+    func `parse media message`(_ fixture: ParseFixture<Media.Subtype>) {
+        fixture.checkParsing()
+    }
+
+    @Test(arguments: [
+        ParseFixture.mediaText(#""TEXT" "something""#, "\n", expected: .success("something")),
+        ParseFixture.mediaText(#""TExt" "something""#, "\n", expected: .success("something")),
+        ParseFixture.mediaText(#"TEXT "something"\n"#, "\n", expected: .failureIgnoringBufferModifications),
+        ParseFixture.mediaText(#""TEXT""#, "", expected: .incompleteMessageIgnoringBufferModifications),
+    ])
+    func `parse media text`(_ fixture: ParseFixture<Media.Subtype>) {
+        fixture.checkParsing()
+    }
 }
 
 // MARK: -
@@ -122,6 +151,49 @@ extension EncodeFixture<Media.Subtype> {
             bufferKind: .defaultServer,
             expectedString: expectedString,
             encoder: { $0.writeMediaSubtype($1) }
+        )
+    }
+}
+
+extension ParseFixture<Media.MediaType> {
+    fileprivate static func mediaType(
+        _ input: String,
+        _ terminator: String = "\r",
+        expected: Expected
+    ) -> Self {
+        ParseFixture(
+            input: input,
+            terminator: terminator,
+            expected: expected,
+            parser: GrammarParser().parseMediaType
+        )
+    }
+}
+
+extension ParseFixture<Media.Subtype> {
+    fileprivate static func mediaMessage(
+        _ input: String,
+        _ terminator: String = "\r",
+        expected: Expected
+    ) -> Self {
+        ParseFixture(
+            input: input,
+            terminator: terminator,
+            expected: expected,
+            parser: GrammarParser().parseMediaMessage
+        )
+    }
+
+    fileprivate static func mediaText(
+        _ input: String,
+        _ terminator: String,
+        expected: Expected
+    ) -> Self {
+        ParseFixture(
+            input: input,
+            terminator: terminator,
+            expected: expected,
+            parser: GrammarParser().parseMediaText
         )
     }
 }

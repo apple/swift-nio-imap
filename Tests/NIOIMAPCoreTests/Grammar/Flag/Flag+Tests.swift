@@ -145,6 +145,24 @@ struct FlagTests {
     func parse(_ fixture: ParseFixture<Flag>) {
         fixture.checkParsing()
     }
+
+    @Test(arguments: [
+        ParseFixture.flagList("()", expected: .success([])),
+        ParseFixture.flagList(#"(\seen)"#, expected: .success([.seen])),
+        ParseFixture.flagList(#"(\seen \answered \draft)"#, expected: .success([.seen, .answered, .draft])),
+        ParseFixture.flagList(#"(\seen \answered \draft )"#, expected: .success([.seen, .answered, .draft])),
+    ])
+    func `parse flag list`(_ fixture: ParseFixture<[Flag]>) {
+        fixture.checkParsing()
+    }
+
+    @Test(arguments: [
+        ParseFixture.flagExtension(#"\Something"#, expected: .success(#"\Something"#)),
+        ParseFixture.flagExtension("Something ", " ", expected: .failureIgnoringBufferModifications),
+    ])
+    func `parse flag extension`(_ fixture: ParseFixture<String>) {
+        fixture.checkParsing()
+    }
 }
 
 // MARK: -
@@ -166,6 +184,36 @@ extension ParseFixture<Flag> {
             terminator: terminator,
             expected: expected,
             parser: GrammarParser().parseFlag
+        )
+    }
+}
+
+extension ParseFixture<[Flag]> {
+    fileprivate static func flagList(
+        _ input: String,
+        _ terminator: String = " ",
+        expected: Expected
+    ) -> Self {
+        ParseFixture(
+            input: input,
+            terminator: terminator,
+            expected: expected,
+            parser: GrammarParser().parseFlagList
+        )
+    }
+}
+
+extension ParseFixture<String> {
+    fileprivate static func flagExtension(
+        _ input: String,
+        _ terminator: String = " ",
+        expected: Expected
+    ) -> Self {
+        ParseFixture(
+            input: input,
+            terminator: terminator,
+            expected: expected,
+            parser: GrammarParser().parseFlagExtension
         )
     }
 }

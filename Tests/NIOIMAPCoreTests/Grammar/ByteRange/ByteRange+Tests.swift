@@ -37,6 +37,18 @@ struct ByteRangeTests {
     func `encode ByteRange struct`(_ fixture: EncodeFixture<ByteRange>) {
         fixture.checkEncoding()
     }
+
+    @Test(arguments: [
+        ParseFixture.byteRange("1", " ", expected: .success(.init(offset: 1, length: nil))),
+        ParseFixture.byteRange("1.2", " ", expected: .success(.init(offset: 1, length: 2))),
+        ParseFixture.byteRange("a.1", " ", expected: .failure),
+        ParseFixture.byteRange("1", "", expected: .incompleteMessage),
+        ParseFixture.byteRange("1.2", "", expected: .incompleteMessage),
+        ParseFixture.byteRange("1.", "", expected: .incompleteMessage),
+    ])
+    func parse(_ fixture: ParseFixture<ByteRange>) {
+        fixture.checkParsing()
+    }
 }
 
 // MARK: -
@@ -59,6 +71,21 @@ extension EncodeFixture<ByteRange> {
             bufferKind: .defaultServer,
             expectedString: expectedString,
             encoder: { $0.writeByteRange($1) }
+        )
+    }
+}
+
+extension ParseFixture<ByteRange> {
+    fileprivate static func byteRange(
+        _ input: String,
+        _ terminator: String,
+        expected: Expected
+    ) -> Self {
+        ParseFixture(
+            input: input,
+            terminator: terminator,
+            expected: expected,
+            parser: GrammarParser().parseByteRange
         )
     }
 }
