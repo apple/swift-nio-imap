@@ -80,6 +80,20 @@ struct SelectParameterTests {
     func encode(_ fixture: EncodeFixture<SelectParameter>) {
         fixture.checkEncoding()
     }
+
+    @Test(arguments: [
+        ParseFixture.selectParameter("test 1", expected: .success(.basic(.init(key: "test", value: .sequence(.set([1])))))),
+        ParseFixture.selectParameter("QRESYNC (1 1)", expected: .success(.qresync(.init(uidValidity: 1, modificationSequenceValue: 1, knownUIDs: nil, sequenceMatchData: nil)))),
+        ParseFixture.selectParameter("QRESYNC (1 1 1:2)", expected: .success(.qresync(.init(uidValidity: 1, modificationSequenceValue: 1, knownUIDs: [1...2], sequenceMatchData: nil)))),
+        ParseFixture.selectParameter("QRESYNC (1 1 1:2 (1:* 1:*))", expected: .success(.qresync(.init(uidValidity: 1, modificationSequenceValue: 1, knownUIDs: [1...2], sequenceMatchData: .init(knownSequenceSet: .set(.all), knownUidSet: .set(.all)))))),
+        ParseFixture.selectParameter("1", expected: .failure),
+        ParseFixture.selectParameter("test ", "", expected: .incompleteMessage),
+        ParseFixture.selectParameter("QRESYNC (", "", expected: .incompleteMessage),
+        ParseFixture.selectParameter("QRESYNC (1 1", "", expected: .incompleteMessage),
+    ])
+    func parse(_ fixture: ParseFixture<SelectParameter>) {
+        fixture.checkParsing()
+    }
 }
 
 // MARK: -
@@ -94,6 +108,21 @@ extension EncodeFixture<SelectParameter> {
             bufferKind: .defaultServer,
             expectedString: expectedString,
             encoder: { $0.writeSelectParameter($1) }
+        )
+    }
+}
+
+extension ParseFixture<SelectParameter> {
+    fileprivate static func selectParameter(
+        _ input: String,
+        _ terminator: String = "\r",
+        expected: Expected
+    ) -> Self {
+        ParseFixture(
+            input: input,
+            terminator: terminator,
+            expected: expected,
+            parser: GrammarParser().parseSelectParameter
         )
     }
 }

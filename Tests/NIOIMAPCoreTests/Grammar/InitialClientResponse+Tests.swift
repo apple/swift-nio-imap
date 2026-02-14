@@ -26,6 +26,14 @@ struct InitialResponseTests {
     func encode(_ fixture: EncodeFixture<InitialResponse>) {
         fixture.checkEncoding()
     }
+
+    @Test(arguments: [
+        ParseFixture.initialResponse("=", expected: .success(.empty)),
+        ParseFixture.initialResponse("YQ==", expected: .success(.init("a"))),
+    ])
+    func parse(_ fixture: ParseFixture<InitialResponse>) {
+        fixture.checkParsing()
+    }
 }
 
 // MARK: -
@@ -37,6 +45,21 @@ extension EncodeFixture<InitialResponse> {
             bufferKind: .defaultServer,
             expectedString: expectedString,
             encoder: { $0.writeInitialResponse($1) }
+        )
+    }
+}
+
+extension ParseFixture<InitialResponse> {
+    fileprivate static func initialResponse(
+        _ input: String,
+        _ terminator: String = " ",
+        expected: Expected
+    ) -> Self {
+        ParseFixture(
+            input: input,
+            terminator: terminator,
+            expected: expected,
+            parser: GrammarParser().parseInitialResponse
         )
     }
 }
