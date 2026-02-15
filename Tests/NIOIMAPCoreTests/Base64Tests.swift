@@ -13,7 +13,7 @@
 //===----------------------------------------------------------------------===//
 
 import NIO
-@testable import NIOIMAPCore
+@_spi(NIOIMAPInternal) @testable import NIOIMAPCore
 import Testing
 
 @Suite("Base64")
@@ -140,5 +140,33 @@ struct Base64Tests {
     func `decode converts Base64 strings to bytes`(encoded: String, expected: [UInt8]) throws {
         let decoded = try Base64.decode(bytes: encoded.utf8, options: [])
         #expect(decoded == expected)
+    }
+
+    @Test(arguments: [
+        ParseFixture.base64("YWFh", " ", expected: .success("aaa")),
+        ParseFixture.base64("YQ==", " ", expected: .success("a")),
+    ])
+    func `parse base64`(_ fixture: ParseFixture<String>) {
+        fixture.checkParsing()
+    }
+}
+
+// MARK: -
+
+extension ParseFixture<String> {
+    fileprivate static func base64(
+        _ input: String,
+        _ terminator: String,
+        expected: Expected
+    ) -> Self {
+        ParseFixture(
+            input: input,
+            terminator: terminator,
+            expected: expected,
+            parser: {
+                let buffer = try GrammarParser().parseBase64(buffer: &$0, tracker: $1)
+                return String(buffer: buffer)
+            }
+        )
     }
 }
