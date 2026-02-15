@@ -33,6 +33,23 @@ struct UntaggedStatusTests {
     func encode(_ fixture: EncodeFixture<UntaggedStatus>) {
         fixture.checkEncoding()
     }
+
+    @Test(arguments: [
+        ParseFixture.untaggedStatus("OK [ALERT] hello1", "\n", expected: .success(.ok(.init(code: .alert, text: "hello1")))),
+        ParseFixture.untaggedStatus("NO [CLOSED] hello2", "\n", expected: .success(.no(.init(code: .closed, text: "hello2")))),
+        ParseFixture.untaggedStatus("BAD [PARSE] hello3", "\n", expected: .success(.bad(.init(code: .parse, text: "hello3")))),
+        ParseFixture.untaggedStatus("PREAUTH [READ-ONLY] hello4", "\n", expected: .success(.preauth(.init(code: .readOnly, text: "hello4")))),
+        ParseFixture.untaggedStatus("BYE [READ-WRITE] hello5", "\n", expected: .success(.bye(.init(code: .readWrite, text: "hello5")))),
+        ParseFixture.untaggedStatus("NO [ALERT] ", "\n", expected: .success(.no(.init(code: .alert, text: "")))),
+        ParseFixture.untaggedStatus("NO [ALERT]", "\n", expected: .success(.no(.init(code: .alert, text: "")))),
+        ParseFixture.untaggedStatus("NO ", "\n", expected: .success(.no(.init(code: nil, text: "")))),
+        ParseFixture.untaggedStatus("NO", "\n", expected: .success(.no(.init(code: nil, text: "")))),
+        ParseFixture.untaggedStatus("OOPS [ALERT] hello1", "\n", expected: .failure),
+        ParseFixture.untaggedStatus("OOPS", "", expected: .incompleteMessage),
+    ])
+    func parse(_ fixture: ParseFixture<UntaggedStatus>) {
+        fixture.checkParsing()
+    }
 }
 
 // MARK: -
@@ -44,6 +61,21 @@ extension EncodeFixture<UntaggedStatus> {
             bufferKind: .defaultServer,
             expectedString: expectedString,
             encoder: { $0.writeUntaggedStatus($1) }
+        )
+    }
+}
+
+extension ParseFixture<UntaggedStatus> {
+    fileprivate static func untaggedStatus(
+        _ input: String,
+        _ terminator: String,
+        expected: Expected
+    ) -> Self {
+        ParseFixture(
+            input: input,
+            terminator: terminator,
+            expected: expected,
+            parser: GrammarParser().parseUntaggedResponseStatus
         )
     }
 }

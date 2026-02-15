@@ -269,6 +269,32 @@ struct ExtendedSearchResponseTests {
     func encode(_ fixture: EncodeFixture<ExtendedSearchResponse>) {
         fixture.checkEncoding()
     }
+
+    @Test(arguments: [
+        ParseFixture.extendedSearchResponse(
+            "",
+            expected: .success(.init(correlator: nil, kind: .sequenceNumber, returnData: []))
+        ),
+        ParseFixture.extendedSearchResponse(
+            " UID",
+            expected: .success(.init(correlator: nil, kind: .uid, returnData: []))
+        ),
+        ParseFixture.extendedSearchResponse(
+            " (TAG \"col\") UID",
+            expected: .success(.init(correlator: SearchCorrelator(tag: "col"), kind: .uid, returnData: []))
+        ),
+        ParseFixture.extendedSearchResponse(
+            " (TAG \"col\") UID COUNT 2",
+            expected: .success(.init(correlator: SearchCorrelator(tag: "col"), kind: .uid, returnData: [.count(2)]))
+        ),
+        ParseFixture.extendedSearchResponse(
+            " (TAG \"col\") UID MIN 1 MAX 2",
+            expected: .success(.init(correlator: SearchCorrelator(tag: "col"), kind: .uid, returnData: [.min(1), .max(2)]))
+        ),
+    ])
+    func parse(_ fixture: ParseFixture<ExtendedSearchResponse>) {
+        fixture.checkParsing()
+    }
 }
 
 // MARK: -
@@ -283,6 +309,21 @@ extension EncodeFixture<ExtendedSearchResponse> {
             bufferKind: .defaultServer,
             expectedString: expectedString,
             encoder: { $0.writeExtendedSearchResponse($1) }
+        )
+    }
+}
+
+extension ParseFixture<ExtendedSearchResponse> {
+    fileprivate static func extendedSearchResponse(
+        _ input: String,
+        _ terminator: String = "\r",
+        expected: Expected
+    ) -> Self {
+        ParseFixture(
+            input: input,
+            terminator: terminator,
+            expected: expected,
+            parser: GrammarParser().parseExtendedSearchResponse
         )
     }
 }

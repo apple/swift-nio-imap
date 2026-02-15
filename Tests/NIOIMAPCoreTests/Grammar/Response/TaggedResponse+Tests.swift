@@ -31,6 +31,20 @@ struct TaggedResponseTests {
     func encode(_ fixture: EncodeFixture<TaggedResponse>) {
         fixture.checkEncoding()
     }
+
+    @Test(arguments: [
+        ParseFixture.taggedResponse(
+            "15.16 OK Fetch completed (0.001 + 0.000 secs).\r\n",
+            "",
+            expected: .success(.init(tag: "15.16", state: .ok(.init(text: "Fetch completed (0.001 + 0.000 secs)."))))
+        ),
+        ParseFixture.taggedResponse("1+5.16 OK Fetch completed (0.001 \r\n", "", expected: .failure),
+        ParseFixture.taggedResponse("15.16 ", "", expected: .incompleteMessage),
+        ParseFixture.taggedResponse("15.16 OK Fetch completed (0.001 + 0.000 secs).", "", expected: .incompleteMessage),
+    ])
+    func parse(_ fixture: ParseFixture<TaggedResponse>) {
+        fixture.checkParsing()
+    }
 }
 
 // MARK: -
@@ -45,6 +59,21 @@ extension EncodeFixture<TaggedResponse> {
             bufferKind: .defaultServer,
             expectedString: expectedString,
             encoder: { $0.writeTaggedResponse($1) }
+        )
+    }
+}
+
+extension ParseFixture<TaggedResponse> {
+    fileprivate static func taggedResponse(
+        _ input: String,
+        _ terminator: String,
+        expected: Expected
+    ) -> Self {
+        ParseFixture(
+            input: input,
+            terminator: terminator,
+            expected: expected,
+            parser: GrammarParser().parseTaggedResponse
         )
     }
 }

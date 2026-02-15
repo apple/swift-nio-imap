@@ -50,6 +50,17 @@ struct ContinuationRequestTests {
     @Test(arguments: [
         ParseFixture.continuationRequest("+ .\r\n", expected: .success(.responseText(.init(text: ".")))),
         ParseFixture.continuationRequest("+ Ok. Foo\r\n", expected: .success(.responseText(.init(text: "Ok. Foo")))),
+        ParseFixture.continuationRequest("+ OK\r\n", expected: .success(.responseText(.init(text: "OK")))),
+        ParseFixture.continuationRequest(
+            "+ IDLE accepted, awaiting DONE command.\r\n",
+            expected: .success(.responseText(.init(text: "IDLE accepted, awaiting DONE command.")))
+        ),
+        ParseFixture.continuationRequest(
+            "+ Ready for additional command text\r\n",
+            expected: .success(.responseText(.init(text: "Ready for additional command text")))
+        ),
+        ParseFixture.continuationRequest("+ \r\n", expected: .success(.responseText(.init(text: "")))),
+        ParseFixture.continuationRequest("+\r\n", expected: .success(.responseText(.init(text: "")))),
         ParseFixture.continuationRequest(
             "+ [ALERT] text\r\n",
             expected: .success(.responseText(.init(code: .alert, text: "text")))

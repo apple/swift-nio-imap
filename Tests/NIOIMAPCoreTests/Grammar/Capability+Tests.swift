@@ -99,6 +99,84 @@ struct CapabilityTests {
     func `encode multiple capabilities`(_ fixture: EncodeFixture<[Capability]>) {
         fixture.checkEncoding()
     }
+
+    @Test(arguments: [
+        ParseFixture.capability("ACL", expected: .success(.acl)),
+        ParseFixture.capability("ANNOTATE-EXPERIMENT-1", expected: .success(.annotateExperiment1)),
+        ParseFixture.capability("AUTH=PLAIN", expected: .success(.authenticate(.plain))),
+        ParseFixture.capability("AUTH=PTOKEN", expected: .success(.authenticate(.pToken))),
+        ParseFixture.capability("AUTH=TOKEN", expected: .success(.authenticate(.token))),
+        ParseFixture.capability("AUTH=WETOKEN", expected: .success(.authenticate(.weToken))),
+        ParseFixture.capability("AUTH=WSTOKEN", expected: .success(.authenticate(.wsToken))),
+        ParseFixture.capability("BINARY", expected: .success(.binary)),
+        ParseFixture.capability("CATENATE", expected: .success(.catenate)),
+        ParseFixture.capability("CHILDREN", expected: .success(.children)),
+        ParseFixture.capability("COMPRESS=DEFLATE", expected: .success(.compression(.deflate))),
+        ParseFixture.capability("CONDSTORE", expected: .success(.condStore)),
+        ParseFixture.capability("CONTEXT=SEARCH", expected: .success(.context(.search))),
+        ParseFixture.capability("CONTEXT=SORT", expected: .success(.context(.sort))),
+        ParseFixture.capability("CREATE-SPECIAL-USE", expected: .success(.createSpecialUse)),
+        ParseFixture.capability("ENABLE", expected: .success(.enable)),
+        ParseFixture.capability("ESEARCH", expected: .success(.extendedSearch)),
+        ParseFixture.capability("ESORT", expected: .success(.esort)),
+        ParseFixture.capability("FILTERS", expected: .success(.filters)),
+        ParseFixture.capability("ID", expected: .success(.id)),
+        ParseFixture.capability("IDLE", expected: .success(.idle)),
+        ParseFixture.capability("JMAPACCESS", expected: .success(.jmapAccess)),
+        ParseFixture.capability("LANGUAGE", expected: .success(.language)),
+        ParseFixture.capability("LIST-STATUS", expected: .success(.listStatus)),
+        ParseFixture.capability("LITERAL+", expected: .success(.literalPlus)),
+        ParseFixture.capability("LITERAL-", expected: .success(.literalMinus)),
+        ParseFixture.capability("LOGIN-REFERRALS", expected: .success(.loginReferrals)),
+        ParseFixture.capability("MESSAGELIMIT=68901", expected: .success(.messageLimit(68_901))),
+        ParseFixture.capability("METADATA", expected: .success(.metadata)),
+        ParseFixture.capability("METADATA-SERVER", expected: .success(.metadataServer)),
+        ParseFixture.capability("MOVE", expected: .success(.move)),
+        ParseFixture.capability("MULTISEARCH", expected: .success(.multiSearch)),
+        ParseFixture.capability("NAMESPACE", expected: .success(.namespace)),
+        ParseFixture.capability("OBJECTID", expected: .success(.objectID)),
+        ParseFixture.capability("PARTIAL", expected: .success(.partial)),
+        ParseFixture.capability("PREVIEW", expected: .success(.preview)),
+        ParseFixture.capability("QRESYNC", expected: .success(.qresync)),
+        ParseFixture.capability("QUOTA", expected: .success(.quota)),
+        ParseFixture.capability("RIGHTS=TEKX", expected: .success(.rights(.tekx))),
+        ParseFixture.capability("SASL-IR", expected: .success(.saslIR)),
+        ParseFixture.capability("SAVELIMIT=64406", expected: .success(.saveLimit(64_406))),
+        ParseFixture.capability("SEARCHRES", expected: .success(.searchRes)),
+        ParseFixture.capability("SORT", expected: .success(.sort(nil))),
+        ParseFixture.capability("SORT=DISPLAY", expected: .success(.sort(.display))),
+        ParseFixture.capability("SPECIAL-USE", expected: .success(.specialUse)),
+        ParseFixture.capability("STATUS=SIZE", expected: .success(.status(.size))),
+        ParseFixture.capability("THREAD=ORDEREDSUBJECT", expected: .success(.thread(.orderedSubject))),
+        ParseFixture.capability("THREAD=REFERENCES", expected: .success(.thread(.references))),
+        ParseFixture.capability("UIDONLY", expected: .success(.uidOnly)),
+        ParseFixture.capability("UIDPLUS", expected: .success(.uidPlus)),
+        ParseFixture.capability("UNSELECT", expected: .success(.unselect)),
+        ParseFixture.capability("URL-PARTIAL", expected: .success(.partialURL)),
+        ParseFixture.capability("URLAUTH", expected: .success(.authenticatedURL)),
+        ParseFixture.capability("UTF8=ACCEPT", expected: .success(.utf8(.accept))),
+        ParseFixture.capability("WITHIN", expected: .success(.within)),
+        ParseFixture.capability("X-GM-EXT-1", expected: .success(.gmailExtensions)),
+        ParseFixture.capability("XYMHIGHESTMODSEQ", expected: .success(.yahooMailHighestModificationSequence)),
+        ParseFixture.capability("", "", expected: .incompleteMessage),
+    ])
+    func parse(_ fixture: ParseFixture<Capability>) {
+        fixture.checkParsing()
+    }
+
+    @Test(arguments: [
+        ParseFixture.capabilityData("CAPABILITY IMAP4rev1", expected: .success([.imap4rev1])),
+        ParseFixture.capabilityData("CAPABILITY IMAP4 IMAP4rev1", expected: .success([.imap4, .imap4rev1])),
+        ParseFixture.capabilityData("CAPABILITY FILTERS IMAP4", expected: .success([.filters, .imap4])),
+        ParseFixture.capabilityData("CAPABILITY FILTERS IMAP4rev1 ENABLE", expected: .success([.filters, .imap4rev1, .enable])),
+        ParseFixture.capabilityData(
+            "CAPABILITY FILTERS IMAP4rev1 ENABLE IMAP4",
+            expected: .success([.filters, .imap4rev1, .enable, .imap4])
+        ),
+    ])
+    func `parse capability data`(_ fixture: ParseFixture<[Capability]>) {
+        fixture.checkParsing()
+    }
 }
 
 // MARK: -
@@ -130,6 +208,36 @@ extension EncodeFixture<[Capability]> {
             bufferKind: .defaultServer,
             expectedString: expectedString,
             encoder: { $0.writeCapabilityData($1) }
+        )
+    }
+}
+
+extension ParseFixture<Capability> {
+    fileprivate static func capability(
+        _ input: String,
+        _ terminator: String = " ",
+        expected: Expected
+    ) -> Self {
+        ParseFixture(
+            input: input,
+            terminator: terminator,
+            expected: expected,
+            parser: GrammarParser().parseCapability
+        )
+    }
+}
+
+extension ParseFixture<[Capability]> {
+    fileprivate static func capabilityData(
+        _ input: String,
+        _ terminator: String = "\r",
+        expected: Expected
+    ) -> Self {
+        ParseFixture(
+            input: input,
+            terminator: terminator,
+            expected: expected,
+            parser: GrammarParser().parseCapabilityData
         )
     }
 }

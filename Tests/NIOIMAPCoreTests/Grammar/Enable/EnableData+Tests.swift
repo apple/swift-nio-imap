@@ -39,6 +39,16 @@ struct EnableDataTests {
     func encode(_ fixture: EncodeFixture<[Capability]>) {
         fixture.checkEncoding()
     }
+
+    @Test(arguments: [
+        ParseFixture.enableData("ENABLED", expected: .success([])),
+        ParseFixture.enableData("ENABLED ENABLE", expected: .success([.enable])),
+        ParseFixture.enableData("ENABLED UTF8=ACCEPT", expected: .success([.utf8(.accept)])),
+        ParseFixture.enableData("ENABLED ENABLE CONDSTORE", expected: .success([.enable, .condStore])),
+    ])
+    func parse(_ fixture: ParseFixture<[Capability]>) {
+        fixture.checkParsing()
+    }
 }
 
 // MARK: -
@@ -53,6 +63,21 @@ extension EncodeFixture<[Capability]> {
             bufferKind: .defaultServer,
             expectedString: expectedString,
             encoder: { $0.writeEnableData($1) }
+        )
+    }
+}
+
+extension ParseFixture<[Capability]> {
+    fileprivate static func enableData(
+        _ input: String,
+        _ terminator: String = "\r",
+        expected: Expected
+    ) -> Self {
+        ParseFixture(
+            input: input,
+            terminator: terminator,
+            expected: expected,
+            parser: GrammarParser().parseEnableData
         )
     }
 }

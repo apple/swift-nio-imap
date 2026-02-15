@@ -43,6 +43,19 @@ struct TaggedResponseStateTests {
     func encode(_ fixture: EncodeFixture<TaggedResponse.State>) {
         fixture.checkEncoding()
     }
+
+    @Test(arguments: [
+        ParseFixture.taggedResponseState("OK [ALERT] hello1", "\n", expected: .success(.ok(.init(code: .alert, text: "hello1")))),
+        ParseFixture.taggedResponseState("NO [CLOSED] hello2", "\n", expected: .success(.no(.init(code: .closed, text: "hello2")))),
+        ParseFixture.taggedResponseState("BAD [PARSE] hello3", "\n", expected: .success(.bad(.init(code: .parse, text: "hello3")))),
+        ParseFixture.taggedResponseState("OK ", "\n", expected: .success(.ok(.init(text: "")))),
+        ParseFixture.taggedResponseState("OK", "\n", expected: .success(.ok(.init(text: "")))),
+        ParseFixture.taggedResponseState("OOPS [ALERT] hello1", "\n", expected: .failure),
+        ParseFixture.taggedResponseState("OOPS", "", expected: .incompleteMessage),
+    ])
+    func parse(_ fixture: ParseFixture<TaggedResponse.State>) {
+        fixture.checkParsing()
+    }
 }
 
 // MARK: -
@@ -57,6 +70,21 @@ extension EncodeFixture<TaggedResponse.State> {
             bufferKind: .defaultServer,
             expectedString: expectedString,
             encoder: { $0.writeTaggedResponseState($1) }
+        )
+    }
+}
+
+extension ParseFixture<TaggedResponse.State> {
+    fileprivate static func taggedResponseState(
+        _ input: String,
+        _ terminator: String,
+        expected: Expected
+    ) -> Self {
+        ParseFixture(
+            input: input,
+            terminator: terminator,
+            expected: expected,
+            parser: GrammarParser().parseTaggedResponseState
         )
     }
 }
