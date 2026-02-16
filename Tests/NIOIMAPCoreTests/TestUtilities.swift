@@ -168,3 +168,13 @@ extension String {
         return result
     }
 }
+
+extension StackTracker {
+    static var testTracker: StackTracker {
+        StackTracker(maximumParserStackDepth: 30)
+    }
+}
+
+let CR = UInt8(ascii: "\r")
+let LF = UInt8(ascii: "\n")
+let CRLF = String(decoding: [CR, LF], as: Unicode.UTF8.self)
