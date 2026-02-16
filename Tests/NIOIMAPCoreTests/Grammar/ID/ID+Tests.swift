@@ -75,6 +75,41 @@ struct IDTests {
             """#
         )
     }
+
+    @Test(arguments: [
+        ParseFixture.idParamsList("NIL", " ", expected: .success([:])),
+        ParseFixture.idParamsList("()", " ", expected: .success([:])),
+        ParseFixture.idParamsList("( )", " ", expected: .success([:])),
+        ParseFixture.idParamsList(#"("key1" "value1")"#, "", expected: .success(["key1": "value1"])),
+        ParseFixture.idParamsList(
+            #"("key1" "value1" "key2" "value2" "key3" "value3")"#,
+            "",
+            expected: .success(["key1": "value1", "key2": "value2", "key3": "value3"])
+        ),
+        ParseFixture.idParamsList(
+            #"("key1" "&AKM-" "flag" "&2Dzf9NtA3GfbQNxi20DcZdtA3G7bQNxn20Dcfw-")"#,
+            "",
+            expected: .success(["key1": "£", "flag": "🏴󠁧󠁢󠁥󠁮󠁧󠁿"])
+        ),
+        ParseFixture.idParamsList(
+            #"("a" "1" "b" "2")"#,
+            "",
+            expected: .success(["a": "1", "b": "2"])
+        ),
+        ParseFixture.idParamsList(
+            #"( "a" "1" "b" "2" )"#,
+            "",
+            expected: .success(["a": "1", "b": "2"])
+        ),
+        ParseFixture.idParamsList(
+            #"("a"  "1"  "b"   "2")"#,
+            "",
+            expected: .success(["a": "1", "b": "2"])
+        ),
+    ])
+    func `parse ID params list`(_ fixture: ParseFixture<OrderedDictionary<String, String?>>) {
+        fixture.checkParsing()
+    }
 }
 
 // MARK: -
@@ -104,6 +139,21 @@ extension ParseFixture<ResponsePayload> {
             terminator: terminator,
             expected: expected,
             parser: GrammarParser().parseResponsePayload
+        )
+    }
+}
+
+extension ParseFixture<OrderedDictionary<String, String?>> {
+    fileprivate static func idParamsList(
+        _ input: String,
+        _ terminator: String = "\r",
+        expected: Expected
+    ) -> Self {
+        ParseFixture(
+            input: input,
+            terminator: terminator,
+            expected: expected,
+            parser: GrammarParser().parseIDParamsList
         )
     }
 }

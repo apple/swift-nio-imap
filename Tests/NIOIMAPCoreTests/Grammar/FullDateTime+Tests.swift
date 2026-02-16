@@ -53,6 +53,40 @@ struct FullDateTimeTests {
     func `encode full time`(_ fixture: EncodeFixture<FullTime>) {
         fixture.checkEncoding()
     }
+
+    @Test(arguments: [
+        ParseFixture.fullDateTime(
+            "1234-12-20T11:22:33",
+            " ",
+            expected: .success(.init(
+                date: .init(year: 1234, month: 12, day: 20),
+                time: .init(hour: 11, minute: 22, second: 33)
+            ))
+        ),
+    ])
+    func `parse full date time`(_ fixture: ParseFixture<FullDateTime>) {
+        fixture.checkParsing()
+    }
+
+    @Test(arguments: [
+        ParseFixture.fullDate("1234-12-23", " ", expected: .success(.init(year: 1234, month: 12, day: 23))),
+        ParseFixture.fullDate("a", "", expected: .failure),
+        ParseFixture.fullDate("1234", "", expected: .incompleteMessage),
+    ])
+    func `parse full date`(_ fixture: ParseFixture<FullDate>) {
+        fixture.checkParsing()
+    }
+
+    @Test(arguments: [
+        ParseFixture.fullTime("12:34:56", " ", expected: .success(.init(hour: 12, minute: 34, second: 56))),
+        ParseFixture.fullTime("12:34:56.123456", " ", expected: .success(.init(hour: 12, minute: 34, second: 56, fraction: 123456))),
+        ParseFixture.fullTime("a", "", expected: .failure),
+        ParseFixture.fullTime("1234:56:12", "", expected: .failure),
+        ParseFixture.fullTime("1234", "", expected: .incompleteMessage),
+    ])
+    func `parse full time`(_ fixture: ParseFixture<FullTime>) {
+        fixture.checkParsing()
+    }
 }
 
 // MARK: -
@@ -86,6 +120,51 @@ extension EncodeFixture<FullTime> {
             bufferKind: .defaultServer,
             expectedString: expectedString,
             encoder: { $0.writeFullTime($1) }
+        )
+    }
+}
+
+extension ParseFixture<FullDateTime> {
+    fileprivate static func fullDateTime(
+        _ input: String,
+        _ terminator: String = "\r",
+        expected: Expected
+    ) -> Self {
+        ParseFixture(
+            input: input,
+            terminator: terminator,
+            expected: expected,
+            parser: GrammarParser().parseFullDateTime
+        )
+    }
+}
+
+extension ParseFixture<FullDate> {
+    fileprivate static func fullDate(
+        _ input: String,
+        _ terminator: String = "\r",
+        expected: Expected
+    ) -> Self {
+        ParseFixture(
+            input: input,
+            terminator: terminator,
+            expected: expected,
+            parser: GrammarParser().parseFullDate
+        )
+    }
+}
+
+extension ParseFixture<FullTime> {
+    fileprivate static func fullTime(
+        _ input: String,
+        _ terminator: String = "\r",
+        expected: Expected
+    ) -> Self {
+        ParseFixture(
+            input: input,
+            terminator: terminator,
+            expected: expected,
+            parser: GrammarParser().parseFullTime
         )
     }
 }

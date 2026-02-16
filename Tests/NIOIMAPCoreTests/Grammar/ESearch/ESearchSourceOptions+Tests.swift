@@ -41,6 +41,35 @@ struct ExtendedSearchSourceOptionsTests {
     func encode(_ fixture: EncodeFixture<ExtendedSearchSourceOptions>) {
         fixture.checkEncoding()
     }
+
+    @Test(arguments: [
+        ParseFixture.extendedSearchSourceOptions(
+            "IN (inboxes)",
+            expected: .success(ExtendedSearchSourceOptions(sourceMailbox: [.inboxes])!)
+        ),
+        ParseFixture.extendedSearchSourceOptions(
+            "IN (inboxes personal)",
+            expected: .success(ExtendedSearchSourceOptions(sourceMailbox: [.inboxes, .personal])!)
+        ),
+        ParseFixture.extendedSearchSourceOptions(
+            "IN (inboxes (name))",
+            expected: .success(ExtendedSearchSourceOptions(
+                sourceMailbox: [.inboxes],
+                scopeOptions: ExtendedSearchScopeOptions(["name": nil])!
+            )!)
+        ),
+        ParseFixture.extendedSearchSourceOptions("IN (inboxes ())", expected: .failure),
+        ParseFixture.extendedSearchSourceOptions("IN ((name))", expected: .failure),
+        ParseFixture.extendedSearchSourceOptions("IN (inboxes (name)", expected: .failure),
+        ParseFixture.extendedSearchSourceOptions("IN (inboxes (name", expected: .failure),
+        ParseFixture.extendedSearchSourceOptions("IN (inboxes (", expected: .failure),
+        ParseFixture.extendedSearchSourceOptions("IN (inboxes )", expected: .failure),
+        ParseFixture.extendedSearchSourceOptions("IN (", expected: .failure),
+        ParseFixture.extendedSearchSourceOptions("IN", expected: .failure),
+    ])
+    func parseExtendedSearchSourceOptions(_ fixture: ParseFixture<ExtendedSearchSourceOptions>) {
+        fixture.checkParsing()
+    }
 }
 
 // MARK: -
@@ -55,6 +84,21 @@ extension EncodeFixture<ExtendedSearchSourceOptions> {
             bufferKind: .defaultServer,
             expectedString: expectedString,
             encoder: { $0.writeExtendedSearchSourceOptions($1) }
+        )
+    }
+}
+
+extension ParseFixture<ExtendedSearchSourceOptions> {
+    fileprivate static func extendedSearchSourceOptions(
+        _ input: String,
+        _ terminator: String = "\r",
+        expected: Expected
+    ) -> Self {
+        ParseFixture(
+            input: input,
+            terminator: terminator,
+            expected: expected,
+            parser: GrammarParser().parseExtendedSearchSourceOptions
         )
     }
 }

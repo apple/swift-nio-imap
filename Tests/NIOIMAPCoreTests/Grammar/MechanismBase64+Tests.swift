@@ -31,6 +31,14 @@ struct MechanismBase64Tests {
     func encode(_ fixture: EncodeFixture<MechanismBase64>) {
         fixture.checkEncoding()
     }
+
+    @Test(arguments: [
+        ParseFixture.mechanismBase64("INTERNAL", " ", expected: .success(.init(mechanism: .internal, base64: nil))),
+        ParseFixture.mechanismBase64("INTERNAL=YQ==", " ", expected: .success(.init(mechanism: .internal, base64: "a"))),
+    ])
+    func parse(_ fixture: ParseFixture<MechanismBase64>) {
+        fixture.checkParsing()
+    }
 }
 
 // MARK: -
@@ -45,6 +53,21 @@ extension EncodeFixture<MechanismBase64> {
             bufferKind: .defaultServer,
             expectedString: expectedString,
             encoder: { $0.writeMechanismBase64($1) }
+        )
+    }
+}
+
+extension ParseFixture<MechanismBase64> {
+    fileprivate static func mechanismBase64(
+        _ input: String,
+        _ terminator: String = "\r",
+        expected: Expected
+    ) -> Self {
+        ParseFixture(
+            input: input,
+            terminator: terminator,
+            expected: expected,
+            parser: GrammarParser().parseMechanismBase64
         )
     }
 }

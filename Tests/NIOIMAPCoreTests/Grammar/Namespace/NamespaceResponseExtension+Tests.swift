@@ -37,6 +37,22 @@ struct NamespaceResponseExtensionTests {
     func encode(_ fixture: EncodeFixture<OrderedDictionary<ByteBuffer, [ByteBuffer]>>) {
         fixture.checkEncoding()
     }
+
+    @Test(arguments: [
+        ParseFixture.namespaceResponseExtension(
+            " \"str1\" (\"str2\")",
+            " ",
+            expected: .success(KeyValue(key: "str1", value: ["str2"]))
+        ),
+        ParseFixture.namespaceResponseExtension(
+            " \"str1\" (\"str2\" \"str3\" \"str4\")",
+            " ",
+            expected: .success(KeyValue(key: "str1", value: ["str2", "str3", "str4"]))
+        ),
+    ])
+    func parse(_ fixture: ParseFixture<KeyValue<ByteBuffer, [ByteBuffer]>>) {
+        fixture.checkParsing()
+    }
 }
 
 // MARK: -
@@ -51,6 +67,21 @@ extension EncodeFixture<OrderedDictionary<ByteBuffer, [ByteBuffer]>> {
             bufferKind: .defaultServer,
             expectedString: expectedString,
             encoder: { $0.writeNamespaceResponseExtensions($1) }
+        )
+    }
+}
+
+extension ParseFixture<KeyValue<ByteBuffer, [ByteBuffer]>> {
+    fileprivate static func namespaceResponseExtension(
+        _ input: String,
+        _ terminator: String = "\r",
+        expected: Expected
+    ) -> Self {
+        ParseFixture(
+            input: input,
+            terminator: terminator,
+            expected: expected,
+            parser: GrammarParser().parseNamespaceResponseExtension
         )
     }
 }

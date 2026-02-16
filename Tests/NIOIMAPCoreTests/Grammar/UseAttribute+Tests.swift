@@ -43,6 +43,19 @@ struct UseAttributeTests {
     @Test func `convert from mailbox info attribute`() {
         #expect(UseAttribute(MailboxInfo.Attribute(#"\All"#)).stringValue == #"\All"#)
     }
+
+    @Test(arguments: [
+        ParseFixture.useAttribute("\\All", "", expected: .success(.all)),
+        ParseFixture.useAttribute("\\Archive", "", expected: .success(.archive)),
+        ParseFixture.useAttribute("\\Flagged", "", expected: .success(.flagged)),
+        ParseFixture.useAttribute("\\Trash", "", expected: .success(.trash)),
+        ParseFixture.useAttribute("\\Sent", "", expected: .success(.sent)),
+        ParseFixture.useAttribute("\\Drafts", "", expected: .success(.drafts)),
+        ParseFixture.useAttribute("\\Other", " ", expected: .success(.init("\\Other"))),
+    ])
+    func parse(_ fixture: ParseFixture<UseAttribute>) {
+        fixture.checkParsing()
+    }
 }
 
 // MARK: -
@@ -54,6 +67,21 @@ extension EncodeFixture<UseAttribute> {
             bufferKind: .defaultServer,
             expectedString: expectedString,
             encoder: { $0.writeUseAttribute($1) }
+        )
+    }
+}
+
+extension ParseFixture<UseAttribute> {
+    fileprivate static func useAttribute(
+        _ input: String,
+        _ terminator: String = "\r",
+        expected: Expected
+    ) -> Self {
+        ParseFixture(
+            input: input,
+            terminator: terminator,
+            expected: expected,
+            parser: GrammarParser().parseUseAttribute
         )
     }
 }

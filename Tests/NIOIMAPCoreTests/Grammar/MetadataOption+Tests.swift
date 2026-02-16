@@ -49,6 +49,23 @@ struct MetadataOptionTests {
     func `encodes array of metadata options`(_ fixture: EncodeFixture<[MetadataOption]>) {
         fixture.checkEncoding()
     }
+
+    @Test(arguments: [
+        ParseFixture.metadataOption("MAXSIZE 123", expected: .success(.maxSize(123))),
+        ParseFixture.metadataOption("DEPTH 1", expected: .success(.scope(.one))),
+        ParseFixture.metadataOption("param", expected: .success(.other(.init(key: "param", value: nil)))),
+    ])
+    func `parse metadata option`(_ fixture: ParseFixture<MetadataOption>) {
+        fixture.checkParsing()
+    }
+
+    @Test(arguments: [
+        ParseFixture.metadataOptions("(MAXSIZE 123)", expected: .success([.maxSize(123)])),
+        ParseFixture.metadataOptions("(DEPTH 1 MAXSIZE 123)", expected: .success([.scope(.one), .maxSize(123)])),
+    ])
+    func `parse metadata options`(_ fixture: ParseFixture<[MetadataOption]>) {
+        fixture.checkParsing()
+    }
 }
 
 // MARK: -
@@ -77,6 +94,36 @@ extension EncodeFixture<[MetadataOption]> {
             bufferKind: .defaultServer,
             expectedString: expectedString,
             encoder: { $0.writeMetadataOptions($1) }
+        )
+    }
+}
+
+extension ParseFixture<MetadataOption> {
+    fileprivate static func metadataOption(
+        _ input: String,
+        _ terminator: String = "\r",
+        expected: Expected
+    ) -> Self {
+        ParseFixture(
+            input: input,
+            terminator: terminator,
+            expected: expected,
+            parser: GrammarParser().parseMetadataOption
+        )
+    }
+}
+
+extension ParseFixture<[MetadataOption]> {
+    fileprivate static func metadataOptions(
+        _ input: String,
+        _ terminator: String = "\r",
+        expected: Expected
+    ) -> Self {
+        ParseFixture(
+            input: input,
+            terminator: terminator,
+            expected: expected,
+            parser: GrammarParser().parseMetadataOptions
         )
     }
 }

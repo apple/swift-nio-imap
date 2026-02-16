@@ -31,6 +31,15 @@ struct ExtendedSearchScopeOptionsTests {
     func encode(_ fixture: EncodeFixture<ExtendedSearchScopeOptions>) {
         fixture.checkEncoding()
     }
+
+    @Test(arguments: [
+        ParseFixture.extendedSearchScopeOptions("name", expected: .success(ExtendedSearchScopeOptions(["name": nil])!)),
+        ParseFixture.extendedSearchScopeOptions("name $", expected: .success(ExtendedSearchScopeOptions(["name": .sequence(.lastCommand)])!)),
+        ParseFixture.extendedSearchScopeOptions("name name2", expected: .success(ExtendedSearchScopeOptions(["name": nil, "name2": nil])!)),
+    ])
+    func parseExtendedSearchScopeOptions(_ fixture: ParseFixture<ExtendedSearchScopeOptions>) {
+        fixture.checkParsing()
+    }
 }
 
 // MARK: -
@@ -45,6 +54,21 @@ extension EncodeFixture<ExtendedSearchScopeOptions> {
             bufferKind: .defaultServer,
             expectedString: expectedString,
             encoder: { $0.writeExtendedSearchScopeOptions($1) }
+        )
+    }
+}
+
+extension ParseFixture<ExtendedSearchScopeOptions> {
+    fileprivate static func extendedSearchScopeOptions(
+        _ input: String,
+        _ terminator: String = "\r",
+        expected: Expected
+    ) -> Self {
+        ParseFixture(
+            input: input,
+            terminator: terminator,
+            expected: expected,
+            parser: GrammarParser().parseExtendedSearchScopeOptions
         )
     }
 }

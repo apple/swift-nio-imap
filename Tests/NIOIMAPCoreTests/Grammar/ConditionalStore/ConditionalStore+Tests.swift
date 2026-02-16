@@ -31,4 +31,36 @@ struct ConditionalStoreTests {
         let chunk = buffer.nextChunk()
         #expect(String(buffer: chunk.bytes) == expected)
     }
+
+    @Test(arguments: [
+        ParseFixture.conditionalStoreParameter("condstore", " ", expected: .success(Dummy())),
+        ParseFixture.conditionalStoreParameter("CONDSTORE", " ", expected: .success(Dummy())),
+        ParseFixture.conditionalStoreParameter("condSTORE", " ", expected: .success(Dummy())),
+    ])
+    fileprivate func parse(_ fixture: ParseFixture<Dummy>) {
+        fixture.checkParsing()
+    }
+}
+
+// MARK: -
+
+/// `Void` / `nil` replacement that is `Equatable`.
+fileprivate struct Dummy: Equatable {}
+
+extension ParseFixture<Dummy> {
+    fileprivate static func conditionalStoreParameter(
+        _ input: String,
+        _ terminator: String,
+        expected: Expected
+    ) -> Self {
+        ParseFixture(
+            input: input,
+            terminator: terminator,
+            expected: expected,
+            parser: {
+                try GrammarParser().parseConditionalStoreParameter(buffer: &$0, tracker: $1)
+                return Dummy()
+            }
+        )
+    }
 }

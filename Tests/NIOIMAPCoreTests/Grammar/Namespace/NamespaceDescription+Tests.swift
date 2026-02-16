@@ -35,6 +35,22 @@ struct NamespaceDescriptionTests {
     func encode(_ fixture: EncodeFixture<NamespaceDescription>) {
         fixture.checkEncoding()
     }
+
+    @Test(arguments: [
+        ParseFixture.namespaceDescription(
+            "(\"str1\" NIL)",
+            " ",
+            expected: .success(.init(string: "str1", char: nil, responseExtensions: [:]))
+        ),
+        ParseFixture.namespaceDescription(
+            "(\"str\" \"a\")",
+            " ",
+            expected: .success(.init(string: "str", char: "a", responseExtensions: [:]))
+        ),
+    ])
+    func parse(_ fixture: ParseFixture<NamespaceDescription>) {
+        fixture.checkParsing()
+    }
 }
 
 // MARK: -
@@ -49,6 +65,21 @@ extension EncodeFixture<NamespaceDescription> {
             bufferKind: .defaultServer,
             expectedString: expectedString,
             encoder: { $0.writeNamespaceDescription($1) }
+        )
+    }
+}
+
+extension ParseFixture<NamespaceDescription> {
+    fileprivate static func namespaceDescription(
+        _ input: String,
+        _ terminator: String = "\r",
+        expected: Expected
+    ) -> Self {
+        ParseFixture(
+            input: input,
+            terminator: terminator,
+            expected: expected,
+            parser: GrammarParser().parseNamespaceDescription
         )
     }
 }

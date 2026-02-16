@@ -33,6 +33,28 @@ struct ChangedSinceModifierTests {
     func `encode unchanged since`(_ fixture: EncodeFixture<UnchangedSinceModifier>) {
         fixture.checkEncoding()
     }
+
+    @Test(arguments: [
+        ParseFixture.changedSinceModifier("CHANGEDSINCE 1", " ", expected: .success(.init(modificationSequence: 1))),
+        ParseFixture.changedSinceModifier("changedsince 1", " ", expected: .success(.init(modificationSequence: 1))),
+        ParseFixture.changedSinceModifier("TEST", "", expected: .failure),
+        ParseFixture.changedSinceModifier("CHANGEDSINCE a", "", expected: .failure),
+        ParseFixture.changedSinceModifier("CHANGEDSINCE 1", "", expected: .incompleteMessage),
+    ])
+    func `parse changed since modifier`(_ fixture: ParseFixture<ChangedSinceModifier>) {
+        fixture.checkParsing()
+    }
+
+    @Test(arguments: [
+        ParseFixture.unchangedSinceModifier("UNCHANGEDSINCE 1", " ", expected: .success(.init(modificationSequence: 1))),
+        ParseFixture.unchangedSinceModifier("unchangedsince 1", " ", expected: .success(.init(modificationSequence: 1))),
+        ParseFixture.unchangedSinceModifier("TEST", "", expected: .failure),
+        ParseFixture.unchangedSinceModifier("UNCHANGEDSINCE a", "", expected: .failure),
+        ParseFixture.unchangedSinceModifier("UNCHANGEDSINCE 1", "", expected: .incompleteMessage),
+    ])
+    func `parse unchanged since modifier`(_ fixture: ParseFixture<UnchangedSinceModifier>) {
+        fixture.checkParsing()
+    }
 }
 
 // MARK: -
@@ -55,6 +77,36 @@ extension EncodeFixture<UnchangedSinceModifier> {
             bufferKind: .defaultServer,
             expectedString: expectedString,
             encoder: { $0.writeUnchangedSinceModifier($1) }
+        )
+    }
+}
+
+extension ParseFixture<ChangedSinceModifier> {
+    fileprivate static func changedSinceModifier(
+        _ input: String,
+        _ terminator: String = "\r",
+        expected: Expected
+    ) -> Self {
+        ParseFixture(
+            input: input,
+            terminator: terminator,
+            expected: expected,
+            parser: GrammarParser().parseChangedSinceModifier
+        )
+    }
+}
+
+extension ParseFixture<UnchangedSinceModifier> {
+    fileprivate static func unchangedSinceModifier(
+        _ input: String,
+        _ terminator: String = "\r",
+        expected: Expected
+    ) -> Self {
+        ParseFixture(
+            input: input,
+            terminator: terminator,
+            expected: expected,
+            parser: GrammarParser().parseUnchangedSinceModifier
         )
     }
 }

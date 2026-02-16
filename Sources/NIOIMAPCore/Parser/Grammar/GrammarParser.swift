@@ -457,16 +457,6 @@ extension GrammarParser {
         )
     }
 
-    // eitem-vendor-tag =  vendor-token "-" atom
-    func parseEitemVendorTag(buffer: inout ParseBuffer, tracker: StackTracker) throws -> EItemVendorTag {
-        try PL.composite(buffer: &buffer, tracker: tracker) { buffer, tracker -> EItemVendorTag in
-            let token = try self.parseVendorToken(buffer: &buffer, tracker: tracker)
-            try PL.parseFixedString("-", buffer: &buffer, tracker: tracker)
-            let atom = try self.parseAtom(buffer: &buffer, tracker: tracker)
-            return EItemVendorTag(token: token, atom: atom)
-        }
-    }
-
     func parseEncodedAuthenticationType(
         buffer: inout ParseBuffer,
         tracker: StackTracker

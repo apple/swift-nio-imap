@@ -59,6 +59,40 @@ struct ResponsePayloadTests {
             #"JMAPACCESS "https://example.com/.well-known/jmap""#,
             expected: .success(.jmapAccess(URL(string: "https://example.com/.well-known/jmap")!))
         ),
+        ParseFixture.responsePayload(
+            #"JMAPACCESS "http://example.com/.well-known/jmap""#,
+            expected: .failureIgnoringBufferModifications
+        ),
+        ParseFixture.responsePayload(
+            #"JMAPACCESS "example.com""#,
+            expected: .failureIgnoringBufferModifications
+        ),
+        ParseFixture.responsePayload("QUOTAROOT INBOX \"Root\"", expected: .success(.quotaRoot(.init("INBOX"), .init("Root")))),
+        ParseFixture.responsePayload("QUOTAROOT", expected: .failure),
+        ParseFixture.responsePayload("QUOTAROOT INBOX", expected: .failure),
+        ParseFixture.responsePayload(
+            "QUOTA \"Root\" (STORAGE 10 512)",
+            expected: .success(.quota(.init("Root"), [QuotaResource(resourceName: "STORAGE", usage: 10, limit: 512)]))
+        ),
+        ParseFixture.responsePayload(
+            "QUOTA \"Root\" (STORAGE 10 512 BEANS 50 100)",
+            expected: .success(.quota(
+                .init("Root"),
+                [
+                    QuotaResource(resourceName: "STORAGE", usage: 10, limit: 512),
+                    QuotaResource(resourceName: "BEANS", usage: 50, limit: 100),
+                ]
+            ))
+        ),
+        ParseFixture.responsePayload("QUOTA \"Root\" ()", expected: .success(.quota(.init("Root"), []))),
+        ParseFixture.responsePayload("QUOTA", expected: .failure),
+        ParseFixture.responsePayload("QUOTA \"Root\"", expected: .failure),
+        ParseFixture.responsePayload("QUOTA \"Root\" (", expected: .failure),
+        ParseFixture.responsePayload("QUOTA \"Root\" (STORAGE", expected: .failure),
+        ParseFixture.responsePayload("QUOTA \"Root\" (STORAGE)", expected: .failure),
+        ParseFixture.responsePayload("QUOTA \"Root\" (STORAGE 10", expected: .failure),
+        ParseFixture.responsePayload("QUOTA \"Root\" (STORAGE 10)", expected: .failure),
+        ParseFixture.responsePayload("QUOTA \"Root\" (STORAGE 10 512 BEANS)", expected: .failure),
     ])
     func parse(_ fixture: ParseFixture<ResponsePayload>) {
         fixture.checkParsing()

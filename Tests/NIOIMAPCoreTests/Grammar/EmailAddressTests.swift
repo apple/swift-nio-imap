@@ -58,6 +58,30 @@ struct EmailAddressTestsSuite {
     }
 
     @Test(arguments: [
+        ParseFixture.emailAddress(
+            "(NIL NIL NIL NIL)",
+            "",
+            expected: .success(.init(personName: nil, sourceRoot: nil, mailbox: nil, host: nil))
+        ),
+        ParseFixture.emailAddress(
+            #"("a" "b" "c" "d")"#,
+            "",
+            expected: .success(.init(personName: "a", sourceRoot: "b", mailbox: "c", host: "d"))
+        ),
+        ParseFixture.emailAddress(
+            #"("å" "é" "ı" "ø")"#,
+            "",
+            expected: .success(.init(personName: "å", sourceRoot: "é", mailbox: "ı", host: "ø"))
+        ),
+        ParseFixture.emailAddress("(NIL NIL NIL NIL ", "\r", expected: .failure),
+        ParseFixture.emailAddress("", "", expected: .incompleteMessage),
+        ParseFixture.emailAddress("(NIL ", "", expected: .incompleteMessage),
+    ])
+    func parse(_ fixture: ParseFixture<EmailAddress>) {
+        fixture.checkParsing()
+    }
+
+    @Test(arguments: [
         EnvelopeGroupingFixture(
             addresses: [],
             expected: []
@@ -210,5 +234,20 @@ struct EnvelopeGroupingFixture: Sendable, CustomTestStringConvertible {
 
     var testDescription: String {
         "grouping \(addresses.count) addresses into \(expected.count) elements"
+    }
+}
+
+extension ParseFixture<EmailAddress> {
+    fileprivate static func emailAddress(
+        _ input: String,
+        _ terminator: String,
+        expected: Expected
+    ) -> Self {
+        ParseFixture(
+            input: input,
+            terminator: terminator,
+            expected: expected,
+            parser: GrammarParser().parseEmailAddress
+        )
     }
 }

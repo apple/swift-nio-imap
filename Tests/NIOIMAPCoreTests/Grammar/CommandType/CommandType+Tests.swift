@@ -451,6 +451,19 @@ struct CommandTypeTests {
     }
 
     @Test(arguments: [
+        ParseFixture.userId("test", " ", expected: .success("test")),
+        ParseFixture.userId("{4}\r\ntest", " ", expected: .success("test")),
+        ParseFixture.userId("{4+}\r\ntest", " ", expected: .success("test")),
+        ParseFixture.userId("\"test\"", " ", expected: .success("test")),
+        ParseFixture.userId("\\\\", "", expected: .failure),
+        ParseFixture.userId("aaa", "", expected: .incompleteMessage),
+        ParseFixture.userId("{1}\r\n", "", expected: .incompleteMessage),
+    ])
+    func parseUserId(_ fixture: ParseFixture<String>) {
+        fixture.checkParsing()
+    }
+
+    @Test(arguments: [
         ParseFixture.authenticateSuffix(" GSSAPI", expected: .success(.authenticate(mechanism: .gssAPI, initialResponse: nil))),
         ParseFixture.authenticateSuffix(" GSSAPI aGV5", expected: .success(.authenticate(mechanism: .gssAPI, initialResponse: .init(.init(.init(string: "hey")))))),
         ParseFixture.authenticateSuffix(" \"GSSAPI\"", "", expected: .failure),
@@ -899,6 +912,21 @@ extension ParseFixture<Command> {
             terminator: terminator,
             expected: expected,
             parser: GrammarParser().parseCommandSuffix_getQuotaRoot
+        )
+    }
+}
+
+extension ParseFixture<String> {
+    fileprivate static func userId(
+        _ input: String,
+        _ terminator: String = "\r",
+        expected: Expected
+    ) -> Self {
+        ParseFixture(
+            input: input,
+            terminator: terminator,
+            expected: expected,
+            parser: GrammarParser().parseUserId
         )
     }
 }

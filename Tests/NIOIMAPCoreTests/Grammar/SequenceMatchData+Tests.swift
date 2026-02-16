@@ -25,6 +25,24 @@ struct SequenceMatchDataTests {
     func encode(_ fixture: EncodeFixture<SequenceMatchData>) {
         fixture.checkEncoding()
     }
+
+    @Test(arguments: [
+        ParseFixture.sequenceMatchData(
+            "(1:* 1:*)",
+            expected: .success(.init(knownSequenceSet: .set(.all), knownUidSet: .set(.all)))
+        ),
+        ParseFixture.sequenceMatchData(
+            "(1,2 3,4)",
+            expected: .success(.init(knownSequenceSet: .set([1, 2]), knownUidSet: .set([3, 4])))
+        ),
+        ParseFixture.sequenceMatchData("()", "", expected: .failure),
+        ParseFixture.sequenceMatchData("(* )", "", expected: .failure),
+        ParseFixture.sequenceMatchData("(1", "", expected: .incompleteMessage),
+        ParseFixture.sequenceMatchData("(1111:2222", "", expected: .incompleteMessage),
+    ])
+    func parse(_ fixture: ParseFixture<SequenceMatchData>) {
+        fixture.checkParsing()
+    }
 }
 
 // MARK: -
@@ -36,6 +54,21 @@ extension EncodeFixture<SequenceMatchData> {
             bufferKind: .defaultServer,
             expectedString: expectedString,
             encoder: { $0.writeSequenceMatchData($1) }
+        )
+    }
+}
+
+extension ParseFixture<SequenceMatchData> {
+    fileprivate static func sequenceMatchData(
+        _ input: String,
+        _ terminator: String = "\r",
+        expected: Expected
+    ) -> Self {
+        ParseFixture(
+            input: input,
+            terminator: terminator,
+            expected: expected,
+            parser: GrammarParser().parseSequenceMatchData
         )
     }
 }

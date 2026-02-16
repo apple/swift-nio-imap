@@ -35,6 +35,17 @@ struct NamespaceResponseTests {
     func encode(_ fixture: EncodeFixture<NamespaceResponse>) {
         fixture.checkEncoding()
     }
+
+    @Test(arguments: [
+        ParseFixture.namespaceResponse(
+            " nil nil nil",
+            " ",
+            expected: .success(.init(userNamespace: [], otherUserNamespace: [], sharedNamespace: []))
+        ),
+    ])
+    func parse(_ fixture: ParseFixture<NamespaceResponse>) {
+        fixture.checkParsing()
+    }
 }
 
 // MARK: -
@@ -49,6 +60,21 @@ extension EncodeFixture<NamespaceResponse> {
             bufferKind: .defaultServer,
             expectedString: expectedString,
             encoder: { $0.writeNamespaceResponse($1) }
+        )
+    }
+}
+
+extension ParseFixture<NamespaceResponse> {
+    fileprivate static func namespaceResponse(
+        _ input: String,
+        _ terminator: String = "\r",
+        expected: Expected
+    ) -> Self {
+        ParseFixture(
+            input: input,
+            terminator: terminator,
+            expected: expected,
+            parser: GrammarParser().parseNamespaceResponse
         )
     }
 }

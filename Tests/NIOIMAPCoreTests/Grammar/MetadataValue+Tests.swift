@@ -43,6 +43,16 @@ struct MetadataValueTests {
     func encode(_ fixture: EncodeFixture<MetadataValue>) {
         fixture.checkEncoding()
     }
+
+    @Test(arguments: [
+        ParseFixture.metadataValue("NIL", expected: .success(.init(nil))),
+        ParseFixture.metadataValue("\"a\"", expected: .success(.init("a"))),
+        ParseFixture.metadataValue("{1}\r\na", expected: .success(.init("a"))),
+        ParseFixture.metadataValue("~{1}\r\na", expected: .success(.init("a"))),
+    ])
+    func parse(_ fixture: ParseFixture<MetadataValue>) {
+        fixture.checkParsing()
+    }
 }
 
 // MARK: -
@@ -58,6 +68,21 @@ extension EncodeFixture<MetadataValue> {
             bufferKind: .client(options),
             expectedStrings: expectedStrings,
             encoder: { $0.writeMetadataValue($1) }
+        )
+    }
+}
+
+extension ParseFixture<MetadataValue> {
+    fileprivate static func metadataValue(
+        _ input: String,
+        _ terminator: String = "\r",
+        expected: Expected
+    ) -> Self {
+        ParseFixture(
+            input: input,
+            terminator: terminator,
+            expected: expected,
+            parser: GrammarParser().parseMetadataValue
         )
     }
 }

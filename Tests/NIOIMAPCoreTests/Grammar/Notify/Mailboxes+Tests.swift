@@ -37,6 +37,16 @@ struct MailboxesTests {
     func encode(_ fixture: EncodeFixture<Mailboxes>) {
         fixture.checkEncoding()
     }
+
+    @Test(arguments: [
+        ParseFixture.oneOrMoreMailbox("\"box1\"", expected: .success(Mailboxes([.init("box1")])!)),
+        ParseFixture.oneOrMoreMailbox("(\"box1\")", expected: .success(Mailboxes([.init("box1")])!)),
+        ParseFixture.oneOrMoreMailbox("(\"box1\" \"box2\")", expected: .success(Mailboxes([.init("box1"), .init("box2")])!)),
+        ParseFixture.oneOrMoreMailbox("()", expected: .failure),
+    ])
+    func parseOneOrMoreMailbox(_ fixture: ParseFixture<Mailboxes>) {
+        fixture.checkParsing()
+    }
 }
 
 // MARK: -
@@ -51,6 +61,21 @@ extension EncodeFixture<Mailboxes> {
             bufferKind: .defaultServer,
             expectedString: expectedString,
             encoder: { $0.writeMailboxes($1) }
+        )
+    }
+}
+
+extension ParseFixture<Mailboxes> {
+    fileprivate static func oneOrMoreMailbox(
+        _ input: String,
+        _ terminator: String = "\r",
+        expected: Expected
+    ) -> Self {
+        ParseFixture(
+            input: input,
+            terminator: terminator,
+            expected: expected,
+            parser: GrammarParser().parseOneOrMoreMailbox
         )
     }
 }

@@ -55,6 +55,23 @@ struct MailboxFilterTests {
     func encode(_ fixture: EncodeFixture<MailboxFilter>) {
         fixture.checkEncoding()
     }
+
+    @Test(arguments: [
+        ParseFixture.filterMailboxes("inboxes", " ", expected: .success(.inboxes)),
+        ParseFixture.filterMailboxes("personal", " ", expected: .success(.personal)),
+        ParseFixture.filterMailboxes("subscribed", " ", expected: .success(.subscribed)),
+        ParseFixture.filterMailboxes("selected", " ", expected: .success(.selected)),
+        ParseFixture.filterMailboxes("selected-delayed", " ", expected: .success(.selectedDelayed)),
+        ParseFixture.filterMailboxes("subtree \"box1\"", " ", expected: .success(.subtree(Mailboxes([.init("box1")])!))),
+        ParseFixture.filterMailboxes("subtree-one \"box1\"", " ", expected: .success(.subtreeOne(Mailboxes([.init("box1")])!))),
+        ParseFixture.filterMailboxes("mailboxes \"box1\"", " ", expected: .success(.mailboxes(Mailboxes([.init("box1")])!))),
+        ParseFixture.filterMailboxes("subtree ", expected: .failure),
+        ParseFixture.filterMailboxes("subtree-one", expected: .failure),
+        ParseFixture.filterMailboxes("mailboxes", expected: .failure),
+    ])
+    func parseFilterMailboxes(_ fixture: ParseFixture<MailboxFilter>) {
+        fixture.checkParsing()
+    }
 }
 
 // MARK: -
@@ -69,6 +86,21 @@ extension EncodeFixture<MailboxFilter> {
             bufferKind: .defaultServer,
             expectedString: expectedString,
             encoder: { $0.writeMailboxFilter($1) }
+        )
+    }
+}
+
+extension ParseFixture<MailboxFilter> {
+    fileprivate static func filterMailboxes(
+        _ input: String,
+        _ terminator: String = "\r",
+        expected: Expected
+    ) -> Self {
+        ParseFixture(
+            input: input,
+            terminator: terminator,
+            expected: expected,
+            parser: GrammarParser().parseFilterMailboxes
         )
     }
 }

@@ -43,6 +43,47 @@ struct CreateParameterTests {
     func encode(_ fixture: EncodeFixture<CreateParameter>) {
         fixture.checkEncoding()
     }
+
+    @Test(arguments: [
+        ParseFixture.createParameter(
+            "param",
+            expected: .success(.labelled(.init(key: "param", value: nil)))
+        ),
+        ParseFixture.createParameter(
+            "param 1",
+            expected: .success(.labelled(.init(key: "param", value: .sequence(.set([1])))))
+        ),
+        ParseFixture.createParameter(
+            "USE (\\All)",
+            expected: .success(.attributes([.all]))
+        ),
+        ParseFixture.createParameter(
+            "USE (\\All \\Sent \\Drafts)",
+            expected: .success(.attributes([.all, .sent, .drafts]))
+        ),
+        ParseFixture.createParameter("param", "", expected: .incompleteMessage),
+        ParseFixture.createParameter("param 1", "", expected: .incompleteMessage),
+        ParseFixture.createParameter("USE (\\Test", "", expected: .incompleteMessage),
+        ParseFixture.createParameter("USE (\\All ", "", expected: .incompleteMessage),
+    ])
+    func `parse single create parameter`(_ fixture: ParseFixture<CreateParameter>) {
+        fixture.checkParsing()
+    }
+
+    @Test(arguments: [
+        ParseFixture.createParameters(
+            " (param1 param2)",
+            expected: .success([
+                .labelled(.init(key: "param1", value: nil)),
+                .labelled(.init(key: "param2", value: nil)),
+            ])
+        ),
+        ParseFixture.createParameters(" (param1", expected: .failure),
+        ParseFixture.createParameters(" (param1", "", expected: .incompleteMessage),
+    ])
+    func `parse create parameters list`(_ fixture: ParseFixture<[CreateParameter]>) {
+        fixture.checkParsing()
+    }
 }
 
 // MARK: -
@@ -57,6 +98,36 @@ extension EncodeFixture<CreateParameter> {
             bufferKind: .defaultServer,
             expectedString: expectedString,
             encoder: { $0.writeCreateParameter($1) }
+        )
+    }
+}
+
+extension ParseFixture<CreateParameter> {
+    fileprivate static func createParameter(
+        _ input: String,
+        _ terminator: String = "\r",
+        expected: Expected
+    ) -> Self {
+        ParseFixture(
+            input: input,
+            terminator: terminator,
+            expected: expected,
+            parser: GrammarParser().parseCreateParameter
+        )
+    }
+}
+
+extension ParseFixture<[CreateParameter]> {
+    fileprivate static func createParameters(
+        _ input: String,
+        _ terminator: String = "\r",
+        expected: Expected
+    ) -> Self {
+        ParseFixture(
+            input: input,
+            terminator: terminator,
+            expected: expected,
+            parser: GrammarParser().parseCreateParameters
         )
     }
 }
