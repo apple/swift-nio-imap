@@ -16,7 +16,6 @@ import Foundation
 import NIO
 @testable import NIOIMAPCore
 import Testing
-import XCTest
 
 func expectEqualAndEqualHash<T>(
     _ a: T,
@@ -47,8 +46,7 @@ extension TestUtilities {
         _ string: String,
         terminator: String = "",
         shouldRemainUnchanged: Bool = false,
-        file: StaticString = (#filePath),
-        line: UInt = #line,
+        sourceLocation: SourceLocation = #_sourceLocation,
         _ body: (inout ParseBuffer) throws -> Void
     ) {
         var inputBuffer = ByteBufferAllocator().buffer(capacity: string.utf8.count + terminator.utf8.count + 10)
@@ -77,13 +75,18 @@ extension TestUtilities {
                 )) ?? ByteBuffer()
             let remainingString = String(buffer: remaining)
             if shouldRemainUnchanged {
-                XCTAssertEqual(String(buffer: beforeRunningBody), remainingString, file: file, line: line)
+                #expect(String(buffer: beforeRunningBody) == remainingString, sourceLocation: sourceLocation)
             } else {
-                XCTAssertEqual(remainingString, expectedString, file: file, line: line)
+                #expect(remainingString == expectedString, sourceLocation: sourceLocation)
             }
         }
 
-        XCTAssertNoThrow(try body(&parseBuffer), file: file, line: line)
+        #expect(
+            throws: Never.self,
+            sourceLocation: sourceLocation
+        ) {
+            try body(&parseBuffer)
+        }
     }
 }
 
