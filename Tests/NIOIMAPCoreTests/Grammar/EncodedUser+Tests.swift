@@ -31,7 +31,7 @@ struct EncodedUserTests {
             "query%FF",
             " ",
             expected: .success(.init(data: "query%FF"))
-        ),
+        )
     ])
     func parse(_ fixture: ParseFixture<EncodedUser>) {
         fixture.checkParsing()

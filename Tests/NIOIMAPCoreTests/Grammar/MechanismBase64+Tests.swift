@@ -34,7 +34,11 @@ struct MechanismBase64Tests {
 
     @Test(arguments: [
         ParseFixture.mechanismBase64("INTERNAL", " ", expected: .success(.init(mechanism: .internal, base64: nil))),
-        ParseFixture.mechanismBase64("INTERNAL=YQ==", " ", expected: .success(.init(mechanism: .internal, base64: "a"))),
+        ParseFixture.mechanismBase64(
+            "INTERNAL=YQ==",
+            " ",
+            expected: .success(.init(mechanism: .internal, base64: "a"))
+        ),
     ])
     func parse(_ fixture: ParseFixture<MechanismBase64>) {
         fixture.checkParsing()

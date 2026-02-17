@@ -98,7 +98,10 @@ private struct ResponseTests {
     @Test(arguments: [
         DebugStringFixture(sut: StreamingKind.body(section: .init(), offset: nil), expected: "BODY[]"),
         DebugStringFixture(sut: StreamingKind.body(section: .init(), offset: 1234), expected: "BODY[]<1234>"),
-        DebugStringFixture(sut: StreamingKind.body(section: .init(part: [2, 3], kind: .header), offset: 1234), expected: "BODY[2.3.HEADER]<1234>"),
+        DebugStringFixture(
+            sut: StreamingKind.body(section: .init(part: [2, 3], kind: .header), offset: 1234),
+            expected: "BODY[2.3.HEADER]<1234>"
+        ),
         DebugStringFixture(sut: StreamingKind.rfc822, expected: "RFC822"),
         DebugStringFixture(sut: StreamingKind.rfc822Text, expected: "RFC822.TEXT"),
         DebugStringFixture(sut: StreamingKind.rfc822Header, expected: "RFC822.HEADER"),
@@ -110,12 +113,21 @@ private struct ResponseTests {
     @Test(arguments: [
         ReflectionFixture(sut: Response.idleStarted, expected: "+ idling\r\n"),
         ReflectionFixture(sut: Response.authenticationChallenge("hello"), expected: "+ aGVsbG8=\r\n"),
-        ReflectionFixture(sut: Response.fatal(.init(text: "Oh no you're dead")), expected: "* BYE Oh no you're dead\r\n"),
-        ReflectionFixture(sut: Response.tagged(.init(tag: "A1", state: .ok(.init(text: "NOOP complete")))), expected: "A1 OK NOOP complete\r\n"),
+        ReflectionFixture(
+            sut: Response.fatal(.init(text: "Oh no you're dead")),
+            expected: "* BYE Oh no you're dead\r\n"
+        ),
+        ReflectionFixture(
+            sut: Response.tagged(.init(tag: "A1", state: .ok(.init(text: "NOOP complete")))),
+            expected: "A1 OK NOOP complete\r\n"
+        ),
         ReflectionFixture(sut: Response.untagged(.id([:])), expected: "* ID NIL\r\n"),
         ReflectionFixture(sut: Response.fetch(.start(1)), expected: "* 1 FETCH ("),
         ReflectionFixture(sut: Response.fetch(.simpleAttribute(.uid(123))), expected: "UID 123"),
-        ReflectionFixture(sut: Response.fetch(.streamingBegin(kind: .rfc822Text, byteCount: 0)), expected: "RFC822.TEXT {0}\r\n"),
+        ReflectionFixture(
+            sut: Response.fetch(.streamingBegin(kind: .rfc822Text, byteCount: 0)),
+            expected: "RFC822.TEXT {0}\r\n"
+        ),
         ReflectionFixture(sut: Response.fetch(.streamingBytes(ByteBuffer(string: "hello"))), expected: "hello"),
         ReflectionFixture(sut: Response.fetch(.finish), expected: ")\r\n"),
     ])
@@ -127,7 +139,10 @@ private struct ResponseTests {
         PIIFixture(input: .idleStarted, expected: "+ idling\r\n"),
         PIIFixture(input: .authenticationChallenge("hello"), expected: "+ [8 bytes]\r\n"),
         PIIFixture(input: .fatal(.init(text: "Oh no you're dead")), expected: "* BYE Oh no you're dead\r\n"),
-        PIIFixture(input: .tagged(.init(tag: "A1", state: .ok(.init(text: "NOOP complete")))), expected: "A1 OK NOOP complete\r\n"),
+        PIIFixture(
+            input: .tagged(.init(tag: "A1", state: .ok(.init(text: "NOOP complete")))),
+            expected: "A1 OK NOOP complete\r\n"
+        ),
         PIIFixture(input: .untagged(.id([:])), expected: "* ID NIL\r\n"),
         PIIFixture(input: .fetch(.start(1)), expected: "* 1 FETCH ("),
         PIIFixture(input: .fetch(.simpleAttribute(.uid(123))), expected: "UID 123"),
@@ -137,8 +152,8 @@ private struct ResponseTests {
     ])
     func `Response PII filtering`(_ fixture: PIIFixture) {
         #expect(
-            Response.descriptionWithoutPII([fixture.input]).mappingControlPictures() ==
-            fixture.expected.mappingControlPictures()
+            Response.descriptionWithoutPII([fixture.input]).mappingControlPictures()
+                == fixture.expected.mappingControlPictures()
         )
     }
 }

@@ -31,7 +31,10 @@ struct ListSelectIndependentOptionTests {
 // MARK: -
 
 extension EncodeFixture<ListSelectIndependentOption> {
-    fileprivate static func listSelectIndependentOption(_ input: ListSelectIndependentOption, _ expectedString: String) -> Self {
+    fileprivate static func listSelectIndependentOption(
+        _ input: ListSelectIndependentOption,
+        _ expectedString: String
+    ) -> Self {
         EncodeFixture(
             input: input,
             bufferKind: .defaultServer,

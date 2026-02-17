@@ -20,10 +20,12 @@ import Testing
 struct BodyFieldDSPTests {
     @Test(arguments: [
         EncodeFixture<BodyStructure.Disposition?>.bodyDisposition(
-            nil, "NIL"
+            nil,
+            "NIL"
         ),
         EncodeFixture<BodyStructure.Disposition?>.bodyDisposition(
-            .init(kind: "some", parameters: ["f1": "v1"]), "(\"some\" (\"f1\" \"v1\"))"
+            .init(kind: "some", parameters: ["f1": "v1"]),
+            "(\"some\" (\"f1\" \"v1\"))"
         ),
     ])
     func encoding(_ fixture: EncodeFixture<BodyStructure.Disposition?>) {
@@ -40,9 +42,21 @@ struct BodyFieldDSPTests {
 
     @Test(arguments: [
         SizeFixture(name: "no size parameter", disposition: .init(kind: "test", parameters: [:]), expected: nil),
-        SizeFixture(name: "lowercase size parameter", disposition: .init(kind: "test", parameters: ["size": "123"]), expected: 123),
-        SizeFixture(name: "uppercase SIZE parameter", disposition: .init(kind: "test", parameters: ["SIZE": "456"]), expected: 456),
-        SizeFixture(name: "invalid size value", disposition: .init(kind: "test", parameters: ["SIZE": "abc"]), expected: nil),
+        SizeFixture(
+            name: "lowercase size parameter",
+            disposition: .init(kind: "test", parameters: ["size": "123"]),
+            expected: 123
+        ),
+        SizeFixture(
+            name: "uppercase SIZE parameter",
+            disposition: .init(kind: "test", parameters: ["SIZE": "456"]),
+            expected: 456
+        ),
+        SizeFixture(
+            name: "invalid size value",
+            disposition: .init(kind: "test", parameters: ["SIZE": "abc"]),
+            expected: nil
+        ),
     ])
     func sizeProperty(_ fixture: SizeFixture) {
         #expect(fixture.disposition.size == fixture.expected)
@@ -57,9 +71,21 @@ struct BodyFieldDSPTests {
     }
 
     @Test(arguments: [
-        FilenameFixture(name: "no filename parameter", disposition: .init(kind: "test", parameters: [:]), expected: nil),
-        FilenameFixture(name: "lowercase filename parameter", disposition: .init(kind: "test", parameters: ["filename": "hello"]), expected: "hello"),
-        FilenameFixture(name: "uppercase FILENAME parameter", disposition: .init(kind: "test", parameters: ["FILENAME": "world"]), expected: "world"),
+        FilenameFixture(
+            name: "no filename parameter",
+            disposition: .init(kind: "test", parameters: [:]),
+            expected: nil
+        ),
+        FilenameFixture(
+            name: "lowercase filename parameter",
+            disposition: .init(kind: "test", parameters: ["filename": "hello"]),
+            expected: "hello"
+        ),
+        FilenameFixture(
+            name: "uppercase FILENAME parameter",
+            disposition: .init(kind: "test", parameters: ["FILENAME": "world"]),
+            expected: "world"
+        ),
     ])
     func filenameProperty(_ fixture: FilenameFixture) {
         #expect(fixture.disposition.filename == fixture.expected)

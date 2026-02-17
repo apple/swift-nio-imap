@@ -37,7 +37,7 @@ private struct MailboxPathTests {
             path: try! .init(name: .init("box"), pathSeparator: "/"),
             newName: "£",
             expected: try! .init(name: .init("box/&AKM-"), pathSeparator: "/")
-        ),
+        )
     ])
     func `make sub-mailbox with display name`(_ fixture: SubMailboxFixture) throws {
         #expect(try fixture.path.makeSubMailbox(displayName: fixture.newName) == fixture.expected)
@@ -64,7 +64,8 @@ private struct MailboxPathTests {
     ])
     func `make root mailbox with display name`(_ fixture: RootMailboxFixture) throws {
         #expect(
-            try MailboxPath.makeRootMailbox(displayName: fixture.displayName, pathSeparator: fixture.pathSeparator) == fixture.expected
+            try MailboxPath.makeRootMailbox(displayName: fixture.displayName, pathSeparator: fixture.pathSeparator)
+                == fixture.expected
         )
     }
 

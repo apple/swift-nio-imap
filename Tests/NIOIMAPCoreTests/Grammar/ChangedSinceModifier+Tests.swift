@@ -46,8 +46,16 @@ struct ChangedSinceModifierTests {
     }
 
     @Test(arguments: [
-        ParseFixture.unchangedSinceModifier("UNCHANGEDSINCE 1", " ", expected: .success(.init(modificationSequence: 1))),
-        ParseFixture.unchangedSinceModifier("unchangedsince 1", " ", expected: .success(.init(modificationSequence: 1))),
+        ParseFixture.unchangedSinceModifier(
+            "UNCHANGEDSINCE 1",
+            " ",
+            expected: .success(.init(modificationSequence: 1))
+        ),
+        ParseFixture.unchangedSinceModifier(
+            "unchangedsince 1",
+            " ",
+            expected: .success(.init(modificationSequence: 1))
+        ),
         ParseFixture.unchangedSinceModifier("TEST", "", expected: .failure),
         ParseFixture.unchangedSinceModifier("UNCHANGEDSINCE a", "", expected: .failure),
         ParseFixture.unchangedSinceModifier("UNCHANGEDSINCE 1", "", expected: .incompleteMessage),

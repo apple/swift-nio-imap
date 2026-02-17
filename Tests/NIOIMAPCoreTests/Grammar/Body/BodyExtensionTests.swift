@@ -23,7 +23,10 @@ struct BodyExtensionTests {
         EncodeFixture.bodyExtensions([.string("apple")], "(\"apple\")"),
         EncodeFixture.bodyExtensions([.string(nil)], "(NIL)"),
         EncodeFixture.bodyExtensions([.number(1), .number(2), .string("three")], "(1 2 \"three\")"),
-        EncodeFixture.bodyExtensions([.number(1), .number(2), .string("three"), .string("four")], "(1 2 \"three\" \"four\")"),
+        EncodeFixture.bodyExtensions(
+            [.number(1), .number(2), .string("three"), .string("four")],
+            "(1 2 \"three\" \"four\")"
+        ),
     ])
     func encode(_ fixture: EncodeFixture<[BodyExtension]>) {
         fixture.checkEncoding()
@@ -34,7 +37,10 @@ struct BodyExtensionTests {
         ParseFixture.bodyExtension(#""s""#, expected: .success([.string("s")])),
         ParseFixture.bodyExtension("(1)", expected: .success([.number(1)])),
         ParseFixture.bodyExtension("(1 \"2\" 3)", expected: .success([.number(1), .string("2"), .number(3)])),
-        ParseFixture.bodyExtension("(1 2 3 (4 (5 (6))))", expected: .success([.number(1), .number(2), .number(3), .number(4), .number(5), .number(6)])),
+        ParseFixture.bodyExtension(
+            "(1 2 3 (4 (5 (6))))",
+            expected: .success([.number(1), .number(2), .number(3), .number(4), .number(5), .number(6)])
+        ),
         ParseFixture.bodyExtension("(((((1)))))", expected: .success([.number(1)])),
     ])
     func parse(_ fixture: ParseFixture<[BodyExtension]>) {
@@ -46,7 +52,12 @@ struct BodyExtensionTests {
 
 extension EncodeFixture<[BodyExtension]> {
     fileprivate static func bodyExtensions(_ input: [BodyExtension], _ expectedString: String) -> Self {
-        EncodeFixture(input: input, bufferKind: .defaultServer, expectedString: expectedString, encoder: { $0.writeBodyExtensions($1) })
+        EncodeFixture(
+            input: input,
+            bufferKind: .defaultServer,
+            expectedString: expectedString,
+            encoder: { $0.writeBodyExtensions($1) }
+        )
     }
 }
 

@@ -22,8 +22,16 @@ struct MessageIdentifierRangeTests {
         ParseFixture.messageIdentifierRange("*", "\r\n", expected: .success(MessageIdentifierRange<UID>(.max))),
         ParseFixture.messageIdentifierRange("1:*", "\r\n", expected: .success(MessageIdentifierRange<UID>.all)),
         ParseFixture.messageIdentifierRange("12:34", "\r\n", expected: .success(MessageIdentifierRange<UID>(12...34))),
-        ParseFixture.messageIdentifierRange("12:*", "\r\n", expected: .success(MessageIdentifierRange<UID>(12 ... .max))),
-        ParseFixture.messageIdentifierRange("1:34", "\r\n", expected: .success(MessageIdentifierRange<UID>((.min)...34))),
+        ParseFixture.messageIdentifierRange(
+            "12:*",
+            "\r\n",
+            expected: .success(MessageIdentifierRange<UID>(12 ... .max))
+        ),
+        ParseFixture.messageIdentifierRange(
+            "1:34",
+            "\r\n",
+            expected: .success(MessageIdentifierRange<UID>((.min)...34))
+        ),
         ParseFixture.messageIdentifierRange("!", " ", expected: .failure),
         ParseFixture.messageIdentifierRange("a", " ", expected: .failure),
         ParseFixture.messageIdentifierRange("1", "", expected: .incompleteMessage),

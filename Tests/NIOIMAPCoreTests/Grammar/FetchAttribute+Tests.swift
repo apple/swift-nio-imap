@@ -60,15 +60,27 @@ struct FetchAttributeTests {
         ReflectionFixture<FetchAttribute>(sut: .rfc822, expected: "RFC822"),
         ReflectionFixture<FetchAttribute>(sut: .bodyStructure(extensions: false), expected: "BODY"),
         ReflectionFixture<FetchAttribute>(sut: .bodyStructure(extensions: true), expected: "BODYSTRUCTURE"),
-        ReflectionFixture<FetchAttribute>(sut: .bodySection(peek: false, .init(kind: .header), nil), expected: "BODY[HEADER]"),
-        ReflectionFixture<FetchAttribute>(sut: .bodySection(peek: false, .init(kind: .header), nil), expected: "BODY[HEADER]"),
+        ReflectionFixture<FetchAttribute>(
+            sut: .bodySection(peek: false, .init(kind: .header), nil),
+            expected: "BODY[HEADER]"
+        ),
+        ReflectionFixture<FetchAttribute>(
+            sut: .bodySection(peek: false, .init(kind: .header), nil),
+            expected: "BODY[HEADER]"
+        ),
         ReflectionFixture<FetchAttribute>(
             sut: .bodySection(peek: true, .init(kind: .headerFields(["message-id", "in-reply-to"])), nil),
             expected: #"BODY.PEEK[HEADER.FIELDS ("message-id" "in-reply-to")]"#
         ),
         ReflectionFixture<FetchAttribute>(sut: .binarySize(section: [1]), expected: "BINARY.SIZE[1]"),
-        ReflectionFixture<FetchAttribute>(sut: .binary(peek: true, section: [1, 2, 3], partial: nil), expected: "BINARY.PEEK[1.2.3]"),
-        ReflectionFixture<FetchAttribute>(sut: .binary(peek: false, section: [3, 4, 5], partial: nil), expected: "BINARY[3.4.5]"),
+        ReflectionFixture<FetchAttribute>(
+            sut: .binary(peek: true, section: [1, 2, 3], partial: nil),
+            expected: "BINARY.PEEK[1.2.3]"
+        ),
+        ReflectionFixture<FetchAttribute>(
+            sut: .binary(peek: false, section: [3, 4, 5], partial: nil),
+            expected: "BINARY[3.4.5]"
+        ),
         ReflectionFixture<FetchAttribute>(sut: .modificationSequenceValue(.zero), expected: "0"),
         ReflectionFixture<FetchAttribute>(sut: .modificationSequenceValue(3), expected: "3"),
         ReflectionFixture<FetchAttribute>(sut: .modificationSequence, expected: "MODSEQ"),
@@ -106,7 +118,10 @@ struct FetchAttributeTests {
             [.flags, .bodyStructure(extensions: false), .rfc822Size, .internalDate, .envelope, .uid],
             "(FLAGS BODY RFC822.SIZE INTERNALDATE ENVELOPE UID)"
         ),
-        EncodeFixture.fetchAttributeList([.gmailLabels, .gmailMessageID, .gmailThreadID], "(X-GM-LABELS X-GM-MSGID X-GM-THRID)"),
+        EncodeFixture.fetchAttributeList(
+            [.gmailLabels, .gmailMessageID, .gmailThreadID],
+            "(X-GM-LABELS X-GM-MSGID X-GM-THRID)"
+        ),
         EncodeFixture.fetchAttributeList([.preview(lazy: false)], "(PREVIEW)"),
         EncodeFixture.fetchAttributeList([.preview(lazy: true)], "(PREVIEW (LAZY))"),
     ])
@@ -130,18 +145,46 @@ struct FetchAttributeTests {
             " ",
             expected: .success(.bodySection(peek: false, .init(part: [1], kind: .complete), 1...2 as ClosedRange))
         ),
-        ParseFixture.fetchAttribute("BODY[1.TEXT]", " ", expected: .success(.bodySection(peek: false, .init(part: [1], kind: .text), nil))),
-        ParseFixture.fetchAttribute("BODY[4.2.TEXT]", " ", expected: .success(.bodySection(peek: false, .init(part: [4, 2], kind: .text), nil))),
-        ParseFixture.fetchAttribute("BODY[HEADER]", " ", expected: .success(.bodySection(peek: false, .init(kind: .header), nil))),
+        ParseFixture.fetchAttribute(
+            "BODY[1.TEXT]",
+            " ",
+            expected: .success(.bodySection(peek: false, .init(part: [1], kind: .text), nil))
+        ),
+        ParseFixture.fetchAttribute(
+            "BODY[4.2.TEXT]",
+            " ",
+            expected: .success(.bodySection(peek: false, .init(part: [4, 2], kind: .text), nil))
+        ),
+        ParseFixture.fetchAttribute(
+            "BODY[HEADER]",
+            " ",
+            expected: .success(.bodySection(peek: false, .init(kind: .header), nil))
+        ),
         ParseFixture.fetchAttribute(
             "BODY.PEEK[HEADER]<3.4>",
             " ",
             expected: .success(.bodySection(peek: true, .init(kind: .header), 3...6 as ClosedRange))
         ),
-        ParseFixture.fetchAttribute("BODY.PEEK[HEADER]", " ", expected: .success(.bodySection(peek: true, .init(kind: .header), nil))),
-        ParseFixture.fetchAttribute("BINARY.PEEK[1]", " ", expected: .success(.binary(peek: true, section: [1], partial: nil))),
-        ParseFixture.fetchAttribute("BINARY.PEEK[1]<3.4>", " ", expected: .success(.binary(peek: true, section: [1], partial: 3...6 as ClosedRange))),
-        ParseFixture.fetchAttribute("BINARY[2]<4.5>", " ", expected: .success(.binary(peek: false, section: [2], partial: 4...8 as ClosedRange))),
+        ParseFixture.fetchAttribute(
+            "BODY.PEEK[HEADER]",
+            " ",
+            expected: .success(.bodySection(peek: true, .init(kind: .header), nil))
+        ),
+        ParseFixture.fetchAttribute(
+            "BINARY.PEEK[1]",
+            " ",
+            expected: .success(.binary(peek: true, section: [1], partial: nil))
+        ),
+        ParseFixture.fetchAttribute(
+            "BINARY.PEEK[1]<3.4>",
+            " ",
+            expected: .success(.binary(peek: true, section: [1], partial: 3...6 as ClosedRange))
+        ),
+        ParseFixture.fetchAttribute(
+            "BINARY[2]<4.5>",
+            " ",
+            expected: .success(.binary(peek: false, section: [2], partial: 4...8 as ClosedRange))
+        ),
         ParseFixture.fetchAttribute("BINARY.SIZE[5]", " ", expected: .success(.binarySize(section: [5]))),
         ParseFixture.fetchAttribute("X-GM-MSGID", " ", expected: .success(.gmailMessageID)),
         ParseFixture.fetchAttribute("X-GM-THRID", " ", expected: .success(.gmailThreadID)),
@@ -160,7 +203,10 @@ struct FetchAttributeTests {
         ParseFixture.partial("<0.1000000000>", expected: .success(ClosedRange(uncheckedBounds: (0, 999_999_999)))),
         ParseFixture.partial("<0.4294967290>", expected: .success(ClosedRange(uncheckedBounds: (0, 4_294_967_289)))),
         ParseFixture.partial("<1.2>", expected: .success(ClosedRange(uncheckedBounds: (1, 2)))),
-        ParseFixture.partial("<4294967290.2>", expected: .success(ClosedRange(uncheckedBounds: (4_294_967_290, 4_294_967_291)))),
+        ParseFixture.partial(
+            "<4294967290.2>",
+            expected: .success(ClosedRange(uncheckedBounds: (4_294_967_290, 4_294_967_291)))
+        ),
         ParseFixture.partial("<0.0>", expected: .failure),
         ParseFixture.partial("<654.0>", expected: .failure),
         ParseFixture.partial("<4294967296.2>", expected: .failure),

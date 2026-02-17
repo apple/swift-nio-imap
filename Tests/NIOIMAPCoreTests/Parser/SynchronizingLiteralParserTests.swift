@@ -248,9 +248,9 @@ extension SynchronizingLiteralParserTests {
                 continuations += parse.synchronizingLiteralCount
 
                 let newReader =
-                consumptions.filter {
-                    $0.numberOfPriorParses <= expected.offset + 1
-                }.map(\.consumption).reduce(0, +) + initialAllByteReader
+                    consumptions.filter {
+                        $0.numberOfPriorParses <= expected.offset + 1
+                    }.map(\.consumption).reduce(0, +) + initialAllByteReader
                 allBytes.moveReaderIndex(to: newReader)
             }
             #expect(

@@ -22,20 +22,19 @@ struct UIDSetNonEmptyTests {}
 extension UIDSetNonEmptyTests {
     @Test func `init with set`() {
         #expect(
-            MessageIdentifierSetNonEmpty(set: MessageIdentifierSet<UID>([6, 100...108]))?.set ==
-            MessageIdentifierSet<UID>([6, 100...108])
+            MessageIdentifierSetNonEmpty(set: MessageIdentifierSet<UID>([6, 100...108]))?.set
+                == MessageIdentifierSet<UID>([6, 100...108])
         )
     }
 
     @Test func `init with range`() {
         #expect(
-            MessageIdentifierSetNonEmpty(range: MessageIdentifierRange(100...108)).set ==
-            MessageIdentifierSet<UID>([100...108])
+            MessageIdentifierSetNonEmpty(range: MessageIdentifierRange(100...108)).set
+                == MessageIdentifierSet<UID>([100...108])
         )
 
         #expect(
-            MessageIdentifierSetNonEmpty(range: MessageIdentifierRange(100)).set ==
-            MessageIdentifierSet<UID>([100])
+            MessageIdentifierSetNonEmpty(range: MessageIdentifierRange(100)).set == MessageIdentifierSet<UID>([100])
         )
     }
 

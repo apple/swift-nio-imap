@@ -48,10 +48,18 @@ struct FetchModifierTests {
     }
 
     @Test(arguments: [
-        ParseFixture.fetchModifier("CHANGEDSINCE 2", " ", expected: .success(.changedSince(.init(modificationSequence: 2)))),
+        ParseFixture.fetchModifier(
+            "CHANGEDSINCE 2",
+            " ",
+            expected: .success(.changedSince(.init(modificationSequence: 2)))
+        ),
         ParseFixture.fetchModifier("PARTIAL -735:-88032", " ", expected: .success(.partial(.last(735...88_032)))),
         ParseFixture.fetchModifier("test", "\r", expected: .success(.other(.init(key: "test", value: nil)))),
-        ParseFixture.fetchModifier("test 1", " ", expected: .success(.other(.init(key: "test", value: .sequence(.set([1])))))),
+        ParseFixture.fetchModifier(
+            "test 1",
+            " ",
+            expected: .success(.other(.init(key: "test", value: .sequence(.set([1])))))
+        ),
         ParseFixture.fetchModifier("1", " ", expected: .failure),
         ParseFixture.fetchModifier("CHANGEDSINCE 1", "", expected: .incompleteMessage),
         ParseFixture.fetchModifier("test 1", "", expected: .incompleteMessage),
@@ -61,7 +69,11 @@ struct FetchModifierTests {
     }
 
     @Test(arguments: [
-        ParseFixture.fetchModifiers(" (CHANGEDSINCE 2)", " ", expected: .success([.changedSince(.init(modificationSequence: 2))])),
+        ParseFixture.fetchModifiers(
+            " (CHANGEDSINCE 2)",
+            " ",
+            expected: .success([.changedSince(.init(modificationSequence: 2))])
+        ),
         ParseFixture.fetchModifiers(" (PARTIAL -735:-88032)", " ", expected: .success([.partial(.last(735...88_032))])),
         ParseFixture.fetchModifiers(
             " (PARTIAL -1:-30 CHANGEDSINCE 98305)",

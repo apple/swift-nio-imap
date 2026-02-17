@@ -53,10 +53,12 @@ struct ExtendedSearchSourceOptionsTests {
         ),
         ParseFixture.extendedSearchSourceOptions(
             "IN (inboxes (name))",
-            expected: .success(ExtendedSearchSourceOptions(
-                sourceMailbox: [.inboxes],
-                scopeOptions: ExtendedSearchScopeOptions(["name": nil])!
-            )!)
+            expected: .success(
+                ExtendedSearchSourceOptions(
+                    sourceMailbox: [.inboxes],
+                    scopeOptions: ExtendedSearchScopeOptions(["name": nil])!
+                )!
+            )
         ),
         ParseFixture.extendedSearchSourceOptions("IN (inboxes ())", expected: .failure),
         ParseFixture.extendedSearchSourceOptions("IN ((name))", expected: .failure),

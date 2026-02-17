@@ -44,13 +44,15 @@ struct RelativeIMAPURLTests {
         ParseFixture.relativeIMAPURL(
             "/test",
             " ",
-            expected: .success(.absolutePath(
-                .init(
-                    command: .messageList(
-                        .init(mailboxUIDValidity: .init(encodeMailbox: .init(mailbox: "test")))
+            expected: .success(
+                .absolutePath(
+                    .init(
+                        command: .messageList(
+                            .init(mailboxUIDValidity: .init(encodeMailbox: .init(mailbox: "test")))
+                        )
                     )
                 )
-            ))
+            )
         ),
         ParseFixture.relativeIMAPURL(
             "//localhost/",

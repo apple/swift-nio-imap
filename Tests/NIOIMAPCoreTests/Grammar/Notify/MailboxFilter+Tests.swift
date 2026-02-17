@@ -62,9 +62,21 @@ struct MailboxFilterTests {
         ParseFixture.filterMailboxes("subscribed", " ", expected: .success(.subscribed)),
         ParseFixture.filterMailboxes("selected", " ", expected: .success(.selected)),
         ParseFixture.filterMailboxes("selected-delayed", " ", expected: .success(.selectedDelayed)),
-        ParseFixture.filterMailboxes("subtree \"box1\"", " ", expected: .success(.subtree(Mailboxes([.init("box1")])!))),
-        ParseFixture.filterMailboxes("subtree-one \"box1\"", " ", expected: .success(.subtreeOne(Mailboxes([.init("box1")])!))),
-        ParseFixture.filterMailboxes("mailboxes \"box1\"", " ", expected: .success(.mailboxes(Mailboxes([.init("box1")])!))),
+        ParseFixture.filterMailboxes(
+            "subtree \"box1\"",
+            " ",
+            expected: .success(.subtree(Mailboxes([.init("box1")])!))
+        ),
+        ParseFixture.filterMailboxes(
+            "subtree-one \"box1\"",
+            " ",
+            expected: .success(.subtreeOne(Mailboxes([.init("box1")])!))
+        ),
+        ParseFixture.filterMailboxes(
+            "mailboxes \"box1\"",
+            " ",
+            expected: .success(.mailboxes(Mailboxes([.init("box1")])!))
+        ),
         ParseFixture.filterMailboxes("subtree ", expected: .failure),
         ParseFixture.filterMailboxes("subtree-one", expected: .failure),
         ParseFixture.filterMailboxes("mailboxes", expected: .failure),

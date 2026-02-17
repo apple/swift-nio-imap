@@ -82,10 +82,37 @@ struct SelectParameterTests {
     }
 
     @Test(arguments: [
-        ParseFixture.selectParameter("test 1", expected: .success(.basic(.init(key: "test", value: .sequence(.set([1])))))),
-        ParseFixture.selectParameter("QRESYNC (1 1)", expected: .success(.qresync(.init(uidValidity: 1, modificationSequenceValue: 1, knownUIDs: nil, sequenceMatchData: nil)))),
-        ParseFixture.selectParameter("QRESYNC (1 1 1:2)", expected: .success(.qresync(.init(uidValidity: 1, modificationSequenceValue: 1, knownUIDs: [1...2], sequenceMatchData: nil)))),
-        ParseFixture.selectParameter("QRESYNC (1 1 1:2 (1:* 1:*))", expected: .success(.qresync(.init(uidValidity: 1, modificationSequenceValue: 1, knownUIDs: [1...2], sequenceMatchData: .init(knownSequenceSet: .set(.all), knownUidSet: .set(.all)))))),
+        ParseFixture.selectParameter(
+            "test 1",
+            expected: .success(.basic(.init(key: "test", value: .sequence(.set([1])))))
+        ),
+        ParseFixture.selectParameter(
+            "QRESYNC (1 1)",
+            expected: .success(
+                .qresync(.init(uidValidity: 1, modificationSequenceValue: 1, knownUIDs: nil, sequenceMatchData: nil))
+            )
+        ),
+        ParseFixture.selectParameter(
+            "QRESYNC (1 1 1:2)",
+            expected: .success(
+                .qresync(
+                    .init(uidValidity: 1, modificationSequenceValue: 1, knownUIDs: [1...2], sequenceMatchData: nil)
+                )
+            )
+        ),
+        ParseFixture.selectParameter(
+            "QRESYNC (1 1 1:2 (1:* 1:*))",
+            expected: .success(
+                .qresync(
+                    .init(
+                        uidValidity: 1,
+                        modificationSequenceValue: 1,
+                        knownUIDs: [1...2],
+                        sequenceMatchData: .init(knownSequenceSet: .set(.all), knownUidSet: .set(.all))
+                    )
+                )
+            )
+        ),
         ParseFixture.selectParameter("1", expected: .failure),
         ParseFixture.selectParameter("test ", "", expected: .incompleteMessage),
         ParseFixture.selectParameter("QRESYNC (", "", expected: .incompleteMessage),

@@ -19,14 +19,17 @@ import Testing
 @Suite("SearchReturnDataExtension")
 struct SearchReturnDataExtensionTests {
     @Test(arguments: [
-        EncodeFixture.searchReturnDataExtension(.init(key: "modifier", value: .sequence(.set([123]))), "modifier 123"),
+        EncodeFixture.searchReturnDataExtension(.init(key: "modifier", value: .sequence(.set([123]))), "modifier 123")
     ])
     func encode(_ fixture: EncodeFixture<KeyValue<String, ParameterValue>>) {
         fixture.checkEncoding()
     }
 
     @Test(arguments: [
-        ParseFixture.searchReturnDataExtension("modifier 64", expected: .success(.init(key: "modifier", value: .sequence(.set([64]))))),
+        ParseFixture.searchReturnDataExtension(
+            "modifier 64",
+            expected: .success(.init(key: "modifier", value: .sequence(.set([64]))))
+        )
     ])
     func parse(_ fixture: ParseFixture<KeyValue<String, ParameterValue>>) {
         fixture.checkParsing()

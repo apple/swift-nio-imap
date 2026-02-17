@@ -153,7 +153,7 @@ extension PipeliningRequirement {
 
 // MARK: -
 
-fileprivate func expect(
+private func expect(
     _ requirements: Set<PipeliningRequirement>,
     canStartWhileRunning behavior: Set<PipeliningBehavior>,
     sourceLocation: SourceLocation = #_sourceLocation
@@ -161,7 +161,7 @@ fileprivate func expect(
     #expect(behavior.satisfies(requirements), sourceLocation: sourceLocation)
 }
 
-fileprivate func expect(
+private func expect(
     _ requirements: Set<PipeliningRequirement>,
     canNotStartWhileRunning behavior: Set<PipeliningBehavior>,
     sourceLocation: SourceLocation = #_sourceLocation
@@ -169,7 +169,7 @@ fileprivate func expect(
     #expect(!behavior.satisfies(requirements), sourceLocation: sourceLocation)
 }
 
-fileprivate func expect(
+private func expect(
     commands: [(SourceLocation, Command)],
     doNotRequire requirement: PipeliningRequirement,
     _ message: @autoclosure () -> String = ""
@@ -183,7 +183,7 @@ fileprivate func expect(
     }
 }
 
-fileprivate func expect(
+private func expect(
     commands: [(SourceLocation, Command)],
     require requirement: PipeliningRequirement,
     _ message: @autoclosure () -> String = ""
@@ -198,7 +198,7 @@ fileprivate func expect(
     }
 }
 
-fileprivate func expect(
+private func expect(
     commands: [(SourceLocation, Command)],
     doNotHaveBehavior behavior: PipeliningBehavior,
     _ message: @autoclosure () -> String = ""
@@ -212,7 +212,7 @@ fileprivate func expect(
     }
 }
 
-fileprivate func expect(
+private func expect(
     commands: [(SourceLocation, Command)],
     haveBehavior behavior: PipeliningBehavior,
     _ message: @autoclosure () -> String = ""

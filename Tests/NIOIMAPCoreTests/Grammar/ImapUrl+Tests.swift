@@ -41,16 +41,18 @@ struct IMAPURLTests {
         ParseFixture.imapURL(
             "imap://localhost/test/;UID=123",
             " ",
-            expected: .success(.init(
-                server: .init(host: "localhost"),
-                query: .fetch(
-                    path: .init(
-                        mailboxReference: .init(encodeMailbox: .init(mailbox: "test")),
-                        iUID: .init(uid: 123)
-                    ),
-                    authenticatedURL: nil
+            expected: .success(
+                .init(
+                    server: .init(host: "localhost"),
+                    query: .fetch(
+                        path: .init(
+                            mailboxReference: .init(encodeMailbox: .init(mailbox: "test")),
+                            iUID: .init(uid: 123)
+                        ),
+                        authenticatedURL: nil
+                    )
                 )
-            ))
+            )
         ),
     ])
     func parse(_ fixture: ParseFixture<IMAPURL>) {

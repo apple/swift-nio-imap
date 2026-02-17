@@ -19,14 +19,14 @@ import Testing
 @Suite("IUID")
 struct IUIDTests {
     @Test(arguments: [
-        EncodeFixture.iuid(.init(uid: 123), "/;UID=123"),
+        EncodeFixture.iuid(.init(uid: 123), "/;UID=123")
     ])
     func encode(_ fixture: EncodeFixture<IUID>) {
         fixture.checkEncoding()
     }
 
     @Test(arguments: [
-        EncodeFixture.iuidOnly(.init(uid: 123), ";UID=123"),
+        EncodeFixture.iuidOnly(.init(uid: 123), ";UID=123")
     ])
     func `encode UID only`(_ fixture: EncodeFixture<IUID>) {
         fixture.checkEncoding()

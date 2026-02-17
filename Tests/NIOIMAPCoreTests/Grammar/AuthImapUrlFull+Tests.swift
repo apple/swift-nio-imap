@@ -60,23 +60,25 @@ struct FullAuthenticatedURLTests {
         ParseFixture.fullAuthenticatedURL(
             "imap://localhost/test/;UID=123;URLAUTH=anonymous:INTERNAL:01234567890123456789012345678901",
             " ",
-            expected: .success(.init(
-                networkMessagePath: .init(
-                    server: .init(host: "localhost"),
-                    messagePath: .init(
-                        mailboxReference: .init(encodeMailbox: .init(mailbox: "test")),
-                        iUID: .init(uid: 123)
-                    )
-                ),
-                authenticatedURL: .init(
-                    authenticatedURL: .init(access: .anonymous),
-                    verifier: .init(
-                        urlAuthMechanism: .internal,
-                        encodedAuthenticationURL: .init(data: "01234567890123456789012345678901")
+            expected: .success(
+                .init(
+                    networkMessagePath: .init(
+                        server: .init(host: "localhost"),
+                        messagePath: .init(
+                            mailboxReference: .init(encodeMailbox: .init(mailbox: "test")),
+                            iUID: .init(uid: 123)
+                        )
+                    ),
+                    authenticatedURL: .init(
+                        authenticatedURL: .init(access: .anonymous),
+                        verifier: .init(
+                            urlAuthMechanism: .internal,
+                            encodedAuthenticationURL: .init(data: "01234567890123456789012345678901")
+                        )
                     )
                 )
-            ))
-        ),
+            )
+        )
     ])
     func parse(_ fixture: ParseFixture<FullAuthenticatedURL>) {
         fixture.checkParsing()

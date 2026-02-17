@@ -35,7 +35,8 @@ struct AbsoluteMessagePathTests {
     @Test(arguments: [
         ParseFixture.absoluteMessagePath("/", " ", expected: .success(.init(command: nil))),
         ParseFixture.absoluteMessagePath(
-            "/test", " ",
+            "/test",
+            " ",
             expected: .success(
                 .init(
                     command: .messageList(.init(mailboxUIDValidity: .init(encodeMailbox: .init(mailbox: "test"))))

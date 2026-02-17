@@ -54,17 +54,19 @@ struct RumpAuthenticatedURLTests {
         ParseFixture.rumpAuthenticatedURL(
             "imap://localhost/test/;UID=123;URLAUTH=anonymous",
             " ",
-            expected: .success(.init(
-                authenticatedURL: .init(
-                    server: .init(host: "localhost"),
-                    messagePath: .init(
-                        mailboxReference: .init(encodeMailbox: .init(mailbox: "test")),
-                        iUID: .init(uid: 123)
-                    )
-                ),
-                authenticatedURLRump: .init(access: .anonymous)
-            ))
-        ),
+            expected: .success(
+                .init(
+                    authenticatedURL: .init(
+                        server: .init(host: "localhost"),
+                        messagePath: .init(
+                            mailboxReference: .init(encodeMailbox: .init(mailbox: "test")),
+                            iUID: .init(uid: 123)
+                        )
+                    ),
+                    authenticatedURLRump: .init(access: .anonymous)
+                )
+            )
+        )
     ])
     func parse(_ fixture: ParseFixture<RumpAuthenticatedURL>) {
         fixture.checkParsing()

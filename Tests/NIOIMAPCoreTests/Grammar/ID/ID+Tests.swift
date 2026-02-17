@@ -36,18 +36,22 @@ struct IDTests {
         ),
         ParseFixture.idResponsePayload(
             #"ID ("name" "Imap" "version" "1.5" "os" "centos" "os-version" "5.5" "support-url" "mailto:admin@xgen.in")"#,
-            expected: .success(.id([
-                "name": "Imap", "version": "1.5", "os": "centos", "os-version": "5.5",
-                "support-url": "mailto:admin@xgen.in",
-            ]))
+            expected: .success(
+                .id([
+                    "name": "Imap", "version": "1.5", "os": "centos", "os-version": "5.5",
+                    "support-url": "mailto:admin@xgen.in",
+                ])
+            )
         ),
         // datamail.in appends a `+` to the ID response:
         ParseFixture.idResponsePayload(
             #"ID ("name" "Imap" "version" "1.5" "os" "centos" "os-version" "5.5" "support-url" "mailto:admin@xgen.in")+"#,
-            expected: .success(.id([
-                "name": "Imap", "version": "1.5", "os": "centos", "os-version": "5.5",
-                "support-url": "mailto:admin@xgen.in",
-            ]))
+            expected: .success(
+                .id([
+                    "name": "Imap", "version": "1.5", "os": "centos", "os-version": "5.5",
+                    "support-url": "mailto:admin@xgen.in",
+                ])
+            )
         ),
     ])
     func parse(_ fixture: ParseFixture<ResponsePayload>) {
@@ -57,22 +61,20 @@ struct IDTests {
     @Test func `ID response does not get redacted for logging`() {
         let id = Response.untagged(ResponsePayload.id(["name": "A"]))
         #expect(
-            "\(Response.descriptionWithoutPII([id]))" ==
-            #"""
-            * ID ("name" "A")\#r
+            "\(Response.descriptionWithoutPII([id]))" == #"""
+                * ID ("name" "A")\#r
 
-            """#
+                """#
         )
     }
 
     @Test func `ID command does not get redacted for logging`() {
         let part = CommandStreamPart.tagged(TaggedCommand(tag: "A1", command: .id(["name": "A"])))
         #expect(
-            "\(CommandStreamPart.descriptionWithoutPII([part]))" ==
-            #"""
-            A1 ID ("name" "A")\#r
+            "\(CommandStreamPart.descriptionWithoutPII([part]))" == #"""
+                A1 ID ("name" "A")\#r
 
-            """#
+                """#
         )
     }
 

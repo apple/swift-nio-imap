@@ -53,7 +53,10 @@ struct SearchKeyTests {
         EncodeFixture.searchKey(.sentBefore(IMAPCalendarDay(year: 2018, month: 12, day: 7)!), "SENTBEFORE 7-Dec-2018"),
         EncodeFixture.searchKey(.sentSince(IMAPCalendarDay(year: 2018, month: 12, day: 7)!), "SENTSINCE 7-Dec-2018"),
         EncodeFixture.searchKey(.messageSizeSmaller(555), "SMALLER 555"),
-        EncodeFixture.searchKey(.uid(.set(MessageIdentifierSetNonEmpty(set: MessageIdentifierSet<UID>(333...444))!)), "UID 333:444"),
+        EncodeFixture.searchKey(
+            .uid(.set(MessageIdentifierSetNonEmpty(set: MessageIdentifierSet<UID>(333...444))!)),
+            "UID 333:444"
+        ),
         EncodeFixture.searchKey(.sequenceNumbers(.range(1...222)), "1:222"),
         EncodeFixture.searchKey(.sequenceNumbers(.range(222...)), "222:*"),
         EncodeFixture.searchKey(.and([]), "()"),
@@ -66,10 +69,22 @@ struct SearchKeyTests {
         EncodeFixture.searchKey(.uidBefore(.lastCommand), "UIDBEFORE $"),
         EncodeFixture.searchKey(.and([.messageSizeSmaller(444)]), "SMALLER 444"),
         EncodeFixture.searchKey(.not(.and([.messageSizeSmaller(444)])), "NOT SMALLER 444"),
-        EncodeFixture.searchKey(.not(.and([.messageSizeSmaller(444), .messageSizeLarger(333)])), "NOT (SMALLER 444 LARGER 333)"),
-        EncodeFixture.searchKey(.or(.not(.messageSizeSmaller(444)), .messageSizeLarger(333)), "OR (NOT SMALLER 444) LARGER 333"),
-        EncodeFixture.searchKey(.or(.not(.and([.messageSizeSmaller(444), .messageSizeLarger(333)])), .undeleted), "OR (NOT (SMALLER 444 LARGER 333)) UNDELETED"),
-        EncodeFixture.searchKey(.and([.or(.messageSizeSmaller(444), .messageSizeLarger(333)), .undeleted]), "(OR SMALLER 444 LARGER 333) UNDELETED"),
+        EncodeFixture.searchKey(
+            .not(.and([.messageSizeSmaller(444), .messageSizeLarger(333)])),
+            "NOT (SMALLER 444 LARGER 333)"
+        ),
+        EncodeFixture.searchKey(
+            .or(.not(.messageSizeSmaller(444)), .messageSizeLarger(333)),
+            "OR (NOT SMALLER 444) LARGER 333"
+        ),
+        EncodeFixture.searchKey(
+            .or(.not(.and([.messageSizeSmaller(444), .messageSizeLarger(333)])), .undeleted),
+            "OR (NOT (SMALLER 444 LARGER 333)) UNDELETED"
+        ),
+        EncodeFixture.searchKey(
+            .and([.or(.messageSizeSmaller(444), .messageSizeLarger(333)), .undeleted]),
+            "(OR SMALLER 444 LARGER 333) UNDELETED"
+        ),
         EncodeFixture.searchKey(.emailID(.init("123-456-789")!), "EMAILID 123-456-789"),
         EncodeFixture.searchKey(.threadID(.init("123-456-789")!), "THREADID 123-456-789"),
     ])
@@ -92,12 +107,30 @@ struct SearchKeyTests {
         ParseFixture.searchKey("UNSEEN", expected: .success(.unseen)),
         ParseFixture.searchKey("UNDRAFT", expected: .success(.undraft)),
         ParseFixture.searchKey("DRAFT", expected: .success(.draft)),
-        ParseFixture.searchKey("ON 25-jun-1994", expected: .success(.on(IMAPCalendarDay(year: 1994, month: 6, day: 25)!))),
-        ParseFixture.searchKey("SINCE 01-jan-2001", expected: .success(.since(IMAPCalendarDay(year: 2001, month: 1, day: 1)!))),
-        ParseFixture.searchKey("SENTON 02-jan-2002", expected: .success(.sentOn(IMAPCalendarDay(year: 2002, month: 1, day: 2)!))),
-        ParseFixture.searchKey("SENTBEFORE 03-jan-2003", expected: .success(.sentBefore(IMAPCalendarDay(year: 2003, month: 1, day: 3)!))),
-        ParseFixture.searchKey("SENTSINCE 04-jan-2004", expected: .success(.sentSince(IMAPCalendarDay(year: 2004, month: 1, day: 4)!))),
-        ParseFixture.searchKey("BEFORE 05-jan-2005", expected: .success(.before(IMAPCalendarDay(year: 2005, month: 1, day: 5)!))),
+        ParseFixture.searchKey(
+            "ON 25-jun-1994",
+            expected: .success(.on(IMAPCalendarDay(year: 1994, month: 6, day: 25)!))
+        ),
+        ParseFixture.searchKey(
+            "SINCE 01-jan-2001",
+            expected: .success(.since(IMAPCalendarDay(year: 2001, month: 1, day: 1)!))
+        ),
+        ParseFixture.searchKey(
+            "SENTON 02-jan-2002",
+            expected: .success(.sentOn(IMAPCalendarDay(year: 2002, month: 1, day: 2)!))
+        ),
+        ParseFixture.searchKey(
+            "SENTBEFORE 03-jan-2003",
+            expected: .success(.sentBefore(IMAPCalendarDay(year: 2003, month: 1, day: 3)!))
+        ),
+        ParseFixture.searchKey(
+            "SENTSINCE 04-jan-2004",
+            expected: .success(.sentSince(IMAPCalendarDay(year: 2004, month: 1, day: 4)!))
+        ),
+        ParseFixture.searchKey(
+            "BEFORE 05-jan-2005",
+            expected: .success(.before(IMAPCalendarDay(year: 2005, month: 1, day: 5)!))
+        ),
         ParseFixture.searchKey("LARGER 1234", expected: .success(.messageSizeLarger(1234))),
         ParseFixture.searchKey("SMALLER 5678", expected: .success(.messageSizeSmaller(5678))),
         ParseFixture.searchKey("BCC data1", expected: .success(.bcc("data1"))),
@@ -111,19 +144,31 @@ struct SearchKeyTests {
         ParseFixture.searchKey("HEADER some value", expected: .success(.header("some", "value"))),
         ParseFixture.searchKey("UNKEYWORD key2", expected: .success(.unkeyword(Flag.Keyword("key2")!))),
         ParseFixture.searchKey("NOT LARGER 1234", expected: .success(.not(.messageSizeLarger(1234)))),
-        ParseFixture.searchKey("OR LARGER 6 SMALLER 4", expected: .success(.or(.messageSizeLarger(6), .messageSizeSmaller(4)))),
-        ParseFixture.searchKey("UID 2:4", expected: .success(.uid(.set(MessageIdentifierSetNonEmpty(set: MessageIdentifierSet<UID>(2...4))!)))),
+        ParseFixture.searchKey(
+            "OR LARGER 6 SMALLER 4",
+            expected: .success(.or(.messageSizeLarger(6), .messageSizeSmaller(4)))
+        ),
+        ParseFixture.searchKey(
+            "UID 2:4",
+            expected: .success(.uid(.set(MessageIdentifierSetNonEmpty(set: MessageIdentifierSet<UID>(2...4))!)))
+        ),
         ParseFixture.searchKey("UIDAFTER 33875", expected: .success(.uidAfter(.id(33_875)))),
         ParseFixture.searchKey("UIDAFTER $", expected: .success(.uidAfter(.lastCommand))),
         ParseFixture.searchKey("UIDBEFORE 44371", expected: .success(.uidBefore(.id(44_371)))),
         ParseFixture.searchKey("UIDBEFORE $", expected: .success(.uidBefore(.lastCommand))),
         ParseFixture.searchKey("2:4", expected: .success(.sequenceNumbers(.set([2...4])))),
         ParseFixture.searchKey("(LARGER 1)", expected: .success(.messageSizeLarger(1))),
-        ParseFixture.searchKey("(LARGER 1 SMALLER 5 KEYWORD hello)", expected: .success(.and([.messageSizeLarger(1), .messageSizeSmaller(5), .keyword(Flag.Keyword("hello")!)]))),
+        ParseFixture.searchKey(
+            "(LARGER 1 SMALLER 5 KEYWORD hello)",
+            expected: .success(.and([.messageSizeLarger(1), .messageSizeSmaller(5), .keyword(Flag.Keyword("hello")!)]))
+        ),
         ParseFixture.searchKey("YOUNGER 34", expected: .success(.younger(34))),
         ParseFixture.searchKey("OLDER 45", expected: .success(.older(45))),
         ParseFixture.searchKey("FILTER something", expected: .success(.filter("something"))),
-        ParseFixture.searchKey("MODSEQ 5", expected: .success(.modificationSequence(.init(extensions: [:], sequenceValue: 5)))),
+        ParseFixture.searchKey(
+            "MODSEQ 5",
+            expected: .success(.modificationSequence(.init(extensions: [:], sequenceValue: 5)))
+        ),
         ParseFixture.searchKey("EMAILID 123-456-789", expected: .success(.emailID(.init("123-456-789")!))),
         ParseFixture.searchKey("THREADID 123-456-789", expected: .success(.threadID(.init("123-456-789")!))),
     ])

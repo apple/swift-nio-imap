@@ -127,7 +127,7 @@ private struct GrammarParserPrimitivesTests {
             .subtracting([
                 UInt8(ascii: "\r"),
                 UInt8(ascii: "\n"),
-                0
+                0,
             ])
             .sorted()
     }
@@ -334,7 +334,7 @@ extension ParseFixture<String?> {
 }
 
 /// `Void` / `nil` replacement that is `Equatable`.
-fileprivate struct Dummy: Equatable {}
+private struct Dummy: Equatable {}
 
 extension ParseFixture<Dummy> {
     fileprivate static func `nil`(

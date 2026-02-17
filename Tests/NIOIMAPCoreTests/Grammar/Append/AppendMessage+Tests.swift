@@ -90,18 +90,22 @@ struct AppendMessageTests {
         ParseFixture.appendMessage(
             " (\\Answered) {123}\r\n",
             "test",
-            expected: .success(.init(
-                options: .init(flagList: [.answered], internalDate: nil, extensions: [:]),
-                data: .init(byteCount: 123)
-            ))
+            expected: .success(
+                .init(
+                    options: .init(flagList: [.answered], internalDate: nil, extensions: [:]),
+                    data: .init(byteCount: 123)
+                )
+            )
         ),
         ParseFixture.appendMessage(
             " (\\Answered) ~{456}\r\n",
             "test",
-            expected: .success(.init(
-                options: .init(flagList: [.answered], internalDate: nil, extensions: [:]),
-                data: .init(byteCount: 456, withoutContentTransferEncoding: true)
-            ))
+            expected: .success(
+                .init(
+                    options: .init(flagList: [.answered], internalDate: nil, extensions: [:]),
+                    data: .init(byteCount: 456, withoutContentTransferEncoding: true)
+                )
+            )
         ),
     ])
     func parse(_ fixture: ParseFixture<AppendMessage>) {

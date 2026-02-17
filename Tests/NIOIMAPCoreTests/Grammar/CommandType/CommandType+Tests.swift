@@ -22,44 +22,113 @@ struct CommandTypeTests {
         CommandEncodeFixture.command(.list(nil, reference: .init(""), .mailbox(""), []), "LIST \"\" \"\""),
         CommandEncodeFixture.command(.list(nil, reference: .init(""), .mailbox("")), "LIST \"\" \"\""),
         CommandEncodeFixture.command(.list(nil, reference: .init(""), .mailbox("")), "LIST \"\" \"\""),
-        CommandEncodeFixture.command(.list(nil, reference: .inbox, .mailbox(""), [.children]), "LIST \"INBOX\" \"\" RETURN (CHILDREN)"),
+        CommandEncodeFixture.command(
+            .list(nil, reference: .inbox, .mailbox(""), [.children]),
+            "LIST \"INBOX\" \"\" RETURN (CHILDREN)"
+        ),
 
         CommandEncodeFixture.command(.namespace, "NAMESPACE"),
 
-        CommandEncodeFixture.command(.login(username: "username", password: "password"), #"LOGIN "username" "password""#),
-        CommandEncodeFixture.command(.login(username: "david evans", password: "great password"), #"LOGIN "david evans" "great password""#),
-        CommandEncodeFixture.command(.login(username: #"foo\bar"#, password: #"pass"word"#), #"LOGIN "foo\\bar" "pass\"word""#),
-        CommandEncodeFixture.command(.login(username: "\r\n", password: "\n"), expectedStrings: ["LOGIN {2}\r\n", "\r\n {1}\r\n", "\n"]),
+        CommandEncodeFixture.command(
+            .login(username: "username", password: "password"),
+            #"LOGIN "username" "password""#
+        ),
+        CommandEncodeFixture.command(
+            .login(username: "david evans", password: "great password"),
+            #"LOGIN "david evans" "great password""#
+        ),
+        CommandEncodeFixture.command(
+            .login(username: #"foo\bar"#, password: #"pass"word"#),
+            #"LOGIN "foo\\bar" "pass\"word""#
+        ),
+        CommandEncodeFixture.command(
+            .login(username: "\r\n", password: "\n"),
+            expectedStrings: ["LOGIN {2}\r\n", "\r\n {1}\r\n", "\n"]
+        ),
 
         CommandEncodeFixture.command(.select(MailboxName("Events")), #"SELECT "Events""#),
-        CommandEncodeFixture.command(.select(.inbox, [.basic(.init(key: "test", value: nil))]), #"SELECT "INBOX" (test)"#),
-        CommandEncodeFixture.command(.select(.inbox, [.basic(.init(key: "test1", value: nil)), .basic(.init(key: "test2", value: nil))]), #"SELECT "INBOX" (test1 test2)"#),
+        CommandEncodeFixture.command(
+            .select(.inbox, [.basic(.init(key: "test", value: nil))]),
+            #"SELECT "INBOX" (test)"#
+        ),
+        CommandEncodeFixture.command(
+            .select(.inbox, [.basic(.init(key: "test1", value: nil)), .basic(.init(key: "test2", value: nil))]),
+            #"SELECT "INBOX" (test1 test2)"#
+        ),
         CommandEncodeFixture.command(.examine(MailboxName("Events")), #"EXAMINE "Events""#),
-        CommandEncodeFixture.command(.examine(.inbox, [.basic(.init(key: "test", value: nil))]), #"EXAMINE "INBOX" (test)"#),
+        CommandEncodeFixture.command(
+            .examine(.inbox, [.basic(.init(key: "test", value: nil))]),
+            #"EXAMINE "INBOX" (test)"#
+        ),
         CommandEncodeFixture.command(.expunge, #"EXPUNGE"#),
         CommandEncodeFixture.command(.move(.set([1]), .inbox), "MOVE 1 \"INBOX\""),
         CommandEncodeFixture.command(.id([:]), "ID NIL"),
-        CommandEncodeFixture.command(.getMetadata(options: [], mailbox: .inbox, entries: ["a"]), "GETMETADATA \"INBOX\" (\"a\")"),
-        CommandEncodeFixture.command(.getMetadata(options: [.maxSize(123)], mailbox: .inbox, entries: ["a"]), "GETMETADATA (MAXSIZE 123) \"INBOX\" (\"a\")"),
-        CommandEncodeFixture.command(.setMetadata(mailbox: .inbox, entries: ["a": nil]), "SETMETADATA \"INBOX\" (\"a\" NIL)"),
+        CommandEncodeFixture.command(
+            .getMetadata(options: [], mailbox: .inbox, entries: ["a"]),
+            "GETMETADATA \"INBOX\" (\"a\")"
+        ),
+        CommandEncodeFixture.command(
+            .getMetadata(options: [.maxSize(123)], mailbox: .inbox, entries: ["a"]),
+            "GETMETADATA (MAXSIZE 123) \"INBOX\" (\"a\")"
+        ),
+        CommandEncodeFixture.command(
+            .setMetadata(mailbox: .inbox, entries: ["a": nil]),
+            "SETMETADATA \"INBOX\" (\"a\" NIL)"
+        ),
 
-        CommandEncodeFixture.command(.fetch(.set([1...40]), [.uid, .internalDate], []), "FETCH 1:40 (UID INTERNALDATE)"),
-        CommandEncodeFixture.command(.fetch(.set([77]), [.uid, .bodySection(peek: true, .header, nil)], [.changedSince(.init(modificationSequence: 707_484_939_116_871_680))]), "FETCH 77 (UID BODY.PEEK[HEADER]) (CHANGEDSINCE 707484939116871680)"),
+        CommandEncodeFixture.command(
+            .fetch(.set([1...40]), [.uid, .internalDate], []),
+            "FETCH 1:40 (UID INTERNALDATE)"
+        ),
+        CommandEncodeFixture.command(
+            .fetch(
+                .set([77]),
+                [.uid, .bodySection(peek: true, .header, nil)],
+                [.changedSince(.init(modificationSequence: 707_484_939_116_871_680))]
+            ),
+            "FETCH 77 (UID BODY.PEEK[HEADER]) (CHANGEDSINCE 707484939116871680)"
+        ),
 
         CommandEncodeFixture.command(.resetKey(mailbox: nil, mechanisms: []), "RESETKEY"),
         CommandEncodeFixture.command(.resetKey(mailbox: nil, mechanisms: [.internal]), "RESETKEY"),
-        CommandEncodeFixture.command(.resetKey(mailbox: .inbox, mechanisms: [.internal]), "RESETKEY \"INBOX\" INTERNAL"),
-        CommandEncodeFixture.command(.resetKey(mailbox: .inbox, mechanisms: [.internal, .init("test")]), "RESETKEY \"INBOX\" INTERNAL test"),
+        CommandEncodeFixture.command(
+            .resetKey(mailbox: .inbox, mechanisms: [.internal]),
+            "RESETKEY \"INBOX\" INTERNAL"
+        ),
+        CommandEncodeFixture.command(
+            .resetKey(mailbox: .inbox, mechanisms: [.internal, .init("test")]),
+            "RESETKEY \"INBOX\" INTERNAL test"
+        ),
 
-        CommandEncodeFixture.command(.generateAuthorizedURL([.init(urlRump: "rump1", mechanism: .internal)]), "GENURLAUTH \"rump1\" INTERNAL"),
-        CommandEncodeFixture.command(.generateAuthorizedURL([.init(urlRump: "rump2", mechanism: .internal), .init(urlRump: "rump3", mechanism: .init("test"))]), "GENURLAUTH \"rump2\" INTERNAL \"rump3\" test"),
+        CommandEncodeFixture.command(
+            .generateAuthorizedURL([.init(urlRump: "rump1", mechanism: .internal)]),
+            "GENURLAUTH \"rump1\" INTERNAL"
+        ),
+        CommandEncodeFixture.command(
+            .generateAuthorizedURL([
+                .init(urlRump: "rump2", mechanism: .internal), .init(urlRump: "rump3", mechanism: .init("test")),
+            ]),
+            "GENURLAUTH \"rump2\" INTERNAL \"rump3\" test"
+        ),
 
         CommandEncodeFixture.command(.namespace, #"NAMESPACE"#),
-        CommandEncodeFixture.command(.uidCopy(.set(.init(range: 363...1860)), MailboxName("Drafts")), #"UID COPY 363:1860 "Drafts""#),
+        CommandEncodeFixture.command(
+            .uidCopy(.set(.init(range: 363...1860)), MailboxName("Drafts")),
+            #"UID COPY 363:1860 "Drafts""#
+        ),
         CommandEncodeFixture.command(.uidMove(.set(.init(range: 1554...1554)), .inbox), #"UID MOVE 1554 "INBOX""#),
-        CommandEncodeFixture.command(.uidFetch(.lastCommand, [.uid, .flags], [.changedSince(.init(modificationSequence: 66_306_787))]), #"UID FETCH $ (UID FLAGS) (CHANGEDSINCE 66306787)"#),
-        CommandEncodeFixture.command(.uidSearch(key: SearchKey.answered, charset: "UTF-8", returnOptions: [.count, .max]), #"UID SEARCH RETURN (COUNT MAX) ANSWERED"#),
-        CommandEncodeFixture.command(.uidStore(.set(.init(range: 4_306...6_866)), [], .flags(.add(silent: true, list: [.answered]))), #"UID STORE 4306:6866 +FLAGS.SILENT (\Answered)"#),
+        CommandEncodeFixture.command(
+            .uidFetch(.lastCommand, [.uid, .flags], [.changedSince(.init(modificationSequence: 66_306_787))]),
+            #"UID FETCH $ (UID FLAGS) (CHANGEDSINCE 66306787)"#
+        ),
+        CommandEncodeFixture.command(
+            .uidSearch(key: SearchKey.answered, charset: "UTF-8", returnOptions: [.count, .max]),
+            #"UID SEARCH RETURN (COUNT MAX) ANSWERED"#
+        ),
+        CommandEncodeFixture.command(
+            .uidStore(.set(.init(range: 4_306...6_866)), [], .flags(.add(silent: true, list: [.answered]))),
+            #"UID STORE 4306:6866 +FLAGS.SILENT (\Answered)"#
+        ),
         CommandEncodeFixture.command(.uidExpunge(.set(.init(range: 5...73))), #"UID EXPUNGE 5:73"#),
         CommandEncodeFixture.command(.uidExpunge(.lastCommand), #"UID EXPUNGE $"#),
 
@@ -67,20 +136,44 @@ struct CommandTypeTests {
         CommandEncodeFixture.command(.urlFetch(["test1", "test2"]), "URLFETCH test1 test2"),
 
         CommandEncodeFixture.command(.create(.inbox, []), "CREATE \"INBOX\""),
-        CommandEncodeFixture.command(.create(.inbox, [.attributes([.archive, .drafts, .flagged])]), "CREATE \"INBOX\" (USE (\\Archive \\Drafts \\Flagged))"),
+        CommandEncodeFixture.command(
+            .create(.inbox, [.attributes([.archive, .drafts, .flagged])]),
+            "CREATE \"INBOX\" (USE (\\Archive \\Drafts \\Flagged))"
+        ),
         CommandEncodeFixture.command(.compress(.deflate), "COMPRESS DEFLATE"),
         CommandEncodeFixture.command(.uidBatches(batchSize: 2_000), "UIDBATCHES 2000"),
         CommandEncodeFixture.command(.uidBatches(batchSize: 1_000, batchRange: 10...20), "UIDBATCHES 1000 10:20"),
         CommandEncodeFixture.command(.getJMAPAccess, "GETJMAPACCESS"),
 
         CommandEncodeFixture.command(.custom(name: "FOOBAR", payloads: []), "FOOBAR"),
-        CommandEncodeFixture.command(.custom(name: "FOOBAR", payloads: [.verbatim(.init(string: "A B C"))]), "FOOBAR A B C"),
-        CommandEncodeFixture.command(.custom(name: "FOOBAR", payloads: [.verbatim(.init(string: "A")), .verbatim(.init(string: "B"))]), "FOOBAR AB"),
+        CommandEncodeFixture.command(
+            .custom(name: "FOOBAR", payloads: [.verbatim(.init(string: "A B C"))]),
+            "FOOBAR A B C"
+        ),
+        CommandEncodeFixture.command(
+            .custom(name: "FOOBAR", payloads: [.verbatim(.init(string: "A")), .verbatim(.init(string: "B"))]),
+            "FOOBAR AB"
+        ),
         CommandEncodeFixture.command(.custom(name: "FOOBAR", payloads: [.literal(.init(string: "A"))]), #"FOOBAR "A""#),
-        CommandEncodeFixture.command(.custom(name: "FOOBAR", payloads: [.literal(.init(string: "A B C"))]), #"FOOBAR "A B C""#),
-        CommandEncodeFixture.command(.custom(name: "FOOBAR", payloads: [.literal(.init(string: "A")), .literal(.init(string: "B"))]), #"FOOBAR "A""B""#),
-        CommandEncodeFixture.command(.custom(name: "FOOBAR", payloads: [.literal(.init(string: "A")), .verbatim(.init(string: " ")), .literal(.init(string: "B"))]), #"FOOBAR "A" "B""#),
-        CommandEncodeFixture.command(.custom(name: "FOOBAR", payloads: [.literal(.init(string: "¶"))]), expectedStrings: ["FOOBAR {2}\r\n", "¶"]),
+        CommandEncodeFixture.command(
+            .custom(name: "FOOBAR", payloads: [.literal(.init(string: "A B C"))]),
+            #"FOOBAR "A B C""#
+        ),
+        CommandEncodeFixture.command(
+            .custom(name: "FOOBAR", payloads: [.literal(.init(string: "A")), .literal(.init(string: "B"))]),
+            #"FOOBAR "A""B""#
+        ),
+        CommandEncodeFixture.command(
+            .custom(
+                name: "FOOBAR",
+                payloads: [.literal(.init(string: "A")), .verbatim(.init(string: " ")), .literal(.init(string: "B"))]
+            ),
+            #"FOOBAR "A" "B""#
+        ),
+        CommandEncodeFixture.command(
+            .custom(name: "FOOBAR", payloads: [.literal(.init(string: "¶"))]),
+            expectedStrings: ["FOOBAR {2}\r\n", "¶"]
+        ),
     ])
     func encode(_ fixture: CommandEncodeFixture<Command>) {
         fixture.checkEncoding()
@@ -101,10 +194,22 @@ struct CommandTypeTests {
         ParseFixture.command("namespace", " ", expected: .success(.namespace)),
         ParseFixture.command("ID NIL", expected: .success(.id(.init()))),
         ParseFixture.command("ENABLE BINARY", expected: .success(.enable([.binary]))),
-        ParseFixture.command("GETMETADATA INBOX (test)", expected: .success(.getMetadata(options: [], mailbox: .inbox, entries: ["test"]))),
-        ParseFixture.command("SETMETADATA INBOX (test NIL)", expected: .success(.setMetadata(mailbox: .inbox, entries: ["test": nil]))),
-        ParseFixture.command("RESETKEY INBOX INTERNAL", expected: .success(.resetKey(mailbox: .inbox, mechanisms: [.internal]))),
-        ParseFixture.command("GENURLAUTH rump INTERNAL", expected: .success(.generateAuthorizedURL([.init(urlRump: "rump", mechanism: .internal)]))),
+        ParseFixture.command(
+            "GETMETADATA INBOX (test)",
+            expected: .success(.getMetadata(options: [], mailbox: .inbox, entries: ["test"]))
+        ),
+        ParseFixture.command(
+            "SETMETADATA INBOX (test NIL)",
+            expected: .success(.setMetadata(mailbox: .inbox, entries: ["test": nil]))
+        ),
+        ParseFixture.command(
+            "RESETKEY INBOX INTERNAL",
+            expected: .success(.resetKey(mailbox: .inbox, mechanisms: [.internal]))
+        ),
+        ParseFixture.command(
+            "GENURLAUTH rump INTERNAL",
+            expected: .success(.generateAuthorizedURL([.init(urlRump: "rump", mechanism: .internal)]))
+        ),
         ParseFixture.command("URLFETCH test", expected: .success(.urlFetch(["test"]))),
         ParseFixture.command("COPY 1 INBOX", expected: .success(.copy(.set([1]), .inbox))),
         ParseFixture.command("COPY 1,2,3 inbox", " ", expected: .success(.copy(.set([1, 2, 3]), .inbox))),
@@ -113,14 +218,32 @@ struct CommandTypeTests {
         ParseFixture.command("MOVE $ INBOX", expected: .success(.move(.lastCommand, .inbox))),
         ParseFixture.command("SEARCH ALL", expected: .success(.search(key: .all, charset: nil, returnOptions: []))),
         ParseFixture.command("ESEARCH ALL", expected: .success(.extendedSearch(.init(key: .all)))),
-        ParseFixture.command("STORE $ +FLAGS \\Answered", expected: .success(.store(.lastCommand, [], .flags(.add(silent: false, list: [.answered]))))),
+        ParseFixture.command(
+            "STORE $ +FLAGS \\Answered",
+            expected: .success(.store(.lastCommand, [], .flags(.add(silent: false, list: [.answered]))))
+        ),
         ParseFixture.command("EXAMINE INBOX", expected: .success(.examine(.inbox, .init()))),
-        ParseFixture.command("LIST INBOX test", expected: .success(.list(nil, reference: .inbox, .mailbox("test"), []))),
+        ParseFixture.command(
+            "LIST INBOX test",
+            expected: .success(.list(nil, reference: .inbox, .mailbox("test"), []))
+        ),
         ParseFixture.command("LSUB INBOX test", expected: .success(.lsub(reference: .inbox, pattern: "test"))),
-        ParseFixture.command("RENAME INBOX inbox2", expected: .success(.rename(from: .inbox, to: .init("inbox2"), parameters: .init()))),
-        ParseFixture.command("RENAME box1 box2", expected: .success(.rename(from: .init("box1"), to: .init("box2"), parameters: [:]))),
-        ParseFixture.command("rename box3 box4", expected: .success(.rename(from: .init("box3"), to: .init("box4"), parameters: [:]))),
-        ParseFixture.command("RENAME box5 box6 (test)", expected: .success(.rename(from: .init("box5"), to: .init("box6"), parameters: ["test": nil]))),
+        ParseFixture.command(
+            "RENAME INBOX inbox2",
+            expected: .success(.rename(from: .inbox, to: .init("inbox2"), parameters: .init()))
+        ),
+        ParseFixture.command(
+            "RENAME box1 box2",
+            expected: .success(.rename(from: .init("box1"), to: .init("box2"), parameters: [:]))
+        ),
+        ParseFixture.command(
+            "rename box3 box4",
+            expected: .success(.rename(from: .init("box3"), to: .init("box4"), parameters: [:]))
+        ),
+        ParseFixture.command(
+            "RENAME box5 box6 (test)",
+            expected: .success(.rename(from: .init("box5"), to: .init("box6"), parameters: ["test": nil]))
+        ),
         ParseFixture.command("SELECT INBOX", expected: .success(.select(.inbox, []))),
         ParseFixture.command("STATUS INBOX (SIZE)", expected: .success(.status(.inbox, [.size]))),
         ParseFixture.command("SUBSCRIBE INBOX", expected: .success(.subscribe(.inbox))),
@@ -131,16 +254,31 @@ struct CommandTypeTests {
         ParseFixture.command("UNSUBScribe INBOX", "\r\n", expected: .success(.unsubscribe(.inbox))),
         ParseFixture.command("UID EXPUNGE 1:2", expected: .success(.uidExpunge(.set([1...2])))),
         ParseFixture.command("FETCH $ (FLAGS)", expected: .success(.fetch(.lastCommand, [.flags], .init()))),
-        ParseFixture.command("LOGIN \"user\" \"password\"", expected: .success(.login(username: "user", password: "password"))),
-        ParseFixture.command("AUTHENTICATE GSSAPI", expected: .success(.authenticate(mechanism: AuthenticationMechanism("GSSAPI"), initialResponse: nil))),
+        ParseFixture.command(
+            "LOGIN \"user\" \"password\"",
+            expected: .success(.login(username: "user", password: "password"))
+        ),
+        ParseFixture.command(
+            "AUTHENTICATE GSSAPI",
+            expected: .success(.authenticate(mechanism: AuthenticationMechanism("GSSAPI"), initialResponse: nil))
+        ),
         ParseFixture.command("CREATE test", expected: .success(.create(.init("test"), []))),
         ParseFixture.command("GETQUOTA root", expected: .success(.getQuota(.init("root")))),
         ParseFixture.command("GETQUOTAROOT INBOX", expected: .success(.getQuotaRoot(.inbox))),
-        ParseFixture.command("SETQUOTA ROOT (resource 123)", expected: .success(.setQuota(.init("ROOT"), [.init(resourceName: "resource", limit: 123)]))),
+        ParseFixture.command(
+            "SETQUOTA ROOT (resource 123)",
+            expected: .success(.setQuota(.init("ROOT"), [.init(resourceName: "resource", limit: 123)]))
+        ),
         ParseFixture.command("COMPRESS DEFLATE", expected: .success(.compress(.deflate))),
         ParseFixture.command("UIDBATCHES 2000", expected: .success(.uidBatches(batchSize: 2_000, batchRange: nil))),
-        ParseFixture.command("UIDBATCHES 1000 10:20", expected: .success(.uidBatches(batchSize: 1_000, batchRange: 10...20))),
-        ParseFixture.command("UIDBATCHES 500 22:22", expected: .success(.uidBatches(batchSize: 500, batchRange: 22...22))),
+        ParseFixture.command(
+            "UIDBATCHES 1000 10:20",
+            expected: .success(.uidBatches(batchSize: 1_000, batchRange: 10...20))
+        ),
+        ParseFixture.command(
+            "UIDBATCHES 500 22:22",
+            expected: .success(.uidBatches(batchSize: 500, batchRange: 22...22))
+        ),
         ParseFixture.command("UIDBATCHES 1000 1", expected: .success(.uidBatches(batchSize: 1_000, batchRange: 1...1))),
         ParseFixture.command("GETJMAPACCESS", expected: .success(.getJMAPAccess)),
         ParseFixture.command("123", expected: .failure),
@@ -201,8 +339,16 @@ struct CommandTypeTests {
     }
 
     @Test(arguments: [
-        ParseFixture.getMetadataSuffix(" INBOX a", " ", expected: .success(.getMetadata(options: [], mailbox: .inbox, entries: ["a"]))),
-        ParseFixture.getMetadataSuffix(" (MAXSIZE 123) INBOX (a b)", " ", expected: .success(.getMetadata(options: [.maxSize(123)], mailbox: .inbox, entries: ["a", "b"]))),
+        ParseFixture.getMetadataSuffix(
+            " INBOX a",
+            " ",
+            expected: .success(.getMetadata(options: [], mailbox: .inbox, entries: ["a"]))
+        ),
+        ParseFixture.getMetadataSuffix(
+            " (MAXSIZE 123) INBOX (a b)",
+            " ",
+            expected: .success(.getMetadata(options: [.maxSize(123)], mailbox: .inbox, entries: ["a", "b"]))
+        ),
         ParseFixture.getMetadataSuffix(" (MAXSIZE 123 rogue) INBOX", expected: .failure),
         ParseFixture.getMetadataSuffix(" (key", "", expected: .incompleteMessage),
         ParseFixture.getMetadataSuffix(" (key value", "", expected: .incompleteMessage),
@@ -213,7 +359,11 @@ struct CommandTypeTests {
     }
 
     @Test(arguments: [
-        ParseFixture.setMetadataSuffix(" INBOX (a NIL)", " ", expected: .success(.setMetadata(mailbox: .inbox, entries: ["a": .init(nil)]))),
+        ParseFixture.setMetadataSuffix(
+            " INBOX (a NIL)",
+            " ",
+            expected: .success(.setMetadata(mailbox: .inbox, entries: ["a": .init(nil)]))
+        ),
         ParseFixture.setMetadataSuffix(" (a NIL)", "", expected: .failure),
         ParseFixture.setMetadataSuffix(" INBOX", "", expected: .incompleteMessage),
         ParseFixture.setMetadataSuffix(" INBOX (", "", expected: .incompleteMessage),
@@ -226,8 +376,14 @@ struct CommandTypeTests {
     @Test(arguments: [
         ParseFixture.resetKeySuffix("", expected: .success(.resetKey(mailbox: nil, mechanisms: []))),
         ParseFixture.resetKeySuffix(" INBOX", expected: .success(.resetKey(mailbox: .inbox, mechanisms: []))),
-        ParseFixture.resetKeySuffix(" INBOX INTERNAL", expected: .success(.resetKey(mailbox: .inbox, mechanisms: [.internal]))),
-        ParseFixture.resetKeySuffix(" INBOX INTERNAL test", expected: .success(.resetKey(mailbox: .inbox, mechanisms: [.internal, .init("test")]))),
+        ParseFixture.resetKeySuffix(
+            " INBOX INTERNAL",
+            expected: .success(.resetKey(mailbox: .inbox, mechanisms: [.internal]))
+        ),
+        ParseFixture.resetKeySuffix(
+            " INBOX INTERNAL test",
+            expected: .success(.resetKey(mailbox: .inbox, mechanisms: [.internal, .init("test")]))
+        ),
         ParseFixture.resetKeySuffix(" INBOX", "", expected: .incompleteMessage),
         ParseFixture.resetKeySuffix(" INBOX INTERNAL", "", expected: .incompleteMessage),
         ParseFixture.resetKeySuffix(" INBOX INTERNAL test", "", expected: .incompleteMessage),
@@ -237,8 +393,18 @@ struct CommandTypeTests {
     }
 
     @Test(arguments: [
-        ParseFixture.genURLAuthSuffix(" test INTERNAL", expected: .success(.generateAuthorizedURL([.init(urlRump: "test", mechanism: .internal)]))),
-        ParseFixture.genURLAuthSuffix(" test INTERNAL test2 INTERNAL", expected: .success(.generateAuthorizedURL([.init(urlRump: "test", mechanism: .internal), .init(urlRump: "test2", mechanism: .internal)]))),
+        ParseFixture.genURLAuthSuffix(
+            " test INTERNAL",
+            expected: .success(.generateAuthorizedURL([.init(urlRump: "test", mechanism: .internal)]))
+        ),
+        ParseFixture.genURLAuthSuffix(
+            " test INTERNAL test2 INTERNAL",
+            expected: .success(
+                .generateAuthorizedURL([
+                    .init(urlRump: "test", mechanism: .internal), .init(urlRump: "test2", mechanism: .internal),
+                ])
+            )
+        ),
         ParseFixture.genURLAuthSuffix(" \\", "", expected: .failure),
         ParseFixture.genURLAuthSuffix(" ", "", expected: .incompleteMessage),
         ParseFixture.genURLAuthSuffix(" test", "", expected: .incompleteMessage),
@@ -298,15 +464,41 @@ struct CommandTypeTests {
 
     @Test(arguments: [
         ParseFixture.searchSuffix(" ALL", expected: .success(.search(key: .all))),
-        ParseFixture.searchSuffix(" ALL DELETED FLAGGED", expected: .success(.search(key: .and([.all, .deleted, .flagged])))),
+        ParseFixture.searchSuffix(
+            " ALL DELETED FLAGGED",
+            expected: .success(.search(key: .and([.all, .deleted, .flagged])))
+        ),
         ParseFixture.searchSuffix(" CHARSET UTF-8 ALL", expected: .success(.search(key: .all, charset: "UTF-8"))),
         ParseFixture.searchSuffix(" DELETED", expected: .success(.search(key: .deleted, returnOptions: []))),
-        ParseFixture.searchSuffix(" RETURN () DELETED", expected: .success(.search(key: .deleted, returnOptions: [.all]))),
-        ParseFixture.searchSuffix(" RETURN (ALL) DELETED", expected: .success(.search(key: .deleted, returnOptions: [.all]))),
-        ParseFixture.searchSuffix(" RETURN (ALL COUNT) ANSWERED", expected: .success(.search(key: .answered, returnOptions: [.all, .count]))),
+        ParseFixture.searchSuffix(
+            " RETURN () DELETED",
+            expected: .success(.search(key: .deleted, returnOptions: [.all]))
+        ),
+        ParseFixture.searchSuffix(
+            " RETURN (ALL) DELETED",
+            expected: .success(.search(key: .deleted, returnOptions: [.all]))
+        ),
+        ParseFixture.searchSuffix(
+            " RETURN (ALL COUNT) ANSWERED",
+            expected: .success(.search(key: .answered, returnOptions: [.all, .count]))
+        ),
         ParseFixture.searchSuffix(" RETURN (MIN) ALL", expected: .success(.search(key: .all, returnOptions: [.min]))),
-        ParseFixture.searchSuffix(#" CHARSET UTF-8 (OR FROM "me" FROM "you") (OR NEW UNSEEN)"#, expected: .success(.search(key: .and([.or(.from("me"), .from("you")), .or(.new, .unseen)]), charset: "UTF-8"))),
-        ParseFixture.searchSuffix(#" RETURN (MIN MAX) CHARSET UTF-8 OR (FROM "me" FROM "you") (NEW UNSEEN)"#, expected: .success(.search(key: .or(.and([.from("me"), .from("you")]), .and([.new, .unseen])), charset: "UTF-8", returnOptions: [.min, .max]))),
+        ParseFixture.searchSuffix(
+            #" CHARSET UTF-8 (OR FROM "me" FROM "you") (OR NEW UNSEEN)"#,
+            expected: .success(
+                .search(key: .and([.or(.from("me"), .from("you")), .or(.new, .unseen)]), charset: "UTF-8")
+            )
+        ),
+        ParseFixture.searchSuffix(
+            #" RETURN (MIN MAX) CHARSET UTF-8 OR (FROM "me" FROM "you") (NEW UNSEEN)"#,
+            expected: .success(
+                .search(
+                    key: .or(.and([.from("me"), .from("you")]), .and([.new, .unseen])),
+                    charset: "UTF-8",
+                    returnOptions: [.min, .max]
+                )
+            )
+        ),
     ])
     func parseSearchSuffix(_ fixture: ParseFixture<Command>) {
         fixture.checkParsing()
@@ -314,7 +506,22 @@ struct CommandTypeTests {
 
     @Test(arguments: [
         ParseFixture.esearchSuffix(" ALL", expected: .success(.extendedSearch(.init(key: .all)))),
-        ParseFixture.esearchSuffix(" IN (mailboxes \"folder1\" subtree \"folder2\") unseen", expected: .success(.extendedSearch(ExtendedSearchOptions(key: .unseen, charset: nil, returnOptions: [], sourceOptions: ExtendedSearchSourceOptions(sourceMailbox: [.mailboxes(Mailboxes([MailboxName("folder1")])!), .subtree(Mailboxes([MailboxName("folder2")])!)]))))),
+        ParseFixture.esearchSuffix(
+            " IN (mailboxes \"folder1\" subtree \"folder2\") unseen",
+            expected: .success(
+                .extendedSearch(
+                    ExtendedSearchOptions(
+                        key: .unseen,
+                        charset: nil,
+                        returnOptions: [],
+                        sourceOptions: ExtendedSearchSourceOptions(sourceMailbox: [
+                            .mailboxes(Mailboxes([MailboxName("folder1")])!),
+                            .subtree(Mailboxes([MailboxName("folder2")])!),
+                        ])
+                    )
+                )
+            )
+        ),
         ParseFixture.esearchSuffix(" IN (mailboxes ", "", expected: .incompleteMessage),
     ])
     func parseEsearchSuffix(_ fixture: ParseFixture<Command>) {
@@ -322,9 +529,30 @@ struct CommandTypeTests {
     }
 
     @Test(arguments: [
-        ParseFixture.storeSuffix(" 1 +FLAGS \\answered", expected: .success(.store(.set([1]), [], .flags(.add(silent: false, list: [.answered]))))),
-        ParseFixture.storeSuffix(" 1 (label) -FLAGS \\seen", expected: .success(.store(.set([1]), [.other(.init(key: "label", value: nil))], .flags(.remove(silent: false, list: [.seen]))))),
-        ParseFixture.storeSuffix(" 1 (label UNCHANGEDSINCE 5) -FLAGS \\seen", expected: .success(.store(.set([1]), [.other(.init(key: "label", value: nil)), .unchangedSince(.init(modificationSequence: 5))], .flags(.remove(silent: false, list: [.seen]))))),
+        ParseFixture.storeSuffix(
+            " 1 +FLAGS \\answered",
+            expected: .success(.store(.set([1]), [], .flags(.add(silent: false, list: [.answered]))))
+        ),
+        ParseFixture.storeSuffix(
+            " 1 (label) -FLAGS \\seen",
+            expected: .success(
+                .store(
+                    .set([1]),
+                    [.other(.init(key: "label", value: nil))],
+                    .flags(.remove(silent: false, list: [.seen]))
+                )
+            )
+        ),
+        ParseFixture.storeSuffix(
+            " 1 (label UNCHANGEDSINCE 5) -FLAGS \\seen",
+            expected: .success(
+                .store(
+                    .set([1]),
+                    [.other(.init(key: "label", value: nil)), .unchangedSince(.init(modificationSequence: 5))],
+                    .flags(.remove(silent: false, list: [.seen]))
+                )
+            )
+        ),
         ParseFixture.storeSuffix(" +FLAGS \\answered", expected: .failure),
         ParseFixture.storeSuffix(" ", "", expected: .incompleteMessage),
         ParseFixture.storeSuffix(" 1 ", "", expected: .incompleteMessage),
@@ -336,22 +564,36 @@ struct CommandTypeTests {
     @Test(arguments: [
         ParseFixture.examineSuffix("EXAMINE inbox", expected: .success(.examine(.inbox, []))),
         ParseFixture.examineSuffix("examine inbox", expected: .success(.examine(.inbox, []))),
-        ParseFixture.examineSuffix("EXAMINE inbox (number)", expected: .success(.examine(.inbox, [.basic(.init(key: "number", value: nil))]))),
+        ParseFixture.examineSuffix(
+            "EXAMINE inbox (number)",
+            expected: .success(.examine(.inbox, [.basic(.init(key: "number", value: nil))]))
+        ),
     ])
     func parseExamineSuffix(_ fixture: ParseFixture<Command>) {
         fixture.checkParsing()
     }
 
     @Test(arguments: [
-        ParseFixture.listSuffix(#" "" """#, expected: .success(.list(nil, reference: MailboxName(""), .mailbox(""), []))),
+        ParseFixture.listSuffix(
+            #" "" """#,
+            expected: .success(.list(nil, reference: MailboxName(""), .mailbox(""), []))
+        )
     ])
     func parseListSuffix(_ fixture: ParseFixture<Command>) {
         fixture.checkParsing()
     }
 
     @Test(arguments: [
-        ParseFixture.LSUBSuffix(" inbox someList", " ", expected: .success(.lsub(reference: .inbox, pattern: "someList"))),
-        ParseFixture.LSUBSuffix(" \"inbox\" \"someList\"", " ", expected: .success(.lsub(reference: .inbox, pattern: "someList"))),
+        ParseFixture.LSUBSuffix(
+            " inbox someList",
+            " ",
+            expected: .success(.lsub(reference: .inbox, pattern: "someList"))
+        ),
+        ParseFixture.LSUBSuffix(
+            " \"inbox\" \"someList\"",
+            " ",
+            expected: .success(.lsub(reference: .inbox, pattern: "someList"))
+        ),
         ParseFixture.LSUBSuffix(" {5}inbox", "", expected: .failure),
         ParseFixture.LSUBSuffix(" inbox", "", expected: .incompleteMessage),
         ParseFixture.LSUBSuffix(" inbox list", "", expected: .incompleteMessage),
@@ -361,7 +603,12 @@ struct CommandTypeTests {
     }
 
     @Test(arguments: [
-        ParseFixture.renameSuffix(" box1 box2", expected: .success(.rename(from: .init(.init(string: "box1")), to: .init(.init(string: "box2")), parameters: [:]))),
+        ParseFixture.renameSuffix(
+            " box1 box2",
+            expected: .success(
+                .rename(from: .init(.init(string: "box1")), to: .init(.init(string: "box2")), parameters: [:])
+            )
+        ),
         ParseFixture.renameSuffix(" {2}b1 {2}b2", "", expected: .failure),
         ParseFixture.renameSuffix(" {2}\r\nb1 {2}b2", "", expected: .failure),
         ParseFixture.renameSuffix(" box1", "", expected: .incompleteMessage),
@@ -373,7 +620,10 @@ struct CommandTypeTests {
 
     @Test(arguments: [
         ParseFixture.selectSuffix(" inbox", expected: .success(.select(.inbox, []))),
-        ParseFixture.selectSuffix(" inbox (some1)", expected: .success(.select(.inbox, [.basic(.init(key: "some1", value: nil))]))),
+        ParseFixture.selectSuffix(
+            " inbox (some1)",
+            expected: .success(.select(.inbox, [.basic(.init(key: "some1", value: nil))]))
+        ),
         ParseFixture.selectSuffix(" ", expected: .failure),
         ParseFixture.selectSuffix(" ", "", expected: .incompleteMessage),
     ])
@@ -382,8 +632,18 @@ struct CommandTypeTests {
     }
 
     @Test(arguments: [
-        ParseFixture.statusSuffix(" inbox (messages unseen)", "\r\n", expected: .success(.status(.inbox, [.messageCount, .unseenCount]))),
-        ParseFixture.statusSuffix(" Deleted (messages unseen HIGHESTMODSEQ)", "\r\n", expected: .success(.status(MailboxName("Deleted"), [.messageCount, .unseenCount, .highestModificationSequence]))),
+        ParseFixture.statusSuffix(
+            " inbox (messages unseen)",
+            "\r\n",
+            expected: .success(.status(.inbox, [.messageCount, .unseenCount]))
+        ),
+        ParseFixture.statusSuffix(
+            " Deleted (messages unseen HIGHESTMODSEQ)",
+            "\r\n",
+            expected: .success(
+                .status(MailboxName("Deleted"), [.messageCount, .unseenCount, .highestModificationSequence])
+            )
+        ),
         ParseFixture.statusSuffix(" inbox (messages unseen", "\r\n", expected: .failure),
         ParseFixture.statusSuffix("", "", expected: .incompleteMessage),
         ParseFixture.statusSuffix(" Deleted (messages ", "", expected: .incompleteMessage),
@@ -414,10 +674,32 @@ struct CommandTypeTests {
         ParseFixture.uidSuffix(" EXPUNGE 1", "\r\n", expected: .success(.uidExpunge(.set([1])))),
         ParseFixture.uidSuffix(" COPY 1 Inbox", "\r\n", expected: .success(.uidCopy(.set([1]), .inbox))),
         ParseFixture.uidSuffix(" FETCH 1 FLAGS", "\r\n", expected: .success(.uidFetch(.set([1]), [.flags], []))),
-        ParseFixture.uidSuffix(" SEARCH CHARSET UTF8 ALL", "\r\n", expected: .success(.uidSearch(key: .all, charset: "UTF8"))),
-        ParseFixture.uidSuffix(" STORE 1 +FLAGS (Test)", "\r\n", expected: .success(.uidStore(.set([1]), [], .flags(.add(silent: false, list: ["Test"]))))),
-        ParseFixture.uidSuffix(" STORE 1 (UNCHANGEDSINCE 5 test) +FLAGS (Test)", "\r\n", expected: .success(.uidStore(.set([1]), [.unchangedSince(.init(modificationSequence: 5)), .other(.init(key: "test", value: nil))], .flags(.add(silent: false, list: ["Test"]))))),
-        ParseFixture.uidSuffix(" COPY * Inbox", "\r\n", expected: .success(.uidCopy(.set([MessageIdentifierRange<UID>(.max)]), .inbox))),
+        ParseFixture.uidSuffix(
+            " SEARCH CHARSET UTF8 ALL",
+            "\r\n",
+            expected: .success(.uidSearch(key: .all, charset: "UTF8"))
+        ),
+        ParseFixture.uidSuffix(
+            " STORE 1 +FLAGS (Test)",
+            "\r\n",
+            expected: .success(.uidStore(.set([1]), [], .flags(.add(silent: false, list: ["Test"]))))
+        ),
+        ParseFixture.uidSuffix(
+            " STORE 1 (UNCHANGEDSINCE 5 test) +FLAGS (Test)",
+            "\r\n",
+            expected: .success(
+                .uidStore(
+                    .set([1]),
+                    [.unchangedSince(.init(modificationSequence: 5)), .other(.init(key: "test", value: nil))],
+                    .flags(.add(silent: false, list: ["Test"]))
+                )
+            )
+        ),
+        ParseFixture.uidSuffix(
+            " COPY * Inbox",
+            "\r\n",
+            expected: .success(.uidCopy(.set([MessageIdentifierRange<UID>(.max)]), .inbox))
+        ),
         ParseFixture.uidSuffix("UID RENAME inbox other", " ", expected: .failure),
     ])
     func parseUidSuffix(_ fixture: ParseFixture<Command>) {
@@ -429,18 +711,36 @@ struct CommandTypeTests {
         ParseFixture.fetchSuffix(" 2:4 FULL", expected: .success(.fetch(.set([2...4]), .full, []))),
         ParseFixture.fetchSuffix(" 3:5 FAST", expected: .success(.fetch(.set([3...5]), .fast, []))),
         ParseFixture.fetchSuffix(" 4:6 ENVELOPE", expected: .success(.fetch(.set([4...6]), [.envelope], []))),
-        ParseFixture.fetchSuffix(" 5:7 (ENVELOPE FLAGS)", expected: .success(.fetch(.set([5...7]), [.envelope, .flags], []))),
-        ParseFixture.fetchSuffix(" 3:5 FAST (name)", expected: .success(.fetch(.set([3...5]), .fast, [.other(.init(key: "name", value: nil))]))),
-        ParseFixture.fetchSuffix(" 1 BODY[TEXT]", expected: .success(.fetch(.set([1]), [.bodySection(peek: false, .init(kind: .text), nil)], []))),
+        ParseFixture.fetchSuffix(
+            " 5:7 (ENVELOPE FLAGS)",
+            expected: .success(.fetch(.set([5...7]), [.envelope, .flags], []))
+        ),
+        ParseFixture.fetchSuffix(
+            " 3:5 FAST (name)",
+            expected: .success(.fetch(.set([3...5]), .fast, [.other(.init(key: "name", value: nil))]))
+        ),
+        ParseFixture.fetchSuffix(
+            " 1 BODY[TEXT]",
+            expected: .success(.fetch(.set([1]), [.bodySection(peek: false, .init(kind: .text), nil)], []))
+        ),
     ])
     func parseFetchSuffix(_ fixture: ParseFixture<Command>) {
         fixture.checkParsing()
     }
 
     @Test(arguments: [
-        ParseFixture.loginSuffix(" email password", expected: .success(.login(username: "email", password: "password"))),
-        ParseFixture.loginSuffix(" \"email\" \"password\"", expected: .success(.login(username: "email", password: "password"))),
-        ParseFixture.loginSuffix(" {5}\r\nemail {8}\r\npassword", expected: .success(.login(username: "email", password: "password"))),
+        ParseFixture.loginSuffix(
+            " email password",
+            expected: .success(.login(username: "email", password: "password"))
+        ),
+        ParseFixture.loginSuffix(
+            " \"email\" \"password\"",
+            expected: .success(.login(username: "email", password: "password"))
+        ),
+        ParseFixture.loginSuffix(
+            " {5}\r\nemail {8}\r\npassword",
+            expected: .success(.login(username: "email", password: "password"))
+        ),
         ParseFixture.loginSuffix("email password", "", expected: .failure),
         ParseFixture.loginSuffix(" email", "", expected: .incompleteMessage),
         ParseFixture.loginSuffix(" email password", "", expected: .incompleteMessage),
@@ -464,8 +764,14 @@ struct CommandTypeTests {
     }
 
     @Test(arguments: [
-        ParseFixture.authenticateSuffix(" GSSAPI", expected: .success(.authenticate(mechanism: .gssAPI, initialResponse: nil))),
-        ParseFixture.authenticateSuffix(" GSSAPI aGV5", expected: .success(.authenticate(mechanism: .gssAPI, initialResponse: .init(.init(.init(string: "hey")))))),
+        ParseFixture.authenticateSuffix(
+            " GSSAPI",
+            expected: .success(.authenticate(mechanism: .gssAPI, initialResponse: nil))
+        ),
+        ParseFixture.authenticateSuffix(
+            " GSSAPI aGV5",
+            expected: .success(.authenticate(mechanism: .gssAPI, initialResponse: .init(.init(.init(string: "hey")))))
+        ),
         ParseFixture.authenticateSuffix(" \"GSSAPI\"", "", expected: .failure),
         ParseFixture.authenticateSuffix(" gssapi", "", expected: .incompleteMessage),
     ])
@@ -475,10 +781,27 @@ struct CommandTypeTests {
 
     @Test(arguments: [
         ParseFixture.createSuffix(" inbox", expected: .success(.create(.inbox, []))),
-        ParseFixture.createSuffix(" inbox (some)", expected: .success(.create(.inbox, [.labelled(.init(key: "some", value: nil))]))),
+        ParseFixture.createSuffix(
+            " inbox (some)",
+            expected: .success(.create(.inbox, [.labelled(.init(key: "some", value: nil))]))
+        ),
         ParseFixture.createSuffix(" inbox (USE (\\All))", expected: .success(.create(.inbox, [.attributes([.all])]))),
-        ParseFixture.createSuffix(" inbox (USE (\\All \\Flagged))", expected: .success(.create(.inbox, [.attributes([.all, .flagged])]))),
-        ParseFixture.createSuffix(" inbox (USE (\\All \\Flagged) some1 2 USE (\\Sent))", expected: .success(.create(.inbox, [.attributes([.all, .flagged]), .labelled(.init(key: "some1", value: .sequence(.set([2])))), .attributes([.sent])]))),
+        ParseFixture.createSuffix(
+            " inbox (USE (\\All \\Flagged))",
+            expected: .success(.create(.inbox, [.attributes([.all, .flagged])]))
+        ),
+        ParseFixture.createSuffix(
+            " inbox (USE (\\All \\Flagged) some1 2 USE (\\Sent))",
+            expected: .success(
+                .create(
+                    .inbox,
+                    [
+                        .attributes([.all, .flagged]), .labelled(.init(key: "some1", value: .sequence(.set([2])))),
+                        .attributes([.sent]),
+                    ]
+                )
+            )
+        ),
         ParseFixture.createSuffix(" inbox", "", expected: .incompleteMessage),
         ParseFixture.createSuffix(" inbox (USE", "", expected: .incompleteMessage),
     ])
@@ -497,8 +820,19 @@ struct CommandTypeTests {
     }
 
     @Test(arguments: [
-        ParseFixture.setQuotaSuffix(#" "" (STORAGE 512)"#, expected: .success(.setQuota(.init(""), [.init(resourceName: "STORAGE", limit: 512)]))),
-        ParseFixture.setQuotaSuffix(#" "" (STORAGE 512 BANDWIDTH 123)"#, expected: .success(.setQuota(.init(""), [.init(resourceName: "STORAGE", limit: 512), .init(resourceName: "BANDWIDTH", limit: 123)]))),
+        ParseFixture.setQuotaSuffix(
+            #" "" (STORAGE 512)"#,
+            expected: .success(.setQuota(.init(""), [.init(resourceName: "STORAGE", limit: 512)]))
+        ),
+        ParseFixture.setQuotaSuffix(
+            #" "" (STORAGE 512 BANDWIDTH 123)"#,
+            expected: .success(
+                .setQuota(
+                    .init(""),
+                    [.init(resourceName: "STORAGE", limit: 512), .init(resourceName: "BANDWIDTH", limit: 123)]
+                )
+            )
+        ),
         ParseFixture.setQuotaSuffix(#" "" STORAGE 512"#, "", expected: .failure),
         ParseFixture.setQuotaSuffix(#" ""#, "", expected: .incompleteMessage),
         ParseFixture.setQuotaSuffix(#" "root"#, "", expected: .incompleteMessage),
@@ -958,4 +1292,3 @@ extension CommandEncodeFixture<Command> {
         )
     }
 }
-

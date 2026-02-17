@@ -169,7 +169,12 @@ struct FlagTests {
 
 extension EncodeFixture<Flag> {
     fileprivate static func flag(_ input: Flag, _ expectedString: String) -> Self {
-        EncodeFixture(input: input, bufferKind: .defaultServer, expectedString: expectedString, encoder: { $0.writeFlag($1) })
+        EncodeFixture(
+            input: input,
+            bufferKind: .defaultServer,
+            expectedString: expectedString,
+            encoder: { $0.writeFlag($1) }
+        )
     }
 }
 

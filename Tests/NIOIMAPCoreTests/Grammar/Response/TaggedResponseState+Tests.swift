@@ -45,9 +45,21 @@ struct TaggedResponseStateTests {
     }
 
     @Test(arguments: [
-        ParseFixture.taggedResponseState("OK [ALERT] hello1", "\n", expected: .success(.ok(.init(code: .alert, text: "hello1")))),
-        ParseFixture.taggedResponseState("NO [CLOSED] hello2", "\n", expected: .success(.no(.init(code: .closed, text: "hello2")))),
-        ParseFixture.taggedResponseState("BAD [PARSE] hello3", "\n", expected: .success(.bad(.init(code: .parse, text: "hello3")))),
+        ParseFixture.taggedResponseState(
+            "OK [ALERT] hello1",
+            "\n",
+            expected: .success(.ok(.init(code: .alert, text: "hello1")))
+        ),
+        ParseFixture.taggedResponseState(
+            "NO [CLOSED] hello2",
+            "\n",
+            expected: .success(.no(.init(code: .closed, text: "hello2")))
+        ),
+        ParseFixture.taggedResponseState(
+            "BAD [PARSE] hello3",
+            "\n",
+            expected: .success(.bad(.init(code: .parse, text: "hello3")))
+        ),
         ParseFixture.taggedResponseState("OK ", "\n", expected: .success(.ok(.init(text: "")))),
         ParseFixture.taggedResponseState("OK", "\n", expected: .success(.ok(.init(text: "")))),
         ParseFixture.taggedResponseState("OOPS [ALERT] hello1", "\n", expected: .failure),

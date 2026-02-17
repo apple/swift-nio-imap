@@ -217,9 +217,15 @@ private struct SectionSpecifierTests {
         ParseFixture.sectionSpecifierKind("HEADER", expected: .success(.header)),
         ParseFixture.sectionSpecifierKind("TEXT", expected: .success(.text)),
         ParseFixture.sectionSpecifierKind("HEADER.FIELDS (f1)", expected: .success(.headerFields(["f1"]))),
-        ParseFixture.sectionSpecifierKind("HEADER.FIELDS (f1 f2 f3)", expected: .success(.headerFields(["f1", "f2", "f3"]))),
+        ParseFixture.sectionSpecifierKind(
+            "HEADER.FIELDS (f1 f2 f3)",
+            expected: .success(.headerFields(["f1", "f2", "f3"]))
+        ),
         ParseFixture.sectionSpecifierKind("HEADER.FIELDS.NOT (f1)", expected: .success(.headerFieldsNot(["f1"]))),
-        ParseFixture.sectionSpecifierKind("HEADER.FIELDS.NOT (f1 f2 f3)", expected: .success(.headerFieldsNot(["f1", "f2", "f3"]))),
+        ParseFixture.sectionSpecifierKind(
+            "HEADER.FIELDS.NOT (f1 f2 f3)",
+            expected: .success(.headerFieldsNot(["f1", "f2", "f3"]))
+        ),
         ParseFixture.sectionSpecifierKind("", expected: .success(.complete)),
         ParseFixture.sectionSpecifierKind("HEADER.FIELDS ", "", expected: .incompleteMessage),
         ParseFixture.sectionSpecifierKind("HEADER.FIELDS (f1 f2 f3 ", "", expected: .incompleteMessage),

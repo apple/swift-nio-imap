@@ -41,7 +41,10 @@ struct MailboxesTests {
     @Test(arguments: [
         ParseFixture.oneOrMoreMailbox("\"box1\"", expected: .success(Mailboxes([.init("box1")])!)),
         ParseFixture.oneOrMoreMailbox("(\"box1\")", expected: .success(Mailboxes([.init("box1")])!)),
-        ParseFixture.oneOrMoreMailbox("(\"box1\" \"box2\")", expected: .success(Mailboxes([.init("box1"), .init("box2")])!)),
+        ParseFixture.oneOrMoreMailbox(
+            "(\"box1\" \"box2\")",
+            expected: .success(Mailboxes([.init("box1"), .init("box2")])!)
+        ),
         ParseFixture.oneOrMoreMailbox("()", expected: .failure),
     ])
     func parseOneOrMoreMailbox(_ fixture: ParseFixture<Mailboxes>) {

@@ -76,10 +76,12 @@ struct ResponseParserTests {
             }
             return results
         }()
-        #expect(results == [
-            .response(.fetch(.start(617_85))),
-            .response(.fetch(.simpleAttribute(.uid(127_139)))),
-        ])
+        #expect(
+            results == [
+                .response(.fetch(.start(617_85))),
+                .response(.fetch(.simpleAttribute(.uid(127_139)))),
+            ]
+        )
     }
 
     @Test
@@ -145,9 +147,10 @@ struct ResponseParserTests {
         var buffer: ByteBuffer = "* 999 FETCH (RFC822.TEXT {3}\r\n123 RFC822.HEADER {11}\r\n "
         #expect(try parser.parseResponseStream(buffer: &buffer) == .response(.fetch(.start(999))))
         #expect(
-            try parser.parseResponseStream(buffer: &buffer) == .response(
-                .fetch(.streamingBegin(kind: .rfc822Text, byteCount: 3))
-            )
+            try parser.parseResponseStream(buffer: &buffer)
+                == .response(
+                    .fetch(.streamingBegin(kind: .rfc822Text, byteCount: 3))
+                )
         )
         #expect(try parser.parseResponseStream(buffer: &buffer) == .response(.fetch(.streamingBytes("123"))))
         #expect(try parser.parseResponseStream(buffer: &buffer) == .response(.fetch(.streamingEnd)))
@@ -190,9 +193,10 @@ struct ResponseParserTests {
         var buffer: ByteBuffer = "* 999 FETCH (FLAGS (\\Seen))\r\n"
         #expect(try parser.parseResponseStream(buffer: &buffer) == .response(.fetch(.start(999))))
         #expect(
-            try parser.parseResponseStream(buffer: &buffer) == .response(
-                .fetch(.simpleAttribute(.flags([.init("\\nees")])))
-            )
+            try parser.parseResponseStream(buffer: &buffer)
+                == .response(
+                    .fetch(.simpleAttribute(.flags([.init("\\nees")])))
+                )
         )
     }
 
@@ -210,9 +214,10 @@ struct ResponseParserTests {
         var buffer: ByteBuffer = "* 999 FETCH (RFC822.TEXT {3}\r\n123 RFC822.HEADER {11}\r\n "
         #expect(try parser.parseResponseStream(buffer: &buffer) == .response(.fetch(.start(999))))
         #expect(
-            try parser.parseResponseStream(buffer: &buffer) == .response(
-                .fetch(.streamingBegin(kind: .rfc822Text, byteCount: 3))
-            )
+            try parser.parseResponseStream(buffer: &buffer)
+                == .response(
+                    .fetch(.streamingBegin(kind: .rfc822Text, byteCount: 3))
+                )
         )
     }
 

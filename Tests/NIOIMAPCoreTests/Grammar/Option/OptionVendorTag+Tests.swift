@@ -19,7 +19,7 @@ import Testing
 @Suite("KeyValue<String, String>")
 struct OptionVendorTagTests {
     @Test(arguments: [
-        EncodeFixture.optionVendorTag(.init(key: "some", value: "thing"), "some-thing"),
+        EncodeFixture.optionVendorTag(.init(key: "some", value: "thing"), "some-thing")
     ])
     func encode(_ fixture: EncodeFixture<KeyValue<String, String>>) {
         fixture.checkEncoding()

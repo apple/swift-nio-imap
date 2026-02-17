@@ -19,7 +19,7 @@ import Testing
 @Suite("EncodedAuthenticationType")
 struct EncodedAuthenticationTypeTests {
     @Test(arguments: [
-        EncodeFixture.encodedAuthenticationType(.init(authenticationType: "hello"), "hello"),
+        EncodeFixture.encodedAuthenticationType(.init(authenticationType: "hello"), "hello")
     ])
     func encode(_ fixture: EncodeFixture<EncodedAuthenticationType>) {
         fixture.checkEncoding()
@@ -30,7 +30,7 @@ struct EncodedAuthenticationTypeTests {
             "hello%FF",
             " ",
             expected: .success(.init(authenticationType: "hello%FF"))
-        ),
+        )
     ])
     func parse(_ fixture: ParseFixture<EncodedAuthenticationType>) {
         fixture.checkParsing()

@@ -24,9 +24,15 @@ struct SearchReturnDataTests {
         EncodeFixture.searchReturnData(.all(LastCommandSet.range(1...3)), "ALL 1:3"),
         EncodeFixture.searchReturnData(.count(1), "COUNT 1"),
         EncodeFixture.searchReturnData(.modificationSequence(1), "MODSEQ 1"),
-        EncodeFixture.searchReturnData(.partial(.first(23_500...24_000), [67, 100...102]), "PARTIAL (23500:24000 67,100:102)"),
+        EncodeFixture.searchReturnData(
+            .partial(.first(23_500...24_000), [67, 100...102]),
+            "PARTIAL (23500:24000 67,100:102)"
+        ),
         EncodeFixture.searchReturnData(.partial(.last(55...700), []), "PARTIAL (-55:-700 NIL)"),
-        EncodeFixture.searchReturnData(.dataExtension(.init(key: "modifier", value: .sequence(.set([3])))), "modifier 3"),
+        EncodeFixture.searchReturnData(
+            .dataExtension(.init(key: "modifier", value: .sequence(.set([3])))),
+            "modifier 3"
+        ),
     ])
     func encode(_ fixture: EncodeFixture<SearchReturnData>) {
         fixture.checkEncoding()
@@ -40,17 +46,29 @@ struct SearchReturnDataTests {
         ParseFixture.searchReturnData("COUNT 4", expected: .success(.count(4))),
         ParseFixture.searchReturnData("MODSEQ 4", expected: .success(.modificationSequence(4))),
         ParseFixture.searchReturnData("PARTIAL (1:10 108595)", expected: .success(.partial(.first(1...10), [108595]))),
-        ParseFixture.searchReturnData("PARTIAL (-2:-20 20:24,108595)", expected: .success(.partial(.last(2...20), [20...24, 108595]))),
+        ParseFixture.searchReturnData(
+            "PARTIAL (-2:-20 20:24,108595)",
+            expected: .success(.partial(.last(2...20), [20...24, 108595]))
+        ),
         ParseFixture.searchReturnData("PARTIAL (1:10 NIL)", expected: .success(.partial(.first(1...10), []))),
-        ParseFixture.searchReturnData("modifier 5", expected: .success(.dataExtension(.init(key: "modifier", value: .sequence(.set([5])))))),
+        ParseFixture.searchReturnData(
+            "modifier 5",
+            expected: .success(.dataExtension(.init(key: "modifier", value: .sequence(.set([5])))))
+        ),
     ])
     func parse(_ fixture: ParseFixture<SearchReturnData>) {
         fixture.checkParsing()
     }
 
     @Test(arguments: [
-        ParseFixture.searchReturnDataPartial("PARTIAL (23500:24000 67,100:102)", expected: .success(.partial(.first(23_500...24_000), [67, 100...102]))),
-        ParseFixture.searchReturnDataPartial("PARTIAL (-55:-700 NIL)", expected: .success(.partial(.last(55...700), []))),
+        ParseFixture.searchReturnDataPartial(
+            "PARTIAL (23500:24000 67,100:102)",
+            expected: .success(.partial(.first(23_500...24_000), [67, 100...102]))
+        ),
+        ParseFixture.searchReturnDataPartial(
+            "PARTIAL (-55:-700 NIL)",
+            expected: .success(.partial(.last(55...700), []))
+        ),
     ])
     func `parse partial`(_ fixture: ParseFixture<SearchReturnData>) {
         fixture.checkParsing()

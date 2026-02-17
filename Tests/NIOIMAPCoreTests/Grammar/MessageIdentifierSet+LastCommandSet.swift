@@ -20,7 +20,16 @@ import Testing
 struct LastCommandSetTests {
     @Test(arguments: [
         ParseFixture.lastCommandSet("765", " ", expected: .success(.set([765]))),
-        ParseFixture.lastCommandSet("1,2:5,7,9:*", " ", expected: .success(.set([MessageIdentifierRange<SequenceNumber>(1), MessageIdentifierRange<SequenceNumber>(2...5), MessageIdentifierRange<SequenceNumber>(7), MessageIdentifierRange<SequenceNumber>(9...)]))),
+        ParseFixture.lastCommandSet(
+            "1,2:5,7,9:*",
+            " ",
+            expected: .success(
+                .set([
+                    MessageIdentifierRange<SequenceNumber>(1), MessageIdentifierRange<SequenceNumber>(2...5),
+                    MessageIdentifierRange<SequenceNumber>(7), MessageIdentifierRange<SequenceNumber>(9...),
+                ])
+            )
+        ),
         ParseFixture.lastCommandSet("1:*", expected: .success(.set([.all]))),
         ParseFixture.lastCommandSet("1:2", expected: .success(.set([1...2]))),
         ParseFixture.lastCommandSet("1:2,2:3,3:4", expected: .success(.set([1...2, 2...3, 3...4]))),

@@ -22,7 +22,7 @@ struct TaggedExtensionTests {
         EncodeFixture.taggedExtension(
             .init(key: "label", value: .sequence(.set([1]))),
             "label 1"
-        ),
+        )
     ])
     func encode(_ fixture: EncodeFixture<KeyValue<String, ParameterValue>>) {
         fixture.checkEncoding()
@@ -32,7 +32,7 @@ struct TaggedExtensionTests {
         ParseFixture.taggedExtension(
             "label 1",
             expected: .success(.init(key: "label", value: .sequence(.set([1]))))
-        ),
+        )
     ])
     func parse(_ fixture: ParseFixture<KeyValue<String, ParameterValue>>) {
         fixture.checkParsing()
@@ -43,7 +43,10 @@ struct TaggedExtensionTests {
         ParseFixture.taggedExtensionComplex("(test)", expected: .success(["test"])),
         ParseFixture.taggedExtensionComplex("(test1 test2)", expected: .success(["test1", "test2"])),
         ParseFixture.taggedExtensionComplex("test1 test2", expected: .success(["test1", "test2"])),
-        ParseFixture.taggedExtensionComplex("test1 test2 (test3 test4) test5", expected: .success(["test1", "test2", "test3", "test4", "test5"])),
+        ParseFixture.taggedExtensionComplex(
+            "test1 test2 (test3 test4) test5",
+            expected: .success(["test1", "test2", "test3", "test4", "test5"])
+        ),
     ])
     func `parse complex`(_ fixture: ParseFixture<[String]>) {
         fixture.checkParsing()

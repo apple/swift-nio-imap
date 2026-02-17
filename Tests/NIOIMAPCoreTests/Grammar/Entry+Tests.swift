@@ -20,7 +20,7 @@ import OrderedCollections
 @Suite("Entry")
 struct EntryTests {
     @Test(arguments: [
-        EncodeFixture.entry(.init(key: "name", value: .init("value")), "\"name\" ~{5}\r\nvalue"),
+        EncodeFixture.entry(.init(key: "name", value: .init("value")), "\"name\" ~{5}\r\nvalue")
     ])
     func `encode single entry`(_ fixture: EncodeFixture<KeyValue<MetadataEntryName, MetadataValue>>) {
         fixture.checkEncoding()

@@ -53,35 +53,35 @@ struct CommandParserTests {
         var parser = CommandParser()
 
         #expect(
-            try parser.parseCommandStream(buffer: &inputA) ==
-            .init(
-                .tagged(
-                    .init(
-                        tag: "A26",
-                        command: .uidFetch(
-                            messages: UIDSet([1...10002]),
-                            attributes: [.uid, .flags, .modificationSequence],
-                            modifiers: []
-                        )!
-                    )
-                ),
-                numberOfSynchronisingLiterals: 0
-            )
+            try parser.parseCommandStream(buffer: &inputA)
+                == .init(
+                    .tagged(
+                        .init(
+                            tag: "A26",
+                            command: .uidFetch(
+                                messages: UIDSet([1...10002]),
+                                attributes: [.uid, .flags, .modificationSequence],
+                                modifiers: []
+                            )!
+                        )
+                    ),
+                    numberOfSynchronisingLiterals: 0
+                )
         )
 
         // Send in another line:
         var inputB = ByteBuffer("A27 UID FETCH 2:22 (UID FLAGS)\r")
         #expect(
-            try parser.parseCommandStream(buffer: &inputB) ==
-            .init(
-                .tagged(
-                    .init(
-                        tag: "A27",
-                        command: .uidFetch(messages: UIDSet([2...22]), attributes: [.uid, .flags], modifiers: [])!
-                    )
-                ),
-                numberOfSynchronisingLiterals: 0
-            )
+            try parser.parseCommandStream(buffer: &inputB)
+                == .init(
+                    .tagged(
+                        .init(
+                            tag: "A27",
+                            command: .uidFetch(messages: UIDSet([2...22]), attributes: [.uid, .flags], modifiers: [])!
+                        )
+                    ),
+                    numberOfSynchronisingLiterals: 0
+                )
         )
     }
 
@@ -93,25 +93,25 @@ struct CommandParserTests {
 
         input = "1 NOOP\r\n"
         #expect(
-            try parser.parseCommandStream(buffer: &input) ==
-            .init(.tagged(.init(tag: "1", command: .noop)), numberOfSynchronisingLiterals: 0)
+            try parser.parseCommandStream(buffer: &input)
+                == .init(.tagged(.init(tag: "1", command: .noop)), numberOfSynchronisingLiterals: 0)
         )
         #expect(input == "")
 
         input = "2 LOGIN {0}\r\n {0}\r\n\r\n"
         #expect(
-            try parser.parseCommandStream(buffer: &input) ==
-            .init(
-                .tagged(.init(tag: "2", command: .login(username: "", password: ""))),
-                numberOfSynchronisingLiterals: 2
-            )
+            try parser.parseCommandStream(buffer: &input)
+                == .init(
+                    .tagged(.init(tag: "2", command: .login(username: "", password: ""))),
+                    numberOfSynchronisingLiterals: 2
+                )
         )
         #expect(input == "")
 
         input = "3 APPEND INBOX {3+}\r\n123 {3+}\r\n456 {3+}\r\n789\r\n"
         #expect(
-            try parser.parseCommandStream(buffer: &input) ==
-            .init(.append(.start(tag: "3", appendingTo: .inbox)), numberOfSynchronisingLiterals: 0)
+            try parser.parseCommandStream(buffer: &input)
+                == .init(.append(.start(tag: "3", appendingTo: .inbox)), numberOfSynchronisingLiterals: 0)
         )
         #expect(input == " {3+}\r\n123 {3+}\r\n456 {3+}\r\n789\r\n")
     }

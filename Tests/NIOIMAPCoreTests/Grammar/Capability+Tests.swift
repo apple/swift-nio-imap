@@ -168,7 +168,10 @@ struct CapabilityTests {
         ParseFixture.capabilityData("CAPABILITY IMAP4rev1", expected: .success([.imap4rev1])),
         ParseFixture.capabilityData("CAPABILITY IMAP4 IMAP4rev1", expected: .success([.imap4, .imap4rev1])),
         ParseFixture.capabilityData("CAPABILITY FILTERS IMAP4", expected: .success([.filters, .imap4])),
-        ParseFixture.capabilityData("CAPABILITY FILTERS IMAP4rev1 ENABLE", expected: .success([.filters, .imap4rev1, .enable])),
+        ParseFixture.capabilityData(
+            "CAPABILITY FILTERS IMAP4rev1 ENABLE",
+            expected: .success([.filters, .imap4rev1, .enable])
+        ),
         ParseFixture.capabilityData(
             "CAPABILITY FILTERS IMAP4rev1 ENABLE IMAP4",
             expected: .success([.filters, .imap4rev1, .enable, .imap4])

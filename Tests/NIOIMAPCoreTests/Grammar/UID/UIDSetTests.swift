@@ -20,10 +20,10 @@ import Testing
 struct UIDSetTests {
     @Test(arguments: [
         DebugStringFixture(
-            sut: [1 ... 3, MessageIdentifierRange<UID>(6), MessageIdentifierRange<UID>(88)] as MessageIdentifierSet,
+            sut: [1...3, MessageIdentifierRange<UID>(6), MessageIdentifierRange<UID>(88)] as MessageIdentifierSet,
             expected: "1:3,6,88"
         ),
-        DebugStringFixture(sut: [1 ... (UID.max)] as MessageIdentifierSet, expected: "1:*"),
+        DebugStringFixture(sut: [1...(UID.max)] as MessageIdentifierSet, expected: "1:*"),
         DebugStringFixture(sut: [MessageIdentifierRange<UID>(37)] as MessageIdentifierSet, expected: "37"),
         DebugStringFixture(sut: [MessageIdentifierRange<UID>(.max)] as MessageIdentifierSet, expected: "*"),
     ])

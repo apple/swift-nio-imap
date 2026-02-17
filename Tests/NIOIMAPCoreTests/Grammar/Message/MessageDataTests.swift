@@ -34,7 +34,10 @@ struct MessageDataTests {
         ParseFixture.messageData("VANISHED 1:3", expected: .success(.vanished([1...3]))),
         ParseFixture.messageData("VANISHED (EARLIER) 1:3", expected: .success(.vanishedEarlier([1...3]))),
         ParseFixture.messageData("GENURLAUTH test", expected: .success(.generateAuthorizedURL(["test"]))),
-        ParseFixture.messageData("GENURLAUTH test1 test2", expected: .success(.generateAuthorizedURL(["test1", "test2"]))),
+        ParseFixture.messageData(
+            "GENURLAUTH test1 test2",
+            expected: .success(.generateAuthorizedURL(["test1", "test2"]))
+        ),
         ParseFixture.messageData("URLFETCH url NIL", expected: .success(.urlFetch([.init(url: "url", data: nil)]))),
         ParseFixture.messageData(
             "URLFETCH url1 NIL url2 NIL url3 \"data\"",

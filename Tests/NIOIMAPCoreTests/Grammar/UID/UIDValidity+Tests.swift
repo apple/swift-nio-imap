@@ -51,7 +51,12 @@ struct UIDValidityTests {
 
 extension EncodeFixture<UIDValidity> {
     fileprivate static func uidValidity(_ input: UIDValidity, _ expectedString: String) -> Self {
-        EncodeFixture(input: input, bufferKind: .defaultServer, expectedString: expectedString, encoder: { $0.writeUIDValidity($1) })
+        EncodeFixture(
+            input: input,
+            bufferKind: .defaultServer,
+            expectedString: expectedString,
+            encoder: { $0.writeUIDValidity($1) }
+        )
     }
 }
 

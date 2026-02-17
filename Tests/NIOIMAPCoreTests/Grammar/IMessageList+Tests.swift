@@ -40,13 +40,15 @@ struct EncodedSearchQueryTests {
 
     @Test(arguments: [
         ParseFixture.encodedSearchQuery(
-            "test", " ",
+            "test",
+            " ",
             expected: .success(
                 .init(mailboxUIDValidity: .init(encodeMailbox: .init(mailbox: "test"), uidValidity: nil))
             )
         ),
         ParseFixture.encodedSearchQuery(
-            "test?query", " ",
+            "test?query",
+            " ",
             expected: .success(
                 .init(
                     mailboxUIDValidity: .init(encodeMailbox: .init(mailbox: "test"), uidValidity: nil),

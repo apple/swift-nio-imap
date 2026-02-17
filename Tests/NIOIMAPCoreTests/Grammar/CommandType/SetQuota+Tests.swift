@@ -29,13 +29,15 @@ struct QuotaCommandTests {
         ),
         ParseFixture.setQuota(
             "SETQUOTA \"MASSIVE_POOL\" (STORAGE 512 BEANS 50000)",
-            expected: .success(.setQuota(
-                QuotaRoot("MASSIVE_POOL"),
-                [
-                    QuotaLimit(resourceName: "STORAGE", limit: 512),
-                    QuotaLimit(resourceName: "BEANS", limit: 50000),
-                ]
-            ))
+            expected: .success(
+                .setQuota(
+                    QuotaRoot("MASSIVE_POOL"),
+                    [
+                        QuotaLimit(resourceName: "STORAGE", limit: 512),
+                        QuotaLimit(resourceName: "BEANS", limit: 50000),
+                    ]
+                )
+            )
         ),
         ParseFixture.setQuota(
             "SETQUOTA \"MASSIVE_POOL\" ()",

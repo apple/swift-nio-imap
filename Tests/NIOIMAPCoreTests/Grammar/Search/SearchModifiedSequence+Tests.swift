@@ -20,8 +20,17 @@ import Testing
 struct SearchModifiedSequenceTests {
     @Test(arguments: [
         EncodeFixture.searchModificationSequence(.init(extensions: [:], sequenceValue: 1), "MODSEQ 1"),
-        EncodeFixture.searchModificationSequence(.init(extensions: [.init(flag: .answered): .all], sequenceValue: .init(integerLiteral: 1)), "MODSEQ \"/flags/\\\\answered\" all 1"),
-        EncodeFixture.searchModificationSequence(.init(extensions: [.init(flag: .answered): .all, .init(flag: .seen): .private], sequenceValue: .init(integerLiteral: 1)), "MODSEQ \"/flags/\\\\answered\" all \"/flags/\\\\seen\" priv 1"),
+        EncodeFixture.searchModificationSequence(
+            .init(extensions: [.init(flag: .answered): .all], sequenceValue: .init(integerLiteral: 1)),
+            "MODSEQ \"/flags/\\\\answered\" all 1"
+        ),
+        EncodeFixture.searchModificationSequence(
+            .init(
+                extensions: [.init(flag: .answered): .all, .init(flag: .seen): .private],
+                sequenceValue: .init(integerLiteral: 1)
+            ),
+            "MODSEQ \"/flags/\\\\answered\" all \"/flags/\\\\seen\" priv 1"
+        ),
         EncodeFixture.searchModificationSequence(.init(extensions: [:], sequenceValue: 1), "MODSEQ 1"),
     ])
     func encode(_ fixture: EncodeFixture<SearchModificationSequence>) {
@@ -29,20 +38,25 @@ struct SearchModifiedSequenceTests {
     }
 
     @Test(arguments: [
-        ParseFixture.searchModificationSequence("MODSEQ 4", expected: .success(.init(extensions: [:], sequenceValue: 4))),
+        ParseFixture.searchModificationSequence(
+            "MODSEQ 4",
+            expected: .success(.init(extensions: [:], sequenceValue: 4))
+        ),
         ParseFixture.searchModificationSequence(
             #"MODSEQ "/flags/\\Answered" priv 4"#,
             expected: .success(.init(extensions: [.init(flag: .answered): .private], sequenceValue: 4))
         ),
         ParseFixture.searchModificationSequence(
             #"MODSEQ "/flags/\\Answered" priv "/flags/\\Seen" shared 4"#,
-            expected: .success(.init(
-                extensions: [
-                    .init(flag: .answered): .private,
-                    .init(flag: .seen): .shared,
-                ],
-                sequenceValue: 4
-            ))
+            expected: .success(
+                .init(
+                    extensions: [
+                        .init(flag: .answered): .private,
+                        .init(flag: .seen): .shared,
+                    ],
+                    sequenceValue: 4
+                )
+            )
         ),
     ])
     func parse(_ fixture: ParseFixture<SearchModificationSequence>) {
@@ -54,7 +68,7 @@ struct SearchModifiedSequenceTests {
             #" "/flags/\\Seen" all"#,
             "",
             expected: .success(.init(key: .init(flag: .seen), value: .all))
-        ),
+        )
     ])
     func `parse extension`(_ fixture: ParseFixture<KeyValue<EntryFlagName, EntryKindRequest>>) {
         fixture.checkParsing()
@@ -64,7 +78,10 @@ struct SearchModifiedSequenceTests {
 // MARK: -
 
 extension EncodeFixture<SearchModificationSequence> {
-    fileprivate static func searchModificationSequence(_ input: SearchModificationSequence, _ expectedString: String) -> Self {
+    fileprivate static func searchModificationSequence(
+        _ input: SearchModificationSequence,
+        _ expectedString: String
+    ) -> Self {
         EncodeFixture(
             input: input,
             bufferKind: .defaultServer,

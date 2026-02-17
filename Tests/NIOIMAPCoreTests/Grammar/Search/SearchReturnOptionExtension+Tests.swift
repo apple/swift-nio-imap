@@ -33,8 +33,16 @@ struct SearchReturnOptionExtensionTests {
     }
 
     @Test(arguments: [
-        ParseFixture.searchReturnOptionExtension("modifier", "\r", expected: .success(.init(key: "modifier", value: nil))),
-        ParseFixture.searchReturnOptionExtension("modifier 4", "\r", expected: .success(.init(key: "modifier", value: .sequence(.set([4]))))),
+        ParseFixture.searchReturnOptionExtension(
+            "modifier",
+            "\r",
+            expected: .success(.init(key: "modifier", value: nil))
+        ),
+        ParseFixture.searchReturnOptionExtension(
+            "modifier 4",
+            "\r",
+            expected: .success(.init(key: "modifier", value: .sequence(.set([4]))))
+        ),
         ParseFixture.searchReturnOptionExtension("modifier ", "", expected: .incompleteMessage),
     ])
     func parse(_ fixture: ParseFixture<KeyValue<String, ParameterValue?>>) {

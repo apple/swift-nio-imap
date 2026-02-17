@@ -250,7 +250,11 @@ struct ExtendedSearchResponseTests {
             #"ESEARCH (TAG "A282") MIN 2 COUNT 3"#
         ),
         EncodeFixture.extendedSearchResponse(
-            .init(correlator: SearchCorrelator(tag: "A283"), kind: .sequenceNumber, returnData: [.all(.set([2, 10...11]))]),
+            .init(
+                correlator: SearchCorrelator(tag: "A283"),
+                kind: .sequenceNumber,
+                returnData: [.all(.set([2, 10...11]))]
+            ),
             #"ESEARCH (TAG "A283") ALL 2,10:11"#
         ),
         EncodeFixture.extendedSearchResponse(
@@ -289,7 +293,9 @@ struct ExtendedSearchResponseTests {
         ),
         ParseFixture.extendedSearchResponse(
             " (TAG \"col\") UID MIN 1 MAX 2",
-            expected: .success(.init(correlator: SearchCorrelator(tag: "col"), kind: .uid, returnData: [.min(1), .max(2)]))
+            expected: .success(
+                .init(correlator: SearchCorrelator(tag: "col"), kind: .uid, returnData: [.min(1), .max(2)])
+            )
         ),
     ])
     func parse(_ fixture: ParseFixture<ExtendedSearchResponse>) {

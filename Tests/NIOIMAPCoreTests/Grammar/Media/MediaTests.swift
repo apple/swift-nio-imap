@@ -73,8 +73,14 @@ struct MediaTests {
     }
 
     @Test(arguments: [
-        ParseFixture.mediaType(#""APPLICATION" "mixed""#, expected: .success(Media.MediaType(topLevel: .application, sub: .mixed))),
-        ParseFixture.mediaType(#""STRING" "related""#, expected: .success(Media.MediaType(topLevel: .init("STRING"), sub: .related))),
+        ParseFixture.mediaType(
+            #""APPLICATION" "mixed""#,
+            expected: .success(Media.MediaType(topLevel: .application, sub: .mixed))
+        ),
+        ParseFixture.mediaType(
+            #""STRING" "related""#,
+            expected: .success(Media.MediaType(topLevel: .init("STRING"), sub: .related))
+        ),
         ParseFixture.mediaType(#"hey "something""#, "\r", expected: .failureIgnoringBufferModifications),
     ])
     func `parse media type`(_ fixture: ParseFixture<Media.MediaType>) {

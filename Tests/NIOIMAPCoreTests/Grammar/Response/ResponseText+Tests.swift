@@ -35,8 +35,14 @@ struct ResponseTextTests {
         ParseFixture.responseText(" text", expected: .success(.init(code: nil, text: "text"))),
         ParseFixture.responseText("[UNSEEN 1]", expected: .success(.init(code: .unseen(1), text: ""))),
         ParseFixture.responseText("[UNSEEN 2] ", expected: .success(.init(code: .unseen(2), text: ""))),
-        ParseFixture.responseText("[UNSEEN 2] some text", expected: .success(.init(code: .unseen(2), text: "some text"))),
-        ParseFixture.responseText("[UIDVALIDITY 1561789793]", expected: .success(.init(code: .uidValidity(1_561_789_793), text: ""))),
+        ParseFixture.responseText(
+            "[UNSEEN 2] some text",
+            expected: .success(.init(code: .unseen(2), text: "some text"))
+        ),
+        ParseFixture.responseText(
+            "[UIDVALIDITY 1561789793]",
+            expected: .success(.init(code: .uidValidity(1_561_789_793), text: ""))
+        ),
         ParseFixture.responseText("[UIDNEXT 171]", expected: .success(.init(code: .uidNext(171), text: ""))),
     ])
     func parse(_ fixture: ParseFixture<ResponseText>) {

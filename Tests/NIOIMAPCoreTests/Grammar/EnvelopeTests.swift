@@ -81,25 +81,51 @@ struct EnvelopeTests {
     @Test(arguments: [
         ParseFixture.envelope(
             #"("date" "subject" (("name1" "adl1" "mailbox1" "host1")) (("name2" "adl2" "mailbox2" "host2")) (("name3" "adl3" "mailbox3" "host3")) (("name4" "adl4" "mailbox4" "host4") ("name5" "adl5" "mailbox5" "host5")) (("name6" "adl6" "mailbox6" "host6")("name7" "adl7" "mailbox7" "host7")) (("name8" "adl8" "mailbox8" "host8")) "someone" "messageid")"#,
-            expected: .success(Envelope(
-                date: "date",
-                subject: "subject",
-                from: [.singleAddress(.init(personName: "name1", sourceRoot: "adl1", mailbox: "mailbox1", host: "host1"))],
-                sender: [.singleAddress(.init(personName: "name2", sourceRoot: "adl2", mailbox: "mailbox2", host: "host2"))],
-                reply: [.singleAddress(.init(personName: "name3", sourceRoot: "adl3", mailbox: "mailbox3", host: "host3"))],
-                to: [
-                    .singleAddress(.init(personName: "name4", sourceRoot: "adl4", mailbox: "mailbox4", host: "host4")),
-                    .singleAddress(.init(personName: "name5", sourceRoot: "adl5", mailbox: "mailbox5", host: "host5"))
-                ],
-                cc: [
-                    .singleAddress(.init(personName: "name6", sourceRoot: "adl6", mailbox: "mailbox6", host: "host6")),
-                    .singleAddress(.init(personName: "name7", sourceRoot: "adl7", mailbox: "mailbox7", host: "host7"))
-                ],
-                bcc: [.singleAddress(.init(personName: "name8", sourceRoot: "adl8", mailbox: "mailbox8", host: "host8"))],
-                inReplyTo: "someone",
-                messageID: "messageid"
-            ))
-        ),
+            expected: .success(
+                Envelope(
+                    date: "date",
+                    subject: "subject",
+                    from: [
+                        .singleAddress(
+                            .init(personName: "name1", sourceRoot: "adl1", mailbox: "mailbox1", host: "host1")
+                        )
+                    ],
+                    sender: [
+                        .singleAddress(
+                            .init(personName: "name2", sourceRoot: "adl2", mailbox: "mailbox2", host: "host2")
+                        )
+                    ],
+                    reply: [
+                        .singleAddress(
+                            .init(personName: "name3", sourceRoot: "adl3", mailbox: "mailbox3", host: "host3")
+                        )
+                    ],
+                    to: [
+                        .singleAddress(
+                            .init(personName: "name4", sourceRoot: "adl4", mailbox: "mailbox4", host: "host4")
+                        ),
+                        .singleAddress(
+                            .init(personName: "name5", sourceRoot: "adl5", mailbox: "mailbox5", host: "host5")
+                        ),
+                    ],
+                    cc: [
+                        .singleAddress(
+                            .init(personName: "name6", sourceRoot: "adl6", mailbox: "mailbox6", host: "host6")
+                        ),
+                        .singleAddress(
+                            .init(personName: "name7", sourceRoot: "adl7", mailbox: "mailbox7", host: "host7")
+                        ),
+                    ],
+                    bcc: [
+                        .singleAddress(
+                            .init(personName: "name8", sourceRoot: "adl8", mailbox: "mailbox8", host: "host8")
+                        )
+                    ],
+                    inReplyTo: "someone",
+                    messageID: "messageid"
+                )
+            )
+        )
     ])
     func `parse envelope`(_ fixture: ParseFixture<Envelope>) {
         fixture.checkParsing()

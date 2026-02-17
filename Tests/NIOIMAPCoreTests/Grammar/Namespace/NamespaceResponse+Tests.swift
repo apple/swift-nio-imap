@@ -41,7 +41,7 @@ struct NamespaceResponseTests {
             " nil nil nil",
             " ",
             expected: .success(.init(userNamespace: [], otherUserNamespace: [], sharedNamespace: []))
-        ),
+        )
     ])
     func parse(_ fixture: ParseFixture<NamespaceResponse>) {
         fixture.checkParsing()

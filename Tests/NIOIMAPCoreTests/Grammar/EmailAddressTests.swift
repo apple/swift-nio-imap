@@ -170,7 +170,9 @@ struct EmailAddressTestsSuite {
                                     groupName: "group2",
                                     sourceRoot: nil,
                                     children: [
-                                        .singleAddress(.init(personName: "b", sourceRoot: "b", mailbox: "b", host: "b")),
+                                        .singleAddress(
+                                            .init(personName: "b", sourceRoot: "b", mailbox: "b", host: "b")
+                                        ),
                                         .group(
                                             .init(
                                                 groupName: "group3",

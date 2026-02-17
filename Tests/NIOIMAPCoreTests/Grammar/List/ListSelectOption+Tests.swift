@@ -30,8 +30,14 @@ struct ListSelectOptionTests {
 
     @Test(arguments: [
         EncodeFixture.listSelectOptions(nil, "()"),
-        EncodeFixture.listSelectOptions(.init(baseOption: .subscribed, options: [.subscribed]), "(SUBSCRIBED SUBSCRIBED)"),
-        EncodeFixture.listSelectOptions(.init(baseOption: .subscribed, options: [.specialUse, .recursiveMatch]), "(SPECIAL-USE RECURSIVEMATCH SUBSCRIBED)"),
+        EncodeFixture.listSelectOptions(
+            .init(baseOption: .subscribed, options: [.subscribed]),
+            "(SUBSCRIBED SUBSCRIBED)"
+        ),
+        EncodeFixture.listSelectOptions(
+            .init(baseOption: .subscribed, options: [.specialUse, .recursiveMatch]),
+            "(SPECIAL-USE RECURSIVEMATCH SUBSCRIBED)"
+        ),
     ])
     func `encode multiple options`(_ fixture: EncodeFixture<ListSelectOptions?>) {
         fixture.checkEncoding()

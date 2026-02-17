@@ -30,7 +30,7 @@ struct QuotaResponseTests {
             (
                 QuotaRoot("!partition/sda4"),
                 [
-                    QuotaResource(resourceName: "STORAGE", usage: 104 , limit: 10923847),
+                    QuotaResource(resourceName: "STORAGE", usage: 104, limit: 10_923_847)
                 ]
             ),
             #"QUOTA "!partition/sda4" (STORAGE 104 10923847)"#
@@ -39,7 +39,7 @@ struct QuotaResponseTests {
             (
                 QuotaRoot("#user/alice"),
                 [
-                    QuotaResource(resourceName: "MESSAGE", usage: 42 , limit: 1000),
+                    QuotaResource(resourceName: "MESSAGE", usage: 42, limit: 1000)
                 ]
             ),
             ##"QUOTA "#user/alice" (MESSAGE 42 1000)"##

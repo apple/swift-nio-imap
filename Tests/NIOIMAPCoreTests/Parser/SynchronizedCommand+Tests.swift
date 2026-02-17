@@ -43,13 +43,18 @@ struct SynchronizedCommandTests {
 
         #expect(buffer.readableBytes == 0)
         #expect(
-            c1 ==
-                SynchronizedCommand(.tagged(TaggedCommand(tag: "1", command: .noop)), numberOfSynchronisingLiterals: 1)
+            c1
+                == SynchronizedCommand(
+                    .tagged(TaggedCommand(tag: "1", command: .noop)),
+                    numberOfSynchronisingLiterals: 1
+                )
         )
         #expect(c2_1 == SynchronizedCommand(.append(.start(tag: "2", appendingTo: .inbox))))
         #expect(
-            c2_2 ==
-                SynchronizedCommand(.append(.beginMessage(message: .init(options: .none, data: .init(byteCount: 10)))))
+            c2_2
+                == SynchronizedCommand(
+                    .append(.beginMessage(message: .init(options: .none, data: .init(byteCount: 10))))
+                )
         )
         #expect(c2_3 == SynchronizedCommand(.append(.messageBytes("0123456789"))))
         #expect(c2_4 == SynchronizedCommand(.append(.endMessage)))
@@ -93,47 +98,49 @@ struct SynchronizedCommandTests {
 
         #expect(buffer.readableBytes == 0)
         #expect(
-            c1 ==
-                SynchronizedCommand(.tagged(TaggedCommand(tag: "1", command: .noop)), numberOfSynchronisingLiterals: 3)
+            c1
+                == SynchronizedCommand(
+                    .tagged(TaggedCommand(tag: "1", command: .noop)),
+                    numberOfSynchronisingLiterals: 3
+                )
         )
         #expect(c2_1 == SynchronizedCommand(.append(.start(tag: "A003", appendingTo: MailboxName("Drafts")))))
         #expect(
-            c2_2 ==
-                SynchronizedCommand(
+            c2_2
+                == SynchronizedCommand(
                     .append(
                         .beginCatenate(options: .init(flagList: [.seen, .draft, .keyword(.mdnSent)], extensions: [:]))
                     )
                 )
         )
         #expect(
-            c2_3 ==
-                SynchronizedCommand(.append(.catenateURL("/Drafts;UIDVALIDITY=385759045/;UID=20/;section=HEADER")))
+            c2_3 == SynchronizedCommand(.append(.catenateURL("/Drafts;UIDVALIDITY=385759045/;UID=20/;section=HEADER")))
         )
         #expect(c2_4 == SynchronizedCommand(.append(.catenateData(.begin(size: 42)))))
         #expect(
-            c2_5 ==
-                SynchronizedCommand(.append(.catenateData(.bytes("\r\n--------------030308070208000400050907\r\n"))))
+            c2_5
+                == SynchronizedCommand(.append(.catenateData(.bytes("\r\n--------------030308070208000400050907\r\n"))))
         )
         #expect(c2_6 == SynchronizedCommand(.append(.catenateData(.end))))
         #expect(
-            c2_7 ==
-                SynchronizedCommand(.append(.catenateURL("/Drafts;UIDVALIDITY=385759045/;UID=20/;section=1.MIME")))
+            c2_7 == SynchronizedCommand(.append(.catenateURL("/Drafts;UIDVALIDITY=385759045/;UID=20/;section=1.MIME")))
         )
         #expect(
-            c2_8 ==
-                SynchronizedCommand(.append(.catenateURL("/Drafts;UIDVALIDITY=385759045/;UID=20/;section=1")))
+            c2_8 == SynchronizedCommand(.append(.catenateURL("/Drafts;UIDVALIDITY=385759045/;UID=20/;section=1")))
         )
         #expect(c2_9 == SynchronizedCommand(.append(.catenateData(.begin(size: 42)))))
         #expect(
-            c2_10 ==
-                SynchronizedCommand(.append(.catenateData(.bytes("\r\n--------------030308070208000400050907\r\n"))))
+            c2_10
+                == SynchronizedCommand(.append(.catenateData(.bytes("\r\n--------------030308070208000400050907\r\n"))))
         )
         #expect(c2_11 == SynchronizedCommand(.append(.catenateData(.end))))
         #expect(c2_12 == SynchronizedCommand(.append(.catenateURL("/Drafts;UIDVALIDITY=385759045/;UID=30"))))
         #expect(c2_13 == SynchronizedCommand(.append(.catenateData(.begin(size: 44)))))
         #expect(
-            c2_14 ==
-                SynchronizedCommand(.append(.catenateData(.bytes("\r\n--------------030308070208000400050907--\r\n"))))
+            c2_14
+                == SynchronizedCommand(
+                    .append(.catenateData(.bytes("\r\n--------------030308070208000400050907--\r\n")))
+                )
         )
         #expect(c2_15 == SynchronizedCommand(.append(.catenateData(.end))))
         #expect(c2_16 == SynchronizedCommand(.append(.endCatenate)))
@@ -157,16 +164,15 @@ struct SynchronizedCommandTests {
         #expect(buffer.readableBytes == 0)
         #expect(c2_1 == SynchronizedCommand(.append(.start(tag: "A003", appendingTo: MailboxName("Drafts")))))
         #expect(
-            c2_2 ==
-                SynchronizedCommand(
+            c2_2
+                == SynchronizedCommand(
                     .append(
                         .beginCatenate(options: .init(flagList: [.seen, .draft, .keyword(.mdnSent)], extensions: [:]))
                     )
                 )
         )
         #expect(
-            c2_3 ==
-                SynchronizedCommand(.append(.catenateURL("/Drafts;UIDVALIDITY=385759045/;UID=20/;section=HEADER")))
+            c2_3 == SynchronizedCommand(.append(.catenateURL("/Drafts;UIDVALIDITY=385759045/;UID=20/;section=HEADER")))
         )
         #expect(c2_4 == SynchronizedCommand(.append(.endCatenate)))
         #expect(c2_5 == SynchronizedCommand(.append(.finish)))
@@ -201,8 +207,8 @@ struct SynchronizedCommandTests {
         #expect(buffer.readableBytes == 0)
         #expect(c2_1 == SynchronizedCommand(.append(.start(tag: "A003", appendingTo: MailboxName("Drafts")))))
         #expect(
-            c2_2 ==
-                SynchronizedCommand(
+            c2_2
+                == SynchronizedCommand(
                     .append(
                         .beginCatenate(
                             options: .init(
@@ -214,8 +220,7 @@ struct SynchronizedCommandTests {
                 )
         )
         #expect(
-            c2_3 ==
-                SynchronizedCommand(.append(.catenateURL("/Drafts;UIDVALIDITY=385759045/;UID=20/;section=HEADER")))
+            c2_3 == SynchronizedCommand(.append(.catenateURL("/Drafts;UIDVALIDITY=385759045/;UID=20/;section=HEADER")))
         )
         #expect(c2_4 == SynchronizedCommand(.append(.endCatenate)))
         #expect(c2_5 == SynchronizedCommand(.append(.finish)))
@@ -238,8 +243,8 @@ struct SynchronizedCommandTests {
         #expect(buffer.readableBytes == 0)
         #expect(c2_1 == SynchronizedCommand(.append(.start(tag: "A003", appendingTo: MailboxName("Drafts")))))
         #expect(
-            c2_2 ==
-                SynchronizedCommand(
+            c2_2
+                == SynchronizedCommand(
                     .append(
                         .beginCatenate(
                             options: .init(
@@ -251,8 +256,7 @@ struct SynchronizedCommandTests {
                 )
         )
         #expect(
-            c2_3 ==
-                SynchronizedCommand(.append(.catenateURL("/Drafts;UIDVALIDITY=385759045/;UID=20/;section=HEADER")))
+            c2_3 == SynchronizedCommand(.append(.catenateURL("/Drafts;UIDVALIDITY=385759045/;UID=20/;section=HEADER")))
         )
         #expect(c2_4 == SynchronizedCommand(.append(.endCatenate)))
         #expect(c2_5 == SynchronizedCommand(.append(.finish)))

@@ -50,13 +50,15 @@ struct URLCommandTests {
 
     @Test(arguments: [
         ParseFixture.urlCommand(
-            "test", " ",
+            "test",
+            " ",
             expected: .success(
                 .messageList(.init(mailboxUIDValidity: .init(encodeMailbox: .init(mailbox: "test"))))
             )
         ),
         ParseFixture.urlCommand(
-            "test/;UID=123", " ",
+            "test/;UID=123",
+            " ",
             expected: .success(
                 .fetch(
                     path: .init(
@@ -68,7 +70,8 @@ struct URLCommandTests {
             )
         ),
         ParseFixture.urlCommand(
-            "test/;UID=123;URLAUTH=anonymous:INTERNAL:01234567890123456789012345678901", " ",
+            "test/;UID=123;URLAUTH=anonymous:INTERNAL:01234567890123456789012345678901",
+            " ",
             expected: .success(
                 .fetch(
                     path: .init(

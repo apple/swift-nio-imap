@@ -20,10 +20,19 @@ import Testing
 struct MailboxAttributeTests {
     @Test(arguments: [
         EncodeFixture.mailboxAttributes([], ""),
-        EncodeFixture.mailboxAttributes([MailboxAttribute.messageCount, .recentCount, .unseenCount], "MESSAGES RECENT UNSEEN"),
-        EncodeFixture.mailboxAttributes([MailboxAttribute.appendLimit, .uidNext, .uidValidity], "APPENDLIMIT UIDNEXT UIDVALIDITY"),
+        EncodeFixture.mailboxAttributes(
+            [MailboxAttribute.messageCount, .recentCount, .unseenCount],
+            "MESSAGES RECENT UNSEEN"
+        ),
+        EncodeFixture.mailboxAttributes(
+            [MailboxAttribute.appendLimit, .uidNext, .uidValidity],
+            "APPENDLIMIT UIDNEXT UIDVALIDITY"
+        ),
         EncodeFixture.mailboxAttributes([MailboxAttribute.size], "SIZE"),
-        EncodeFixture.mailboxAttributes([MailboxAttribute.highestModificationSequence, .messageCount], "HIGHESTMODSEQ MESSAGES"),
+        EncodeFixture.mailboxAttributes(
+            [MailboxAttribute.highestModificationSequence, .messageCount],
+            "HIGHESTMODSEQ MESSAGES"
+        ),
         EncodeFixture.mailboxAttributes([MailboxAttribute.mailboxID], "MAILBOXID"),
     ])
     func `encode attributes`(_ fixture: EncodeFixture<[MailboxAttribute]>) {
@@ -99,7 +108,9 @@ struct MailboxAttributeTests {
         ParseFixture.mailboxStatus("SIZE 81630", expected: .success(.init(size: 81_630))),
         ParseFixture.mailboxStatus(
             "UIDNEXT 95604  HIGHESTMODSEQ 35227 APPENDLIMIT 81818  UIDVALIDITY 33682",
-            expected: .success(.init(nextUID: 95604, uidValidity: 33682, highestModificationSequence: 35227, appendLimit: 81818))
+            expected: .success(
+                .init(nextUID: 95604, uidValidity: 33682, highestModificationSequence: 35227, appendLimit: 81818)
+            )
         ),
         ParseFixture.mailboxStatus(
             "MAILBOXID (F2212ea87-6097-4256-9d51-71338625)",
@@ -119,13 +130,23 @@ struct MailboxAttributeTests {
 
 extension EncodeFixture<[MailboxAttribute]> {
     fileprivate static func mailboxAttributes(_ input: [MailboxAttribute], _ expectedString: String) -> Self {
-        EncodeFixture(input: input, bufferKind: .defaultServer, expectedString: expectedString, encoder: { $0.writeMailboxAttributes($1) })
+        EncodeFixture(
+            input: input,
+            bufferKind: .defaultServer,
+            expectedString: expectedString,
+            encoder: { $0.writeMailboxAttributes($1) }
+        )
     }
 }
 
 extension EncodeFixture<MailboxStatus> {
     fileprivate static func mailboxStatus(_ input: MailboxStatus, _ expectedString: String) -> Self {
-        EncodeFixture(input: input, bufferKind: .defaultServer, expectedString: expectedString, encoder: { $0.writeMailboxStatus($1) })
+        EncodeFixture(
+            input: input,
+            bufferKind: .defaultServer,
+            expectedString: expectedString,
+            encoder: { $0.writeMailboxStatus($1) }
+        )
     }
 }
 

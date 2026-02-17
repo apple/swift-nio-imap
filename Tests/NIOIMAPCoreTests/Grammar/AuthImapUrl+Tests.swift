@@ -48,14 +48,16 @@ struct AuthImapUrlTests {
         ParseFixture.authenticatedURL(
             "imap://localhost/test/;UID=123",
             " ",
-            expected: .success(.init(
-                server: .init(host: "localhost"),
-                messagePath: .init(
-                    mailboxReference: .init(encodeMailbox: .init(mailbox: "test")),
-                    iUID: .init(uid: 123)
+            expected: .success(
+                .init(
+                    server: .init(host: "localhost"),
+                    messagePath: .init(
+                        mailboxReference: .init(encodeMailbox: .init(mailbox: "test")),
+                        iUID: .init(uid: 123)
+                    )
                 )
-            ))
-        ),
+            )
+        )
     ])
     func parse(_ fixture: ParseFixture<NetworkMessagePath>) {
         fixture.checkParsing()

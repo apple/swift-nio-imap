@@ -21,7 +21,10 @@ struct OptionValueCompTests {
     @Test(arguments: [
         EncodeFixture.optionValueComp(.string("test"), #""test""#),
         EncodeFixture.optionValueComp([.string("test1"), .string("test2")], #"("test1" "test2")"#),
-        EncodeFixture.optionValueComp(.array([.string("a"), .array([.string("E"), .string("F")]), .string("b")]), #"("a" ("E" "F") "b")"#),
+        EncodeFixture.optionValueComp(
+            .array([.string("a"), .array([.string("E"), .string("F")]), .string("b")]),
+            #"("a" ("E" "F") "b")"#
+        ),
     ])
     func encode(_ fixture: EncodeFixture<OptionValueComp>) {
         fixture.checkEncoding()

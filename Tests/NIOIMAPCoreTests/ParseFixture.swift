@@ -29,7 +29,7 @@ struct ParseFixture<T>: Sendable where T: Sendable {
     var expected: Expected
     /// The parser being tested.
     var parser: @Sendable (inout ParseBuffer, StackTracker) throws -> T
-    
+
     enum Expected: Sendable {
         /// The input is valid.
         case success(T)
@@ -84,8 +84,7 @@ extension ParseFixture {
                     performing: {
                         let parsed = try parser(&buffer, .testTracker)
                         #expect(
-                            parsed ==
-                            expectedValue,
+                            parsed == expectedValue,
                             sourceLocation: sourceLocation
                         )
                     }
@@ -195,17 +194,26 @@ extension ParseBuffer {
 
         body(&parseBuffer)
 
-        let remaining = (try? PL.parseBytes(
-            buffer: &parseBuffer,
-            tracker: .makeNewDefault,
-            upTo: .max
-        )).map { String(buffer: $0) } ?? ""
+        let remaining =
+            (try? PL.parseBytes(
+                buffer: &parseBuffer,
+                tracker: .makeNewDefault,
+                upTo: .max
+            )).map { String(buffer: $0) } ?? ""
         switch finalBufferExpectation {
         case .terminatorOnly:
             let expectedString = String(buffer: expected)
-            #expect(remaining == expectedString, "Terminator (and trailing) should remain in input buffer, nothing else.", sourceLocation: sourceLocation)
+            #expect(
+                remaining == expectedString,
+                "Terminator (and trailing) should remain in input buffer, nothing else.",
+                sourceLocation: sourceLocation
+            )
         case .initialCondition:
-            #expect(String(buffer: beforeRunningBody) == remaining, "Input buffer should remain unchanged.", sourceLocation: sourceLocation)
+            #expect(
+                String(buffer: beforeRunningBody) == remaining,
+                "Input buffer should remain unchanged.",
+                sourceLocation: sourceLocation
+            )
         case .ignore:
             break
         }

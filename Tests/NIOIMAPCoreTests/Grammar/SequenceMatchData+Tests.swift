@@ -20,7 +20,10 @@ import Testing
 struct SequenceMatchDataTests {
     @Test(arguments: [
         EncodeFixture.sequenceMatchData(.init(knownSequenceSet: .set(.all), knownUidSet: .set(.all)), "(1:* 1:*)"),
-        EncodeFixture.sequenceMatchData(.init(knownSequenceSet: .set([1, 2, 3]), knownUidSet: .set([4, 5, 6])), "(1:3 4:6)"),
+        EncodeFixture.sequenceMatchData(
+            .init(knownSequenceSet: .set([1, 2, 3]), knownUidSet: .set([4, 5, 6])),
+            "(1:3 4:6)"
+        ),
     ])
     func encode(_ fixture: EncodeFixture<SequenceMatchData>) {
         fixture.checkEncoding()

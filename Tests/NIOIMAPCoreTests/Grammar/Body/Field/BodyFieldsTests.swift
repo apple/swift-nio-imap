@@ -28,7 +28,7 @@ struct BodyFieldsTests {
                 octetCount: 12
             ),
             "(\"f1\" \"v1\") \"fieldID\" \"desc\" \"BASE64\" 12"
-        ),
+        )
     ])
     func encoding(_ fixture: EncodeFixture<BodyStructure.Fields>) {
         fixture.checkEncoding()
@@ -47,7 +47,7 @@ struct BodyFieldsTests {
                     octetCount: 1234
                 )
             )
-        ),
+        )
     ])
     func parse(_ fixture: ParseFixture<BodyStructure.Fields>) {
         fixture.checkParsing()

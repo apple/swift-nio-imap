@@ -96,43 +96,53 @@ struct ExtendedSearchOptionsTests {
         ),
         ParseFixture.extendedSearchOptions(
             " IN (inboxes) ALL",
-            expected: .success(ExtendedSearchOptions(
-                key: .all,
-                sourceOptions: ExtendedSearchSourceOptions(sourceMailbox: [.inboxes])
-            ))
+            expected: .success(
+                ExtendedSearchOptions(
+                    key: .all,
+                    sourceOptions: ExtendedSearchSourceOptions(sourceMailbox: [.inboxes])
+                )
+            )
         ),
         ParseFixture.extendedSearchOptions(
             " IN (inboxes) CHARSET Alien ALL",
-            expected: .success(ExtendedSearchOptions(
-                key: .all,
-                charset: "Alien",
-                sourceOptions: ExtendedSearchSourceOptions(sourceMailbox: [.inboxes])
-            ))
+            expected: .success(
+                ExtendedSearchOptions(
+                    key: .all,
+                    charset: "Alien",
+                    sourceOptions: ExtendedSearchSourceOptions(sourceMailbox: [.inboxes])
+                )
+            )
         ),
         ParseFixture.extendedSearchOptions(
             " IN (inboxes) RETURN (MIN) ALL",
-            expected: .success(ExtendedSearchOptions(
-                key: .all,
-                returnOptions: [.min],
-                sourceOptions: ExtendedSearchSourceOptions(sourceMailbox: [.inboxes])
-            ))
+            expected: .success(
+                ExtendedSearchOptions(
+                    key: .all,
+                    returnOptions: [.min],
+                    sourceOptions: ExtendedSearchSourceOptions(sourceMailbox: [.inboxes])
+                )
+            )
         ),
         ParseFixture.extendedSearchOptions(
             " RETURN (MIN) CHARSET Alien ALL",
-            expected: .success(ExtendedSearchOptions(
-                key: .all,
-                charset: "Alien",
-                returnOptions: [.min]
-            ))
+            expected: .success(
+                ExtendedSearchOptions(
+                    key: .all,
+                    charset: "Alien",
+                    returnOptions: [.min]
+                )
+            )
         ),
         ParseFixture.extendedSearchOptions(
             " IN (inboxes) RETURN (MIN) CHARSET Alien ALL",
-            expected: .success(ExtendedSearchOptions(
-                key: .all,
-                charset: "Alien",
-                returnOptions: [.min],
-                sourceOptions: ExtendedSearchSourceOptions(sourceMailbox: [.inboxes])
-            ))
+            expected: .success(
+                ExtendedSearchOptions(
+                    key: .all,
+                    charset: "Alien",
+                    returnOptions: [.min],
+                    sourceOptions: ExtendedSearchSourceOptions(sourceMailbox: [.inboxes])
+                )
+            )
         ),
     ])
     func parseExtendedSearchOptions(_ fixture: ParseFixture<ExtendedSearchOptions>) {

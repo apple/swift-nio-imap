@@ -45,7 +45,7 @@ struct ConditionalStoreTests {
 // MARK: -
 
 /// `Void` / `nil` replacement that is `Equatable`.
-fileprivate struct Dummy: Equatable {}
+private struct Dummy: Equatable {}
 
 extension ParseFixture<Dummy> {
     fileprivate static func conditionalStoreParameter(

@@ -18,30 +18,32 @@ import Testing
 
 @Suite("CommandStreamPart")
 private struct CommandStreamTests {
-    @Test(arguments: [
-        CommandEncodeFixture.commandStream(.append(.start(tag: "1", appendingTo: .inbox)), "1 APPEND \"INBOX\""),
-        CommandEncodeFixture.commandStream(
-            .append(.beginMessage(message: .init(options: .none, data: .init(byteCount: 3)))),
-            " {3}\r\n"
-        ),
-        CommandEncodeFixture.commandStream(
-            .append(
-                .beginMessage(
-                    message: .init(
-                        options: .init(flagList: [.seen, .deleted], extensions: [:]),
-                        data: .init(byteCount: 3)
-                    )
-                )
+    @Test(
+        arguments: [
+            CommandEncodeFixture.commandStream(.append(.start(tag: "1", appendingTo: .inbox)), "1 APPEND \"INBOX\""),
+            CommandEncodeFixture.commandStream(
+                .append(.beginMessage(message: .init(options: .none, data: .init(byteCount: 3)))),
+                " {3}\r\n"
             ),
-            " (\\Seen \\Deleted) {3}\r\n"
-        ),
-        CommandEncodeFixture.commandStream(.append(.messageBytes("123")), "123"),
-        CommandEncodeFixture.commandStream(.append(.endMessage), ""),
-        CommandEncodeFixture.commandStream(.append(.finish), "\r\n"),
-        CommandEncodeFixture.commandStream(.tagged(.init(tag: "1", command: .noop)), "1 NOOP\r\n"),
-        CommandEncodeFixture.commandStream(.idleDone, "DONE\r\n"),
-        CommandEncodeFixture.commandStream(.continuationResponse("test"), "dGVzdA==\r\n"),
-    ] as [CommandEncodeFixture<CommandStreamPart>])
+            CommandEncodeFixture.commandStream(
+                .append(
+                    .beginMessage(
+                        message: .init(
+                            options: .init(flagList: [.seen, .deleted], extensions: [:]),
+                            data: .init(byteCount: 3)
+                        )
+                    )
+                ),
+                " (\\Seen \\Deleted) {3}\r\n"
+            ),
+            CommandEncodeFixture.commandStream(.append(.messageBytes("123")), "123"),
+            CommandEncodeFixture.commandStream(.append(.endMessage), ""),
+            CommandEncodeFixture.commandStream(.append(.finish), "\r\n"),
+            CommandEncodeFixture.commandStream(.tagged(.init(tag: "1", command: .noop)), "1 NOOP\r\n"),
+            CommandEncodeFixture.commandStream(.idleDone, "DONE\r\n"),
+            CommandEncodeFixture.commandStream(.continuationResponse("test"), "dGVzdA==\r\n"),
+        ] as [CommandEncodeFixture<CommandStreamPart>]
+    )
     func encode(_ fixture: CommandEncodeFixture<CommandStreamPart>) {
         fixture.checkEncoding()
     }
@@ -123,8 +125,8 @@ private struct CommandStreamTests {
 
         var encodedCommand = buffer.buffer.nextChunk()
         #expect(
-            String(buffer: encodedCommand.bytes) ==
-            #"A003 APPEND "Drafts" (\Seen \Draft $MDNSent) CATENATE (URL "/Drafts;UIDVALIDITY=385759045/;UID=20/;section=HEADER" TEXT {42}\#r\#n"#
+            String(buffer: encodedCommand.bytes)
+                == #"A003 APPEND "Drafts" (\Seen \Draft $MDNSent) CATENATE (URL "/Drafts;UIDVALIDITY=385759045/;UID=20/;section=HEADER" TEXT {42}\#r\#n"#
         )
         guard encodedCommand.waitForContinuation else {
             Issue.record("Should have had a continuation.")
@@ -133,8 +135,8 @@ private struct CommandStreamTests {
 
         encodedCommand = buffer.buffer.nextChunk()
         #expect(
-            String(buffer: encodedCommand.bytes) ==
-            #"\#r\#n--------------030308070208000400050907\#r\#n URL "/Drafts;UIDVALIDITY=385759045/;UID=20/;section=1.MIME" URL "/Drafts;UIDVALIDITY=385759045/;UID=20/;section=1" TEXT {42}\#r\#n"#
+            String(buffer: encodedCommand.bytes)
+                == #"\#r\#n--------------030308070208000400050907\#r\#n URL "/Drafts;UIDVALIDITY=385759045/;UID=20/;section=1.MIME" URL "/Drafts;UIDVALIDITY=385759045/;UID=20/;section=1" TEXT {42}\#r\#n"#
         )
         guard encodedCommand.waitForContinuation else {
             Issue.record("Should have had a continuation.")
@@ -143,8 +145,8 @@ private struct CommandStreamTests {
 
         encodedCommand = buffer.buffer.nextChunk()
         #expect(
-            String(buffer: encodedCommand.bytes) ==
-            #"\#r\#n--------------030308070208000400050907\#r\#n URL "/Drafts;UIDVALIDITY=385759045/;UID=30" TEXT {44}\#r\#n"#
+            String(buffer: encodedCommand.bytes)
+                == #"\#r\#n--------------030308070208000400050907\#r\#n URL "/Drafts;UIDVALIDITY=385759045/;UID=30" TEXT {44}\#r\#n"#
         )
         guard encodedCommand.waitForContinuation else {
             Issue.record("Should have had a continuation.")
@@ -153,8 +155,7 @@ private struct CommandStreamTests {
 
         encodedCommand = buffer.buffer.nextChunk()
         #expect(
-            String(buffer: encodedCommand.bytes) ==
-            #"\#r\#n--------------030308070208000400050907--\#r\#n)\#r\#n"#
+            String(buffer: encodedCommand.bytes) == #"\#r\#n--------------030308070208000400050907--\#r\#n)\#r\#n"#
         )
         #expect(!encodedCommand.waitForContinuation, "Should not have additional continuations.")
     }
@@ -189,8 +190,8 @@ private struct CommandStreamTests {
 
         let encodedCommand = buffer.buffer.nextChunk()
         #expect(
-            String(buffer: encodedCommand.bytes) ==
-            #"A003 APPEND "Drafts" (\Seen \Draft $MDNSent) CATENATE (URL "/Drafts;UIDVALIDITY=385759045/;UID=20/;section=HEADER" TEXT {42+}\#r\#n"#
+            String(buffer: encodedCommand.bytes)
+                == #"A003 APPEND "Drafts" (\Seen \Draft $MDNSent) CATENATE (URL "/Drafts;UIDVALIDITY=385759045/;UID=20/;section=HEADER" TEXT {42+}\#r\#n"#
                 + #"\#r\#n--------------030308070208000400050907\#r\#n URL "/Drafts;UIDVALIDITY=385759045/;UID=20/;section=1.MIME" URL "/Drafts;UIDVALIDITY=385759045/;UID=20/;section=1" TEXT {42+}\#r\#n"#
                 + #"\#r\#n--------------030308070208000400050907\#r\#n URL "/Drafts;UIDVALIDITY=385759045/;UID=30" TEXT {44+}\#r\#n"#
                 + #"\#r\#n--------------030308070208000400050907--\#r\#n)\#r\#n"#
@@ -218,8 +219,8 @@ private struct CommandStreamTests {
 
         var encodedCommand = buffer.buffer.nextChunk()
         #expect(
-            String(buffer: encodedCommand.bytes) ==
-            #"A003 APPEND "Drafts" (\Seen \Draft $MDNSent) CATENATE (URL "/Drafts;UIDVALIDITY=385759045/;UID=20/;section=HEADER" TEXT {5}\#r\#n"#
+            String(buffer: encodedCommand.bytes)
+                == #"A003 APPEND "Drafts" (\Seen \Draft $MDNSent) CATENATE (URL "/Drafts;UIDVALIDITY=385759045/;UID=20/;section=HEADER" TEXT {5}\#r\#n"#
         )
         guard encodedCommand.waitForContinuation else {
             Issue.record("Should have had a continuation.")
@@ -228,8 +229,8 @@ private struct CommandStreamTests {
 
         encodedCommand = buffer.buffer.nextChunk()
         #expect(
-            String(buffer: encodedCommand.bytes) ==
-            #"hello)\#r\#nA003 APPEND "Drafts" (\Seen \Draft $MDNSent) CATENATE (URL "/Drafts;UIDVALIDITY=385759045/;UID=20/;section=HEADER" TEXT {5}\#r\#n"#
+            String(buffer: encodedCommand.bytes)
+                == #"hello)\#r\#nA003 APPEND "Drafts" (\Seen \Draft $MDNSent) CATENATE (URL "/Drafts;UIDVALIDITY=385759045/;UID=20/;section=HEADER" TEXT {5}\#r\#n"#
         )
         guard encodedCommand.waitForContinuation else {
             Issue.record("Should have had a continuation.")

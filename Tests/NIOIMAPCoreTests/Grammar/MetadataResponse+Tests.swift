@@ -38,8 +38,14 @@ struct MetadataResponseTests {
 
     @Test(arguments: [
         ParseFixture.metadataResponse("METADATA INBOX \"a\"", expected: .success(.list(list: ["a"], mailbox: .inbox))),
-        ParseFixture.metadataResponse("METADATA INBOX \"a\" \"b\" \"c\"", expected: .success(.list(list: ["a", "b", "c"], mailbox: .inbox))),
-        ParseFixture.metadataResponse("METADATA INBOX (\"a\" NIL)", expected: .success(.values(values: ["a": .init(nil)], mailbox: .inbox))),
+        ParseFixture.metadataResponse(
+            "METADATA INBOX \"a\" \"b\" \"c\"",
+            expected: .success(.list(list: ["a", "b", "c"], mailbox: .inbox))
+        ),
+        ParseFixture.metadataResponse(
+            "METADATA INBOX (\"a\" NIL)",
+            expected: .success(.values(values: ["a": .init(nil)], mailbox: .inbox))
+        ),
     ])
     func parse(_ fixture: ParseFixture<MetadataResponse>) {
         fixture.checkParsing()

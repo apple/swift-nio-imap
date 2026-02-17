@@ -21,21 +21,72 @@ struct MailboxDataTests {
     @Test(arguments: [
         EncodeFixture.mailboxData(.exists(1), "1 EXISTS"),
         EncodeFixture.mailboxData(.flags([.answered, .deleted]), "FLAGS (\\Answered \\Deleted)"),
-        EncodeFixture.mailboxData(.list(MailboxInfo(attributes: [], path: try! .init(name: .inbox), extensions: [:])), "LIST () NIL \"INBOX\""),
-        EncodeFixture.mailboxData(.lsub(.init(attributes: [.init("\\draft")], path: try! .init(name: .init("Drafts"), pathSeparator: "."), extensions: [:])), "LSUB (\\draft) \".\" \"Drafts\""),
-        EncodeFixture.mailboxData(.extendedSearch(ExtendedSearchResponse(correlator: nil, kind: .sequenceNumber, returnData: [.count(1)])), "ESEARCH COUNT 1"),
-        EncodeFixture.mailboxData(.extendedSearch(ExtendedSearchResponse(correlator: nil, kind: .sequenceNumber, returnData: [.count(1), .count(2)])), "ESEARCH COUNT 1 COUNT 2"),
+        EncodeFixture.mailboxData(
+            .list(MailboxInfo(attributes: [], path: try! .init(name: .inbox), extensions: [:])),
+            "LIST () NIL \"INBOX\""
+        ),
+        EncodeFixture.mailboxData(
+            .lsub(
+                .init(
+                    attributes: [.init("\\draft")],
+                    path: try! .init(name: .init("Drafts"), pathSeparator: "."),
+                    extensions: [:]
+                )
+            ),
+            "LSUB (\\draft) \".\" \"Drafts\""
+        ),
+        EncodeFixture.mailboxData(
+            .extendedSearch(ExtendedSearchResponse(correlator: nil, kind: .sequenceNumber, returnData: [.count(1)])),
+            "ESEARCH COUNT 1"
+        ),
+        EncodeFixture.mailboxData(
+            .extendedSearch(
+                ExtendedSearchResponse(correlator: nil, kind: .sequenceNumber, returnData: [.count(1), .count(2)])
+            ),
+            "ESEARCH COUNT 1 COUNT 2"
+        ),
         EncodeFixture.mailboxData(.status(.inbox, .init(messageCount: 1)), "STATUS \"INBOX\" (MESSAGES 1)"),
-        EncodeFixture.mailboxData(.status(.inbox, .init(messageCount: 1, unseenCount: 2)), "STATUS \"INBOX\" (MESSAGES 1 UNSEEN 2)"),
-        EncodeFixture.mailboxData(.namespace(.init(userNamespace: [], otherUserNamespace: [], sharedNamespace: [])), "NAMESPACE NIL NIL NIL"),
+        EncodeFixture.mailboxData(
+            .status(.inbox, .init(messageCount: 1, unseenCount: 2)),
+            "STATUS \"INBOX\" (MESSAGES 1 UNSEEN 2)"
+        ),
+        EncodeFixture.mailboxData(
+            .namespace(.init(userNamespace: [], otherUserNamespace: [], sharedNamespace: [])),
+            "NAMESPACE NIL NIL NIL"
+        ),
         EncodeFixture.mailboxData(.search([]), "SEARCH"),
         EncodeFixture.mailboxData(.search([1]), "SEARCH 1"),
         EncodeFixture.mailboxData(.search([1, 2, 3, 4, 5]), "SEARCH 1 2 3 4 5"),
-        EncodeFixture.mailboxData(.search([20, 23], ModificationSequenceValue(917_162_500)), "SEARCH 20 23 (MODSEQ 917162500)"),
-        EncodeFixture.mailboxData(.uidBatches(UIDBatchesResponse(correlator: .init(tag: "A143"), batches: [99_695...215_295, 20_350...99_696, 7_829...20_351, 1...7830])), #"UIDBATCHES (TAG "A143") 215295:99695,99696:20350,20351:7829,7830:1"#),
-        EncodeFixture.mailboxData(.uidBatches(UIDBatchesResponse(correlator: .init(tag: "A143"), batches: [])), #"UIDBATCHES (TAG "A143")"#),
-        EncodeFixture.mailboxData(.uidBatches(UIDBatchesResponse(correlator: .init(tag: "A143"), batches: [99_695])), #"UIDBATCHES (TAG "A143") 99695"#),
-        EncodeFixture.mailboxData(.uidBatches(UIDBatchesResponse(correlator: .init(tag: "A143", mailbox: MailboxName("Drafts"), uidValidity: 4_889_695), batches: [99_695])), #"UIDBATCHES (TAG "A143" MAILBOX "Drafts" UIDVALIDITY 4889695) 99695"#),
+        EncodeFixture.mailboxData(
+            .search([20, 23], ModificationSequenceValue(917_162_500)),
+            "SEARCH 20 23 (MODSEQ 917162500)"
+        ),
+        EncodeFixture.mailboxData(
+            .uidBatches(
+                UIDBatchesResponse(
+                    correlator: .init(tag: "A143"),
+                    batches: [99_695...215_295, 20_350...99_696, 7_829...20_351, 1...7830]
+                )
+            ),
+            #"UIDBATCHES (TAG "A143") 215295:99695,99696:20350,20351:7829,7830:1"#
+        ),
+        EncodeFixture.mailboxData(
+            .uidBatches(UIDBatchesResponse(correlator: .init(tag: "A143"), batches: [])),
+            #"UIDBATCHES (TAG "A143")"#
+        ),
+        EncodeFixture.mailboxData(
+            .uidBatches(UIDBatchesResponse(correlator: .init(tag: "A143"), batches: [99_695])),
+            #"UIDBATCHES (TAG "A143") 99695"#
+        ),
+        EncodeFixture.mailboxData(
+            .uidBatches(
+                UIDBatchesResponse(
+                    correlator: .init(tag: "A143", mailbox: MailboxName("Drafts"), uidValidity: 4_889_695),
+                    batches: [99_695]
+                )
+            ),
+            #"UIDBATCHES (TAG "A143" MAILBOX "Drafts" UIDVALIDITY 4889695) 99695"#
+        ),
     ])
     func `encode`(_ fixture: EncodeFixture<MailboxData>) {
         fixture.checkEncoding()
@@ -44,7 +95,10 @@ struct MailboxDataTests {
     @Test(arguments: [
         EncodeFixture.mailboxDataSearchSort(nil, "SEARCH"),
         EncodeFixture.mailboxDataSearchSort(.init(identifiers: [1], modificationSequence: 2), "SEARCH 1 (MODSEQ 2)"),
-        EncodeFixture.mailboxDataSearchSort(.init(identifiers: [1, 2, 3], modificationSequence: 2), "SEARCH 1 2 3 (MODSEQ 2)"),
+        EncodeFixture.mailboxDataSearchSort(
+            .init(identifiers: [1, 2, 3], modificationSequence: 2),
+            "SEARCH 1 2 3 (MODSEQ 2)"
+        ),
     ])
     func `encode search/sort`(_ fixture: EncodeFixture<MailboxData.SearchSort?>) {
         fixture.checkEncoding()
@@ -91,13 +145,23 @@ struct MailboxDataTests {
         ParseFixture.mailboxData(
             "ESEARCH MIN 1 MAX 2",
             "\r\n",
-            expected: .success(.extendedSearch(.init(correlator: nil, kind: .sequenceNumber, returnData: [.min(1), .max(2)])))
+            expected: .success(
+                .extendedSearch(.init(correlator: nil, kind: .sequenceNumber, returnData: [.min(1), .max(2)]))
+            )
         ),
-        ParseFixture.mailboxData("ESEARCH", "\r", expected: .success(.extendedSearch(.init(correlator: nil, kind: .sequenceNumber, returnData: [])))),
+        ParseFixture.mailboxData(
+            "ESEARCH",
+            "\r",
+            expected: .success(.extendedSearch(.init(correlator: nil, kind: .sequenceNumber, returnData: [])))
+        ),
         ParseFixture.mailboxData("1234 EXISTS", "\r\n", expected: .success(.exists(1234))),
         ParseFixture.mailboxData("5678 RECENT", "\r\n", expected: .success(.recent(5678))),
         ParseFixture.mailboxData("STATUS INBOX ()", "\r\n", expected: .success(.status(.inbox, .init()))),
-        ParseFixture.mailboxData("STATUS INBOX (MESSAGES 2)", "\r\n", expected: .success(.status(.inbox, .init(messageCount: 2)))),
+        ParseFixture.mailboxData(
+            "STATUS INBOX (MESSAGES 2)",
+            "\r\n",
+            expected: .success(.status(.inbox, .init(messageCount: 2)))
+        ),
         ParseFixture.mailboxData(
             "LSUB (\\seen \\draft) NIL inbox",
             "\r\n",
@@ -137,7 +201,9 @@ struct MailboxDataTests {
         ParseFixture.mailboxData(
             #"UIDBATCHES (TAG "A143") 20351:7829,7830:1"#,
             "\r\n",
-            expected: .success(.uidBatches(.init(correlator: .init(tag: "A143"), batches: [7_829...20_351, 1...7_830])))
+            expected: .success(
+                .uidBatches(.init(correlator: .init(tag: "A143"), batches: [7_829...20_351, 1...7_830]))
+            )
         ),
     ])
     func parse(_ fixture: ParseFixture<MailboxData>) {

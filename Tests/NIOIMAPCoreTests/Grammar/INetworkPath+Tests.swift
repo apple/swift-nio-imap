@@ -29,10 +29,12 @@ struct NetworkPathTests {
                     userAuthenticationMechanism: .init(encodedUser: .init(data: "user"), authenticationMechanism: nil),
                     host: "mail.example.com"
                 ),
-                query: .messageList(.init(
-                    mailboxUIDValidity: .init(encodeMailbox: .init(mailbox: "INBOX"), uidValidity: nil),
-                    encodedSearch: nil
-                ))
+                query: .messageList(
+                    .init(
+                        mailboxUIDValidity: .init(encodeMailbox: .init(mailbox: "INBOX"), uidValidity: nil),
+                        encodedSearch: nil
+                    )
+                )
             ),
             "//user@mail.example.com/INBOX"
         ),
@@ -50,16 +52,18 @@ struct NetworkPathTests {
         ParseFixture.networkPath(
             "//localhost/test/;UID=123",
             " ",
-            expected: .success(.init(
-                server: .init(host: "localhost"),
-                query: .fetch(
-                    path: .init(
-                        mailboxReference: .init(encodeMailbox: .init(mailbox: "test")),
-                        iUID: .init(uid: 123)
-                    ),
-                    authenticatedURL: nil
+            expected: .success(
+                .init(
+                    server: .init(host: "localhost"),
+                    query: .fetch(
+                        path: .init(
+                            mailboxReference: .init(encodeMailbox: .init(mailbox: "test")),
+                            iUID: .init(uid: 123)
+                        ),
+                        authenticatedURL: nil
+                    )
                 )
-            ))
+            )
         ),
     ])
     func parse(_ fixture: ParseFixture<NetworkPath>) {

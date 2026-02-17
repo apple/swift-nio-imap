@@ -34,8 +34,14 @@ struct ExtendedSearchScopeOptionsTests {
 
     @Test(arguments: [
         ParseFixture.extendedSearchScopeOptions("name", expected: .success(ExtendedSearchScopeOptions(["name": nil])!)),
-        ParseFixture.extendedSearchScopeOptions("name $", expected: .success(ExtendedSearchScopeOptions(["name": .sequence(.lastCommand)])!)),
-        ParseFixture.extendedSearchScopeOptions("name name2", expected: .success(ExtendedSearchScopeOptions(["name": nil, "name2": nil])!)),
+        ParseFixture.extendedSearchScopeOptions(
+            "name $",
+            expected: .success(ExtendedSearchScopeOptions(["name": .sequence(.lastCommand)])!)
+        ),
+        ParseFixture.extendedSearchScopeOptions(
+            "name name2",
+            expected: .success(ExtendedSearchScopeOptions(["name": nil, "name2": nil])!)
+        ),
     ])
     func parseExtendedSearchScopeOptions(_ fixture: ParseFixture<ExtendedSearchScopeOptions>) {
         fixture.checkParsing()

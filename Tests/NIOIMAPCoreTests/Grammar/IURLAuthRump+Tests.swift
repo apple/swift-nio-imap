@@ -49,15 +49,17 @@ struct AuthenticatedURLRumpTests {
         ParseFixture.authenticatedURLRump(
             ";EXPIRE=1234-12-23T12:34:56;URLAUTH=anonymous",
             " ",
-            expected: .success(.init(
-                expire: .init(
-                    dateTime: .init(
-                        date: .init(year: 1234, month: 12, day: 23),
-                        time: .init(hour: 12, minute: 34, second: 56)
-                    )
-                ),
-                access: .anonymous
-            ))
+            expected: .success(
+                .init(
+                    expire: .init(
+                        dateTime: .init(
+                            date: .init(year: 1234, month: 12, day: 23),
+                            time: .init(hour: 12, minute: 34, second: 56)
+                        )
+                    ),
+                    access: .anonymous
+                )
+            )
         ),
     ])
     func parse(_ fixture: ParseFixture<AuthenticatedURLRump>) {

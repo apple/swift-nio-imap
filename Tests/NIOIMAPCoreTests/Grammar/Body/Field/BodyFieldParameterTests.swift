@@ -35,7 +35,9 @@ struct BodyFieldParameterTests {
         ParseFixture.bodyParameterPairs(
             "(\"NAME\" \"Nutzungsbedingungen f\u{C3}\u{83}\u{C2}\u{83}\u{C3}\u{82}\u{C2}\u{BC}r Meine Allianz.pdf\")",
             " ",
-            expected: .success(["NAME": "Nutzungsbedingungen f\u{C3}\u{83}\u{C2}\u{83}\u{C3}\u{82}\u{C2}\u{BC}r Meine Allianz.pdf"])
+            expected: .success([
+                "NAME": "Nutzungsbedingungen f\u{C3}\u{83}\u{C2}\u{83}\u{C3}\u{82}\u{C2}\u{BC}r Meine Allianz.pdf"
+            ])
         ),
         ParseFixture.bodyParameterPairs(#"("p1" "#, "", expected: .incompleteMessageIgnoringBufferModifications),
     ])

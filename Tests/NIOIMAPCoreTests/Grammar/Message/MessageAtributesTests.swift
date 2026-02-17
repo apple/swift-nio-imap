@@ -63,7 +63,19 @@ struct MessageAttributeTests {
             "ENVELOPE (\"date\" \"subject\" ((\"name\" \"adl\" \"mailbox\" \"host\")) ((\"name\" \"adl\" \"mailbox\" \"host\")) ((\"name\" \"adl\" \"mailbox\" \"host\")) ((\"name\" \"adl\" \"mailbox\" \"host\")) ((\"name\" \"adl\" \"mailbox\" \"host\")) ((\"name\" \"adl\" \"mailbox\" \"host\")) \"replyto\" \"abc123\")"
         ),
         EncodeFixture.messageAttribute(
-            .internalDate(ServerMessageDate(ServerMessageDate.Components(year: 1994, month: 6, day: 25, hour: 1, minute: 2, second: 3, timeZoneMinutes: 0)!)),
+            .internalDate(
+                ServerMessageDate(
+                    ServerMessageDate.Components(
+                        year: 1994,
+                        month: 6,
+                        day: 25,
+                        hour: 1,
+                        minute: 2,
+                        second: 3,
+                        timeZoneMinutes: 0
+                    )!
+                )
+            ),
             #"INTERNALDATE "25-Jun-1994 01:02:03 +0000""#
         ),
         EncodeFixture.messageAttribute(.binarySize(section: [2], size: 3), "BINARY.SIZE[2] 3"),
@@ -78,7 +90,10 @@ struct MessageAttributeTests {
             ]),
             "X-GM-LABELS (\\Inbox \\Sent \"Important\" \"Muy Importante\")"
         ),
-        EncodeFixture.messageAttribute(.preview(.init("Lorem ipsum dolor sit amet")), "PREVIEW \"Lorem ipsum dolor sit amet\""),
+        EncodeFixture.messageAttribute(
+            .preview(.init("Lorem ipsum dolor sit amet")),
+            "PREVIEW \"Lorem ipsum dolor sit amet\""
+        ),
         EncodeFixture.messageAttribute(.preview(.init(#"A\B"#)), #"PREVIEW "A\\B""#),
         EncodeFixture.messageAttribute(.emailID(.init("123-456-789")!), "EMAILID (123-456-789)"),
         EncodeFixture.messageAttribute(.threadID(.init("123-456-789")!), "THREADID (123-456-789)"),
@@ -91,7 +106,10 @@ struct MessageAttributeTests {
     @Test(arguments: [
         EncodeFixture.messageAttributes([.flags([.draft])], "(FLAGS (\\Draft))"),
         EncodeFixture.messageAttributes([.flags([.flagged]), .rfc822Size(123)], "(FLAGS (\\Flagged) RFC822.SIZE 123)"),
-        EncodeFixture.messageAttributes([.flags([.flagged]), .rfc822Size(123), .uid(456)], "(FLAGS (\\Flagged) RFC822.SIZE 123 UID 456)"),
+        EncodeFixture.messageAttributes(
+            [.flags([.flagged]), .rfc822Size(123), .uid(456)],
+            "(FLAGS (\\Flagged) RFC822.SIZE 123 UID 456)"
+        ),
     ])
     func `encode multiple`(_ fixture: EncodeFixture<[MessageAttribute]>) {
         fixture.checkEncoding()
@@ -140,13 +158,33 @@ struct MessageAttributeTests {
 
         return [
             ParseFixture.messageAttribute(#"FLAGS (\seen)"#, " ", expected: .success(.flags([.seen]))),
-            ParseFixture.messageAttribute(#"FLAGS (\Answered \Flagged \Draft)"#, " ", expected: .success(.flags([.answered, .flagged, .draft]))),
+            ParseFixture.messageAttribute(
+                #"FLAGS (\Answered \Flagged \Draft)"#,
+                " ",
+                expected: .success(.flags([.answered, .flagged, .draft]))
+            ),
             ParseFixture.messageAttribute("UID 1234", " ", expected: .success(.uid(1234))),
             ParseFixture.messageAttribute("RFC822.SIZE 1234", " ", expected: .success(.rfc822Size(1234))),
-            ParseFixture.messageAttribute("BINARY.SIZE[3] 4", " ", expected: .success(.binarySize(section: [3], size: 4))),
-            ParseFixture.messageAttribute(#"INTERNALDATE "25-jun-1994 01:02:03 +0000""#, " ", expected: .success(.internalDate(date1))),
-            ParseFixture.messageAttribute(#"INTERNALDATE "8-Mar-2023 12:16:47 +0800""#, " ", expected: .success(.internalDate(date2))),
-            ParseFixture.messageAttribute(#"INTERNALDATE "08-Mar-2023 12:16:47 +0800""#, " ", expected: .success(.internalDate(date2))),
+            ParseFixture.messageAttribute(
+                "BINARY.SIZE[3] 4",
+                " ",
+                expected: .success(.binarySize(section: [3], size: 4))
+            ),
+            ParseFixture.messageAttribute(
+                #"INTERNALDATE "25-jun-1994 01:02:03 +0000""#,
+                " ",
+                expected: .success(.internalDate(date1))
+            ),
+            ParseFixture.messageAttribute(
+                #"INTERNALDATE "8-Mar-2023 12:16:47 +0800""#,
+                " ",
+                expected: .success(.internalDate(date2))
+            ),
+            ParseFixture.messageAttribute(
+                #"INTERNALDATE "08-Mar-2023 12:16:47 +0800""#,
+                " ",
+                expected: .success(.internalDate(date2))
+            ),
             ParseFixture.messageAttribute(
                 #"ENVELOPE ("date" "subject" (("from1" "from2" "from3" "from4")) (("sender1" "sender2" "sender3" "sender4")) (("reply1" "reply2" "reply3" "reply4")) (("to1" "to2" "to3" "to4")) (("cc1" "cc2" "cc3" "cc4")) (("bcc1" "bcc2" "bcc3" "bcc4")) "inreplyto" "messageid")"#,
                 " ",
@@ -336,14 +374,38 @@ struct MessageAttributeTests {
                     )
                 )
             ),
-            ParseFixture.messageAttribute(#"BODYSTRUCTURE ("text")"#, " ", expected: .success(.body(.invalid, hasExtensionData: true))),
+            ParseFixture.messageAttribute(
+                #"BODYSTRUCTURE ("text")"#,
+                " ",
+                expected: .success(.body(.invalid, hasExtensionData: true))
+            ),
             ParseFixture.messageAttribute("RFC822.TEXT NIL", " ", expected: .success(.nilBody(.rfc822Text))),
             ParseFixture.messageAttribute("RFC822.HEADER NIL", " ", expected: .success(.nilBody(.rfc822Header))),
-            ParseFixture.messageAttribute("BINARY[4]<5> NIL", " ", expected: .success(.nilBody(.binary(section: [4], offset: 5)))),
-            ParseFixture.messageAttribute("BODY[4.TEXT]<5> NIL", " ", expected: .success(.nilBody(.body(section: .init(part: [4], kind: .text), offset: 5)))),
-            ParseFixture.messageAttribute("MODSEQ (3)", " ", expected: .success(.fetchModificationResponse(.init(modifierSequenceValue: 3)))),
-            ParseFixture.messageAttribute("X-GM-MSGID 1278455344230334865", " ", expected: .success(.gmailMessageID(1_278_455_344_230_334_865))),
-            ParseFixture.messageAttribute("X-GM-THRID 1278455344230334865", " ", expected: .success(.gmailThreadID(1_278_455_344_230_334_865))),
+            ParseFixture.messageAttribute(
+                "BINARY[4]<5> NIL",
+                " ",
+                expected: .success(.nilBody(.binary(section: [4], offset: 5)))
+            ),
+            ParseFixture.messageAttribute(
+                "BODY[4.TEXT]<5> NIL",
+                " ",
+                expected: .success(.nilBody(.body(section: .init(part: [4], kind: .text), offset: 5)))
+            ),
+            ParseFixture.messageAttribute(
+                "MODSEQ (3)",
+                " ",
+                expected: .success(.fetchModificationResponse(.init(modifierSequenceValue: 3)))
+            ),
+            ParseFixture.messageAttribute(
+                "X-GM-MSGID 1278455344230334865",
+                " ",
+                expected: .success(.gmailMessageID(1_278_455_344_230_334_865))
+            ),
+            ParseFixture.messageAttribute(
+                "X-GM-THRID 1278455344230334865",
+                " ",
+                expected: .success(.gmailThreadID(1_278_455_344_230_334_865))
+            ),
             ParseFixture.messageAttribute(
                 "X-GM-LABELS (\\Inbox \\Sent Important \"Muy Importante\")",
                 " ",
@@ -354,13 +416,37 @@ struct MessageAttributeTests {
                     ])
                 )
             ),
-            ParseFixture.messageAttribute("X-GM-LABELS (foo)", " ", expected: .success(.gmailLabels([GmailLabel("foo")]))),
+            ParseFixture.messageAttribute(
+                "X-GM-LABELS (foo)",
+                " ",
+                expected: .success(.gmailLabels([GmailLabel("foo")]))
+            ),
             ParseFixture.messageAttribute("X-GM-LABELS ()", " ", expected: .success(.gmailLabels([]))),
-            ParseFixture.messageAttribute(#"X-GM-LABELS (\Drafts)"#, " ", expected: .success(.gmailLabels([GmailLabel(#"\Drafts"#)]))),
-            ParseFixture.messageAttribute(#"X-GM-LABELS ("\\Important")"#, " ", expected: .success(.gmailLabels([GmailLabel(#"\Important"#)]))),
-            ParseFixture.messageAttribute("PREVIEW \"Lorem ipsum dolor sit amet\"", "", expected: .success(.preview(.init("Lorem ipsum dolor sit amet")))),
-            ParseFixture.messageAttribute("EMAILID (123-456-789)", " ", expected: .success(.emailID(.init("123-456-789")!))),
-            ParseFixture.messageAttribute("THREADID (123-456-789)", " ", expected: .success(.threadID(.init("123-456-789")!))),
+            ParseFixture.messageAttribute(
+                #"X-GM-LABELS (\Drafts)"#,
+                " ",
+                expected: .success(.gmailLabels([GmailLabel(#"\Drafts"#)]))
+            ),
+            ParseFixture.messageAttribute(
+                #"X-GM-LABELS ("\\Important")"#,
+                " ",
+                expected: .success(.gmailLabels([GmailLabel(#"\Important"#)]))
+            ),
+            ParseFixture.messageAttribute(
+                "PREVIEW \"Lorem ipsum dolor sit amet\"",
+                "",
+                expected: .success(.preview(.init("Lorem ipsum dolor sit amet")))
+            ),
+            ParseFixture.messageAttribute(
+                "EMAILID (123-456-789)",
+                " ",
+                expected: .success(.emailID(.init("123-456-789")!))
+            ),
+            ParseFixture.messageAttribute(
+                "THREADID (123-456-789)",
+                " ",
+                expected: .success(.threadID(.init("123-456-789")!))
+            ),
             ParseFixture.messageAttribute("THREADID NIL", " ", expected: .success(.threadID(nil))),
         ]
     }
@@ -370,13 +456,23 @@ struct MessageAttributeTests {
 
 extension EncodeFixture<MessageAttribute> {
     fileprivate static func messageAttribute(_ input: MessageAttribute, _ expectedString: String) -> Self {
-        EncodeFixture(input: input, bufferKind: .defaultServer, expectedString: expectedString, encoder: { $0.writeMessageAttribute($1) })
+        EncodeFixture(
+            input: input,
+            bufferKind: .defaultServer,
+            expectedString: expectedString,
+            encoder: { $0.writeMessageAttribute($1) }
+        )
     }
 }
 
 extension EncodeFixture<[MessageAttribute]> {
     fileprivate static func messageAttributes(_ input: [MessageAttribute], _ expectedString: String) -> Self {
-        EncodeFixture(input: input, bufferKind: .defaultServer, expectedString: expectedString, encoder: { $0.writeMessageAttributes($1) })
+        EncodeFixture(
+            input: input,
+            bufferKind: .defaultServer,
+            expectedString: expectedString,
+            encoder: { $0.writeMessageAttributes($1) }
+        )
     }
 }
 

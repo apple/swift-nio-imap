@@ -28,18 +28,17 @@ struct ListTests {
 
 /// Generates ParseFixture instances for all 256 possible byte values.
 /// Only '%' (0x25) and '*' (0x2A) are valid list wildcards.
-fileprivate func wildcardFixtures() -> [ParseFixture<String>] {
+private func wildcardFixtures() -> [ParseFixture<String>] {
     let validWildcards: Set<UInt8> = [UInt8(ascii: "%"), UInt8(ascii: "*")]
 
     return (UInt8.min...UInt8.max).map { byte in
         let input = String(decoding: [byte], as: UTF8.self)
 
-        if validWildcards.contains(byte) {
-            let expected = String(Character(Unicode.Scalar(byte)))
-            return ParseFixture.listWildcard(input, expected: .success(expected))
-        } else {
+        guard validWildcards.contains(byte) else {
             return ParseFixture.listWildcard(input, expected: .failureIgnoringBufferModifications)
         }
+        let expected = String(Character(Unicode.Scalar(byte)))
+        return ParseFixture.listWildcard(input, expected: .success(expected))
     }
 }
 

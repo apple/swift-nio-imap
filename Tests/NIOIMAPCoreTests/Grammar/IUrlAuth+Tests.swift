@@ -42,14 +42,16 @@ struct AuthenticatedURLTests {
         ParseFixture.authenticatedURL(
             ";URLAUTH=anonymous:INTERNAL:01234567890123456789012345678901",
             " ",
-            expected: .success(.init(
-                authenticatedURL: .init(access: .anonymous),
-                verifier: .init(
-                    urlAuthMechanism: .internal,
-                    encodedAuthenticationURL: .init(data: "01234567890123456789012345678901")
+            expected: .success(
+                .init(
+                    authenticatedURL: .init(access: .anonymous),
+                    verifier: .init(
+                        urlAuthMechanism: .internal,
+                        encodedAuthenticationURL: .init(data: "01234567890123456789012345678901")
+                    )
                 )
-            ))
-        ),
+            )
+        )
     ])
     func parse(_ fixture: ParseFixture<AuthenticatedURL>) {
         fixture.checkParsing()

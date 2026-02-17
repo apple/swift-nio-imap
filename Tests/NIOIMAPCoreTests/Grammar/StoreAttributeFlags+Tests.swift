@@ -35,8 +35,14 @@ struct StoreAttributeFlagsTests {
         ParseFixture.storeFlags("-FLAGS ()", expected: .success(.remove(silent: false, list: []))),
         ParseFixture.storeFlags("FLAGS ()", expected: .success(.replace(silent: false, list: []))),
         ParseFixture.storeFlags("+FLAGS.SILENT ()", expected: .success(.add(silent: true, list: []))),
-        ParseFixture.storeFlags(#"+FLAGS.SILENT (\answered \seen)"#, expected: .success(.add(silent: true, list: [.answered, .seen]))),
-        ParseFixture.storeFlags(#"+FLAGS.SILENT \answered \seen"#, expected: .success(.add(silent: true, list: [.answered, .seen]))),
+        ParseFixture.storeFlags(
+            #"+FLAGS.SILENT (\answered \seen)"#,
+            expected: .success(.add(silent: true, list: [.answered, .seen]))
+        ),
+        ParseFixture.storeFlags(
+            #"+FLAGS.SILENT \answered \seen"#,
+            expected: .success(.add(silent: true, list: [.answered, .seen]))
+        ),
         ParseFixture.storeFlags(#"FLAGS.SILEN \answered"#, expected: .failure),
         ParseFixture.storeFlags("+FLAGS ", "", expected: .incompleteMessage),
         ParseFixture.storeFlags("-FLAGS ", "", expected: .incompleteMessage),

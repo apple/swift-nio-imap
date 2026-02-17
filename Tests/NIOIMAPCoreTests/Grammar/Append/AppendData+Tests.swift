@@ -20,16 +20,24 @@ import Testing
 struct AppendDataTests {
     @Test(arguments: [
         EncodeFixture.appendData(
-            .init(byteCount: 123), .rfc3501, "{123}\r\n"
+            .init(byteCount: 123),
+            .rfc3501,
+            "{123}\r\n"
         ),
         EncodeFixture.appendData(
-            .init(byteCount: 456, withoutContentTransferEncoding: true), .rfc3501, "~{456}\r\n"
+            .init(byteCount: 456, withoutContentTransferEncoding: true),
+            .rfc3501,
+            "~{456}\r\n"
         ),
         EncodeFixture.appendData(
-            .init(byteCount: 123), .literalPlus, "{123+}\r\n"
+            .init(byteCount: 123),
+            .literalPlus,
+            "{123+}\r\n"
         ),
         EncodeFixture.appendData(
-            .init(byteCount: 456, withoutContentTransferEncoding: true), .literalPlus, "~{456+}\r\n"
+            .init(byteCount: 456, withoutContentTransferEncoding: true),
+            .literalPlus,
+            "~{456+}\r\n"
         ),
     ])
     func encode(_ fixture: EncodeFixture<AppendData>) {
@@ -38,13 +46,29 @@ struct AppendDataTests {
 
     @Test(arguments: [
         ParseFixture.appendData("{123}\r\n", "hello", expected: .success(.init(byteCount: 123))),
-        ParseFixture.appendData("~{456}\r\n", "hello", expected: .success(.init(byteCount: 456, withoutContentTransferEncoding: true))),
+        ParseFixture.appendData(
+            "~{456}\r\n",
+            "hello",
+            expected: .success(.init(byteCount: 456, withoutContentTransferEncoding: true))
+        ),
         ParseFixture.appendData("{0}\r\n", "hello", expected: .success(.init(byteCount: 0))),
-        ParseFixture.appendData("~{\(Int.max)}\r\n", "hello", expected: .success(.init(byteCount: .max, withoutContentTransferEncoding: true))),
+        ParseFixture.appendData(
+            "~{\(Int.max)}\r\n",
+            "hello",
+            expected: .success(.init(byteCount: .max, withoutContentTransferEncoding: true))
+        ),
         ParseFixture.appendData("{123+}\r\n", "hello", expected: .success(.init(byteCount: 123))),
-        ParseFixture.appendData("~{456+}\r\n", "hello", expected: .success(.init(byteCount: 456, withoutContentTransferEncoding: true))),
+        ParseFixture.appendData(
+            "~{456+}\r\n",
+            "hello",
+            expected: .success(.init(byteCount: 456, withoutContentTransferEncoding: true))
+        ),
         ParseFixture.appendData("{0+}\r\n", "hello", expected: .success(.init(byteCount: 0))),
-        ParseFixture.appendData("~{\(Int.max)+}\r\n", "hello", expected: .success(.init(byteCount: .max, withoutContentTransferEncoding: true))),
+        ParseFixture.appendData(
+            "~{\(Int.max)+}\r\n",
+            "hello",
+            expected: .success(.init(byteCount: .max, withoutContentTransferEncoding: true))
+        ),
         ParseFixture.appendData("{-1}\r\n", "hello", expected: .failureIgnoringBufferModifications),
         ParseFixture.appendData("{\(UInt(Int.max) + 1)}\r\n", "hello", expected: .failureIgnoringBufferModifications),
     ])

@@ -19,7 +19,7 @@ import Testing
 @Suite("EncodedSection")
 struct EncodedSectionTests {
     @Test(arguments: [
-        EncodeFixture.encodedSection(.init(section: "hello"), "hello"),
+        EncodeFixture.encodedSection(.init(section: "hello"), "hello")
     ])
     func encode(_ fixture: EncodeFixture<EncodedSection>) {
         fixture.checkEncoding()
@@ -30,7 +30,7 @@ struct EncodedSectionTests {
             "query%FF",
             " ",
             expected: .success(.init(section: "query%FF"))
-        ),
+        )
     ])
     func parse(_ fixture: ParseFixture<EncodedSection>) {
         fixture.checkParsing()

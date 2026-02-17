@@ -51,7 +51,11 @@ struct ModificationSequenceValueTests {
         ParseFixture.modificationSequenceValue("1234567", " ", expected: .success(1_234_567)),
         ParseFixture.modificationSequenceValue("123456789", " ", expected: .success(123_456_789)),
         ParseFixture.modificationSequenceValue("0", " ", expected: .success(.zero)),
-        ParseFixture.modificationSequenceValue("9223372036854775807", " ", expected: .success(9_223_372_036_854_775_807)),
+        ParseFixture.modificationSequenceValue(
+            "9223372036854775807",
+            " ",
+            expected: .success(9_223_372_036_854_775_807)
+        ),
         ParseFixture.modificationSequenceValue("9223372036854775808", " ", expected: .failure),
         ParseFixture.modificationSequenceValue("13853076851840262211", " ", expected: .failure),
         ParseFixture.modificationSequenceValue("18446744073709551615", " ", expected: .failure),

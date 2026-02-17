@@ -20,40 +20,61 @@ import Testing
 struct MailboxInfoTests {
     @Test func `attribute hashable`() {
         #expect(
-            MailboxInfo.Attribute("test").hashValue ==
-            MailboxInfo.Attribute("TEST").hashValue,
+            MailboxInfo.Attribute("test").hashValue == MailboxInfo.Attribute("TEST").hashValue,
             "hashing should be case insensitive"
         )
         #expect(
-            MailboxInfo.Attribute("a").hashValue !=
-            MailboxInfo.Attribute("b").hashValue
+            MailboxInfo.Attribute("a").hashValue != MailboxInfo.Attribute("b").hashValue
         )
     }
 
     @Test(arguments: [
-        EncodeFixture.mailboxInfo(MailboxInfo(attributes: [], path: try! .init(name: .inbox), extensions: [:]), #"() NIL "INBOX""#),
+        EncodeFixture.mailboxInfo(
+            MailboxInfo(attributes: [], path: try! .init(name: .inbox), extensions: [:]),
+            #"() NIL "INBOX""#
+        ),
         EncodeFixture.mailboxInfo(
             MailboxInfo(attributes: [], path: try! .init(name: .inbox, pathSeparator: "/"), extensions: [:]),
             #"() "/" "INBOX""#
         ),
         EncodeFixture.mailboxInfo(
-            MailboxInfo(attributes: [.noSelect], path: try! .init(name: MailboxName("Projects"), pathSeparator: "/"), extensions: [:]),
+            MailboxInfo(
+                attributes: [.noSelect],
+                path: try! .init(name: MailboxName("Projects"), pathSeparator: "/"),
+                extensions: [:]
+            ),
             #"(\Noselect) "/" "Projects""#
         ),
         EncodeFixture.mailboxInfo(
-            MailboxInfo(attributes: [.marked, .hasChildren], path: try! .init(name: MailboxName("INBOX"), pathSeparator: "/"), extensions: [:]),
+            MailboxInfo(
+                attributes: [.marked, .hasChildren],
+                path: try! .init(name: MailboxName("INBOX"), pathSeparator: "/"),
+                extensions: [:]
+            ),
             #"(\Marked \HasChildren) "/" "INBOX""#
         ),
         EncodeFixture.mailboxInfo(
-            MailboxInfo(attributes: [.hasNoChildren], path: try! .init(name: MailboxName("Sent"), pathSeparator: "/"), extensions: [:]),
+            MailboxInfo(
+                attributes: [.hasNoChildren],
+                path: try! .init(name: MailboxName("Sent"), pathSeparator: "/"),
+                extensions: [:]
+            ),
             #"(\HasNoChildren) "/" "Sent""#
         ),
         EncodeFixture.mailboxInfo(
-            MailboxInfo(attributes: [.noSelect, .hasChildren], path: try! .init(name: MailboxName("[Gmail]"), pathSeparator: "/"), extensions: [:]),
+            MailboxInfo(
+                attributes: [.noSelect, .hasChildren],
+                path: try! .init(name: MailboxName("[Gmail]"), pathSeparator: "/"),
+                extensions: [:]
+            ),
             #"(\Noselect \HasChildren) "/" "[Gmail]""#
         ),
         EncodeFixture.mailboxInfo(
-            MailboxInfo(attributes: [.subscribed, .hasNoChildren], path: try! .init(name: MailboxName("Archive/2024"), pathSeparator: "."), extensions: [:]),
+            MailboxInfo(
+                attributes: [.subscribed, .hasNoChildren],
+                path: try! .init(name: MailboxName("Archive/2024"), pathSeparator: "."),
+                extensions: [:]
+            ),
             #"(\Subscribed \HasNoChildren) "." "Archive/2024""#
         ),
     ])
@@ -72,8 +93,18 @@ struct MailboxInfoTests {
     }
 
     @Test(arguments: [
-        ParseFixture.mailboxInfo("() NIL inbox", "\r", expected: .success(.init(attributes: [], path: try! .init(name: .inbox), extensions: [:]))),
-        ParseFixture.mailboxInfo(#"() "d" inbox"#, "\r", expected: .success(.init(attributes: [], path: try! .init(name: .inbox, pathSeparator: "d"), extensions: [:]))),
+        ParseFixture.mailboxInfo(
+            "() NIL inbox",
+            "\r",
+            expected: .success(.init(attributes: [], path: try! .init(name: .inbox), extensions: [:]))
+        ),
+        ParseFixture.mailboxInfo(
+            #"() "d" inbox"#,
+            "\r",
+            expected: .success(
+                .init(attributes: [], path: try! .init(name: .inbox, pathSeparator: "d"), extensions: [:])
+            )
+        ),
         ParseFixture.mailboxInfo(
             "(\\oflag1 \\oflag2) NIL inbox",
             "\r",
@@ -106,7 +137,11 @@ struct MailboxInfoTests {
     @Test(arguments: [
         ParseFixture.mailboxListFlags("\\marked", "\r", expected: .success([.marked])),
         ParseFixture.mailboxListFlags("\\marked \\remote", "\r", expected: .success([.marked, .remote])),
-        ParseFixture.mailboxListFlags("\\marked \\o1 \\o2", "\r", expected: .success([.marked, .init("\\o1"), .init("\\o2")])),
+        ParseFixture.mailboxListFlags(
+            "\\marked \\o1 \\o2",
+            "\r",
+            expected: .success([.marked, .init("\\o1"), .init("\\o2")])
+        ),
     ])
     func `parse flags`(_ fixture: ParseFixture<[MailboxInfo.Attribute]>) {
         fixture.checkParsing()

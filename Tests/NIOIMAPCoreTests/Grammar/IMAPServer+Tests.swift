@@ -50,11 +50,13 @@ struct IMAPServerTests {
         ParseFixture.imapServer(
             ";AUTH=*@localhost",
             " ",
-            expected: .success(.init(
-                userAuthenticationMechanism: .init(encodedUser: nil, authenticationMechanism: .any),
-                host: "localhost",
-                port: nil
-            ))
+            expected: .success(
+                .init(
+                    userAuthenticationMechanism: .init(encodedUser: nil, authenticationMechanism: .any),
+                    host: "localhost",
+                    port: nil
+                )
+            )
         ),
         ParseFixture.imapServer(
             "localhost:1234",
@@ -64,11 +66,13 @@ struct IMAPServerTests {
         ParseFixture.imapServer(
             ";AUTH=*@localhost:1234",
             " ",
-            expected: .success(.init(
-                userAuthenticationMechanism: .init(encodedUser: nil, authenticationMechanism: .any),
-                host: "localhost",
-                port: 1234
-            ))
+            expected: .success(
+                .init(
+                    userAuthenticationMechanism: .init(encodedUser: nil, authenticationMechanism: .any),
+                    host: "localhost",
+                    port: 1234
+                )
+            )
         ),
     ])
     func parse(_ fixture: ParseFixture<IMAPServer>) {

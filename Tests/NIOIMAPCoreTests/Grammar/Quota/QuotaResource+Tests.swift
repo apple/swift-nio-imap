@@ -21,7 +21,10 @@ struct QuotaResourceTests {
     @Test(arguments: [
         EncodeFixture.quotaResource(QuotaResource(resourceName: "STORAGE", usage: 10, limit: 512), "STORAGE 10 512"),
         EncodeFixture.quotaResource(QuotaResource(resourceName: "MESSAGE", usage: 0, limit: 1000), "MESSAGE 0 1000"),
-        EncodeFixture.quotaResource(QuotaResource(resourceName: "ATTACHMENT", usage: 999_999_999, limit: 1_000_000_000), "ATTACHMENT 999999999 1000000000"),
+        EncodeFixture.quotaResource(
+            QuotaResource(resourceName: "ATTACHMENT", usage: 999_999_999, limit: 1_000_000_000),
+            "ATTACHMENT 999999999 1000000000"
+        ),
     ])
     func encode(_ fixture: EncodeFixture<QuotaResource>) {
         fixture.checkEncoding()
@@ -32,6 +35,11 @@ struct QuotaResourceTests {
 
 extension EncodeFixture<QuotaResource> {
     fileprivate static func quotaResource(_ input: QuotaResource, _ expectedString: String) -> Self {
-        EncodeFixture(input: input, bufferKind: .defaultServer, expectedString: expectedString, encoder: { $0.writeQuotaResource($1) })
+        EncodeFixture(
+            input: input,
+            bufferKind: .defaultServer,
+            expectedString: expectedString,
+            encoder: { $0.writeQuotaResource($1) }
+        )
     }
 }

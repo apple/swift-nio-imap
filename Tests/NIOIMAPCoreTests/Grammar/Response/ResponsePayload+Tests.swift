@@ -48,13 +48,22 @@ struct ResponsePayloadTests {
 
     @Test(arguments: [
         ParseFixture.responsePayload("CAPABILITY ENABLE", expected: .success(.capabilityData([.enable]))),
-        ParseFixture.responsePayload("BYE test", expected: .success(.conditionalState(.bye(.init(code: nil, text: "test"))))),
-        ParseFixture.responsePayload("OK test", expected: .success(.conditionalState(.ok(.init(code: nil, text: "test"))))),
+        ParseFixture.responsePayload(
+            "BYE test",
+            expected: .success(.conditionalState(.bye(.init(code: nil, text: "test"))))
+        ),
+        ParseFixture.responsePayload(
+            "OK test",
+            expected: .success(.conditionalState(.ok(.init(code: nil, text: "test"))))
+        ),
         ParseFixture.responsePayload("1 EXISTS", expected: .success(.mailboxData(.exists(1)))),
         ParseFixture.responsePayload("2 EXPUNGE", expected: .success(.messageData(.expunge(2)))),
         ParseFixture.responsePayload("ENABLED ENABLE", expected: .success(.enableData([.enable]))),
         ParseFixture.responsePayload("ID (\"key\" NIL)", expected: .success(.id(["key": nil]))),
-        ParseFixture.responsePayload("METADATA INBOX a", expected: .success(.metadata(.list(list: ["a"], mailbox: .inbox)))),
+        ParseFixture.responsePayload(
+            "METADATA INBOX a",
+            expected: .success(.metadata(.list(list: ["a"], mailbox: .inbox)))
+        ),
         ParseFixture.responsePayload(
             #"JMAPACCESS "https://example.com/.well-known/jmap""#,
             expected: .success(.jmapAccess(URL(string: "https://example.com/.well-known/jmap")!))
@@ -67,7 +76,10 @@ struct ResponsePayloadTests {
             #"JMAPACCESS "example.com""#,
             expected: .failureIgnoringBufferModifications
         ),
-        ParseFixture.responsePayload("QUOTAROOT INBOX \"Root\"", expected: .success(.quotaRoot(.init("INBOX"), .init("Root")))),
+        ParseFixture.responsePayload(
+            "QUOTAROOT INBOX \"Root\"",
+            expected: .success(.quotaRoot(.init("INBOX"), .init("Root")))
+        ),
         ParseFixture.responsePayload("QUOTAROOT", expected: .failure),
         ParseFixture.responsePayload("QUOTAROOT INBOX", expected: .failure),
         ParseFixture.responsePayload(
@@ -76,13 +88,15 @@ struct ResponsePayloadTests {
         ),
         ParseFixture.responsePayload(
             "QUOTA \"Root\" (STORAGE 10 512 BEANS 50 100)",
-            expected: .success(.quota(
-                .init("Root"),
-                [
-                    QuotaResource(resourceName: "STORAGE", usage: 10, limit: 512),
-                    QuotaResource(resourceName: "BEANS", usage: 50, limit: 100),
-                ]
-            ))
+            expected: .success(
+                .quota(
+                    .init("Root"),
+                    [
+                        QuotaResource(resourceName: "STORAGE", usage: 10, limit: 512),
+                        QuotaResource(resourceName: "BEANS", usage: 50, limit: 100),
+                    ]
+                )
+            )
         ),
         ParseFixture.responsePayload("QUOTA \"Root\" ()", expected: .success(.quota(.init("Root"), []))),
         ParseFixture.responsePayload("QUOTA", expected: .failure),
@@ -103,7 +117,12 @@ struct ResponsePayloadTests {
 
 extension EncodeFixture<ResponsePayload> {
     fileprivate static func responsePayload(_ input: ResponsePayload, _ expectedString: String) -> Self {
-        EncodeFixture(input: input, bufferKind: .defaultServer, expectedString: expectedString, encoder: { $0.writeResponsePayload($1) })
+        EncodeFixture(
+            input: input,
+            bufferKind: .defaultServer,
+            expectedString: expectedString,
+            encoder: { $0.writeResponsePayload($1) }
+        )
     }
 }
 

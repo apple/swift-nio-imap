@@ -38,7 +38,11 @@ struct ByteBufferWriteLiteralTests {
         EncodeFixture.imapStringClient(#"a"b\c"#, expectedStrings: [#""a\"b\\c""#], options: .rfc3501),
         EncodeFixture.imapStringClient(#"a"b\c"#, expectedStrings: [#""a\"b\\c""#], options: .literalPlus),
         /// But we'll fall back to literals if there are too many `\` and/or `"` in the string:
-        EncodeFixture.imapStringClient(#"a""""b\\\\c"#, expectedStrings: ["{11}\r\n", #"a""""b\\\\c"#], options: .rfc3501),
+        EncodeFixture.imapStringClient(
+            #"a""""b\\\\c"#,
+            expectedStrings: ["{11}\r\n", #"a""""b\\\\c"#],
+            options: .rfc3501
+        ),
         // We'll use literal (plus) if the string contains any non-ASCII:
         EncodeFixture.imapStringClient("båd", expectedStrings: ["{4+}\r\nbåd"], options: .literalPlus),
         EncodeFixture.imapStringClient("パリ", expectedStrings: ["{6+}\r\nパリ"], options: .literalPlus),
