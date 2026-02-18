@@ -103,7 +103,7 @@ struct URLFetchTypeTests {
         fixture.checkEncoding()
     }
 
-    @Test(arguments: [
+    @Test("parse - partial and section cases", arguments: [
         ParseFixture.urlFetchType(
             ";PARTIAL=1.2",
             expected: .success(.partialOnly(.init(range: .init(offset: 1, length: 2))))
@@ -122,11 +122,11 @@ struct URLFetchTypeTests {
             )
         ),
     ])
-    func `parse - partial and section cases`(_ fixture: ParseFixture<URLFetchType>) {
+    func parsePartialAndSectionCases(_ fixture: ParseFixture<URLFetchType>) {
         fixture.checkParsing()
     }
 
-    @Test(arguments: [
+    @Test("parse - UID cases", arguments: [
         ParseFixture.urlFetchType(
             ";UID=123",
             expected: .success(.uidSectionPartial(uid: .init(uid: 123), section: nil, partial: nil))
@@ -162,11 +162,11 @@ struct URLFetchTypeTests {
             )
         ),
     ])
-    func `parse - UID cases`(_ fixture: ParseFixture<URLFetchType>) {
+    func parseUIDCases(_ fixture: ParseFixture<URLFetchType>) {
         fixture.checkParsing()
     }
 
-    @Test(arguments: [
+    @Test("parse - ref cases 1", arguments: [
         ParseFixture.urlFetchType(
             "test;UID=123",
             expected: .success(
@@ -190,11 +190,11 @@ struct URLFetchTypeTests {
             )
         ),
     ])
-    func `parse - ref cases 1`(_ fixture: ParseFixture<URLFetchType>) {
+    func parseRefCases1(_ fixture: ParseFixture<URLFetchType>) {
         fixture.checkParsing()
     }
 
-    @Test(arguments: [
+    @Test("parse - ref cases 2", arguments: [
         ParseFixture.urlFetchType(
             "test;UID=123/;PARTIAL=1.2",
             expected: .success(
@@ -218,7 +218,7 @@ struct URLFetchTypeTests {
             )
         ),
     ])
-    func `parse - ref cases 2`(_ fixture: ParseFixture<URLFetchType>) {
+    func parseRefCases2(_ fixture: ParseFixture<URLFetchType>) {
         fixture.checkParsing()
     }
 }

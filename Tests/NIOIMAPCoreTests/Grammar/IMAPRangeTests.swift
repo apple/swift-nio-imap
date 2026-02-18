@@ -26,19 +26,22 @@ struct IMAPRangeTests {
         fixture.checkEncoding()
     }
 
-    @Test func `range from`() {
+    @Test("range from")
+    func rangeFrom() {
         let sut = MessageIdentifierRange<SequenceNumber>(7...)
         #expect(sut.range.lowerBound == 7)
         #expect(sut.range.upperBound == .max)
     }
 
-    @Test func `range to`() {
+    @Test("range to")
+    func rangeTo() {
         let sut = MessageIdentifierRange<SequenceNumber>(...7)
         #expect(sut.range.lowerBound == 1)
         #expect(sut.range.upperBound == 7)
     }
 
-    @Test func `range closed`() {
+    @Test("range closed")
+    func rangeClosed() {
         let sut = MessageIdentifierRange<SequenceNumber>(3...4)
         #expect(sut.range.lowerBound == 3)
         #expect(sut.range.upperBound == 4)

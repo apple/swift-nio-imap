@@ -58,7 +58,8 @@ struct IDTests {
         fixture.checkParsing()
     }
 
-    @Test func `ID response does not get redacted for logging`() {
+    @Test("ID response does not get redacted for logging")
+    func idResponseDoesNotGetRedactedForLogging() {
         let id = Response.untagged(ResponsePayload.id(["name": "A"]))
         #expect(
             "\(Response.descriptionWithoutPII([id]))" == #"""
@@ -68,7 +69,8 @@ struct IDTests {
         )
     }
 
-    @Test func `ID command does not get redacted for logging`() {
+    @Test("ID command does not get redacted for logging")
+    func idCommandDoesNotGetRedactedForLogging() {
         let part = CommandStreamPart.tagged(TaggedCommand(tag: "A1", command: .id(["name": "A"])))
         #expect(
             "\(CommandStreamPart.descriptionWithoutPII([part]))" == #"""
@@ -78,7 +80,7 @@ struct IDTests {
         )
     }
 
-    @Test(arguments: [
+    @Test("parse ID params list", arguments: [
         ParseFixture.idParamsList("NIL", " ", expected: .success([:])),
         ParseFixture.idParamsList("()", " ", expected: .success([:])),
         ParseFixture.idParamsList("( )", " ", expected: .success([:])),
@@ -109,7 +111,7 @@ struct IDTests {
             expected: .success(["a": "1", "b": "2"])
         ),
     ])
-    func `parse ID params list`(_ fixture: ParseFixture<OrderedDictionary<String, String?>>) {
+    func parseIDParamsList(_ fixture: ParseFixture<OrderedDictionary<String, String?>>) {
         fixture.checkParsing()
     }
 }

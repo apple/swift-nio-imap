@@ -43,8 +43,8 @@ struct Base64Tests {
         ([.base64UrlAlphabet], [.base64UrlAlphabet]),
     ]
 
-    @Test(arguments: testBuffers, encodingOptions)
-    func `round trip encodes and decodes successfully`(
+    @Test("round trip encodes and decodes successfully", arguments: testBuffers, encodingOptions)
+    func roundTripEncodesAndDecodesSuccessfully(
         bytes: [UInt8],
         options: (Base64.EncodingOptions, Base64.DecodingOptions)
     ) throws {
@@ -53,7 +53,7 @@ struct Base64Tests {
         #expect(decoded == bytes)
     }
 
-    @Test(arguments: [
+    @Test("decode converts Base64 strings to bytes", arguments: [
         (
             "YIIB+wYJKoZIhvcSAQICAQBuggHqMIIB5qADAgEFoQMCAQ6iBwMFACAAAACjggEmYYIBIjCCAR6gAwIBBaESGxB1Lndhc2hpbmd0b24uZWR1oi0wK6ADAgEDoSQwIhsEaW1hcBsac2hpdmFtcy5jYWMud2FzaGluZ3Rvbi5lZHWjgdMwgdCgAwIBAaEDAgEDooHDBIHAcS1GSa5b+fXnPZNmXB9SjL8Ollj2SKyb+3S0iXMljen/jNkpJXAleKTz6BQPzj8duz8EtoOuNfKgweViyn/9B9bccy1uuAE2HI0yC/PHXNNU9ZrBziJ8Lm0tTNc98kUpjXnHZhsMcz5Mx2GR6dGknbI0iaGcRerMUsWOuBmKKKRmVMMdR9T3EZdpqsBd7jZCNMWotjhivd5zovQlFqQ2Wjc2+y46vKP/iXxWIuQJuDiisyXF0Y8+5GTpALpHDc1/pIGmMIGjoAMCAQGigZsEgZg2on5mSuxoDHEA1w9bcW9nFdFxDKpdrQhVGVRDIzcCMCTzvUboqb5KjY1NJKJsfjRQiBYBdENKfzK+g5DlV8nrw81uOcP8NOQCLR5XkoMHC0Dr/80ziQzbNqhxO6652Npft0LQwJvenwDI13YxpwOdMXzkWZN/XrEqOWp6GCgXTBvCyLWLlWnbaUkZdEYbKHBPjd8t/1x5Yg==",
             [
@@ -137,16 +137,16 @@ struct Base64Tests {
             ]
         ),
     ])
-    func `decode converts Base64 strings to bytes`(encoded: String, expected: [UInt8]) throws {
+    func decodeConvertsBase64StringsToBytes(encoded: String, expected: [UInt8]) throws {
         let decoded = try Base64.decode(bytes: encoded.utf8, options: [])
         #expect(decoded == expected)
     }
 
-    @Test(arguments: [
+    @Test("parse base64", arguments: [
         ParseFixture.base64("YWFh", " ", expected: .success("aaa")),
         ParseFixture.base64("YQ==", " ", expected: .success("a")),
     ])
-    func `parse base64`(_ fixture: ParseFixture<String>) {
+    func parseBase64(_ fixture: ParseFixture<String>) {
         fixture.checkParsing()
     }
 }

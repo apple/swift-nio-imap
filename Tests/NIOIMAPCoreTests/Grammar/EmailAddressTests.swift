@@ -18,7 +18,8 @@ import Testing
 
 @Suite("EmailAddress")
 struct EmailAddressTestsSuite {
-    @Test func `address initialization with properties`() {
+    @Test("address initialization with properties")
+    func addressInitializationWithProperties() {
         let name: ByteBuffer? = "a"
         let adl: ByteBuffer? = "b"
         let mailbox: ByteBuffer? = "c"
@@ -53,7 +54,7 @@ struct EmailAddressTestsSuite {
             expectedString: "(NIL NIL {4}\r\n阿Q {13}\r\n例子.中国)"
         ),
     ])
-    func `encode email address`(_ fixture: EmailAddressFixture) {
+    func encodeEmailAddress(_ fixture: EmailAddressFixture) {
         fixture.checkEncoding()
     }
 
@@ -198,7 +199,7 @@ struct EmailAddressTestsSuite {
             ]
         ),
     ])
-    func `parse envelope email address groups`(_ fixture: EnvelopeGroupingFixture) {
+    func parseEnvelopeEmailAddressGroups(_ fixture: EnvelopeGroupingFixture) {
         let actual = GrammarParser().parseEnvelopeEmailAddressGroups(fixture.addresses)
         #expect(actual == fixture.expected)
     }

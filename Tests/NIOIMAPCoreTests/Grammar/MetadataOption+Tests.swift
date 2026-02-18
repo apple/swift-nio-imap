@@ -18,7 +18,7 @@ import Testing
 
 @Suite("MetadataOption")
 struct MetadataOptionTests {
-    @Test(arguments: [
+    @Test("encodes single metadata option", arguments: [
         EncodeFixture.metadataOption(
             .maxSize(123),
             "MAXSIZE 123"
@@ -32,11 +32,11 @@ struct MetadataOptionTests {
             "param"
         ),
     ])
-    func `encodes single metadata option`(_ fixture: EncodeFixture<MetadataOption>) {
+    func encodesSingleMetadataOption(_ fixture: EncodeFixture<MetadataOption>) {
         fixture.checkEncoding()
     }
 
-    @Test(arguments: [
+    @Test("encodes array of metadata options", arguments: [
         EncodeFixture.metadataOptions(
             [.maxSize(123)],
             "(MAXSIZE 123)"
@@ -46,24 +46,24 @@ struct MetadataOptionTests {
             "(MAXSIZE 1 DEPTH 1)"
         ),
     ])
-    func `encodes array of metadata options`(_ fixture: EncodeFixture<[MetadataOption]>) {
+    func encodesArrayOfMetadataOptions(_ fixture: EncodeFixture<[MetadataOption]>) {
         fixture.checkEncoding()
     }
 
-    @Test(arguments: [
+    @Test("parse metadata option", arguments: [
         ParseFixture.metadataOption("MAXSIZE 123", expected: .success(.maxSize(123))),
         ParseFixture.metadataOption("DEPTH 1", expected: .success(.scope(.one))),
         ParseFixture.metadataOption("param", expected: .success(.other(.init(key: "param", value: nil)))),
     ])
-    func `parse metadata option`(_ fixture: ParseFixture<MetadataOption>) {
+    func parseMetadataOption(_ fixture: ParseFixture<MetadataOption>) {
         fixture.checkParsing()
     }
 
-    @Test(arguments: [
+    @Test("parse metadata options", arguments: [
         ParseFixture.metadataOptions("(MAXSIZE 123)", expected: .success([.maxSize(123)])),
         ParseFixture.metadataOptions("(DEPTH 1 MAXSIZE 123)", expected: .success([.scope(.one), .maxSize(123)])),
     ])
-    func `parse metadata options`(_ fixture: ParseFixture<[MetadataOption]>) {
+    func parseMetadataOptions(_ fixture: ParseFixture<[MetadataOption]>) {
         fixture.checkParsing()
     }
 }

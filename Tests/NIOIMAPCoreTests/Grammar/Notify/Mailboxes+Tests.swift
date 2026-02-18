@@ -18,8 +18,8 @@ import Testing
 
 @Suite("Mailboxes")
 struct MailboxesTests {
-    @Test
-    func `rejects empty mailbox list`() {
+    @Test("rejects empty mailbox list")
+    func rejectsEmptyMailboxList() {
         #expect(Mailboxes([]) == nil)
         #expect(Mailboxes([.inbox]) != nil)
     }

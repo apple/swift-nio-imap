@@ -52,13 +52,15 @@ struct MessageIdentifierSetTests {
         fixture.checkParsing()
     }
 
-    @Test func `convert to sequence number`() {
+    @Test("convert to sequence number")
+    func convertToSequenceNumber() {
         let input = MessageIdentifierSet<UnknownMessageIdentifier>([1...5, 10...15, 20...30])
         let output = MessageIdentifierSet<SequenceNumber>(input)
         #expect(output == [1...5, 10...15, 20...30])
     }
 
-    @Test func `convert to UID`() {
+    @Test("convert to UID")
+    func convertToUID() {
         let input = MessageIdentifierSet<UnknownMessageIdentifier>([1...5, 10...15, 20...30])
         let output = MessageIdentifierSet<UID>(input)
         #expect(output == [1...5, 10...15, 20...30])

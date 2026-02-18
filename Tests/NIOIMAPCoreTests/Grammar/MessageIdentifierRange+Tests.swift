@@ -40,13 +40,15 @@ struct MessageIdentifierRangeTests {
         fixture.checkParsing()
     }
 
-    @Test func `convert to sequence number`() {
+    @Test("convert to sequence number")
+    func convertToSequenceNumber() {
         let input = MessageIdentifierRange<UnknownMessageIdentifier>(UnknownMessageIdentifier(1)...2)
         let output = MessageIdentifierRange<SequenceNumber>(input)
         #expect(output == 1...2)
     }
 
-    @Test func `convert to UID`() {
+    @Test("convert to UID")
+    func convertToUID() {
         let input = MessageIdentifierRange<UnknownMessageIdentifier>(UnknownMessageIdentifier(5)...6)
         let output = MessageIdentifierRange<UID>(input)
         #expect(output == 5...6)

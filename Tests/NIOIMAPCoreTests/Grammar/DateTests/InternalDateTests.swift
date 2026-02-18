@@ -17,7 +17,8 @@ import Testing
 
 @Suite("ServerMessageDate")
 struct InternalDateTests {
-    @Test func `component initialization and roundtrip with typical values`() {
+    @Test("component initialization and roundtrip with typical values")
+    func componentInitializationAndRoundtripWithTypicalValues() {
         let components = ServerMessageDate.Components(
             year: 1994,
             month: 6,
@@ -39,7 +40,8 @@ struct InternalDateTests {
         #expect(String(reflecting: date) == #""25-Jun-1994 01:02:03 +1020""#)
     }
 
-    @Test func `component initialization with minimum boundary values`() {
+    @Test("component initialization with minimum boundary values")
+    func componentInitializationWithMinimumBoundaryValues() {
         let components = ServerMessageDate.Components(
             year: 1900,
             month: 1,
@@ -61,7 +63,8 @@ struct InternalDateTests {
         #expect(String(reflecting: date) == #""1-Jan-1900 00:00:00 -1559""#)
     }
 
-    @Test func `component initialization with maximum boundary values`() {
+    @Test("component initialization with maximum boundary values")
+    func componentInitializationWithMaximumBoundaryValues() {
         let components = ServerMessageDate.Components(
             year: 2579,
             month: 12,

@@ -18,7 +18,7 @@ import Testing
 
 @Suite("QuotaResponse")
 struct QuotaResponseTests {
-    @Test(arguments: [
+    @Test("encode quota response", arguments: [
         EncodeFixture.quota(
             (
                 QuotaRoot("Root"),
@@ -45,20 +45,20 @@ struct QuotaResponseTests {
             ##"QUOTA "#user/alice" (MESSAGE 42 1000)"##
         ),
     ])
-    func `encode quota response`(
+    func encodeQuotaResponse(
         fixture: EncodeFixture<(QuotaRoot, [QuotaResource])>
     ) {
         fixture.checkEncoding()
     }
 
-    @Test(arguments: [
+    @Test("encode quota resources", arguments: [
         EncodeFixture.quotaResources(
             [QuotaResource(resourceName: "STORAGE", usage: 10, limit: 512)],
             "(STORAGE 10 512)"
         ),
         EncodeFixture.quotaResources([], "()"),
     ])
-    func `encode quota resources`(_ fixture: EncodeFixture<[QuotaResource]>) {
+    func encodeQuotaResources(_ fixture: EncodeFixture<[QuotaResource]>) {
         fixture.checkEncoding()
     }
 }

@@ -18,21 +18,21 @@ import Testing
 
 @Suite("URLMessageSection")
 struct URLMessageSectionTests {
-    @Test(arguments: [
+    @Test("encode URL message section", arguments: [
         EncodeFixture.urlMessageSection(.init(encodedSection: .init(section: "test")), "/;SECTION=test")
     ])
-    func `encode URL message section`(_ fixture: EncodeFixture<URLMessageSection>) {
+    func encodeURLMessageSection(_ fixture: EncodeFixture<URLMessageSection>) {
         fixture.checkEncoding()
     }
 
-    @Test(arguments: [
+    @Test("encode URL message section only", arguments: [
         EncodeFixture.urlMessageSectionOnly(.init(encodedSection: .init(section: "test")), ";SECTION=test")
     ])
-    func `encode URL message section only`(_ fixture: EncodeFixture<URLMessageSection>) {
+    func encodeURLMessageSectionOnly(_ fixture: EncodeFixture<URLMessageSection>) {
         fixture.checkEncoding()
     }
 
-    @Test(arguments: [
+    @Test("parse with slash", arguments: [
         ParseFixture.urlMessageSectionWithSlash(
             "/;SECTION=a",
             " ",
@@ -54,11 +54,11 @@ struct URLMessageSectionTests {
             expected: .incompleteMessage
         ),
     ])
-    func `parse with slash`(_ fixture: ParseFixture<URLMessageSection>) {
+    func parseWithSlash(_ fixture: ParseFixture<URLMessageSection>) {
         fixture.checkParsing()
     }
 
-    @Test(arguments: [
+    @Test("parse without slash", arguments: [
         ParseFixture.urlMessageSectionWithoutSlash(
             ";SECTION=a",
             " ",
@@ -80,7 +80,7 @@ struct URLMessageSectionTests {
             expected: .incompleteMessage
         ),
     ])
-    func `parse without slash`(_ fixture: ParseFixture<URLMessageSection>) {
+    func parseWithoutSlash(_ fixture: ParseFixture<URLMessageSection>) {
         fixture.checkParsing()
     }
 }
