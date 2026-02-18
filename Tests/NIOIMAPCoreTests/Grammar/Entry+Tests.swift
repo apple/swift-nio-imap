@@ -19,14 +19,14 @@ import OrderedCollections
 
 @Suite("Entry")
 struct EntryTests {
-    @Test(arguments: [
+    @Test("encode single entry", arguments: [
         EncodeFixture.entry(.init(key: "name", value: .init("value")), "\"name\" ~{5}\r\nvalue")
     ])
-    func `encode single entry`(_ fixture: EncodeFixture<KeyValue<MetadataEntryName, MetadataValue>>) {
+    func encodeSingleEntry(_ fixture: EncodeFixture<KeyValue<MetadataEntryName, MetadataValue>>) {
         fixture.checkEncoding()
     }
 
-    @Test(arguments: [
+    @Test("encode entry values", arguments: [
         EncodeFixture.entryValues(
             ["name": .init("value")],
             "(\"name\" ~{5}\r\nvalue)"
@@ -36,11 +36,11 @@ struct EntryTests {
             "(\"name1\" ~{6}\r\nvalue1 \"name2\" ~{6}\r\nvalue2)"
         ),
     ])
-    func `encode entry values`(_ fixture: EncodeFixture<OrderedDictionary<MetadataEntryName, MetadataValue>>) {
+    func encodeEntryValues(_ fixture: EncodeFixture<OrderedDictionary<MetadataEntryName, MetadataValue>>) {
         fixture.checkEncoding()
     }
 
-    @Test(arguments: [
+    @Test("encode entries list", arguments: [
         EncodeFixture.entries(
             ["name"],
             "(\"name\")"
@@ -50,11 +50,11 @@ struct EntryTests {
             "(\"name1\" \"name2\")"
         ),
     ])
-    func `encode entries list`(_ fixture: EncodeFixture<[MetadataEntryName]>) {
+    func encodeEntriesList(_ fixture: EncodeFixture<[MetadataEntryName]>) {
         fixture.checkEncoding()
     }
 
-    @Test(arguments: [
+    @Test("encode entry list", arguments: [
         EncodeFixture.entryList(
             ["name"],
             "\"name\""
@@ -64,11 +64,11 @@ struct EntryTests {
             "\"name1\" \"name2\""
         ),
     ])
-    func `encode entry list`(_ fixture: EncodeFixture<[MetadataEntryName]>) {
+    func encodeEntryList(_ fixture: EncodeFixture<[MetadataEntryName]>) {
         fixture.checkEncoding()
     }
 
-    @Test(arguments: [
+    @Test("parse entry value", arguments: [
         ParseFixture.entryValue(
             "\"name\" \"value\"",
             "",
@@ -80,11 +80,11 @@ struct EntryTests {
             expected: .success(.init(key: "name", value: .init(nil)))
         ),
     ])
-    func `parse entry value`(_ fixture: ParseFixture<KeyValue<MetadataEntryName, MetadataValue>>) {
+    func parseEntryValue(_ fixture: ParseFixture<KeyValue<MetadataEntryName, MetadataValue>>) {
         fixture.checkParsing()
     }
 
-    @Test(arguments: [
+    @Test("parse entry values", arguments: [
         ParseFixture.entryValues(
             "(\"name\" \"value\")",
             "",
@@ -96,11 +96,11 @@ struct EntryTests {
             expected: .success(["name1": .init("value1"), "name2": .init("value2")])
         ),
     ])
-    func `parse entry values`(_ fixture: ParseFixture<OrderedDictionary<MetadataEntryName, MetadataValue>>) {
+    func parseEntryValues(_ fixture: ParseFixture<OrderedDictionary<MetadataEntryName, MetadataValue>>) {
         fixture.checkParsing()
     }
 
-    @Test(arguments: [
+    @Test("parse entries", arguments: [
         ParseFixture.entries(
             "\"name\"",
             "",
@@ -117,11 +117,11 @@ struct EntryTests {
             expected: .success(["name1", "name2"])
         ),
     ])
-    func `parse entries`(_ fixture: ParseFixture<[MetadataEntryName]>) {
+    func parseEntries(_ fixture: ParseFixture<[MetadataEntryName]>) {
         fixture.checkParsing()
     }
 
-    @Test(arguments: [
+    @Test("parse entry list", arguments: [
         ParseFixture.entryList(
             "\"name\"",
             expected: .success(["name"])
@@ -131,7 +131,7 @@ struct EntryTests {
             expected: .success(["name1", "name2"])
         ),
     ])
-    func `parse entry list`(_ fixture: ParseFixture<[MetadataEntryName]>) {
+    func parseEntryList(_ fixture: ParseFixture<[MetadataEntryName]>) {
         fixture.checkParsing()
     }
 }

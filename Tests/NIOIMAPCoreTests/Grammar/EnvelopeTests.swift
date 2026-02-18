@@ -78,7 +78,7 @@ struct EnvelopeTests {
         fixture.checkEncoding()
     }
 
-    @Test(arguments: [
+    @Test("parse envelope", arguments: [
         ParseFixture.envelope(
             #"("date" "subject" (("name1" "adl1" "mailbox1" "host1")) (("name2" "adl2" "mailbox2" "host2")) (("name3" "adl3" "mailbox3" "host3")) (("name4" "adl4" "mailbox4" "host4") ("name5" "adl5" "mailbox5" "host5")) (("name6" "adl6" "mailbox6" "host6")("name7" "adl7" "mailbox7" "host7")) (("name8" "adl8" "mailbox8" "host8")) "someone" "messageid")"#,
             expected: .success(
@@ -127,11 +127,11 @@ struct EnvelopeTests {
             )
         )
     ])
-    func `parse envelope`(_ fixture: ParseFixture<Envelope>) {
+    func parseEnvelope(_ fixture: ParseFixture<Envelope>) {
         fixture.checkParsing()
     }
 
-    @Test(arguments: [
+    @Test("parse envelope email addresses", arguments: [
         ParseFixture.envelopeEmailAddresses(
             "((NIL NIL NIL NIL))",
             " ",
@@ -144,11 +144,11 @@ struct EnvelopeTests {
         ),
         ParseFixture.envelopeEmailAddresses("NIL", " ", expected: .failure),
     ])
-    func `parse envelope email addresses`(_ fixture: ParseFixture<[EmailAddress]>) {
+    func parseEnvelopeEmailAddresses(_ fixture: ParseFixture<[EmailAddress]>) {
         fixture.checkParsing()
     }
 
-    @Test(arguments: [
+    @Test("parse optional envelope email addresses", arguments: [
         ParseFixture.optionalEnvelopeEmailAddresses(
             #"(("a" "b" "c" "d"))"#,
             " ",
@@ -156,7 +156,7 @@ struct EnvelopeTests {
         ),
         ParseFixture.optionalEnvelopeEmailAddresses("NIL", " ", expected: .success([])),
     ])
-    func `parse optional envelope email addresses`(_ fixture: ParseFixture<[EmailAddressListElement]>) {
+    func parseOptionalEnvelopeEmailAddresses(_ fixture: ParseFixture<[EmailAddressListElement]>) {
         fixture.checkParsing()
     }
 }

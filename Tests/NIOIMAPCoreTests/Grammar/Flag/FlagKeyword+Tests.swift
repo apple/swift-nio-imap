@@ -18,8 +18,8 @@ import Testing
 
 @Suite("FlagKeyword")
 struct FlagKeywordTests {
-    @Test
-    func `keyword equality`() {
+    @Test("keyword equality")
+    func keywordEquality() {
         #expect(Flag.Keyword("flag") == Flag.Keyword("flag"))
         #expect(Flag.Keyword("flagA") != Flag.Keyword("flag"))
         #expect(Flag.Keyword("flag") != Flag.Keyword("flagB"))

@@ -20,7 +20,8 @@ import Testing
 struct DateTests {}
 
 extension DateTests {
-    @Test func `date initialization`() throws {
+    @Test("date initialization")
+    func dateInitialization() throws {
         let day = 25
         let month = 6
         let year = 1994
@@ -99,32 +100,32 @@ extension DateTests {
         fixture.checkParsing()
     }
 
-    @Test(arguments: [
+    @Test("parse date day", arguments: [
         ParseFixture.dateDay("1", "\r", expected: .success(1)),
         ParseFixture.dateDay("12", "\r", expected: .success(12)),
         ParseFixture.dateDay("1", "a", expected: .success(1)),
         ParseFixture.dateDay("a", "\r", expected: .failureIgnoringBufferModifications),
         ParseFixture.dateDay("1234 ", "\r", expected: .failureIgnoringBufferModifications),
     ])
-    func `parse date day`(_ fixture: ParseFixture<Int>) {
+    func parseDateDay(_ fixture: ParseFixture<Int>) {
         fixture.checkParsing()
     }
 
-    @Test(arguments: [
+    @Test("parse date month", arguments: [
         ParseFixture.dateMonth("jun", " ", expected: .success(6)),
         ParseFixture.dateMonth("JUn", " ", expected: .success(6)),
         ParseFixture.dateMonth("ju", "", expected: .incompleteMessageIgnoringBufferModifications),
         ParseFixture.dateMonth("aaa ", " ", expected: .failureIgnoringBufferModifications),
     ])
-    func `parse date month`(_ fixture: ParseFixture<Int>) {
+    func parseDateMonth(_ fixture: ParseFixture<Int>) {
         fixture.checkParsing()
     }
 
-    @Test(arguments: [
+    @Test("parse date text", arguments: [
         ParseFixture.dateText("25-Jun-1994", " ", expected: .success(IMAPCalendarDay(year: 1994, month: 6, day: 25)!)),
         ParseFixture.dateText("25-Jun-", "", expected: .incompleteMessageIgnoringBufferModifications),
     ])
-    func `parse date text`(_ fixture: ParseFixture<IMAPCalendarDay>) {
+    func parseDateText(_ fixture: ParseFixture<IMAPCalendarDay>) {
         fixture.checkParsing()
     }
 }

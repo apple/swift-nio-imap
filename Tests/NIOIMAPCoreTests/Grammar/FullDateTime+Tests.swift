@@ -18,7 +18,7 @@ import Testing
 
 @Suite("FullDateTime")
 struct FullDateTimeTests {
-    @Test(arguments: [
+    @Test("encode full date time", arguments: [
         EncodeFixture.fullDateTime(
             .init(date: .init(year: 1, month: 2, day: 3), time: .init(hour: 4, minute: 5, second: 6)),
             "0001-02-03T04:05:06"
@@ -40,11 +40,11 @@ struct FullDateTimeTests {
             "9999-12-31T23:59:59"
         ),
     ])
-    func `encode full date time`(_ fixture: EncodeFixture<FullDateTime>) {
+    func encodeFullDateTime(_ fixture: EncodeFixture<FullDateTime>) {
         fixture.checkEncoding()
     }
 
-    @Test(arguments: [
+    @Test("encode full date", arguments: [
         EncodeFixture.fullDate(.init(year: 1, month: 2, day: 3), "0001-02-03"),
         EncodeFixture.fullDate(.init(year: 2025, month: 1, day: 1), "2025-01-01"),
         EncodeFixture.fullDate(.init(year: 2025, month: 12, day: 31), "2025-12-31"),
@@ -52,11 +52,11 @@ struct FullDateTimeTests {
         EncodeFixture.fullDate(.init(year: 2024, month: 6, day: 15), "2024-06-15"),
         EncodeFixture.fullDate(.init(year: 9999, month: 12, day: 31), "9999-12-31"),
     ])
-    func `encode full date`(_ fixture: EncodeFixture<FullDate>) {
+    func encodeFullDate(_ fixture: EncodeFixture<FullDate>) {
         fixture.checkEncoding()
     }
 
-    @Test(arguments: [
+    @Test("encode full time", arguments: [
         EncodeFixture.fullTime(.init(hour: 0, minute: 0, second: 0), "00:00:00"),
         EncodeFixture.fullTime(.init(hour: 1, minute: 2, second: 3), "01:02:03"),
         EncodeFixture.fullTime(.init(hour: 12, minute: 30, second: 45), "12:30:45"),
@@ -65,11 +65,11 @@ struct FullDateTimeTests {
         EncodeFixture.fullTime(.init(hour: 12, minute: 30, second: 45, fraction: 123), "12:30:45.123"),
         EncodeFixture.fullTime(.init(hour: 0, minute: 0, second: 0, fraction: 1), "00:00:00.1"),
     ])
-    func `encode full time`(_ fixture: EncodeFixture<FullTime>) {
+    func encodeFullTime(_ fixture: EncodeFixture<FullTime>) {
         fixture.checkEncoding()
     }
 
-    @Test(arguments: [
+    @Test("parse full date time", arguments: [
         ParseFixture.fullDateTime(
             "1234-12-20T11:22:33",
             " ",
@@ -81,20 +81,20 @@ struct FullDateTimeTests {
             )
         )
     ])
-    func `parse full date time`(_ fixture: ParseFixture<FullDateTime>) {
+    func parseFullDateTime(_ fixture: ParseFixture<FullDateTime>) {
         fixture.checkParsing()
     }
 
-    @Test(arguments: [
+    @Test("parse full date", arguments: [
         ParseFixture.fullDate("1234-12-23", " ", expected: .success(.init(year: 1234, month: 12, day: 23))),
         ParseFixture.fullDate("a", "", expected: .failure),
         ParseFixture.fullDate("1234", "", expected: .incompleteMessage),
     ])
-    func `parse full date`(_ fixture: ParseFixture<FullDate>) {
+    func parseFullDate(_ fixture: ParseFixture<FullDate>) {
         fixture.checkParsing()
     }
 
-    @Test(arguments: [
+    @Test("parse full time", arguments: [
         ParseFixture.fullTime("12:34:56", " ", expected: .success(.init(hour: 12, minute: 34, second: 56))),
         ParseFixture.fullTime(
             "12:34:56.123456",
@@ -105,7 +105,7 @@ struct FullDateTimeTests {
         ParseFixture.fullTime("1234:56:12", "", expected: .failure),
         ParseFixture.fullTime("1234", "", expected: .incompleteMessage),
     ])
-    func `parse full time`(_ fixture: ParseFixture<FullTime>) {
+    func parseFullTime(_ fixture: ParseFixture<FullTime>) {
         fixture.checkParsing()
     }
 }

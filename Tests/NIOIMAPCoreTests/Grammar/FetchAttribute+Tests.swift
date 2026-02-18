@@ -49,7 +49,7 @@ struct FetchAttributeTests {
         fixture.checkEncoding()
     }
 
-    @Test(arguments: [
+    @Test("custom debug string convertible", arguments: [
         ReflectionFixture<FetchAttribute>(sut: .envelope, expected: "ENVELOPE"),
         ReflectionFixture<FetchAttribute>(sut: .flags, expected: "FLAGS"),
         ReflectionFixture<FetchAttribute>(sut: .uid, expected: "UID"),
@@ -92,11 +92,11 @@ struct FetchAttributeTests {
         ReflectionFixture<FetchAttribute>(sut: .emailID, expected: "EMAILID"),
         ReflectionFixture<FetchAttribute>(sut: .threadID, expected: "THREADID"),
     ])
-    func `custom debug string convertible`(_ fixture: ReflectionFixture<FetchAttribute>) {
+    func customDebugStringConvertible(_ fixture: ReflectionFixture<FetchAttribute>) {
         fixture.check()
     }
 
-    @Test(arguments: [
+    @Test("encode list", arguments: [
         EncodeFixture.fetchAttributeList([.envelope], "(ENVELOPE)"),
         EncodeFixture.fetchAttributeList([.flags, .internalDate, .rfc822Size], "FAST"),
         EncodeFixture.fetchAttributeList([.internalDate, .rfc822Size, .flags], "FAST"),
@@ -125,7 +125,7 @@ struct FetchAttributeTests {
         EncodeFixture.fetchAttributeList([.preview(lazy: false)], "(PREVIEW)"),
         EncodeFixture.fetchAttributeList([.preview(lazy: true)], "(PREVIEW (LAZY))"),
     ])
-    func `encode list`(_ fixture: EncodeFixture<[FetchAttribute]>) {
+    func encodeList(_ fixture: EncodeFixture<[FetchAttribute]>) {
         fixture.checkEncoding()
     }
 
@@ -199,7 +199,7 @@ struct FetchAttributeTests {
         fixture.checkParsing()
     }
 
-    @Test(arguments: [
+    @Test("parse partial", arguments: [
         ParseFixture.partial("<0.1000000000>", expected: .success(ClosedRange(uncheckedBounds: (0, 999_999_999)))),
         ParseFixture.partial("<0.4294967290>", expected: .success(ClosedRange(uncheckedBounds: (0, 4_294_967_289)))),
         ParseFixture.partial("<1.2>", expected: .success(ClosedRange(uncheckedBounds: (1, 2)))),
@@ -219,7 +219,7 @@ struct FetchAttributeTests {
         ParseFixture.partial("<1.", "", expected: .incompleteMessage),
         ParseFixture.partial("<1.22222222", "", expected: .incompleteMessage),
     ])
-    func `parse partial`(_ fixture: ParseFixture<ClosedRange<UInt32>>) {
+    func parsePartial(_ fixture: ParseFixture<ClosedRange<UInt32>>) {
         fixture.checkParsing()
     }
 }

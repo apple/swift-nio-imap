@@ -18,17 +18,17 @@ import Testing
 
 @Suite("FetchModifier")
 struct FetchModifierTests {
-    @Test(arguments: [
+    @Test("encode single modifier", arguments: [
         EncodeFixture.fetchModifier(.changedSince(.init(modificationSequence: 4)), "CHANGEDSINCE 4"),
         EncodeFixture.fetchModifier(.partial(.last(735...88_032)), "PARTIAL -735:-88032"),
         EncodeFixture.fetchModifier(.other(.init(key: "test", value: nil)), "test"),
         EncodeFixture.fetchModifier(.other(.init(key: "test", value: .sequence(.set([4])))), "test 4"),
     ])
-    func `encode single modifier`(_ fixture: EncodeFixture<FetchModifier>) {
+    func encodeSingleModifier(_ fixture: EncodeFixture<FetchModifier>) {
         fixture.checkEncoding()
     }
 
-    @Test(arguments: [
+    @Test("encode multiple modifiers", arguments: [
         EncodeFixture.fetchModifiers(
             [.partial(.last(1...30)), .changedSince(.init(modificationSequence: 3_665_089_505_007_763_456))],
             " (PARTIAL -1:-30 CHANGEDSINCE 3665089505007763456)"
@@ -43,7 +43,7 @@ struct FetchModifierTests {
         ),
         EncodeFixture.fetchModifiers([], ""),
     ])
-    func `encode multiple modifiers`(_ fixture: EncodeFixture<[FetchModifier]>) {
+    func encodeMultipleModifiers(_ fixture: EncodeFixture<[FetchModifier]>) {
         fixture.checkEncoding()
     }
 
@@ -68,7 +68,7 @@ struct FetchModifierTests {
         fixture.checkParsing()
     }
 
-    @Test(arguments: [
+    @Test("parse multiple modifiers", arguments: [
         ParseFixture.fetchModifiers(
             " (CHANGEDSINCE 2)",
             " ",
@@ -81,7 +81,7 @@ struct FetchModifierTests {
             expected: .success([.partial(.last(1...30)), .changedSince(.init(modificationSequence: 98305))])
         ),
     ])
-    func `parse multiple modifiers`(_ fixture: ParseFixture<[FetchModifier]>) {
+    func parseMultipleModifiers(_ fixture: ParseFixture<[FetchModifier]>) {
         fixture.checkParsing()
     }
 }
