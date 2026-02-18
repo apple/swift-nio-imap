@@ -18,34 +18,34 @@ import Testing
 
 @Suite("ChangedSinceModifier")
 struct ChangedSinceModifierTests {
-    @Test(arguments: [
+    @Test("encode changed since", arguments: [
         EncodeFixture.changedSinceModifier(.init(modificationSequence: 3), "CHANGEDSINCE 3"),
         EncodeFixture.changedSinceModifier(.init(modificationSequence: 999999), "CHANGEDSINCE 999999"),
     ])
-    func `encode changed since`(_ fixture: EncodeFixture<ChangedSinceModifier>) {
+    func encodeChangedSince(_ fixture: EncodeFixture<ChangedSinceModifier>) {
         fixture.checkEncoding()
     }
 
-    @Test(arguments: [
+    @Test("encode unchanged since", arguments: [
         EncodeFixture.unchangedSinceModifier(.init(modificationSequence: 3), "UNCHANGEDSINCE 3"),
         EncodeFixture.unchangedSinceModifier(.init(modificationSequence: 12345), "UNCHANGEDSINCE 12345"),
     ])
-    func `encode unchanged since`(_ fixture: EncodeFixture<UnchangedSinceModifier>) {
+    func encodeUnchangedSince(_ fixture: EncodeFixture<UnchangedSinceModifier>) {
         fixture.checkEncoding()
     }
 
-    @Test(arguments: [
+    @Test("parse changed since modifier", arguments: [
         ParseFixture.changedSinceModifier("CHANGEDSINCE 1", " ", expected: .success(.init(modificationSequence: 1))),
         ParseFixture.changedSinceModifier("changedsince 1", " ", expected: .success(.init(modificationSequence: 1))),
         ParseFixture.changedSinceModifier("TEST", "", expected: .failure),
         ParseFixture.changedSinceModifier("CHANGEDSINCE a", "", expected: .failure),
         ParseFixture.changedSinceModifier("CHANGEDSINCE 1", "", expected: .incompleteMessage),
     ])
-    func `parse changed since modifier`(_ fixture: ParseFixture<ChangedSinceModifier>) {
+    func parseChangedSinceModifier(_ fixture: ParseFixture<ChangedSinceModifier>) {
         fixture.checkParsing()
     }
 
-    @Test(arguments: [
+    @Test("parse unchanged since modifier", arguments: [
         ParseFixture.unchangedSinceModifier(
             "UNCHANGEDSINCE 1",
             " ",
@@ -60,7 +60,7 @@ struct ChangedSinceModifierTests {
         ParseFixture.unchangedSinceModifier("UNCHANGEDSINCE a", "", expected: .failure),
         ParseFixture.unchangedSinceModifier("UNCHANGEDSINCE 1", "", expected: .incompleteMessage),
     ])
-    func `parse unchanged since modifier`(_ fixture: ParseFixture<UnchangedSinceModifier>) {
+    func parseUnchangedSinceModifier(_ fixture: ParseFixture<UnchangedSinceModifier>) {
         fixture.checkParsing()
     }
 }

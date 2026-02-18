@@ -303,7 +303,7 @@ struct CommandTypeTests {
         fixture.checkParsing()
     }
 
-    @Test func `parser literal length limit`() throws {
+    @Test("parser literal length limit") func parserLiteralLengthLimit() throws {
         let parser = GrammarParser(literalSizeLimit: 5)
         var b1 = ParseBuffer("{5}\r\nabcde")
         #expect(try parser.parseLiteral(buffer: &b1, tracker: .makeNewDefault) == "abcde")

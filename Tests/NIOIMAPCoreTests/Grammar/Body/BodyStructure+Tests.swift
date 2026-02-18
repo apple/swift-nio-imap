@@ -18,7 +18,7 @@ import Testing
 
 @Suite("BodyStructure")
 private struct BodyStructureTests {
-    @Test(arguments: [
+    @Test("index navigation", arguments: [
         IndexNavigationFixture(
             bodyStructure: .singlepart(
                 .init(
@@ -385,7 +385,7 @@ private struct BodyStructureTests {
             ]
         ),
     ])
-    func `index navigation`(_ fixture: IndexNavigationFixture) {
+    func indexNavigation(_ fixture: IndexNavigationFixture) {
         // Check startIndex
         #expect(
             fixture.bodyStructure.startIndex == fixture.expectedIndices.first!,
@@ -431,7 +431,7 @@ private struct BodyStructureTests {
         }
     }
 
-    @Test(arguments: [
+    @Test("find and subscript access", arguments: [
         PositionFixture(
             bodyStructure: .singlepart(
                 .init(
@@ -893,7 +893,7 @@ private struct BodyStructureTests {
             )
         ),
     ])
-    func `find and subscript access`(_ fixture: PositionFixture) {
+    func findAndSubscriptAccess(_ fixture: PositionFixture) {
         guard let sub = fixture.bodyStructure.find(fixture.index) else {
             Issue.record("Invalid part '\(fixture.index)'.")
             return
@@ -902,7 +902,7 @@ private struct BodyStructureTests {
         #expect(fixture.bodyStructure[fixture.index] == fixture.expectedSubStructure)
     }
 
-    @Test(arguments: [
+    @Test("media type", arguments: [
         MediaTypeFixture(
             bodyStructure: .singlepart(
                 .init(
@@ -1043,12 +1043,12 @@ private struct BodyStructureTests {
             expectedSubtype: "mixed"
         ),
     ])
-    func `media type`(_ fixture: MediaTypeFixture) {
+    func mediaType(_ fixture: MediaTypeFixture) {
         #expect(fixture.bodyStructure.mediaType.topLevel == fixture.expectedTopLevel)
         #expect(fixture.bodyStructure.mediaType.sub == fixture.expectedSubtype)
     }
 
-    @Test(arguments: [
+    @Test("enumerate parts", arguments: [
         EnumeratePartsFixture(
             bodyStructure: .singlepart(
                 .init(
@@ -1723,7 +1723,7 @@ private struct BodyStructureTests {
             ]
         ),
     ])
-    func `enumerate parts`(_ fixture: EnumeratePartsFixture) {
+    func enumerateParts(_ fixture: EnumeratePartsFixture) {
         var result: [(SectionSpecifier.Part, BodyStructure)] = []
         fixture.bodyStructure.enumerateParts {
             result.append(($0, $1))
@@ -1866,7 +1866,7 @@ private struct BodyStructureTests {
         fixture.checkParsing()
     }
 
-    @Test(arguments: [
+    @Test("parse invalid body", arguments: [
         ParseFixture.invalidBodyStructure(#"()"#, " UID 1", expected: .success(.invalid)),
         ParseFixture.invalidBodyStructure(#"(foo bar)"#, " UID 1", expected: .success(.invalid)),
         ParseFixture.invalidBodyStructure(
@@ -1921,7 +1921,7 @@ private struct BodyStructureTests {
             expected: .failure
         ),
     ])
-    func `parse invalid body`(_ fixture: ParseFixture<MessageAttribute.BodyStructure>) {
+    func parseInvalidBody(_ fixture: ParseFixture<MessageAttribute.BodyStructure>) {
         fixture.checkParsing()
     }
 }

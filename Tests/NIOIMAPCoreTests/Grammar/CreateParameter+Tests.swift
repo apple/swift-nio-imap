@@ -44,7 +44,7 @@ struct CreateParameterTests {
         fixture.checkEncoding()
     }
 
-    @Test(arguments: [
+    @Test("parse single create parameter", arguments: [
         ParseFixture.createParameter(
             "param",
             expected: .success(.labelled(.init(key: "param", value: nil)))
@@ -66,11 +66,11 @@ struct CreateParameterTests {
         ParseFixture.createParameter("USE (\\Test", "", expected: .incompleteMessage),
         ParseFixture.createParameter("USE (\\All ", "", expected: .incompleteMessage),
     ])
-    func `parse single create parameter`(_ fixture: ParseFixture<CreateParameter>) {
+    func parseSingleCreateParameter(_ fixture: ParseFixture<CreateParameter>) {
         fixture.checkParsing()
     }
 
-    @Test(arguments: [
+    @Test("parse create parameters list", arguments: [
         ParseFixture.createParameters(
             " (param1 param2)",
             expected: .success([
@@ -81,7 +81,7 @@ struct CreateParameterTests {
         ParseFixture.createParameters(" (param1", expected: .failure),
         ParseFixture.createParameters(" (param1", "", expected: .incompleteMessage),
     ])
-    func `parse create parameters list`(_ fixture: ParseFixture<[CreateParameter]>) {
+    func parseCreateParametersList(_ fixture: ParseFixture<[CreateParameter]>) {
         fixture.checkParsing()
     }
 }

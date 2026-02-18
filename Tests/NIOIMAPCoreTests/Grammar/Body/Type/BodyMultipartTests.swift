@@ -18,7 +18,7 @@ import Testing
 
 @Suite("BodyStructure.Multipart")
 struct BodyMultipartTests {
-    @Test(arguments: [
+    @Test("encode multipart", arguments: [
         EncodeFixture.bodyMultipart(
             .init(
                 parts: [
@@ -99,11 +99,11 @@ struct BodyMultipartTests {
             #"("TEXT" "HTML" NIL NIL NIL "BASE64" 6 5)("TEXT" "PLAIN" NIL NIL NIL "BASE64" 7 6) "RELATED""#
         ),
     ])
-    func `encode multipart`(_ fixture: EncodeFixture<BodyStructure.Multipart>) {
+    func encodeMultipart(_ fixture: EncodeFixture<BodyStructure.Multipart>) {
         fixture.checkEncoding()
     }
 
-    @Test(arguments: [
+    @Test("encode extension", arguments: [
         EncodeFixture.bodyExtensionMultipart(
             .init(parameters: ["f": "v"], dispositionAndLanguage: nil),
             "(\"f\" \"v\")"
@@ -119,7 +119,7 @@ struct BodyMultipartTests {
             "(\"f1\" \"v1\") (\"string\" (\"f2\" \"v2\"))"
         ),
     ])
-    func `encode extension`(_ fixture: EncodeFixture<BodyStructure.Multipart.Extension>) {
+    func encodeExtension(_ fixture: EncodeFixture<BodyStructure.Multipart.Extension>) {
         fixture.checkEncoding()
     }
 }

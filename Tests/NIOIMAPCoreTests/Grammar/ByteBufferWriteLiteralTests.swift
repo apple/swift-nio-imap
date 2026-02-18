@@ -18,7 +18,7 @@ import Testing
 
 @Suite("ByteBuffer Literal Writing")
 struct ByteBufferWriteLiteralTests {
-    @Test(arguments: [
+    @Test("writeIMAPString with client buffers", arguments: [
         EncodeFixture.imapStringClient("", expectedStrings: ["\"\""], options: .rfc3501),
         EncodeFixture.imapStringClient("", expectedStrings: ["{0}\r\n"], options: .noQuoted),
         EncodeFixture.imapStringClient("a", expectedStrings: [#""a""#], options: .rfc3501),
@@ -71,11 +71,11 @@ struct ByteBufferWriteLiteralTests {
             options: .literalMinus
         ),
     ])
-    func `writeIMAPString with client buffers`(_ fixture: EncodeFixture<ByteBuffer>) {
+    func writeIMAPStringWithClientBuffers(_ fixture: EncodeFixture<ByteBuffer>) {
         fixture.checkEncoding()
     }
 
-    @Test(arguments: [
+    @Test("writeIMAPString with server buffers", arguments: [
         EncodeFixture.imapStringServer("", expectedString: "\"\"", options: .rfc3501),
         EncodeFixture.imapStringServer("abc", expectedString: #""abc""#, options: .rfc3501),
         EncodeFixture.imapStringServer(#"""#, expectedString: #""\"""#, options: .rfc3501),
@@ -91,15 +91,15 @@ struct ByteBufferWriteLiteralTests {
             options: .rfc3501
         ),
     ])
-    func `writeIMAPString with server buffers`(_ fixture: EncodeFixture<ByteBuffer>) {
+    func writeIMAPStringWithServerBuffers(_ fixture: EncodeFixture<ByteBuffer>) {
         fixture.checkEncoding()
     }
 
-    @Test(arguments: [
+    @Test("writeLiteral8 with client buffers", arguments: [
         EncodeFixture.literal8("", expectedStrings: ["~{0}\r\n"], options: .rfc3501),
         EncodeFixture.literal8("abc", expectedStrings: ["~{3}\r\n", "abc"], options: .rfc3501),
     ])
-    func `writeLiteral8 with client buffers`(_ fixture: EncodeFixture<ByteBuffer>) {
+    func writeLiteral8WithClientBuffers(_ fixture: EncodeFixture<ByteBuffer>) {
         fixture.checkEncoding()
     }
 }

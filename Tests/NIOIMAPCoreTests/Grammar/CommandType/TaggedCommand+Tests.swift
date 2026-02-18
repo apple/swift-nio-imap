@@ -29,7 +29,7 @@ struct TaggedCommandTests {
         fixture.checkParsing()
     }
 
-    @Test func `parse tagged command throws bad command`() {
+    @Test("parse tagged command throws bad command") func parseTaggedCommandThrowsBadCommand() {
         // Test that the parser error occurs when parsing the command name
         var buffer1 = TestUtilities.makeParseBuffer(for: "A1 ()\r\n")
         do {

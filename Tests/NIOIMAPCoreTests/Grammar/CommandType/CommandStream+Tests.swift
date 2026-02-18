@@ -48,7 +48,7 @@ private struct CommandStreamTests {
         fixture.checkEncoding()
     }
 
-    @Test func `continuation synchronizing literal`() throws {
+    @Test("continuation synchronizing literal") func continuationSynchronizingLiteral() throws {
         let parts: [AppendCommand] = [
             .start(tag: "1", appendingTo: .inbox),
             .beginMessage(message: .init(options: .none, data: .init(byteCount: 7))),
@@ -73,7 +73,7 @@ private struct CommandStreamTests {
         #expect(!continuation.waitForContinuation, "Should not have additional continuations.")
     }
 
-    @Test func `continuation non-synchronizing literal plus`() throws {
+    @Test("continuation non-synchronizing literal plus") func continuationNonSynchronizingLiteralPlus() throws {
         let parts: [AppendCommand] = [
             .start(tag: "1", appendingTo: .inbox),
             .beginMessage(message: .init(options: .none, data: .init(byteCount: 3))),
@@ -97,7 +97,7 @@ private struct CommandStreamTests {
         }
     }
 
-    @Test func `catenate example one with synchronizing literals`() throws {
+    @Test("catenate example one with synchronizing literals") func catenateExampleOneWithSynchronizingLiterals() throws {
         let parts: [AppendCommand] = [
             .start(tag: "A003", appendingTo: MailboxName("Drafts")),
             .beginCatenate(options: .init(flagList: [.seen, .draft, .keyword(.mdnSent)], extensions: [:])),
@@ -160,7 +160,7 @@ private struct CommandStreamTests {
         #expect(!encodedCommand.waitForContinuation, "Should not have additional continuations.")
     }
 
-    @Test func `catenate example one with non-synchronizing literals`() throws {
+    @Test("catenate example one with non-synchronizing literals") func catenateExampleOneWithNonSynchronizingLiterals() throws {
         let parts: [AppendCommand] = [
             .start(tag: "A003", appendingTo: MailboxName("Drafts")),
             .beginCatenate(options: .init(flagList: [.seen, .draft, .keyword(.mdnSent)], extensions: [:])),
@@ -199,7 +199,7 @@ private struct CommandStreamTests {
         #expect(!encodedCommand.waitForContinuation, "Should not have additional continuations.")
     }
 
-    @Test func `catenate sequential commands`() throws {
+    @Test("catenate sequential commands") func catenateSequentialCommands() throws {
         let parts: [AppendCommand] = [
             .start(tag: "A003", appendingTo: MailboxName("Drafts")),
             .beginCatenate(options: .init(flagList: [.seen, .draft, .keyword(.mdnSent)], extensions: [:])),
@@ -242,7 +242,7 @@ private struct CommandStreamTests {
         #expect(!encodedCommand.waitForContinuation, "Should not have additional continuations.")
     }
 
-    @Test(arguments: [
+    @Test("description without PII", arguments: [
         PIIFixture(
             input: .append(.start(tag: "1", appendingTo: .inbox)),
             expected: "1 APPEND \"∅\""
@@ -275,7 +275,7 @@ private struct CommandStreamTests {
             expected: "[8 bytes]\r\n"
         ),
     ])
-    func `description without PII`(_ fixture: PIIFixture) {
+    func descriptionWithoutPII(_ fixture: PIIFixture) {
         #expect(CommandStreamPart.descriptionWithoutPII([fixture.input]) == fixture.expected)
     }
 }

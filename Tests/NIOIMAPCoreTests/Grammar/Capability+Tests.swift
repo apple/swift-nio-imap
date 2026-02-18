@@ -18,16 +18,16 @@ import Testing
 
 @Suite("Capability")
 struct CapabilityTests {
-    @Test(arguments: [
+    @Test("name and value properties", arguments: [
         CapabilityFixture(name: "ACL", capability: .acl, expectedName: "ACL", expectedValue: nil),
         CapabilityFixture(name: "STATUS", capability: .status(.size), expectedName: "STATUS", expectedValue: "SIZE"),
     ])
-    func `name and value properties`(_ fixture: CapabilityFixture) {
+    func nameAndValueProperties(_ fixture: CapabilityFixture) {
         #expect(fixture.capability.name == fixture.expectedName)
         #expect(fixture.capability.value == fixture.expectedValue)
     }
 
-    @Test(arguments: [
+    @Test("encode single capability", arguments: [
         EncodeFixture.capability(.acl, "ACL"),
         EncodeFixture.capability(.annotateExperiment1, "ANNOTATE-EXPERIMENT-1"),
         EncodeFixture.capability(.appendLimit(11_206_521), "APPENDLIMIT=11206521"),
@@ -88,19 +88,19 @@ struct CapabilityTests {
         EncodeFixture.capability(.within, "WITHIN"),
         EncodeFixture.capability(.yahooMailHighestModificationSequence, "XYMHIGHESTMODSEQ"),
     ])
-    func `encode single capability`(_ fixture: EncodeFixture<Capability>) {
+    func encodeSingleCapability(_ fixture: EncodeFixture<Capability>) {
         fixture.checkEncoding()
     }
 
-    @Test(arguments: [
+    @Test("encode multiple capabilities", arguments: [
         EncodeFixture.capabilities([.condStore], "CAPABILITY CONDSTORE"),
         EncodeFixture.capabilities([.condStore, .enable, .filters], "CAPABILITY CONDSTORE ENABLE FILTERS"),
     ])
-    func `encode multiple capabilities`(_ fixture: EncodeFixture<[Capability]>) {
+    func encodeMultipleCapabilities(_ fixture: EncodeFixture<[Capability]>) {
         fixture.checkEncoding()
     }
 
-    @Test(arguments: [
+    @Test("parse capability data", arguments: [
         ParseFixture.capability("ACL", expected: .success(.acl)),
         ParseFixture.capability("ANNOTATE-EXPERIMENT-1", expected: .success(.annotateExperiment1)),
         ParseFixture.capability("AUTH=PLAIN", expected: .success(.authenticate(.plain))),
@@ -177,7 +177,7 @@ struct CapabilityTests {
             expected: .success([.filters, .imap4rev1, .enable, .imap4])
         ),
     ])
-    func `parse capability data`(_ fixture: ParseFixture<[Capability]>) {
+    func parseCapabilityData(_ fixture: ParseFixture<[Capability]>) {
         fixture.checkParsing()
     }
 }
