@@ -18,7 +18,8 @@ import Testing
 
 @Suite("MailboxPath")
 private struct MailboxPathTests {
-    @Test func `initialization with various path separator options`() {
+    @Test("initialization with various path separator options")
+    func initializationWithVariousPathSeparatorOptions() {
         let test1 = try! MailboxPath(name: .init("box"), pathSeparator: nil)
         #expect(test1.name == .init("box"))
         #expect(test1.pathSeparator == nil)
@@ -32,25 +33,26 @@ private struct MailboxPathTests {
         #expect(test3.pathSeparator == "/")
     }
 
-    @Test(arguments: [
+    @Test("make sub-mailbox with display name", arguments: [
         SubMailboxFixture(
             path: try! .init(name: .init("box"), pathSeparator: "/"),
             newName: "£",
             expected: try! .init(name: .init("box/&AKM-"), pathSeparator: "/")
         )
     ])
-    func `make sub-mailbox with display name`(_ fixture: SubMailboxFixture) throws {
+    func makeSubMailboxWithDisplayName(_ fixture: SubMailboxFixture) throws {
         #expect(try fixture.path.makeSubMailbox(displayName: fixture.newName) == fixture.expected)
     }
 
-    @Test func `make sub-mailbox enforces size limit`() {
+    @Test("make sub-mailbox enforces size limit")
+    func makeSubMailboxEnforcesSizeLimit() {
         #expect(throws: MailboxTooBigError.self) {
             try MailboxPath(name: .init(ByteBuffer(string: String(repeating: "a", count: 999))), pathSeparator: "/")
                 .makeSubMailbox(displayName: "1")
         }
     }
 
-    @Test(arguments: [
+    @Test("make root mailbox with display name", arguments: [
         RootMailboxFixture(
             displayName: "box2",
             pathSeparator: nil,
@@ -62,20 +64,21 @@ private struct MailboxPathTests {
             expected: try! .init(name: .init("&AKM-"), pathSeparator: "/")
         ),
     ])
-    func `make root mailbox with display name`(_ fixture: RootMailboxFixture) throws {
+    func makeRootMailboxWithDisplayName(_ fixture: RootMailboxFixture) throws {
         #expect(
             try MailboxPath.makeRootMailbox(displayName: fixture.displayName, pathSeparator: fixture.pathSeparator)
                 == fixture.expected
         )
     }
 
-    @Test func `make root mailbox enforces size limit`() {
+    @Test("make root mailbox enforces size limit")
+    func makeRootMailboxEnforcesSizeLimit() {
         #expect(throws: MailboxTooBigError.self) {
             try MailboxPath.makeRootMailbox(displayName: String(repeating: "a", count: 1001))
         }
     }
 
-    @Test(arguments: [
+    @Test("splitting mailbox path components", arguments: [
         SplittingFixture(
             path: try! .init(name: .init("ABC"), pathSeparator: "B"),
             omitEmpty: true,
@@ -112,18 +115,19 @@ private struct MailboxPathTests {
             expected: ["", "", "test1", "", "test2", "", ""]
         ),
     ])
-    func `splitting mailbox path components`(_ fixture: SplittingFixture) {
+    func splittingMailboxPathComponents(_ fixture: SplittingFixture) {
         #expect(fixture.path.displayStringComponents(omittingEmptySubsequences: fixture.omitEmpty) == fixture.expected)
     }
 
-    @Test func `create submailbox without path separator throws`() {
+    @Test("create submailbox without path separator throws")
+    func createSubmailboxWithoutPathSeparatorThrows() {
         let mailbox = try! MailboxPath(name: .inbox, pathSeparator: nil)
         #expect(throws: InvalidPathSeparatorError.self) {
             try mailbox.makeSubMailbox(displayName: "sub")
         }
     }
 
-    @Test(arguments: [
+    @Test("custom debug string convertible", arguments: [
         DebugStringFixture(sut: MailboxName.inbox, expected: "INBOX"),
         DebugStringFixture(sut: .init(ByteBuffer()), expected: ""),
         DebugStringFixture(sut: .init(ByteBuffer("Food")), expected: "Food"),
@@ -133,14 +137,15 @@ private struct MailboxPathTests {
         DebugStringFixture(sut: .init(ByteBuffer("a\u{11}b")), expected: "a\u{11}b"),
         DebugStringFixture(sut: .init(ByteBuffer("båd")), expected: "båd"),
     ])
-    func `custom debug string convertible`(_ fixture: DebugStringFixture<MailboxName>) {
+    func customDebugStringConvertible(_ fixture: DebugStringFixture<MailboxName>) {
         fixture.check()
     }
 }
 
 @Suite("MailboxName")
 struct MailboxNameTests {
-    @Test func `initialization normalizes INBOX to uppercase`() {
+    @Test("initialization normalizes INBOX to uppercase")
+    func initializationNormalizesINBOXToUppercase() {
         let test1 = MailboxName("INBOX")
         #expect(test1.bytes == Array("INBOX".utf8))
         #expect(test1.isInbox)
@@ -162,14 +167,16 @@ struct MailboxNameTests {
         #expect(!test5.isInbox)
     }
 
-    @Test func `initialization with non-UTF8 bytes`() {
+    @Test("initialization with non-UTF8 bytes")
+    func initializationWithNonUTF8Bytes() {
         let hexBytes: [UInt8] = [0x80]
         let test1 = MailboxName(.init(bytes: hexBytes))
         #expect(test1.bytes == hexBytes)
         #expect(!test1.isInbox)
     }
 
-    @Test func `equality comparison`() {
+    @Test("equality comparison")
+    func equalityComparison() {
         // Since we're using a custom implementation of Hashable.
 
         #expect(MailboxName("INBOX") == MailboxName("inbox"))
@@ -178,7 +185,8 @@ struct MailboxNameTests {
         #expect(MailboxName("Sent") != MailboxName("Drafts"))
     }
 
-    @Test func `hash value distribution`() {
+    @Test("hash value distribution")
+    func hashValueDistribution() {
         // Since we're using a custom implementation of Hashable.
 
         func countBits(_ v: Int) -> Int {

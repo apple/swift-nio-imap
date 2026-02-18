@@ -103,7 +103,7 @@ struct MessageAttributeTests {
         fixture.checkEncoding()
     }
 
-    @Test(arguments: [
+    @Test("encode multiple", arguments: [
         EncodeFixture.messageAttributes([.flags([.draft])], "(FLAGS (\\Draft))"),
         EncodeFixture.messageAttributes([.flags([.flagged]), .rfc822Size(123)], "(FLAGS (\\Flagged) RFC822.SIZE 123)"),
         EncodeFixture.messageAttributes(
@@ -111,11 +111,11 @@ struct MessageAttributeTests {
             "(FLAGS (\\Flagged) RFC822.SIZE 123 UID 456)"
         ),
     ])
-    func `encode multiple`(_ fixture: EncodeFixture<[MessageAttribute]>) {
+    func encodeMultiple(_ fixture: EncodeFixture<[MessageAttribute]>) {
         fixture.checkEncoding()
     }
 
-    @Test(arguments: [
+    @Test("custom debug string convertible", arguments: [
         DebugStringFixture(sut: MessageAttribute.rfc822Size(123), expected: "RFC822.SIZE 123"),
         DebugStringFixture(sut: MessageAttribute.flags([.draft]), expected: "FLAGS (\\Draft)"),
         DebugStringFixture(
@@ -125,7 +125,7 @@ struct MessageAttributeTests {
             expected: "X-GM-LABELS (\\Inbox \\Sent \"Important\" \"Muy Importante\")"
         ),
     ])
-    func `custom debug string convertible`(_ fixture: DebugStringFixture<MessageAttribute>) {
+    func customDebugStringConvertible(_ fixture: DebugStringFixture<MessageAttribute>) {
         fixture.check()
     }
 

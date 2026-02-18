@@ -18,17 +18,17 @@ import Testing
 
 @Suite("ListSelectOption")
 struct ListSelectOptionTests {
-    @Test(arguments: [
+    @Test("encode single option", arguments: [
         EncodeFixture.listSelectOption(.subscribed, "SUBSCRIBED"),
         EncodeFixture.listSelectOption(.remote, "REMOTE"),
         EncodeFixture.listSelectOption(.recursiveMatch, "RECURSIVEMATCH"),
         EncodeFixture.listSelectOption(.specialUse, "SPECIAL-USE"),
     ])
-    func `encode single option`(_ fixture: EncodeFixture<ListSelectOption>) {
+    func encodeSingleOption(_ fixture: EncodeFixture<ListSelectOption>) {
         fixture.checkEncoding()
     }
 
-    @Test(arguments: [
+    @Test("encode multiple options", arguments: [
         EncodeFixture.listSelectOptions(nil, "()"),
         EncodeFixture.listSelectOptions(
             .init(baseOption: .subscribed, options: [.subscribed]),
@@ -39,7 +39,7 @@ struct ListSelectOptionTests {
             "(SPECIAL-USE RECURSIVEMATCH SUBSCRIBED)"
         ),
     ])
-    func `encode multiple options`(_ fixture: EncodeFixture<ListSelectOptions?>) {
+    func encodeMultipleOptions(_ fixture: EncodeFixture<ListSelectOptions?>) {
         fixture.checkEncoding()
     }
 }

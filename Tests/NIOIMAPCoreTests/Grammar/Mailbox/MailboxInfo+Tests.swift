@@ -18,7 +18,8 @@ import Testing
 
 @Suite("MailboxInfo")
 struct MailboxInfoTests {
-    @Test func `attribute hashable`() {
+    @Test("attribute hashable")
+    func attributeHashable() {
         #expect(
             MailboxInfo.Attribute("test").hashValue == MailboxInfo.Attribute("TEST").hashValue,
             "hashing should be case insensitive"
@@ -82,13 +83,13 @@ struct MailboxInfoTests {
         fixture.checkEncoding()
     }
 
-    @Test(arguments: [
+    @Test("encode flags", arguments: [
         EncodeFixture.mailboxListFlags([], ""),
         EncodeFixture.mailboxListFlags([.marked], #"\Marked"#),
         EncodeFixture.mailboxListFlags([.noInferiors], #"\Noinferiors"#),
         EncodeFixture.mailboxListFlags([.marked, .noInferiors, .init(#"\test"#)], #"\Marked \Noinferiors \test"#),
     ])
-    func `encode flags`(_ fixture: EncodeFixture<[MailboxInfo.Attribute]>) {
+    func encodeFlags(_ fixture: EncodeFixture<[MailboxInfo.Attribute]>) {
         fixture.checkEncoding()
     }
 
@@ -134,7 +135,7 @@ struct MailboxInfoTests {
         fixture.checkParsing()
     }
 
-    @Test(arguments: [
+    @Test("parse flags", arguments: [
         ParseFixture.mailboxListFlags("\\marked", "\r", expected: .success([.marked])),
         ParseFixture.mailboxListFlags("\\marked \\remote", "\r", expected: .success([.marked, .remote])),
         ParseFixture.mailboxListFlags(
@@ -143,7 +144,7 @@ struct MailboxInfoTests {
             expected: .success([.marked, .init("\\o1"), .init("\\o2")])
         ),
     ])
-    func `parse flags`(_ fixture: ParseFixture<[MailboxInfo.Attribute]>) {
+    func parseFlags(_ fixture: ParseFixture<[MailboxInfo.Attribute]>) {
         fixture.checkParsing()
     }
 }

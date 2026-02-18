@@ -18,7 +18,7 @@ import Testing
 
 @Suite("MailboxAttribute")
 struct MailboxAttributeTests {
-    @Test(arguments: [
+    @Test("encode attributes", arguments: [
         EncodeFixture.mailboxAttributes([], ""),
         EncodeFixture.mailboxAttributes(
             [MailboxAttribute.messageCount, .recentCount, .unseenCount],
@@ -35,11 +35,11 @@ struct MailboxAttributeTests {
         ),
         EncodeFixture.mailboxAttributes([MailboxAttribute.mailboxID], "MAILBOXID"),
     ])
-    func `encode attributes`(_ fixture: EncodeFixture<[MailboxAttribute]>) {
+    func encodeAttributes(_ fixture: EncodeFixture<[MailboxAttribute]>) {
         fixture.checkEncoding()
     }
 
-    @Test(arguments: [
+    @Test("encode status", arguments: [
         EncodeFixture.mailboxStatus(.init(), ""),
         EncodeFixture.mailboxStatus(
             .init(
@@ -64,11 +64,12 @@ struct MailboxAttributeTests {
             "UIDNEXT 377003"
         ),
     ])
-    func `encode status`(_ fixture: EncodeFixture<MailboxStatus>) {
+    func encodeStatus(_ fixture: EncodeFixture<MailboxStatus>) {
         fixture.checkEncoding()
     }
 
-    @Test func `parse all mailbox attributes`() {
+    @Test("parse all mailbox attributes")
+    func parseAllMailboxAttributes() {
         for att in MailboxAttribute.allCases {
             let fixture = ParseFixture.mailboxAttribute(
                 att.rawValue,
@@ -79,15 +80,15 @@ struct MailboxAttributeTests {
         }
     }
 
-    @Test(arguments: [
+    @Test("parse mailbox attribute errors", arguments: [
         ParseFixture.mailboxAttribute("a", "", expected: .incompleteMessageIgnoringBufferModifications),
         ParseFixture.mailboxAttribute("a ", " ", expected: .failureIgnoringBufferModifications),
     ])
-    func `parse mailbox attribute errors`(_ fixture: ParseFixture<MailboxAttribute>) {
+    func parseMailboxAttributeErrors(_ fixture: ParseFixture<MailboxAttribute>) {
         fixture.checkParsing()
     }
 
-    @Test(arguments: [
+    @Test("parse mailbox status", arguments: [
         ParseFixture.mailboxStatus("MESSAGES 1", expected: .success(.init(messageCount: 1))),
         ParseFixture.mailboxStatus(
             "MESSAGES 1 RECENT 2 UIDNEXT 3 UIDVALIDITY 4 UNSEEN 5 SIZE 6 HIGHESTMODSEQ 7",
@@ -121,7 +122,7 @@ struct MailboxAttributeTests {
         ParseFixture.mailboxStatus("", "", expected: .incompleteMessage),
         ParseFixture.mailboxStatus("MESSAGES 2 UNSEEN ", "", expected: .incompleteMessage),
     ])
-    func `parse mailbox status`(_ fixture: ParseFixture<MailboxStatus>) {
+    func parseMailboxStatus(_ fixture: ParseFixture<MailboxStatus>) {
         fixture.checkParsing()
     }
 }
