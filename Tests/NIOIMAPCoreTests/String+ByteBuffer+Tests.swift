@@ -17,20 +17,22 @@ import Testing
 
 @Suite("String + ByteBuffer")
 struct StringByteBufferTests {
-    @Test func `validating UTF-8 returns nil for overflow bytes`() {
+    @Test("validating UTF-8 returns nil for overflow bytes")
+    func validatingUtf8ReturnsNilForOverflowBytes() {
         let bytes: [UInt8] = [0, 1, 2, 3, 255]
         #expect(String(validatingUTF8Bytes: bytes) == nil)
     }
 
-    @Test(arguments: [
+    @Test("validating UTF-8 returns nil for invalid sequences", arguments: [
         [0xC2],
         [0xE1, 0x80],
     ])
-    func `validating UTF-8 returns nil for invalid sequences`(bytes: [UInt8]) {
+    func validatingUtf8ReturnsNilForInvalidSequences(bytes: [UInt8]) {
         #expect(String(validatingUTF8Bytes: bytes) == nil)
     }
 
-    @Test func `validating UTF-8 correctly decodes valid string`() {
+    @Test("validating UTF-8 correctly decodes valid string")
+    func validatingUtf8CorrectlyDecodesValidString() {
         let test1 = "hello, world"
         #expect(String(validatingUTF8Bytes: test1.utf8) == test1)
 
@@ -38,7 +40,8 @@ struct StringByteBufferTests {
         #expect(String(validatingUTF8Bytes: test2) == "⚡⚢⚣⚤")
     }
 
-    @Test func `best effort decoding correctly decodes valid string`() {
+    @Test("best effort decoding correctly decodes valid string")
+    func bestEffortDecodingCorrectlyDecodesValidString() {
         let test1 = "hello, world"
         #expect(String(bestEffortDecodingUTF8Bytes: test1.utf8) == test1)
 
@@ -46,7 +49,8 @@ struct StringByteBufferTests {
         #expect(String(bestEffortDecodingUTF8Bytes: test2) == "⚡⚢⚣⚤")
     }
 
-    @Test func `best effort decoding removes invalid bytes`() {
+    @Test("best effort decoding removes invalid bytes")
+    func bestEffortDecodingRemovesInvalidBytes() {
         let bytes: [UInt8] = [0x41, 0xFF, 0x42]
         #expect(String(bestEffortDecodingUTF8Bytes: bytes) == "AB")
     }

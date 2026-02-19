@@ -232,7 +232,8 @@ private func expect(
 struct PipeliningTests {
     // MARK: Interaction of Requirements and Behavior
 
-    @Test func `can start with empty behavior`() {
+    @Test("can start with empty behavior")
+    func canStartWithEmptyBehavior() {
         // When the running command doesn't have any requirements, anything can run:
         expect(
             [],
@@ -264,7 +265,8 @@ struct PipeliningTests {
         )
     }
 
-    @Test func `can start with changes mailbox selection behavior`() {
+    @Test("can start with changes mailbox selection behavior")
+    func canStartWithChangesMailboxSelectionBehavior() {
         expect(
             [],
             canStartWhileRunning: [.changesMailboxSelection]
@@ -298,7 +300,8 @@ struct PipeliningTests {
         )
     }
 
-    @Test func `can start with depends on mailbox selection behavior`() {
+    @Test("can start with depends on mailbox selection behavior")
+    func canStartWithDependsOnMailboxSelectionBehavior() {
         expect(
             [],
             canStartWhileRunning: [.dependsOnMailboxSelection]
@@ -333,7 +336,8 @@ struct PipeliningTests {
         )
     }
 
-    @Test func `can start with may trigger untagged expunge behavior`() {
+    @Test("can start with may trigger untagged expunge behavior")
+    func canStartWithMayTriggerUntaggedExpungeBehavior() {
         expect(
             [],
             canStartWhileRunning: [.mayTriggerUntaggedExpunge]
@@ -367,7 +371,8 @@ struct PipeliningTests {
         )
     }
 
-    @Test func `can start with is UID based behavior`() {
+    @Test("can start with is UID based behavior")
+    func canStartWithIsUidBasedBehavior() {
         expect(
             [],
             canStartWhileRunning: [.isUIDBased]
@@ -398,7 +403,8 @@ struct PipeliningTests {
         )
     }
 
-    @Test func `can start with changes flags behavior`() {
+    @Test("can start with changes flags behavior")
+    func canStartWithChangesFlagsBehavior() {
         expect(
             [],
             canStartWhileRunning: [.changesFlagsOnAnyMessage]
@@ -442,7 +448,8 @@ struct PipeliningTests {
         )
     }
 
-    @Test func `can start with reads flags behavior`() {
+    @Test("can start with reads flags behavior")
+    func canStartWithReadsFlagsBehavior() {
         expect(
             [],
             canStartWhileRunning: [.readsFlagsFromAnyMessage]
@@ -486,7 +493,8 @@ struct PipeliningTests {
         )
     }
 
-    @Test func `can start with barrier behavior`() {
+    @Test("can start with barrier behavior")
+    func canStartWithBarrierBehavior() {
         // Nothing can be started, while a barrier is running.
         expect(
             [],
@@ -520,7 +528,8 @@ struct PipeliningTests {
 
     // MARK: Command Requirements
 
-    @Test func append() {
+    @Test("append")
+    func append() {
         let append = CommandStreamPart.append(.start(tag: "A1", appendingTo: .food))
         #expect(append.pipeliningRequirements == [])
         #expect(
@@ -530,7 +539,8 @@ struct PipeliningTests {
         )
     }
 
-    @Test func `catenate part`() {
+    @Test("catenate part")
+    func catenatePart() {
         // CATENATE may reference other messages by UID:
         let append = CommandStreamPart.append(.catenateURL(.joeURLFetch))
         #expect(append.pipeliningRequirements == [])
@@ -541,7 +551,8 @@ struct PipeliningTests {
         )
     }
 
-    @Test func `UID batches`() {
+    @Test("UID batches")
+    func uidBatches() {
         let append = CommandStreamPart.tagged(.init(tag: "A1", command: .uidBatches(batchSize: 1_000)))
         #expect(append.pipeliningRequirements == [])
         #expect(
@@ -552,7 +563,8 @@ struct PipeliningTests {
         )
     }
 
-    @Test func `command requires no mailbox commands running`() {
+    @Test("command requires no mailbox commands running")
+    func commandRequiresNoMailboxCommandsRunning() {
         // Which commands have the requirements that:
         // > No command that depend on the _Selected State_ must be running.
 
@@ -622,7 +634,8 @@ struct PipeliningTests {
         )
     }
 
-    @Test func `command requires no untagged expunge response`() {
+    @Test("command requires no untagged expunge response")
+    func commandRequiresNoUntaggedExpungeResponse() {
         // Which commands have the requirements that:
         // > No command besides `FETCH`, `STORE`, and `SEARCH` is running.
         // This is a requirement for all sequence number based commands.
@@ -715,7 +728,8 @@ struct PipeliningTests {
         }
     }
 
-    @Test func `command requires no UID based command running`() {
+    @Test("command requires no UID based command running")
+    func commandRequiresNoUidBasedCommandRunning() {
         // Which commands have the requirements that:
         // > No command is running that uses UIDs to specify messages.
 
@@ -817,7 +831,8 @@ struct PipeliningTests {
         }
     }
 
-    @Test func `command requires no flag changes`() {
+    @Test("command requires no flag changes")
+    func commandRequiresNoFlagChanges() {
         // Which commands have the requirements that:
         // > No STORE command is running.
         // (i.e. no flags are being changed)
@@ -930,7 +945,8 @@ struct PipeliningTests {
         }
     }
 
-    @Test func `command requires no flag reads`() {
+    @Test("command requires no flag reads")
+    func commandRequiresNoFlagReads() {
         // Which commands have the requirements that:
         /// > No command is running that retrieves flags.
 
@@ -1026,7 +1042,8 @@ struct PipeliningTests {
 
     // MARK: Command Behavior
 
-    @Test func `command behavior changes mailbox selection`() {
+    @Test("command behavior changes mailbox selection")
+    func commandBehaviorChangesMailboxSelection() {
         /// Commands that change the _mailbox selection_.
 
         expect(
@@ -1093,7 +1110,8 @@ struct PipeliningTests {
         )
     }
 
-    @Test func `command behavior depends on mailbox selection`() {
+    @Test("command behavior depends on mailbox selection")
+    func commandBehaviorDependsOnMailboxSelection() {
         /// Commands that depend on the _mailbox selection_.
 
         expect(
@@ -1163,7 +1181,8 @@ struct PipeliningTests {
         )
     }
 
-    @Test func `command behavior may trigger untagged expunge`() {
+    @Test("command behavior may trigger untagged expunge")
+    func commandBehaviorMayTriggerUntaggedExpunge() {
         // All commands, except for FETCH, STORE, and SEARCH can
         // trigger an untagged EXPUNGE.
         expect(
@@ -1233,7 +1252,8 @@ struct PipeliningTests {
         )
     }
 
-    @Test func `command behavior is UID based`() {
+    @Test("command behavior is UID based")
+    func commandBehaviorIsUidBased() {
         /// Commands that use UIDs to specify messages.
 
         expect(
@@ -1331,7 +1351,8 @@ struct PipeliningTests {
         }
     }
 
-    @Test func `command behavior changes flags`() {
+    @Test("command behavior changes flags")
+    func commandBehaviorChangesFlags() {
         /// Commands that change flags on messages.
 
         expect(
@@ -1408,7 +1429,8 @@ struct PipeliningTests {
         }
     }
 
-    @Test func `command behavior reads flags`() {
+    @Test("command behavior reads flags")
+    func commandBehaviorReadsFlags() {
         /// Command that are querying / reading flags.
 
         expect(
@@ -1516,7 +1538,8 @@ struct PipeliningTests {
         }
     }
 
-    @Test func `command behavior barrier`() {
+    @Test("command behavior barrier")
+    func commandBehaviorBarrier() {
         /// No additional commands may be sent until these commands complete.
 
         expect(

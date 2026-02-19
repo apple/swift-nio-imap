@@ -20,19 +20,22 @@ import Testing
 struct CommandParserTests {
     // MARK: - Initialization
 
-    @Test func `default buffer size is 8192`() {
+    @Test("default buffer size is 8192")
+    func defaultBufferSizeIs8192() {
         let parser = CommandParser()
         #expect(parser.bufferLimit == 8_192)
     }
 
-    @Test func `custom buffer size is respected`() {
+    @Test("custom buffer size is respected")
+    func customBufferSizeIsRespected() {
         let parser = CommandParser(bufferLimit: 80_000)
         #expect(parser.bufferLimit == 80_000)
     }
 
     // MARK: - Integration Tests
 
-    @Test func `parse empty byte buffer for APPEND does not return empty bytes`() throws {
+    @Test("parse empty byte buffer for APPEND does not return empty bytes")
+    func parseEmptyByteBufferForAppendDoesNotReturnEmptyBytes() throws {
         // Test that we don't just get returned an empty byte case if
         // we haven't yet received any literal data from the network
         var input = ByteBuffer("1 APPEND INBOX {5}\r\n")  // everything except the literal data
@@ -46,7 +49,8 @@ struct CommandParserTests {
         #expect(try parser.parseCommandStream(buffer: &literalBuffer) == nil)
     }
 
-    @Test func `parse with LF missing from newline`() throws {
+    @Test("parse with LF missing from newline")
+    func parseWithLfMissingFromNewline() throws {
         // The FramingParser might split the CRLF newline into CR only (LF in the "next frame").
         // We thus need to be able to parse this:
         var inputA = ByteBuffer("A26 UID FETCH 1:10002 (UID FLAGS MODSEQ)\r")
@@ -85,7 +89,8 @@ struct CommandParserTests {
         )
     }
 
-    @Test func `normal usage parses commands correctly`() throws {
+    @Test("normal usage parses commands correctly")
+    func normalUsageParsesCommandsCorrectly() throws {
         var input = ByteBuffer("")
         var parser = CommandParser()
 
@@ -116,7 +121,7 @@ struct CommandParserTests {
         #expect(input == " {3+}\r\n123 {3+}\r\n456 {3+}\r\n789\r\n")
     }
 
-    @Test(arguments: [
+    @Test("random data does not crash parser", arguments: [
         Array("+000000000000000000000000000000000000000000000000000000000}\n".utf8),
         Array("eSequence468117eY SEARCH 4:1 000,0\n000059?000000600=)O".utf8),
         [
@@ -124,7 +129,7 @@ struct CommandParserTests {
             0x00, 0x3D, 0x0C, 0x0A, 0x43, 0x20, 0x22, 0xE8,
         ],
     ])
-    func `random data does not crash parser`(input: [UInt8]) {
+    func randomDataDoesNotCrashParser(input: [UInt8]) {
         var parser = CommandParser()
         do {
             var buffer = ByteBuffer(bytes: input)
@@ -142,7 +147,7 @@ struct CommandParserTests {
 
     // MARK: - Grammar Parser Tests
 
-    @Test(arguments: [
+    @Test("parseString parses quoted and literal strings", arguments: [
         ParseFixture.string(#""foo""#, " ", expected: .success(ByteBuffer(string: "foo"))),
         ParseFixture.string(#""f\"oo""#, " ", expected: .success(ByteBuffer(string: #"f"oo"#))),
         ParseFixture.string(#""f\\oo""#, " ", expected: .success(ByteBuffer(string: #"f\oo"#))),
@@ -151,18 +156,18 @@ struct CommandParserTests {
         ParseFixture.string(#"foo"#, " ", expected: .failure),
         ParseFixture.string(#" "foo""#, " ", expected: .failure),
     ])
-    func `parseString parses quoted and literal strings`(_ fixture: ParseFixture<ByteBuffer>) {
+    func parseStringParsesQuotedAndLiteralStrings(_ fixture: ParseFixture<ByteBuffer>) {
         fixture.checkParsing()
     }
 
-    @Test(arguments: [
+    @Test("parseStringAllowingNonASCII parses strings with non-ASCII characters", arguments: [
         ParseFixture.stringAllowingNonASCII(#""foo""#, " ", expected: .success(ByteBuffer(string: "foo"))),
         ParseFixture.stringAllowingNonASCII(#""äø""#, " ", expected: .success(ByteBuffer(string: "äø"))),
         ParseFixture.stringAllowingNonASCII(#""ä\"ø""#, " ", expected: .success(ByteBuffer(string: #"ä"ø"#))),
         ParseFixture.stringAllowingNonASCII(#""ä\\ø""#, " ", expected: .success(ByteBuffer(string: #"ä\ø"#))),
         ParseFixture.stringAllowingNonASCII("{3}\r\nfoo", " ", expected: .success(ByteBuffer(string: "foo"))),
     ])
-    func `parseStringAllowingNonASCII parses strings with non-ASCII characters`(_ fixture: ParseFixture<ByteBuffer>) {
+    func parseStringAllowingNonAsciiParsesStringsWithNonAsciiCharacters(_ fixture: ParseFixture<ByteBuffer>) {
         fixture.checkParsing()
     }
 }

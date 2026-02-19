@@ -17,7 +17,7 @@ import NIO
 import Testing
 
 extension ResponseParserTests {
-    @Test(arguments: [
+    @Test("parse response stream", arguments: [
         ResponseStreamFixture(
             input: "+ OK Continue",
             expected: [.continuationRequest(.responseText(.init(text: "OK Continue")))]
@@ -1085,7 +1085,7 @@ extension ResponseParserTests {
             ]
         ),
     ])
-    fileprivate func `parse response stream`(
+    fileprivate func parseResponseStream(
         fixture: ResponseStreamFixture
     ) {
         var buffer = ByteBuffer(string: fixture.input + "\r\n")

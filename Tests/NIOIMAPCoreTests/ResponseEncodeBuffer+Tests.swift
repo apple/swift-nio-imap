@@ -18,7 +18,8 @@ import Testing
 
 @Suite("ResponseEncodeBuffer")
 struct ResponseEncodeBufferTests {
-    @Test func `correctly streams many simple attributes with spaces`() {
+    @Test("correctly streams many simple attributes with spaces")
+    func correctlyStreamsManySimpleAttributesWithSpaces() {
         // Previously had a bug where spaces weren't inserted between attributes
         var buffer = ResponseEncodeBuffer(buffer: ByteBuffer(string: ""), options: .rfc3501, loggingMode: false)
         buffer.writeFetchResponse(.start(1))
@@ -31,7 +32,8 @@ struct ResponseEncodeBufferTests {
         #expect(outputString == "* 1 FETCH (FLAGS (\\Answered) UID 999 BINARY.SIZE[1] 665)\r\n")
     }
 
-    @Test func `correctly handles fetch streaming with literal data`() {
+    @Test("correctly handles fetch streaming with literal data")
+    func correctlyHandlesFetchStreamingWithLiteralData() {
         var buffer = ResponseEncodeBuffer(buffer: ByteBuffer(string: ""), options: .rfc3501, loggingMode: false)
         buffer.writeFetchResponse(.start(1))
         buffer.writeFetchResponse(.streamingBegin(kind: .body(section: .complete, offset: nil), byteCount: 10))

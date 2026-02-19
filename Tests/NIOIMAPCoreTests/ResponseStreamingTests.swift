@@ -27,7 +27,7 @@ struct ResponseStreamingTests {
         var testDescription: String { name }
     }
 
-    @Test(arguments: [
+    @Test("parse fetch responses", arguments: [
         FetchResponseFixture(
             name: "Body streaming with offset and flags",
             input: "* 1 FETCH (BODY[TEXT]<4> {3}\r\nabc FLAGS (\\seen \\answered))\r\n",
@@ -211,7 +211,7 @@ struct ResponseStreamingTests {
             ]
         ),
     ])
-    func `parse fetch responses`(_ fixture: FetchResponseFixture) throws {
+    func parseFetchResponses(_ fixture: FetchResponseFixture) throws {
         var buffer = ByteBuffer(string: fixture.input)
         var parser = ResponseParser()
 

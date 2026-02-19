@@ -19,7 +19,7 @@ import Testing
 
 @Suite("SynchronizingLiteralParser")
 struct SynchronizingLiteralParserTests {
-    @Test(arguments: [
+    @Test("single string parsing", arguments: [
         SingleStringFixture(
             testDescription: "straight forward case",
             input: "LOGIN \"a\" \"b\"\r\nFOO x y\r\n",
@@ -77,14 +77,14 @@ struct SynchronizingLiteralParserTests {
             continuationsNecessary: 0
         ),
     ])
-    fileprivate func `single string parsing`(fixture: SingleStringFixture) {
+    fileprivate func singleStringParsing(fixture: SingleStringFixture) {
         var helper = Helper()
         helper.feed(fixture.input)
         helper.assertOneParse(fixture.expectedOutput, continuationsNecessary: fixture.continuationsNecessary)
     }
 
-    @Test
-    func `drip feed works for literals 1`() {
+    @Test("drip feed works for literals 1")
+    func dripFeedWorksForLiterals1() {
         var helper = Helper()
         helper.feed("LOGIN {")
         helper.feed("1")
@@ -95,8 +95,8 @@ struct SynchronizingLiteralParserTests {
         helper.assertMultipleParses(["", "", "", "LOGIN {1}\r\n"], continuationsNecessary: 1)
     }
 
-    @Test
-    func `drip feed works for literals 2`() {
+    @Test("drip feed works for literals 2")
+    func dripFeedWorksForLiterals2() {
         var helper = Helper()
         helper.feed("LOGIN {")
         helper.feed("1")
@@ -107,8 +107,8 @@ struct SynchronizingLiteralParserTests {
         helper.assertMultipleParses(["", "", "", "LOGIN {1}\r"], continuationsNecessary: 1)
     }
 
-    @Test
-    func `consumption works`() {
+    @Test("consumption works")
+    func consumptionWorks() {
         var helper = Helper()
         let string = "LOGIN {1}\r\nA {1}\r\nB\r\nFOO {1}\r\nx y\r\n"
         helper.feed(string)
@@ -131,8 +131,8 @@ struct SynchronizingLiteralParserTests {
         )
     }
 
-    @Test
-    func `drip feed works`() {
+    @Test("drip feed works")
+    func dripFeedWorks() {
         var helper = Helper()
         helper.feed("LOGIN {")
         helper.feed("1}\r\n")
@@ -174,8 +174,8 @@ struct SynchronizingLiteralParserTests {
         )
     }
 
-    @Test
-    func `append followed by half command`() {
+    @Test("append followed by half command")
+    func appendFollowedByHalfCommand() {
         var helper = Helper()
         helper.feed("tag APPEND box (\\Seen) {1+}\r\na\r\n")
         helper.indicateConsume("tag APPEND box (\\Seen) {1+}\r\n")

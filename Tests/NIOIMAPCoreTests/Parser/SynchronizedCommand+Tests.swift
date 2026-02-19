@@ -25,7 +25,8 @@ import Testing
 struct SynchronizedCommandTests {
     // MARK: - Basic Command Streaming
 
-    @Test func `command stream with NOOP, APPEND with literal, and NOOP`() throws {
+    @Test("command stream with NOOP, APPEND with literal, and NOOP")
+    func commandStreamWithNoopAppendWithLiteralAndNoop() throws {
         // 1 NOOP
         // 2 APPEND INBOX {10}\r\n0123456789
         // 3 NOOP
@@ -64,7 +65,8 @@ struct SynchronizedCommandTests {
 
     // MARK: - CATENATE Command Tests
 
-    @Test func `CATENATE with multiple URL and TEXT parts`() throws {
+    @Test("CATENATE with multiple URL and TEXT parts")
+    func catenateWithMultipleUrlAndTextParts() throws {
         var buffer = ByteBuffer(
             string: #"1 NOOP\#r\#n"#
                 + #"A003 APPEND Drafts (\Seen \Draft $MDNSent) CATENATE (URL "/Drafts;UIDVALIDITY=385759045/;UID=20/;section=HEADER" TEXT {42}\#r\#n"#
@@ -147,7 +149,8 @@ struct SynchronizedCommandTests {
         #expect(c2_17 == SynchronizedCommand(.append(.finish)))
     }
 
-    @Test func `CATENATE with single URL part`() throws {
+    @Test("CATENATE with single URL part")
+    func catenateWithSingleUrlPart() throws {
         var buffer = ByteBuffer(
             string:
                 #"A003 APPEND "Drafts" (\Seen \Draft $MDNSent) CATENATE (URL "/Drafts;UIDVALIDITY=385759045/;UID=20/;section=HEADER")\#r\#n"#
@@ -178,7 +181,8 @@ struct SynchronizedCommandTests {
         #expect(c2_5 == SynchronizedCommand(.append(.finish)))
     }
 
-    @Test func `CATENATE fails to parse with extra space after opening parenthesis`() throws {
+    @Test("CATENATE fails to parse with extra space after opening parenthesis")
+    func catenateFailsToParseWithExtraSpaceAfterOpeningParenthesis() throws {
         var buffer = ByteBuffer(
             string:
                 #"A003 APPEND "Drafts" (\Seen \Draft $MDNSent) CATENATE ( URL "/Drafts;UIDVALIDITY=385759045/;UID=20/;section=HEADER")\#r\#n"#
@@ -190,7 +194,8 @@ struct SynchronizedCommandTests {
         #expect(throws: (any Error).self) { try parser.parseCommandStream(buffer: &buffer) }
     }
 
-    @Test func `CATENATE with extension options`() throws {
+    @Test("CATENATE with extension options")
+    func catenateWithExtensionOptions() throws {
         var buffer = ByteBuffer(
             string:
                 #"A003 APPEND "Drafts" (\Seen \Draft $MDNSent) EXTENSION (extdata) CATENATE (URL "/Drafts;UIDVALIDITY=385759045/;UID=20/;section=HEADER")\#r\#n"#
@@ -226,7 +231,8 @@ struct SynchronizedCommandTests {
         #expect(c2_5 == SynchronizedCommand(.append(.finish)))
     }
 
-    @Test func `CATENATE with extension options and mixed case keyword`() throws {
+    @Test("CATENATE with extension options and mixed case keyword")
+    func catenateWithExtensionOptionsAndMixedCaseKeyword() throws {
         var buffer = ByteBuffer(
             string:
                 #"A003 APPEND "Drafts" (\Seen \Draft $MDNSent) EXTENSION (extdata) cAtEnAtE (URL "/Drafts;UIDVALIDITY=385759045/;UID=20/;section=HEADER")\#r\#n"#
@@ -264,7 +270,8 @@ struct SynchronizedCommandTests {
 
     // MARK: - IDLE Command Tests
 
-    @Test func `IDLE command lifecycle with mode transitions`() throws {
+    @Test("IDLE command lifecycle with mode transitions")
+    func idleCommandLifecycleWithModeTransitions() throws {
         // 1 NOOP
         // 2 IDLE\r\nDONE\r\n
         // 3 NOOP

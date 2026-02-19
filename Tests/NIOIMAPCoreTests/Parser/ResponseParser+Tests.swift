@@ -18,20 +18,20 @@ import Testing
 
 @Suite("ResponseParser")
 struct ResponseParserTests {
-    @Test
-    func `CommandParser uses default buffer size`() {
+    @Test("CommandParser uses default buffer size")
+    func commandParserUsesDefaultBufferSize() {
         let parser = CommandParser()
         #expect(parser.bufferLimit == 8_192)
     }
 
-    @Test
-    func `CommandParser uses custom buffer size`() {
+    @Test("CommandParser uses custom buffer size")
+    func commandParserUsesCustomBufferSize() {
         let parser = CommandParser(bufferLimit: 80_000)
         #expect(parser.bufferLimit == 80_000)
     }
 
-    @Test
-    func `attempt to stream bytes from empty buffer`() throws {
+    @Test("attempt to stream bytes from empty buffer")
+    func attemptToStreamBytesFromEmptyBuffer() throws {
         var parser = ResponseParser()
         var buffer: ByteBuffer = ""
 
@@ -55,8 +55,8 @@ struct ResponseParserTests {
         #expect(try parser.parseResponseStream(buffer: &buffer) == .response(.fetch(.streamingEnd)))
     }
 
-    @Test
-    func `parse incomplete invalid body structure`() throws {
+    @Test("parse incomplete invalid body structure")
+    func parseIncompleteInvalidBodyStructure() throws {
         //
         // When parsing an incomplete buffer, parseInvalidBody() will throw an
         // IncompleteMessage error. This needs to _not_ fail the parsing, but instead
@@ -84,8 +84,8 @@ struct ResponseParserTests {
         )
     }
 
-    @Test
-    func `attribute limit fails on streaming`() throws {
+    @Test("attribute limit fails on streaming")
+    func attributeLimitFailsOnStreaming() throws {
         var parser = ResponseParser(
             options: ResponseParser.Options(
                 bufferLimit: 1000,
@@ -110,8 +110,8 @@ struct ResponseParserTests {
         }
     }
 
-    @Test
-    func `attribute limit fails on simple`() throws {
+    @Test("attribute limit fails on simple")
+    func attributeLimitFailsOnSimple() throws {
         var parser = ResponseParser(
             options: ResponseParser.Options(
                 bufferLimit: 1000,
@@ -136,8 +136,8 @@ struct ResponseParserTests {
         }
     }
 
-    @Test
-    func `reject large bodies`() throws {
+    @Test("reject large bodies")
+    func rejectLargeBodies() throws {
         var parser = ResponseParser(
             options: ResponseParser.Options(
                 bufferLimit: 1000,
@@ -160,8 +160,8 @@ struct ResponseParserTests {
         }
     }
 
-    @Test
-    func `parse without string cache`() throws {
+    @Test("parse without string cache")
+    func parseWithoutStringCache() throws {
         var parser = ResponseParser(
             options: ResponseParser.Options(
                 bufferLimit: 1000,
@@ -175,8 +175,8 @@ struct ResponseParserTests {
         )
     }
 
-    @Test
-    func `parse with string cache`() throws {
+    @Test("parse with string cache")
+    func parseWithStringCache() throws {
         // The flag "seen" should be given to our cache closure
         // which will replace it with "nees", and therefore our
         // parse result should contain the flag "nees".
@@ -200,8 +200,8 @@ struct ResponseParserTests {
         )
     }
 
-    @Test
-    func `separate literal size limit`() throws {
+    @Test("separate literal size limit")
+    func separateLiteralSizeLimit() throws {
         // Even with a `literalSizeLimit` of 1 parsing a RFC822.TEXT should _not_ fail
         // if the `bodySizeLimit` is large enough.
         var parser = ResponseParser(
@@ -221,8 +221,8 @@ struct ResponseParserTests {
         )
     }
 
-    @Test
-    func `state is enforced`() throws {
+    @Test("state is enforced")
+    func stateIsEnforced() throws {
         var parser = ResponseParser()
         var input = ByteBuffer(string: "* 1 FETCH (* 2 FETCH \n")
 

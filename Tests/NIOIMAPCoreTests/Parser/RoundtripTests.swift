@@ -30,7 +30,7 @@ private enum RoundtripTests {
         }
     }
 
-    @Test(arguments: [
+    @Test("command roundtrip", arguments: [
         RoundtripFixture(name: "NOOP command", command: .noop),
         RoundtripFixture(name: "CAPABILITY command", command: .capability),
         RoundtripFixture(name: "LOGOUT command", command: .logout),
@@ -171,7 +171,7 @@ private enum RoundtripTests {
             )
         ),
     ])
-    static func `command roundtrip`(_ fixture: RoundtripFixture) throws {
+    static func commandRoundtrip(_ fixture: RoundtripFixture) throws {
         var encodeBuffer = CommandEncodeBuffer(buffer: ByteBuffer(), options: .init(), loggingMode: false)
         let tag = "1"
         let taggedCommand = TaggedCommand(tag: tag, command: fixture.command)
