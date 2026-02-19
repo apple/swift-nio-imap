@@ -17,7 +17,8 @@ import Foundation
 import Testing
 
 @Suite struct AuthenticationStateMachineTests {
-    @Test func `normal workflow`() {
+    @Test("normal workflow")
+    func normalWorkflow() {
         var stateMachine = ClientStateMachine.Authentication()
 
         // send and respond to a couple of challenges
@@ -36,7 +37,8 @@ import Testing
         #expect(stateMachine.state == .finished)
     }
 
-    @Test func `receiving untagged during authentication`() {
+    @Test("receiving untagged during authentication")
+    func receivingUntaggedDuringAuthentication() {
         var stateMachine = ClientStateMachine.Authentication()
 
         // send and respond to a couple of challenges
@@ -52,7 +54,8 @@ import Testing
         #expect(stateMachine.state == .finished)
     }
 
-    @Test func `duplicate challenge throws`() {
+    @Test("duplicate challenge throws")
+    func duplicateChallengeThrows() {
         var stateMachine = ClientStateMachine.Authentication()
         #expect(throws: Never.self) { try stateMachine.receiveContinuationRequest(.data("c1")) }
 

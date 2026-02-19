@@ -17,7 +17,8 @@ import Foundation
 import Testing
 
 @Suite struct IdleStateMachineTests {
-    @Test func `normal workflow untagged`() {
+    @Test("normal workflow untagged")
+    func normalWorkflowUntagged() {
         var machine = ClientStateMachine.Idle()
 
         // server confirms idle
@@ -32,7 +33,8 @@ import Testing
         machine.sendCommand(.idleDone)
     }
 
-    @Test func `normal workflow fetch`() {
+    @Test("normal workflow fetch")
+    func normalWorkflowFetch() {
         var machine = ClientStateMachine.Idle()
 
         // server confirms idle
@@ -49,7 +51,8 @@ import Testing
         machine.sendCommand(.idleDone)
     }
 
-    @Test func `multiple idle confirmations throws error`() {
+    @Test("multiple idle confirmations throws error")
+    func multipleIdleConfirmationsThrowsError() {
         var machine = ClientStateMachine.Idle()
         #expect(throws: Never.self) { try machine.receiveContinuationRequest(.responseText(.init(text: "OK"))) }
 
@@ -59,7 +62,8 @@ import Testing
         }
     }
 
-    @Test func `incorrect response type throws error`() {
+    @Test("incorrect response type throws error")
+    func incorrectResponseTypeThrowsError() {
         var machine = ClientStateMachine.Idle()
 
         // expecting a continuation to confirm idle has started
@@ -70,7 +74,8 @@ import Testing
         }
     }
 
-    @Test func `send response after finished throws`() {
+    @Test("send response after finished throws")
+    func sendResponseAfterFinishedThrows() {
         var machine = ClientStateMachine.Idle()
         #expect(throws: Never.self) { try machine.receiveContinuationRequest(.responseText(.init(text: "OK"))) }
         machine.sendCommand(.idleDone)

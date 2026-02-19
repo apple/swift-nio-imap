@@ -22,7 +22,8 @@ import Testing
 @Suite struct CommandDecoder_Tests {}
 
 extension CommandDecoder_Tests {
-    @Test func `consume when returning not enough data regression`() {
+    @Test("consume when returning not enough data regression")
+    func consumeWhenReturningNotEnoughDataRegression() {
         let channel = EmbeddedChannel(handler: ByteToMessageHandler(CommandDecoder()), loop: .init())
 
         for feed in ["tag APPEND box (\\Seen) {1+}\r\na\r\n", "t"] {

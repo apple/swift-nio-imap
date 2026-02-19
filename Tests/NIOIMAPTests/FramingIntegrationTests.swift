@@ -44,17 +44,20 @@ import Testing
 }
 
 extension FramingIntegrationTests {
-    @Test func `simple commands`() {
+    @Test("simple commands")
+    func simpleCommands() {
         self.writeInbound("A1 NOOP\r\n")
         self.assertInbound(.tagged(.init(tag: "A1", command: .noop)))
     }
 
-    @Test func `literal dump`() {
+    @Test("literal dump")
+    func literalDump() {
         self.writeInbound("A1 LOGIN {3}\r\n123 {3}\r\n456\r\n")
         self.assertInbound(.tagged(.init(tag: "A1", command: .login(username: "123", password: "456"))))
     }
 
-    @Test func `literal streaming`() {
+    @Test("literal streaming")
+    func literalStreaming() {
         self.writeInbound("A1 LOGIN {3}\r\n123 ")
         self.writeInbound("{3}\r\n456\r\n")
         self.assertInbound(.tagged(.init(tag: "A1", command: .login(username: "123", password: "456"))))

@@ -17,10 +17,11 @@ import NIOIMAP
 import NIOIMAPCore
 import NIOTestUtils
 
-import XCTest
+import Testing
 
-final class ParserIntegrationTests: XCTestCase {
-    func testItWorksWithAnActualConnection() {
+@Suite struct ParserIntegrationTests {
+    @Test("it works with an actual connection")
+    func itWorksWithAnActualConnection() {
         class CollectEverythingHandler: ChannelInboundHandler {
             typealias InboundIn = CommandStreamPart
 
@@ -53,12 +54,12 @@ final class ParserIntegrationTests: XCTestCase {
 
         let group = MultiThreadedEventLoopGroup(numberOfThreads: 1)
         defer {
-            XCTAssertNoThrow(try group.syncShutdownGracefully())
+            #expect(throws: Never.self) { try group.syncShutdownGracefully() }
         }
 
         let collectionDonePromise = group.next().makePromise(of: [CommandStreamPart].self)
         var server: Channel?
-        XCTAssertNoThrow(
+        #expect(throws: Never.self) {
             server = try ServerBootstrap(group: group)
                 .serverChannelOption(ChannelOptions.socket(.init(SOL_SOCKET), .init(SO_REUSEADDR)), value: 1)
                 .childChannelInitializer { channel in
@@ -72,32 +73,36 @@ final class ParserIntegrationTests: XCTestCase {
                 }
                 .bind(to: .init(ipAddress: "127.0.0.1", port: 0))
                 .wait()
-        )
-        XCTAssertNotNil(server)
+        }
+        #expect(server != nil)
         defer {
-            XCTAssertNoThrow(try server?.close().wait())
+            #expect(throws: Never.self) { try server?.close().wait() }
         }
 
         var maybeClient: Channel?
-        XCTAssertNoThrow(
+        #expect(throws: Never.self) {
             maybeClient = try ClientBootstrap(group: group)
                 .connect(to: server?.localAddress ?? SocketAddress(unixDomainSocketPath: "should fail"))
                 .wait()
-        )
+        }
         guard let client = maybeClient else {
-            XCTFail("couldn't connect client")
+            Issue.record("couldn't connect client")
             return
         }
 
         // try a couple of examples
-        XCTAssertNoThrow(try client.writeAndFlush("tag LOGIN \"1\" \"2\"\r\n" as ByteBuffer).wait())
-        XCTAssertNoThrow(try client.writeAndFlush("tag NOOP\r\n" as ByteBuffer).wait())
-        XCTAssertNoThrow(try client.close().wait())
+        #expect(throws: Never.self) { try client.writeAndFlush("tag LOGIN \"1\" \"2\"\r\n" as ByteBuffer).wait() }
+        #expect(throws: Never.self) { try client.writeAndFlush("tag NOOP\r\n" as ByteBuffer).wait() }
+        #expect(throws: Never.self) { try client.close().wait() }
 
         let expected: [CommandStreamPart] = [
             .tagged(.init(tag: "tag", command: .login(username: "1", password: "2"))),
             .tagged(.init(tag: "tag", command: .noop)),
         ]
-        XCTAssertNoThrow(XCTAssertEqual(expected, try collectionDonePromise.futureResult.wait()))
+        var result: [CommandStreamPart]?
+        #expect(throws: Never.self) {
+            result = try collectionDonePromise.futureResult.wait()
+        }
+        #expect(result == expected)
     }
 }
