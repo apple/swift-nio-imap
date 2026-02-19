@@ -25,32 +25,32 @@ struct IUIDTests {
         fixture.checkEncoding()
     }
 
-    @Test(arguments: [
+    @Test("encode UID only", arguments: [
         EncodeFixture.iuidOnly(.init(uid: 123), ";UID=123")
     ])
-    func `encode UID only`(_ fixture: EncodeFixture<IUID>) {
+    func encodeUIDOnly(_ fixture: EncodeFixture<IUID>) {
         fixture.checkEncoding()
     }
 
-    @Test(arguments: [
+    @Test("parse with slash", arguments: [
         ParseFixture.parseWithSlash("/;UID=1", " ", expected: .success(.init(uid: 1))),
         ParseFixture.parseWithSlash("/;UID=12", " ", expected: .success(.init(uid: 12))),
         ParseFixture.parseWithSlash("/;UID=123", " ", expected: .success(.init(uid: 123))),
         ParseFixture.parseWithSlash("a", " ", expected: .failure),
         ParseFixture.parseWithSlash("/;UID=1", "", expected: .incompleteMessage),
     ])
-    func `parse with slash`(_ fixture: ParseFixture<IUID>) {
+    func parseWithSlash(_ fixture: ParseFixture<IUID>) {
         fixture.checkParsing()
     }
 
-    @Test(arguments: [
+    @Test("parse without slash", arguments: [
         ParseFixture.parseWithoutSlash(";UID=1", " ", expected: .success(.init(uid: 1))),
         ParseFixture.parseWithoutSlash(";UID=12", " ", expected: .success(.init(uid: 12))),
         ParseFixture.parseWithoutSlash(";UID=123", " ", expected: .success(.init(uid: 123))),
         ParseFixture.parseWithoutSlash("a", " ", expected: .failure),
         ParseFixture.parseWithoutSlash(";UID=1", "", expected: .incompleteMessage),
     ])
-    func `parse without slash`(_ fixture: ParseFixture<IUID>) {
+    func parseWithoutSlash(_ fixture: ParseFixture<IUID>) {
         fixture.checkParsing()
     }
 }

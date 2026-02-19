@@ -18,12 +18,14 @@ import Testing
 
 @Suite("UID")
 struct UIDTests {
-    @Test func `integer literal`() {
+    @Test("integer literal")
+    func integerLiteral() {
         let num: UID = 5
         #expect(num == 5)
     }
 
-    @Test func `valid range`() {
+    @Test("valid range")
+    func validRange() {
         #expect(UID(exactly: 0) == nil)
         #expect(UID(exactly: 1)?.rawValue == 1)
         #expect(UID(exactly: 4_294_967_295)?.rawValue == 4_294_967_295)
@@ -38,12 +40,12 @@ struct UIDTests {
         #expect(UID(1) < 999)
     }
 
-    @Test(arguments: [
+    @Test("custom debug string", arguments: [
         DebugStringFixture(sut: UID.min, expected: "1"),
         DebugStringFixture(sut: UID.max, expected: "*"),
         DebugStringFixture(sut: UID(2), expected: "2"),
     ])
-    func `custom debug string`(_ fixture: DebugStringFixture<UID>) {
+    func customDebugString(_ fixture: DebugStringFixture<UID>) {
         fixture.check()
     }
 
@@ -57,13 +59,15 @@ struct UIDTests {
         fixture.checkEncoding()
     }
 
-    @Test func `round trip codable`() {
+    @Test("round trip codable")
+    func roundTripCodable() {
         checkCodableRoundTrips(UID(1))
         checkCodableRoundTrips(UID(45_678))
         checkCodableRoundTrips(UID.max)
     }
 
-    @Test func `strideable advanced by`() {
+    @Test("strideable advanced by")
+    func strideableAdvancedBy() {
         #expect(UID(1).advanced(by: 1) == UID(2))
         #expect(UID(1).advanced(by: 2) == UID(3))
         #expect(UID.max.advanced(by: 0) == UID.max)

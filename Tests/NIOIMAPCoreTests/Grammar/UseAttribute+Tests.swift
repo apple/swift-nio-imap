@@ -32,7 +32,8 @@ struct UseAttributeTests {
         fixture.checkEncoding()
     }
 
-    @Test func `lowercasing behavior`() {
+    @Test("lowercasing behavior")
+    func lowercasingBehavior() {
         let t1 = UseAttribute("TEST")
         let t2 = UseAttribute("test")
         #expect(t1 == t2)
@@ -40,7 +41,8 @@ struct UseAttributeTests {
         #expect(t2.stringValue == "test")
     }
 
-    @Test func `convert from mailbox info attribute`() {
+    @Test("convert from mailbox info attribute")
+    func convertFromMailboxInfoAttribute() {
         #expect(UseAttribute(MailboxInfo.Attribute(#"\All"#)).stringValue == #"\All"#)
     }
 

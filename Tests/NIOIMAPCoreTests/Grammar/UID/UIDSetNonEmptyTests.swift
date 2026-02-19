@@ -20,14 +20,16 @@ import Testing
 struct UIDSetNonEmptyTests {}
 
 extension UIDSetNonEmptyTests {
-    @Test func `init with set`() {
+    @Test("init with set")
+    func initWithSet() {
         #expect(
             MessageIdentifierSetNonEmpty(set: MessageIdentifierSet<UID>([6, 100...108]))?.set
                 == MessageIdentifierSet<UID>([6, 100...108])
         )
     }
 
-    @Test func `init with range`() {
+    @Test("init with range")
+    func initWithRange() {
         #expect(
             MessageIdentifierSetNonEmpty(range: MessageIdentifierRange(100...108)).set
                 == MessageIdentifierSet<UID>([100...108])
@@ -38,7 +40,7 @@ extension UIDSetNonEmptyTests {
         )
     }
 
-    @Test(arguments: [
+    @Test("custom debug string convertible", arguments: [
         DebugStringFixture(
             sut: MessageIdentifierSetNonEmpty<UID>(set: [1])!,
             expected: "1"
@@ -56,7 +58,7 @@ extension UIDSetNonEmptyTests {
             expected: "42:*"
         ),
     ])
-    func `custom debug string convertible`(_ fixture: DebugStringFixture<MessageIdentifierSetNonEmpty<UID>>) {
+    func customDebugStringConvertible(_ fixture: DebugStringFixture<MessageIdentifierSetNonEmpty<UID>>) {
         fixture.check()
     }
 
@@ -98,7 +100,8 @@ extension UIDSetNonEmptyTests {
         fixture.checkEncoding()
     }
 
-    @Test func `min max`() {
+    @Test("min max")
+    func minMax() {
         #expect(MessageIdentifierSetNonEmpty<UID>(set: [55])!.min() == 55)
         #expect(MessageIdentifierSetNonEmpty<UID>(set: [55])!.max() == 55)
 

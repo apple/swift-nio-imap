@@ -30,13 +30,15 @@ struct UIDRangeTests {
         #expect(range.upperBound == 999)
     }
 
-    @Test func `init range`() {
+    @Test("init range")
+    func initRange() {
         let range = MessageIdentifierRange<UID>(1...999).range
         #expect(range.lowerBound == 1)
         #expect(range.upperBound == 999)
     }
 
-    @Test func `init integer`() {
+    @Test("init integer")
+    func initInteger() {
         let range: MessageIdentifierRange<UID> = 654
         #expect(range.range.lowerBound == 654)
         #expect(range.range.upperBound == 654)
@@ -141,7 +143,8 @@ struct UIDRangeTests {
         #expect("\(fixture.input)" == fixture.expectedStrings.joined())
     }
 
-    @Test func `range operator prefix`() {
+    @Test("range operator prefix")
+    func rangeOperatorPrefix() {
         var buffer = EncodeBuffer.serverEncodeBuffer(
             buffer: ByteBuffer(),
             options: ResponseEncodingOptions(),
@@ -155,7 +158,8 @@ struct UIDRangeTests {
         #expect(actualString == expected)
     }
 
-    @Test func `range operator postfix`() {
+    @Test("range operator postfix")
+    func rangeOperatorPostfix() {
         var buffer = EncodeBuffer.serverEncodeBuffer(
             buffer: ByteBuffer(),
             options: ResponseEncodingOptions(),
@@ -169,7 +173,8 @@ struct UIDRangeTests {
         #expect(actualString == expected)
     }
 
-    @Test func `range operator postfix complete right larger`() {
+    @Test("range operator postfix complete right larger")
+    func rangeOperatorPostfixCompleteRightLarger() {
         var buffer = EncodeBuffer.serverEncodeBuffer(
             buffer: ByteBuffer(),
             options: ResponseEncodingOptions(),

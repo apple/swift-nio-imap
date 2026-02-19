@@ -18,7 +18,7 @@ import Testing
 
 @Suite("UIDSet")
 struct UIDSetTests {
-    @Test(arguments: [
+    @Test("custom debug string convertible", arguments: [
         DebugStringFixture(
             sut: [1...3, MessageIdentifierRange<UID>(6), MessageIdentifierRange<UID>(88)] as MessageIdentifierSet,
             expected: "1:3,6,88"
@@ -27,7 +27,7 @@ struct UIDSetTests {
         DebugStringFixture(sut: [MessageIdentifierRange<UID>(37)] as MessageIdentifierSet, expected: "37"),
         DebugStringFixture(sut: [MessageIdentifierRange<UID>(.max)] as MessageIdentifierSet, expected: "*"),
     ])
-    func `custom debug string convertible`(_ fixture: DebugStringFixture<MessageIdentifierSet<UID>>) {
+    func customDebugStringConvertible(_ fixture: DebugStringFixture<MessageIdentifierSet<UID>>) {
         fixture.check()
     }
 
@@ -51,7 +51,8 @@ struct UIDSetTests {
         fixture.checkEncoding()
     }
 
-    @Test func `min max`() {
+    @Test("min max")
+    func minMax() {
         #expect(MessageIdentifierSet<UID>().min() == nil)
         #expect(MessageIdentifierSet<UID>().max() == nil)
 
@@ -151,7 +152,8 @@ struct UIDSetTests {
         #expect(sut.count == 4)
     }
 
-    @Test func `remove 1`() {
+    @Test("remove 1")
+    func remove1() {
         var sut = MessageIdentifierSet<UID>(4...6)
         #expect(sut.remove(1) == nil)
         #expect("\(sut)" == "4:6")
@@ -162,7 +164,8 @@ struct UIDSetTests {
         #expect(sut.count == 2)
     }
 
-    @Test func `remove 2`() {
+    @Test("remove 2")
+    func remove2() {
         var sut = MessageIdentifierSet<UID>(1...3)
         #expect(sut.remove(1) == 1)
         #expect("\(sut)" == "2:3")
@@ -348,21 +351,24 @@ struct UIDSetTests {
         #expect(!sut.isEmpty)
     }
 
-    @Test func `collection A`() {
+    @Test("collection A")
+    func collectionA() {
         let sut = MessageIdentifierSet([MessageIdentifierRange<UID>(55...57), MessageIdentifierRange<UID>(80)])
         #expect(sut.map { "\($0)" } == ["55", "56", "57", "80"])
         #expect(sut.count == 4)
         #expect(!sut.isEmpty)
     }
 
-    @Test func `collection B`() {
+    @Test("collection B")
+    func collectionB() {
         let sut = MessageIdentifierSet([MessageIdentifierRange<UID>(8), MessageIdentifierRange<UID>(55...57)])
         #expect(sut.map { "\($0)" } == ["8", "55", "56", "57"])
         #expect(sut.count == 4)
         #expect(!sut.isEmpty)
     }
 
-    @Test func `indexes single range`() {
+    @Test("indexes single range")
+    func indexesSingleRange() {
         let sut = MessageIdentifierSet<UID>(40...89)
         #expect(
             sut.index(sut.startIndex, offsetBy: 10)
@@ -414,7 +420,8 @@ struct UIDSetTests {
         #expect(sut.index(sut.startIndex, offsetBy: 51, limitedBy: sut.endIndex) == nil)
     }
 
-    @Test func `indexes multiple single values`() {
+    @Test("indexes multiple single values")
+    func indexesMultipleSingleValues() {
         let sut: MessageIdentifierSet<UID> = {
             var sut = MessageIdentifierSet<UID>()
             for uid in [
@@ -479,7 +486,8 @@ struct UIDSetTests {
         #expect(sut.index(sut.startIndex, offsetBy: 31, limitedBy: sut.endIndex) == nil)
     }
 
-    @Test func `indexes multiple short ranges`() {
+    @Test("indexes multiple short ranges")
+    func indexesMultipleShortRanges() {
         let sut = MessageIdentifierSet([
             MessageIdentifierRange<UID>(55...57),
             MessageIdentifierRange<UID>(155...157),

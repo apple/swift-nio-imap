@@ -18,7 +18,7 @@ import Testing
 
 @Suite("StoreData")
 struct StoreDataTests {
-    @Test(arguments: [
+    @Test("parse store modifier", arguments: [
         ParseFixture.storeModifier(
             "UNCHANGEDSINCE 2",
             expected: .success(.unchangedSince(.init(modificationSequence: 2)))
@@ -32,11 +32,11 @@ struct StoreDataTests {
         ParseFixture.storeModifier("UNCHANGEDSINCE 1", "", expected: .incompleteMessage),
         ParseFixture.storeModifier("test 1", "", expected: .incompleteMessage),
     ])
-    func `parse store modifier`(_ fixture: ParseFixture<StoreModifier>) {
+    func parseStoreModifier(_ fixture: ParseFixture<StoreModifier>) {
         fixture.checkParsing()
     }
 
-    @Test(arguments: [
+    @Test("parse store data", arguments: [
         ParseFixture.storeData("+FLAGS (foo)", expected: .success(.flags(.add(silent: false, list: [.init("foo")])))),
         ParseFixture.storeData(
             "-X-GM-LABELS (bar)",
@@ -47,11 +47,11 @@ struct StoreDataTests {
         ParseFixture.storeData("-", "", expected: .incompleteMessage),
         ParseFixture.storeData("", "", expected: .incompleteMessage),
     ])
-    func `parse store data`(_ fixture: ParseFixture<StoreData>) {
+    func parseStoreData(_ fixture: ParseFixture<StoreData>) {
         fixture.checkParsing()
     }
 
-    @Test(arguments: [
+    @Test("parse store gmail labels", arguments: [
         ParseFixture.storeGmailLabels(
             "+X-GM-LABELS (foo)",
             expected: .success(.add(silent: false, gmailLabels: [.init("foo")]))
@@ -75,7 +75,7 @@ struct StoreDataTests {
         ParseFixture.storeGmailLabels("-X-GM-LABELS ", "", expected: .incompleteMessage),
         ParseFixture.storeGmailLabels("X-GM-LABELS ", "", expected: .incompleteMessage),
     ])
-    func `parse store gmail labels`(_ fixture: ParseFixture<StoreGmailLabels>) {
+    func parseStoreGmailLabels(_ fixture: ParseFixture<StoreGmailLabels>) {
         fixture.checkParsing()
     }
 }

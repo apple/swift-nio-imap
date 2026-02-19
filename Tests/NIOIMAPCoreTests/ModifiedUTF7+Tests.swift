@@ -18,7 +18,7 @@ import Testing
 
 @Suite("ModifiedUTF7")
 struct ModifiedUTF7Tests {
-    @Test(arguments: [
+    @Test("encode converts strings to Modified UTF-7", arguments: [
         ("", ""),
         ("abc", "abc"),
         ("&", "&-"),
@@ -34,12 +34,12 @@ struct ModifiedUTF7Tests {
         ("a+b", "a+b"),
         ("~ab", "~ab"),
     ])
-    func `encode converts strings to Modified UTF-7`(input: String, expected: String) {
+    func encodeConvertsStringsToModifiedUTF7(input: String, expected: String) {
         let actual = ModifiedUTF7.encode(input)
         #expect(String(buffer: actual) == expected)
     }
 
-    @Test(arguments: [
+    @Test("decode converts Modified UTF-7 to strings", arguments: [
         ("", ""),
         ("abc", "abc"),
         ("&-", "&"),
@@ -55,32 +55,33 @@ struct ModifiedUTF7Tests {
         ("a+b", "a+b"),
         ("~ab", "~ab"),
     ])
-    func `decode converts Modified UTF-7 to strings`(input: String, expected: String) throws {
+    func decodeConvertsModifiedUTF7ToStrings(input: String, expected: String) throws {
         let actual = try ModifiedUTF7.decode(ByteBuffer(string: input))
         #expect(actual == expected)
     }
 
-    @Test func `decode throws error for invalid Modified UTF-7`() {
+    @Test("decode throws error for invalid Modified UTF-7")
+    func decodeThrowsErrorForInvalidModifiedUTF7() {
         #expect(throws: ModifiedUTF7.OddByteCountError.self) {
             try ModifiedUTF7.decode(ByteBuffer(string: "&aa==-"))
         }
     }
 
-    @Test(arguments: [
+    @Test("validate accepts valid Modified UTF-7 strings", arguments: [
         "a",
         "a/b/c",
         "&2Dzf49g83+M-",
         "&ltFO9g-",
     ])
-    func `validate accepts valid Modified UTF-7 strings`(input: String) throws {
+    func validateAcceptsValidModifiedUTF7Strings(input: String) throws {
         try ModifiedUTF7.validate(ByteBuffer(string: input))
     }
 
-    @Test(arguments: [
+    @Test("validate rejects invalid Modified UTF-7 strings", arguments: [
         "&Jjo!",
         "&U,BTFw-&ZeVnLIqe-",
     ])
-    func `validate rejects invalid Modified UTF-7 strings`(input: String) {
+    func validateRejectsInvalidModifiedUTF7Strings(input: String) {
         #expect(throws: Error.self) {
             try ModifiedUTF7.validate(ByteBuffer(string: input))
         }
