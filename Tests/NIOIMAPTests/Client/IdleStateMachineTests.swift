@@ -14,70 +14,70 @@
 
 import Foundation
 @testable import NIOIMAP
-import XCTest
+import Testing
 
-class IdleStateMachineTests: XCTestCase {
-    func testNormalWorkflow_untagged() {
+@Suite struct IdleStateMachineTests {
+    @Test func `normal workflow untagged`() {
         var machine = ClientStateMachine.Idle()
 
         // server confirms idle
-        XCTAssertNoThrow(try machine.receiveContinuationRequest(.responseText(.init(text: "OK"))))
+        #expect(throws: Never.self) { try machine.receiveContinuationRequest(.responseText(.init(text: "OK"))) }
 
         // server is allowed to send untagged responses while idle
-        XCTAssertNoThrow(try machine.receiveResponse(.untagged(.id(["Key1": "Value1"]))))
-        XCTAssertNoThrow(try machine.receiveResponse(.untagged(.id(["Key2": "Value2"]))))
-        XCTAssertNoThrow(try machine.receiveResponse(.untagged(.id(["Key3": "Value3"]))))
+        #expect(throws: Never.self) { try machine.receiveResponse(.untagged(.id(["Key1": "Value1"]))) }
+        #expect(throws: Never.self) { try machine.receiveResponse(.untagged(.id(["Key2": "Value2"]))) }
+        #expect(throws: Never.self) { try machine.receiveResponse(.untagged(.id(["Key3": "Value3"]))) }
 
         // user ends idle
         machine.sendCommand(.idleDone)
     }
 
-    func testNormalWorkflow_fetch() {
+    @Test func `normal workflow fetch`() {
         var machine = ClientStateMachine.Idle()
 
         // server confirms idle
-        XCTAssertNoThrow(try machine.receiveContinuationRequest(.responseText(.init(text: "OK"))))
+        #expect(throws: Never.self) { try machine.receiveContinuationRequest(.responseText(.init(text: "OK"))) }
 
         // server is allowed to send untagged responses while idle.
         // `Response.fetch` are all untagged responses.
-        XCTAssertNoThrow(try machine.receiveResponse(.fetch(.start(1))))
-        XCTAssertNoThrow(try machine.receiveResponse(.fetch(.simpleAttribute(.flags([.answered])))))
-        XCTAssertNoThrow(try machine.receiveResponse(.fetch(.simpleAttribute(.uid(999)))))
-        XCTAssertNoThrow(try machine.receiveResponse(.fetch(.finish)))
+        #expect(throws: Never.self) { try machine.receiveResponse(.fetch(.start(1))) }
+        #expect(throws: Never.self) { try machine.receiveResponse(.fetch(.simpleAttribute(.flags([.answered])))) }
+        #expect(throws: Never.self) { try machine.receiveResponse(.fetch(.simpleAttribute(.uid(999)))) }
+        #expect(throws: Never.self) { try machine.receiveResponse(.fetch(.finish)) }
 
         // user ends idle
         machine.sendCommand(.idleDone)
     }
 
-    func testMultipleIdleConfirmationsThrowsError() {
+    @Test func `multiple idle confirmations throws error`() {
         var machine = ClientStateMachine.Idle()
-        XCTAssertNoThrow(try machine.receiveContinuationRequest(.responseText(.init(text: "OK"))))
+        #expect(throws: Never.self) { try machine.receiveContinuationRequest(.responseText(.init(text: "OK"))) }
 
         // server cannot confirm idle twice
-        XCTAssertThrowsError(try machine.receiveContinuationRequest(.responseText(.init(text: "OK")))) { e in
-            XCTAssertTrue(e is UnexpectedContinuationRequest)
+        #expect(throws: UnexpectedContinuationRequest.self) {
+            try machine.receiveContinuationRequest(.responseText(.init(text: "OK")))
         }
     }
 
-    func testIncorrectResponseTypeThrowsError() {
+    @Test func `incorrect response type throws error`() {
         var machine = ClientStateMachine.Idle()
 
         // expecting a continuation to confirm idle has started
         // but instead let's send a tagged response
         let badResponse = Response.tagged(.init(tag: "A1", state: .ok(.init(code: nil, text: "ok"))))
-        XCTAssertThrowsError(try machine.receiveResponse(badResponse)) { e in
-            XCTAssertTrue(e is UnexpectedResponse)
+        #expect(throws: UnexpectedResponse.self) {
+            try machine.receiveResponse(badResponse)
         }
     }
 
-    func testSendResponseAfterFinishedThrows() {
+    @Test func `send response after finished throws`() {
         var machine = ClientStateMachine.Idle()
-        XCTAssertNoThrow(try machine.receiveContinuationRequest(.responseText(.init(text: "OK"))))
+        #expect(throws: Never.self) { try machine.receiveContinuationRequest(.responseText(.init(text: "OK"))) }
         machine.sendCommand(.idleDone)
 
         let badResponse = Response.tagged(.init(tag: "A1", state: .ok(.init(code: nil, text: "ok"))))
-        XCTAssertThrowsError(try machine.receiveResponse(badResponse)) { e in
-            XCTAssertTrue(e is UnexpectedResponse)
+        #expect(throws: UnexpectedResponse.self) {
+            try machine.receiveResponse(badResponse)
         }
     }
 }
