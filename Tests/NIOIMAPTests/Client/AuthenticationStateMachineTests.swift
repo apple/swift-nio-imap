@@ -14,50 +14,50 @@
 
 import Foundation
 @testable import NIOIMAP
-import XCTest
+import Testing
 
-class AuthenticationStateMachineTests: XCTestCase {
-    func testNormalWorkflow() {
+@Suite struct AuthenticationStateMachineTests {
+    @Test func `normal workflow`() {
         var stateMachine = ClientStateMachine.Authentication()
 
         // send and respond to a couple of challenges
-        XCTAssertNoThrow(try stateMachine.receiveContinuationRequest(.data("challenge1")))
+        #expect(throws: Never.self) { try stateMachine.receiveContinuationRequest(.data("challenge1")) }
         stateMachine.sendCommand(.continuationResponse("response1"))
-        XCTAssertNoThrow(try stateMachine.receiveContinuationRequest(.data("challenge2")))
+        #expect(throws: Never.self) { try stateMachine.receiveContinuationRequest(.data("challenge2")) }
         stateMachine.sendCommand(.continuationResponse("response2"))
-        XCTAssertNoThrow(try stateMachine.receiveContinuationRequest(.data("challenge3")))
+        #expect(throws: Never.self) { try stateMachine.receiveContinuationRequest(.data("challenge3")) }
         stateMachine.sendCommand(.continuationResponse("response3"))
-        XCTAssertEqual(stateMachine.state, .waitingForServer)
+        #expect(stateMachine.state == .waitingForServer)
 
         // finish
-        XCTAssertNoThrow(
+        #expect(throws: Never.self) {
             try stateMachine.receiveResponse(.tagged(.init(tag: "A1", state: .ok(.init(code: nil, text: "OK")))))
-        )
-        XCTAssertEqual(stateMachine.state, .finished)
+        }
+        #expect(stateMachine.state == .finished)
     }
 
-    func testReceivingUntaggedDuringAuthentication() {
+    @Test func `receiving untagged during authentication`() {
         var stateMachine = ClientStateMachine.Authentication()
 
         // send and respond to a couple of challenges
-        XCTAssertNoThrow(try stateMachine.receiveContinuationRequest(.data("challenge1")))
+        #expect(throws: Never.self) { try stateMachine.receiveContinuationRequest(.data("challenge1")) }
         stateMachine.sendCommand(.continuationResponse("response1"))
-        XCTAssertNoThrow(try stateMachine.receiveResponse(.untagged(.capabilityData([.imap4rev1]))))
-        XCTAssertEqual(stateMachine.state, .waitingForServer)
+        #expect(throws: Never.self) { try stateMachine.receiveResponse(.untagged(.capabilityData([.imap4rev1]))) }
+        #expect(stateMachine.state == .waitingForServer)
 
         // finish
-        XCTAssertNoThrow(
+        #expect(throws: Never.self) {
             try stateMachine.receiveResponse(.tagged(.init(tag: "A1", state: .ok(.init(code: nil, text: "OK")))))
-        )
-        XCTAssertEqual(stateMachine.state, .finished)
+        }
+        #expect(stateMachine.state == .finished)
     }
 
-    func testDuplicateChallengeThrows() {
+    @Test func `duplicate challenge throws`() {
         var stateMachine = ClientStateMachine.Authentication()
-        XCTAssertNoThrow(try stateMachine.receiveContinuationRequest(.data("c1")))
+        #expect(throws: Never.self) { try stateMachine.receiveContinuationRequest(.data("c1")) }
 
-        XCTAssertThrowsError(try stateMachine.receiveResponse(.authenticationChallenge("c2"))) { e in
-            XCTAssertTrue(e is UnexpectedResponse)
+        #expect(throws: UnexpectedResponse.self) {
+            try stateMachine.receiveResponse(.authenticationChallenge("c2"))
         }
     }
 }
