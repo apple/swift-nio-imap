@@ -40,11 +40,14 @@ struct UIDTests {
         #expect(UID(1) < 999)
     }
 
-    @Test("custom debug string", arguments: [
-        DebugStringFixture(sut: UID.min, expected: "1"),
-        DebugStringFixture(sut: UID.max, expected: "*"),
-        DebugStringFixture(sut: UID(2), expected: "2"),
-    ])
+    @Test(
+        "custom debug string",
+        arguments: [
+            DebugStringFixture(sut: UID.min, expected: "1"),
+            DebugStringFixture(sut: UID.max, expected: "*"),
+            DebugStringFixture(sut: UID(2), expected: "2"),
+        ]
+    )
     func customDebugString(_ fixture: DebugStringFixture<UID>) {
         fixture.check()
     }

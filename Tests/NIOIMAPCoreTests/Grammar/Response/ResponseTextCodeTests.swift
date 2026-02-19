@@ -221,18 +221,21 @@ struct ResponseTextCodeTests {
         fixture.checkParsing()
     }
 
-    @Test("debug string description", arguments: [
-        DebugStringFixture<ResponseTextCode>(sut: .noPermission, expected: "NOPERM"),
-        DebugStringFixture<ResponseTextCode>(
-            sut: .badCharset(["some", "string"]),
-            expected: "BADCHARSET (some string)"
-        ),
-        DebugStringFixture<ResponseTextCode>(sut: .permanentFlags([.wildcard]), expected: #"PERMANENTFLAGS (\*)"#),
-        DebugStringFixture<ResponseTextCode>(
-            sut: .permanentFlags([.wildcard, .wildcard]),
-            expected: #"PERMANENTFLAGS (\* \*)"#
-        ),
-    ])
+    @Test(
+        "debug string description",
+        arguments: [
+            DebugStringFixture<ResponseTextCode>(sut: .noPermission, expected: "NOPERM"),
+            DebugStringFixture<ResponseTextCode>(
+                sut: .badCharset(["some", "string"]),
+                expected: "BADCHARSET (some string)"
+            ),
+            DebugStringFixture<ResponseTextCode>(sut: .permanentFlags([.wildcard]), expected: #"PERMANENTFLAGS (\*)"#),
+            DebugStringFixture<ResponseTextCode>(
+                sut: .permanentFlags([.wildcard, .wildcard]),
+                expected: #"PERMANENTFLAGS (\* \*)"#
+            ),
+        ]
+    )
     func debugStringDescription(_ fixture: DebugStringFixture<ResponseTextCode>) {
         fixture.check()
     }

@@ -18,68 +18,80 @@ import Testing
 
 @Suite("URLMessageSection")
 struct URLMessageSectionTests {
-    @Test("encode URL message section", arguments: [
-        EncodeFixture.urlMessageSection(.init(encodedSection: .init(section: "test")), "/;SECTION=test")
-    ])
+    @Test(
+        "encode URL message section",
+        arguments: [
+            EncodeFixture.urlMessageSection(.init(encodedSection: .init(section: "test")), "/;SECTION=test")
+        ]
+    )
     func encodeURLMessageSection(_ fixture: EncodeFixture<URLMessageSection>) {
         fixture.checkEncoding()
     }
 
-    @Test("encode URL message section only", arguments: [
-        EncodeFixture.urlMessageSectionOnly(.init(encodedSection: .init(section: "test")), ";SECTION=test")
-    ])
+    @Test(
+        "encode URL message section only",
+        arguments: [
+            EncodeFixture.urlMessageSectionOnly(.init(encodedSection: .init(section: "test")), ";SECTION=test")
+        ]
+    )
     func encodeURLMessageSectionOnly(_ fixture: EncodeFixture<URLMessageSection>) {
         fixture.checkEncoding()
     }
 
-    @Test("parse with slash", arguments: [
-        ParseFixture.urlMessageSectionWithSlash(
-            "/;SECTION=a",
-            " ",
-            expected: .success(.init(encodedSection: .init(section: "a")))
-        ),
-        ParseFixture.urlMessageSectionWithSlash(
-            "/;SECTION=abc",
-            " ",
-            expected: .success(.init(encodedSection: .init(section: "abc")))
-        ),
-        ParseFixture.urlMessageSectionWithSlash(
-            "SECTION=a",
-            " ",
-            expected: .failure
-        ),
-        ParseFixture.urlMessageSectionWithSlash(
-            "/;SECTION=1",
-            "",
-            expected: .incompleteMessage
-        ),
-    ])
+    @Test(
+        "parse with slash",
+        arguments: [
+            ParseFixture.urlMessageSectionWithSlash(
+                "/;SECTION=a",
+                " ",
+                expected: .success(.init(encodedSection: .init(section: "a")))
+            ),
+            ParseFixture.urlMessageSectionWithSlash(
+                "/;SECTION=abc",
+                " ",
+                expected: .success(.init(encodedSection: .init(section: "abc")))
+            ),
+            ParseFixture.urlMessageSectionWithSlash(
+                "SECTION=a",
+                " ",
+                expected: .failure
+            ),
+            ParseFixture.urlMessageSectionWithSlash(
+                "/;SECTION=1",
+                "",
+                expected: .incompleteMessage
+            ),
+        ]
+    )
     func parseWithSlash(_ fixture: ParseFixture<URLMessageSection>) {
         fixture.checkParsing()
     }
 
-    @Test("parse without slash", arguments: [
-        ParseFixture.urlMessageSectionWithoutSlash(
-            ";SECTION=a",
-            " ",
-            expected: .success(.init(encodedSection: .init(section: "a")))
-        ),
-        ParseFixture.urlMessageSectionWithoutSlash(
-            ";SECTION=abc",
-            " ",
-            expected: .success(.init(encodedSection: .init(section: "abc")))
-        ),
-        ParseFixture.urlMessageSectionWithoutSlash(
-            "SECTION=a",
-            " ",
-            expected: .failure
-        ),
-        ParseFixture.urlMessageSectionWithoutSlash(
-            ";SECTION=1",
-            "",
-            expected: .incompleteMessage
-        ),
-    ])
+    @Test(
+        "parse without slash",
+        arguments: [
+            ParseFixture.urlMessageSectionWithoutSlash(
+                ";SECTION=a",
+                " ",
+                expected: .success(.init(encodedSection: .init(section: "a")))
+            ),
+            ParseFixture.urlMessageSectionWithoutSlash(
+                ";SECTION=abc",
+                " ",
+                expected: .success(.init(encodedSection: .init(section: "abc")))
+            ),
+            ParseFixture.urlMessageSectionWithoutSlash(
+                "SECTION=a",
+                " ",
+                expected: .failure
+            ),
+            ParseFixture.urlMessageSectionWithoutSlash(
+                ";SECTION=1",
+                "",
+                expected: .incompleteMessage
+            ),
+        ]
+    )
     func parseWithoutSlash(_ fixture: ParseFixture<URLMessageSection>) {
         fixture.checkParsing()
     }

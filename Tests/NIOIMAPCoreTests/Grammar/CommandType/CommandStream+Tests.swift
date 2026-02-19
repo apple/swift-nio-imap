@@ -97,7 +97,8 @@ private struct CommandStreamTests {
         }
     }
 
-    @Test("catenate example one with synchronizing literals") func catenateExampleOneWithSynchronizingLiterals() throws {
+    @Test("catenate example one with synchronizing literals") func catenateExampleOneWithSynchronizingLiterals() throws
+    {
         let parts: [AppendCommand] = [
             .start(tag: "A003", appendingTo: MailboxName("Drafts")),
             .beginCatenate(options: .init(flagList: [.seen, .draft, .keyword(.mdnSent)], extensions: [:])),
@@ -160,7 +161,9 @@ private struct CommandStreamTests {
         #expect(!encodedCommand.waitForContinuation, "Should not have additional continuations.")
     }
 
-    @Test("catenate example one with non-synchronizing literals") func catenateExampleOneWithNonSynchronizingLiterals() throws {
+    @Test("catenate example one with non-synchronizing literals") func catenateExampleOneWithNonSynchronizingLiterals()
+        throws
+    {
         let parts: [AppendCommand] = [
             .start(tag: "A003", appendingTo: MailboxName("Drafts")),
             .beginCatenate(options: .init(flagList: [.seen, .draft, .keyword(.mdnSent)], extensions: [:])),
@@ -242,39 +245,42 @@ private struct CommandStreamTests {
         #expect(!encodedCommand.waitForContinuation, "Should not have additional continuations.")
     }
 
-    @Test("description without PII", arguments: [
-        PIIFixture(
-            input: .append(.start(tag: "1", appendingTo: .inbox)),
-            expected: "1 APPEND \"∅\""
-        ),
-        PIIFixture(
-            input: .append(.beginMessage(message: .init(options: .none, data: .init(byteCount: 3)))),
-            expected: " {3}\r\n"
-        ),
-        PIIFixture(
-            input: .append(
-                .beginMessage(
-                    message: .init(
-                        options: .init(flagList: [.seen, .deleted], extensions: [:]),
-                        data: .init(byteCount: 3)
-                    )
-                )
+    @Test(
+        "description without PII",
+        arguments: [
+            PIIFixture(
+                input: .append(.start(tag: "1", appendingTo: .inbox)),
+                expected: "1 APPEND \"∅\""
             ),
-            expected: " (\\Seen \\Deleted) {3}\r\n"
-        ),
-        PIIFixture(
-            input: .tagged(.init(tag: "1", command: .noop)),
-            expected: "1 NOOP\r\n"
-        ),
-        PIIFixture(
-            input: .idleDone,
-            expected: "DONE\r\n"
-        ),
-        PIIFixture(
-            input: .continuationResponse("test"),
-            expected: "[8 bytes]\r\n"
-        ),
-    ])
+            PIIFixture(
+                input: .append(.beginMessage(message: .init(options: .none, data: .init(byteCount: 3)))),
+                expected: " {3}\r\n"
+            ),
+            PIIFixture(
+                input: .append(
+                    .beginMessage(
+                        message: .init(
+                            options: .init(flagList: [.seen, .deleted], extensions: [:]),
+                            data: .init(byteCount: 3)
+                        )
+                    )
+                ),
+                expected: " (\\Seen \\Deleted) {3}\r\n"
+            ),
+            PIIFixture(
+                input: .tagged(.init(tag: "1", command: .noop)),
+                expected: "1 NOOP\r\n"
+            ),
+            PIIFixture(
+                input: .idleDone,
+                expected: "DONE\r\n"
+            ),
+            PIIFixture(
+                input: .continuationResponse("test"),
+                expected: "[8 bytes]\r\n"
+            ),
+        ]
+    )
     func descriptionWithoutPII(_ fixture: PIIFixture) {
         #expect(CommandStreamPart.descriptionWithoutPII([fixture.input]) == fixture.expected)
     }

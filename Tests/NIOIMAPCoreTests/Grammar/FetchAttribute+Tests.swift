@@ -49,82 +49,88 @@ struct FetchAttributeTests {
         fixture.checkEncoding()
     }
 
-    @Test("custom debug string convertible", arguments: [
-        ReflectionFixture<FetchAttribute>(sut: .envelope, expected: "ENVELOPE"),
-        ReflectionFixture<FetchAttribute>(sut: .flags, expected: "FLAGS"),
-        ReflectionFixture<FetchAttribute>(sut: .uid, expected: "UID"),
-        ReflectionFixture<FetchAttribute>(sut: .internalDate, expected: "INTERNALDATE"),
-        ReflectionFixture<FetchAttribute>(sut: .rfc822Header, expected: "RFC822.HEADER"),
-        ReflectionFixture<FetchAttribute>(sut: .rfc822Size, expected: "RFC822.SIZE"),
-        ReflectionFixture<FetchAttribute>(sut: .rfc822Text, expected: "RFC822.TEXT"),
-        ReflectionFixture<FetchAttribute>(sut: .rfc822, expected: "RFC822"),
-        ReflectionFixture<FetchAttribute>(sut: .bodyStructure(extensions: false), expected: "BODY"),
-        ReflectionFixture<FetchAttribute>(sut: .bodyStructure(extensions: true), expected: "BODYSTRUCTURE"),
-        ReflectionFixture<FetchAttribute>(
-            sut: .bodySection(peek: false, .init(kind: .header), nil),
-            expected: "BODY[HEADER]"
-        ),
-        ReflectionFixture<FetchAttribute>(
-            sut: .bodySection(peek: false, .init(kind: .header), nil),
-            expected: "BODY[HEADER]"
-        ),
-        ReflectionFixture<FetchAttribute>(
-            sut: .bodySection(peek: true, .init(kind: .headerFields(["message-id", "in-reply-to"])), nil),
-            expected: #"BODY.PEEK[HEADER.FIELDS ("message-id" "in-reply-to")]"#
-        ),
-        ReflectionFixture<FetchAttribute>(sut: .binarySize(section: [1]), expected: "BINARY.SIZE[1]"),
-        ReflectionFixture<FetchAttribute>(
-            sut: .binary(peek: true, section: [1, 2, 3], partial: nil),
-            expected: "BINARY.PEEK[1.2.3]"
-        ),
-        ReflectionFixture<FetchAttribute>(
-            sut: .binary(peek: false, section: [3, 4, 5], partial: nil),
-            expected: "BINARY[3.4.5]"
-        ),
-        ReflectionFixture<FetchAttribute>(sut: .modificationSequenceValue(.zero), expected: "0"),
-        ReflectionFixture<FetchAttribute>(sut: .modificationSequenceValue(3), expected: "3"),
-        ReflectionFixture<FetchAttribute>(sut: .modificationSequence, expected: "MODSEQ"),
-        ReflectionFixture<FetchAttribute>(sut: .gmailMessageID, expected: "X-GM-MSGID"),
-        ReflectionFixture<FetchAttribute>(sut: .gmailThreadID, expected: "X-GM-THRID"),
-        ReflectionFixture<FetchAttribute>(sut: .gmailLabels, expected: "X-GM-LABELS"),
-        ReflectionFixture<FetchAttribute>(sut: .preview(lazy: false), expected: "PREVIEW"),
-        ReflectionFixture<FetchAttribute>(sut: .preview(lazy: true), expected: "PREVIEW (LAZY)"),
-        ReflectionFixture<FetchAttribute>(sut: .emailID, expected: "EMAILID"),
-        ReflectionFixture<FetchAttribute>(sut: .threadID, expected: "THREADID"),
-    ])
+    @Test(
+        "custom debug string convertible",
+        arguments: [
+            ReflectionFixture<FetchAttribute>(sut: .envelope, expected: "ENVELOPE"),
+            ReflectionFixture<FetchAttribute>(sut: .flags, expected: "FLAGS"),
+            ReflectionFixture<FetchAttribute>(sut: .uid, expected: "UID"),
+            ReflectionFixture<FetchAttribute>(sut: .internalDate, expected: "INTERNALDATE"),
+            ReflectionFixture<FetchAttribute>(sut: .rfc822Header, expected: "RFC822.HEADER"),
+            ReflectionFixture<FetchAttribute>(sut: .rfc822Size, expected: "RFC822.SIZE"),
+            ReflectionFixture<FetchAttribute>(sut: .rfc822Text, expected: "RFC822.TEXT"),
+            ReflectionFixture<FetchAttribute>(sut: .rfc822, expected: "RFC822"),
+            ReflectionFixture<FetchAttribute>(sut: .bodyStructure(extensions: false), expected: "BODY"),
+            ReflectionFixture<FetchAttribute>(sut: .bodyStructure(extensions: true), expected: "BODYSTRUCTURE"),
+            ReflectionFixture<FetchAttribute>(
+                sut: .bodySection(peek: false, .init(kind: .header), nil),
+                expected: "BODY[HEADER]"
+            ),
+            ReflectionFixture<FetchAttribute>(
+                sut: .bodySection(peek: false, .init(kind: .header), nil),
+                expected: "BODY[HEADER]"
+            ),
+            ReflectionFixture<FetchAttribute>(
+                sut: .bodySection(peek: true, .init(kind: .headerFields(["message-id", "in-reply-to"])), nil),
+                expected: #"BODY.PEEK[HEADER.FIELDS ("message-id" "in-reply-to")]"#
+            ),
+            ReflectionFixture<FetchAttribute>(sut: .binarySize(section: [1]), expected: "BINARY.SIZE[1]"),
+            ReflectionFixture<FetchAttribute>(
+                sut: .binary(peek: true, section: [1, 2, 3], partial: nil),
+                expected: "BINARY.PEEK[1.2.3]"
+            ),
+            ReflectionFixture<FetchAttribute>(
+                sut: .binary(peek: false, section: [3, 4, 5], partial: nil),
+                expected: "BINARY[3.4.5]"
+            ),
+            ReflectionFixture<FetchAttribute>(sut: .modificationSequenceValue(.zero), expected: "0"),
+            ReflectionFixture<FetchAttribute>(sut: .modificationSequenceValue(3), expected: "3"),
+            ReflectionFixture<FetchAttribute>(sut: .modificationSequence, expected: "MODSEQ"),
+            ReflectionFixture<FetchAttribute>(sut: .gmailMessageID, expected: "X-GM-MSGID"),
+            ReflectionFixture<FetchAttribute>(sut: .gmailThreadID, expected: "X-GM-THRID"),
+            ReflectionFixture<FetchAttribute>(sut: .gmailLabels, expected: "X-GM-LABELS"),
+            ReflectionFixture<FetchAttribute>(sut: .preview(lazy: false), expected: "PREVIEW"),
+            ReflectionFixture<FetchAttribute>(sut: .preview(lazy: true), expected: "PREVIEW (LAZY)"),
+            ReflectionFixture<FetchAttribute>(sut: .emailID, expected: "EMAILID"),
+            ReflectionFixture<FetchAttribute>(sut: .threadID, expected: "THREADID"),
+        ]
+    )
     func customDebugStringConvertible(_ fixture: ReflectionFixture<FetchAttribute>) {
         fixture.check()
     }
 
-    @Test("encode list", arguments: [
-        EncodeFixture.fetchAttributeList([.envelope], "(ENVELOPE)"),
-        EncodeFixture.fetchAttributeList([.flags, .internalDate, .rfc822Size], "FAST"),
-        EncodeFixture.fetchAttributeList([.internalDate, .rfc822Size, .flags], "FAST"),
-        EncodeFixture.fetchAttributeList([.flags, .internalDate, .rfc822Size, .envelope], "ALL"),
-        EncodeFixture.fetchAttributeList([.rfc822Size, .flags, .envelope, .internalDate], "ALL"),
-        EncodeFixture.fetchAttributeList(
-            [.flags, .internalDate, .rfc822Size, .envelope, .bodyStructure(extensions: false)],
-            "FULL"
-        ),
-        EncodeFixture.fetchAttributeList(
-            [.flags, .bodyStructure(extensions: false), .rfc822Size, .internalDate, .envelope],
-            "FULL"
-        ),
-        EncodeFixture.fetchAttributeList(
-            [.flags, .bodyStructure(extensions: true), .rfc822Size, .internalDate, .envelope],
-            "(FLAGS BODYSTRUCTURE RFC822.SIZE INTERNALDATE ENVELOPE)"
-        ),
-        EncodeFixture.fetchAttributeList(
-            [.flags, .bodyStructure(extensions: false), .rfc822Size, .internalDate, .envelope, .uid],
-            "(FLAGS BODY RFC822.SIZE INTERNALDATE ENVELOPE UID)"
-        ),
-        EncodeFixture.fetchAttributeList(
-            [.gmailLabels, .gmailMessageID, .gmailThreadID],
-            "(X-GM-LABELS X-GM-MSGID X-GM-THRID)"
-        ),
-        EncodeFixture.fetchAttributeList([.preview(lazy: false)], "(PREVIEW)"),
-        EncodeFixture.fetchAttributeList([.preview(lazy: true)], "(PREVIEW (LAZY))"),
-    ])
+    @Test(
+        "encode list",
+        arguments: [
+            EncodeFixture.fetchAttributeList([.envelope], "(ENVELOPE)"),
+            EncodeFixture.fetchAttributeList([.flags, .internalDate, .rfc822Size], "FAST"),
+            EncodeFixture.fetchAttributeList([.internalDate, .rfc822Size, .flags], "FAST"),
+            EncodeFixture.fetchAttributeList([.flags, .internalDate, .rfc822Size, .envelope], "ALL"),
+            EncodeFixture.fetchAttributeList([.rfc822Size, .flags, .envelope, .internalDate], "ALL"),
+            EncodeFixture.fetchAttributeList(
+                [.flags, .internalDate, .rfc822Size, .envelope, .bodyStructure(extensions: false)],
+                "FULL"
+            ),
+            EncodeFixture.fetchAttributeList(
+                [.flags, .bodyStructure(extensions: false), .rfc822Size, .internalDate, .envelope],
+                "FULL"
+            ),
+            EncodeFixture.fetchAttributeList(
+                [.flags, .bodyStructure(extensions: true), .rfc822Size, .internalDate, .envelope],
+                "(FLAGS BODYSTRUCTURE RFC822.SIZE INTERNALDATE ENVELOPE)"
+            ),
+            EncodeFixture.fetchAttributeList(
+                [.flags, .bodyStructure(extensions: false), .rfc822Size, .internalDate, .envelope, .uid],
+                "(FLAGS BODY RFC822.SIZE INTERNALDATE ENVELOPE UID)"
+            ),
+            EncodeFixture.fetchAttributeList(
+                [.gmailLabels, .gmailMessageID, .gmailThreadID],
+                "(X-GM-LABELS X-GM-MSGID X-GM-THRID)"
+            ),
+            EncodeFixture.fetchAttributeList([.preview(lazy: false)], "(PREVIEW)"),
+            EncodeFixture.fetchAttributeList([.preview(lazy: true)], "(PREVIEW (LAZY))"),
+        ]
+    )
     func encodeList(_ fixture: EncodeFixture<[FetchAttribute]>) {
         fixture.checkEncoding()
     }
@@ -199,26 +205,32 @@ struct FetchAttributeTests {
         fixture.checkParsing()
     }
 
-    @Test("parse partial", arguments: [
-        ParseFixture.partial("<0.1000000000>", expected: .success(ClosedRange(uncheckedBounds: (0, 999_999_999)))),
-        ParseFixture.partial("<0.4294967290>", expected: .success(ClosedRange(uncheckedBounds: (0, 4_294_967_289)))),
-        ParseFixture.partial("<1.2>", expected: .success(ClosedRange(uncheckedBounds: (1, 2)))),
-        ParseFixture.partial(
-            "<4294967290.2>",
-            expected: .success(ClosedRange(uncheckedBounds: (4_294_967_290, 4_294_967_291)))
-        ),
-        ParseFixture.partial("<0.0>", expected: .failure),
-        ParseFixture.partial("<654.0>", expected: .failure),
-        ParseFixture.partial("<4294967296.2>", expected: .failure),
-        ParseFixture.partial("<4294967294.2>", expected: .failure),
-        ParseFixture.partial("<2.4294967294>", expected: .failure),
-        ParseFixture.partial("<4294967000.4294967000>", expected: .failure),
-        ParseFixture.partial("<2200000000.2200000000>", expected: .failure),
-        ParseFixture.partial("<", "", expected: .incompleteMessage),
-        ParseFixture.partial("<111111111", "", expected: .incompleteMessage),
-        ParseFixture.partial("<1.", "", expected: .incompleteMessage),
-        ParseFixture.partial("<1.22222222", "", expected: .incompleteMessage),
-    ])
+    @Test(
+        "parse partial",
+        arguments: [
+            ParseFixture.partial("<0.1000000000>", expected: .success(ClosedRange(uncheckedBounds: (0, 999_999_999)))),
+            ParseFixture.partial(
+                "<0.4294967290>",
+                expected: .success(ClosedRange(uncheckedBounds: (0, 4_294_967_289)))
+            ),
+            ParseFixture.partial("<1.2>", expected: .success(ClosedRange(uncheckedBounds: (1, 2)))),
+            ParseFixture.partial(
+                "<4294967290.2>",
+                expected: .success(ClosedRange(uncheckedBounds: (4_294_967_290, 4_294_967_291)))
+            ),
+            ParseFixture.partial("<0.0>", expected: .failure),
+            ParseFixture.partial("<654.0>", expected: .failure),
+            ParseFixture.partial("<4294967296.2>", expected: .failure),
+            ParseFixture.partial("<4294967294.2>", expected: .failure),
+            ParseFixture.partial("<2.4294967294>", expected: .failure),
+            ParseFixture.partial("<4294967000.4294967000>", expected: .failure),
+            ParseFixture.partial("<2200000000.2200000000>", expected: .failure),
+            ParseFixture.partial("<", "", expected: .incompleteMessage),
+            ParseFixture.partial("<111111111", "", expected: .incompleteMessage),
+            ParseFixture.partial("<1.", "", expected: .incompleteMessage),
+            ParseFixture.partial("<1.22222222", "", expected: .incompleteMessage),
+        ]
+    )
     func parsePartial(_ fixture: ParseFixture<ClosedRange<UInt32>>) {
         fixture.checkParsing()
     }

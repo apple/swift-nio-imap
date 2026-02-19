@@ -92,24 +92,33 @@ struct MailboxDataTests {
         fixture.checkEncoding()
     }
 
-    @Test("encode search/sort", arguments: [
-        EncodeFixture.mailboxDataSearchSort(nil, "SEARCH"),
-        EncodeFixture.mailboxDataSearchSort(.init(identifiers: [1], modificationSequence: 2), "SEARCH 1 (MODSEQ 2)"),
-        EncodeFixture.mailboxDataSearchSort(
-            .init(identifiers: [1, 2, 3], modificationSequence: 2),
-            "SEARCH 1 2 3 (MODSEQ 2)"
-        ),
-    ])
+    @Test(
+        "encode search/sort",
+        arguments: [
+            EncodeFixture.mailboxDataSearchSort(nil, "SEARCH"),
+            EncodeFixture.mailboxDataSearchSort(
+                .init(identifiers: [1], modificationSequence: 2),
+                "SEARCH 1 (MODSEQ 2)"
+            ),
+            EncodeFixture.mailboxDataSearchSort(
+                .init(identifiers: [1, 2, 3], modificationSequence: 2),
+                "SEARCH 1 2 3 (MODSEQ 2)"
+            ),
+        ]
+    )
     func encodeSearchSort(_ fixture: EncodeFixture<MailboxData.SearchSort?>) {
         fixture.checkEncoding()
     }
 
-    @Test("parse search/sort modification sequence", arguments: [
-        ParseFixture.searchSortModificationSequence("(MODSEQ 123)", "\r", expected: .success(123)),
-        ParseFixture.searchSortModificationSequence("(MODSEQ a)", "", expected: .failure),
-        ParseFixture.searchSortModificationSequence("(MODSEQ ", "", expected: .incompleteMessage),
-        ParseFixture.searchSortModificationSequence("(MODSEQ 111", "", expected: .incompleteMessage),
-    ])
+    @Test(
+        "parse search/sort modification sequence",
+        arguments: [
+            ParseFixture.searchSortModificationSequence("(MODSEQ 123)", "\r", expected: .success(123)),
+            ParseFixture.searchSortModificationSequence("(MODSEQ a)", "", expected: .failure),
+            ParseFixture.searchSortModificationSequence("(MODSEQ ", "", expected: .incompleteMessage),
+            ParseFixture.searchSortModificationSequence("(MODSEQ 111", "", expected: .incompleteMessage),
+        ]
+    )
     func parseSearchSortModificationSequence(_ fixture: ParseFixture<ModificationSequenceValue>) {
         fixture.checkParsing()
     }

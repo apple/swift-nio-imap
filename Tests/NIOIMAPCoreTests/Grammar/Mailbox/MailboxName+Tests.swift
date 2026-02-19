@@ -33,13 +33,16 @@ private struct MailboxPathTests {
         #expect(test3.pathSeparator == "/")
     }
 
-    @Test("make sub-mailbox with display name", arguments: [
-        SubMailboxFixture(
-            path: try! .init(name: .init("box"), pathSeparator: "/"),
-            newName: "£",
-            expected: try! .init(name: .init("box/&AKM-"), pathSeparator: "/")
-        )
-    ])
+    @Test(
+        "make sub-mailbox with display name",
+        arguments: [
+            SubMailboxFixture(
+                path: try! .init(name: .init("box"), pathSeparator: "/"),
+                newName: "£",
+                expected: try! .init(name: .init("box/&AKM-"), pathSeparator: "/")
+            )
+        ]
+    )
     func makeSubMailboxWithDisplayName(_ fixture: SubMailboxFixture) throws {
         #expect(try fixture.path.makeSubMailbox(displayName: fixture.newName) == fixture.expected)
     }
@@ -52,18 +55,21 @@ private struct MailboxPathTests {
         }
     }
 
-    @Test("make root mailbox with display name", arguments: [
-        RootMailboxFixture(
-            displayName: "box2",
-            pathSeparator: nil,
-            expected: try! .init(name: .init("box2"), pathSeparator: nil)
-        ),
-        RootMailboxFixture(
-            displayName: "£",
-            pathSeparator: "/",
-            expected: try! .init(name: .init("&AKM-"), pathSeparator: "/")
-        ),
-    ])
+    @Test(
+        "make root mailbox with display name",
+        arguments: [
+            RootMailboxFixture(
+                displayName: "box2",
+                pathSeparator: nil,
+                expected: try! .init(name: .init("box2"), pathSeparator: nil)
+            ),
+            RootMailboxFixture(
+                displayName: "£",
+                pathSeparator: "/",
+                expected: try! .init(name: .init("&AKM-"), pathSeparator: "/")
+            ),
+        ]
+    )
     func makeRootMailboxWithDisplayName(_ fixture: RootMailboxFixture) throws {
         #expect(
             try MailboxPath.makeRootMailbox(displayName: fixture.displayName, pathSeparator: fixture.pathSeparator)
@@ -78,43 +84,46 @@ private struct MailboxPathTests {
         }
     }
 
-    @Test("splitting mailbox path components", arguments: [
-        SplittingFixture(
-            path: try! .init(name: .init("ABC"), pathSeparator: "B"),
-            omitEmpty: true,
-            expected: ["A", "C"]
-        ),
-        SplittingFixture(
-            path: try! .init(name: .init("ABC"), pathSeparator: "D"),
-            omitEmpty: true,
-            expected: ["ABC"]
-        ),
-        SplittingFixture(
-            path: try! .init(name: .init(""), pathSeparator: "D"),
-            omitEmpty: true,
-            expected: []
-        ),
-        SplittingFixture(
-            path: try! .init(name: .init("some/real/mailbox"), pathSeparator: "/"),
-            omitEmpty: true,
-            expected: ["some", "real", "mailbox"]
-        ),
-        SplittingFixture(
-            path: try! .init(name: .init("mailbox#test"), pathSeparator: "#"),
-            omitEmpty: true,
-            expected: ["mailbox", "test"]
-        ),
-        SplittingFixture(
-            path: try! .init(name: .init("//test1//test2//"), pathSeparator: "/"),
-            omitEmpty: true,
-            expected: ["test1", "test2"]
-        ),
-        SplittingFixture(
-            path: try! .init(name: .init("//test1//test2//"), pathSeparator: "/"),
-            omitEmpty: false,
-            expected: ["", "", "test1", "", "test2", "", ""]
-        ),
-    ])
+    @Test(
+        "splitting mailbox path components",
+        arguments: [
+            SplittingFixture(
+                path: try! .init(name: .init("ABC"), pathSeparator: "B"),
+                omitEmpty: true,
+                expected: ["A", "C"]
+            ),
+            SplittingFixture(
+                path: try! .init(name: .init("ABC"), pathSeparator: "D"),
+                omitEmpty: true,
+                expected: ["ABC"]
+            ),
+            SplittingFixture(
+                path: try! .init(name: .init(""), pathSeparator: "D"),
+                omitEmpty: true,
+                expected: []
+            ),
+            SplittingFixture(
+                path: try! .init(name: .init("some/real/mailbox"), pathSeparator: "/"),
+                omitEmpty: true,
+                expected: ["some", "real", "mailbox"]
+            ),
+            SplittingFixture(
+                path: try! .init(name: .init("mailbox#test"), pathSeparator: "#"),
+                omitEmpty: true,
+                expected: ["mailbox", "test"]
+            ),
+            SplittingFixture(
+                path: try! .init(name: .init("//test1//test2//"), pathSeparator: "/"),
+                omitEmpty: true,
+                expected: ["test1", "test2"]
+            ),
+            SplittingFixture(
+                path: try! .init(name: .init("//test1//test2//"), pathSeparator: "/"),
+                omitEmpty: false,
+                expected: ["", "", "test1", "", "test2", "", ""]
+            ),
+        ]
+    )
     func splittingMailboxPathComponents(_ fixture: SplittingFixture) {
         #expect(fixture.path.displayStringComponents(omittingEmptySubsequences: fixture.omitEmpty) == fixture.expected)
     }
@@ -127,16 +136,19 @@ private struct MailboxPathTests {
         }
     }
 
-    @Test("custom debug string convertible", arguments: [
-        DebugStringFixture(sut: MailboxName.inbox, expected: "INBOX"),
-        DebugStringFixture(sut: .init(ByteBuffer()), expected: ""),
-        DebugStringFixture(sut: .init(ByteBuffer("Food")), expected: "Food"),
-        DebugStringFixture(sut: .init(ByteBuffer("food")), expected: "food"),
-        DebugStringFixture(sut: .init(ByteBuffer("FOOD")), expected: "FOOD"),
-        DebugStringFixture(sut: .init(ByteBuffer("box/&AKM-")), expected: "box/&AKM-"),
-        DebugStringFixture(sut: .init(ByteBuffer("a\u{11}b")), expected: "a\u{11}b"),
-        DebugStringFixture(sut: .init(ByteBuffer("båd")), expected: "båd"),
-    ])
+    @Test(
+        "custom debug string convertible",
+        arguments: [
+            DebugStringFixture(sut: MailboxName.inbox, expected: "INBOX"),
+            DebugStringFixture(sut: .init(ByteBuffer()), expected: ""),
+            DebugStringFixture(sut: .init(ByteBuffer("Food")), expected: "Food"),
+            DebugStringFixture(sut: .init(ByteBuffer("food")), expected: "food"),
+            DebugStringFixture(sut: .init(ByteBuffer("FOOD")), expected: "FOOD"),
+            DebugStringFixture(sut: .init(ByteBuffer("box/&AKM-")), expected: "box/&AKM-"),
+            DebugStringFixture(sut: .init(ByteBuffer("a\u{11}b")), expected: "a\u{11}b"),
+            DebugStringFixture(sut: .init(ByteBuffer("båd")), expected: "båd"),
+        ]
+    )
     func customDebugStringConvertible(_ fixture: DebugStringFixture<MailboxName>) {
         fixture.check()
     }

@@ -18,27 +18,33 @@ import Testing
 
 @Suite("ListSelectOption")
 struct ListSelectOptionTests {
-    @Test("encode single option", arguments: [
-        EncodeFixture.listSelectOption(.subscribed, "SUBSCRIBED"),
-        EncodeFixture.listSelectOption(.remote, "REMOTE"),
-        EncodeFixture.listSelectOption(.recursiveMatch, "RECURSIVEMATCH"),
-        EncodeFixture.listSelectOption(.specialUse, "SPECIAL-USE"),
-    ])
+    @Test(
+        "encode single option",
+        arguments: [
+            EncodeFixture.listSelectOption(.subscribed, "SUBSCRIBED"),
+            EncodeFixture.listSelectOption(.remote, "REMOTE"),
+            EncodeFixture.listSelectOption(.recursiveMatch, "RECURSIVEMATCH"),
+            EncodeFixture.listSelectOption(.specialUse, "SPECIAL-USE"),
+        ]
+    )
     func encodeSingleOption(_ fixture: EncodeFixture<ListSelectOption>) {
         fixture.checkEncoding()
     }
 
-    @Test("encode multiple options", arguments: [
-        EncodeFixture.listSelectOptions(nil, "()"),
-        EncodeFixture.listSelectOptions(
-            .init(baseOption: .subscribed, options: [.subscribed]),
-            "(SUBSCRIBED SUBSCRIBED)"
-        ),
-        EncodeFixture.listSelectOptions(
-            .init(baseOption: .subscribed, options: [.specialUse, .recursiveMatch]),
-            "(SPECIAL-USE RECURSIVEMATCH SUBSCRIBED)"
-        ),
-    ])
+    @Test(
+        "encode multiple options",
+        arguments: [
+            EncodeFixture.listSelectOptions(nil, "()"),
+            EncodeFixture.listSelectOptions(
+                .init(baseOption: .subscribed, options: [.subscribed]),
+                "(SUBSCRIBED SUBSCRIBED)"
+            ),
+            EncodeFixture.listSelectOptions(
+                .init(baseOption: .subscribed, options: [.specialUse, .recursiveMatch]),
+                "(SPECIAL-USE RECURSIVEMATCH SUBSCRIBED)"
+            ),
+        ]
+    )
     func encodeMultipleOptions(_ fixture: EncodeFixture<ListSelectOptions?>) {
         fixture.checkEncoding()
     }

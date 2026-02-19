@@ -268,11 +268,14 @@ extension ParserLibraryTests {
 // MARK: - parseSpace
 
 extension ParserLibraryTests {
-    @Test("parseSpaces consumes leading spaces", arguments: [
-        (" a", "a"),
-        ("       a", "a"),
-        ("  a  ", "a  "),
-    ])
+    @Test(
+        "parseSpaces consumes leading spaces",
+        arguments: [
+            (" a", "a"),
+            ("       a", "a"),
+            ("  a  ", "a  "),
+        ]
+    )
     func parseSpacesConsumesLeadingSpaces(input: String, expectedRemaining: String) throws {
         var buffer = ParseBuffer(ByteBuffer(string: input))
         let remaining = ParseBuffer(ByteBuffer(string: expectedRemaining))
@@ -284,12 +287,15 @@ extension ParserLibraryTests {
 // MARK: - parseUInt64
 
 extension ParserLibraryTests {
-    @Test("parseUnsignedInt64 parses numbers correctly", arguments: [
-        ("12345\r", 12345, 5),
-        ("18446744073709551615\r", UInt64.max, 20),
-        ("12345 a", 12345, 5),
-        ("18446744073709551615b", UInt64.max, 20),
-    ])
+    @Test(
+        "parseUnsignedInt64 parses numbers correctly",
+        arguments: [
+            ("12345\r", 12345, 5),
+            ("18446744073709551615\r", UInt64.max, 20),
+            ("12345 a", 12345, 5),
+            ("18446744073709551615b", UInt64.max, 20),
+        ]
+    )
     func parseUnsignedInt64ParsesNumbersCorrectly(
         input: String,
         expectedResult: UInt64,
@@ -340,17 +346,20 @@ extension ParserLibraryTests {
 // MARK: - parseNewline
 
 extension ParserLibraryTests {
-    @Test("parseNewline handles various newline formats", arguments: [
-        "\r\n",
-        "\n",
-        "\r",
-        " \r\n",
-        " \n",
-        " \r",
-        "      \r\n",
-        "      \n",
-        "      \r",
-    ])
+    @Test(
+        "parseNewline handles various newline formats",
+        arguments: [
+            "\r\n",
+            "\n",
+            "\r",
+            " \r\n",
+            " \n",
+            " \r",
+            "      \r\n",
+            "      \n",
+            "      \r",
+        ]
+    )
     func parseNewlineHandlesVariousNewlineFormats(newline: String) throws {
         var buffer = TestUtilities.makeParseBuffer(for: newline + "hello, world")
         try ParserLibrary.parseNewline(buffer: &buffer, tracker: StackTracker.makeNewDefault)

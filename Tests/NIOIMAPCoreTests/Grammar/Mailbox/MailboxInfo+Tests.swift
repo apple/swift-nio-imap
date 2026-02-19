@@ -83,12 +83,15 @@ struct MailboxInfoTests {
         fixture.checkEncoding()
     }
 
-    @Test("encode flags", arguments: [
-        EncodeFixture.mailboxListFlags([], ""),
-        EncodeFixture.mailboxListFlags([.marked], #"\Marked"#),
-        EncodeFixture.mailboxListFlags([.noInferiors], #"\Noinferiors"#),
-        EncodeFixture.mailboxListFlags([.marked, .noInferiors, .init(#"\test"#)], #"\Marked \Noinferiors \test"#),
-    ])
+    @Test(
+        "encode flags",
+        arguments: [
+            EncodeFixture.mailboxListFlags([], ""),
+            EncodeFixture.mailboxListFlags([.marked], #"\Marked"#),
+            EncodeFixture.mailboxListFlags([.noInferiors], #"\Noinferiors"#),
+            EncodeFixture.mailboxListFlags([.marked, .noInferiors, .init(#"\test"#)], #"\Marked \Noinferiors \test"#),
+        ]
+    )
     func encodeFlags(_ fixture: EncodeFixture<[MailboxInfo.Attribute]>) {
         fixture.checkEncoding()
     }
@@ -135,15 +138,18 @@ struct MailboxInfoTests {
         fixture.checkParsing()
     }
 
-    @Test("parse flags", arguments: [
-        ParseFixture.mailboxListFlags("\\marked", "\r", expected: .success([.marked])),
-        ParseFixture.mailboxListFlags("\\marked \\remote", "\r", expected: .success([.marked, .remote])),
-        ParseFixture.mailboxListFlags(
-            "\\marked \\o1 \\o2",
-            "\r",
-            expected: .success([.marked, .init("\\o1"), .init("\\o2")])
-        ),
-    ])
+    @Test(
+        "parse flags",
+        arguments: [
+            ParseFixture.mailboxListFlags("\\marked", "\r", expected: .success([.marked])),
+            ParseFixture.mailboxListFlags("\\marked \\remote", "\r", expected: .success([.marked, .remote])),
+            ParseFixture.mailboxListFlags(
+                "\\marked \\o1 \\o2",
+                "\r",
+                expected: .success([.marked, .init("\\o1"), .init("\\o2")])
+            ),
+        ]
+    )
     func parseFlags(_ fixture: ParseFixture<[MailboxInfo.Attribute]>) {
         fixture.checkParsing()
     }

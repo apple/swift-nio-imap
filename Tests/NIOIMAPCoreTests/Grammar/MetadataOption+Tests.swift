@@ -18,51 +18,63 @@ import Testing
 
 @Suite("MetadataOption")
 struct MetadataOptionTests {
-    @Test("encodes single metadata option", arguments: [
-        EncodeFixture.metadataOption(
-            .maxSize(123),
-            "MAXSIZE 123"
-        ),
-        EncodeFixture.metadataOption(
-            .scope(.one),
-            "DEPTH 1"
-        ),
-        EncodeFixture.metadataOption(
-            .other(.init(key: "param", value: nil)),
-            "param"
-        ),
-    ])
+    @Test(
+        "encodes single metadata option",
+        arguments: [
+            EncodeFixture.metadataOption(
+                .maxSize(123),
+                "MAXSIZE 123"
+            ),
+            EncodeFixture.metadataOption(
+                .scope(.one),
+                "DEPTH 1"
+            ),
+            EncodeFixture.metadataOption(
+                .other(.init(key: "param", value: nil)),
+                "param"
+            ),
+        ]
+    )
     func encodesSingleMetadataOption(_ fixture: EncodeFixture<MetadataOption>) {
         fixture.checkEncoding()
     }
 
-    @Test("encodes array of metadata options", arguments: [
-        EncodeFixture.metadataOptions(
-            [.maxSize(123)],
-            "(MAXSIZE 123)"
-        ),
-        EncodeFixture.metadataOptions(
-            [.maxSize(1), .scope(.one)],
-            "(MAXSIZE 1 DEPTH 1)"
-        ),
-    ])
+    @Test(
+        "encodes array of metadata options",
+        arguments: [
+            EncodeFixture.metadataOptions(
+                [.maxSize(123)],
+                "(MAXSIZE 123)"
+            ),
+            EncodeFixture.metadataOptions(
+                [.maxSize(1), .scope(.one)],
+                "(MAXSIZE 1 DEPTH 1)"
+            ),
+        ]
+    )
     func encodesArrayOfMetadataOptions(_ fixture: EncodeFixture<[MetadataOption]>) {
         fixture.checkEncoding()
     }
 
-    @Test("parse metadata option", arguments: [
-        ParseFixture.metadataOption("MAXSIZE 123", expected: .success(.maxSize(123))),
-        ParseFixture.metadataOption("DEPTH 1", expected: .success(.scope(.one))),
-        ParseFixture.metadataOption("param", expected: .success(.other(.init(key: "param", value: nil)))),
-    ])
+    @Test(
+        "parse metadata option",
+        arguments: [
+            ParseFixture.metadataOption("MAXSIZE 123", expected: .success(.maxSize(123))),
+            ParseFixture.metadataOption("DEPTH 1", expected: .success(.scope(.one))),
+            ParseFixture.metadataOption("param", expected: .success(.other(.init(key: "param", value: nil)))),
+        ]
+    )
     func parseMetadataOption(_ fixture: ParseFixture<MetadataOption>) {
         fixture.checkParsing()
     }
 
-    @Test("parse metadata options", arguments: [
-        ParseFixture.metadataOptions("(MAXSIZE 123)", expected: .success([.maxSize(123)])),
-        ParseFixture.metadataOptions("(DEPTH 1 MAXSIZE 123)", expected: .success([.scope(.one), .maxSize(123)])),
-    ])
+    @Test(
+        "parse metadata options",
+        arguments: [
+            ParseFixture.metadataOptions("(MAXSIZE 123)", expected: .success([.maxSize(123)])),
+            ParseFixture.metadataOptions("(DEPTH 1 MAXSIZE 123)", expected: .success([.scope(.one), .maxSize(123)])),
+        ]
+    )
     func parseMetadataOptions(_ fixture: ParseFixture<[MetadataOption]>) {
         fixture.checkParsing()
     }

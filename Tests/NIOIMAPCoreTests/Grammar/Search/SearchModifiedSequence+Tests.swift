@@ -63,13 +63,16 @@ struct SearchModifiedSequenceTests {
         fixture.checkParsing()
     }
 
-    @Test("parse extension", arguments: [
-        ParseFixture.searchModificationSequenceExtension(
-            #" "/flags/\\Seen" all"#,
-            "",
-            expected: .success(.init(key: .init(flag: .seen), value: .all))
-        )
-    ])
+    @Test(
+        "parse extension",
+        arguments: [
+            ParseFixture.searchModificationSequenceExtension(
+                #" "/flags/\\Seen" all"#,
+                "",
+                expected: .success(.init(key: .init(flag: .seen), value: .all))
+            )
+        ]
+    )
     func parseExtension(_ fixture: ParseFixture<KeyValue<EntryFlagName, EntryKindRequest>>) {
         fixture.checkParsing()
     }

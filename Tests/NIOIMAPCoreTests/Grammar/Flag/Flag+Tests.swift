@@ -34,14 +34,17 @@ struct FlagTests {
         #expect(Flag.Keyword(#"a*b"#) == nil)
     }
 
-    @Test("extension initialization", arguments: [
-        (Flag.extension("\\ANSWERED"), Flag.answered),
-        (Flag.extension("\\answered"), Flag.answered),
-        (Flag.extension("\\deleted"), Flag.deleted),
-        (Flag.extension("\\seen"), Flag.seen),
-        (Flag.extension("\\draft"), Flag.draft),
-        (Flag.extension("\\flagged"), Flag.flagged),
-    ])
+    @Test(
+        "extension initialization",
+        arguments: [
+            (Flag.extension("\\ANSWERED"), Flag.answered),
+            (Flag.extension("\\answered"), Flag.answered),
+            (Flag.extension("\\deleted"), Flag.deleted),
+            (Flag.extension("\\seen"), Flag.seen),
+            (Flag.extension("\\draft"), Flag.draft),
+            (Flag.extension("\\flagged"), Flag.flagged),
+        ]
+    )
     func extensionInitialization(_ input: Flag, _ expected: Flag) {
         #expect(input == expected)
     }
@@ -146,20 +149,26 @@ struct FlagTests {
         fixture.checkParsing()
     }
 
-    @Test("parse flag list", arguments: [
-        ParseFixture.flagList("()", expected: .success([])),
-        ParseFixture.flagList(#"(\seen)"#, expected: .success([.seen])),
-        ParseFixture.flagList(#"(\seen \answered \draft)"#, expected: .success([.seen, .answered, .draft])),
-        ParseFixture.flagList(#"(\seen \answered \draft )"#, expected: .success([.seen, .answered, .draft])),
-    ])
+    @Test(
+        "parse flag list",
+        arguments: [
+            ParseFixture.flagList("()", expected: .success([])),
+            ParseFixture.flagList(#"(\seen)"#, expected: .success([.seen])),
+            ParseFixture.flagList(#"(\seen \answered \draft)"#, expected: .success([.seen, .answered, .draft])),
+            ParseFixture.flagList(#"(\seen \answered \draft )"#, expected: .success([.seen, .answered, .draft])),
+        ]
+    )
     func parseFlagList(_ fixture: ParseFixture<[Flag]>) {
         fixture.checkParsing()
     }
 
-    @Test("parse flag extension", arguments: [
-        ParseFixture.flagExtension(#"\Something"#, expected: .success(#"\Something"#)),
-        ParseFixture.flagExtension("Something ", " ", expected: .failureIgnoringBufferModifications),
-    ])
+    @Test(
+        "parse flag extension",
+        arguments: [
+            ParseFixture.flagExtension(#"\Something"#, expected: .success(#"\Something"#)),
+            ParseFixture.flagExtension("Something ", " ", expected: .failureIgnoringBufferModifications),
+        ]
+    )
     func parseFlagExtension(_ fixture: ParseFixture<String>) {
         fixture.checkParsing()
     }

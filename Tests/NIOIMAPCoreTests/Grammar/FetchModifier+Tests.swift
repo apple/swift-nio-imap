@@ -18,31 +18,37 @@ import Testing
 
 @Suite("FetchModifier")
 struct FetchModifierTests {
-    @Test("encode single modifier", arguments: [
-        EncodeFixture.fetchModifier(.changedSince(.init(modificationSequence: 4)), "CHANGEDSINCE 4"),
-        EncodeFixture.fetchModifier(.partial(.last(735...88_032)), "PARTIAL -735:-88032"),
-        EncodeFixture.fetchModifier(.other(.init(key: "test", value: nil)), "test"),
-        EncodeFixture.fetchModifier(.other(.init(key: "test", value: .sequence(.set([4])))), "test 4"),
-    ])
+    @Test(
+        "encode single modifier",
+        arguments: [
+            EncodeFixture.fetchModifier(.changedSince(.init(modificationSequence: 4)), "CHANGEDSINCE 4"),
+            EncodeFixture.fetchModifier(.partial(.last(735...88_032)), "PARTIAL -735:-88032"),
+            EncodeFixture.fetchModifier(.other(.init(key: "test", value: nil)), "test"),
+            EncodeFixture.fetchModifier(.other(.init(key: "test", value: .sequence(.set([4])))), "test 4"),
+        ]
+    )
     func encodeSingleModifier(_ fixture: EncodeFixture<FetchModifier>) {
         fixture.checkEncoding()
     }
 
-    @Test("encode multiple modifiers", arguments: [
-        EncodeFixture.fetchModifiers(
-            [.partial(.last(1...30)), .changedSince(.init(modificationSequence: 3_665_089_505_007_763_456))],
-            " (PARTIAL -1:-30 CHANGEDSINCE 3665089505007763456)"
-        ),
-        EncodeFixture.fetchModifiers(
-            [.changedSince(.init(modificationSequence: 98305))],
-            " (CHANGEDSINCE 98305)"
-        ),
-        EncodeFixture.fetchModifiers(
-            [.other(.init(key: "test", value: nil)), .other(.init(key: "test", value: .sequence(.set([4]))))],
-            " (test test 4)"
-        ),
-        EncodeFixture.fetchModifiers([], ""),
-    ])
+    @Test(
+        "encode multiple modifiers",
+        arguments: [
+            EncodeFixture.fetchModifiers(
+                [.partial(.last(1...30)), .changedSince(.init(modificationSequence: 3_665_089_505_007_763_456))],
+                " (PARTIAL -1:-30 CHANGEDSINCE 3665089505007763456)"
+            ),
+            EncodeFixture.fetchModifiers(
+                [.changedSince(.init(modificationSequence: 98305))],
+                " (CHANGEDSINCE 98305)"
+            ),
+            EncodeFixture.fetchModifiers(
+                [.other(.init(key: "test", value: nil)), .other(.init(key: "test", value: .sequence(.set([4]))))],
+                " (test test 4)"
+            ),
+            EncodeFixture.fetchModifiers([], ""),
+        ]
+    )
     func encodeMultipleModifiers(_ fixture: EncodeFixture<[FetchModifier]>) {
         fixture.checkEncoding()
     }
@@ -68,19 +74,26 @@ struct FetchModifierTests {
         fixture.checkParsing()
     }
 
-    @Test("parse multiple modifiers", arguments: [
-        ParseFixture.fetchModifiers(
-            " (CHANGEDSINCE 2)",
-            " ",
-            expected: .success([.changedSince(.init(modificationSequence: 2))])
-        ),
-        ParseFixture.fetchModifiers(" (PARTIAL -735:-88032)", " ", expected: .success([.partial(.last(735...88_032))])),
-        ParseFixture.fetchModifiers(
-            " (PARTIAL -1:-30 CHANGEDSINCE 98305)",
-            " ",
-            expected: .success([.partial(.last(1...30)), .changedSince(.init(modificationSequence: 98305))])
-        ),
-    ])
+    @Test(
+        "parse multiple modifiers",
+        arguments: [
+            ParseFixture.fetchModifiers(
+                " (CHANGEDSINCE 2)",
+                " ",
+                expected: .success([.changedSince(.init(modificationSequence: 2))])
+            ),
+            ParseFixture.fetchModifiers(
+                " (PARTIAL -735:-88032)",
+                " ",
+                expected: .success([.partial(.last(735...88_032))])
+            ),
+            ParseFixture.fetchModifiers(
+                " (PARTIAL -1:-30 CHANGEDSINCE 98305)",
+                " ",
+                expected: .success([.partial(.last(1...30)), .changedSince(.init(modificationSequence: 98305))])
+            ),
+        ]
+    )
     func parseMultipleModifiers(_ fixture: ParseFixture<[FetchModifier]>) {
         fixture.checkParsing()
     }

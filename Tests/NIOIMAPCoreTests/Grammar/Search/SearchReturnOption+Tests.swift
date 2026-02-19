@@ -32,14 +32,20 @@ struct SearchReturnOptionTests {
         fixture.checkEncoding()
     }
 
-    @Test("encode multiple", arguments: [
-        EncodeFixture.searchReturnOptions([], ""),
-        EncodeFixture.searchReturnOptions([.min], " RETURN (MIN)"),
-        EncodeFixture.searchReturnOptions([.all], " RETURN (ALL)"),
-        EncodeFixture.searchReturnOptions([.min, .all], " RETURN (MIN ALL)"),
-        EncodeFixture.searchReturnOptions([.min, .max, .count], " RETURN (MIN MAX COUNT)"),
-        EncodeFixture.searchReturnOptions([.min, .partial(.last(400...1_000))], " RETURN (MIN PARTIAL -400:-1000)"),
-    ])
+    @Test(
+        "encode multiple",
+        arguments: [
+            EncodeFixture.searchReturnOptions([], ""),
+            EncodeFixture.searchReturnOptions([.min], " RETURN (MIN)"),
+            EncodeFixture.searchReturnOptions([.all], " RETURN (ALL)"),
+            EncodeFixture.searchReturnOptions([.min, .all], " RETURN (MIN ALL)"),
+            EncodeFixture.searchReturnOptions([.min, .max, .count], " RETURN (MIN MAX COUNT)"),
+            EncodeFixture.searchReturnOptions(
+                [.min, .partial(.last(400...1_000))],
+                " RETURN (MIN PARTIAL -400:-1000)"
+            ),
+        ]
+    )
     func encodeMultiple(_ fixture: EncodeFixture<[SearchReturnOption]>) {
         fixture.checkEncoding()
     }
@@ -71,25 +77,28 @@ struct SearchReturnOptionTests {
         fixture.checkParsing()
     }
 
-    @Test("parse multiple", arguments: [
-        ParseFixture.searchReturnOptions(" RETURN (ALL)", expected: .success([.all])),
-        ParseFixture.searchReturnOptions(" RETURN (MIN MAX COUNT)", expected: .success([.min, .max, .count])),
-        ParseFixture.searchReturnOptions(
-            " RETURN (m1 m2)",
-            expected: .success([
-                .optionExtension(.init(key: "m1", value: nil)),
-                .optionExtension(.init(key: "m2", value: nil)),
-            ])
-        ),
-        ParseFixture.searchReturnOptions(
-            " RETURN (PARTIAL 23500:24000)",
-            expected: .success([.partial(.first(23_500...24_000))])
-        ),
-        ParseFixture.searchReturnOptions(
-            " RETURN (MIN PARTIAL -1:-100 MAX)",
-            expected: .success([.min, .partial(.last(1...100)), .max])
-        ),
-    ])
+    @Test(
+        "parse multiple",
+        arguments: [
+            ParseFixture.searchReturnOptions(" RETURN (ALL)", expected: .success([.all])),
+            ParseFixture.searchReturnOptions(" RETURN (MIN MAX COUNT)", expected: .success([.min, .max, .count])),
+            ParseFixture.searchReturnOptions(
+                " RETURN (m1 m2)",
+                expected: .success([
+                    .optionExtension(.init(key: "m1", value: nil)),
+                    .optionExtension(.init(key: "m2", value: nil)),
+                ])
+            ),
+            ParseFixture.searchReturnOptions(
+                " RETURN (PARTIAL 23500:24000)",
+                expected: .success([.partial(.first(23_500...24_000))])
+            ),
+            ParseFixture.searchReturnOptions(
+                " RETURN (MIN PARTIAL -1:-100 MAX)",
+                expected: .success([.min, .partial(.last(1...100)), .max])
+            ),
+        ]
+    )
     func parseMultiple(_ fixture: ParseFixture<[SearchReturnOption]>) {
         fixture.checkParsing()
     }

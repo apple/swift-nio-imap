@@ -18,10 +18,18 @@ import Testing
 
 @Suite("Media")
 struct MediaTests {
-    @Test("media type init normalizes case", arguments: [
-        MediaTypeInitFixture(topLevel: "image", sub: "jpeg", expectedTopLevel: "image", expectedSub: "jpeg"),
-        MediaTypeInitFixture(topLevel: "APPLICATION", sub: "PDF", expectedTopLevel: "application", expectedSub: "pdf"),
-    ])
+    @Test(
+        "media type init normalizes case",
+        arguments: [
+            MediaTypeInitFixture(topLevel: "image", sub: "jpeg", expectedTopLevel: "image", expectedSub: "jpeg"),
+            MediaTypeInitFixture(
+                topLevel: "APPLICATION",
+                sub: "PDF",
+                expectedTopLevel: "application",
+                expectedSub: "pdf"
+            ),
+        ]
+    )
     func mediaTypeInitNormalizesCase(_ fixture: MediaTypeInitFixture) {
         let mediaType = Media.MediaType(topLevel: fixture.topLevel, sub: fixture.sub)
         #expect(String(mediaType.topLevel) == fixture.expectedTopLevel)
@@ -40,71 +48,93 @@ struct MediaTests {
         #expect(String(Media.Subtype("HTML")) == "html")
     }
 
-    @Test("encode media type", arguments: [
-        EncodeFixture.mediaType(.init(topLevel: "text", sub: "html"), #""TEXT" "HTML""#),
-        EncodeFixture.mediaType(.init(topLevel: .image, sub: "jpeg"), #""IMAGE" "JPEG""#),
-        EncodeFixture.mediaType(.init(topLevel: .application, sub: "pdf"), #""APPLICATION" "PDF""#),
-    ])
+    @Test(
+        "encode media type",
+        arguments: [
+            EncodeFixture.mediaType(.init(topLevel: "text", sub: "html"), #""TEXT" "HTML""#),
+            EncodeFixture.mediaType(.init(topLevel: .image, sub: "jpeg"), #""IMAGE" "JPEG""#),
+            EncodeFixture.mediaType(.init(topLevel: .application, sub: "pdf"), #""APPLICATION" "PDF""#),
+        ]
+    )
     func encodeMediaType(_ fixture: EncodeFixture<Media.MediaType>) {
         fixture.checkEncoding()
     }
 
-    @Test("encode top level type", arguments: [
-        EncodeFixture.topLevelType(.multipart, #""MULTIPART""#),
-        EncodeFixture.topLevelType(.application, #""APPLICATION""#),
-        EncodeFixture.topLevelType(.video, #""VIDEO""#),
-        EncodeFixture.topLevelType(.image, #""IMAGE""#),
-        EncodeFixture.topLevelType(.audio, #""AUDIO""#),
-        EncodeFixture.topLevelType(.message, #""MESSAGE""#),
-        EncodeFixture.topLevelType(.font, #""FONT""#),
-        EncodeFixture.topLevelType(.init("other"), #""OTHER""#),
-    ])
+    @Test(
+        "encode top level type",
+        arguments: [
+            EncodeFixture.topLevelType(.multipart, #""MULTIPART""#),
+            EncodeFixture.topLevelType(.application, #""APPLICATION""#),
+            EncodeFixture.topLevelType(.video, #""VIDEO""#),
+            EncodeFixture.topLevelType(.image, #""IMAGE""#),
+            EncodeFixture.topLevelType(.audio, #""AUDIO""#),
+            EncodeFixture.topLevelType(.message, #""MESSAGE""#),
+            EncodeFixture.topLevelType(.font, #""FONT""#),
+            EncodeFixture.topLevelType(.init("other"), #""OTHER""#),
+        ]
+    )
     func encodeTopLevelType(_ fixture: EncodeFixture<Media.TopLevelType>) {
         fixture.checkEncoding()
     }
 
-    @Test("encode subtype", arguments: [
-        EncodeFixture.subtype(.related, #""RELATED""#),
-        EncodeFixture.subtype(.mixed, #""MIXED""#),
-        EncodeFixture.subtype(.alternative, #""ALTERNATIVE""#),
-        EncodeFixture.subtype(.init("other"), #""OTHER""#),
-        EncodeFixture.subtype(.init("html"), #""HTML""#),
-    ])
+    @Test(
+        "encode subtype",
+        arguments: [
+            EncodeFixture.subtype(.related, #""RELATED""#),
+            EncodeFixture.subtype(.mixed, #""MIXED""#),
+            EncodeFixture.subtype(.alternative, #""ALTERNATIVE""#),
+            EncodeFixture.subtype(.init("other"), #""OTHER""#),
+            EncodeFixture.subtype(.init("html"), #""HTML""#),
+        ]
+    )
     func encodeSubtype(_ fixture: EncodeFixture<Media.Subtype>) {
         fixture.checkEncoding()
     }
 
-    @Test("parse media type", arguments: [
-        ParseFixture.mediaType(
-            #""APPLICATION" "mixed""#,
-            expected: .success(Media.MediaType(topLevel: .application, sub: .mixed))
-        ),
-        ParseFixture.mediaType(
-            #""STRING" "related""#,
-            expected: .success(Media.MediaType(topLevel: .init("STRING"), sub: .related))
-        ),
-        ParseFixture.mediaType(#"hey "something""#, "\r", expected: .failureIgnoringBufferModifications),
-    ])
+    @Test(
+        "parse media type",
+        arguments: [
+            ParseFixture.mediaType(
+                #""APPLICATION" "mixed""#,
+                expected: .success(Media.MediaType(topLevel: .application, sub: .mixed))
+            ),
+            ParseFixture.mediaType(
+                #""STRING" "related""#,
+                expected: .success(Media.MediaType(topLevel: .init("STRING"), sub: .related))
+            ),
+            ParseFixture.mediaType(#"hey "something""#, "\r", expected: .failureIgnoringBufferModifications),
+        ]
+    )
     func parseMediaType(_ fixture: ParseFixture<Media.MediaType>) {
         fixture.checkParsing()
     }
 
-    @Test("parse media message", arguments: [
-        ParseFixture.mediaMessage(#""MESSAGE" "RFC822""#, expected: .success(.rfc822)),
-        ParseFixture.mediaMessage(#""messAGE" "RfC822""#, expected: .success(.rfc822)),
-        ParseFixture.mediaMessage("abcdefghijklmnopqrstuvwxyz\n", "\n", expected: .failureIgnoringBufferModifications),
-        ParseFixture.mediaMessage(#""messAGE""#, "", expected: .incompleteMessageIgnoringBufferModifications),
-    ])
+    @Test(
+        "parse media message",
+        arguments: [
+            ParseFixture.mediaMessage(#""MESSAGE" "RFC822""#, expected: .success(.rfc822)),
+            ParseFixture.mediaMessage(#""messAGE" "RfC822""#, expected: .success(.rfc822)),
+            ParseFixture.mediaMessage(
+                "abcdefghijklmnopqrstuvwxyz\n",
+                "\n",
+                expected: .failureIgnoringBufferModifications
+            ),
+            ParseFixture.mediaMessage(#""messAGE""#, "", expected: .incompleteMessageIgnoringBufferModifications),
+        ]
+    )
     func parseMediaMessage(_ fixture: ParseFixture<Media.Subtype>) {
         fixture.checkParsing()
     }
 
-    @Test("parse media text", arguments: [
-        ParseFixture.mediaText(#""TEXT" "something""#, "\n", expected: .success("something")),
-        ParseFixture.mediaText(#""TExt" "something""#, "\n", expected: .success("something")),
-        ParseFixture.mediaText(#"TEXT "something"\n"#, "\n", expected: .failureIgnoringBufferModifications),
-        ParseFixture.mediaText(#""TEXT""#, "", expected: .incompleteMessageIgnoringBufferModifications),
-    ])
+    @Test(
+        "parse media text",
+        arguments: [
+            ParseFixture.mediaText(#""TEXT" "something""#, "\n", expected: .success("something")),
+            ParseFixture.mediaText(#""TExt" "something""#, "\n", expected: .success("something")),
+            ParseFixture.mediaText(#"TEXT "something"\n"#, "\n", expected: .failureIgnoringBufferModifications),
+            ParseFixture.mediaText(#""TEXT""#, "", expected: .incompleteMessageIgnoringBufferModifications),
+        ]
+    )
     func parseMediaText(_ fixture: ParseFixture<Media.Subtype>) {
         fixture.checkParsing()
     }

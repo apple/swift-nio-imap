@@ -26,9 +26,12 @@ struct ListSelectBaseOptionTests {
         fixture.checkEncoding()
     }
 
-    @Test("encode quoted", arguments: [
-        EncodeFixture.listSelectBaseOptionQuoted(.subscribed, #""SUBSCRIBED""#)
-    ])
+    @Test(
+        "encode quoted",
+        arguments: [
+            EncodeFixture.listSelectBaseOptionQuoted(.subscribed, #""SUBSCRIBED""#)
+        ]
+    )
     func encodeQuoted(_ fixture: EncodeFixture<ListSelectBaseOption>) {
         fixture.checkEncoding()
     }

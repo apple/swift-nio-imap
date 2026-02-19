@@ -18,46 +18,52 @@ import Testing
 
 @Suite("QuotaResponse")
 struct QuotaResponseTests {
-    @Test("encode quota response", arguments: [
-        EncodeFixture.quota(
-            (
-                QuotaRoot("Root"),
-                []
+    @Test(
+        "encode quota response",
+        arguments: [
+            EncodeFixture.quota(
+                (
+                    QuotaRoot("Root"),
+                    []
+                ),
+                #"QUOTA "Root" ()"#
             ),
-            #"QUOTA "Root" ()"#
-        ),
-        EncodeFixture.quota(
-            (
-                QuotaRoot("!partition/sda4"),
-                [
-                    QuotaResource(resourceName: "STORAGE", usage: 104, limit: 10_923_847)
-                ]
+            EncodeFixture.quota(
+                (
+                    QuotaRoot("!partition/sda4"),
+                    [
+                        QuotaResource(resourceName: "STORAGE", usage: 104, limit: 10_923_847)
+                    ]
+                ),
+                #"QUOTA "!partition/sda4" (STORAGE 104 10923847)"#
             ),
-            #"QUOTA "!partition/sda4" (STORAGE 104 10923847)"#
-        ),
-        EncodeFixture.quota(
-            (
-                QuotaRoot("#user/alice"),
-                [
-                    QuotaResource(resourceName: "MESSAGE", usage: 42, limit: 1000)
-                ]
+            EncodeFixture.quota(
+                (
+                    QuotaRoot("#user/alice"),
+                    [
+                        QuotaResource(resourceName: "MESSAGE", usage: 42, limit: 1000)
+                    ]
+                ),
+                ##"QUOTA "#user/alice" (MESSAGE 42 1000)"##
             ),
-            ##"QUOTA "#user/alice" (MESSAGE 42 1000)"##
-        ),
-    ])
+        ]
+    )
     func encodeQuotaResponse(
         fixture: EncodeFixture<(QuotaRoot, [QuotaResource])>
     ) {
         fixture.checkEncoding()
     }
 
-    @Test("encode quota resources", arguments: [
-        EncodeFixture.quotaResources(
-            [QuotaResource(resourceName: "STORAGE", usage: 10, limit: 512)],
-            "(STORAGE 10 512)"
-        ),
-        EncodeFixture.quotaResources([], "()"),
-    ])
+    @Test(
+        "encode quota resources",
+        arguments: [
+            EncodeFixture.quotaResources(
+                [QuotaResource(resourceName: "STORAGE", usage: 10, limit: 512)],
+                "(STORAGE 10 512)"
+            ),
+            EncodeFixture.quotaResources([], "()"),
+        ]
+    )
     func encodeQuotaResources(_ fixture: EncodeFixture<[QuotaResource]>) {
         fixture.checkEncoding()
     }

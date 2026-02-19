@@ -49,10 +49,13 @@ struct ResponseTextTests {
         fixture.checkParsing()
     }
 
-    @Test("custom debug string convertible", arguments: [
-        DebugStringFixture(sut: ResponseText(code: nil, text: "buffer"), expected: "buffer"),
-        DebugStringFixture(sut: ResponseText(code: .alert, text: "buffer"), expected: "[ALERT] buffer"),
-    ])
+    @Test(
+        "custom debug string convertible",
+        arguments: [
+            DebugStringFixture(sut: ResponseText(code: nil, text: "buffer"), expected: "buffer"),
+            DebugStringFixture(sut: ResponseText(code: .alert, text: "buffer"), expected: "[ALERT] buffer"),
+        ]
+    )
     func customDebugStringConvertible(_ fixture: DebugStringFixture<ResponseText>) {
         fixture.check()
     }

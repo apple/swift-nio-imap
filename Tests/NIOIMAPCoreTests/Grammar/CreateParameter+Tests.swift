@@ -44,43 +44,49 @@ struct CreateParameterTests {
         fixture.checkEncoding()
     }
 
-    @Test("parse single create parameter", arguments: [
-        ParseFixture.createParameter(
-            "param",
-            expected: .success(.labelled(.init(key: "param", value: nil)))
-        ),
-        ParseFixture.createParameter(
-            "param 1",
-            expected: .success(.labelled(.init(key: "param", value: .sequence(.set([1])))))
-        ),
-        ParseFixture.createParameter(
-            "USE (\\All)",
-            expected: .success(.attributes([.all]))
-        ),
-        ParseFixture.createParameter(
-            "USE (\\All \\Sent \\Drafts)",
-            expected: .success(.attributes([.all, .sent, .drafts]))
-        ),
-        ParseFixture.createParameter("param", "", expected: .incompleteMessage),
-        ParseFixture.createParameter("param 1", "", expected: .incompleteMessage),
-        ParseFixture.createParameter("USE (\\Test", "", expected: .incompleteMessage),
-        ParseFixture.createParameter("USE (\\All ", "", expected: .incompleteMessage),
-    ])
+    @Test(
+        "parse single create parameter",
+        arguments: [
+            ParseFixture.createParameter(
+                "param",
+                expected: .success(.labelled(.init(key: "param", value: nil)))
+            ),
+            ParseFixture.createParameter(
+                "param 1",
+                expected: .success(.labelled(.init(key: "param", value: .sequence(.set([1])))))
+            ),
+            ParseFixture.createParameter(
+                "USE (\\All)",
+                expected: .success(.attributes([.all]))
+            ),
+            ParseFixture.createParameter(
+                "USE (\\All \\Sent \\Drafts)",
+                expected: .success(.attributes([.all, .sent, .drafts]))
+            ),
+            ParseFixture.createParameter("param", "", expected: .incompleteMessage),
+            ParseFixture.createParameter("param 1", "", expected: .incompleteMessage),
+            ParseFixture.createParameter("USE (\\Test", "", expected: .incompleteMessage),
+            ParseFixture.createParameter("USE (\\All ", "", expected: .incompleteMessage),
+        ]
+    )
     func parseSingleCreateParameter(_ fixture: ParseFixture<CreateParameter>) {
         fixture.checkParsing()
     }
 
-    @Test("parse create parameters list", arguments: [
-        ParseFixture.createParameters(
-            " (param1 param2)",
-            expected: .success([
-                .labelled(.init(key: "param1", value: nil)),
-                .labelled(.init(key: "param2", value: nil)),
-            ])
-        ),
-        ParseFixture.createParameters(" (param1", expected: .failure),
-        ParseFixture.createParameters(" (param1", "", expected: .incompleteMessage),
-    ])
+    @Test(
+        "parse create parameters list",
+        arguments: [
+            ParseFixture.createParameters(
+                " (param1 param2)",
+                expected: .success([
+                    .labelled(.init(key: "param1", value: nil)),
+                    .labelled(.init(key: "param2", value: nil)),
+                ])
+            ),
+            ParseFixture.createParameters(" (param1", expected: .failure),
+            ParseFixture.createParameters(" (param1", "", expected: .incompleteMessage),
+        ]
+    )
     func parseCreateParametersList(_ fixture: ParseFixture<[CreateParameter]>) {
         fixture.checkParsing()
     }

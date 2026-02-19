@@ -23,10 +23,13 @@ struct StringByteBufferTests {
         #expect(String(validatingUTF8Bytes: bytes) == nil)
     }
 
-    @Test("validating UTF-8 returns nil for invalid sequences", arguments: [
-        [0xC2],
-        [0xE1, 0x80],
-    ])
+    @Test(
+        "validating UTF-8 returns nil for invalid sequences",
+        arguments: [
+            [0xC2],
+            [0xE1, 0x80],
+        ]
+    )
     func validatingUtf8ReturnsNilForInvalidSequences(bytes: [UInt8]) {
         #expect(String(validatingUTF8Bytes: bytes) == nil)
     }

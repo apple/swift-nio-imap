@@ -19,64 +19,67 @@ import Testing
 
 @Suite("SynchronizingLiteralParser")
 struct SynchronizingLiteralParserTests {
-    @Test("single string parsing", arguments: [
-        SingleStringFixture(
-            testDescription: "straight forward case",
-            input: "LOGIN \"a\" \"b\"\r\nFOO x y\r\n",
-            continuationsNecessary: 0
-        ),
-        SingleStringFixture(
-            testDescription: "single CR newline",
-            input: "LOGIN \"a\" \"b\"\r",
-            continuationsNecessary: 0
-        ),
-        SingleStringFixture(
-            testDescription: "empty literals work",
-            input: "LOGIN {0}\r\n {0+}\r\n {~0}\r\n {~0+}\r\n {0-}\r\n\r\nFOO x y\r\n",
-            continuationsNecessary: 2
-        ),
-        SingleStringFixture(
-            testDescription: "straight forward case with synchronising literals",
-            input: "LOGIN {1}\r\nA {1}\r\nB\r\nFOO x y\r\n",
-            continuationsNecessary: 2
-        ),
-        SingleStringFixture(
-            testDescription: "straight forward case with non-synchronising literals",
-            input: "LOGIN {1+}\r\nA {1+}\r\nB\r\nFOO x y\r\n",
-            continuationsNecessary: 0
-        ),
-        SingleStringFixture(
-            testDescription: "straight forward case with mixed literals",
-            input: "LOGIN {1+}\r\nA {1}\r\nB\r\nFOO x y\r\n",
-            continuationsNecessary: 1
-        ),
-        SingleStringFixture(
-            testDescription: "partial commands dont make bytes visible",
-            input: "LOGIN \"a\" \"b\"",
-            expectedOutput: "",
-            continuationsNecessary: 0
-        ),
-        SingleStringFixture(
-            testDescription: "partial commands literals do make bytes visible 1",
-            input: "LOGIN \"a\" {2}\r\n1",
-            continuationsNecessary: 1
-        ),
-        SingleStringFixture(
-            testDescription: "partial commands literals do make bytes visible 2",
-            input: "LOGIN \"a\" {2}\r\n",
-            continuationsNecessary: 1
-        ),
-        SingleStringFixture(
-            testDescription: "literal data in normal literal",
-            input: "{5}\r\n{0}\r\n\r\n",
-            continuationsNecessary: 1
-        ),
-        SingleStringFixture(
-            testDescription: "literal data in plus literal",
-            input: "{5+}\r\n{0}\r\n\r\n",
-            continuationsNecessary: 0
-        ),
-    ])
+    @Test(
+        "single string parsing",
+        arguments: [
+            SingleStringFixture(
+                testDescription: "straight forward case",
+                input: "LOGIN \"a\" \"b\"\r\nFOO x y\r\n",
+                continuationsNecessary: 0
+            ),
+            SingleStringFixture(
+                testDescription: "single CR newline",
+                input: "LOGIN \"a\" \"b\"\r",
+                continuationsNecessary: 0
+            ),
+            SingleStringFixture(
+                testDescription: "empty literals work",
+                input: "LOGIN {0}\r\n {0+}\r\n {~0}\r\n {~0+}\r\n {0-}\r\n\r\nFOO x y\r\n",
+                continuationsNecessary: 2
+            ),
+            SingleStringFixture(
+                testDescription: "straight forward case with synchronising literals",
+                input: "LOGIN {1}\r\nA {1}\r\nB\r\nFOO x y\r\n",
+                continuationsNecessary: 2
+            ),
+            SingleStringFixture(
+                testDescription: "straight forward case with non-synchronising literals",
+                input: "LOGIN {1+}\r\nA {1+}\r\nB\r\nFOO x y\r\n",
+                continuationsNecessary: 0
+            ),
+            SingleStringFixture(
+                testDescription: "straight forward case with mixed literals",
+                input: "LOGIN {1+}\r\nA {1}\r\nB\r\nFOO x y\r\n",
+                continuationsNecessary: 1
+            ),
+            SingleStringFixture(
+                testDescription: "partial commands dont make bytes visible",
+                input: "LOGIN \"a\" \"b\"",
+                expectedOutput: "",
+                continuationsNecessary: 0
+            ),
+            SingleStringFixture(
+                testDescription: "partial commands literals do make bytes visible 1",
+                input: "LOGIN \"a\" {2}\r\n1",
+                continuationsNecessary: 1
+            ),
+            SingleStringFixture(
+                testDescription: "partial commands literals do make bytes visible 2",
+                input: "LOGIN \"a\" {2}\r\n",
+                continuationsNecessary: 1
+            ),
+            SingleStringFixture(
+                testDescription: "literal data in normal literal",
+                input: "{5}\r\n{0}\r\n\r\n",
+                continuationsNecessary: 1
+            ),
+            SingleStringFixture(
+                testDescription: "literal data in plus literal",
+                input: "{5+}\r\n{0}\r\n\r\n",
+                continuationsNecessary: 0
+            ),
+        ]
+    )
     fileprivate func singleStringParsing(fixture: SingleStringFixture) {
         var helper = Helper()
         helper.feed(fixture.input)

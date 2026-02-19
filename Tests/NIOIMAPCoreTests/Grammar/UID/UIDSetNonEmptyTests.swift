@@ -40,24 +40,27 @@ extension UIDSetNonEmptyTests {
         )
     }
 
-    @Test("custom debug string convertible", arguments: [
-        DebugStringFixture(
-            sut: MessageIdentifierSetNonEmpty<UID>(set: [1])!,
-            expected: "1"
-        ),
-        DebugStringFixture(
-            sut: MessageIdentifierSetNonEmpty<UID>(set: [1...3, 6, 88])!,
-            expected: "1:3,6,88"
-        ),
-        DebugStringFixture(
-            sut: MessageIdentifierSetNonEmpty<UID>(set: [10, 20, 30])!,
-            expected: "10,20,30"
-        ),
-        DebugStringFixture(
-            sut: MessageIdentifierSetNonEmpty<UID>(set: [42...])!,
-            expected: "42:*"
-        ),
-    ])
+    @Test(
+        "custom debug string convertible",
+        arguments: [
+            DebugStringFixture(
+                sut: MessageIdentifierSetNonEmpty<UID>(set: [1])!,
+                expected: "1"
+            ),
+            DebugStringFixture(
+                sut: MessageIdentifierSetNonEmpty<UID>(set: [1...3, 6, 88])!,
+                expected: "1:3,6,88"
+            ),
+            DebugStringFixture(
+                sut: MessageIdentifierSetNonEmpty<UID>(set: [10, 20, 30])!,
+                expected: "10,20,30"
+            ),
+            DebugStringFixture(
+                sut: MessageIdentifierSetNonEmpty<UID>(set: [42...])!,
+                expected: "42:*"
+            ),
+        ]
+    )
     func customDebugStringConvertible(_ fixture: DebugStringFixture<MessageIdentifierSetNonEmpty<UID>>) {
         fixture.check()
     }

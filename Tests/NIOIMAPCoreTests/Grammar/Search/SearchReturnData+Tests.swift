@@ -60,16 +60,19 @@ struct SearchReturnDataTests {
         fixture.checkParsing()
     }
 
-    @Test("parse partial", arguments: [
-        ParseFixture.searchReturnDataPartial(
-            "PARTIAL (23500:24000 67,100:102)",
-            expected: .success(.partial(.first(23_500...24_000), [67, 100...102]))
-        ),
-        ParseFixture.searchReturnDataPartial(
-            "PARTIAL (-55:-700 NIL)",
-            expected: .success(.partial(.last(55...700), []))
-        ),
-    ])
+    @Test(
+        "parse partial",
+        arguments: [
+            ParseFixture.searchReturnDataPartial(
+                "PARTIAL (23500:24000 67,100:102)",
+                expected: .success(.partial(.first(23_500...24_000), [67, 100...102]))
+            ),
+            ParseFixture.searchReturnDataPartial(
+                "PARTIAL (-55:-700 NIL)",
+                expected: .success(.partial(.last(55...700), []))
+            ),
+        ]
+    )
     func parsePartial(_ fixture: ParseFixture<SearchReturnData>) {
         fixture.checkParsing()
     }
