@@ -14,119 +14,120 @@
 
 import Foundation
 @testable import NIOIMAP
-import XCTest
+import Testing
 
-class AppendStateMachineTests: XCTestCase {
+@Suite struct AppendStateMachineTests {
     var stateMachine: ClientStateMachine.Append!
 
-    override func setUp() {
+    init() {
         self.stateMachine = .init(tag: "A1")
     }
 
-    func testNormalWorkflow() {
+    @Test("normal workflow")
+    mutating func normalWorkflow() {
         // append a message
         self.stateMachine.sendCommand(
             .append(.beginMessage(message: .init(options: .init(), data: .init(byteCount: 10))))
         )
-        XCTAssert(self.stateMachine.isWaitingForContinuationRequest)
+        #expect(self.stateMachine.isWaitingForContinuationRequest)
 
-        XCTAssertNoThrow(try self.stateMachine.receiveContinuationRequest(.data("req")))
-        XCTAssertFalse(self.stateMachine.isWaitingForContinuationRequest)
+        #expect(throws: Never.self) { try self.stateMachine.receiveContinuationRequest(.data("req")) }
+        #expect(!self.stateMachine.isWaitingForContinuationRequest)
 
         self.stateMachine.sendCommand(.append(.messageBytes("12345")))
-        XCTAssertFalse(self.stateMachine.isWaitingForContinuationRequest)
+        #expect(!self.stateMachine.isWaitingForContinuationRequest)
 
         self.stateMachine.sendCommand(.append(.messageBytes("67890")))
-        XCTAssertFalse(self.stateMachine.isWaitingForContinuationRequest)
+        #expect(!self.stateMachine.isWaitingForContinuationRequest)
 
         self.stateMachine.sendCommand(.append(.endMessage))
-        XCTAssertFalse(self.stateMachine.isWaitingForContinuationRequest)
+        #expect(!self.stateMachine.isWaitingForContinuationRequest)
 
         self.stateMachine.sendCommand(.append(.finish))
-        XCTAssertFalse(self.stateMachine.isWaitingForContinuationRequest)
+        #expect(!self.stateMachine.isWaitingForContinuationRequest)
 
-        XCTAssertNoThrow(
-            XCTAssertEqual(
-                try self.stateMachine.receiveResponse(
-                    .tagged(.init(tag: "A1", state: .ok(.init(code: nil, text: "OK"))))
-                ),
-                .doneAppending
+        var result: ClientStateMachine.Append.ReceiveResponseResult?
+        #expect(throws: Never.self) {
+            result = try self.stateMachine.receiveResponse(
+                .tagged(.init(tag: "A1", state: .ok(.init(code: nil, text: "OK"))))
             )
-        )
+        }
+        #expect(result == .doneAppending)
     }
 
-    func testNormalWorkflow_catenate() {
+    @Test("normal workflow catenate")
+    mutating func normalWorkflowCatenate() {
         // append a message
         self.stateMachine.sendCommand(
             .append(.beginMessage(message: .init(options: .init(), data: .init(byteCount: 10))))
         )
-        XCTAssert(self.stateMachine.isWaitingForContinuationRequest)
+        #expect(self.stateMachine.isWaitingForContinuationRequest)
 
-        XCTAssertNoThrow(try self.stateMachine.receiveContinuationRequest(.data("req")))
-        XCTAssertFalse(self.stateMachine.isWaitingForContinuationRequest)
+        #expect(throws: Never.self) { try self.stateMachine.receiveContinuationRequest(.data("req")) }
+        #expect(!self.stateMachine.isWaitingForContinuationRequest)
 
-        // “Normal”
+        // "Normal"
         self.stateMachine.sendCommand(.append(.messageBytes("12345")))
-        XCTAssertFalse(self.stateMachine.isWaitingForContinuationRequest)
+        #expect(!self.stateMachine.isWaitingForContinuationRequest)
 
         self.stateMachine.sendCommand(.append(.messageBytes("67890")))
-        XCTAssertFalse(self.stateMachine.isWaitingForContinuationRequest)
+        #expect(!self.stateMachine.isWaitingForContinuationRequest)
 
         self.stateMachine.sendCommand(.append(.endMessage))
-        XCTAssertFalse(self.stateMachine.isWaitingForContinuationRequest)
+        #expect(!self.stateMachine.isWaitingForContinuationRequest)
 
         // Catenate
         self.stateMachine.sendCommand(.append(.beginCatenate(options: .init())))
-        XCTAssertFalse(self.stateMachine.isWaitingForContinuationRequest)
+        #expect(!self.stateMachine.isWaitingForContinuationRequest)
 
         self.stateMachine.sendCommand(.append(.catenateURL("url1")))
-        XCTAssertFalse(self.stateMachine.isWaitingForContinuationRequest)
+        #expect(!self.stateMachine.isWaitingForContinuationRequest)
 
         self.stateMachine.sendCommand(.append(.catenateURL("url2")))
-        XCTAssertFalse(self.stateMachine.isWaitingForContinuationRequest)
+        #expect(!self.stateMachine.isWaitingForContinuationRequest)
 
         self.stateMachine.sendCommand(.append(.catenateURL("url3")))
-        XCTAssertFalse(self.stateMachine.isWaitingForContinuationRequest)
+        #expect(!self.stateMachine.isWaitingForContinuationRequest)
 
         self.stateMachine.sendCommand(.append(.catenateData(.begin(size: 10))))
-        XCTAssert(self.stateMachine.isWaitingForContinuationRequest)
+        #expect(self.stateMachine.isWaitingForContinuationRequest)
 
-        XCTAssertNoThrow(try self.stateMachine.receiveContinuationRequest(.data("req")))
-        XCTAssertFalse(self.stateMachine.isWaitingForContinuationRequest)
+        #expect(throws: Never.self) { try self.stateMachine.receiveContinuationRequest(.data("req")) }
+        #expect(!self.stateMachine.isWaitingForContinuationRequest)
 
         self.stateMachine.sendCommand(.append(.catenateData(.bytes("12345"))))
-        XCTAssertFalse(self.stateMachine.isWaitingForContinuationRequest)
+        #expect(!self.stateMachine.isWaitingForContinuationRequest)
 
         self.stateMachine.sendCommand(.append(.catenateData(.bytes("67890"))))
-        XCTAssertFalse(self.stateMachine.isWaitingForContinuationRequest)
+        #expect(!self.stateMachine.isWaitingForContinuationRequest)
 
         self.stateMachine.sendCommand(.append(.catenateData(.end)))
-        XCTAssertFalse(self.stateMachine.isWaitingForContinuationRequest)
+        #expect(!self.stateMachine.isWaitingForContinuationRequest)
 
         self.stateMachine.sendCommand(.append(.endCatenate))
-        XCTAssertFalse(self.stateMachine.isWaitingForContinuationRequest)
+        #expect(!self.stateMachine.isWaitingForContinuationRequest)
 
         self.stateMachine.sendCommand(.append(.finish))
-        XCTAssertFalse(self.stateMachine.isWaitingForContinuationRequest)
+        #expect(!self.stateMachine.isWaitingForContinuationRequest)
 
-        XCTAssertNoThrow(
-            XCTAssertEqual(
-                try self.stateMachine.receiveResponse(
-                    .tagged(.init(tag: "A1", state: .ok(.init(code: nil, text: "OK"))))
-                ),
-                .doneAppending
+        var result: ClientStateMachine.Append.ReceiveResponseResult?
+        #expect(throws: Never.self) {
+            result = try self.stateMachine.receiveResponse(
+                .tagged(.init(tag: "A1", state: .ok(.init(code: nil, text: "OK"))))
             )
-        )
+        }
+        #expect(result == .doneAppending)
     }
 
-    func testReceivingUntaggedWhileWaitingForContinuationRequest() throws {
+    @Test("receiving untagged while waiting for continuation request")
+    mutating func receivingUntaggedWhileWaitingForContinuationRequest() throws {
         // append a message
         self.stateMachine.sendCommand(
             .append(.beginMessage(message: .init(options: .init(), data: .init(byteCount: 10))))
         )
-        XCTAssert(self.stateMachine.isWaitingForContinuationRequest)
+        #expect(self.stateMachine.isWaitingForContinuationRequest)
 
-        // At this point, we’re waiting for a Continuation Request from the server.
+        // At this point, we're waiting for a Continuation Request from the server.
         // But we may end up getting an untagged response first.
         // ```
         // C: A003 APPEND saved-messages (\Seen) {310}
@@ -136,11 +137,10 @@ class AppendStateMachineTests: XCTestCase {
         // C: From: Fred Foobar <foobar@Blurdybloop.COM>
         // ``
 
-        XCTAssertNoThrow(
-            try self.stateMachine.receiveResponse(.untagged(.messageData(.expunge(3)))),
-            "Should be ignored."
-        )
-        XCTAssertNoThrow(try self.stateMachine.receiveContinuationRequest(.data("req")))
-        XCTAssertFalse(self.stateMachine.isWaitingForContinuationRequest)
+        #expect(throws: Never.self, "Should be ignored.") {
+            try self.stateMachine.receiveResponse(.untagged(.messageData(.expunge(3))))
+        }
+        #expect(throws: Never.self) { try self.stateMachine.receiveContinuationRequest(.data("req")) }
+        #expect(!self.stateMachine.isWaitingForContinuationRequest)
     }
 }

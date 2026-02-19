@@ -17,14 +17,15 @@ import NIO
 @testable import NIOIMAPCore
 import NIOTestUtils
 
-import XCTest
+import Testing
 
-final class RealWorldTests: XCTestCase {}
+@Suite struct RealWorldTests {}
 
 // MARK: Test stream simple fetch responses
 
 extension RealWorldTests {
-    func test_realWorldTest() {
+    @Test("real world test")
+    func realWorldTest() {
         let input = """
             * 1 FETCH (UID 54 RFC822.SIZE 40639)
             * 2 FETCH (UID 55 RFC822.SIZE 27984)
@@ -123,7 +124,7 @@ extension RealWorldTests {
             case .none:
                 ()
             }
-            XCTFail("unhandled error: \(error)")
+            Issue.record("unhandled error: \(error)")
         }
     }
 }
