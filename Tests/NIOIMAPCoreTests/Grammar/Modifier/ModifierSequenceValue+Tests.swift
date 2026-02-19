@@ -18,7 +18,8 @@ import Testing
 
 @Suite("ModificationSequenceValue")
 struct ModificationSequenceValueTests {
-    @Test func `lossy conversion from integer`() {
+    @Test("lossy conversion from integer")
+    func lossyConversionFromInteger() {
         #expect(ModificationSequenceValue(exactly: 0)?.value == 0)
         #expect(ModificationSequenceValue(exactly: 100 as Int64)?.value == 100)
         #expect(ModificationSequenceValue(exactly: 100 as UInt64)?.value == 100)

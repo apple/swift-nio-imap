@@ -18,7 +18,7 @@ import Testing
 
 @Suite("MailboxData")
 struct MailboxDataTests {
-    @Test("encode", arguments: [
+    @Test(arguments: [
         EncodeFixture.mailboxData(.exists(1), "1 EXISTS"),
         EncodeFixture.mailboxData(.flags([.answered, .deleted]), "FLAGS (\\Answered \\Deleted)"),
         EncodeFixture.mailboxData(

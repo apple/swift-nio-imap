@@ -105,7 +105,7 @@ struct ResponseTextCodeTests {
         EncodeFixture.responseTextCode(.urlMechanisms([]), "URLMECH INTERNAL"),
         EncodeFixture.responseTextCode(.useAttribute, "USEATTR"),
     ])
-    func `encode`(_ fixture: EncodeFixture<ResponseTextCode>) {
+    func encode(_ fixture: EncodeFixture<ResponseTextCode>) {
         fixture.checkEncoding()
     }
 
@@ -221,7 +221,7 @@ struct ResponseTextCodeTests {
         fixture.checkParsing()
     }
 
-    @Test(arguments: [
+    @Test("debug string description", arguments: [
         DebugStringFixture<ResponseTextCode>(sut: .noPermission, expected: "NOPERM"),
         DebugStringFixture<ResponseTextCode>(
             sut: .badCharset(["some", "string"]),
@@ -233,7 +233,7 @@ struct ResponseTextCodeTests {
             expected: #"PERMANENTFLAGS (\* \*)"#
         ),
     ])
-    func `debug string description`(_ fixture: DebugStringFixture<ResponseTextCode>) {
+    func debugStringDescription(_ fixture: DebugStringFixture<ResponseTextCode>) {
         fixture.check()
     }
 }

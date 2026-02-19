@@ -20,12 +20,14 @@ import Testing
 struct SequenceNumberTests {}
 
 extension SequenceNumberTests {
-    @Test func `integer literal`() {
+    @Test("integer literal")
+    func integerLiteral() {
         let num: SequenceNumber = 5
         #expect(num == 5)
     }
 
-    @Test func `valid range`() {
+    @Test("valid range")
+    func validRange() {
         #expect(SequenceNumber(exactly: 0) == nil)
         #expect(SequenceNumber(exactly: 1)?.rawValue == 1)
         #expect(SequenceNumber(exactly: 4_294_967_295)?.rawValue == 4_294_967_295)
@@ -52,7 +54,8 @@ extension SequenceNumberTests {
         fixture.checkEncoding()
     }
 
-    @Test func `advanced by`() {
+    @Test("advanced by")
+    func advancedBy() {
         let min = SequenceNumber(1)
         let max = SequenceNumber.max
         #expect(max.advanced(by: 0) == max)

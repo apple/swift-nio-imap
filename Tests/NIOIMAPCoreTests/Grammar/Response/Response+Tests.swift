@@ -18,7 +18,7 @@ import Testing
 
 @Suite("Response")
 private struct ResponseTests {
-    @Test(arguments: [
+    @Test("encode single response", arguments: [
         EncodeFixture.response(
             .idleStarted,
             expectedString: "+ idling\r\n"
@@ -44,11 +44,11 @@ private struct ResponseTests {
             expectedString: "* 1 FETCH ("
         ),
     ])
-    func `encode single response`(_ fixture: EncodeFixture<Response>) {
+    func encodeSingleResponse(_ fixture: EncodeFixture<Response>) {
         fixture.checkEncoding()
     }
 
-    @Test(arguments: [
+    @Test("encode multiple fetch responses", arguments: [
         EncodeFixture.fetchResponses(
             [.start(1), .simpleAttribute(.rfc822Size(123)), .finish],
             expectedString: "* 1 FETCH (RFC822.SIZE 123)\r\n"
@@ -91,11 +91,11 @@ private struct ResponseTests {
             expectedString: "* 87 UIDFETCH (BODY[4.TEXT] NIL UID 123)\r\n"
         ),
     ])
-    func `encode multiple fetch responses`(_ fixture: EncodeFixture<[FetchResponse]>) {
+    func encodeMultipleFetchResponses(_ fixture: EncodeFixture<[FetchResponse]>) {
         fixture.checkEncoding()
     }
 
-    @Test(arguments: [
+    @Test("StreamingKind custom debug string", arguments: [
         DebugStringFixture(sut: StreamingKind.body(section: .init(), offset: nil), expected: "BODY[]"),
         DebugStringFixture(sut: StreamingKind.body(section: .init(), offset: 1234), expected: "BODY[]<1234>"),
         DebugStringFixture(
@@ -106,11 +106,11 @@ private struct ResponseTests {
         DebugStringFixture(sut: StreamingKind.rfc822Text, expected: "RFC822.TEXT"),
         DebugStringFixture(sut: StreamingKind.rfc822Header, expected: "RFC822.HEADER"),
     ])
-    func `StreamingKind custom debug string`(_ fixture: DebugStringFixture<StreamingKind>) {
+    func streamingKindCustomDebugString(_ fixture: DebugStringFixture<StreamingKind>) {
         fixture.check()
     }
 
-    @Test(arguments: [
+    @Test("Response reflection string", arguments: [
         ReflectionFixture(sut: Response.idleStarted, expected: "+ idling\r\n"),
         ReflectionFixture(sut: Response.authenticationChallenge("hello"), expected: "+ aGVsbG8=\r\n"),
         ReflectionFixture(
@@ -131,11 +131,11 @@ private struct ResponseTests {
         ReflectionFixture(sut: Response.fetch(.streamingBytes(ByteBuffer(string: "hello"))), expected: "hello"),
         ReflectionFixture(sut: Response.fetch(.finish), expected: ")\r\n"),
     ])
-    func `Response reflection string`(_ fixture: ReflectionFixture<Response>) {
+    func responseReflectionString(_ fixture: ReflectionFixture<Response>) {
         fixture.check()
     }
 
-    @Test(arguments: [
+    @Test("Response PII filtering", arguments: [
         PIIFixture(input: .idleStarted, expected: "+ idling\r\n"),
         PIIFixture(input: .authenticationChallenge("hello"), expected: "+ [8 bytes]\r\n"),
         PIIFixture(input: .fatal(.init(text: "Oh no you're dead")), expected: "* BYE Oh no you're dead\r\n"),
@@ -150,7 +150,7 @@ private struct ResponseTests {
         PIIFixture(input: .fetch(.streamingBytes(ByteBuffer(string: "hello"))), expected: "[5 bytes]"),
         PIIFixture(input: .fetch(.finish), expected: ")\r\n"),
     ])
-    func `Response PII filtering`(_ fixture: PIIFixture) {
+    func responsePIIFiltering(_ fixture: PIIFixture) {
         #expect(
             Response.descriptionWithoutPII([fixture.input]).mappingControlPictures()
                 == fixture.expected.mappingControlPictures()

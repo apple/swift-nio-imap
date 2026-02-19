@@ -18,7 +18,8 @@ import Testing
 
 @Suite("ExtendedSearchResponse")
 struct ExtendedSearchResponseTests {
-    @Test func `matched UIDs`() {
+    @Test("matched UIDs")
+    func matchedUIDs() {
         #expect(
             ExtendedSearchResponse(kind: .uid, returnData: [.all(.set([44, 70...120]))]).matchedUIDs
                 == [44, 70...120]
@@ -62,7 +63,8 @@ struct ExtendedSearchResponseTests {
         )
     }
 
-    @Test func `matched sequence numbers`() {
+    @Test("matched sequence numbers")
+    func matchedSequenceNumbers() {
         #expect(
             ExtendedSearchResponse(kind: .sequenceNumber, returnData: [.all(.set([44, 70...120]))])
                 .matchedSequenceNumbers
@@ -133,7 +135,8 @@ struct ExtendedSearchResponseTests {
         )
     }
 
-    @Test func `min UID`() {
+    @Test("min UID")
+    func minUID() {
         #expect(
             ExtendedSearchResponse(kind: .uid, returnData: [.min(73)]).minUID
                 == 73
@@ -156,7 +159,8 @@ struct ExtendedSearchResponseTests {
         )
     }
 
-    @Test func `min sequence number`() {
+    @Test("min sequence number")
+    func minSequenceNumber() {
         #expect(
             ExtendedSearchResponse(kind: .sequenceNumber, returnData: [.min(73)]).minSequenceNumber
                 == 73
@@ -180,7 +184,8 @@ struct ExtendedSearchResponseTests {
         )
     }
 
-    @Test func `max UID`() {
+    @Test("max UID")
+    func maxUID() {
         #expect(
             ExtendedSearchResponse(kind: .uid, returnData: [.max(103)]).maxUID
                 == 103
@@ -203,7 +208,8 @@ struct ExtendedSearchResponseTests {
         )
     }
 
-    @Test func `max sequence number`() {
+    @Test("max sequence number")
+    func maxSequenceNumber() {
         #expect(
             ExtendedSearchResponse(kind: .sequenceNumber, returnData: [.max(103)]).maxSequenceNumber
                 == 103
