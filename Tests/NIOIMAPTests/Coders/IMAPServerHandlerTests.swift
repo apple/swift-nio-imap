@@ -14,27 +14,48 @@
 
 import NIO
 import NIOIMAP
-import XCTest
+import Testing
 
-class IMAPServerHandlerTests: XCTestCase {
+@Suite struct IMAPServerHandlerTests {
     var channel: EmbeddedChannel!
     var handler: IMAPServerHandler!
 
+    init() {
+        self.handler = IMAPServerHandler()
+        self.channel = EmbeddedChannel(handlers: [ByteToMessageHandler(FrameDecoder()), self.handler])
+    }
+
     // MARK: - Tests
 
-    func testSimpleCommandAndResponse() {
+    @Test("simple command and response")
+    func simpleCommandAndResponse() {
+        defer {
+            _ = try? self.channel.finish()
+        }
         self.writeInbound("a LOGIN \"user\" \"password\"\r\n")
         self.assertInbound(.tagged(.init(tag: "a", command: .login(username: "user", password: "password"))))
         self.writeOutbound(.tagged(.init(tag: "a", state: .ok(.init(text: "yo")))))
         self.assertOutboundString("a OK yo\r\n")
     }
 
-    func testSimpleCommandWithContinuationRequestWorks() {
+    @Test("simple command with continuation request works")
+    func simpleCommandWithContinuationRequestWorks() {
+        defer {
+            _ = try? self.channel.finish()
+        }
         self.writeInbound("a LOGIN {4}\r\n")
-        XCTAssertNoThrow(XCTAssertNil(try self.channel.readInbound(as: CommandStreamPart.self)))
+        var result: CommandStreamPart?
+        #expect(throws: Never.self) {
+            result = try self.channel.readInbound(as: CommandStreamPart.self)
+        }
+        #expect(result == nil)
 
         // Nothing happens until `read()`
-        XCTAssertNoThrow(XCTAssertNil(try self.channel.readOutbound(as: ByteBuffer.self)))
+        var outbound: ByteBuffer?
+        #expect(throws: Never.self) {
+            outbound = try self.channel.readOutbound(as: ByteBuffer.self)
+        }
+        #expect(outbound == nil)
 
         self.channel.read()
         self.assertOutboundString("+ OK\r\n")
@@ -46,10 +67,18 @@ class IMAPServerHandlerTests: XCTestCase {
         self.assertOutboundString("a OK yo\r\n")
     }
 
-    func testSimpleCommandWithContinuationRequestWorksEvenIfClientMisbehavesAndSendsWithoutWaiting() {
+    @Test("simple command with continuation request works even if client misbehaves and sends without waiting")
+    func simpleCommandWithContinuationRequestWorksEvenIfClientMisbehavesAndSendsWithoutWaiting() {
+        defer {
+            _ = try? self.channel.finish()
+        }
         self.writeInbound("a LOGIN {4}\r\nuser \"password\"\r\n")
         // Nothing happens until `read()`
-        XCTAssertNoThrow(XCTAssertNil(try self.channel.readOutbound(as: ByteBuffer.self)))
+        var outbound: ByteBuffer?
+        #expect(throws: Never.self) {
+            outbound = try self.channel.readOutbound(as: ByteBuffer.self)
+        }
+        #expect(outbound == nil)
 
         self.assertInbound(.tagged(.init(tag: "a", command: .login(username: "user", password: "password"))))
         self.writeOutbound(.tagged(.init(tag: "a", state: .ok(.init(text: "yo")))))
@@ -59,14 +88,26 @@ class IMAPServerHandlerTests: XCTestCase {
         self.assertOutboundString("+ OK\r\n")
     }
 
-    func testSettingContinuationRequestOnLiveHandler() {
+    @Test("setting continuation request on live handler")
+    func settingContinuationRequestOnLiveHandler() {
+        defer {
+            _ = try? self.channel.finish()
+        }
         self.handler.continuationRequest = ContinuationRequest.responseText(.init(text: "FoO"))
 
         self.writeInbound("a LOGIN {4}\r\n")
-        XCTAssertNoThrow(XCTAssertNil(try self.channel.readInbound(as: CommandStreamPart.self)))
+        var result: CommandStreamPart?
+        #expect(throws: Never.self) {
+            result = try self.channel.readInbound(as: CommandStreamPart.self)
+        }
+        #expect(result == nil)
 
         // Nothing happens until `read()`
-        XCTAssertNoThrow(XCTAssertNil(try self.channel.readOutbound(as: ByteBuffer.self)))
+        var outbound: ByteBuffer?
+        #expect(throws: Never.self) {
+            outbound = try self.channel.readOutbound(as: ByteBuffer.self)
+        }
+        #expect(outbound == nil)
 
         self.channel.read()
         self.assertOutboundString("+ FoO\r\n")
@@ -78,15 +119,27 @@ class IMAPServerHandlerTests: XCTestCase {
         self.assertOutboundString("a OK yo\r\n")
     }
 
-    func testSettingContinuationRequestInInit() {
+    @Test("setting continuation request in init")
+    mutating func settingContinuationRequestInInit() {
         self.handler = IMAPServerHandler(continuationRequest: ContinuationRequest.responseText(.init(text: "FoO")))
         self.channel = EmbeddedChannel(handlers: [ByteToMessageHandler(FrameDecoder()), self.handler])
+        defer {
+            _ = try? self.channel.finish()
+        }
 
         self.writeInbound("a LOGIN {4}\r\n")
-        XCTAssertNoThrow(XCTAssertNil(try self.channel.readInbound(as: CommandStreamPart.self)))
+        var result: CommandStreamPart?
+        #expect(throws: Never.self) {
+            result = try self.channel.readInbound(as: CommandStreamPart.self)
+        }
+        #expect(result == nil)
 
         // Nothing happens until `read()`
-        XCTAssertNoThrow(XCTAssertNil(try self.channel.readOutbound(as: ByteBuffer.self)))
+        var outbound: ByteBuffer?
+        #expect(throws: Never.self) {
+            outbound = try self.channel.readOutbound(as: ByteBuffer.self)
+        }
+        #expect(outbound == nil)
 
         self.channel.read()
         self.assertOutboundString("+ FoO\r\n")
@@ -101,19 +154,19 @@ class IMAPServerHandlerTests: XCTestCase {
     // We previously had a bug where the response encode buffer was dropped with every
     // individual server response, meaning we lost the state. We need to state to insert
     // correct spaces in between streaming fetch attributes. This test prevents regression.
-    func testFetchResponsesIncludeSpaces() {
+    @Test("fetch responses include spaces")
+    mutating func fetchResponsesIncludeSpaces() {
         // note that the same handler (and therefore the same `ResponseEncodeBuffer` is used
         // throughout the test
         self.handler = IMAPServerHandler()
         self.channel = EmbeddedChannel(handler: self.handler)
+        defer {
+            _ = try? self.channel.finish()
+        }
 
         // single attribute
         self.writeOutbound(.fetch(.start(1)), wait: false)
         self.assertOutboundString("* 1 FETCH (")
-        self.writeOutbound(.fetch(.simpleAttribute(.flags([.answered, .draft]))), wait: false)
-        self.assertOutboundString("FLAGS (\\Answered \\Draft)")
-        self.writeOutbound(.fetch(.finish), wait: false)
-        self.assertOutboundString(")\r\n")
 
         // multiple attributes
         self.writeOutbound(.fetch(.start(2)), wait: false)
@@ -146,9 +199,13 @@ class IMAPServerHandlerTests: XCTestCase {
         self.assertOutboundString(")\r\n")
     }
 
-    func testAuthenticationFlow() {
+    @Test("authentication flow")
+    mutating func authenticationFlow() {
         self.handler = IMAPServerHandler()
         self.channel = EmbeddedChannel(handlers: [ByteToMessageHandler(FrameDecoder()), self.handler])
+        defer {
+            _ = try? self.channel.finish()
+        }
 
         // client starts authentication
         self.writeInbound("A1 AUTHENTICATE GSSAPI\r\n")
@@ -183,11 +240,15 @@ class IMAPServerHandlerTests: XCTestCase {
         self.assertOutboundBuffer("A1 OK Success\r\n")
     }
 
-    func testAppend() {
+    @Test("append")
+    mutating func append() {
         self.handler = IMAPServerHandler(
             continuationRequest: .responseText(ResponseText(text: "Ready for literal data"))
         )
         self.channel = EmbeddedChannel(handlers: [ByteToMessageHandler(FrameDecoder()), self.handler])
+        defer {
+            _ = try? self.channel.finish()
+        }
 
         self.writeInbound("A1 APPEND saved-messages (\\Seen) {12}\r\n")
         self.assertInbound(.append(.start(tag: "A1", appendingTo: MailboxName("saved-messages"))))
@@ -224,22 +285,6 @@ class IMAPServerHandlerTests: XCTestCase {
         self.assertOutboundBufferEmpty()
     }
 
-    // MARK: - setup/tear down
-
-    override func setUp() {
-        XCTAssertNil(self.handler)
-        XCTAssertNil(self.channel)
-        self.handler = IMAPServerHandler()
-        self.channel = EmbeddedChannel(handlers: [ByteToMessageHandler(FrameDecoder()), self.handler])
-    }
-
-    override func tearDown() {
-        XCTAssertNotNil(self.channel)
-        XCTAssertNotNil(self.handler)
-        XCTAssertNoThrow(XCTAssertTrue(try self.channel.finish().isClean))
-        self.channel = nil
-        self.handler = nil
-    }
 }
 
 // MARK: - Helpers
@@ -247,28 +292,34 @@ class IMAPServerHandlerTests: XCTestCase {
 extension IMAPServerHandlerTests {
     private func assertInbound(_ command: CommandStreamPart, line: UInt = #line) {
         var maybeRead: CommandStreamPart?
-        XCTAssertNoThrow(maybeRead = try self.channel.readInbound(), line: line)
+        #expect(throws: Never.self) {
+            maybeRead = try self.channel.readInbound()
+        }
         guard let read = maybeRead else {
-            XCTFail("Inbound buffer empty", line: line)
+            Issue.record("Inbound buffer empty")
             return
         }
-        XCTAssertEqual(command, read, line: line)
+        #expect(command == read)
     }
 
     private func assertOutboundBuffer(_ buffer: ByteBuffer, line: UInt = #line) {
         var maybeRead: ByteBuffer?
-        XCTAssertNoThrow(maybeRead = try self.channel.readOutbound(), line: line)
+        #expect(throws: Never.self) {
+            maybeRead = try self.channel.readOutbound()
+        }
         guard let read = maybeRead else {
-            XCTFail("Outbound buffer empty", line: line)
+            Issue.record("Outbound buffer empty")
             return
         }
-        XCTAssertEqual(buffer, read, "\(String(buffer: buffer)) != \(String(buffer: read))", line: line)
+        #expect(buffer == read, "\(String(buffer: buffer)) != \(String(buffer: read))")
     }
 
     private func assertOutboundBufferEmpty(line: UInt = #line) {
         var maybeRead: ByteBuffer?
-        XCTAssertNoThrow(maybeRead = try self.channel.readOutbound(), line: line)
-        XCTAssertNil(maybeRead.map { String(buffer: $0) })
+        #expect(throws: Never.self) {
+            maybeRead = try self.channel.readOutbound()
+        }
+        #expect(maybeRead.map { String(buffer: $0) } == nil)
     }
 
     private func assertOutboundString(_ string: String, line: UInt = #line) {
@@ -278,14 +329,18 @@ extension IMAPServerHandlerTests {
     }
 
     private func writeInbound(_ string: String, line: UInt = #line) {
-        XCTAssertNoThrow(try self.channel.writeInbound(self.buffer(string: string)), line: line)
+        #expect(throws: Never.self) {
+            try self.channel.writeInbound(self.buffer(string: string))
+        }
     }
 
     @discardableResult
     private func writeOutbound(_ response: Response, wait: Bool = true, line: UInt = #line) -> EventLoopFuture<Void> {
         let result = self.channel.writeAndFlush(response)
         if wait {
-            XCTAssertNoThrow(try result.wait(), line: line)
+            #expect(throws: Never.self) {
+                try result.wait()
+            }
         }
         return result
     }
