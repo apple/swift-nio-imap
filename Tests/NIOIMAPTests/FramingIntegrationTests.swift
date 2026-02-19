@@ -17,44 +17,44 @@ import NIO
 @testable import NIOIMAPCore
 import NIOTestUtils
 
-import XCTest
+import Testing
 
-final class FramingIntegrationTests: XCTestCase {
+@Suite struct FramingIntegrationTests {
     var channel: EmbeddedChannel!
 
-    override func setUp() {
+    init() {
         self.channel = EmbeddedChannel(handlers: [ByteToMessageHandler(FrameDecoder()), IMAPServerHandler()])
     }
 
     func writeInbound(_ buffer: ByteBuffer, line: UInt = #line) {
-        XCTAssertNoThrow(try self.channel.writeInbound(buffer), line: line)
+        #expect(throws: Never.self) { try self.channel.writeInbound(buffer) }
     }
 
     func assertInbound(_ command: CommandStreamPart, line: UInt = #line) {
         var _inbound: CommandStreamPart?
-        XCTAssertNoThrow(_inbound = try self.channel.readInbound(as: CommandStreamPart.self), line: line)
+        #expect(throws: Never.self) { _inbound = try self.channel.readInbound(as: CommandStreamPart.self) }
 
         guard let inbound = _inbound else {
-            XCTAssertNotNil(nil, line: line)
+            #expect(Bool(false), "Expected non-nil inbound value")
             return
         }
 
-        XCTAssertEqual(command, inbound, line: line)
+        #expect(command == inbound)
     }
 }
 
 extension FramingIntegrationTests {
-    func testSimpleCommands() {
+    @Test func `simple commands`() {
         self.writeInbound("A1 NOOP\r\n")
         self.assertInbound(.tagged(.init(tag: "A1", command: .noop)))
     }
 
-    func testLiteralDump() {
+    @Test func `literal dump`() {
         self.writeInbound("A1 LOGIN {3}\r\n123 {3}\r\n456\r\n")
         self.assertInbound(.tagged(.init(tag: "A1", command: .login(username: "123", password: "456"))))
     }
 
-    func testLiteralstreaming() {
+    @Test func `literal streaming`() {
         self.writeInbound("A1 LOGIN {3}\r\n123 ")
         self.writeInbound("{3}\r\n456\r\n")
         self.assertInbound(.tagged(.init(tag: "A1", command: .login(username: "123", password: "456"))))
