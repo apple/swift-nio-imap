@@ -92,7 +92,7 @@ extension ParseFixture<SearchCorrelator> {
     fileprivate static func searchCorrelator(
         _ input: String,
         _ terminator: String = "\r",
-        expected: Expected,
+        expected: Expected
     ) -> Self {
         ParseFixture(
             input: input,
