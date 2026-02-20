@@ -65,7 +65,9 @@ struct ClientStateMachineTests {
         }
 
         // SELECT
-        #expect(throws: Never.self) { try stateMachine.sendCommand(.tagged(.init(tag: "A5", command: .select(.inbox, [])))) }
+        #expect(throws: Never.self) {
+            try stateMachine.sendCommand(.tagged(.init(tag: "A5", command: .select(.inbox, []))))
+        }
         #expect(throws: Never.self) {
             try stateMachine.receiveResponse(.tagged(.init(tag: "A5", state: .ok(.init(text: "OK")))))
         }
@@ -123,18 +125,20 @@ struct ClientStateMachineTests {
         // We haven't yet continued the first command
         // so we shouldn't get anything back here.
         var result2: OutgoingChunk?
-        #expect(throws: Never.self) { result2 = try stateMachine.sendCommand(.tagged(.init(tag: "A2", command: .noop))) }
+        #expect(throws: Never.self) {
+            result2 = try stateMachine.sendCommand(.tagged(.init(tag: "A2", command: .noop)))
+        }
         #expect(result2 == nil)
         stateMachine.flush()
 
         var result3: ClientStateMachine.ContinuationRequestAction!
         #expect(throws: Never.self) { result3 = try stateMachine.receiveContinuationRequest(.data("OK")) }
         #expect(
-            result3 ==
-            .sendChunks([
-                .init(bytes: "å \"pass\"\r\n", promise: nil, shouldSucceedPromise: true),
-                .init(bytes: "A2 NOOP\r\n", promise: nil, shouldSucceedPromise: true),
-            ])
+            result3
+                == .sendChunks([
+                    .init(bytes: "å \"pass\"\r\n", promise: nil, shouldSucceedPromise: true),
+                    .init(bytes: "A2 NOOP\r\n", promise: nil, shouldSucceedPromise: true),
+                ])
         )
     }
 
@@ -194,10 +198,10 @@ struct ClientStateMachineTests {
             resultAction = try stateMachine.receiveContinuationRequest(.data("Ready for literal data"))
         }
         #expect(
-            resultAction ==
-            .sendChunks([
-                .init(bytes: "äÿ\r\n", promise: nil, shouldSucceedPromise: true)
-            ])
+            resultAction
+                == .sendChunks([
+                    .init(bytes: "äÿ\r\n", promise: nil, shouldSucceedPromise: true)
+                ])
         )
     }
 
@@ -236,10 +240,10 @@ struct ClientStateMachineTests {
             resultAction = try stateMachine.receiveContinuationRequest(.data("Ready for literal data"))
         }
         #expect(
-            resultAction ==
-            .sendChunks([
-                .init(bytes: "äÿ\r\n", promise: nil, shouldSucceedPromise: true)
-            ])
+            resultAction
+                == .sendChunks([
+                    .init(bytes: "äÿ\r\n", promise: nil, shouldSucceedPromise: true)
+                ])
         )
     }
 
@@ -281,7 +285,9 @@ extension ClientStateMachineTests {
         // 2. server confirms idle
         // 3. end idle
         #expect(throws: Never.self) { try stateMachine.sendCommand(.tagged(.init(tag: "A2", command: .idleStart))) }
-        #expect(throws: Never.self) { try stateMachine.receiveContinuationRequest(.responseText(.init(text: "IDLE started"))) }
+        #expect(throws: Never.self) {
+            try stateMachine.receiveContinuationRequest(.responseText(.init(text: "IDLE started")))
+        }
         #expect(throws: Never.self) { try stateMachine.sendCommand(.idleDone) }
 
         // state machine should have reset, so we can send a normal command again
@@ -293,7 +299,9 @@ extension ClientStateMachineTests {
         var stateMachine = makeStateMachine()
         // set up the state machine to idle
         #expect(throws: Never.self) { try stateMachine.sendCommand(.tagged(.init(tag: "A1", command: .idleStart))) }
-        #expect(throws: Never.self) { try stateMachine.receiveContinuationRequest(.responseText(.init(text: "IDLE started"))) }
+        #expect(throws: Never.self) {
+            try stateMachine.receiveContinuationRequest(.responseText(.init(text: "IDLE started")))
+        }
 
         // machine is idle, so sending a different command should throw
         #expect(throws: UnexpectedContinuationRequest.self) {
@@ -544,7 +552,9 @@ extension ClientStateMachineTests {
     func appendPreloading() {
         var stateMachine = makeStateMachine()
         var result: OutgoingChunk?
-        #expect(throws: Never.self) { result = try stateMachine.sendCommand(.append(.start(tag: "A1", appendingTo: .inbox))) }
+        #expect(throws: Never.self) {
+            result = try stateMachine.sendCommand(.append(.start(tag: "A1", appendingTo: .inbox)))
+        }
         #expect(result == .init(bytes: "A1 APPEND \"INBOX\"", promise: nil, shouldSucceedPromise: true))
 
         #expect(throws: Never.self) {
@@ -578,20 +588,22 @@ extension ClientStateMachineTests {
 
         // We should send the pending chunks at this point:
         #expect(
-            resultAction ==
-            .sendChunks([
-                .init(bytes: "0", promise: nil, shouldSucceedPromise: true),
-                .init(bytes: "1", promise: nil, shouldSucceedPromise: true),
-                .init(bytes: "2", promise: nil, shouldSucceedPromise: true),
-                .init(bytes: "3", promise: nil, shouldSucceedPromise: true),
-                .init(bytes: "4", promise: nil, shouldSucceedPromise: true),
-                .init(bytes: "", promise: nil, shouldSucceedPromise: true),
-                .init(bytes: "\r\n", promise: nil, shouldSucceedPromise: true),
-            ])
+            resultAction
+                == .sendChunks([
+                    .init(bytes: "0", promise: nil, shouldSucceedPromise: true),
+                    .init(bytes: "1", promise: nil, shouldSucceedPromise: true),
+                    .init(bytes: "2", promise: nil, shouldSucceedPromise: true),
+                    .init(bytes: "3", promise: nil, shouldSucceedPromise: true),
+                    .init(bytes: "4", promise: nil, shouldSucceedPromise: true),
+                    .init(bytes: "", promise: nil, shouldSucceedPromise: true),
+                    .init(bytes: "\r\n", promise: nil, shouldSucceedPromise: true),
+                ])
         )
 
         // Complete the APPEND command:
-        #expect(throws: Never.self) { try stateMachine.receiveResponse(.tagged(.init(tag: "A1", state: .ok(.init(text: ""))))) }
+        #expect(throws: Never.self) {
+            try stateMachine.receiveResponse(.tagged(.init(tag: "A1", state: .ok(.init(text: "")))))
+        }
 
         guard
             case .expectingNormalResponse = stateMachine.state
@@ -605,7 +617,9 @@ extension ClientStateMachineTests {
     func appendReceivingUntaggedWhileWaitingForContinuationRequest() {
         var stateMachine = makeStateMachine()
         var result: OutgoingChunk?
-        #expect(throws: Never.self) { result = try stateMachine.sendCommand(.append(.start(tag: "A1", appendingTo: .inbox))) }
+        #expect(throws: Never.self) {
+            result = try stateMachine.sendCommand(.append(.start(tag: "A1", appendingTo: .inbox)))
+        }
         #expect(result == .init(bytes: "A1 APPEND \"INBOX\"", promise: nil, shouldSucceedPromise: true))
 
         #expect(throws: Never.self) {
@@ -643,7 +657,9 @@ extension ClientStateMachineTests {
         #expect(result == .init(bytes: "\r\n", promise: nil, shouldSucceedPromise: true))
 
         // Complete the APPEND command:
-        #expect(throws: Never.self) { try stateMachine.receiveResponse(.tagged(.init(tag: "A1", state: .ok(.init(text: ""))))) }
+        #expect(throws: Never.self) {
+            try stateMachine.receiveResponse(.tagged(.init(tag: "A1", state: .ok(.init(text: "")))))
+        }
 
         guard
             case .expectingNormalResponse = stateMachine.state
@@ -665,7 +681,9 @@ extension ClientStateMachineTests {
         #expect(result!.bytes == "B2 EXPUNGE\r\n")
 
         // Now send the APPEND:
-        #expect(throws: Never.self) { result = try stateMachine.sendCommand(.append(.start(tag: "A1", appendingTo: .inbox))) }
+        #expect(throws: Never.self) {
+            result = try stateMachine.sendCommand(.append(.start(tag: "A1", appendingTo: .inbox)))
+        }
         #expect(result == .init(bytes: "A1 APPEND \"INBOX\"", promise: nil, shouldSucceedPromise: true))
 
         #expect(throws: Never.self) {
@@ -705,7 +723,9 @@ extension ClientStateMachineTests {
         #expect(result == .init(bytes: "\r\n", promise: nil, shouldSucceedPromise: true))
 
         // Complete the APPEND command:
-        #expect(throws: Never.self) { try stateMachine.receiveResponse(.tagged(.init(tag: "A1", state: .ok(.init(text: ""))))) }
+        #expect(throws: Never.self) {
+            try stateMachine.receiveResponse(.tagged(.init(tag: "A1", state: .ok(.init(text: "")))))
+        }
 
         guard
             case .expectingNormalResponse = stateMachine.state

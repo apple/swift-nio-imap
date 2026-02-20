@@ -357,7 +357,11 @@ import Testing
         #expect(throws: Never.self) {
             result = try parser.appendAndFrameBuffer(&buffer)
         }
-        #expect(result == [.complete(#"A1 LOGIN "foobar" {3}\#r\#n"#), .insideLiteral("hey", remainingBytes: 0), .complete("\r\n")])
+        #expect(
+            result == [
+                .complete(#"A1 LOGIN "foobar" {3}\#r\#n"#), .insideLiteral("hey", remainingBytes: 0), .complete("\r\n"),
+            ]
+        )
     }
 
     @Test("parsing quoted with escaped quote followed by literal")
@@ -368,7 +372,12 @@ import Testing
         #expect(throws: Never.self) {
             result = try parser.appendAndFrameBuffer(&buffer)
         }
-        #expect(result == [.complete(#"A1 LOGIN "foo\"bar" {3}\#r\#n"#), .insideLiteral("hey", remainingBytes: 0), .complete("\r\n")])
+        #expect(
+            result == [
+                .complete(#"A1 LOGIN "foo\"bar" {3}\#r\#n"#), .insideLiteral("hey", remainingBytes: 0),
+                .complete("\r\n"),
+            ]
+        )
     }
 
     @Test("parsing binary literal")
@@ -379,7 +388,9 @@ import Testing
         #expect(throws: Never.self) {
             result = try parser.appendAndFrameBuffer(&buffer)
         }
-        #expect(result == [.complete("A1 LOGIN {~3}\r\n"), .insideLiteral("hey", remainingBytes: 0), .complete("\r\n")])
+        #expect(
+            result == [.complete("A1 LOGIN {~3}\r\n"), .insideLiteral("hey", remainingBytes: 0), .complete("\r\n")]
+        )
     }
 
     @Test("parsing literal plus")
@@ -390,7 +401,9 @@ import Testing
         #expect(throws: Never.self) {
             result = try parser.appendAndFrameBuffer(&buffer)
         }
-        #expect(result == [.complete("A1 LOGIN {3+}\r\n"), .insideLiteral("hey", remainingBytes: 0), .complete("\r\n")])
+        #expect(
+            result == [.complete("A1 LOGIN {3+}\r\n"), .insideLiteral("hey", remainingBytes: 0), .complete("\r\n")]
+        )
     }
 
     @Test("parsing literal integer overflow")
@@ -412,7 +425,9 @@ import Testing
         #expect(throws: Never.self) {
             result = try parser.appendAndFrameBuffer(&buffer)
         }
-        #expect(result == [.complete("A1 LOGIN {3-}\r\n"), .insideLiteral("hey", remainingBytes: 0), .complete("\r\n")])
+        #expect(
+            result == [.complete("A1 LOGIN {3-}\r\n"), .insideLiteral("hey", remainingBytes: 0), .complete("\r\n")]
+        )
     }
 
     @Test("parsing binary literal plus")
@@ -423,7 +438,9 @@ import Testing
         #expect(throws: Never.self) {
             result = try parser.appendAndFrameBuffer(&buffer)
         }
-        #expect(result == [.complete("A1 LOGIN {~3+}\r\n"), .insideLiteral("hey", remainingBytes: 0), .complete("\r\n")])
+        #expect(
+            result == [.complete("A1 LOGIN {~3+}\r\n"), .insideLiteral("hey", remainingBytes: 0), .complete("\r\n")]
+        )
     }
 
     // full command "A1 LOGIN {3}\r\n123 test\r\n

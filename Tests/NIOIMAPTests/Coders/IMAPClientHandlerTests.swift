@@ -334,7 +334,9 @@ struct IMAPClientHandlerTests {
         }
 
         // client starts authentication
-        helper.writeOutbound(.tagged(.init(tag: "A1", command: .authenticate(mechanism: .gssAPI, initialResponse: nil))))
+        helper.writeOutbound(
+            .tagged(.init(tag: "A1", command: .authenticate(mechanism: .gssAPI, initialResponse: nil)))
+        )
         helper.assertOutboundString("A1 AUTHENTICATE GSSAPI\r\n")
 
         // server sends challenge
@@ -690,7 +692,9 @@ struct IMAPClientHandlerTests {
                 PostTestHandler(),
             ]).wait()
         }
-        helper.writeOutbound(.tagged(.init(tag: "A1", command: .authenticate(mechanism: .gssAPI, initialResponse: nil))))
+        helper.writeOutbound(
+            .tagged(.init(tag: "A1", command: .authenticate(mechanism: .gssAPI, initialResponse: nil)))
+        )
     }
 
     @Test("write cascades promise failure")

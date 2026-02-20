@@ -47,28 +47,28 @@ extension CommandEncodingOptions {
                 userOptions: .automatic,
                 automatic: .a
             ).encodingOptions
-            == .a
+                == .a
         )
         #expect(
             ClientEncodingOptions(
                 userOptions: .automatic,
                 automatic: .b
             ).encodingOptions
-            == .b
+                == .b
         )
         #expect(
             ClientEncodingOptions(
                 userOptions: .fixed(.a),
                 automatic: .b
             ).encodingOptions
-            == .a
+                == .a
         )
         #expect(
             ClientEncodingOptions(
                 userOptions: .fixed(.b),
                 automatic: .a
             ).encodingOptions
-            == .b
+                == .b
         )
     }
 
@@ -81,9 +81,9 @@ extension CommandEncodingOptions {
         sut.updateAutomaticOptions(response: .untagged(.capabilityData([.imap4, .literalMinus])))
         #expect(
             sut.encodingOptions
-            == CommandEncodingOptions(
-                useNonSynchronizingLiteralMinus: true
-            )
+                == CommandEncodingOptions(
+                    useNonSynchronizingLiteralMinus: true
+                )
         )
 
         sut.updateAutomaticOptions(
@@ -101,10 +101,10 @@ extension CommandEncodingOptions {
         )
         #expect(
             sut.encodingOptions
-            == CommandEncodingOptions(
-                useNonSynchronizingLiteralPlus: true,
-                useBinaryLiteral: true
-            )
+                == CommandEncodingOptions(
+                    useNonSynchronizingLiteralPlus: true,
+                    useBinaryLiteral: true
+                )
         )
     }
 
@@ -120,9 +120,9 @@ extension CommandEncodingOptions {
         sut.userOptions = .automatic
         #expect(
             sut.encodingOptions
-            == CommandEncodingOptions(
-                useNonSynchronizingLiteralMinus: true
-            )
+                == CommandEncodingOptions(
+                    useNonSynchronizingLiteralMinus: true
+                )
         )
     }
 }

@@ -35,7 +35,9 @@ let CRLF = String(decoding: [CR, LF], as: Unicode.UTF8.self)
     @Test("arbitrary long mailbox name")
     func arbitraryLongMailboxName() {
         let longBuffer = self.channel.allocator.buffer(repeating: UInt8(ascii: "x"), count: 60 * 1024)
-        #expect(throws: Never.self) { try self.channel.writeInbound(self.channel.allocator.buffer(string: "CREATE \"")) }
+        #expect(throws: Never.self) {
+            try self.channel.writeInbound(self.channel.allocator.buffer(string: "CREATE \""))
+        }
 
         do {
             while true {
