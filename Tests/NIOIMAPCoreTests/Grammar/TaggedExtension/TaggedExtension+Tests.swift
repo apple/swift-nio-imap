@@ -38,17 +38,20 @@ struct TaggedExtensionTests {
         fixture.checkParsing()
     }
 
-    @Test(arguments: [
-        ParseFixture.taggedExtensionComplex("test", expected: .success(["test"])),
-        ParseFixture.taggedExtensionComplex("(test)", expected: .success(["test"])),
-        ParseFixture.taggedExtensionComplex("(test1 test2)", expected: .success(["test1", "test2"])),
-        ParseFixture.taggedExtensionComplex("test1 test2", expected: .success(["test1", "test2"])),
-        ParseFixture.taggedExtensionComplex(
-            "test1 test2 (test3 test4) test5",
-            expected: .success(["test1", "test2", "test3", "test4", "test5"])
-        ),
-    ])
-    func `parse complex`(_ fixture: ParseFixture<[String]>) {
+    @Test(
+        "parse complex",
+        arguments: [
+            ParseFixture.taggedExtensionComplex("test", expected: .success(["test"])),
+            ParseFixture.taggedExtensionComplex("(test)", expected: .success(["test"])),
+            ParseFixture.taggedExtensionComplex("(test1 test2)", expected: .success(["test1", "test2"])),
+            ParseFixture.taggedExtensionComplex("test1 test2", expected: .success(["test1", "test2"])),
+            ParseFixture.taggedExtensionComplex(
+                "test1 test2 (test3 test4) test5",
+                expected: .success(["test1", "test2", "test3", "test4", "test5"])
+            ),
+        ]
+    )
+    func parseComplex(_ fixture: ParseFixture<[String]>) {
         fixture.checkParsing()
     }
 }

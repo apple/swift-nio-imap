@@ -18,8 +18,8 @@ import Testing
 
 @Suite("List")
 struct ListTests {
-    @Test(arguments: wildcardFixtures())
-    func `parse list wildcard`(_ fixture: ParseFixture<String>) {
+    @Test("parse list wildcard", arguments: wildcardFixtures())
+    func parseListWildcard(_ fixture: ParseFixture<String>) {
         fixture.checkParsing()
     }
 }

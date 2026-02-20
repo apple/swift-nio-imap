@@ -35,32 +35,32 @@ struct UInt8ParseTypeMembershipTests {
         #expect(invalid.allSatisfy { !$0.isLF })
     }
 
-    @Test
-    func `response special`() {
+    @Test("response special")
+    func responseSpecial() {
         let valid: Set<UInt8> = [UInt8(ascii: "]")]
         let invalid = allChars.subtracting(valid)
         #expect(valid.allSatisfy { $0.isResponseSpecial })
         #expect(invalid.allSatisfy { !$0.isResponseSpecial })
     }
 
-    @Test
-    func `list wildcard`() {
+    @Test("list wildcard")
+    func listWildcard() {
         let valid: Set<UInt8> = [UInt8(ascii: "%"), UInt8(ascii: "*")]
         let invalid = allChars.subtracting(valid)
         #expect(valid.allSatisfy { $0.isListWildcard })
         #expect(invalid.allSatisfy { !$0.isListWildcard })
     }
 
-    @Test
-    func `quoted special`() {
+    @Test("quoted special")
+    func quotedSpecial() {
         let valid: Set<UInt8> = [UInt8(ascii: "\\"), UInt8(ascii: "\"")]
         let invalid = allChars.subtracting(valid)
         #expect(valid.allSatisfy { $0.isQuotedSpecial })
         #expect(invalid.allSatisfy { !$0.isQuotedSpecial })
     }
 
-    @Test
-    func `atom special`() {
+    @Test("atom special")
+    func atomSpecial() {
         var valid: Set<UInt8> = [
             UInt8(ascii: "("), UInt8(ascii: ")"), UInt8(ascii: " "), UInt8(ascii: "{"),
             UInt8(ascii: "]"),  // ResponseSpecial
@@ -77,8 +77,8 @@ struct UInt8ParseTypeMembershipTests {
         }
     }
 
-    @Test
-    func `text char`() {
+    @Test("text char")
+    func textChar() {
         // thanks Johannes
         let invalid: Set<UInt8> = [UInt8(ascii: "\r"), .init(ascii: "\n"), 0]
         let valid = allChars.subtracting(invalid).subtracting(128...UInt8.max)
@@ -86,8 +86,8 @@ struct UInt8ParseTypeMembershipTests {
         #expect(invalid.allSatisfy { !$0.isTextChar })
     }
 
-    @Test
-    func `hex character`() {
+    @Test("hex character")
+    func hexCharacter() {
         var valid = Set<UInt8>()
         valid = valid.union(UInt8(ascii: "0")...UInt8(ascii: "9"))
         valid = valid.union(UInt8(ascii: "a")...UInt8(ascii: "f"))
@@ -98,8 +98,8 @@ struct UInt8ParseTypeMembershipTests {
         #expect(invalid.allSatisfy { !$0.isHexCharacter })
     }
 
-    @Test
-    func `base64 character`() {
+    @Test("base64 character")
+    func base64Character() {
         var valid = Set<UInt8>()
         valid = valid.union(UInt8(ascii: "0")...UInt8(ascii: "9"))
         valid = valid.union(UInt8(ascii: "a")...UInt8(ascii: "z"))

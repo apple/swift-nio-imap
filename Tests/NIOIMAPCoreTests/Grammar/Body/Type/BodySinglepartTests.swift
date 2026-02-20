@@ -88,24 +88,27 @@ extension BodySinglepartTests {
         fixture.checkEncoding()
     }
 
-    @Test(arguments: [
-        EncodeFixture.bodySinglepartExtension(
-            .init(digest: nil, dispositionAndLanguage: nil),
-            "NIL"
-        ),
-        EncodeFixture.bodySinglepartExtension(
-            .init(digest: "md5", dispositionAndLanguage: nil),
-            "\"md5\""
-        ),
-        EncodeFixture.bodySinglepartExtension(
-            .init(
-                digest: "md5",
-                dispositionAndLanguage: .init(disposition: .init(kind: "string", parameters: [:]), language: nil)
+    @Test(
+        "encode extension",
+        arguments: [
+            EncodeFixture.bodySinglepartExtension(
+                .init(digest: nil, dispositionAndLanguage: nil),
+                "NIL"
             ),
-            "\"md5\" (\"string\" NIL)"
-        ),
-    ])
-    func `encode extension`(_ fixture: EncodeFixture<BodyStructure.Singlepart.Extension>) {
+            EncodeFixture.bodySinglepartExtension(
+                .init(digest: "md5", dispositionAndLanguage: nil),
+                "\"md5\""
+            ),
+            EncodeFixture.bodySinglepartExtension(
+                .init(
+                    digest: "md5",
+                    dispositionAndLanguage: .init(disposition: .init(kind: "string", parameters: [:]), language: nil)
+                ),
+                "\"md5\" (\"string\" NIL)"
+            ),
+        ]
+    )
+    func encodeExtension(_ fixture: EncodeFixture<BodyStructure.Singlepart.Extension>) {
         fixture.checkEncoding()
     }
 

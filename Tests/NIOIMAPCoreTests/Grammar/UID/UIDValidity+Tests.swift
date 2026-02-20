@@ -38,8 +38,8 @@ struct UIDValidityTests {
         fixture.checkParsing()
     }
 
-    @Test
-    func `valid range`() {
+    @Test("valid range")
+    func validRange() {
         #expect(UIDValidity(exactly: 0) == nil)
         #expect(UIDValidity(exactly: 1)?.rawValue == 1)
         #expect(UIDValidity(exactly: 4_294_967_295)?.rawValue == 4_294_967_295)

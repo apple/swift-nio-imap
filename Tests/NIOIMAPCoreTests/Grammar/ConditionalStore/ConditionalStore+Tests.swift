@@ -18,8 +18,8 @@ import Testing
 
 @Suite("ConditionalStoreParameter")
 struct ConditionalStoreTests {
-    @Test
-    func `encodes to CONDSTORE`() {
+    @Test("encodes to CONDSTORE")
+    func encodesToCondstore() {
         let expected = "CONDSTORE"
         var buffer = EncodeBuffer.serverEncodeBuffer(
             buffer: ByteBufferAllocator().buffer(capacity: 128),

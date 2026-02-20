@@ -30,7 +30,8 @@ struct AttributeFlagTests {
         fixture.checkEncoding()
     }
 
-    @Test func `lowercased normalization`() {
+    @Test("lowercased normalization")
+    func lowercasedNormalization() {
         #expect(AttributeFlag("TEST") == AttributeFlag("test"))
         #expect(AttributeFlag("TEST").stringValue == "test")
         #expect(AttributeFlag("test").stringValue == "test")

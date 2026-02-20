@@ -32,25 +32,37 @@ struct MessagePathByteRangeTests {
         fixture.checkEncoding()
     }
 
-    @Test(arguments: [
-        ParseFixture.parseWithSlash("/;PARTIAL=1", expected: .success(.init(range: .init(offset: 1, length: nil)))),
-        ParseFixture.parseWithSlash("/;PARTIAL=1.2", expected: .success(.init(range: .init(offset: 1, length: 2)))),
-        ParseFixture.parseWithSlash("/;PARTIAL=a", expected: .failure),
-        ParseFixture.parseWithSlash("PARTIAL=a", expected: .failure),
-        ParseFixture.parseWithSlash("/;PARTIAL=1", "", expected: .incompleteMessage),
-    ])
-    func `parse with slash`(_ fixture: ParseFixture<MessagePath.ByteRange>) {
+    @Test(
+        "parse with slash",
+        arguments: [
+            ParseFixture.parseWithSlash("/;PARTIAL=1", expected: .success(.init(range: .init(offset: 1, length: nil)))),
+            ParseFixture.parseWithSlash("/;PARTIAL=1.2", expected: .success(.init(range: .init(offset: 1, length: 2)))),
+            ParseFixture.parseWithSlash("/;PARTIAL=a", expected: .failure),
+            ParseFixture.parseWithSlash("PARTIAL=a", expected: .failure),
+            ParseFixture.parseWithSlash("/;PARTIAL=1", "", expected: .incompleteMessage),
+        ]
+    )
+    func parseWithSlash(_ fixture: ParseFixture<MessagePath.ByteRange>) {
         fixture.checkParsing()
     }
 
-    @Test(arguments: [
-        ParseFixture.parseWithoutSlash(";PARTIAL=1", expected: .success(.init(range: .init(offset: 1, length: nil)))),
-        ParseFixture.parseWithoutSlash(";PARTIAL=1.2", expected: .success(.init(range: .init(offset: 1, length: 2)))),
-        ParseFixture.parseWithoutSlash(";PARTIAL=a", expected: .failure),
-        ParseFixture.parseWithoutSlash("PARTIAL=a", expected: .failure),
-        ParseFixture.parseWithoutSlash(";PARTIAL=1", "", expected: .incompleteMessage),
-    ])
-    func `parse without slash`(_ fixture: ParseFixture<MessagePath.ByteRange>) {
+    @Test(
+        "parse without slash",
+        arguments: [
+            ParseFixture.parseWithoutSlash(
+                ";PARTIAL=1",
+                expected: .success(.init(range: .init(offset: 1, length: nil)))
+            ),
+            ParseFixture.parseWithoutSlash(
+                ";PARTIAL=1.2",
+                expected: .success(.init(range: .init(offset: 1, length: 2)))
+            ),
+            ParseFixture.parseWithoutSlash(";PARTIAL=a", expected: .failure),
+            ParseFixture.parseWithoutSlash("PARTIAL=a", expected: .failure),
+            ParseFixture.parseWithoutSlash(";PARTIAL=1", "", expected: .incompleteMessage),
+        ]
+    )
+    func parseWithoutSlash(_ fixture: ParseFixture<MessagePath.ByteRange>) {
         fixture.checkParsing()
     }
 }

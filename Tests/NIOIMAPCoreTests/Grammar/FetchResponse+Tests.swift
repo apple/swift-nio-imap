@@ -40,11 +40,14 @@ struct FetchResponseTests {
         fixture.checkParsing()
     }
 
-    @Test(arguments: [
-        ParseFixture.fetchResponseStart("* 1 FETCH (", " ", expected: .success(.start(1))),
-        ParseFixture.fetchResponseStart("* 1 UIDFETCH (", " ", expected: .success(.startUID(1))),
-    ])
-    func `parse start`(_ fixture: ParseFixture<GrammarParser._FetchResponse>) {
+    @Test(
+        "parse start",
+        arguments: [
+            ParseFixture.fetchResponseStart("* 1 FETCH (", " ", expected: .success(.start(1))),
+            ParseFixture.fetchResponseStart("* 1 UIDFETCH (", " ", expected: .success(.startUID(1))),
+        ]
+    )
+    func parseStart(_ fixture: ParseFixture<GrammarParser._FetchResponse>) {
         fixture.checkParsing()
     }
 }
