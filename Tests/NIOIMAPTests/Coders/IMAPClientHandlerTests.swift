@@ -16,6 +16,7 @@ import NIO
 @testable import NIOIMAP
 @testable import NIOIMAPCore
 import Testing
+import Synchronization
 
 @Suite("IMAPClientHandler")
 struct IMAPClientHandlerTests {
@@ -697,6 +698,7 @@ struct IMAPClientHandlerTests {
         )
     }
 
+    @available(macOS 15.0, *)
     @Test("write cascades promise failure")
     func writeCascadesPromiseFailure() {
         var helper = Helper()
@@ -718,15 +720,17 @@ struct IMAPClientHandlerTests {
         }
 
         // writing a command that has a continuation
-        var didComplete = NIOLoopBound(false, eventLoop: helper.channel.eventLoop)
+        let didComplete = Mutex(false)
         helper.writeOutbound(.tagged(.init(tag: "A1", command: .create(.init("å"), []))), wait: false).whenFailure {
             error in
             #expect(error is TestError)
-            didComplete.value = true
+            didComplete.withLock({ $0 = true })
         }
-        #expect(didComplete.value)
+        let a = didComplete.withLock({ $0 })
+        #expect(a)
     }
 
+    @available(macOS 15.0, *)
     @Test("write cascades continuation promise failure")
     func writeCascadesContinuationPromiseFailure() {
         var helper = Helper()
@@ -766,12 +770,13 @@ struct IMAPClientHandlerTests {
         testHandler.failNextWrite = true
         helper.writeInbound("+ OK\r\n")
 
-        var didComplete = NIOLoopBound(false, eventLoop: helper.channel.eventLoop)
+        let didComplete = Mutex(false)
         future.whenFailure { error in
             #expect(error is TestError)
-            didComplete.value = true
+            didComplete.withLock({ $0 = true })
         }
-        #expect(didComplete.value)
+        let a = didComplete.withLock({ $0 })
+        #expect(a)
     }
 
     @Test("append waits for continuation")
