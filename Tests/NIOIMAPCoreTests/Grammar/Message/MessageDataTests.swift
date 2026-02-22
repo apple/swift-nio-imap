@@ -30,6 +30,13 @@ struct MessageDataTests {
     }
 
     @Test(arguments: [
+        EncodeFixture.messageDataEnd(.expunge(1), ")"),
+    ])
+    func encodeEnd(_ fixture: EncodeFixture<MessageData>) {
+        fixture.checkEncoding()
+    }
+
+    @Test(arguments: [
         ParseFixture.messageData("3 EXPUNGE", expected: .success(.expunge(3))),
         ParseFixture.messageData("VANISHED 1:3", expected: .success(.vanished([1...3]))),
         ParseFixture.messageData("VANISHED (EARLIER) 1:3", expected: .success(.vanishedEarlier([1...3]))),
@@ -65,6 +72,18 @@ extension EncodeFixture<MessageData> {
             bufferKind: .defaultServer,
             expectedString: expectedString,
             encoder: { $0.writeMessageData($1) }
+        )
+    }
+
+    fileprivate static func messageDataEnd(
+        _ input: MessageData,
+        _ expectedString: String
+    ) -> Self {
+        EncodeFixture(
+            input: input,
+            bufferKind: .defaultServer,
+            expectedString: expectedString,
+            encoder: { $0.writeMessageDataEnd($1) }
         )
     }
 }

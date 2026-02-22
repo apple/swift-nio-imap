@@ -84,6 +84,54 @@ struct LastCommandMessageIDRFC5182Tests {
     }
 }
 
+@Suite("StoreModifier")
+struct StoreModifierTests {
+    @Test(arguments: [
+        EncodeFixture.storeModifier(
+            .unchangedSince(.init(modificationSequence: 12345)),
+            "UNCHANGEDSINCE 12345"
+        ),
+        EncodeFixture.storeModifier(
+            .other(.init(key: "MYEXT", value: nil)),
+            "MYEXT"
+        ),
+    ])
+    func encode(_ fixture: EncodeFixture<StoreModifier>) {
+        fixture.checkEncoding()
+    }
+
+    @Test(arguments: [
+        ParseFixture.storeModifier("UNCHANGEDSINCE 12345", expected: .success(.unchangedSince(.init(modificationSequence: 12345)))),
+        ParseFixture.storeModifier("MYEXT", ")", expected: .success(.other(.init(key: "MYEXT", value: nil)))),
+        ParseFixture.storeModifier("", "", expected: .incompleteMessage),
+    ])
+    func parse(_ fixture: ParseFixture<StoreModifier>) {
+        fixture.checkParsing()
+    }
+}
+
+@Suite("StoreModifiers (array)")
+struct StoreModifiersTests {
+    @Test(arguments: [
+        EncodeFixture.storeModifiers(
+            [.unchangedSince(.init(modificationSequence: 99))],
+            " (UNCHANGEDSINCE 99)"
+        ),
+        EncodeFixture.storeModifiers([], ""),
+    ])
+    func encode(_ fixture: EncodeFixture<[StoreModifier]>) {
+        fixture.checkEncoding()
+    }
+
+    @Test(arguments: [
+        ParseFixture.storeModifiers(" (UNCHANGEDSINCE 42)", expected: .success([.unchangedSince(.init(modificationSequence: 42))])),
+        ParseFixture.storeModifiers("", "", expected: .incompleteMessage),
+    ])
+    func parse(_ fixture: ParseFixture<[StoreModifier]>) {
+        fixture.checkParsing()
+    }
+}
+
 // MARK: -
 
 /// `Void` / `nil` replacement that is `Equatable`.
@@ -170,6 +218,58 @@ extension ParseFixture<LastCommandMessageID<UID>> {
                     setParser: GrammarParser().parseMessageIdentifier
                 )
             }
+        )
+    }
+}
+
+extension EncodeFixture<StoreModifier> {
+    fileprivate static func storeModifier(_ input: StoreModifier, _ expectedString: String) -> Self {
+        EncodeFixture(
+            input: input,
+            bufferKind: .defaultServer,
+            expectedString: expectedString,
+            encoder: { $0.writeStoreModifier($1) }
+        )
+    }
+}
+
+extension ParseFixture<StoreModifier> {
+    fileprivate static func storeModifier(
+        _ input: String,
+        _ terminator: String = " ",
+        expected: Expected
+    ) -> Self {
+        ParseFixture(
+            input: input,
+            terminator: terminator,
+            expected: expected,
+            parser: GrammarParser().parseStoreModifier
+        )
+    }
+}
+
+extension EncodeFixture<[StoreModifier]> {
+    fileprivate static func storeModifiers(_ input: [StoreModifier], _ expectedString: String) -> Self {
+        EncodeFixture(
+            input: input,
+            bufferKind: .defaultServer,
+            expectedString: expectedString,
+            encoder: { $0.writeStoreModifiers($1) }
+        )
+    }
+}
+
+extension ParseFixture<[StoreModifier]> {
+    fileprivate static func storeModifiers(
+        _ input: String,
+        _ terminator: String = " ",
+        expected: Expected
+    ) -> Self {
+        ParseFixture(
+            input: input,
+            terminator: terminator,
+            expected: expected,
+            parser: GrammarParser().parseStoreModifiers
         )
     }
 }

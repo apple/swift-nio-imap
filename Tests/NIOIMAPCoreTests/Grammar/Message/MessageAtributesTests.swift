@@ -98,6 +98,12 @@ struct MessageAttributeTests {
         EncodeFixture.messageAttribute(.emailID(.init("123-456-789")!), "EMAILID (123-456-789)"),
         EncodeFixture.messageAttribute(.threadID(.init("123-456-789")!), "THREADID (123-456-789)"),
         EncodeFixture.messageAttribute(.threadID(nil), "THREADID NIL"),
+        EncodeFixture.messageAttribute(.nilBody(.rfc822Text), "RFC822.TEXT NIL"),
+        EncodeFixture.messageAttribute(.nilBody(.rfc822Header), "RFC822.HEADER NIL"),
+        EncodeFixture.messageAttribute(
+            .nilBody(.body(section: .init(part: [4], kind: .text), offset: 5)),
+            "BODY[4.TEXT]<5> NIL"
+        ),
     ])
     func encode(_ fixture: EncodeFixture<MessageAttribute>) {
         fixture.checkEncoding()

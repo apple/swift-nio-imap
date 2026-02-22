@@ -1292,3 +1292,29 @@ extension CommandEncodeFixture<Command> {
         )
     }
 }
+
+@Suite("AuthenticationMechanism")
+struct AuthenticationMechanismTests {
+    @Test(arguments: [
+        EncodeFixture.authenticationMechanism(.gssAPI, "GSSAPI"),
+        EncodeFixture.authenticationMechanism(.plain, "PLAIN"),
+        EncodeFixture.authenticationMechanism(.init("myAuth"), "MYAUTH"),
+    ])
+    func encode(_ fixture: EncodeFixture<AuthenticationMechanism>) {
+        fixture.checkEncoding()
+    }
+}
+
+extension EncodeFixture<AuthenticationMechanism> {
+    fileprivate static func authenticationMechanism(
+        _ input: AuthenticationMechanism,
+        _ expectedString: String
+    ) -> Self {
+        EncodeFixture(
+            input: input,
+            bufferKind: .defaultServer,
+            expectedString: expectedString,
+            encoder: { $0.writeAuthenticationMechanism($1) }
+        )
+    }
+}
