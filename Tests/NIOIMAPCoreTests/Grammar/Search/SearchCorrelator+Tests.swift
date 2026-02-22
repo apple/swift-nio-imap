@@ -32,19 +32,19 @@ struct SearchCorrelatorTests {
     @Test(arguments: [
         ParseFixture.searchCorrelator(
             " (TAG \"test1\")",
-            expected: .success(SearchCorrelator(tag: "test1")),
+            expected: .success(SearchCorrelator(tag: "test1"))
         ),
         ParseFixture.searchCorrelator(
             " (TAG \"test2\")",
-            expected: .success(SearchCorrelator(tag: "test2")),
+            expected: .success(SearchCorrelator(tag: "test2"))
         ),
         ParseFixture.searchCorrelator(
             " (TAG \"test1\" MAILBOX \"mb\" UIDVALIDITY 5)",
-            expected: .success(SearchCorrelator(tag: "test1", mailbox: MailboxName("mb"), uidValidity: 5)),
+            expected: .success(SearchCorrelator(tag: "test1", mailbox: MailboxName("mb"), uidValidity: 5))
         ),
         ParseFixture.searchCorrelator(
             " (MAILBOX \"mb\" UIDVALIDITY 5 TAG \"test1\")",
-            expected: .success(SearchCorrelator(tag: "test1", mailbox: MailboxName("mb"), uidValidity: 5)),
+            expected: .success(SearchCorrelator(tag: "test1", mailbox: MailboxName("mb"), uidValidity: 5))
         ),
         ParseFixture.searchCorrelator(
             " (TAG \"test1\" MAILBOX \"mb\" )",
