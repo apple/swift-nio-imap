@@ -535,14 +535,14 @@ struct IMAPClientHandlerTests {
         let eventExpectation2 = helper.channel.eventLoop.makePromise(of: Void.self)
         let eventExpectation3 = helper.channel.eventLoop.makePromise(of: Void.self)
 
-        class UserEventHandler: ChannelDuplexHandler {
+        final class UserEventHandler: ChannelDuplexHandler, Sendable {
             typealias InboundIn = Response
 
             typealias OutboundIn = CommandStreamPart
 
-            var expectation1: EventLoopPromise<Void>
-            var expectation2: EventLoopPromise<Void>
-            var expectation3: EventLoopPromise<Void>
+            let expectation1: EventLoopPromise<Void>
+            let expectation2: EventLoopPromise<Void>
+            let expectation3: EventLoopPromise<Void>
 
             init(
                 expectation1: EventLoopPromise<Void>,
@@ -632,6 +632,7 @@ struct IMAPClientHandlerTests {
         }
     }
 
+    @available(macOS 15.0, *)
     @Test("protect against reentrancy")
     func protectAgainstReentrancy() {
         var helper = Helper()
@@ -641,20 +642,22 @@ struct IMAPClientHandlerTests {
 
         struct MyOutboundEvent {}
 
-        class PreTestHandler: ChannelDuplexHandler {
+        final class PreTestHandler: ChannelDuplexHandler, Sendable {
             typealias InboundIn = ByteBuffer
             typealias InboundOut = ByteBuffer
             typealias OutboundIn = ByteBuffer
 
-            var callCount = 0
+            let callCount = Mutex(0)
 
             func write(context: ChannelHandlerContext, data: NIOAny, promise: EventLoopPromise<Void>?) {
-                self.callCount += 1
-                if self.callCount == 1 {
-                    let data = self.wrapInboundOut(ByteBuffer(string: "+ \r\n"))
-                    context.fireChannelRead(data)
-                    promise?.succeed(())
+                let count = self.callCount.withLock {
+                    $0 += 1
+                    return $0
                 }
+                guard count == 1 else { return }
+                let data = self.wrapInboundOut(ByteBuffer(string: "+ \r\n"))
+                context.fireChannelRead(data)
+                promise?.succeed(())
             }
 
             func triggerUserOutboundEvent(context: ChannelHandlerContext, event: Any, promise: EventLoopPromise<Void>?)
@@ -666,19 +669,21 @@ struct IMAPClientHandlerTests {
             }
         }
 
-        class PostTestHandler: ChannelDuplexHandler {
+        final class PostTestHandler: ChannelDuplexHandler, Sendable {
             typealias InboundIn = Response
             typealias OutboundIn = Response
             typealias OutboundOut = IMAPClientHandler.Message
 
-            var callCount = 0
+            let callCount = Mutex(0)
 
             func channelRead(context: ChannelHandlerContext, data: NIOAny) {
-                self.callCount += 1
-                if self.callCount == 1 {
-                    context.writeAndFlush(self.wrapOutboundOut(.part(.continuationResponse(""))), promise: nil)
-                    context.triggerUserOutboundEvent(MyOutboundEvent(), promise: nil)
+                let count = self.callCount.withLock {
+                    $0 += 1
+                    return $0
                 }
+                guard count == 1 else { return }
+                context.writeAndFlush(self.wrapOutboundOut(.part(.continuationResponse(""))), promise: nil)
+                context.triggerUserOutboundEvent(MyOutboundEvent(), promise: nil)
             }
 
             func errorCaught(context: ChannelHandlerContext, error: Error) {
