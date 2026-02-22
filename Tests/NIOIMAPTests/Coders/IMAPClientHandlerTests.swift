@@ -707,7 +707,7 @@ struct IMAPClientHandlerTests {
         }
 
         struct TestError: Error {}
-        class TestOutboundHandlerThatFails: ChannelOutboundHandler {
+        final class TestOutboundHandlerThatFails: Sendable, ChannelOutboundHandler {
             typealias OutboundIn = ByteBuffer
             func write(context: ChannelHandlerContext, data: NIOAny, promise: EventLoopPromise<Void>?) {
                 #expect(promise != nil)
@@ -739,11 +739,13 @@ struct IMAPClientHandlerTests {
         }
 
         struct TestError: Error {}
-        class TestOutboundHandlerThatFails: ChannelOutboundHandler {
-            var failNextWrite: Bool = false
+        final class TestOutboundHandlerThatFails: Sendable, ChannelOutboundHandler {
+            let failNextWrite = Mutex(false)
             typealias OutboundIn = ByteBuffer
             func write(context: ChannelHandlerContext, data: NIOAny, promise: EventLoopPromise<Void>?) {
-                if self.failNextWrite {
+                guard
+                    !self.failNextWrite.withLock({ $0 })
+                else {
                     #expect(promise != nil)
                     promise?.fail(TestError())
                     return
@@ -767,7 +769,7 @@ struct IMAPClientHandlerTests {
         )
         helper.assertOutboundString("A1 RENAME {2}\r\n")
 
-        testHandler.failNextWrite = true
+        testHandler.failNextWrite.withLock { $0 = true }
         helper.writeInbound("+ OK\r\n")
 
         let didComplete = Mutex(false)
