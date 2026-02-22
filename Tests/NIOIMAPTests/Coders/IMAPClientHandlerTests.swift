@@ -692,11 +692,11 @@ struct IMAPClientHandlerTests {
         }
 
         #expect(throws: Never.self) {
-            try helper.channel.pipeline.addHandlers([
+            try helper.channel.pipeline.syncOperations.addHandlers([
                 PreTestHandler(),
                 IMAPClientHandler(),
                 PostTestHandler(),
-            ]).wait()
+            ])
         }
         helper.writeOutbound(
             .tagged(.init(tag: "A1", command: .authenticate(mechanism: .gssAPI, initialResponse: nil)))
