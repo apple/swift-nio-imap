@@ -28,7 +28,7 @@ private let bufferA = ByteBuffer([
     0x02, 0x02, 0x01, 0x00, 0x00, 0xFF, 0xFF, 0xFF, 0xFF, 0xEA, 0x37, 0x32,
     0x1B, 0x81, 0x84, 0xDC, 0xA9, 0x13, 0xCC, 0x17, 0x81, 0x89, 0x51, 0xDE,
     0x71, 0xE3, 0xF6, 0x09, 0x66, 0x34, 0x49, 0x1D, 0x1F, 0x01, 0x00, 0x20,
-    0x00, 0x04, 0x04, 0x04, 0x04,
+    0x00, 0x04, 0x04, 0x04, 0x04
 ])
 
 @Suite("ContinuationRequest")
@@ -41,7 +41,7 @@ struct ContinuationRequestTests {
         EncodeFixture.continuationRequest(
             .data(bufferA),
             "+ YDMGCSqGSIb3EgECAgIBAAD/////6jcyG4GE3KkTzBeBiVHeceP2CWY0SR0fAQAgAAQEBAQ=\r\n"
-        ),
+        )
     ])
     func encode(_ fixture: EncodeFixture<ContinuationRequest>) {
         fixture.checkEncoding()
@@ -69,7 +69,7 @@ struct ContinuationRequestTests {
         ParseFixture.continuationRequest(
             "+ YDMGCSqGSIb3EgECAgIBAAD/////6jcyG4GE3KkTzBeBiVHeceP2CWY0SR0fAQAgAAQEBAQ=\r\n",
             expected: .success(.data(bufferA))
-        ),
+        )
     ])
     func parse(_ fixture: ParseFixture<ContinuationRequest>) {
         fixture.checkParsing()

@@ -20,7 +20,7 @@ import Testing
 struct SearchCriteriaTests {
     @Test(arguments: [
         EncodeFixture.searchCriteria([.all], "ALL"),
-        EncodeFixture.searchCriteria([.all, .answered, .deleted], "ALL ANSWERED DELETED"),
+        EncodeFixture.searchCriteria([.all, .answered, .deleted], "ALL ANSWERED DELETED")
     ])
     func encode(_ fixture: EncodeFixture<[SearchKey]>) {
         fixture.checkEncoding()
@@ -28,7 +28,7 @@ struct SearchCriteriaTests {
 
     @Test(arguments: [
         ParseFixture.searchCriteria("ALL", expected: .success([.all])),
-        ParseFixture.searchCriteria("ALL ANSWERED DELETED", expected: .success([.all, .answered, .deleted])),
+        ParseFixture.searchCriteria("ALL ANSWERED DELETED", expected: .success([.all, .answered, .deleted]))
     ])
     func parse(_ fixture: ParseFixture<[SearchKey]>) {
         fixture.checkParsing()

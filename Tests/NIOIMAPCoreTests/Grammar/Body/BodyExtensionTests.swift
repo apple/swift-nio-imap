@@ -26,7 +26,7 @@ struct BodyExtensionTests {
         EncodeFixture.bodyExtensions(
             [.number(1), .number(2), .string("three"), .string("four")],
             "(1 2 \"three\" \"four\")"
-        ),
+        )
     ])
     func encode(_ fixture: EncodeFixture<[BodyExtension]>) {
         fixture.checkEncoding()
@@ -41,7 +41,7 @@ struct BodyExtensionTests {
             "(1 2 3 (4 (5 (6))))",
             expected: .success([.number(1), .number(2), .number(3), .number(4), .number(5), .number(6)])
         ),
-        ParseFixture.bodyExtension("(((((1)))))", expected: .success([.number(1)])),
+        ParseFixture.bodyExtension("(((((1)))))", expected: .success([.number(1)]))
     ])
     func parse(_ fixture: ParseFixture<[BodyExtension]>) {
         fixture.checkParsing()

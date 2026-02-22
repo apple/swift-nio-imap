@@ -52,7 +52,7 @@ struct EmailAddressTestsSuite {
             name: "unicode",
             address: .init(personName: nil, sourceRoot: nil, mailbox: "阿Q", host: "例子.中国"),
             expectedString: "(NIL NIL {4}\r\n阿Q {13}\r\n例子.中国)"
-        ),
+        )
     ])
     func encodeEmailAddress(_ fixture: EmailAddressFixture) {
         fixture.checkEncoding()
@@ -76,7 +76,7 @@ struct EmailAddressTestsSuite {
         ),
         ParseFixture.emailAddress("(NIL NIL NIL NIL ", "\r", expected: .failure),
         ParseFixture.emailAddress("", "", expected: .incompleteMessage),
-        ParseFixture.emailAddress("(NIL ", "", expected: .incompleteMessage),
+        ParseFixture.emailAddress("(NIL ", "", expected: .incompleteMessage)
     ])
     func parse(_ fixture: ParseFixture<EmailAddress>) {
         fixture.checkParsing()
@@ -94,18 +94,18 @@ struct EmailAddressTestsSuite {
         EnvelopeGroupingFixture(
             addresses: [
                 .init(personName: "a", sourceRoot: "a", mailbox: "a", host: "a"),
-                .init(personName: "b", sourceRoot: "b", mailbox: "b", host: "b"),
+                .init(personName: "b", sourceRoot: "b", mailbox: "b", host: "b")
             ],
             expected: [
                 .singleAddress(.init(personName: "a", sourceRoot: "a", mailbox: "a", host: "a")),
-                .singleAddress(.init(personName: "b", sourceRoot: "b", mailbox: "b", host: "b")),
+                .singleAddress(.init(personName: "b", sourceRoot: "b", mailbox: "b", host: "b"))
             ]
         ),
         EnvelopeGroupingFixture(
             addresses: [
                 .init(personName: nil, sourceRoot: nil, mailbox: "group", host: nil),
                 .init(personName: "a", sourceRoot: "a", mailbox: "a", host: "a"),
-                .init(personName: nil, sourceRoot: nil, mailbox: nil, host: nil),
+                .init(personName: nil, sourceRoot: nil, mailbox: nil, host: nil)
             ],
             expected: [
                 .group(
@@ -131,7 +131,7 @@ struct EmailAddressTestsSuite {
                 .init(personName: "a", sourceRoot: "a", mailbox: "a", host: "a"),
                 .init(personName: "b", sourceRoot: "b", mailbox: "b", host: "b"),
                 .init(personName: "c", sourceRoot: "c", mailbox: "c", host: "c"),
-                .init(personName: nil, sourceRoot: nil, mailbox: nil, host: nil),
+                .init(personName: nil, sourceRoot: nil, mailbox: nil, host: nil)
             ],
             expected: [
                 .group(
@@ -141,7 +141,7 @@ struct EmailAddressTestsSuite {
                         children: [
                             .singleAddress(.init(personName: "a", sourceRoot: "a", mailbox: "a", host: "a")),
                             .singleAddress(.init(personName: "b", sourceRoot: "b", mailbox: "b", host: "b")),
-                            .singleAddress(.init(personName: "c", sourceRoot: "c", mailbox: "c", host: "c")),
+                            .singleAddress(.init(personName: "c", sourceRoot: "c", mailbox: "c", host: "c"))
                         ]
                     )
                 )
@@ -157,7 +157,7 @@ struct EmailAddressTestsSuite {
                 .init(personName: "c", sourceRoot: "c", mailbox: "c", host: "c"),
                 .init(personName: nil, sourceRoot: nil, mailbox: nil, host: nil),
                 .init(personName: nil, sourceRoot: nil, mailbox: nil, host: nil),
-                .init(personName: nil, sourceRoot: nil, mailbox: nil, host: nil),
+                .init(personName: nil, sourceRoot: nil, mailbox: nil, host: nil)
             ],
             expected: [
                 .group(
@@ -189,15 +189,15 @@ struct EmailAddressTestsSuite {
                                                     )
                                                 ]
                                             )
-                                        ),
+                                        )
                                     ]
                                 )
-                            ),
+                            )
                         ]
                     )
                 )
             ]
-        ),
+        )
     ])
     func parseEnvelopeEmailAddressGroups(_ fixture: EnvelopeGroupingFixture) {
         let actual = GrammarParser().parseEnvelopeEmailAddressGroups(fixture.addresses)

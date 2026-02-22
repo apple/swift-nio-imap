@@ -39,7 +39,7 @@ struct EntryTests {
             EncodeFixture.entryValues(
                 ["name1": .init("value1"), "name2": .init("value2")],
                 "(\"name1\" ~{6}\r\nvalue1 \"name2\" ~{6}\r\nvalue2)"
-            ),
+            )
         ]
     )
     func encodeEntryValues(_ fixture: EncodeFixture<OrderedDictionary<MetadataEntryName, MetadataValue>>) {
@@ -56,7 +56,7 @@ struct EntryTests {
             EncodeFixture.entries(
                 ["name1", "name2"],
                 "(\"name1\" \"name2\")"
-            ),
+            )
         ]
     )
     func encodeEntriesList(_ fixture: EncodeFixture<[MetadataEntryName]>) {
@@ -73,7 +73,7 @@ struct EntryTests {
             EncodeFixture.entryList(
                 ["name1", "name2"],
                 "\"name1\" \"name2\""
-            ),
+            )
         ]
     )
     func encodeEntryList(_ fixture: EncodeFixture<[MetadataEntryName]>) {
@@ -92,7 +92,7 @@ struct EntryTests {
                 "\"name\" NIL",
                 "",
                 expected: .success(.init(key: "name", value: .init(nil)))
-            ),
+            )
         ]
     )
     func parseEntryValue(_ fixture: ParseFixture<KeyValue<MetadataEntryName, MetadataValue>>) {
@@ -111,7 +111,7 @@ struct EntryTests {
                 "(\"name1\" \"value1\" \"name2\" \"value2\")",
                 "",
                 expected: .success(["name1": .init("value1"), "name2": .init("value2")])
-            ),
+            )
         ]
     )
     func parseEntryValues(_ fixture: ParseFixture<OrderedDictionary<MetadataEntryName, MetadataValue>>) {
@@ -135,7 +135,7 @@ struct EntryTests {
                 "(\"name1\" \"name2\")",
                 "",
                 expected: .success(["name1", "name2"])
-            ),
+            )
         ]
     )
     func parseEntries(_ fixture: ParseFixture<[MetadataEntryName]>) {
@@ -152,7 +152,7 @@ struct EntryTests {
             ParseFixture.entryList(
                 "\"name1\" \"name2\"",
                 expected: .success(["name1", "name2"])
-            ),
+            )
         ]
     )
     func parseEntryList(_ fixture: ParseFixture<[MetadataEntryName]>) {

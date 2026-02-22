@@ -21,7 +21,7 @@ struct ListReturnOptionsTests {
     @Test(arguments: [
         EncodeFixture.listReturnOptions([], "RETURN ()"),
         EncodeFixture.listReturnOptions([.subscribed], "RETURN (SUBSCRIBED)"),
-        EncodeFixture.listReturnOptions([.subscribed, .children], "RETURN (SUBSCRIBED CHILDREN)"),
+        EncodeFixture.listReturnOptions([.subscribed, .children], "RETURN (SUBSCRIBED CHILDREN)")
     ])
     func encode(_ fixture: EncodeFixture<[ReturnOption]>) {
         fixture.checkEncoding()

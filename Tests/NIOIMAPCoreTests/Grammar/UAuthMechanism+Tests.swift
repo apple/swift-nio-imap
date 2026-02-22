@@ -26,7 +26,7 @@ struct URLAuthenticationMechanismTests {
         EncodeFixture.urlAuthenticationMechanism(
             .init("test"),
             "test"
-        ),
+        )
     ])
     func encode(_ fixture: EncodeFixture<URLAuthenticationMechanism>) {
         fixture.checkEncoding()
@@ -42,7 +42,7 @@ struct URLAuthenticationMechanismTests {
             "abcdEFG0123456789",
             " ",
             expected: .success(.init("abcdEFG0123456789"))
-        ),
+        )
     ])
     func parse(_ fixture: ParseFixture<URLAuthenticationMechanism>) {
         fixture.checkParsing()

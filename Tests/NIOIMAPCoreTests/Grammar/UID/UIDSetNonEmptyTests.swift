@@ -58,7 +58,7 @@ extension UIDSetNonEmptyTests {
             DebugStringFixture(
                 sut: MessageIdentifierSetNonEmpty<UID>(set: [42...])!,
                 expected: "42:*"
-            ),
+            )
         ]
     )
     func customDebugStringConvertible(_ fixture: DebugStringFixture<MessageIdentifierSetNonEmpty<UID>>) {
@@ -97,7 +97,7 @@ extension UIDSetNonEmptyTests {
         EncodeFixture.uidSet(
             MessageIdentifierSetNonEmpty<UID>(set: [1, 2, 3, 4, 5])!,
             "1:5"
-        ),
+        )
     ])
     func encode(_ fixture: EncodeFixture<MessageIdentifierSetNonEmpty<UID>>) {
         fixture.checkEncoding()

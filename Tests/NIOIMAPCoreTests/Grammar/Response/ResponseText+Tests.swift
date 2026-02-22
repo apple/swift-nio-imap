@@ -22,7 +22,7 @@ struct ResponseTextTests {
         EncodeFixture.responseText(.init(code: nil, text: "buffer"), "buffer"),
         EncodeFixture.responseText(.init(code: .alert, text: "buffer"), "[ALERT] buffer"),
         EncodeFixture.responseText(.init(code: nil, text: ""), " "),
-        EncodeFixture.responseText(.init(code: .alert, text: ""), "[ALERT]  "),
+        EncodeFixture.responseText(.init(code: .alert, text: ""), "[ALERT]  ")
     ])
     func encode(_ fixture: EncodeFixture<ResponseText>) {
         fixture.checkEncoding()
@@ -43,7 +43,7 @@ struct ResponseTextTests {
             "[UIDVALIDITY 1561789793]",
             expected: .success(.init(code: .uidValidity(1_561_789_793), text: ""))
         ),
-        ParseFixture.responseText("[UIDNEXT 171]", expected: .success(.init(code: .uidNext(171), text: ""))),
+        ParseFixture.responseText("[UIDNEXT 171]", expected: .success(.init(code: .uidNext(171), text: "")))
     ])
     func parse(_ fixture: ParseFixture<ResponseText>) {
         fixture.checkParsing()
@@ -53,7 +53,7 @@ struct ResponseTextTests {
         "custom debug string convertible",
         arguments: [
             DebugStringFixture(sut: ResponseText(code: nil, text: "buffer"), expected: "buffer"),
-            DebugStringFixture(sut: ResponseText(code: .alert, text: "buffer"), expected: "[ALERT] buffer"),
+            DebugStringFixture(sut: ResponseText(code: .alert, text: "buffer"), expected: "[ALERT] buffer")
         ]
     )
     func customDebugStringConvertible(_ fixture: DebugStringFixture<ResponseText>) {

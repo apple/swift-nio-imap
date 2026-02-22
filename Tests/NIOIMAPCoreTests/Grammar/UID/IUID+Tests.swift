@@ -42,7 +42,7 @@ struct IUIDTests {
             ParseFixture.parseWithSlash("/;UID=12", " ", expected: .success(.init(uid: 12))),
             ParseFixture.parseWithSlash("/;UID=123", " ", expected: .success(.init(uid: 123))),
             ParseFixture.parseWithSlash("a", " ", expected: .failure),
-            ParseFixture.parseWithSlash("/;UID=1", "", expected: .incompleteMessage),
+            ParseFixture.parseWithSlash("/;UID=1", "", expected: .incompleteMessage)
         ]
     )
     func parseWithSlash(_ fixture: ParseFixture<IUID>) {
@@ -56,7 +56,7 @@ struct IUIDTests {
             ParseFixture.parseWithoutSlash(";UID=12", " ", expected: .success(.init(uid: 12))),
             ParseFixture.parseWithoutSlash(";UID=123", " ", expected: .success(.init(uid: 123))),
             ParseFixture.parseWithoutSlash("a", " ", expected: .failure),
-            ParseFixture.parseWithoutSlash(";UID=1", "", expected: .incompleteMessage),
+            ParseFixture.parseWithoutSlash(";UID=1", "", expected: .incompleteMessage)
         ]
     )
     func parseWithoutSlash(_ fixture: ParseFixture<IUID>) {

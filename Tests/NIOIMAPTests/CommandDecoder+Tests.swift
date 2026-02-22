@@ -41,7 +41,7 @@ extension CommandDecoder_Tests {
             ),
             (.append(.messageBytes("a")), #line),
             (.append(.endMessage), #line),
-            (.append(.finish), #line),
+            (.append(.finish), #line)
         ]
 
         for (expected, line) in output {

@@ -38,7 +38,7 @@ struct MetadataValueTests {
             .init("\0"),
             .init(capabilities: [.binary]),
             ["~{1}\r\n", "\0"]
-        ),
+        )
     ])
     func encode(_ fixture: EncodeFixture<MetadataValue>) {
         fixture.checkEncoding()
@@ -48,7 +48,7 @@ struct MetadataValueTests {
         ParseFixture.metadataValue("NIL", expected: .success(.init(nil))),
         ParseFixture.metadataValue("\"a\"", expected: .success(.init("a"))),
         ParseFixture.metadataValue("{1}\r\na", expected: .success(.init("a"))),
-        ParseFixture.metadataValue("~{1}\r\na", expected: .success(.init("a"))),
+        ParseFixture.metadataValue("~{1}\r\na", expected: .success(.init("a")))
     ])
     func parse(_ fixture: ParseFixture<MetadataValue>) {
         fixture.checkParsing()

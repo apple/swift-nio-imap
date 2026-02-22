@@ -20,7 +20,7 @@ import Testing
 struct EncodedAuthenticatedURLTests {
     @Test(arguments: [
         EncodeFixture.encodedAuthenticationURL(.init(data: "1F"), "1F"),
-        EncodeFixture.encodedAuthenticationURL(.init(data: "ABC123"), "ABC123"),
+        EncodeFixture.encodedAuthenticationURL(.init(data: "ABC123"), "ABC123")
     ])
     func encode(_ fixture: EncodeFixture<EncodedAuthenticatedURL>) {
         fixture.checkEncoding()
@@ -41,7 +41,7 @@ struct EncodedAuthenticatedURLTests {
             "0123456789",
             "",
             expected: .incompleteMessage
-        ),
+        )
     ])
     func parse(_ fixture: ParseFixture<EncodedAuthenticatedURL>) {
         fixture.checkParsing()

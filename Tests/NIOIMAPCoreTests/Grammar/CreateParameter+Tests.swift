@@ -38,7 +38,7 @@ struct CreateParameterTests {
         EncodeFixture.createParameter(
             .attributes([.all, .flagged]),
             "USE (\\All \\Flagged)"
-        ),
+        )
     ])
     func encode(_ fixture: EncodeFixture<CreateParameter>) {
         fixture.checkEncoding()
@@ -66,7 +66,7 @@ struct CreateParameterTests {
             ParseFixture.createParameter("param", "", expected: .incompleteMessage),
             ParseFixture.createParameter("param 1", "", expected: .incompleteMessage),
             ParseFixture.createParameter("USE (\\Test", "", expected: .incompleteMessage),
-            ParseFixture.createParameter("USE (\\All ", "", expected: .incompleteMessage),
+            ParseFixture.createParameter("USE (\\All ", "", expected: .incompleteMessage)
         ]
     )
     func parseSingleCreateParameter(_ fixture: ParseFixture<CreateParameter>) {
@@ -80,11 +80,11 @@ struct CreateParameterTests {
                 " (param1 param2)",
                 expected: .success([
                     .labelled(.init(key: "param1", value: nil)),
-                    .labelled(.init(key: "param2", value: nil)),
+                    .labelled(.init(key: "param2", value: nil))
                 ])
             ),
             ParseFixture.createParameters(" (param1", expected: .failure),
-            ParseFixture.createParameters(" (param1", "", expected: .incompleteMessage),
+            ParseFixture.createParameters(" (param1", "", expected: .incompleteMessage)
         ]
     )
     func parseCreateParametersList(_ fixture: ParseFixture<[CreateParameter]>) {

@@ -22,7 +22,7 @@ struct BodyFieldParameterTests {
     @Test(arguments: [
         EncodeFixture.bodyParameterPairs([:], "NIL"),
         EncodeFixture.bodyParameterPairs(["f1": "v1"], "(\"f1\" \"v1\")"),
-        EncodeFixture.bodyParameterPairs(["f1": "v1", "f2": "v2"], "(\"f1\" \"v1\" \"f2\" \"v2\")"),
+        EncodeFixture.bodyParameterPairs(["f1": "v1", "f2": "v2"], "(\"f1\" \"v1\" \"f2\" \"v2\")")
     ])
     func encoding(_ fixture: EncodeFixture<OrderedDictionary<String, String>>) {
         fixture.checkEncoding()
@@ -39,7 +39,7 @@ struct BodyFieldParameterTests {
                 "NAME": "Nutzungsbedingungen f\u{C3}\u{83}\u{C2}\u{83}\u{C3}\u{82}\u{C2}\u{BC}r Meine Allianz.pdf"
             ])
         ),
-        ParseFixture.bodyParameterPairs(#"("p1" "#, "", expected: .incompleteMessageIgnoringBufferModifications),
+        ParseFixture.bodyParameterPairs(#"("p1" "#, "", expected: .incompleteMessageIgnoringBufferModifications)
     ])
     func parse(_ fixture: ParseFixture<OrderedDictionary<String, String>>) {
         fixture.checkParsing()

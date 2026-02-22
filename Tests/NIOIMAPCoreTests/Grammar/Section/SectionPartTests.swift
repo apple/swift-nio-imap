@@ -21,7 +21,7 @@ struct SectionPartTests {
     @Test(arguments: [
         EncodeFixture.sectionPart([], ""),
         EncodeFixture.sectionPart([715_472], "715472"),
-        EncodeFixture.sectionPart([1, 2, 3, 5, 8, 11], "1.2.3.5.8.11"),
+        EncodeFixture.sectionPart([1, 2, 3, 5, 8, 11], "1.2.3.5.8.11")
     ])
     func encode(_ fixture: EncodeFixture<SectionSpecifier.Part>) {
         fixture.checkEncoding()
@@ -32,7 +32,7 @@ struct SectionPartTests {
         ParseFixture.sectionPart("1.2", expected: .success([1, 2])),
         ParseFixture.sectionPart("1.2.3.4.5", expected: .success([1, 2, 3, 4, 5])),
         ParseFixture.sectionPart("", expected: .failure),
-        ParseFixture.sectionPart("1.", "", expected: .incompleteMessage),
+        ParseFixture.sectionPart("1.", "", expected: .incompleteMessage)
     ])
     func parse(_ fixture: ParseFixture<SectionSpecifier.Part>) {
         fixture.checkParsing()

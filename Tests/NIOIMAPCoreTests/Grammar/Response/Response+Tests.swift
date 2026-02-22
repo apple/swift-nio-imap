@@ -44,7 +44,7 @@ private struct ResponseTests {
             EncodeFixture.response(
                 .fetch(.start(1)),
                 expectedString: "* 1 FETCH ("
-            ),
+            )
         ]
     )
     func encodeSingleResponse(_ fixture: EncodeFixture<Response>) {
@@ -69,21 +69,21 @@ private struct ResponseTests {
             EncodeFixture.fetchResponses(
                 [
                     .start(3), .simpleAttribute(.uid(123)), .streamingBegin(kind: .rfc822Text, byteCount: 0),
-                    .streamingEnd, .simpleAttribute(.uid(456)), .finish,
+                    .streamingEnd, .simpleAttribute(.uid(456)), .finish
                 ],
                 expectedString: "* 3 FETCH (UID 123 RFC822.TEXT {0}\r\n UID 456)\r\n"
             ),
             EncodeFixture.fetchResponses(
                 [
                     .start(3), .simpleAttribute(.uid(123)), .streamingBegin(kind: .rfc822Header, byteCount: 0),
-                    .streamingEnd, .simpleAttribute(.uid(456)), .finish,
+                    .streamingEnd, .simpleAttribute(.uid(456)), .finish
                 ],
                 expectedString: "* 3 FETCH (UID 123 RFC822.HEADER {0}\r\n UID 456)\r\n"
             ),
             EncodeFixture.fetchResponses(
                 [
                     .start(87), .simpleAttribute(.nilBody(.body(section: .init(part: [4], kind: .text), offset: nil))),
-                    .simpleAttribute(.uid(123)), .finish,
+                    .simpleAttribute(.uid(123)), .finish
                 ],
                 expectedString: "* 87 FETCH (BODY[4.TEXT] NIL UID 123)\r\n"
             ),
@@ -91,10 +91,10 @@ private struct ResponseTests {
                 [
                     .startUID(87),
                     .simpleAttribute(.nilBody(.body(section: .init(part: [4], kind: .text), offset: nil))),
-                    .simpleAttribute(.uid(123)), .finish,
+                    .simpleAttribute(.uid(123)), .finish
                 ],
                 expectedString: "* 87 UIDFETCH (BODY[4.TEXT] NIL UID 123)\r\n"
-            ),
+            )
         ]
     )
     func encodeMultipleFetchResponses(_ fixture: EncodeFixture<[FetchResponse]>) {
@@ -112,7 +112,7 @@ private struct ResponseTests {
             ),
             DebugStringFixture(sut: StreamingKind.rfc822, expected: "RFC822"),
             DebugStringFixture(sut: StreamingKind.rfc822Text, expected: "RFC822.TEXT"),
-            DebugStringFixture(sut: StreamingKind.rfc822Header, expected: "RFC822.HEADER"),
+            DebugStringFixture(sut: StreamingKind.rfc822Header, expected: "RFC822.HEADER")
         ]
     )
     func streamingKindCustomDebugString(_ fixture: DebugStringFixture<StreamingKind>) {
@@ -140,7 +140,7 @@ private struct ResponseTests {
                 expected: "RFC822.TEXT {0}\r\n"
             ),
             ReflectionFixture(sut: Response.fetch(.streamingBytes(ByteBuffer(string: "hello"))), expected: "hello"),
-            ReflectionFixture(sut: Response.fetch(.finish), expected: ")\r\n"),
+            ReflectionFixture(sut: Response.fetch(.finish), expected: ")\r\n")
         ]
     )
     func responseReflectionString(_ fixture: ReflectionFixture<Response>) {
@@ -165,7 +165,7 @@ private struct ResponseTests {
                 expected: "RFC822.TEXT {0}\r\n"
             ),
             PIIFixture(input: .fetch(.streamingBytes(ByteBuffer(string: "hello"))), expected: "[5 bytes]"),
-            PIIFixture(input: .fetch(.finish), expected: ")\r\n"),
+            PIIFixture(input: .fetch(.finish), expected: ")\r\n")
         ]
     )
     func responsePIIFiltering(_ fixture: PIIFixture) {

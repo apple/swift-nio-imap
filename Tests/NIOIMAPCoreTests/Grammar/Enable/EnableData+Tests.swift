@@ -34,7 +34,7 @@ struct EnableDataTests {
         EncodeFixture.enableData(
             [.enable, .condStore, .authenticate(.init("some"))],
             "ENABLED ENABLE CONDSTORE AUTH=SOME"
-        ),
+        )
     ])
     func encode(_ fixture: EncodeFixture<[Capability]>) {
         fixture.checkEncoding()
@@ -44,7 +44,7 @@ struct EnableDataTests {
         ParseFixture.enableData("ENABLED", expected: .success([])),
         ParseFixture.enableData("ENABLED ENABLE", expected: .success([.enable])),
         ParseFixture.enableData("ENABLED UTF8=ACCEPT", expected: .success([.utf8(.accept)])),
-        ParseFixture.enableData("ENABLED ENABLE CONDSTORE", expected: .success([.enable, .condStore])),
+        ParseFixture.enableData("ENABLED ENABLE CONDSTORE", expected: .success([.enable, .condStore]))
     ])
     func parse(_ fixture: ParseFixture<[Capability]>) {
         fixture.checkParsing()

@@ -44,7 +44,7 @@ struct RumpAuthenticatedURLTests {
                 authenticatedURLRump: .init(access: .user(.init(data: "testuser")))
             ),
             "imap://mail.example.com/INBOX/;UID=456;URLAUTH=user+testuser"
-        ),
+        )
     ])
     func encode(_ fixture: EncodeFixture<RumpAuthenticatedURL>) {
         fixture.checkEncoding()

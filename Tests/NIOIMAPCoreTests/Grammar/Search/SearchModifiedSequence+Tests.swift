@@ -31,7 +31,7 @@ struct SearchModifiedSequenceTests {
             ),
             "MODSEQ \"/flags/\\\\answered\" all \"/flags/\\\\seen\" priv 1"
         ),
-        EncodeFixture.searchModificationSequence(.init(extensions: [:], sequenceValue: 1), "MODSEQ 1"),
+        EncodeFixture.searchModificationSequence(.init(extensions: [:], sequenceValue: 1), "MODSEQ 1")
     ])
     func encode(_ fixture: EncodeFixture<SearchModificationSequence>) {
         fixture.checkEncoding()
@@ -52,12 +52,12 @@ struct SearchModifiedSequenceTests {
                 .init(
                     extensions: [
                         .init(flag: .answered): .private,
-                        .init(flag: .seen): .shared,
+                        .init(flag: .seen): .shared
                     ],
                     sequenceValue: 4
                 )
             )
-        ),
+        )
     ])
     func parse(_ fixture: ParseFixture<SearchModificationSequence>) {
         fixture.checkParsing()

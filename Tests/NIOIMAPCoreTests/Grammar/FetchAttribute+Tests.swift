@@ -43,7 +43,7 @@ struct FetchAttributeTests {
         EncodeFixture.fetchAttribute(.preview(lazy: false), "PREVIEW"),
         EncodeFixture.fetchAttribute(.preview(lazy: true), "PREVIEW (LAZY)"),
         EncodeFixture.fetchAttribute(.emailID, "EMAILID"),
-        EncodeFixture.fetchAttribute(.threadID, "THREADID"),
+        EncodeFixture.fetchAttribute(.threadID, "THREADID")
     ])
     func encode(_ fixture: EncodeFixture<FetchAttribute>) {
         fixture.checkEncoding()
@@ -92,7 +92,7 @@ struct FetchAttributeTests {
             ReflectionFixture<FetchAttribute>(sut: .preview(lazy: false), expected: "PREVIEW"),
             ReflectionFixture<FetchAttribute>(sut: .preview(lazy: true), expected: "PREVIEW (LAZY)"),
             ReflectionFixture<FetchAttribute>(sut: .emailID, expected: "EMAILID"),
-            ReflectionFixture<FetchAttribute>(sut: .threadID, expected: "THREADID"),
+            ReflectionFixture<FetchAttribute>(sut: .threadID, expected: "THREADID")
         ]
     )
     func customDebugStringConvertible(_ fixture: ReflectionFixture<FetchAttribute>) {
@@ -128,7 +128,7 @@ struct FetchAttributeTests {
                 "(X-GM-LABELS X-GM-MSGID X-GM-THRID)"
             ),
             EncodeFixture.fetchAttributeList([.preview(lazy: false)], "(PREVIEW)"),
-            EncodeFixture.fetchAttributeList([.preview(lazy: true)], "(PREVIEW (LAZY))"),
+            EncodeFixture.fetchAttributeList([.preview(lazy: true)], "(PREVIEW (LAZY))")
         ]
     )
     func encodeList(_ fixture: EncodeFixture<[FetchAttribute]>) {
@@ -199,7 +199,7 @@ struct FetchAttributeTests {
         ParseFixture.fetchAttribute("PREVIEW", " ", expected: .success(.preview(lazy: false))),
         ParseFixture.fetchAttribute("PREVIEW (LAZY)", " ", expected: .success(.preview(lazy: true))),
         ParseFixture.fetchAttribute("EMAILID", " ", expected: .success(.emailID)),
-        ParseFixture.fetchAttribute("THREADID", " ", expected: .success(.threadID)),
+        ParseFixture.fetchAttribute("THREADID", " ", expected: .success(.threadID))
     ])
     func parse(_ fixture: ParseFixture<FetchAttribute>) {
         fixture.checkParsing()
@@ -228,7 +228,7 @@ struct FetchAttributeTests {
             ParseFixture.partial("<", "", expected: .incompleteMessage),
             ParseFixture.partial("<111111111", "", expected: .incompleteMessage),
             ParseFixture.partial("<1.", "", expected: .incompleteMessage),
-            ParseFixture.partial("<1.22222222", "", expected: .incompleteMessage),
+            ParseFixture.partial("<1.22222222", "", expected: .incompleteMessage)
         ]
     )
     func parsePartial(_ fixture: ParseFixture<ClosedRange<UInt32>>) {

@@ -27,7 +27,7 @@ struct CapabilityTests {
                 capability: .status(.size),
                 expectedName: "STATUS",
                 expectedValue: "SIZE"
-            ),
+            )
         ]
     )
     func nameAndValueProperties(_ fixture: CapabilityFixture) {
@@ -96,7 +96,7 @@ struct CapabilityTests {
             EncodeFixture.capability(.unselect, "UNSELECT"),
             EncodeFixture.capability(.utf8(.accept), "UTF8=ACCEPT"),
             EncodeFixture.capability(.within, "WITHIN"),
-            EncodeFixture.capability(.yahooMailHighestModificationSequence, "XYMHIGHESTMODSEQ"),
+            EncodeFixture.capability(.yahooMailHighestModificationSequence, "XYMHIGHESTMODSEQ")
         ]
     )
     func encodeSingleCapability(_ fixture: EncodeFixture<Capability>) {
@@ -107,7 +107,7 @@ struct CapabilityTests {
         "encode multiple capabilities",
         arguments: [
             EncodeFixture.capabilities([.condStore], "CAPABILITY CONDSTORE"),
-            EncodeFixture.capabilities([.condStore, .enable, .filters], "CAPABILITY CONDSTORE ENABLE FILTERS"),
+            EncodeFixture.capabilities([.condStore, .enable, .filters], "CAPABILITY CONDSTORE ENABLE FILTERS")
         ]
     )
     func encodeMultipleCapabilities(_ fixture: EncodeFixture<[Capability]>) {
@@ -174,7 +174,7 @@ struct CapabilityTests {
             ParseFixture.capability("WITHIN", expected: .success(.within)),
             ParseFixture.capability("X-GM-EXT-1", expected: .success(.gmailExtensions)),
             ParseFixture.capability("XYMHIGHESTMODSEQ", expected: .success(.yahooMailHighestModificationSequence)),
-            ParseFixture.capability("", "", expected: .incompleteMessage),
+            ParseFixture.capability("", "", expected: .incompleteMessage)
         ]
     )
     func parse(_ fixture: ParseFixture<Capability>) {
@@ -192,7 +192,7 @@ struct CapabilityTests {
         ParseFixture.capabilityData(
             "CAPABILITY FILTERS IMAP4rev1 ENABLE IMAP4",
             expected: .success([.filters, .imap4rev1, .enable, .imap4])
-        ),
+        )
     ])
     func parseCapabilityData(_ fixture: ParseFixture<[Capability]>) {
         fixture.checkParsing()

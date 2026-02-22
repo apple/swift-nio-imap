@@ -21,7 +21,7 @@ struct ResponseFatalTests {
     @Test(arguments: [
         EncodeFixture.responseFatal(.init(code: .alert, text: "error"), "* BYE [ALERT] error\r\n"),
         EncodeFixture.responseFatal(.init(code: .serverBug, text: "Oops"), "* BYE [SERVERBUG] Oops\r\n"),
-        EncodeFixture.responseFatal(.init(code: nil, text: "Oh, no"), "* BYE Oh, no\r\n"),
+        EncodeFixture.responseFatal(.init(code: nil, text: "Oh, no"), "* BYE Oh, no\r\n")
     ])
     func encode(_ fixture: EncodeFixture<ResponseText>) {
         fixture.checkEncoding()

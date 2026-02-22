@@ -35,7 +35,7 @@ struct IMAPServerTests {
                 port: 1234
             ),
             ";AUTH=*@localhost:1234"
-        ),
+        )
     ])
     func encode(_ fixture: EncodeFixture<IMAPServer>) {
         fixture.checkEncoding()
@@ -73,7 +73,7 @@ struct IMAPServerTests {
                     port: 1234
                 )
             )
-        ),
+        )
     ])
     func parse(_ fixture: ParseFixture<IMAPServer>) {
         fixture.checkParsing()

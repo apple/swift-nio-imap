@@ -106,7 +106,7 @@ struct CommandTypeTests {
         ),
         CommandEncodeFixture.command(
             .generateAuthorizedURL([
-                .init(urlRump: "rump2", mechanism: .internal), .init(urlRump: "rump3", mechanism: .init("test")),
+                .init(urlRump: "rump2", mechanism: .internal), .init(urlRump: "rump3", mechanism: .init("test"))
             ]),
             "GENURLAUTH \"rump2\" INTERNAL \"rump3\" test"
         ),
@@ -173,7 +173,7 @@ struct CommandTypeTests {
         CommandEncodeFixture.command(
             .custom(name: "FOOBAR", payloads: [.literal(.init(string: "¶"))]),
             expectedStrings: ["FOOBAR {2}\r\n", "¶"]
-        ),
+        )
     ])
     func encode(_ fixture: CommandEncodeFixture<Command>) {
         fixture.checkEncoding()
@@ -297,7 +297,7 @@ struct CommandTypeTests {
         ParseFixture.command("SUBSCRIBE ", "", expected: .incompleteMessage),
         ParseFixture.command("UNSUBSCRIBE", " ", expected: .incompleteMessage),
         ParseFixture.command("RENAME box1 ", "", expected: .incompleteMessage),
-        ParseFixture.command("DELETE ", "", expected: .incompleteMessageIgnoringBufferModifications),
+        ParseFixture.command("DELETE ", "", expected: .incompleteMessageIgnoringBufferModifications)
     ])
     func parse(_ fixture: ParseFixture<Command>) {
         fixture.checkParsing()
@@ -322,7 +322,7 @@ struct CommandTypeTests {
         ParseFixture.idSuffix(" ~", "", expected: .failure),
         ParseFixture.idSuffix(" []", "", expected: .failure),
         ParseFixture.idSuffix(" (\"name\"", "", expected: .incompleteMessage),
-        ParseFixture.idSuffix(" (\"name\" \"some\"", "", expected: .incompleteMessage),
+        ParseFixture.idSuffix(" (\"name\" \"some\"", "", expected: .incompleteMessage)
     ])
     func parseIdSuffix(_ fixture: ParseFixture<Command>) {
         fixture.checkParsing()
@@ -332,7 +332,7 @@ struct CommandTypeTests {
         ParseFixture.enableSuffix(" ACL", expected: .success(.enable([.acl]))),
         ParseFixture.enableSuffix(" ACL BINARY CHILDREN", expected: .success(.enable([.acl, .binary, .children]))),
         ParseFixture.enableSuffix(" (ACL)", expected: .failure),
-        ParseFixture.enableSuffix(" ACL", "", expected: .incompleteMessage),
+        ParseFixture.enableSuffix(" ACL", "", expected: .incompleteMessage)
     ])
     func parseEnableSuffix(_ fixture: ParseFixture<Command>) {
         fixture.checkParsing()
@@ -352,7 +352,7 @@ struct CommandTypeTests {
         ParseFixture.getMetadataSuffix(" (MAXSIZE 123 rogue) INBOX", expected: .failure),
         ParseFixture.getMetadataSuffix(" (key", "", expected: .incompleteMessage),
         ParseFixture.getMetadataSuffix(" (key value", "", expected: .incompleteMessage),
-        ParseFixture.getMetadataSuffix(" (MAXSIZE 123) INBOX", "", expected: .incompleteMessage),
+        ParseFixture.getMetadataSuffix(" (MAXSIZE 123) INBOX", "", expected: .incompleteMessage)
     ])
     func parseGetMetadataSuffix(_ fixture: ParseFixture<Command>) {
         fixture.checkParsing()
@@ -367,7 +367,7 @@ struct CommandTypeTests {
         ParseFixture.setMetadataSuffix(" (a NIL)", "", expected: .failure),
         ParseFixture.setMetadataSuffix(" INBOX", "", expected: .incompleteMessage),
         ParseFixture.setMetadataSuffix(" INBOX (", "", expected: .incompleteMessage),
-        ParseFixture.setMetadataSuffix(" INBOX (a", "", expected: .incompleteMessage),
+        ParseFixture.setMetadataSuffix(" INBOX (a", "", expected: .incompleteMessage)
     ])
     func parseSetMetadataSuffix(_ fixture: ParseFixture<Command>) {
         fixture.checkParsing()
@@ -386,7 +386,7 @@ struct CommandTypeTests {
         ),
         ParseFixture.resetKeySuffix(" INBOX", "", expected: .incompleteMessage),
         ParseFixture.resetKeySuffix(" INBOX INTERNAL", "", expected: .incompleteMessage),
-        ParseFixture.resetKeySuffix(" INBOX INTERNAL test", "", expected: .incompleteMessage),
+        ParseFixture.resetKeySuffix(" INBOX INTERNAL test", "", expected: .incompleteMessage)
     ])
     func parseResetKeySuffix(_ fixture: ParseFixture<Command>) {
         fixture.checkParsing()
@@ -401,14 +401,14 @@ struct CommandTypeTests {
             " test INTERNAL test2 INTERNAL",
             expected: .success(
                 .generateAuthorizedURL([
-                    .init(urlRump: "test", mechanism: .internal), .init(urlRump: "test2", mechanism: .internal),
+                    .init(urlRump: "test", mechanism: .internal), .init(urlRump: "test2", mechanism: .internal)
                 ])
             )
         ),
         ParseFixture.genURLAuthSuffix(" \\", "", expected: .failure),
         ParseFixture.genURLAuthSuffix(" ", "", expected: .incompleteMessage),
         ParseFixture.genURLAuthSuffix(" test", "", expected: .incompleteMessage),
-        ParseFixture.genURLAuthSuffix(" test internal", "", expected: .incompleteMessage),
+        ParseFixture.genURLAuthSuffix(" test internal", "", expected: .incompleteMessage)
     ])
     func parseGenURLAuthSuffix(_ fixture: ParseFixture<Command>) {
         fixture.checkParsing()
@@ -419,7 +419,7 @@ struct CommandTypeTests {
         ParseFixture.urlFetchSuffix(" test1 test2", expected: .success(.urlFetch(["test1", "test2"]))),
         ParseFixture.urlFetchSuffix(" \\ ", "", expected: .failure),
         ParseFixture.urlFetchSuffix(" test", "", expected: .incompleteMessage),
-        ParseFixture.urlFetchSuffix(" test1 test2 test3", "", expected: .incompleteMessage),
+        ParseFixture.urlFetchSuffix(" test1 test2 test3", "", expected: .incompleteMessage)
     ])
     func parseUrlFetchSuffix(_ fixture: ParseFixture<Command>) {
         fixture.checkParsing()
@@ -433,7 +433,7 @@ struct CommandTypeTests {
         ParseFixture.copySuffix(" a inbox", expected: .failure),
         ParseFixture.copySuffix(" 1: inbox", expected: .failure),
         ParseFixture.copySuffix(" 1", "", expected: .incompleteMessage),
-        ParseFixture.copySuffix(" 1 inbox", "", expected: .incompleteMessage),
+        ParseFixture.copySuffix(" 1 inbox", "", expected: .incompleteMessage)
     ])
     func parseCopySuffix(_ fixture: ParseFixture<Command>) {
         fixture.checkParsing()
@@ -442,7 +442,7 @@ struct CommandTypeTests {
     @Test(arguments: [
         ParseFixture.deleteSuffix(" INBOX", "\r\n", expected: .success(.delete(.inbox))),
         ParseFixture.deleteSuffix(" {5}12345", " ", expected: .failure),
-        ParseFixture.deleteSuffix(" INBOX", "", expected: .incompleteMessage),
+        ParseFixture.deleteSuffix(" INBOX", "", expected: .incompleteMessage)
     ])
     func parseDeleteSuffix(_ fixture: ParseFixture<Command>) {
         fixture.checkParsing()
@@ -456,7 +456,7 @@ struct CommandTypeTests {
         ParseFixture.moveSuffix(" a inbox", expected: .failure),
         ParseFixture.moveSuffix(" 1: inbox", expected: .failure),
         ParseFixture.moveSuffix(" 1", "", expected: .incompleteMessage),
-        ParseFixture.moveSuffix(" 1 inbox", "", expected: .incompleteMessage),
+        ParseFixture.moveSuffix(" 1 inbox", "", expected: .incompleteMessage)
     ])
     func parseMoveSuffix(_ fixture: ParseFixture<Command>) {
         fixture.checkParsing()
@@ -498,7 +498,7 @@ struct CommandTypeTests {
                     returnOptions: [.min, .max]
                 )
             )
-        ),
+        )
     ])
     func parseSearchSuffix(_ fixture: ParseFixture<Command>) {
         fixture.checkParsing()
@@ -516,13 +516,13 @@ struct CommandTypeTests {
                         returnOptions: [],
                         sourceOptions: ExtendedSearchSourceOptions(sourceMailbox: [
                             .mailboxes(Mailboxes([MailboxName("folder1")])!),
-                            .subtree(Mailboxes([MailboxName("folder2")])!),
+                            .subtree(Mailboxes([MailboxName("folder2")])!)
                         ])
                     )
                 )
             )
         ),
-        ParseFixture.esearchSuffix(" IN (mailboxes ", "", expected: .incompleteMessage),
+        ParseFixture.esearchSuffix(" IN (mailboxes ", "", expected: .incompleteMessage)
     ])
     func parseEsearchSuffix(_ fixture: ParseFixture<Command>) {
         fixture.checkParsing()
@@ -555,7 +555,7 @@ struct CommandTypeTests {
         ),
         ParseFixture.storeSuffix(" +FLAGS \\answered", expected: .failure),
         ParseFixture.storeSuffix(" ", "", expected: .incompleteMessage),
-        ParseFixture.storeSuffix(" 1 ", "", expected: .incompleteMessage),
+        ParseFixture.storeSuffix(" 1 ", "", expected: .incompleteMessage)
     ])
     func parseStoreSuffix(_ fixture: ParseFixture<Command>) {
         fixture.checkParsing()
@@ -567,7 +567,7 @@ struct CommandTypeTests {
         ParseFixture.examineSuffix(
             "EXAMINE inbox (number)",
             expected: .success(.examine(.inbox, [.basic(.init(key: "number", value: nil))]))
-        ),
+        )
     ])
     func parseExamineSuffix(_ fixture: ParseFixture<Command>) {
         fixture.checkParsing()
@@ -596,7 +596,7 @@ struct CommandTypeTests {
         ),
         ParseFixture.LSUBSuffix(" {5}inbox", "", expected: .failure),
         ParseFixture.LSUBSuffix(" inbox", "", expected: .incompleteMessage),
-        ParseFixture.LSUBSuffix(" inbox list", "", expected: .incompleteMessage),
+        ParseFixture.LSUBSuffix(" inbox list", "", expected: .incompleteMessage)
     ])
     func parseLSUBSuffix(_ fixture: ParseFixture<Command>) {
         fixture.checkParsing()
@@ -612,7 +612,7 @@ struct CommandTypeTests {
         ParseFixture.renameSuffix(" {2}b1 {2}b2", "", expected: .failure),
         ParseFixture.renameSuffix(" {2}\r\nb1 {2}b2", "", expected: .failure),
         ParseFixture.renameSuffix(" box1", "", expected: .incompleteMessage),
-        ParseFixture.renameSuffix(" box1 box2", "", expected: .incompleteMessage),
+        ParseFixture.renameSuffix(" box1 box2", "", expected: .incompleteMessage)
     ])
     func parseRenameSuffix(_ fixture: ParseFixture<Command>) {
         fixture.checkParsing()
@@ -625,7 +625,7 @@ struct CommandTypeTests {
             expected: .success(.select(.inbox, [.basic(.init(key: "some1", value: nil))]))
         ),
         ParseFixture.selectSuffix(" ", expected: .failure),
-        ParseFixture.selectSuffix(" ", "", expected: .incompleteMessage),
+        ParseFixture.selectSuffix(" ", "", expected: .incompleteMessage)
     ])
     func parseSelectSuffix(_ fixture: ParseFixture<Command>) {
         fixture.checkParsing()
@@ -646,7 +646,7 @@ struct CommandTypeTests {
         ),
         ParseFixture.statusSuffix(" inbox (messages unseen", "\r\n", expected: .failure),
         ParseFixture.statusSuffix("", "", expected: .incompleteMessage),
-        ParseFixture.statusSuffix(" Deleted (messages ", "", expected: .incompleteMessage),
+        ParseFixture.statusSuffix(" Deleted (messages ", "", expected: .incompleteMessage)
     ])
     func parseStatusSuffix(_ fixture: ParseFixture<Command>) {
         fixture.checkParsing()
@@ -655,7 +655,7 @@ struct CommandTypeTests {
     @Test(arguments: [
         ParseFixture.subscribeSuffix(" INBOX", expected: .success(.subscribe(.inbox))),
         ParseFixture.subscribeSuffix("inbox", "", expected: .failure),
-        ParseFixture.subscribeSuffix(" inbox", "", expected: .incompleteMessage),
+        ParseFixture.subscribeSuffix(" inbox", "", expected: .incompleteMessage)
     ])
     func parseSubscribeSuffix(_ fixture: ParseFixture<Command>) {
         fixture.checkParsing()
@@ -664,7 +664,7 @@ struct CommandTypeTests {
     @Test(arguments: [
         ParseFixture.unsubscribeSuffix(" inbox", expected: .success(.unsubscribe(.inbox))),
         ParseFixture.unsubscribeSuffix("inbox", "", expected: .failure),
-        ParseFixture.unsubscribeSuffix(" inbox", "", expected: .incompleteMessage),
+        ParseFixture.unsubscribeSuffix(" inbox", "", expected: .incompleteMessage)
     ])
     func parseUnsubscribeSuffix(_ fixture: ParseFixture<Command>) {
         fixture.checkParsing()
@@ -700,7 +700,7 @@ struct CommandTypeTests {
             "\r\n",
             expected: .success(.uidCopy(.set([MessageIdentifierRange<UID>(.max)]), .inbox))
         ),
-        ParseFixture.uidSuffix("UID RENAME inbox other", " ", expected: .failure),
+        ParseFixture.uidSuffix("UID RENAME inbox other", " ", expected: .failure)
     ])
     func parseUidSuffix(_ fixture: ParseFixture<Command>) {
         fixture.checkParsing()
@@ -722,7 +722,7 @@ struct CommandTypeTests {
         ParseFixture.fetchSuffix(
             " 1 BODY[TEXT]",
             expected: .success(.fetch(.set([1]), [.bodySection(peek: false, .init(kind: .text), nil)], []))
-        ),
+        )
     ])
     func parseFetchSuffix(_ fixture: ParseFixture<Command>) {
         fixture.checkParsing()
@@ -744,7 +744,7 @@ struct CommandTypeTests {
         ParseFixture.loginSuffix("email password", "", expected: .failure),
         ParseFixture.loginSuffix(" email", "", expected: .incompleteMessage),
         ParseFixture.loginSuffix(" email password", "", expected: .incompleteMessage),
-        ParseFixture.loginSuffix(" {5}\r\nemail {8}", "", expected: .incompleteMessage),
+        ParseFixture.loginSuffix(" {5}\r\nemail {8}", "", expected: .incompleteMessage)
     ])
     func parseLoginSuffix(_ fixture: ParseFixture<Command>) {
         fixture.checkParsing()
@@ -757,7 +757,7 @@ struct CommandTypeTests {
         ParseFixture.userId("\"test\"", " ", expected: .success("test")),
         ParseFixture.userId("\\\\", "", expected: .failure),
         ParseFixture.userId("aaa", "", expected: .incompleteMessage),
-        ParseFixture.userId("{1}\r\n", "", expected: .incompleteMessage),
+        ParseFixture.userId("{1}\r\n", "", expected: .incompleteMessage)
     ])
     func parseUserId(_ fixture: ParseFixture<String>) {
         fixture.checkParsing()
@@ -773,7 +773,7 @@ struct CommandTypeTests {
             expected: .success(.authenticate(mechanism: .gssAPI, initialResponse: .init(.init(.init(string: "hey")))))
         ),
         ParseFixture.authenticateSuffix(" \"GSSAPI\"", "", expected: .failure),
-        ParseFixture.authenticateSuffix(" gssapi", "", expected: .incompleteMessage),
+        ParseFixture.authenticateSuffix(" gssapi", "", expected: .incompleteMessage)
     ])
     func parseAuthenticateSuffix(_ fixture: ParseFixture<Command>) {
         fixture.checkParsing()
@@ -797,13 +797,13 @@ struct CommandTypeTests {
                     .inbox,
                     [
                         .attributes([.all, .flagged]), .labelled(.init(key: "some1", value: .sequence(.set([2])))),
-                        .attributes([.sent]),
+                        .attributes([.sent])
                     ]
                 )
             )
         ),
         ParseFixture.createSuffix(" inbox", "", expected: .incompleteMessage),
-        ParseFixture.createSuffix(" inbox (USE", "", expected: .incompleteMessage),
+        ParseFixture.createSuffix(" inbox (USE", "", expected: .incompleteMessage)
     ])
     func parseCreateSuffix(_ fixture: ParseFixture<Command>) {
         fixture.checkParsing()
@@ -813,7 +813,7 @@ struct CommandTypeTests {
         ParseFixture.getQuotaSuffix(" \"\"", expected: .success(.getQuota(.init("")))),
         ParseFixture.getQuotaSuffix(" \"quota\"", expected: .success(.getQuota(.init("quota")))),
         ParseFixture.getQuotaSuffix(" {5}quota", expected: .failure),
-        ParseFixture.getQuotaSuffix(" \"root", "", expected: .incompleteMessage),
+        ParseFixture.getQuotaSuffix(" \"root", "", expected: .incompleteMessage)
     ])
     func parseGetQuotaSuffix(_ fixture: ParseFixture<Command>) {
         fixture.checkParsing()
@@ -838,7 +838,7 @@ struct CommandTypeTests {
         ParseFixture.setQuotaSuffix(#" "root"#, "", expected: .incompleteMessage),
         ParseFixture.setQuotaSuffix(#" "root" ("#, "", expected: .incompleteMessage),
         ParseFixture.setQuotaSuffix(#" "root" (STORAGE"#, "", expected: .incompleteMessage),
-        ParseFixture.setQuotaSuffix(#" "root" (STORAGE 123"#, "", expected: .incompleteMessage),
+        ParseFixture.setQuotaSuffix(#" "root" (STORAGE 123"#, "", expected: .incompleteMessage)
     ])
     func parseSetQuotaSuffix(_ fixture: ParseFixture<Command>) {
         fixture.checkParsing()
@@ -849,7 +849,7 @@ struct CommandTypeTests {
         ParseFixture.getQuotaRootSuffix(" \"INBOX\"", expected: .success(.getQuotaRoot(.inbox))),
         ParseFixture.getQuotaRootSuffix(" {5}\r\nINBOX", expected: .success(.getQuotaRoot(.inbox))),
         ParseFixture.getQuotaRootSuffix(" {5}INBOX", "", expected: .failure),
-        ParseFixture.getQuotaRootSuffix(" INBOX", "", expected: .incompleteMessage),
+        ParseFixture.getQuotaRootSuffix(" INBOX", "", expected: .incompleteMessage)
     ])
     func parseGetQuotaRootSuffix(_ fixture: ParseFixture<Command>) {
         fixture.checkParsing()

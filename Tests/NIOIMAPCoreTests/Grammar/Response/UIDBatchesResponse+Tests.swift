@@ -44,7 +44,7 @@ struct UIDBatchesResponseTests {
                 batches: [3_298_065...8_548_912]
             ),
             #"UIDBATCHES (TAG "A143" MAILBOX "Sent" UIDVALIDITY 8389223) 8548912:3298065"#
-        ),
+        )
     ])
     func encode(_ fixture: EncodeFixture<UIDBatchesResponse>) {
         fixture.checkEncoding()
@@ -80,7 +80,7 @@ struct UIDBatchesResponseTests {
                     batches: [3_298_065...8_548_912]
                 )
             )
-        ),
+        )
     ])
     func parse(_ fixture: ParseFixture<UIDBatchesResponse>) {
         fixture.checkParsing()

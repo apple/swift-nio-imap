@@ -37,7 +37,7 @@ struct UntaggedStatusTests {
         EncodeFixture.untaggedStatus(
             .bye(.init(text: "Autologout; idle for too long")),
             "BYE Autologout; idle for too long"
-        ),
+        )
     ])
     func encode(_ fixture: EncodeFixture<UntaggedStatus>) {
         fixture.checkEncoding()
@@ -74,7 +74,7 @@ struct UntaggedStatusTests {
         ParseFixture.untaggedStatus("NO ", "\n", expected: .success(.no(.init(code: nil, text: "")))),
         ParseFixture.untaggedStatus("NO", "\n", expected: .success(.no(.init(code: nil, text: "")))),
         ParseFixture.untaggedStatus("OOPS [ALERT] hello1", "\n", expected: .failure),
-        ParseFixture.untaggedStatus("OOPS", "", expected: .incompleteMessage),
+        ParseFixture.untaggedStatus("OOPS", "", expected: .incompleteMessage)
     ])
     func parse(_ fixture: ParseFixture<UntaggedStatus>) {
         fixture.checkParsing()

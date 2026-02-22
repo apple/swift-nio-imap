@@ -23,7 +23,7 @@ struct MailboxTests {
         EncodeFixture.mailbox(.init(""), #""""#),
         EncodeFixture.mailbox(.init("box"), #""box""#),
         EncodeFixture.mailbox(.init(#"a"b"#), #""a\"b""#),
-        EncodeFixture.mailbox(.init(ByteBuffer(string: #"&ltFO9g-\"#)), #""&ltFO9g-\\""#),
+        EncodeFixture.mailbox(.init(ByteBuffer(string: #"&ltFO9g-\"#)), #""&ltFO9g-\\""#)
     ])
     func encode(_ fixture: EncodeFixture<MailboxName>) {
         fixture.checkEncoding()

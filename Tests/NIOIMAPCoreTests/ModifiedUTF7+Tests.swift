@@ -34,7 +34,7 @@ struct ModifiedUTF7Tests {
             ("a/b/c", "a/b/c"),
             (#"a\b\c"#, #"a\b\c"#),
             ("a+b", "a+b"),
-            ("~ab", "~ab"),
+            ("~ab", "~ab")
         ]
     )
     func encodeConvertsStringsToModifiedUTF7(input: String, expected: String) {
@@ -58,7 +58,7 @@ struct ModifiedUTF7Tests {
             ("a/b/c", "a/b/c"),
             (#"a\b\c"#, #"a\b\c"#),
             ("a+b", "a+b"),
-            ("~ab", "~ab"),
+            ("~ab", "~ab")
         ]
     )
     func decodeConvertsModifiedUTF7ToStrings(input: String, expected: String) throws {
@@ -79,7 +79,7 @@ struct ModifiedUTF7Tests {
             "a",
             "a/b/c",
             "&2Dzf49g83+M-",
-            "&ltFO9g-",
+            "&ltFO9g-"
         ]
     )
     func validateAcceptsValidModifiedUTF7Strings(input: String) throws {
@@ -90,7 +90,7 @@ struct ModifiedUTF7Tests {
         "validate rejects invalid Modified UTF-7 strings",
         arguments: [
             "&Jjo!",
-            "&U,BTFw-&ZeVnLIqe-",
+            "&U,BTFw-&ZeVnLIqe-"
         ]
     )
     func validateRejectsInvalidModifiedUTF7Strings(input: String) {

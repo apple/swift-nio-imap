@@ -84,7 +84,7 @@ extension DateTests {
         EncodeFixture.date(
             IMAPCalendarDay(year: 2023, month: 10, day: 13)!,
             "13-Oct-2023"
-        ),
+        )
     ])
     func encode(_ fixture: EncodeFixture<IMAPCalendarDay>) {
         fixture.checkEncoding()
@@ -94,7 +94,7 @@ extension DateTests {
         ParseFixture.date("25-Jun-1994", " ", expected: .success(IMAPCalendarDay(year: 1994, month: 6, day: 25)!)),
         ParseFixture.date("\"25-Jun-1994\"", "\r", expected: .success(IMAPCalendarDay(year: 1994, month: 6, day: 25)!)),
         ParseFixture.date("\"25-Jun-1994 ", "\r", expected: .failure),
-        ParseFixture.date("\"\"", "\r", expected: .failure),
+        ParseFixture.date("\"\"", "\r", expected: .failure)
     ])
     func parse(_ fixture: ParseFixture<IMAPCalendarDay>) {
         fixture.checkParsing()
@@ -107,7 +107,7 @@ extension DateTests {
             ParseFixture.dateDay("12", "\r", expected: .success(12)),
             ParseFixture.dateDay("1", "a", expected: .success(1)),
             ParseFixture.dateDay("a", "\r", expected: .failureIgnoringBufferModifications),
-            ParseFixture.dateDay("1234 ", "\r", expected: .failureIgnoringBufferModifications),
+            ParseFixture.dateDay("1234 ", "\r", expected: .failureIgnoringBufferModifications)
         ]
     )
     func parseDateDay(_ fixture: ParseFixture<Int>) {
@@ -120,7 +120,7 @@ extension DateTests {
             ParseFixture.dateMonth("jun", " ", expected: .success(6)),
             ParseFixture.dateMonth("JUn", " ", expected: .success(6)),
             ParseFixture.dateMonth("ju", "", expected: .incompleteMessageIgnoringBufferModifications),
-            ParseFixture.dateMonth("aaa ", " ", expected: .failureIgnoringBufferModifications),
+            ParseFixture.dateMonth("aaa ", " ", expected: .failureIgnoringBufferModifications)
         ]
     )
     func parseDateMonth(_ fixture: ParseFixture<Int>) {
@@ -135,7 +135,7 @@ extension DateTests {
                 " ",
                 expected: .success(IMAPCalendarDay(year: 1994, month: 6, day: 25)!)
             ),
-            ParseFixture.dateText("25-Jun-", "", expected: .incompleteMessageIgnoringBufferModifications),
+            ParseFixture.dateText("25-Jun-", "", expected: .incompleteMessageIgnoringBufferModifications)
         ]
     )
     func parseDateText(_ fixture: ParseFixture<IMAPCalendarDay>) {

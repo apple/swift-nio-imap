@@ -39,7 +39,7 @@ struct ResponseStreamingTests {
                     .fetch(.streamingBytes("abc")),
                     .fetch(.streamingEnd),
                     .fetch(.simpleAttribute(.flags([.seen, .answered]))),
-                    .fetch(.finish),
+                    .fetch(.finish)
                 ]
             ),
             FetchResponseFixture(
@@ -51,7 +51,7 @@ struct ResponseStreamingTests {
                     .fetch(.streamingBegin(kind: .body(section: .text, offset: nil), byteCount: 3)),
                     .fetch(.streamingBytes("def")),
                     .fetch(.streamingEnd),
-                    .fetch(.finish),
+                    .fetch(.finish)
                 ]
             ),
             FetchResponseFixture(
@@ -62,7 +62,7 @@ struct ResponseStreamingTests {
                     .fetch(.streamingBegin(kind: .body(section: .text, offset: nil), byteCount: 3)),
                     .fetch(.streamingBytes("ghi")),
                     .fetch(.streamingEnd),
-                    .fetch(.finish),
+                    .fetch(.finish)
                 ]
             ),
             FetchResponseFixture(
@@ -73,7 +73,7 @@ struct ResponseStreamingTests {
                     .fetch(
                         .simpleAttribute(.nilBody(.body(section: .init(part: [5, 2], kind: .MIMEHeader), offset: nil)))
                     ),
-                    .fetch(.finish),
+                    .fetch(.finish)
                 ]
             ),
             FetchResponseFixture(
@@ -83,7 +83,7 @@ struct ResponseStreamingTests {
                     .fetch(.start(3)),
                     .fetch(.simpleAttribute(.nilBody(.body(section: .init(part: [3]), offset: nil)))),
                     .fetch(.simpleAttribute(.uid(456))),
-                    .fetch(.finish),
+                    .fetch(.finish)
                 ]
             ),
             FetchResponseFixture(
@@ -94,7 +94,7 @@ struct ResponseStreamingTests {
                     .fetch(.streamingBegin(kind: .binary(section: [4], offset: nil), byteCount: 3)),
                     .fetch(.streamingBytes("ghi")),
                     .fetch(.streamingEnd),
-                    .fetch(.finish),
+                    .fetch(.finish)
                 ]
             ),
             FetchResponseFixture(
@@ -103,7 +103,7 @@ struct ResponseStreamingTests {
                 expectation: [
                     .fetch(.start(3)),
                     .fetch(.simpleAttribute(.nilBody(.binary(section: [4], offset: nil)))),
-                    .fetch(.finish),
+                    .fetch(.finish)
                 ]
             ),
             FetchResponseFixture(
@@ -117,7 +117,7 @@ struct ResponseStreamingTests {
                     .fetch(.streamingBytes("abc")),
                     .fetch(.streamingEnd),
                     .fetch(.simpleAttribute(.flags([.seen, .answered]))),
-                    .fetch(.finish),
+                    .fetch(.finish)
                 ]
             ),
             FetchResponseFixture(
@@ -131,7 +131,7 @@ struct ResponseStreamingTests {
                     .fetch(.streamingBytes("asdf")),
                     .fetch(.streamingEnd),
                     .fetch(.simpleAttribute(.flags([.seen, .answered]))),
-                    .fetch(.finish),
+                    .fetch(.finish)
                 ]
             ),
             FetchResponseFixture(
@@ -148,7 +148,7 @@ struct ResponseStreamingTests {
                     .fetch(.streamingBytes("abc")),
                     .fetch(.streamingEnd),
                     .fetch(.simpleAttribute(.flags([.seen, .answered]))),
-                    .fetch(.finish),
+                    .fetch(.finish)
                 ]
             ),
             FetchResponseFixture(
@@ -165,7 +165,7 @@ struct ResponseStreamingTests {
                     .fetch(.streamingBytes("abc")),
                     .fetch(.streamingEnd),
                     .fetch(.simpleAttribute(.flags([.seen, .answered]))),
-                    .fetch(.finish),
+                    .fetch(.finish)
                 ]
             ),
             FetchResponseFixture(
@@ -176,7 +176,7 @@ struct ResponseStreamingTests {
                     .fetch(.streamingBegin(kind: .rfc822Text, byteCount: 3)),
                     .fetch(.streamingBytes("abc")),
                     .fetch(.streamingEnd),
-                    .fetch(.finish),
+                    .fetch(.finish)
                 ]
             ),
             FetchResponseFixture(
@@ -187,7 +187,7 @@ struct ResponseStreamingTests {
                     .fetch(.streamingBegin(kind: .rfc822Header, byteCount: 3)),
                     .fetch(.streamingBytes("abc")),
                     .fetch(.streamingEnd),
-                    .fetch(.finish),
+                    .fetch(.finish)
                 ]
             ),
             FetchResponseFixture(
@@ -198,7 +198,7 @@ struct ResponseStreamingTests {
                     .fetch(.streamingBegin(kind: .binary(section: [], offset: nil), byteCount: 4)),
                     .fetch(.streamingBytes("1234")),
                     .fetch(.streamingEnd),
-                    .fetch(.finish),
+                    .fetch(.finish)
                 ]
             ),
             FetchResponseFixture(
@@ -209,9 +209,9 @@ struct ResponseStreamingTests {
                     .fetch(.streamingBegin(kind: .binary(section: [1, 2], offset: 77), byteCount: 4)),
                     .fetch(.streamingBytes("1234")),
                     .fetch(.streamingEnd),
-                    .fetch(.finish),
+                    .fetch(.finish)
                 ]
-            ),
+            )
         ]
     )
     func parseFetchResponses(_ fixture: FetchResponseFixture) throws {

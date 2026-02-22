@@ -24,7 +24,7 @@ struct StoreAttributeFlagsTests {
         EncodeFixture.storeFlags(.remove(silent: true, list: [.deleted]), "-FLAGS.SILENT (\\Deleted)"),
         EncodeFixture.storeFlags(.remove(silent: false, list: [.flagged]), "-FLAGS (\\Flagged)"),
         EncodeFixture.storeFlags(.replace(silent: true, list: [.seen]), "FLAGS.SILENT (\\Seen)"),
-        EncodeFixture.storeFlags(.replace(silent: false, list: [.deleted]), "FLAGS (\\Deleted)"),
+        EncodeFixture.storeFlags(.replace(silent: false, list: [.deleted]), "FLAGS (\\Deleted)")
     ])
     func encode(_ fixture: EncodeFixture<StoreFlags>) {
         fixture.checkEncoding()
@@ -46,7 +46,7 @@ struct StoreAttributeFlagsTests {
         ParseFixture.storeFlags(#"FLAGS.SILEN \answered"#, expected: .failure),
         ParseFixture.storeFlags("+FLAGS ", "", expected: .incompleteMessage),
         ParseFixture.storeFlags("-FLAGS ", "", expected: .incompleteMessage),
-        ParseFixture.storeFlags("FLAGS ", "", expected: .incompleteMessage),
+        ParseFixture.storeFlags("FLAGS ", "", expected: .incompleteMessage)
     ])
     func parse(_ fixture: ParseFixture<StoreFlags>) {
         fixture.checkParsing()

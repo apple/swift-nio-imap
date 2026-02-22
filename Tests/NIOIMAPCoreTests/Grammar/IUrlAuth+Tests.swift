@@ -32,7 +32,7 @@ struct AuthenticatedURLTests {
                 verifier: .init(urlAuthMechanism: .internal, encodedAuthenticationURL: .init(data: "verifier456"))
             ),
             ";URLAUTH=user+alice:INTERNAL:verifier456"
-        ),
+        )
     ])
     func encode(_ fixture: EncodeFixture<AuthenticatedURL>) {
         fixture.checkEncoding()

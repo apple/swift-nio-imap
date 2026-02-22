@@ -26,7 +26,7 @@ struct ByteRangeTests {
             EncodeFixture.byteRange(10...20, "<10.11>"),
             EncodeFixture.byteRange(100...199, "<100.100>"),
             EncodeFixture.byteRange(400...479, "<400.80>"),
-            EncodeFixture.byteRange(843...1_369, "<843.527>"),
+            EncodeFixture.byteRange(843...1_369, "<843.527>")
         ]
     )
     func encodeClosedRange(_ fixture: EncodeFixture<ClosedRange<UInt32>>) {
@@ -37,7 +37,7 @@ struct ByteRangeTests {
         "encode ByteRange struct",
         arguments: [
             EncodeFixture.byteRangeStruct(.init(offset: 1, length: nil), "1"),
-            EncodeFixture.byteRangeStruct(.init(offset: 1, length: 2), "1.2"),
+            EncodeFixture.byteRangeStruct(.init(offset: 1, length: 2), "1.2")
         ]
     )
     func encodeByteRangeStruct(_ fixture: EncodeFixture<ByteRange>) {
@@ -50,7 +50,7 @@ struct ByteRangeTests {
         ParseFixture.byteRange("a.1", " ", expected: .failure),
         ParseFixture.byteRange("1", "", expected: .incompleteMessage),
         ParseFixture.byteRange("1.2", "", expected: .incompleteMessage),
-        ParseFixture.byteRange("1.", "", expected: .incompleteMessage),
+        ParseFixture.byteRange("1.", "", expected: .incompleteMessage)
     ])
     func parse(_ fixture: ParseFixture<ByteRange>) {
         fixture.checkParsing()

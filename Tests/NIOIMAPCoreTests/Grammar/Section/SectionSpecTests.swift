@@ -22,7 +22,7 @@ private struct SectionSpecifierTests {
         EncodeFixture.sectionSpecifier(nil, ""),
         EncodeFixture.sectionSpecifier(.init(kind: .header), "HEADER"),
         EncodeFixture.sectionSpecifier(.init(part: [1, 2, 3, 4], kind: .complete), "1.2.3.4"),
-        EncodeFixture.sectionSpecifier(.init(part: [1, 2, 3, 4], kind: .header), "1.2.3.4.HEADER"),
+        EncodeFixture.sectionSpecifier(.init(part: [1, 2, 3, 4], kind: .header), "1.2.3.4.HEADER")
     ])
     func encode(_ fixture: EncodeFixture<SectionSpecifier?>) {
         fixture.checkEncoding()
@@ -57,7 +57,7 @@ private struct SectionSpecifierTests {
                 lhs: .init(part: [1, 2], kind: .text),
                 rhs: .init(part: [1, 2, 3], kind: .header),
                 expected: true
-            ),
+            )
         ]
     )
     func comparableSectionSpecifier(_ fixture: ComparableFixture<SectionSpecifier>) {
@@ -114,7 +114,7 @@ private struct SectionSpecifierTests {
             ComparableFixture<SectionSpecifier.Kind>(lhs: .text, rhs: .headerFields([]), expected: false),
             ComparableFixture<SectionSpecifier.Kind>(lhs: .text, rhs: .headerFieldsNot([]), expected: false),
             ComparableFixture<SectionSpecifier.Kind>(lhs: .text, rhs: .MIMEHeader, expected: false),
-            ComparableFixture<SectionSpecifier.Kind>(lhs: .text, rhs: .text, expected: false),
+            ComparableFixture<SectionSpecifier.Kind>(lhs: .text, rhs: .text, expected: false)
         ]
     )
     func comparableSectionSpecifierKind(_ fixture: ComparableFixture<SectionSpecifier.Kind>) {
@@ -129,7 +129,7 @@ private struct SectionSpecifierTests {
             ComparableFixture<SectionSpecifier.Part>(lhs: [1, 2], rhs: [1], expected: false),
             ComparableFixture<SectionSpecifier.Part>(lhs: [1, 2, 3, 4], rhs: [1, 2, 3, 4], expected: false),
             ComparableFixture<SectionSpecifier.Part>(lhs: [1, 2, 3, 4], rhs: [1, 2, 3, 4, 5, 6], expected: true),
-            ComparableFixture<SectionSpecifier.Part>(lhs: [1, 2, 3, 4, 5, 6], rhs: [1, 2, 3], expected: false),
+            ComparableFixture<SectionSpecifier.Part>(lhs: [1, 2, 3, 4, 5, 6], rhs: [1, 2, 3], expected: false)
         ]
     )
     func comparableSectionSpecifierPart(_ fixture: ComparableFixture<SectionSpecifier.Part>) {
@@ -142,7 +142,7 @@ private struct SectionSpecifierTests {
             PartHelperFixture(part: [], expected: []),
             PartHelperFixture(part: [5], expected: []),
             PartHelperFixture(part: [5, 3], expected: [3]),
-            PartHelperFixture(part: [5, 3, 8], expected: [3, 8]),
+            PartHelperFixture(part: [5, 3, 8], expected: [3, 8])
         ]
     )
     func partDropFirst(_ fixture: PartHelperFixture) {
@@ -155,7 +155,7 @@ private struct SectionSpecifierTests {
             PartHelperFixture(part: [], expected: []),
             PartHelperFixture(part: [5], expected: []),
             PartHelperFixture(part: [5, 3], expected: [5]),
-            PartHelperFixture(part: [5, 3, 8], expected: [5, 3]),
+            PartHelperFixture(part: [5, 3, 8], expected: [5, 3])
         ]
     )
     func partDropLast(_ fixture: PartHelperFixture) {
@@ -166,7 +166,7 @@ private struct SectionSpecifierTests {
         "Part appending",
         arguments: [
             PartAppendingFixture(part: [], new: 1, expected: [1]),
-            PartAppendingFixture(part: [5, 3, 8], new: 4, expected: [5, 3, 8, 4]),
+            PartAppendingFixture(part: [5, 3, 8], new: 4, expected: [5, 3, 8, 4])
         ]
     )
     func partAppending(_ fixture: PartAppendingFixture) {
@@ -198,7 +198,7 @@ private struct SectionSpecifierTests {
             PartRelationFixture(part: [2, 3, 1, 7], other: [2, 3], expected: false, relation: .isChildPart),
             PartRelationFixture(part: [2, 3, 1, 7], other: [2, 3, 1], expected: true, relation: .isChildPart),
             PartRelationFixture(part: [2, 4, 1, 7], other: [2, 3], expected: false, relation: .isChildPart),
-            PartRelationFixture(part: [5, 3, 1, 7], other: [2, 3], expected: false, relation: .isChildPart),
+            PartRelationFixture(part: [5, 3, 1, 7], other: [2, 3], expected: false, relation: .isChildPart)
         ]
     )
     func partRelation(_ fixture: PartRelationFixture) {
@@ -216,7 +216,7 @@ private struct SectionSpecifierTests {
             DebugStringFixture(sut: SectionSpecifier.Part([]), expected: ""),
             DebugStringFixture(sut: SectionSpecifier.Part([1]), expected: "1"),
             DebugStringFixture(sut: SectionSpecifier.Part([1, 2]), expected: "1.2"),
-            DebugStringFixture(sut: SectionSpecifier.Part([1, 2, 3, 4]), expected: "1.2.3.4"),
+            DebugStringFixture(sut: SectionSpecifier.Part([1, 2, 3, 4]), expected: "1.2.3.4")
         ]
     )
     func partCustomDebugString(_ fixture: DebugStringFixture<SectionSpecifier.Part>) {
@@ -231,7 +231,7 @@ private struct SectionSpecifierTests {
             ParseFixture.section("[", " ", expected: .failure),
             ParseFixture.section("[HEADER", " ", expected: .failure),
             ParseFixture.section("[", "", expected: .incompleteMessage),
-            ParseFixture.section("[HEADER", "", expected: .incompleteMessage),
+            ParseFixture.section("[HEADER", "", expected: .incompleteMessage)
         ]
     )
     func parseSection(_ fixture: ParseFixture<SectionSpecifier>) {
@@ -247,7 +247,7 @@ private struct SectionSpecifierTests {
             ParseFixture.sectionSpecifier("MIME", expected: .failure),
             ParseFixture.sectionSpecifier("", "", expected: .incompleteMessage),
             ParseFixture.sectionSpecifier("1", "", expected: .incompleteMessage),
-            ParseFixture.sectionSpecifier("1.", "", expected: .incompleteMessage),
+            ParseFixture.sectionSpecifier("1.", "", expected: .incompleteMessage)
         ]
     )
     func parseSectionSpecifier(_ fixture: ParseFixture<SectionSpecifier>) {
@@ -272,7 +272,7 @@ private struct SectionSpecifierTests {
             ),
             ParseFixture.sectionSpecifierKind("", expected: .success(.complete)),
             ParseFixture.sectionSpecifierKind("HEADER.FIELDS ", "", expected: .incompleteMessage),
-            ParseFixture.sectionSpecifierKind("HEADER.FIELDS (f1 f2 f3 ", "", expected: .incompleteMessage),
+            ParseFixture.sectionSpecifierKind("HEADER.FIELDS (f1 f2 f3 ", "", expected: .incompleteMessage)
         ]
     )
     func parseSectionSpecifierKind(_ fixture: ParseFixture<SectionSpecifier.Kind>) {

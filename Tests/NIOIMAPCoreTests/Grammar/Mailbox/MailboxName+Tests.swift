@@ -67,7 +67,7 @@ private struct MailboxPathTests {
                 displayName: "£",
                 pathSeparator: "/",
                 expected: try! .init(name: .init("&AKM-"), pathSeparator: "/")
-            ),
+            )
         ]
     )
     func makeRootMailboxWithDisplayName(_ fixture: RootMailboxFixture) throws {
@@ -121,7 +121,7 @@ private struct MailboxPathTests {
                 path: try! .init(name: .init("//test1//test2//"), pathSeparator: "/"),
                 omitEmpty: false,
                 expected: ["", "", "test1", "", "test2", "", ""]
-            ),
+            )
         ]
     )
     func splittingMailboxPathComponents(_ fixture: SplittingFixture) {
@@ -146,7 +146,7 @@ private struct MailboxPathTests {
             DebugStringFixture(sut: .init(ByteBuffer("FOOD")), expected: "FOOD"),
             DebugStringFixture(sut: .init(ByteBuffer("box/&AKM-")), expected: "box/&AKM-"),
             DebugStringFixture(sut: .init(ByteBuffer("a\u{11}b")), expected: "a\u{11}b"),
-            DebugStringFixture(sut: .init(ByteBuffer("båd")), expected: "båd"),
+            DebugStringFixture(sut: .init(ByteBuffer("båd")), expected: "båd")
         ]
     )
     func customDebugStringConvertible(_ fixture: DebugStringFixture<MailboxName>) {

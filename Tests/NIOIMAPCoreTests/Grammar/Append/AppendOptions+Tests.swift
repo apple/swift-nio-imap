@@ -44,7 +44,7 @@ struct AppendOptionsTests {
                 extensions: [:]
             ),
             " (\\Answered) \"25-Jun-1994 01:02:03 +0000\""
-        ),
+        )
     ])
     func encode(_ fixture: EncodeFixture<AppendOptions>) {
         fixture.checkEncoding()
@@ -89,11 +89,11 @@ struct AppendOptionsTests {
                     extensions: [
                         "name1": .sequence(.range(1...2)),
                         "name2": .sequence(.range(2...3)),
-                        "name3": .sequence(.range(3...4)),
+                        "name3": .sequence(.range(3...4))
                     ]
                 )
             )
-        ),
+        )
     ])
     func parse(_ fixture: ParseFixture<AppendOptions>) {
         fixture.checkParsing()

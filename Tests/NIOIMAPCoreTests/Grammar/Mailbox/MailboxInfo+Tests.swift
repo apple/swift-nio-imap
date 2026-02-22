@@ -77,7 +77,7 @@ struct MailboxInfoTests {
                 extensions: [:]
             ),
             #"(\Subscribed \HasNoChildren) "." "Archive/2024""#
-        ),
+        )
     ])
     func encode(_ fixture: EncodeFixture<MailboxInfo>) {
         fixture.checkEncoding()
@@ -89,7 +89,7 @@ struct MailboxInfoTests {
             EncodeFixture.mailboxListFlags([], ""),
             EncodeFixture.mailboxListFlags([.marked], #"\Marked"#),
             EncodeFixture.mailboxListFlags([.noInferiors], #"\Noinferiors"#),
-            EncodeFixture.mailboxListFlags([.marked, .noInferiors, .init(#"\test"#)], #"\Marked \Noinferiors \test"#),
+            EncodeFixture.mailboxListFlags([.marked, .noInferiors, .init(#"\test"#)], #"\Marked \Noinferiors \test"#)
         ]
     )
     func encodeFlags(_ fixture: EncodeFixture<[MailboxInfo.Attribute]>) {
@@ -132,7 +132,7 @@ struct MailboxInfoTests {
             )
         ),
         ParseFixture.mailboxInfo(#"() ""#, "", expected: .incompleteMessageIgnoringBufferModifications),
-        ParseFixture.mailboxInfo(#"() "\" inbox"#, "", expected: .failureIgnoringBufferModifications),
+        ParseFixture.mailboxInfo(#"() "\" inbox"#, "", expected: .failureIgnoringBufferModifications)
     ])
     func parse(_ fixture: ParseFixture<MailboxInfo>) {
         fixture.checkParsing()
@@ -147,7 +147,7 @@ struct MailboxInfoTests {
                 "\\marked \\o1 \\o2",
                 "\r",
                 expected: .success([.marked, .init("\\o1"), .init("\\o2")])
-            ),
+            )
         ]
     )
     func parseFlags(_ fixture: ParseFixture<[MailboxInfo.Attribute]>) {

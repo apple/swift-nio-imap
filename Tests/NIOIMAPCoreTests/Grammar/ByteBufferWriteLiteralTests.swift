@@ -55,7 +55,7 @@ struct ByteBufferWriteLiteralTests {
             EncodeFixture.imapStringClient(
                 "01234567890123456789012345678901234567890123456789012345678901234567890",
                 expectedStrings: [
-                    "{71}\r\n", "01234567890123456789012345678901234567890123456789012345678901234567890",
+                    "{71}\r\n", "01234567890123456789012345678901234567890123456789012345678901234567890"
                 ],
                 options: .rfc3501
             ),
@@ -73,7 +73,7 @@ struct ByteBufferWriteLiteralTests {
                 String(repeating: "a", count: 4097),
                 expectedStrings: ["{4097}\r\n", String(repeating: "a", count: 4097)],
                 options: .literalMinus
-            ),
+            )
         ]
     )
     func writeIMAPStringWithClientBuffers(_ fixture: EncodeFixture<ByteBuffer>) {
@@ -100,7 +100,7 @@ struct ByteBufferWriteLiteralTests {
                 "01234567890123456789012345678901234567890123456789012345678901234567890",
                 expectedString: "{71}\r\n01234567890123456789012345678901234567890123456789012345678901234567890",
                 options: .rfc3501
-            ),
+            )
         ]
     )
     func writeIMAPStringWithServerBuffers(_ fixture: EncodeFixture<ByteBuffer>) {
@@ -111,7 +111,7 @@ struct ByteBufferWriteLiteralTests {
         "writeLiteral8 with client buffers",
         arguments: [
             EncodeFixture.literal8("", expectedStrings: ["~{0}\r\n"], options: .rfc3501),
-            EncodeFixture.literal8("abc", expectedStrings: ["~{3}\r\n", "abc"], options: .rfc3501),
+            EncodeFixture.literal8("abc", expectedStrings: ["~{3}\r\n", "abc"], options: .rfc3501)
         ]
     )
     func writeLiteral8WithClientBuffers(_ fixture: EncodeFixture<ByteBuffer>) {

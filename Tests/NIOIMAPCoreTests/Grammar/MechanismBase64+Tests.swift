@@ -26,7 +26,7 @@ struct MechanismBase64Tests {
         EncodeFixture.mechanismBase64(
             .init(mechanism: .internal, base64: "base64"),
             "INTERNAL=base64"
-        ),
+        )
     ])
     func encode(_ fixture: EncodeFixture<MechanismBase64>) {
         fixture.checkEncoding()
@@ -38,7 +38,7 @@ struct MechanismBase64Tests {
             "INTERNAL=YQ==",
             " ",
             expected: .success(.init(mechanism: .internal, base64: "a"))
-        ),
+        )
     ])
     func parse(_ fixture: ParseFixture<MechanismBase64>) {
         fixture.checkParsing()

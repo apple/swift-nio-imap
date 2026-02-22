@@ -42,7 +42,7 @@ struct URLCommandTests {
                 )
             ),
             "test/;UID=123;URLAUTH=anonymous:INTERNAL:01234567890123456789012345678901"
-        ),
+        )
     ])
     func encode(_ fixture: EncodeFixture<URLCommand>) {
         fixture.checkEncoding()
@@ -87,7 +87,7 @@ struct URLCommandTests {
                     )
                 )
             )
-        ),
+        )
     ])
     func parse(_ fixture: ParseFixture<URLCommand>) {
         fixture.checkParsing()

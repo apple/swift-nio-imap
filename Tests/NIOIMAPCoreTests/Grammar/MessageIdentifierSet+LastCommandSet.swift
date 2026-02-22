@@ -26,7 +26,7 @@ struct LastCommandSetTests {
             expected: .success(
                 .set([
                     MessageIdentifierRange<SequenceNumber>(1), MessageIdentifierRange<SequenceNumber>(2...5),
-                    MessageIdentifierRange<SequenceNumber>(7), MessageIdentifierRange<SequenceNumber>(9...),
+                    MessageIdentifierRange<SequenceNumber>(7), MessageIdentifierRange<SequenceNumber>(9...)
                 ])
             )
         ),
@@ -40,7 +40,7 @@ struct LastCommandSetTests {
         ParseFixture.lastCommandSet("", "", expected: .incompleteMessage),
         ParseFixture.lastCommandSet("1,", "", expected: .incompleteMessage),
         ParseFixture.lastCommandSet("1111", "", expected: .incompleteMessage),
-        ParseFixture.lastCommandSet("1111:2222", "", expected: .incompleteMessage),
+        ParseFixture.lastCommandSet("1111:2222", "", expected: .incompleteMessage)
     ])
     func parse(_ fixture: ParseFixture<LastCommandSet<SequenceNumber>>) {
         fixture.checkParsing()

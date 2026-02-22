@@ -22,7 +22,7 @@ struct ChangedSinceModifierTests {
         "encode changed since",
         arguments: [
             EncodeFixture.changedSinceModifier(.init(modificationSequence: 3), "CHANGEDSINCE 3"),
-            EncodeFixture.changedSinceModifier(.init(modificationSequence: 999999), "CHANGEDSINCE 999999"),
+            EncodeFixture.changedSinceModifier(.init(modificationSequence: 999999), "CHANGEDSINCE 999999")
         ]
     )
     func encodeChangedSince(_ fixture: EncodeFixture<ChangedSinceModifier>) {
@@ -33,7 +33,7 @@ struct ChangedSinceModifierTests {
         "encode unchanged since",
         arguments: [
             EncodeFixture.unchangedSinceModifier(.init(modificationSequence: 3), "UNCHANGEDSINCE 3"),
-            EncodeFixture.unchangedSinceModifier(.init(modificationSequence: 12345), "UNCHANGEDSINCE 12345"),
+            EncodeFixture.unchangedSinceModifier(.init(modificationSequence: 12345), "UNCHANGEDSINCE 12345")
         ]
     )
     func encodeUnchangedSince(_ fixture: EncodeFixture<UnchangedSinceModifier>) {
@@ -55,7 +55,7 @@ struct ChangedSinceModifierTests {
             ),
             ParseFixture.changedSinceModifier("TEST", "", expected: .failure),
             ParseFixture.changedSinceModifier("CHANGEDSINCE a", "", expected: .failure),
-            ParseFixture.changedSinceModifier("CHANGEDSINCE 1", "", expected: .incompleteMessage),
+            ParseFixture.changedSinceModifier("CHANGEDSINCE 1", "", expected: .incompleteMessage)
         ]
     )
     func parseChangedSinceModifier(_ fixture: ParseFixture<ChangedSinceModifier>) {
@@ -77,7 +77,7 @@ struct ChangedSinceModifierTests {
             ),
             ParseFixture.unchangedSinceModifier("TEST", "", expected: .failure),
             ParseFixture.unchangedSinceModifier("UNCHANGEDSINCE a", "", expected: .failure),
-            ParseFixture.unchangedSinceModifier("UNCHANGEDSINCE 1", "", expected: .incompleteMessage),
+            ParseFixture.unchangedSinceModifier("UNCHANGEDSINCE 1", "", expected: .incompleteMessage)
         ]
     )
     func parseUnchangedSinceModifier(_ fixture: ParseFixture<UnchangedSinceModifier>) {

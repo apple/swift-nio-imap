@@ -26,7 +26,7 @@ struct ExtendedSearchScopeOptionsTests {
         EncodeFixture.extendedSearchScopeOptions(
             ExtendedSearchScopeOptions(["test": .sequence(.lastCommand), "test2": nil])!,
             "test $ test2"
-        ),
+        )
     ])
     func encode(_ fixture: EncodeFixture<ExtendedSearchScopeOptions>) {
         fixture.checkEncoding()
@@ -41,7 +41,7 @@ struct ExtendedSearchScopeOptionsTests {
         ParseFixture.extendedSearchScopeOptions(
             "name name2",
             expected: .success(ExtendedSearchScopeOptions(["name": nil, "name2": nil])!)
-        ),
+        )
     ])
     func parseExtendedSearchScopeOptions(_ fixture: ParseFixture<ExtendedSearchScopeOptions>) {
         fixture.checkParsing()

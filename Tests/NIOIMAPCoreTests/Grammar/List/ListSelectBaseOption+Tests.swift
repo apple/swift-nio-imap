@@ -20,7 +20,7 @@ import Testing
 struct ListSelectBaseOptionTests {
     @Test(arguments: [
         EncodeFixture.listSelectBaseOption(.subscribed, "SUBSCRIBED"),
-        EncodeFixture.listSelectBaseOption(.option(.init(key: .standard("test"), value: nil)), "test"),
+        EncodeFixture.listSelectBaseOption(.option(.init(key: .standard("test"), value: nil)), "test")
     ])
     func encode(_ fixture: EncodeFixture<ListSelectBaseOption>) {
         fixture.checkEncoding()

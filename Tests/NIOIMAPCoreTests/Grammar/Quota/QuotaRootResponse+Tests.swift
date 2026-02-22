@@ -28,7 +28,7 @@ struct QuotaRootResponseTests {
             MailboxName("INBOX"),
             QuotaRoot("#user/alice"),
             ##"QUOTAROOT "INBOX" "#user/alice""##
-        ),
+        )
     ])
     func encode(_ fixture: EncodeFixture<(MailboxName, QuotaRoot)>) {
         fixture.checkEncoding()

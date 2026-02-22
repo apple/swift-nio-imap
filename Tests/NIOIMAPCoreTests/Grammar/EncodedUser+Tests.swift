@@ -20,7 +20,7 @@ import Testing
 struct EncodedUserTests {
     @Test(arguments: [
         EncodeFixture.encodedUser(.init(data: "hello"), "hello"),
-        EncodeFixture.encodedUser(.init(data: "test@example.com"), "test@example.com"),
+        EncodeFixture.encodedUser(.init(data: "test@example.com"), "test@example.com")
     ])
     func encode(_ fixture: EncodeFixture<EncodedUser>) {
         fixture.checkEncoding()

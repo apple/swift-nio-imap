@@ -86,7 +86,7 @@ struct MessageAttributeTests {
         EncodeFixture.messageAttribute(.gmailThreadID(1_266_894_439_832_287_888), "X-GM-THRID 1266894439832287888"),
         EncodeFixture.messageAttribute(
             .gmailLabels([
-                GmailLabel("\\Inbox"), GmailLabel("\\Sent"), GmailLabel("Important"), GmailLabel("Muy Importante"),
+                GmailLabel("\\Inbox"), GmailLabel("\\Sent"), GmailLabel("Important"), GmailLabel("Muy Importante")
             ]),
             "X-GM-LABELS (\\Inbox \\Sent \"Important\" \"Muy Importante\")"
         ),
@@ -97,7 +97,7 @@ struct MessageAttributeTests {
         EncodeFixture.messageAttribute(.preview(.init(#"A\B"#)), #"PREVIEW "A\\B""#),
         EncodeFixture.messageAttribute(.emailID(.init("123-456-789")!), "EMAILID (123-456-789)"),
         EncodeFixture.messageAttribute(.threadID(.init("123-456-789")!), "THREADID (123-456-789)"),
-        EncodeFixture.messageAttribute(.threadID(nil), "THREADID NIL"),
+        EncodeFixture.messageAttribute(.threadID(nil), "THREADID NIL")
     ])
     func encode(_ fixture: EncodeFixture<MessageAttribute>) {
         fixture.checkEncoding()
@@ -114,7 +114,7 @@ struct MessageAttributeTests {
             EncodeFixture.messageAttributes(
                 [.flags([.flagged]), .rfc822Size(123), .uid(456)],
                 "(FLAGS (\\Flagged) RFC822.SIZE 123 UID 456)"
-            ),
+            )
         ]
     )
     func encodeMultiple(_ fixture: EncodeFixture<[MessageAttribute]>) {
@@ -128,10 +128,10 @@ struct MessageAttributeTests {
             DebugStringFixture(sut: MessageAttribute.flags([.draft]), expected: "FLAGS (\\Draft)"),
             DebugStringFixture(
                 sut: MessageAttribute.gmailLabels([
-                    GmailLabel("\\Inbox"), GmailLabel("\\Sent"), GmailLabel("Important"), GmailLabel("Muy Importante"),
+                    GmailLabel("\\Inbox"), GmailLabel("\\Sent"), GmailLabel("Important"), GmailLabel("Muy Importante")
                 ]),
                 expected: "X-GM-LABELS (\\Inbox \\Sent \"Important\" \"Muy Importante\")"
-            ),
+            )
         ]
     )
     func customDebugStringConvertible(_ fixture: DebugStringFixture<MessageAttribute>) {
@@ -291,7 +291,7 @@ struct MessageAttributeTests {
                                                     )
                                                 )
                                             )
-                                        ),
+                                        )
                                     ],
                                     mediaSubtype: .alternative,
                                     extension: .init(
@@ -363,7 +363,7 @@ struct MessageAttributeTests {
                                                     )
                                                 )
                                             )
-                                        ),
+                                        )
                                     ],
                                     mediaSubtype: .alternative,
                                     extension: .init(
@@ -421,7 +421,7 @@ struct MessageAttributeTests {
                 expected: .success(
                     .gmailLabels([
                         GmailLabel("\\Inbox"), GmailLabel("\\Sent"), GmailLabel("Important"),
-                        GmailLabel("Muy Importante"),
+                        GmailLabel("Muy Importante")
                     ])
                 )
             ),
@@ -456,7 +456,7 @@ struct MessageAttributeTests {
                 " ",
                 expected: .success(.threadID(.init("123-456-789")!))
             ),
-            ParseFixture.messageAttribute("THREADID NIL", " ", expected: .success(.threadID(nil))),
+            ParseFixture.messageAttribute("THREADID NIL", " ", expected: .success(.threadID(nil)))
         ]
     }
 }

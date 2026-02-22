@@ -24,7 +24,7 @@ struct QuotaResourceTests {
         EncodeFixture.quotaResource(
             QuotaResource(resourceName: "ATTACHMENT", usage: 999_999_999, limit: 1_000_000_000),
             "ATTACHMENT 999999999 1000000000"
-        ),
+        )
     ])
     func encode(_ fixture: EncodeFixture<QuotaResource>) {
         fixture.checkEncoding()

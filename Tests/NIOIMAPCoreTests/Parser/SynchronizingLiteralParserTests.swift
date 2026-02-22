@@ -77,7 +77,7 @@ struct SynchronizingLiteralParserTests {
                 testDescription: "literal data in plus literal",
                 input: "{5+}\r\n{0}\r\n\r\n",
                 continuationsNecessary: 0
-            ),
+            )
         ]
     )
     fileprivate func singleStringParsing(fixture: SingleStringFixture) {
@@ -128,7 +128,7 @@ struct SynchronizingLiteralParserTests {
                 "LOGIN {1}\r\nA {1}\r\nB\r\nFOO {1}\r\nx y\r\n",
                 "B\r\nFOO {1}\r\nx y\r\n",
                 "\r\nFOO {1}\r\nx y\r\n",
-                "FOO {1}\r\nx y\r\n",
+                "FOO {1}\r\nx y\r\n"
             ],
             continuationsNecessary: 3
         )
@@ -171,7 +171,7 @@ struct SynchronizingLiteralParserTests {
                 "{2}\n\r\n\nFOO {5}\n{0}\r\n\n",
                 "\n\nFOO {5}\n{0}\r\n\n",
                 "FOO {5}\n{0}\r\n\n",
-                "",
+                ""
             ],
             continuationsNecessary: 4
         )
@@ -191,7 +191,7 @@ struct SynchronizingLiteralParserTests {
             "tag APPEND box (\\Seen) {1+}\r\na\r\n",
             "a\r\n",
             "\r\n",
-            "\r\n",
+            "\r\n"
         ])
     }
 }

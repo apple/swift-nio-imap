@@ -20,7 +20,7 @@ import Testing
 struct FilterNameTests {
     @Test(arguments: [
         ParseFixture.filterName("a", " ", expected: .success("a")),
-        ParseFixture.filterName("abcdefg", " ", expected: .success("abcdefg")),
+        ParseFixture.filterName("abcdefg", " ", expected: .success("abcdefg"))
     ])
     func parse(_ fixture: ParseFixture<String>) {
         fixture.checkParsing()

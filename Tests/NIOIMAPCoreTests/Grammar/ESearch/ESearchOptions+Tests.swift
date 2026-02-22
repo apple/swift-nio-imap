@@ -75,7 +75,7 @@ struct ExtendedSearchOptionsTests {
                 sourceOptions: ExtendedSearchSourceOptions(sourceMailbox: [.inboxes])
             ),
             " IN (inboxes) RETURN (MIN) CHARSET Alien ALL"
-        ),
+        )
     ])
     func encode(_ fixture: EncodeFixture<ExtendedSearchOptions>) {
         fixture.checkEncoding()
@@ -143,7 +143,7 @@ struct ExtendedSearchOptionsTests {
                     sourceOptions: ExtendedSearchSourceOptions(sourceMailbox: [.inboxes])
                 )
             )
-        ),
+        )
     ])
     func parseExtendedSearchOptions(_ fixture: ParseFixture<ExtendedSearchOptions>) {
         fixture.checkParsing()

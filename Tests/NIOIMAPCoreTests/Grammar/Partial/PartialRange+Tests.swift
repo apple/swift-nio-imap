@@ -22,7 +22,7 @@ struct PartialRangeTests {
         EncodeFixture.partialRange(.first(1...1), "1:1"),
         EncodeFixture.partialRange(.first(100...200), "100:200"),
         EncodeFixture.partialRange(.last(1...1), "-1:-1"),
-        EncodeFixture.partialRange(.last(100...200), "-100:-200"),
+        EncodeFixture.partialRange(.last(100...200), "-100:-200")
     ])
     func encode(_ fixture: EncodeFixture<PartialRange>) {
         fixture.checkEncoding()
@@ -50,7 +50,7 @@ struct PartialRangeTests {
         ParseFixture.partialRange("a", " ", expected: .failure),
         ParseFixture.partialRange("1", "", expected: .incompleteMessage),
         ParseFixture.partialRange("1:", "", expected: .incompleteMessage),
-        ParseFixture.partialRange("1:2", "", expected: .incompleteMessage),
+        ParseFixture.partialRange("1:2", "", expected: .incompleteMessage)
     ])
     func parse(_ fixture: ParseFixture<PartialRange>) {
         fixture.checkParsing()

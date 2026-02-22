@@ -34,7 +34,7 @@ struct QuotaCommandTests {
                     QuotaRoot("MASSIVE_POOL"),
                     [
                         QuotaLimit(resourceName: "STORAGE", limit: 512),
-                        QuotaLimit(resourceName: "BEANS", limit: 50000),
+                        QuotaLimit(resourceName: "BEANS", limit: 50000)
                     ]
                 )
             )
@@ -47,7 +47,7 @@ struct QuotaCommandTests {
         ParseFixture.setQuota("SETQUOTA \"MASSIVE_POOL\" (STORAGE 40M)", expected: .failure),
         ParseFixture.setQuota("SETQUOTA \"MASSIVE_POOL\" (STORAGE)", expected: .failure),
         ParseFixture.setQuota("SETQUOTA \"MASSIVE_POOL\" (", expected: .failure),
-        ParseFixture.setQuota("SETQUOTA \"MASSIVE_POOL\"", expected: .failure),
+        ParseFixture.setQuota("SETQUOTA \"MASSIVE_POOL\"", expected: .failure)
     ])
     func parseSetQuota(_ fixture: ParseFixture<Command>) {
         fixture.checkParsing()
@@ -56,7 +56,7 @@ struct QuotaCommandTests {
     @Test(arguments: [
         ParseFixture.getQuota("GETQUOTA \"\"", expected: .success(.getQuota(QuotaRoot("")))),
         ParseFixture.getQuota("GETQUOTA \"MASSIVE_POOL\"", expected: .success(.getQuota(QuotaRoot("MASSIVE_POOL")))),
-        ParseFixture.getQuota("GETQUOTA", expected: .failure),
+        ParseFixture.getQuota("GETQUOTA", expected: .failure)
     ])
     func parseGetQuota(_ fixture: ParseFixture<Command>) {
         fixture.checkParsing()
@@ -65,7 +65,7 @@ struct QuotaCommandTests {
     @Test(arguments: [
         ParseFixture.getQuotaRoot("GETQUOTAROOT INBOX", expected: .success(.getQuotaRoot(MailboxName("INBOX")))),
         ParseFixture.getQuotaRoot("GETQUOTAROOT Other", expected: .success(.getQuotaRoot(MailboxName("Other")))),
-        ParseFixture.getQuotaRoot("GETQUOTAROOT", expected: .failure),
+        ParseFixture.getQuotaRoot("GETQUOTAROOT", expected: .failure)
     ])
     func parseGetQuotaRoot(_ fixture: ParseFixture<Command>) {
         fixture.checkParsing()

@@ -20,7 +20,7 @@ import Testing
 struct HeaderListsTests {
     @Test(arguments: [
         EncodeFixture.headerList([], "()"),
-        EncodeFixture.headerList(["hello", "there", "world"], #"("hello" "there" "world")"#),
+        EncodeFixture.headerList(["hello", "there", "world"], #"("hello" "there" "world")"#)
     ])
     func encode(_ fixture: EncodeFixture<[String]>) {
         fixture.checkEncoding()
@@ -29,7 +29,7 @@ struct HeaderListsTests {
     @Test(arguments: [
         ParseFixture.headerList(#"("field")"#, expected: .success(["field"])),
         ParseFixture.headerList(#"("first" "second" "third")"#, expected: .success(["first", "second", "third"])),
-        ParseFixture.headerList("()", "\r", expected: .failureIgnoringBufferModifications),
+        ParseFixture.headerList("()", "\r", expected: .failureIgnoringBufferModifications)
     ])
     func parse(_ fixture: ParseFixture<[String]>) {
         fixture.checkParsing()

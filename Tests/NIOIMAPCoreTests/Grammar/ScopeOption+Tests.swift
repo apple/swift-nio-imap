@@ -30,7 +30,7 @@ struct ScopeOptionTests {
         EncodeFixture.scopeOption(
             .infinity,
             "DEPTH infinity"
-        ),
+        )
     ])
     func encode(_ fixture: EncodeFixture<ScopeOption>) {
         fixture.checkEncoding()
@@ -39,7 +39,7 @@ struct ScopeOptionTests {
     @Test(arguments: [
         ParseFixture.scopeOption("DEPTH 0", expected: .success(.zero)),
         ParseFixture.scopeOption("DEPTH 1", expected: .success(.one)),
-        ParseFixture.scopeOption("DEPTH infinity", expected: .success(.infinity)),
+        ParseFixture.scopeOption("DEPTH infinity", expected: .success(.infinity))
     ])
     func parse(_ fixture: ParseFixture<ScopeOption>) {
         fixture.checkParsing()

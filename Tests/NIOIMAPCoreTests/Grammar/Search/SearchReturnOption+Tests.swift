@@ -26,7 +26,7 @@ struct SearchReturnOptionTests {
         EncodeFixture.searchReturnOption(.save, "SAVE"),
         EncodeFixture.searchReturnOption(.optionExtension(.init(key: "modifier", value: nil)), "modifier"),
         EncodeFixture.searchReturnOption(.partial(.first(23_500...24_000)), "PARTIAL 23500:24000"),
-        EncodeFixture.searchReturnOption(.partial(.last(1...100)), "PARTIAL -1:-100"),
+        EncodeFixture.searchReturnOption(.partial(.last(1...100)), "PARTIAL -1:-100")
     ])
     func encode(_ fixture: EncodeFixture<SearchReturnOption>) {
         fixture.checkEncoding()
@@ -43,7 +43,7 @@ struct SearchReturnOptionTests {
             EncodeFixture.searchReturnOptions(
                 [.min, .partial(.last(400...1_000))],
                 " RETURN (MIN PARTIAL -400:-1000)"
-            ),
+            )
         ]
     )
     func encodeMultiple(_ fixture: EncodeFixture<[SearchReturnOption]>) {
@@ -71,7 +71,7 @@ struct SearchReturnOptionTests {
         ParseFixture.searchReturnOption(
             "modifier",
             expected: .success(.optionExtension(.init(key: "modifier", value: nil)))
-        ),
+        )
     ])
     func parse(_ fixture: ParseFixture<SearchReturnOption>) {
         fixture.checkParsing()
@@ -86,7 +86,7 @@ struct SearchReturnOptionTests {
                 " RETURN (m1 m2)",
                 expected: .success([
                     .optionExtension(.init(key: "m1", value: nil)),
-                    .optionExtension(.init(key: "m2", value: nil)),
+                    .optionExtension(.init(key: "m2", value: nil))
                 ])
             ),
             ParseFixture.searchReturnOptions(
@@ -96,7 +96,7 @@ struct SearchReturnOptionTests {
             ParseFixture.searchReturnOptions(
                 " RETURN (MIN PARTIAL -1:-100 MAX)",
                 expected: .success([.min, .partial(.last(1...100)), .max])
-            ),
+            )
         ]
     )
     func parseMultiple(_ fixture: ParseFixture<[SearchReturnOption]>) {

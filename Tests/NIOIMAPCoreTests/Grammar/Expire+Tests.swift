@@ -45,7 +45,7 @@ struct ExpireTests {
                 )
             ),
             ";EXPIRE=2099-12-31T23:59:59.999999"
-        ),
+        )
     ])
     func encode(_ fixture: EncodeFixture<Expire>) {
         fixture.checkEncoding()
@@ -75,7 +75,7 @@ struct ExpireTests {
                     )
                 )
             )
-        ),
+        )
     ])
     func parse(_ fixture: ParseFixture<Expire>) {
         fixture.checkParsing()

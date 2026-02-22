@@ -20,7 +20,7 @@ import Testing
 struct PatternsTests {
     @Test(arguments: [
         EncodeFixture.patterns(["Mailbox1", "Mailbox2"], "(\"Mailbox1\" \"Mailbox2\")"),
-        EncodeFixture.patterns(["*"], "(\"*\")"),
+        EncodeFixture.patterns(["*"], "(\"*\")")
     ])
     func encode(_ fixture: EncodeFixture<[ByteBuffer]>) {
         fixture.checkEncoding()

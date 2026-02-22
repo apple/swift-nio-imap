@@ -34,7 +34,7 @@ struct AccessTests {
         EncodeFixture.access(
             .user(.init(data: "abc")),
             "user+abc"
-        ),
+        )
     ])
     func encode(_ fixture: EncodeFixture<Access>) {
         fixture.checkEncoding()
@@ -60,7 +60,7 @@ struct AccessTests {
             "user+abc",
             " ",
             expected: .success(.user(.init(data: "abc")))
-        ),
+        )
     ])
     func parse(_ fixture: ParseFixture<Access>) {
         fixture.checkParsing()

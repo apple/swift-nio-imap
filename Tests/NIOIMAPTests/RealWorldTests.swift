@@ -92,7 +92,7 @@ extension RealWorldTests {
                                 )
                             )
                         )
-                    ),
+                    )
                 ]
             )
         ]

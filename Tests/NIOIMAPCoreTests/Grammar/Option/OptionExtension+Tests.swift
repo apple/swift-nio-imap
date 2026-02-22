@@ -30,7 +30,7 @@ struct OptionExtensionTests {
         EncodeFixture.optionExtension(
             .init(key: .vendor(.init(key: "token", value: "atom")), value: .string("value")),
             "token-atom (\"value\")"
-        ),
+        )
     ])
     func encode(_ fixture: EncodeFixture<KeyValue<OptionExtensionKind, OptionValueComp?>>) {
         fixture.checkEncoding()

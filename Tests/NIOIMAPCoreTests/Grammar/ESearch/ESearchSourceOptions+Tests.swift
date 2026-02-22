@@ -36,7 +36,7 @@ struct ExtendedSearchSourceOptionsTests {
                 scopeOptions: ExtendedSearchScopeOptions(["test": nil])
             )!,
             "IN (inboxes personal (test))"
-        ),
+        )
     ])
     func encode(_ fixture: EncodeFixture<ExtendedSearchSourceOptions>) {
         fixture.checkEncoding()
@@ -67,7 +67,7 @@ struct ExtendedSearchSourceOptionsTests {
         ParseFixture.extendedSearchSourceOptions("IN (inboxes (", expected: .failure),
         ParseFixture.extendedSearchSourceOptions("IN (inboxes )", expected: .failure),
         ParseFixture.extendedSearchSourceOptions("IN (", expected: .failure),
-        ParseFixture.extendedSearchSourceOptions("IN", expected: .failure),
+        ParseFixture.extendedSearchSourceOptions("IN", expected: .failure)
     ])
     func parseExtendedSearchSourceOptions(_ fixture: ParseFixture<ExtendedSearchSourceOptions>) {
         fixture.checkParsing()

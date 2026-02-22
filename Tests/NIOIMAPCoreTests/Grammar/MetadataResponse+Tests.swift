@@ -30,7 +30,7 @@ struct MetadataResponseTests {
         EncodeFixture.metadataResponse(
             .values(values: ["a": .init(nil)], mailbox: .inbox),
             "METADATA \"INBOX\" (\"a\" NIL)"
-        ),
+        )
     ])
     func encode(_ fixture: EncodeFixture<MetadataResponse>) {
         fixture.checkEncoding()
@@ -45,7 +45,7 @@ struct MetadataResponseTests {
         ParseFixture.metadataResponse(
             "METADATA INBOX (\"a\" NIL)",
             expected: .success(.values(values: ["a": .init(nil)], mailbox: .inbox))
-        ),
+        )
     ])
     func parse(_ fixture: ParseFixture<MetadataResponse>) {
         fixture.checkParsing()

@@ -146,7 +146,7 @@ struct InternalDateTests {
             expected: .failureIgnoringBufferModifications
         ),
         ParseFixture.internalDate(#""25-Jun-1994 01:02:03 +12""#, "", expected: .failureIgnoringBufferModifications),
-        ParseFixture.internalDate(#""25-Jun-1994 01:02:03 abc""#, "", expected: .failureIgnoringBufferModifications),
+        ParseFixture.internalDate(#""25-Jun-1994 01:02:03 abc""#, "", expected: .failureIgnoringBufferModifications)
     ])
     func parse(_ fixture: ParseFixture<ServerMessageDate>) {
         fixture.checkParsing()

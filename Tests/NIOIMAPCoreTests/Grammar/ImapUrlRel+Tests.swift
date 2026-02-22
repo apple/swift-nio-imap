@@ -34,7 +34,7 @@ struct RelativeIMAPURLTests {
         EncodeFixture.relativeIMAPURL(
             .empty,
             ""
-        ),
+        )
     ])
     func encode(_ fixture: EncodeFixture<RelativeIMAPURL>) {
         fixture.checkEncoding()
@@ -63,7 +63,7 @@ struct RelativeIMAPURLTests {
             "",
             " ",
             expected: .success(.empty)
-        ),
+        )
     ])
     func parse(_ fixture: ParseFixture<RelativeIMAPURL>) {
         fixture.checkParsing()

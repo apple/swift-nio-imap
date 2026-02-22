@@ -86,7 +86,7 @@ struct MailboxDataTests {
                 )
             ),
             #"UIDBATCHES (TAG "A143" MAILBOX "Drafts" UIDVALIDITY 4889695) 99695"#
-        ),
+        )
     ])
     func encode(_ fixture: EncodeFixture<MailboxData>) {
         fixture.checkEncoding()
@@ -103,7 +103,7 @@ struct MailboxDataTests {
             EncodeFixture.mailboxDataSearchSort(
                 .init(identifiers: [1, 2, 3], modificationSequence: 2),
                 "SEARCH 1 2 3 (MODSEQ 2)"
-            ),
+            )
         ]
     )
     func encodeSearchSort(_ fixture: EncodeFixture<MailboxData.SearchSort?>) {
@@ -116,7 +116,7 @@ struct MailboxDataTests {
             ParseFixture.searchSortModificationSequence("(MODSEQ 123)", "\r", expected: .success(123)),
             ParseFixture.searchSortModificationSequence("(MODSEQ a)", "", expected: .failure),
             ParseFixture.searchSortModificationSequence("(MODSEQ ", "", expected: .incompleteMessage),
-            ParseFixture.searchSortModificationSequence("(MODSEQ 111", "", expected: .incompleteMessage),
+            ParseFixture.searchSortModificationSequence("(MODSEQ 111", "", expected: .incompleteMessage)
         ]
     )
     func parseSearchSortModificationSequence(_ fixture: ParseFixture<ModificationSequenceValue>) {
@@ -213,7 +213,7 @@ struct MailboxDataTests {
             expected: .success(
                 .uidBatches(.init(correlator: .init(tag: "A143"), batches: [7_829...20_351, 1...7_830]))
             )
-        ),
+        )
     ])
     func parse(_ fixture: ParseFixture<MailboxData>) {
         fixture.checkParsing()

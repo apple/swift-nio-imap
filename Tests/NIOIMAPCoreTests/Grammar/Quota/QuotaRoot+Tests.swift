@@ -20,7 +20,7 @@ import Testing
 struct QuotaRootTests {
     @Test(arguments: [
         EncodeFixture.quotaRoot(QuotaRoot(""), #""""#),
-        EncodeFixture.quotaRoot(QuotaRoot("MassivePool"), #""MassivePool""#),
+        EncodeFixture.quotaRoot(QuotaRoot("MassivePool"), #""MassivePool""#)
     ])
     func encode(_ fixture: EncodeFixture<QuotaRoot>) {
         fixture.checkEncoding()

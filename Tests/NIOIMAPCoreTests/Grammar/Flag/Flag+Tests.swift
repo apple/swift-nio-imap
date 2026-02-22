@@ -42,7 +42,7 @@ struct FlagTests {
             (Flag.extension("\\deleted"), Flag.deleted),
             (Flag.extension("\\seen"), Flag.seen),
             (Flag.extension("\\draft"), Flag.draft),
-            (Flag.extension("\\flagged"), Flag.flagged),
+            (Flag.extension("\\flagged"), Flag.flagged)
         ]
     )
     func extensionInitialization(_ input: Flag, _ expected: Flag) {
@@ -124,7 +124,7 @@ struct FlagTests {
         EncodeFixture.flag(.extension("\\EXTENSION"), "\\EXTENSION"),
         EncodeFixture.flag(.keyword(Flag.Keyword("$extension")!), "$extension"),
         EncodeFixture.flag(.keyword(Flag.Keyword("$Extension")!), "$Extension"),
-        EncodeFixture.flag(.keyword(Flag.Keyword("$EXTENSION")!), "$EXTENSION"),
+        EncodeFixture.flag(.keyword(Flag.Keyword("$EXTENSION")!), "$EXTENSION")
     ])
     func encode(_ fixture: EncodeFixture<Flag>) {
         fixture.checkEncoding()
@@ -143,7 +143,7 @@ struct FlagTests {
         ParseFixture.flag(#"$MailFlagBit2"#, expected: .success("$MailFlagBit2")),
         ParseFixture.flag(#"OIB-Seen-INBOX"#, expected: .success("OIB-Seen-INBOX")),
         ParseFixture.flag(#"OIB-Seen-Unsubscribe"#, expected: .success("OIB-Seen-Unsubscribe")),
-        ParseFixture.flag(#"OIB-Seen-[Gmail]/Trash"#, expected: .success("OIB-Seen-[Gmail]/Trash")),
+        ParseFixture.flag(#"OIB-Seen-[Gmail]/Trash"#, expected: .success("OIB-Seen-[Gmail]/Trash"))
     ])
     func parse(_ fixture: ParseFixture<Flag>) {
         fixture.checkParsing()
@@ -155,7 +155,7 @@ struct FlagTests {
             ParseFixture.flagList("()", expected: .success([])),
             ParseFixture.flagList(#"(\seen)"#, expected: .success([.seen])),
             ParseFixture.flagList(#"(\seen \answered \draft)"#, expected: .success([.seen, .answered, .draft])),
-            ParseFixture.flagList(#"(\seen \answered \draft )"#, expected: .success([.seen, .answered, .draft])),
+            ParseFixture.flagList(#"(\seen \answered \draft )"#, expected: .success([.seen, .answered, .draft]))
         ]
     )
     func parseFlagList(_ fixture: ParseFixture<[Flag]>) {
@@ -166,7 +166,7 @@ struct FlagTests {
         "parse flag extension",
         arguments: [
             ParseFixture.flagExtension(#"\Something"#, expected: .success(#"\Something"#)),
-            ParseFixture.flagExtension("Something ", " ", expected: .failureIgnoringBufferModifications),
+            ParseFixture.flagExtension("Something ", " ", expected: .failureIgnoringBufferModifications)
         ]
     )
     func parseFlagExtension(_ fixture: ParseFixture<String>) {

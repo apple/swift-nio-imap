@@ -48,7 +48,7 @@ extension SequenceNumberTests {
         EncodeFixture.sequenceNumber(9999, "9999"),
         EncodeFixture.sequenceNumber(65535, "65535"),
         EncodeFixture.sequenceNumber(1_000_000, "1000000"),
-        EncodeFixture.sequenceNumber(.max, "4294967295"),
+        EncodeFixture.sequenceNumber(.max, "4294967295")
     ])
     func encode(_ fixture: EncodeFixture<SequenceNumber>) {
         fixture.checkEncoding()

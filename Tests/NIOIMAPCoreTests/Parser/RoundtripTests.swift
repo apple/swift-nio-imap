@@ -180,7 +180,7 @@ private enum RoundtripTests {
                         sourceOptions: ExtendedSearchSourceOptions(sourceMailbox: [.inboxes])
                     )
                 )
-            ),
+            )
         ]
     )
     static func commandRoundtrip(_ fixture: RoundtripFixture) throws {

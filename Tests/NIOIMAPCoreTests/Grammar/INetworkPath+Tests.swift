@@ -37,7 +37,7 @@ struct NetworkPathTests {
                 )
             ),
             "//user@mail.example.com/INBOX"
-        ),
+        )
     ])
     func encode(_ fixture: EncodeFixture<NetworkPath>) {
         fixture.checkEncoding()
@@ -64,7 +64,7 @@ struct NetworkPathTests {
                     )
                 )
             )
-        ),
+        )
     ])
     func parse(_ fixture: ParseFixture<NetworkPath>) {
         fixture.checkParsing()

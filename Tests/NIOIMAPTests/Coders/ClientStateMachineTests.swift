@@ -137,7 +137,7 @@ struct ClientStateMachineTests {
             result3
                 == .sendChunks([
                     .init(bytes: "å \"pass\"\r\n", promise: nil, shouldSucceedPromise: true),
-                    .init(bytes: "A2 NOOP\r\n", promise: nil, shouldSucceedPromise: true),
+                    .init(bytes: "A2 NOOP\r\n", promise: nil, shouldSucceedPromise: true)
                 ])
         )
     }
@@ -596,7 +596,7 @@ extension ClientStateMachineTests {
                     .init(bytes: "3", promise: nil, shouldSucceedPromise: true),
                     .init(bytes: "4", promise: nil, shouldSucceedPromise: true),
                     .init(bytes: "", promise: nil, shouldSucceedPromise: true),
-                    .init(bytes: "\r\n", promise: nil, shouldSucceedPromise: true),
+                    .init(bytes: "\r\n", promise: nil, shouldSucceedPromise: true)
                 ])
         )
 

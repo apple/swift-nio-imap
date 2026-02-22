@@ -79,7 +79,7 @@ struct ResponseParserTests {
         #expect(
             results == [
                 .response(.fetch(.start(617_85))),
-                .response(.fetch(.simpleAttribute(.uid(127_139)))),
+                .response(.fetch(.simpleAttribute(.uid(127_139))))
             ]
         )
     }

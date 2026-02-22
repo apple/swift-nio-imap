@@ -38,7 +38,7 @@ struct TaggedResponseStateTests {
         EncodeFixture.taggedResponseState(
             .ok(.init(code: nil, text: "")),
             "OK  "
-        ),
+        )
     ])
     func encode(_ fixture: EncodeFixture<TaggedResponse.State>) {
         fixture.checkEncoding()
@@ -63,7 +63,7 @@ struct TaggedResponseStateTests {
         ParseFixture.taggedResponseState("OK ", "\n", expected: .success(.ok(.init(text: "")))),
         ParseFixture.taggedResponseState("OK", "\n", expected: .success(.ok(.init(text: "")))),
         ParseFixture.taggedResponseState("OOPS [ALERT] hello1", "\n", expected: .failure),
-        ParseFixture.taggedResponseState("OOPS", "", expected: .incompleteMessage),
+        ParseFixture.taggedResponseState("OOPS", "", expected: .incompleteMessage)
     ])
     func parse(_ fixture: ParseFixture<TaggedResponse.State>) {
         fixture.checkParsing()

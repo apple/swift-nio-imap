@@ -65,7 +65,7 @@ struct UInt8ParseTypeMembershipTests {
             UInt8(ascii: "("), UInt8(ascii: ")"), UInt8(ascii: " "), UInt8(ascii: "{"),
             UInt8(ascii: "]"),  // ResponseSpecial
             UInt8(ascii: "%"), UInt8(ascii: "*"),  // ListWildcard
-            UInt8(ascii: "\""), UInt8(ascii: "\\"),  // QuotedSpecial
+            UInt8(ascii: "\""), UInt8(ascii: "\\")  // QuotedSpecial
         ]
         valid = valid.union(0...31)
         allChars.forEach { char in

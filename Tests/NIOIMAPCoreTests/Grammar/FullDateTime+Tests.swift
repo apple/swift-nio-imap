@@ -40,7 +40,7 @@ struct FullDateTimeTests {
             EncodeFixture.fullDateTime(
                 .init(date: .init(year: 9999, month: 12, day: 31), time: .init(hour: 23, minute: 59, second: 59)),
                 "9999-12-31T23:59:59"
-            ),
+            )
         ]
     )
     func encodeFullDateTime(_ fixture: EncodeFixture<FullDateTime>) {
@@ -55,7 +55,7 @@ struct FullDateTimeTests {
             EncodeFixture.fullDate(.init(year: 2025, month: 12, day: 31), "2025-12-31"),
             EncodeFixture.fullDate(.init(year: 2024, month: 2, day: 29), "2024-02-29"),
             EncodeFixture.fullDate(.init(year: 2024, month: 6, day: 15), "2024-06-15"),
-            EncodeFixture.fullDate(.init(year: 9999, month: 12, day: 31), "9999-12-31"),
+            EncodeFixture.fullDate(.init(year: 9999, month: 12, day: 31), "9999-12-31")
         ]
     )
     func encodeFullDate(_ fixture: EncodeFixture<FullDate>) {
@@ -71,7 +71,7 @@ struct FullDateTimeTests {
             EncodeFixture.fullTime(.init(hour: 23, minute: 59, second: 59), "23:59:59"),
             EncodeFixture.fullTime(.init(hour: 1, minute: 2, second: 3, fraction: 4), "01:02:03.4"),
             EncodeFixture.fullTime(.init(hour: 12, minute: 30, second: 45, fraction: 123), "12:30:45.123"),
-            EncodeFixture.fullTime(.init(hour: 0, minute: 0, second: 0, fraction: 1), "00:00:00.1"),
+            EncodeFixture.fullTime(.init(hour: 0, minute: 0, second: 0, fraction: 1), "00:00:00.1")
         ]
     )
     func encodeFullTime(_ fixture: EncodeFixture<FullTime>) {
@@ -102,7 +102,7 @@ struct FullDateTimeTests {
         arguments: [
             ParseFixture.fullDate("1234-12-23", " ", expected: .success(.init(year: 1234, month: 12, day: 23))),
             ParseFixture.fullDate("a", "", expected: .failure),
-            ParseFixture.fullDate("1234", "", expected: .incompleteMessage),
+            ParseFixture.fullDate("1234", "", expected: .incompleteMessage)
         ]
     )
     func parseFullDate(_ fixture: ParseFixture<FullDate>) {
@@ -120,7 +120,7 @@ struct FullDateTimeTests {
             ),
             ParseFixture.fullTime("a", "", expected: .failure),
             ParseFixture.fullTime("1234:56:12", "", expected: .failure),
-            ParseFixture.fullTime("1234", "", expected: .incompleteMessage),
+            ParseFixture.fullTime("1234", "", expected: .incompleteMessage)
         ]
     )
     func parseFullTime(_ fixture: ParseFixture<FullTime>) {

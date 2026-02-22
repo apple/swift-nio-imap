@@ -21,7 +21,7 @@ struct ListSelectIndependentOptionTests {
     @Test(arguments: [
         EncodeFixture.listSelectIndependentOption(.remote, "REMOTE"),
         EncodeFixture.listSelectIndependentOption(.option(.init(key: .standard("test"), value: nil)), "test"),
-        EncodeFixture.listSelectIndependentOption(.specialUse, "SPECIAL-USE"),
+        EncodeFixture.listSelectIndependentOption(.specialUse, "SPECIAL-USE")
     ])
     func encode(_ fixture: EncodeFixture<ListSelectIndependentOption>) {
         fixture.checkEncoding()

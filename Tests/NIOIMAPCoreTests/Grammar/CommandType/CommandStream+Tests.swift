@@ -41,7 +41,7 @@ private struct CommandStreamTests {
             CommandEncodeFixture.commandStream(.append(.finish), "\r\n"),
             CommandEncodeFixture.commandStream(.tagged(.init(tag: "1", command: .noop)), "1 NOOP\r\n"),
             CommandEncodeFixture.commandStream(.idleDone, "DONE\r\n"),
-            CommandEncodeFixture.commandStream(.continuationResponse("test"), "dGVzdA==\r\n"),
+            CommandEncodeFixture.commandStream(.continuationResponse("test"), "dGVzdA==\r\n")
         ] as [CommandEncodeFixture<CommandStreamPart>]
     )
     func encode(_ fixture: CommandEncodeFixture<CommandStreamPart>) {
@@ -54,7 +54,7 @@ private struct CommandStreamTests {
             .beginMessage(message: .init(options: .none, data: .init(byteCount: 7))),
             .messageBytes("Foo Bar"),
             .endMessage,
-            .finish,
+            .finish
         ]
 
         var buffer = CommandEncodeBuffer(buffer: "", capabilities: [], loggingMode: false)
@@ -79,7 +79,7 @@ private struct CommandStreamTests {
             .beginMessage(message: .init(options: .none, data: .init(byteCount: 3))),
             .messageBytes("abc"),
             .endMessage,
-            .finish,
+            .finish
         ]
 
         var options = CommandEncodingOptions()
@@ -116,7 +116,7 @@ private struct CommandStreamTests {
             .catenateData(.bytes("\r\n--------------030308070208000400050907--\r\n")),
             .catenateData(.end),
             .endCatenate,
-            .finish,
+            .finish
         ]
 
         var buffer = CommandEncodeBuffer(buffer: "", capabilities: [], loggingMode: false)
@@ -181,7 +181,7 @@ private struct CommandStreamTests {
             .catenateData(.bytes("\r\n--------------030308070208000400050907--\r\n")),
             .catenateData(.end),
             .endCatenate,
-            .finish,
+            .finish
         ]
 
         var options = CommandEncodingOptions()
@@ -211,7 +211,7 @@ private struct CommandStreamTests {
             .catenateData(.bytes("hello")),
             .catenateData(.end),
             .endCatenate,
-            .finish,
+            .finish
         ]
 
         // Apply parts twice.
@@ -278,7 +278,7 @@ private struct CommandStreamTests {
             PIIFixture(
                 input: .continuationResponse("test"),
                 expected: "[8 bytes]\r\n"
-            ),
+            )
         ]
     )
     func descriptionWithoutPII(_ fixture: PIIFixture) {

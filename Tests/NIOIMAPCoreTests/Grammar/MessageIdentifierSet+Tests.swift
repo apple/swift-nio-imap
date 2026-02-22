@@ -34,7 +34,7 @@ struct MessageIdentifierSetTests {
                     MessageIdentifierRange<UID>(2),
                     MessageIdentifierRange<UID>(34...56),
                     MessageIdentifierRange<UID>(78...910),
-                    MessageIdentifierRange<UID>(11),
+                    MessageIdentifierRange<UID>(11)
                 ])
             )
         ),
@@ -46,7 +46,7 @@ struct MessageIdentifierSetTests {
         ParseFixture.messageIdentifierSet("1:*", "\r\n", expected: .success(.all)),
         ParseFixture.messageIdentifierSet("a", " ", expected: .failure),
         ParseFixture.messageIdentifierSet("1234", "", expected: .incompleteMessage),
-        ParseFixture.messageIdentifierSet("", "", expected: .incompleteMessage),
+        ParseFixture.messageIdentifierSet("", "", expected: .incompleteMessage)
     ])
     func parse(_ fixture: ParseFixture<MessageIdentifierSet<UID>>) {
         fixture.checkParsing()

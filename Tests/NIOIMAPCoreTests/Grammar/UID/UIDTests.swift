@@ -45,7 +45,7 @@ struct UIDTests {
         arguments: [
             DebugStringFixture(sut: UID.min, expected: "1"),
             DebugStringFixture(sut: UID.max, expected: "*"),
-            DebugStringFixture(sut: UID(2), expected: "2"),
+            DebugStringFixture(sut: UID(2), expected: "2")
         ]
     )
     func customDebugString(_ fixture: DebugStringFixture<UID>) {
@@ -56,7 +56,7 @@ struct UIDTests {
         EncodeFixture.uid(.min, "1"),
         EncodeFixture.uid(.max, "*"),
         EncodeFixture.uid(UID(1234), "1234"),
-        EncodeFixture.uid(UID(392_972_163), "392972163"),
+        EncodeFixture.uid(UID(392_972_163), "392972163")
     ])
     func encode(_ fixture: EncodeFixture<UID>) {
         fixture.checkEncoding()

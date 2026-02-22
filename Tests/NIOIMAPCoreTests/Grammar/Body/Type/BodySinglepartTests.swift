@@ -82,7 +82,7 @@ extension BodySinglepartTests {
                 extension: nil
             ),
             #""MESSAGE" "RFC822" NIL NIL NIL "BASE64" 6 ("date" NIL NIL NIL NIL NIL NIL NIL NIL NIL) ("TEXT" "SUBTYPE" NIL NIL NIL "BASE64" 6 5) 8"#
-        ),
+        )
     ])
     func encode(_ fixture: EncodeFixture<BodyStructure.Singlepart>) {
         fixture.checkEncoding()
@@ -105,7 +105,7 @@ extension BodySinglepartTests {
                     dispositionAndLanguage: .init(disposition: .init(kind: "string", parameters: [:]), language: nil)
                 ),
                 "\"md5\" (\"string\" NIL)"
-            ),
+            )
         ]
     )
     func encodeExtension(_ fixture: EncodeFixture<BodyStructure.Singlepart.Extension>) {
@@ -214,7 +214,7 @@ extension BodySinglepartTests {
                     extension: nil
                 )
             )
-        ),
+        )
     ])
     func parse(_ fixture: ParseFixture<BodyStructure.Singlepart>) {
         fixture.checkParsing()

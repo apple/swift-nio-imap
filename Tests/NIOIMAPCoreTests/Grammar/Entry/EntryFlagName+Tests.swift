@@ -21,7 +21,7 @@ struct EntryFlagNameTests {
     @Test(arguments: [
         EncodeFixture.entryFlagName(.init(flag: .answered), "\"/flags/\\\\answered\""),
         EncodeFixture.entryFlagName(.init(flag: .deleted), "\"/flags/\\\\deleted\""),
-        EncodeFixture.entryFlagName(.init(flag: .init("\\\\CustomFlag")), "\"/flags/\\\\customflag\""),
+        EncodeFixture.entryFlagName(.init(flag: .init("\\\\CustomFlag")), "\"/flags/\\\\customflag\"")
     ])
     func encoding(_ fixture: EncodeFixture<EntryFlagName>) {
         fixture.checkEncoding()
@@ -42,7 +42,7 @@ struct EntryFlagNameTests {
             "\"/flags",
             "",
             expected: .incompleteMessage
-        ),
+        )
     ])
     func parse(_ fixture: ParseFixture<EntryFlagName>) {
         fixture.checkParsing()

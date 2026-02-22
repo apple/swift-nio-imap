@@ -71,7 +71,7 @@ struct FlagKeywordTests {
         EncodeFixture.flagKeyword(
             .unregistered_redirected,
             "Redirected"
-        ),
+        )
     ])
     func encode(_ fixture: EncodeFixture<Flag.Keyword>) {
         fixture.checkEncoding()
