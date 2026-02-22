@@ -15,17 +15,11 @@
 import Foundation
 import NIO
 @testable import NIOIMAPCore
-import XCTest
+import Testing
 
 enum TestUtilities {}
 
 // MARK: - ByteBuffer
-
-#if swift(>=5.3)
-func magicFile(file: StaticString = (#filePath)) -> StaticString { file }
-#else
-func magicFile(file: StaticString = (#filePath)) -> StaticString { file }
-#endif
 
 extension TestUtilities {
     static func makeParseBuffer(for bytes: [UInt8]) -> ByteBuffer {
@@ -44,8 +38,7 @@ extension TestUtilities {
         _ string: String,
         terminator: String = "",
         shouldRemainUnchanged: Bool = false,
-        file: StaticString = (#filePath),
-        line: UInt = #line,
+        sourceLocation: SourceLocation = #_sourceLocation,
         _ body: (inout ByteBuffer) throws -> Void
     ) {
         var inputBuffer = ByteBufferAllocator().buffer(capacity: string.utf8.count + terminator.utf8.count + 10)
@@ -74,18 +67,18 @@ extension TestUtilities {
             let expectedString = String(buffer: expected)
             let remainingString = String(buffer: remaining)
             if shouldRemainUnchanged {
-                XCTAssertEqual(beforeRunningBody, inputBuffer, file: file, line: line)
+                #expect(beforeRunningBody == inputBuffer, sourceLocation: sourceLocation)
             } else {
-                XCTAssertEqual(remainingString, expectedString, file: file, line: line)
+                #expect(remainingString == expectedString, sourceLocation: sourceLocation)
             }
         }
 
-        XCTAssertNoThrow(try body(&inputBuffer), file: file, line: line)
+        #expect(throws: Never.self, sourceLocation: sourceLocation) {
+            try body(&inputBuffer)
+        }
     }
 }
 
-#if swift(>=5.8)
-#if hasFeature(RetroactiveAttribute)
 extension ByteBuffer: @retroactive ExpressibleByStringLiteral {
     public init(stringLiteral value: String) {
         let allocator = ByteBufferAllocator()
@@ -93,21 +86,3 @@ extension ByteBuffer: @retroactive ExpressibleByStringLiteral {
         self.writeString(value)
     }
 }
-#else
-extension ByteBuffer: ExpressibleByStringLiteral {
-    public init(stringLiteral value: String) {
-        let allocator = ByteBufferAllocator()
-        self = allocator.buffer(capacity: 0)
-        self.writeString(value)
-    }
-}
-#endif
-#else
-extension ByteBuffer: ExpressibleByStringLiteral {
-    public init(stringLiteral value: String) {
-        let allocator = ByteBufferAllocator()
-        self = allocator.buffer(capacity: 0)
-        self.writeString(value)
-    }
-}
-#endif
