@@ -400,31 +400,31 @@ extension ClientStateMachineTests {
 
 // MARK: - Append
 
+private func expectOutgoingChunk(
+    _ expected: OutgoingChunk,
+    _ closure: @autoclosure () throws -> OutgoingChunk?,
+    sourceLocation: SourceLocation = #_sourceLocation
+) {
+    var result: OutgoingChunk?
+    #expect(throws: Never.self) { result = try closure() }
+
+    #expect(expected.promise?.futureResult === result?.promise?.futureResult, sourceLocation: sourceLocation)
+    #expect(expected.bytes == result?.bytes, sourceLocation: sourceLocation)
+    #expect(expected.shouldSucceedPromise == result?.shouldSucceedPromise, sourceLocation: sourceLocation)
+}
+
 extension ClientStateMachineTests {
-    func assert(
-        _ expected: OutgoingChunk,
-        _ closure: @autoclosure () throws -> OutgoingChunk?,
-        sourceLocation: SourceLocation = #_sourceLocation
-    ) {
-        var result: OutgoingChunk?
-        #expect(throws: Never.self) { result = try closure() }
-
-        #expect(expected.promise?.futureResult === result?.promise?.futureResult, sourceLocation: sourceLocation)
-        #expect(expected.bytes == result?.bytes, sourceLocation: sourceLocation)
-        #expect(expected.shouldSucceedPromise == result?.shouldSucceedPromise, sourceLocation: sourceLocation)
-    }
-
     @Test("append workflow normal")
     func appendWorkflowNormal() {
         var stateMachine = makeStateMachine()
         // start the append command
-        self.assert(
+        expectOutgoingChunk(
             .init(bytes: "A1 APPEND \"INBOX\"", promise: nil, shouldSucceedPromise: true),
             try stateMachine.sendCommand(.append(.start(tag: "A1", appendingTo: .inbox)))
         )
 
         // append a message
-        self.assert(
+        expectOutgoingChunk(
             .init(bytes: " {10}\r\n", promise: nil, shouldSucceedPromise: true),
             try stateMachine.sendCommand(
                 .append(.beginMessage(message: .init(options: .init(), data: .init(byteCount: 10))))
@@ -435,63 +435,63 @@ extension ClientStateMachineTests {
             action = try stateMachine.receiveContinuationRequest(.data("ready2"))
         }
         #expect(action == .sendChunks([]))
-        self.assert(
+        expectOutgoingChunk(
             .init(bytes: "01234", promise: nil, shouldSucceedPromise: true),
             try stateMachine.sendCommand(.append(.messageBytes("01234")))
         )
-        self.assert(
+        expectOutgoingChunk(
             .init(bytes: "56789", promise: nil, shouldSucceedPromise: true),
             try stateMachine.sendCommand(.append(.messageBytes("56789")))
         )
-        self.assert(
+        expectOutgoingChunk(
             .init(bytes: "", promise: nil, shouldSucceedPromise: true),
             try stateMachine.sendCommand(.append(.endMessage))
         )
 
         // catenate some urls and a message
-        self.assert(
+        expectOutgoingChunk(
             .init(bytes: " CATENATE (", promise: nil, shouldSucceedPromise: true),
             try stateMachine.sendCommand(.append(.beginCatenate(options: .init())))
         )
-        self.assert(
+        expectOutgoingChunk(
             .init(bytes: "URL \"url1\"", promise: nil, shouldSucceedPromise: true),
             try stateMachine.sendCommand(.append(.catenateURL("url1")))
         )
-        self.assert(
+        expectOutgoingChunk(
             .init(bytes: " URL \"url2\"", promise: nil, shouldSucceedPromise: true),
             try stateMachine.sendCommand(.append(.catenateURL("url2")))
         )
-        self.assert(
+        expectOutgoingChunk(
             .init(bytes: " TEXT {10}\r\n", promise: nil, shouldSucceedPromise: true),
             try stateMachine.sendCommand(.append(.catenateData(.begin(size: 10))))
         )
         #expect(throws: Never.self) { try stateMachine.receiveContinuationRequest(.data("ready2")) }
-        self.assert(
+        expectOutgoingChunk(
             .init(bytes: "01234", promise: nil, shouldSucceedPromise: true),
             try stateMachine.sendCommand(.append(.catenateData(.bytes("01234"))))
         )
-        self.assert(
+        expectOutgoingChunk(
             .init(bytes: "56789", promise: nil, shouldSucceedPromise: true),
             try stateMachine.sendCommand(.append(.catenateData(.bytes("56789"))))
         )
-        self.assert(
+        expectOutgoingChunk(
             .init(bytes: "", promise: nil, shouldSucceedPromise: true),
             try stateMachine.sendCommand(.append(.catenateData(.end)))
         )
-        self.assert(
+        expectOutgoingChunk(
             .init(bytes: ")", promise: nil, shouldSucceedPromise: true),
             try stateMachine.sendCommand(.append(.endCatenate))
         )
 
         // show that we can finish the append command, and then send another different command
-        self.assert(
+        expectOutgoingChunk(
             .init(bytes: "\r\n", promise: nil, shouldSucceedPromise: true),
             try stateMachine.sendCommand(.append(.finish))
         )
         #expect(throws: Never.self) {
             try stateMachine.receiveResponse(.tagged(.init(tag: "A1", state: .ok(.init(code: nil, text: "OK")))))
         }
-        self.assert(
+        expectOutgoingChunk(
             .init(bytes: "A2 NOOP\r\n", promise: nil, shouldSucceedPromise: true),
             try stateMachine.sendCommand(.tagged(.init(tag: "A2", command: .noop)))
         )
@@ -501,13 +501,13 @@ extension ClientStateMachineTests {
     func appendWorkflowReceivingUntaggedResponses() throws {
         var stateMachine = makeStateMachine()
         // start the append command
-        self.assert(
+        expectOutgoingChunk(
             .init(bytes: "A1 APPEND \"INBOX\"", promise: nil, shouldSucceedPromise: true),
             try stateMachine.sendCommand(.append(.start(tag: "A1", appendingTo: .inbox)))
         )
 
         // append a message
-        self.assert(
+        expectOutgoingChunk(
             .init(bytes: " {10}\r\n", promise: nil, shouldSucceedPromise: true),
             try stateMachine.sendCommand(
                 .append(.beginMessage(message: .init(options: .init(), data: .init(byteCount: 10))))
@@ -518,11 +518,11 @@ extension ClientStateMachineTests {
             action = try stateMachine.receiveContinuationRequest(.data("ready2"))
         }
         #expect(action == .sendChunks([]))
-        self.assert(
+        expectOutgoingChunk(
             .init(bytes: "0123456789", promise: nil, shouldSucceedPromise: true),
             try stateMachine.sendCommand(.append(.messageBytes("0123456789")))
         )
-        self.assert(
+        expectOutgoingChunk(
             .init(bytes: "", promise: nil, shouldSucceedPromise: true),
             try stateMachine.sendCommand(.append(.endMessage))
         )
@@ -531,7 +531,7 @@ extension ClientStateMachineTests {
         try stateMachine.receiveResponse(.untagged(.mailboxData(.exists(5_732))))
 
         // Finish the append command, and then send another different command
-        self.assert(
+        expectOutgoingChunk(
             .init(bytes: "\r\n", promise: nil, shouldSucceedPromise: true),
             try stateMachine.sendCommand(.append(.finish))
         )
@@ -542,7 +542,7 @@ extension ClientStateMachineTests {
         #expect(throws: Never.self) {
             try stateMachine.receiveResponse(.tagged(.init(tag: "A1", state: .ok(.init(code: nil, text: "OK")))))
         }
-        self.assert(
+        expectOutgoingChunk(
             .init(bytes: "A2 NOOP\r\n", promise: nil, shouldSucceedPromise: true),
             try stateMachine.sendCommand(.tagged(.init(tag: "A2", command: .noop)))
         )

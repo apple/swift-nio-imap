@@ -19,8 +19,9 @@ import NIOTestUtils
 
 import Testing
 
-@Suite struct CommandEncoder_Tests {
-    @Test("encoding")
+@Suite("CommandEncoder")
+struct CommandEncoder_Tests {
+    @Test
     func encoding() {
         // For now this is a fairly limited sequence of test
         // just to ensure that CommandEncoder correctly uses

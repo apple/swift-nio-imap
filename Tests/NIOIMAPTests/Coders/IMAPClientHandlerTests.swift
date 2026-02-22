@@ -20,8 +20,6 @@ import Synchronization
 
 @Suite("IMAPClientHandler")
 struct IMAPClientHandlerTests {
-    // MARK: - Tests
-
     @Test("basic command and response")
     func basicCommandAndResponse() {
         var helper = Helper()
@@ -30,9 +28,9 @@ struct IMAPClientHandlerTests {
         }
 
         helper.writeOutbound(.tagged(.init(tag: "a", command: .login(username: "foo", password: "bar"))))
-        helper.assertOutboundString("a LOGIN \"foo\" \"bar\"\r\n")
+        helper.expectOutboundString("a LOGIN \"foo\" \"bar\"\r\n")
         helper.writeInbound("a OK ok\r\n")
-        helper.assertInbound(
+        helper.expectInbound(
             .tagged(
                 .init(
                     tag: "a",
@@ -78,9 +76,9 @@ struct IMAPClientHandlerTests {
             )
         )
         helper.writeOutbound(.tagged(.init(tag: "A1", command: .login(username: "foo", password: "bar"))))
-        helper.assertOutboundString("A1 LOGIN \"foo\" \"bar\"\r\n")
+        helper.expectOutboundString("A1 LOGIN \"foo\" \"bar\"\r\n")
         helper.writeInbound("A1 OK [REFERRAL imap://hostname/foo/bar/;UID=1234]\r\n")
-        helper.assertInbound(expectedResponse)
+        helper.expectInbound(expectedResponse)
     }
 
     @Test("command that needs to wait for continuation request")
@@ -103,12 +101,12 @@ struct IMAPClientHandlerTests {
             ),
             wait: false
         )
-        helper.assertOutboundString("x RENAME {2}\r\n")
+        helper.expectOutboundString("x RENAME {2}\r\n")
         helper.writeInbound("+ OK\r\n")
-        helper.assertOutboundString("å \"to\"\r\n")
+        helper.expectOutboundString("å \"to\"\r\n")
         #expect(throws: Never.self) { try f.wait() }
         helper.writeInbound("x OK ok\r\n")
-        helper.assertInbound(
+        helper.expectInbound(
             .tagged(
                 .init(
                     tag: "x",
@@ -138,14 +136,14 @@ struct IMAPClientHandlerTests {
             ),
             wait: false
         )
-        helper.assertOutboundString("x RENAME {2}\r\n")
+        helper.expectOutboundString("x RENAME {2}\r\n")
         helper.writeInbound("+ OK\r\n")
-        helper.assertOutboundString("å {2}\r\n")
+        helper.expectOutboundString("å {2}\r\n")
         helper.writeInbound("+ OK\r\n")
-        helper.assertOutboundString("ß\r\n")
+        helper.expectOutboundString("ß\r\n")
         #expect(throws: Never.self) { try f.wait() }
         helper.writeInbound("x OK ok\r\n")
-        helper.assertInbound(
+        helper.expectInbound(
             .tagged(
                 .init(
                     tag: "x",
@@ -188,16 +186,16 @@ struct IMAPClientHandlerTests {
             ),
             wait: false
         )
-        helper.assertOutboundString("x RENAME {2}\r\n")
+        helper.expectOutboundString("x RENAME {2}\r\n")
         helper.writeInbound("+ OK\r\n")
         #expect(throws: Never.self) { try f1.wait() }
-        helper.assertOutboundString("å \"to\"\r\n")
-        helper.assertOutboundString("y RENAME \"from\" {2}\r\n")
+        helper.expectOutboundString("å \"to\"\r\n")
+        helper.expectOutboundString("y RENAME \"from\" {2}\r\n")
         helper.writeInbound("+ OK\r\n")
         #expect(throws: Never.self) { try f2.wait() }
-        helper.assertOutboundString("ß\r\n")
+        helper.expectOutboundString("ß\r\n")
         helper.writeInbound("x OK ok\r\n")
-        helper.assertInbound(
+        helper.expectInbound(
             .tagged(
                 .init(
                     tag: "x",
@@ -206,7 +204,7 @@ struct IMAPClientHandlerTests {
             )
         )
         helper.writeInbound("y OK ok\r\n")
-        helper.assertInbound(
+        helper.expectInbound(
             .tagged(
                 .init(
                     tag: "y",
@@ -232,28 +230,28 @@ struct IMAPClientHandlerTests {
         let f4 = helper.writeOutbound(.tagged(.init(tag: "4", command: .create(.init("a"), []))), wait: false)
         let f5 = helper.writeOutbound(.tagged(.init(tag: "5", command: .create(.init("b"), []))), wait: false)
 
-        helper.assertOutboundString("1 CREATE {2}\r\n")
+        helper.expectOutboundString("1 CREATE {2}\r\n")
         helper.writeInbound("+ OK\r\n")
         #expect(throws: Never.self) { try f1.wait() }
-        helper.assertOutboundString("å\r\n")
+        helper.expectOutboundString("å\r\n")
 
-        helper.assertOutboundString("2 CREATE {2}\r\n")
+        helper.expectOutboundString("2 CREATE {2}\r\n")
         helper.writeInbound("+ OK\r\n")
         #expect(throws: Never.self) { try f2.wait() }
-        helper.assertOutboundString("ß\r\n")
+        helper.expectOutboundString("ß\r\n")
 
-        helper.assertOutboundString("3 CREATE {3}\r\n")
+        helper.expectOutboundString("3 CREATE {3}\r\n")
         helper.writeInbound("+ OK\r\n")
         #expect(throws: Never.self) { try f3.wait() }
-        helper.assertOutboundString("∂\r\n")
+        helper.expectOutboundString("∂\r\n")
 
-        helper.assertOutboundString("4 CREATE \"a\"\r\n")
+        helper.expectOutboundString("4 CREATE \"a\"\r\n")
         #expect(throws: Never.self) { try f4.wait() }
-        helper.assertOutboundString("5 CREATE \"b\"\r\n")
+        helper.expectOutboundString("5 CREATE \"b\"\r\n")
         #expect(throws: Never.self) { try f5.wait() }
 
         helper.writeInbound("1 OK ok\r\n")
-        helper.assertInbound(
+        helper.expectInbound(
             .tagged(
                 .init(
                     tag: "1",
@@ -262,7 +260,7 @@ struct IMAPClientHandlerTests {
             )
         )
         helper.writeInbound("2 OK ok\r\n")
-        helper.assertInbound(
+        helper.expectInbound(
             .tagged(
                 .init(
                     tag: "2",
@@ -272,7 +270,7 @@ struct IMAPClientHandlerTests {
         )
 
         helper.writeInbound("3 OK ok\r\n")
-        helper.assertInbound(
+        helper.expectInbound(
             .tagged(
                 .init(
                     tag: "3",
@@ -282,7 +280,7 @@ struct IMAPClientHandlerTests {
         )
 
         helper.writeInbound("4 OK ok\r\n")
-        helper.assertInbound(
+        helper.expectInbound(
             .tagged(
                 .init(
                     tag: "4",
@@ -292,7 +290,7 @@ struct IMAPClientHandlerTests {
         )
 
         helper.writeInbound("5 OK ok\r\n")
-        helper.assertInbound(
+        helper.expectInbound(
             .tagged(
                 .init(
                     tag: "5",
@@ -321,7 +319,7 @@ struct IMAPClientHandlerTests {
                 )
             )
         )
-        helper.assertOutboundString("x RENAME \"from\" \"to\"\r\n")
+        helper.expectOutboundString("x RENAME \"from\" \"to\"\r\n")
         #expect(throws: UnexpectedContinuationRequest.self) {
             try helper.channel.writeInbound(helper.buffer(string: "+ OK\r\n+ OK\r\n"))
         }
@@ -338,12 +336,12 @@ struct IMAPClientHandlerTests {
         helper.writeOutbound(
             .tagged(.init(tag: "A1", command: .authenticate(mechanism: .gssAPI, initialResponse: nil)))
         )
-        helper.assertOutboundString("A1 AUTHENTICATE GSSAPI\r\n")
+        helper.expectOutboundString("A1 AUTHENTICATE GSSAPI\r\n")
 
         // server sends challenge
         let challengeBytes1 = ""
         helper.writeInbound("+ \(challengeBytes1)\r\n")
-        helper.assertInbound(.authenticationChallenge(ByteBuffer()))
+        helper.expectInbound(.authenticationChallenge(ByteBuffer()))
 
         // client responds
         let responseBytes1 =
@@ -415,13 +413,13 @@ struct IMAPClientHandlerTests {
                 ])
             )
         )
-        helper.assertOutboundString("\(responseBytes1)\r\n")
+        helper.expectOutboundString("\(responseBytes1)\r\n")
 
         // server challenge 2
         let challengeBytes2 =
             "YGgGCSqGSIb3EgECAgIAb1kwV6ADAgEFoQMCAQ+iSzBJoAMCAQGiQgRAtHTEuOP2BXb9sBYFR4SJlDZxmg39IxmRBOhXRKdDA0uHTCOT9Bq3OsUTXUlk0CsFLoa8j+gvGDlgHuqzWHPSQg=="
         helper.writeInbound("+ \(challengeBytes2)\r\n")
-        helper.assertInbound(
+        helper.expectInbound(
             .authenticationChallenge(
                 ByteBuffer(bytes: [
                     0x60, 0x68, 0x06, 0x09, 0x2A, 0x86, 0x48, 0x86, 0xF7, 0x12, 0x01, 0x02, 0x02, 0x02, 0x00, 0x6F,
@@ -443,11 +441,11 @@ struct IMAPClientHandlerTests {
 
         // client responds
         helper.writeOutbound(.continuationResponse(""))
-        helper.assertOutboundString("\r\n")
+        helper.expectOutboundString("\r\n")
 
         // all done
         helper.writeInbound("A1 OK Success\r\n")
-        helper.assertInbound(.tagged(.init(tag: "A1", state: .ok(.init(text: "Success")))))
+        helper.expectInbound(.tagged(.init(tag: "A1", state: .ok(.init(text: "Success")))))
     }
 
     @Test("can change encoding to fixed")
@@ -461,11 +459,11 @@ struct IMAPClientHandlerTests {
             .tagged(.init(tag: "A1", command: .login(username: "å", password: "ß"))),
             wait: false
         )
-        helper.assertOutboundString("A1 LOGIN {2}\r\n")
+        helper.expectOutboundString("A1 LOGIN {2}\r\n")
         helper.writeInbound("+ OK\r\n")
-        helper.assertOutboundString("å {2}\r\n")
+        helper.expectOutboundString("å {2}\r\n")
         helper.writeInbound("+ OK\r\n")
-        helper.assertOutboundString("ß\r\n")
+        helper.expectOutboundString("ß\r\n")
         #expect(throws: Never.self) { try f1.wait() }
 
         // Change the encoding options:
@@ -487,7 +485,7 @@ struct IMAPClientHandlerTests {
             .tagged(.init(tag: "A3", command: .login(username: "å", password: "ß"))),
             wait: false
         )
-        helper.assertOutboundString("A3 LOGIN {2+}\r\nå {2+}\r\nß\r\n")
+        helper.expectOutboundString("A3 LOGIN {2+}\r\nå {2+}\r\nß\r\n")
         #expect(throws: Never.self) { try f3.wait() }
     }
 
@@ -502,16 +500,16 @@ struct IMAPClientHandlerTests {
             .tagged(.init(tag: "A1", command: .login(username: "å", password: "ß"))),
             wait: false
         )
-        helper.assertOutboundString("A1 LOGIN {2}\r\n")
+        helper.expectOutboundString("A1 LOGIN {2}\r\n")
         helper.writeInbound("+ OK\r\n")
-        helper.assertOutboundString("å {2}\r\n")
+        helper.expectOutboundString("å {2}\r\n")
         helper.writeInbound("+ OK\r\n")
-        helper.assertOutboundString("ß\r\n")
+        helper.expectOutboundString("ß\r\n")
         #expect(throws: Never.self) { try f1.wait() }
 
         // send some capabilities
         helper.writeInbound("A1 OK [CAPABILITY IMAP4 LITERAL+]\r\n")
-        helper.assertInbound(
+        helper.expectInbound(
             .tagged(.init(tag: "A1", state: .ok(.init(code: .capability([.imap4, .literalPlus]), text: ""))))
         )
 
@@ -520,7 +518,7 @@ struct IMAPClientHandlerTests {
             .tagged(.init(tag: "A3", command: .login(username: "å", password: "ß"))),
             wait: false
         )
-        helper.assertOutboundString("A3 LOGIN {2+}\r\nå {2+}\r\nß\r\n")
+        helper.expectOutboundString("A3 LOGIN {2+}\r\nå {2+}\r\nß\r\n")
         #expect(throws: Never.self) { try f3.wait() }
     }
 
@@ -581,26 +579,26 @@ struct IMAPClientHandlerTests {
 
         // confirm it works for literals
         helper.writeOutbound(.tagged(.init(tag: "A1", command: .login(username: "å", password: "ß"))), wait: false)
-        helper.assertOutboundString("A1 LOGIN {2}\r\n")
+        helper.expectOutboundString("A1 LOGIN {2}\r\n")
         helper.writeInbound("+ 1\r\n")
         #expect(throws: Never.self) { try eventExpectation1.futureResult.wait() }
-        helper.assertOutboundString("å {2}\r\n")
+        helper.expectOutboundString("å {2}\r\n")
         helper.writeInbound("+ 2\r\n")
         #expect(throws: Never.self) { try eventExpectation2.futureResult.wait() }
-        helper.assertOutboundString("ß\r\n")
+        helper.expectOutboundString("ß\r\n")
         helper.writeInbound("A1 OK\r\n")
-        helper.assertInbound(.tagged(.init(tag: "A1", state: .ok(.init(code: nil, text: "")))))
+        helper.expectInbound(.tagged(.init(tag: "A1", state: .ok(.init(code: nil, text: "")))))
 
         // now confirm idle
         helper.writeOutbound(.tagged(.init(tag: "A2", command: .idleStart)), wait: false)
-        helper.assertOutboundString("A2 IDLE\r\n")
+        helper.expectOutboundString("A2 IDLE\r\n")
         helper.writeInbound("+ 3\r\n")
         #expect(throws: Never.self) { try eventExpectation3.futureResult.wait() }
-        helper.assertInbound(.idleStarted)
+        helper.expectInbound(.idleStarted)
         helper.writeOutbound(.idleDone)
-        helper.assertOutboundString("DONE\r\n")
+        helper.expectOutboundString("DONE\r\n")
         helper.writeInbound("A2 OK\r\n")
-        helper.assertInbound(.tagged(.init(tag: "A2", state: .ok(.init(code: nil, text: "")))))
+        helper.expectInbound(.tagged(.init(tag: "A2", state: .ok(.init(code: nil, text: "")))))
     }
 
     @Test("promises are failed on channel close")
@@ -620,7 +618,7 @@ struct IMAPClientHandlerTests {
         let p2 = helper.writeOutbound(.tagged(.init(tag: "A2", command: .noop)), wait: false)
 
         // at this point we'll be held by the continuation requirement for p1
-        helper.assertOutboundString("A1 LOGIN {2}\r\n")
+        helper.expectOutboundString("A1 LOGIN {2}\r\n")
         helper.channel.pipeline.fireChannelInactive()
 
         #expect(throws: ChannelError.self) {
@@ -772,7 +770,7 @@ struct IMAPClientHandlerTests {
                 )
             )
         )
-        helper.assertOutboundString("A1 RENAME {2}\r\n")
+        helper.expectOutboundString("A1 RENAME {2}\r\n")
 
         testHandler.failNextWrite.withLock { $0 = true }
         helper.writeInbound("+ OK\r\n")
@@ -794,39 +792,39 @@ struct IMAPClientHandlerTests {
         }
 
         helper.writeOutbound(.append(.start(tag: "A1", appendingTo: .inbox)))
-        helper.assertOutboundString("A1 APPEND \"INBOX\"")
+        helper.expectOutboundString("A1 APPEND \"INBOX\"")
 
         let literalPromise = helper.writeOutbound(
             .append(.beginMessage(message: .init(options: .none, data: .init(byteCount: 5)))),
             wait: false
         )
-        helper.assertOutboundString(" {5}\r\n")
+        helper.expectOutboundString(" {5}\r\n")
         #expect(throws: Never.self) { try literalPromise.wait() }
 
         let p1 = helper.writeOutbound(.append(.messageBytes("0")), wait: false)
-        helper.assertNoOutboundString()
+        helper.expectNoOutboundString()
         let p2 = helper.writeOutbound(.append(.messageBytes("1")), wait: false)
-        helper.assertNoOutboundString()
+        helper.expectNoOutboundString()
         let p3 = helper.writeOutbound(.append(.messageBytes("2")), wait: false)
-        helper.assertNoOutboundString()
+        helper.expectNoOutboundString()
         let p4 = helper.writeOutbound(.append(.messageBytes("3")), wait: false)
-        helper.assertNoOutboundString()
+        helper.expectNoOutboundString()
         let p5 = helper.writeOutbound(.append(.messageBytes("4")), wait: false)
-        helper.assertNoOutboundString()
+        helper.expectNoOutboundString()
         let p6 = helper.writeOutbound(.append(.endMessage), wait: false)
-        helper.assertNoOutboundString()
+        helper.expectNoOutboundString()
         let p7 = helper.writeOutbound(.append(.finish), wait: false)
-        helper.assertNoOutboundString()
+        helper.expectNoOutboundString()
 
         // send a continuation, we should now get outbound strings
         helper.writeInbound("+ OK\r\n")
-        helper.assertOutboundString("0")
-        helper.assertOutboundString("1")
-        helper.assertOutboundString("2")
-        helper.assertOutboundString("3")
-        helper.assertOutboundString("4")
-        helper.assertOutboundString("")
-        helper.assertOutboundString("\r\n")
+        helper.expectOutboundString("0")
+        helper.expectOutboundString("1")
+        helper.expectOutboundString("2")
+        helper.expectOutboundString("3")
+        helper.expectOutboundString("4")
+        helper.expectOutboundString("")
+        helper.expectOutboundString("\r\n")
 
         // make sure all the promises are succeeded
         #expect(throws: Never.self) { try p1.wait() }
@@ -852,7 +850,7 @@ struct IMAPClientHandlerTests {
             .tagged(.init(tag: "A1", command: .login(username: "å", password: "test"))),
             wait: false
         )
-        helper.assertOutboundBuffer("A1 LOGIN {2}\r\n")
+        helper.expectOutboundBuffer("A1 LOGIN {2}\r\n")
         #expect(throws: (any Error).self) {
             try helper.channel.writeInbound(ByteBuffer("A1 OK\r\n"))
         }
@@ -890,7 +888,7 @@ extension IMAPClientHandlerTests {
 // MARK: - Helper methods
 
 extension IMAPClientHandlerTests.Helper {
-    func assertInbound(_ response: Response, sourceLocation: SourceLocation = #_sourceLocation) {
+    func expectInbound(_ response: Response, sourceLocation: SourceLocation = #_sourceLocation) {
         var maybeRead: Response?
         #expect(throws: Never.self, sourceLocation: sourceLocation) {
             maybeRead = try self.channel.readInbound()
@@ -902,7 +900,7 @@ extension IMAPClientHandlerTests.Helper {
         #expect(response == read, sourceLocation: sourceLocation)
     }
 
-    func assertOutboundBuffer(_ buffer: ByteBuffer, sourceLocation: SourceLocation = #_sourceLocation) {
+    func expectOutboundBuffer(_ buffer: ByteBuffer, sourceLocation: SourceLocation = #_sourceLocation) {
         var maybeRead: ByteBuffer?
         #expect(throws: Never.self, sourceLocation: sourceLocation) {
             maybeRead = try self.channel.readOutbound()
@@ -914,13 +912,13 @@ extension IMAPClientHandlerTests.Helper {
         #expect(buffer == read, "\(String(buffer: buffer)) != \(String(buffer: read))", sourceLocation: sourceLocation)
     }
 
-    func assertOutboundString(_ string: String, sourceLocation: SourceLocation = #_sourceLocation) {
+    func expectOutboundString(_ string: String, sourceLocation: SourceLocation = #_sourceLocation) {
         var buffer = self.channel.allocator.buffer(capacity: string.utf8.count)
         buffer.writeString(string)
-        self.assertOutboundBuffer(buffer, sourceLocation: sourceLocation)
+        self.expectOutboundBuffer(buffer, sourceLocation: sourceLocation)
     }
 
-    func assertNoOutboundString(sourceLocation: SourceLocation = #_sourceLocation) {
+    func expectNoOutboundString(sourceLocation: SourceLocation = #_sourceLocation) {
         var result: ByteBuffer?
         #expect(throws: Never.self, sourceLocation: sourceLocation) {
             result = try self.channel.readOutbound(as: ByteBuffer.self)

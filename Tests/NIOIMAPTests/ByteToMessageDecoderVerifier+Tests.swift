@@ -20,11 +20,12 @@ import NIO
 import NIOIMAPCore
 import NIOTestUtils
 
-@Suite struct B2MV_Tests {}
+@Suite("ByteToMessageDecoderVerifier")
+struct ByteToMessageDecoderVerifierTests {}
 
 // MARK: - Command
 
-extension B2MV_Tests {
+extension ByteToMessageDecoderVerifierTests {
     @Test("command")
     func command() {
         let inoutPairs: [(String, [CommandStreamPart])] = [
@@ -292,7 +293,7 @@ extension B2MV_Tests {
 
 // MARK: - Response
 
-extension B2MV_Tests {
+extension ByteToMessageDecoderVerifierTests {
     @Test("response")
     func response() {
         let inoutPairs: [(String, [Response])] = [
