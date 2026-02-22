@@ -33,7 +33,7 @@ extension ResponseParserTests {
                 expected: [
                     .response(.fetch(.start(999))),
                     .response(.fetch(.simpleAttribute(.flags([.seen])))),
-                    .response(.fetch(.finish)),
+                    .response(.fetch(.finish))
                 ]
             ),
             ResponseStreamFixture(
@@ -115,7 +115,7 @@ extension ResponseParserTests {
                             )
                         )
                     ),
-                    .response(.fetch(.finish)),
+                    .response(.fetch(.finish))
                 ]
             ),
             ResponseStreamFixture(
@@ -173,7 +173,7 @@ extension ResponseParserTests {
                             )
                         )
                     ),
-                    .response(.fetch(.finish)),
+                    .response(.fetch(.finish))
                 ],
             ),
             ResponseStreamFixture(
@@ -257,7 +257,7 @@ extension ResponseParserTests {
                             )
                         )
                     ),
-                    .response(.fetch(.finish)),
+                    .response(.fetch(.finish))
                 ]
             ),
             ResponseStreamFixture(
@@ -337,7 +337,7 @@ extension ResponseParserTests {
                             )
                         )
                     ),
-                    .response(.fetch(.finish)),
+                    .response(.fetch(.finish))
                 ]
             ),
             ResponseStreamFixture(
@@ -377,7 +377,7 @@ extension ResponseParserTests {
                             )
                         )
                     ),
-                    .response(.fetch(.finish)),
+                    .response(.fetch(.finish))
                 ]
             ),
             ResponseStreamFixture(
@@ -418,7 +418,7 @@ extension ResponseParserTests {
                             )
                         )
                     ),
-                    .response(.fetch(.finish)),
+                    .response(.fetch(.finish))
                 ]
             ),
             ResponseStreamFixture(
@@ -722,7 +722,7 @@ extension ResponseParserTests {
                             )
                         )
                     ),
-                    .response(.fetch(.finish)),
+                    .response(.fetch(.finish))
                 ]
             ),
             ResponseStreamFixture(
@@ -778,7 +778,7 @@ extension ResponseParserTests {
                             )
                         )
                     ),
-                    .response(.fetch(.finish)),
+                    .response(.fetch(.finish))
                 ]
             ),
             ResponseStreamFixture(
@@ -946,7 +946,7 @@ extension ResponseParserTests {
                             )
                         )
                     ),
-                    .response(.fetch(.finish)),
+                    .response(.fetch(.finish))
                 ]
             ),
             ResponseStreamFixture(
@@ -1060,7 +1060,7 @@ extension ResponseParserTests {
                             )
                         )
                     ),
-                    .response(.fetch(.finish)),
+                    .response(.fetch(.finish))
                 ]
             ),
             ResponseStreamFixture(
@@ -1070,7 +1070,7 @@ extension ResponseParserTests {
                     .response(.fetch(.simpleAttribute(.uid(2_282_556_735)))),
                     .response(.fetch(.simpleAttribute(.preview(.init("abc"))))),
                     .response(.fetch(.simpleAttribute(.flags([.seen])))),
-                    .response(.fetch(.finish)),
+                    .response(.fetch(.finish))
                 ]
             ),
             ResponseStreamFixture(
@@ -1083,7 +1083,7 @@ extension ResponseParserTests {
                     .response(.fetch(.simpleAttribute(.uid(127_139)))),
                     .response(.fetch(.simpleAttribute(.rfc822Size(1_008_880)))),
                     .response(.fetch(.simpleAttribute(.body(.invalid, hasExtensionData: true)))),
-                    .response(.fetch(.finish)),
+                    .response(.fetch(.finish))
                 ]
             ),
         ]
