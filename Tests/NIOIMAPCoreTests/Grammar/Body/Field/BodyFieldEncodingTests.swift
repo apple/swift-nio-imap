@@ -24,7 +24,7 @@ struct BodyFieldEncodingTests {
         EncodeFixture.bodyEncoding(.binary, #""BINARY""#),
         EncodeFixture.bodyEncoding(.base64, #""BASE64""#),
         EncodeFixture.bodyEncoding(.quotedPrintable, #""QUOTED-PRINTABLE""#),
-        EncodeFixture.bodyEncoding(.init("some"), "\"SOME\"")
+        EncodeFixture.bodyEncoding(.init("some"), "\"SOME\""),
     ])
     func encoding(_ fixture: EncodeFixture<BodyStructure.Encoding>) {
         fixture.checkEncoding()
@@ -36,7 +36,7 @@ struct BodyFieldEncodingTests {
         ParseFixture.bodyEncoding(#""7BIT""#, expected: .success(.sevenBit)),
         ParseFixture.bodyEncoding(#""8BIT""#, expected: .success(.eightBit)),
         ParseFixture.bodyEncoding(#""QUOTED-PRINTABLE""#, expected: .success(.quotedPrintable)),
-        ParseFixture.bodyEncoding(#""other""#, expected: .success(.init("other")))
+        ParseFixture.bodyEncoding(#""other""#, expected: .success(.init("other"))),
     ])
     func parse(_ fixture: ParseFixture<BodyStructure.Encoding?>) {
         fixture.checkParsing()

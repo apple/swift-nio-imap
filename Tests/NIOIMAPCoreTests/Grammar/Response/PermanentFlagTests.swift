@@ -20,7 +20,7 @@ import Testing
 struct PermanentFlagTests {
     @Test(arguments: [
         EncodeFixture.permanentFlag(.wildcard, #"\*"#),
-        EncodeFixture.permanentFlag(.flag(.answered), #"\Answered"#)
+        EncodeFixture.permanentFlag(.flag(.answered), #"\Answered"#),
     ])
     func encode(_ fixture: EncodeFixture<PermanentFlag>) {
         fixture.checkEncoding()

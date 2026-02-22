@@ -27,7 +27,7 @@ struct MediaTests {
                 sub: "PDF",
                 expectedTopLevel: "application",
                 expectedSub: "pdf"
-            )
+            ),
         ]
     )
     func mediaTypeInitNormalizesCase(_ fixture: MediaTypeInitFixture) {
@@ -53,7 +53,7 @@ struct MediaTests {
         arguments: [
             EncodeFixture.mediaType(.init(topLevel: "text", sub: "html"), #""TEXT" "HTML""#),
             EncodeFixture.mediaType(.init(topLevel: .image, sub: "jpeg"), #""IMAGE" "JPEG""#),
-            EncodeFixture.mediaType(.init(topLevel: .application, sub: "pdf"), #""APPLICATION" "PDF""#)
+            EncodeFixture.mediaType(.init(topLevel: .application, sub: "pdf"), #""APPLICATION" "PDF""#),
         ]
     )
     func encodeMediaType(_ fixture: EncodeFixture<Media.MediaType>) {
@@ -70,7 +70,7 @@ struct MediaTests {
             EncodeFixture.topLevelType(.audio, #""AUDIO""#),
             EncodeFixture.topLevelType(.message, #""MESSAGE""#),
             EncodeFixture.topLevelType(.font, #""FONT""#),
-            EncodeFixture.topLevelType(.init("other"), #""OTHER""#)
+            EncodeFixture.topLevelType(.init("other"), #""OTHER""#),
         ]
     )
     func encodeTopLevelType(_ fixture: EncodeFixture<Media.TopLevelType>) {
@@ -84,7 +84,7 @@ struct MediaTests {
             EncodeFixture.subtype(.mixed, #""MIXED""#),
             EncodeFixture.subtype(.alternative, #""ALTERNATIVE""#),
             EncodeFixture.subtype(.init("other"), #""OTHER""#),
-            EncodeFixture.subtype(.init("html"), #""HTML""#)
+            EncodeFixture.subtype(.init("html"), #""HTML""#),
         ]
     )
     func encodeSubtype(_ fixture: EncodeFixture<Media.Subtype>) {
@@ -102,7 +102,7 @@ struct MediaTests {
                 #""STRING" "related""#,
                 expected: .success(Media.MediaType(topLevel: .init("STRING"), sub: .related))
             ),
-            ParseFixture.mediaType(#"hey "something""#, "\r", expected: .failureIgnoringBufferModifications)
+            ParseFixture.mediaType(#"hey "something""#, "\r", expected: .failureIgnoringBufferModifications),
         ]
     )
     func parseMediaType(_ fixture: ParseFixture<Media.MediaType>) {
@@ -119,7 +119,7 @@ struct MediaTests {
                 "\n",
                 expected: .failureIgnoringBufferModifications
             ),
-            ParseFixture.mediaMessage(#""messAGE""#, "", expected: .incompleteMessageIgnoringBufferModifications)
+            ParseFixture.mediaMessage(#""messAGE""#, "", expected: .incompleteMessageIgnoringBufferModifications),
         ]
     )
     func parseMediaMessage(_ fixture: ParseFixture<Media.Subtype>) {
@@ -132,7 +132,7 @@ struct MediaTests {
             ParseFixture.mediaText(#""TEXT" "something""#, "\n", expected: .success("something")),
             ParseFixture.mediaText(#""TExt" "something""#, "\n", expected: .success("something")),
             ParseFixture.mediaText(#"TEXT "something"\n"#, "\n", expected: .failureIgnoringBufferModifications),
-            ParseFixture.mediaText(#""TEXT""#, "", expected: .incompleteMessageIgnoringBufferModifications)
+            ParseFixture.mediaText(#""TEXT""#, "", expected: .incompleteMessageIgnoringBufferModifications),
         ]
     )
     func parseMediaText(_ fixture: ParseFixture<Media.Subtype>) {

@@ -97,7 +97,7 @@ struct URLFetchTypeTests {
                 partial: .init(range: .init(offset: 1, length: 2))
             ),
             "test;UID=123/;SECTION=box/;PARTIAL=1.2"
-        )
+        ),
     ])
     func encode(_ fixture: EncodeFixture<URLFetchType>) {
         fixture.checkEncoding()
@@ -124,7 +124,7 @@ struct URLFetchTypeTests {
                         partial: .init(range: .init(offset: 1, length: 2))
                     )
                 )
-            )
+            ),
         ]
     )
     func parsePartialAndSectionCases(_ fixture: ParseFixture<URLFetchType>) {
@@ -167,7 +167,7 @@ struct URLFetchTypeTests {
                         partial: .init(range: .init(offset: 1, length: 2))
                     )
                 )
-            )
+            ),
         ]
     )
     func parseUIDCases(_ fixture: ParseFixture<URLFetchType>) {
@@ -198,7 +198,7 @@ struct URLFetchTypeTests {
                         partial: nil
                     )
                 )
-            )
+            ),
         ]
     )
     func parseRefCases1(_ fixture: ParseFixture<URLFetchType>) {
@@ -229,7 +229,7 @@ struct URLFetchTypeTests {
                         partial: .init(range: .init(offset: 1, length: 2))
                     )
                 )
-            )
+            ),
         ]
     )
     func parseRefCases2(_ fixture: ParseFixture<URLFetchType>) {

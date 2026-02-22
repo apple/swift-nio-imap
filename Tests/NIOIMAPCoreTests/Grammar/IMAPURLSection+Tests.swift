@@ -60,7 +60,7 @@ struct URLMessageSectionTests {
                 "/;SECTION=1",
                 "",
                 expected: .incompleteMessage
-            )
+            ),
         ]
     )
     func parseWithSlash(_ fixture: ParseFixture<URLMessageSection>) {
@@ -89,7 +89,7 @@ struct URLMessageSectionTests {
                 ";SECTION=1",
                 "",
                 expected: .incompleteMessage
-            )
+            ),
         ]
     )
     func parseWithoutSlash(_ fixture: ParseFixture<URLMessageSection>) {

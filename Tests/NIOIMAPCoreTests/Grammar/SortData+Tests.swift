@@ -26,7 +26,7 @@ struct SortDataTests {
         EncodeFixture.sortData(
             .init(identifiers: [1], modificationSequence: 2),
             "SORT 1 (MODSEQ 2)"
-        )
+        ),
     ])
     func encode(_ fixture: EncodeFixture<SortData?>) {
         fixture.checkEncoding()

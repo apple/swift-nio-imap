@@ -32,7 +32,7 @@ struct MetadataOptionTests {
             EncodeFixture.metadataOption(
                 .other(.init(key: "param", value: nil)),
                 "param"
-            )
+            ),
         ]
     )
     func encodesSingleMetadataOption(_ fixture: EncodeFixture<MetadataOption>) {
@@ -49,7 +49,7 @@ struct MetadataOptionTests {
             EncodeFixture.metadataOptions(
                 [.maxSize(1), .scope(.one)],
                 "(MAXSIZE 1 DEPTH 1)"
-            )
+            ),
         ]
     )
     func encodesArrayOfMetadataOptions(_ fixture: EncodeFixture<[MetadataOption]>) {
@@ -61,7 +61,7 @@ struct MetadataOptionTests {
         arguments: [
             ParseFixture.metadataOption("MAXSIZE 123", expected: .success(.maxSize(123))),
             ParseFixture.metadataOption("DEPTH 1", expected: .success(.scope(.one))),
-            ParseFixture.metadataOption("param", expected: .success(.other(.init(key: "param", value: nil))))
+            ParseFixture.metadataOption("param", expected: .success(.other(.init(key: "param", value: nil)))),
         ]
     )
     func parseMetadataOption(_ fixture: ParseFixture<MetadataOption>) {
@@ -72,7 +72,7 @@ struct MetadataOptionTests {
         "parse metadata options",
         arguments: [
             ParseFixture.metadataOptions("(MAXSIZE 123)", expected: .success([.maxSize(123)])),
-            ParseFixture.metadataOptions("(DEPTH 1 MAXSIZE 123)", expected: .success([.scope(.one), .maxSize(123)]))
+            ParseFixture.metadataOptions("(DEPTH 1 MAXSIZE 123)", expected: .success([.scope(.one), .maxSize(123)])),
         ]
     )
     func parseMetadataOptions(_ fixture: ParseFixture<[MetadataOption]>) {

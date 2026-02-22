@@ -20,7 +20,7 @@ import Testing
 struct ResponseDataTests {
     @Test(arguments: [
         EncodeFixture.responsePayload(.messageData(.expunge(3)), "* 3 EXPUNGE\r\n"),
-        EncodeFixture.responsePayload(.messageData(.vanished([42, 77])), "* VANISHED 42,77\r\n")
+        EncodeFixture.responsePayload(.messageData(.vanished([42, 77])), "* VANISHED 42,77\r\n"),
     ])
     func encode(_ fixture: EncodeFixture<ResponsePayload>) {
         fixture.checkEncoding()
@@ -34,7 +34,7 @@ struct ResponseDataTests {
         ParseFixture.responseData(
             "* 3 EXPUNGE\r\n",
             expected: .success(.messageData(.expunge(3)))
-        )
+        ),
     ])
     func parse(_ fixture: ParseFixture<ResponsePayload>) {
         fixture.checkParsing()

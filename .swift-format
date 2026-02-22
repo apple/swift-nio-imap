@@ -14,7 +14,6 @@
   "lineLength" : 120,
   "maximumBlankLines" : 1,
   "multilineTrailingCommaBehavior" : "neverUsed",
-  "multiElementCollectionTrailingCommas" : false,
   "prioritizeKeepingFunctionOutputTogether" : true,
   "respectsExistingLineBreaks" : true,
   "rules" : {

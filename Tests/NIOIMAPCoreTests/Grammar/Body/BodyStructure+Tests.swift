@@ -36,7 +36,7 @@ private struct BodyStructureTests {
                 ),
                 expectedIndices: [
                     [],
-                    [1]
+                    [1],
                 ]
             ),
             IndexNavigationFixture(
@@ -83,7 +83,7 @@ private struct BodyStructureTests {
                 ),
                 expectedIndices: [
                     [],
-                    [1]
+                    [1],
                 ]
             ),
             IndexNavigationFixture(
@@ -109,7 +109,7 @@ private struct BodyStructureTests {
                 expectedIndices: [
                     [],
                     [1],
-                    [2]
+                    [2],
                 ]
             ),
             IndexNavigationFixture(
@@ -143,7 +143,7 @@ private struct BodyStructureTests {
                     [],
                     [1],
                     [1, 1],
-                    [2]
+                    [2],
                 ]
             ),
             IndexNavigationFixture(
@@ -185,7 +185,7 @@ private struct BodyStructureTests {
                                         octetCount: 0
                                     )
                                 )
-                            )
+                            ),
                         ],
                         mediaSubtype: .mixed
                     )
@@ -195,7 +195,7 @@ private struct BodyStructureTests {
                     [1],
                     [2],
                     [3],
-                    [4]
+                    [4],
                 ]
             ),
             IndexNavigationFixture(
@@ -267,15 +267,15 @@ private struct BodyStructureTests {
                                                                 octetCount: 5
                                                             )
                                                         )
-                                                    )
+                                                    ),
                                                 ],
                                                 mediaSubtype: .init("subtype")
                                             )
-                                        )
+                                        ),
                                     ],
                                     mediaSubtype: .init("subtype")
                                 )
-                            )
+                            ),
                         ],
                         mediaSubtype: .init("subtype")
                     )
@@ -289,7 +289,7 @@ private struct BodyStructureTests {
                     [2, 2, 1],
                     [2, 2, 2],
                     [2, 2, 3],
-                    [3]
+                    [3],
                 ]
             ),
             IndexNavigationFixture(
@@ -337,7 +337,7 @@ private struct BodyStructureTests {
                                                                 octetCount: 5
                                                             )
                                                         )
-                                                    )
+                                                    ),
                                                 ],
                                                 mediaSubtype: .init("subtype")
                                             )
@@ -353,7 +353,7 @@ private struct BodyStructureTests {
                                                     octetCount: 0
                                                 )
                                             )
-                                        )
+                                        ),
                                     ],
                                     mediaSubtype: .init("subtype")
                                 )
@@ -369,7 +369,7 @@ private struct BodyStructureTests {
                                         octetCount: 0
                                     )
                                 )
-                            )
+                            ),
                         ],
                         mediaSubtype: .init("subtype")
                     )
@@ -383,9 +383,9 @@ private struct BodyStructureTests {
                     [1, 1, 3],
                     [1, 2],
                     [2],
-                    [3]
+                    [3],
                 ]
-            )
+            ),
         ]
     )
     func indexNavigation(_ fixture: IndexNavigationFixture) {
@@ -586,7 +586,7 @@ private struct BodyStructureTests {
                                         octetCount: 2
                                     )
                                 )
-                            )
+                            ),
                         ],
                         mediaSubtype: .init("subtype")
                     )
@@ -674,15 +674,15 @@ private struct BodyStructureTests {
                                                                 octetCount: 5
                                                             )
                                                         )
-                                                    )
+                                                    ),
                                                 ],
                                                 mediaSubtype: .init("subtype")
                                             )
-                                        )
+                                        ),
                                     ],
                                     mediaSubtype: .init("subtype")
                                 )
-                            )
+                            ),
                         ],
                         mediaSubtype: .init("subtype")
                     )
@@ -752,7 +752,7 @@ private struct BodyStructureTests {
                                                                     octetCount: 2
                                                                 )
                                                             )
-                                                        )
+                                                        ),
                                                     ],
                                                     mediaSubtype: .init("mixed")
                                                 )
@@ -780,7 +780,7 @@ private struct BodyStructureTests {
                                         octetCount: 0
                                     )
                                 )
-                            )
+                            ),
                         ],
                         mediaSubtype: .init("mixed")
                     )
@@ -850,7 +850,7 @@ private struct BodyStructureTests {
                                                                     octetCount: 2
                                                                 )
                                                             )
-                                                        )
+                                                        ),
                                                     ],
                                                     mediaSubtype: .init("mixed")
                                                 )
@@ -878,7 +878,7 @@ private struct BodyStructureTests {
                                         octetCount: 0
                                     )
                                 )
-                            )
+                            ),
                         ],
                         mediaSubtype: .init("mixed")
                     )
@@ -896,7 +896,7 @@ private struct BodyStructureTests {
                         )
                     )
                 )
-            )
+            ),
         ]
     )
     func findAndSubscriptAccess(_ fixture: PositionFixture) {
@@ -1049,7 +1049,7 @@ private struct BodyStructureTests {
                 ),
                 expectedTopLevel: "multipart",
                 expectedSubtype: "mixed"
-            )
+            ),
         ]
     )
     func mediaType(_ fixture: MediaTypeFixture) {
@@ -1142,7 +1142,7 @@ private struct BodyStructureTests {
                                                                     octetCount: 2
                                                                 )
                                                             )
-                                                        )
+                                                        ),
                                                     ],
                                                     mediaSubtype: .init("mixed")
                                                 )
@@ -1170,7 +1170,7 @@ private struct BodyStructureTests {
                                         octetCount: 0
                                     )
                                 )
-                            )
+                            ),
                         ],
                         mediaSubtype: .init("mixed")
                     )
@@ -1228,7 +1228,7 @@ private struct BodyStructureTests {
                                                                             octetCount: 2
                                                                         )
                                                                     )
-                                                                )
+                                                                ),
                                                             ],
                                                             mediaSubtype: .init("mixed")
                                                         )
@@ -1256,7 +1256,7 @@ private struct BodyStructureTests {
                                                 octetCount: 0
                                             )
                                         )
-                                    )
+                                    ),
                                 ],
                                 mediaSubtype: .init("mixed")
                             )
@@ -1307,7 +1307,7 @@ private struct BodyStructureTests {
                                                                 octetCount: 2
                                                             )
                                                         )
-                                                    )
+                                                    ),
                                                 ],
                                                 mediaSubtype: .init("mixed")
                                             )
@@ -1369,7 +1369,7 @@ private struct BodyStructureTests {
                                 )
                             )
                         )
-                    )
+                    ),
                 ]
             ),
             EnumeratePartsFixture(
@@ -1441,15 +1441,15 @@ private struct BodyStructureTests {
                                                                 octetCount: 5
                                                             )
                                                         )
-                                                    )
+                                                    ),
                                                 ],
                                                 mediaSubtype: .init("subtype")
                                             )
-                                        )
+                                        ),
                                     ],
                                     mediaSubtype: .init("subtype")
                                 )
-                            )
+                            ),
                         ],
                         mediaSubtype: .init("subtype")
                     )
@@ -1531,15 +1531,15 @@ private struct BodyStructureTests {
                                                                         octetCount: 5
                                                                     )
                                                                 )
-                                                            )
+                                                            ),
                                                         ],
                                                         mediaSubtype: .init("subtype")
                                                     )
-                                                )
+                                                ),
                                             ],
                                             mediaSubtype: .init("subtype")
                                         )
-                                    )
+                                    ),
                                 ],
                                 mediaSubtype: .init("subtype")
                             )
@@ -1615,11 +1615,11 @@ private struct BodyStructureTests {
                                                             octetCount: 5
                                                         )
                                                     )
-                                                )
+                                                ),
                                             ],
                                             mediaSubtype: .init("subtype")
                                         )
-                                    )
+                                    ),
                                 ],
                                 mediaSubtype: .init("subtype")
                             )
@@ -1680,7 +1680,7 @@ private struct BodyStructureTests {
                                                 octetCount: 5
                                             )
                                         )
-                                    )
+                                    ),
                                 ],
                                 mediaSubtype: .init("subtype")
                             )
@@ -1730,9 +1730,9 @@ private struct BodyStructureTests {
                                 )
                             )
                         )
-                    )
+                    ),
                 ]
-            )
+            ),
         ]
     )
     func enumerateParts(_ fixture: EnumeratePartsFixture) {
@@ -1823,7 +1823,7 @@ private struct BodyStructureTests {
                                                     )
                                                 )
                                             )
-                                        )
+                                        ),
                                     ],
                                     mediaSubtype: .alternative,
                                     extension: .init(
@@ -1859,7 +1859,7 @@ private struct BodyStructureTests {
                                         )
                                     )
                                 )
-                            )
+                            ),
                         ],
                         mediaSubtype: .mixed,
                         extension: .init(
@@ -1872,7 +1872,7 @@ private struct BodyStructureTests {
                     )
                 )
             )
-        )
+        ),
     ])
     func parse(_ fixture: ParseFixture<BodyStructure>) {
         fixture.checkParsing()
@@ -1933,7 +1933,7 @@ private struct BodyStructureTests {
                 #"("text" "plain" ("CHARSET" {1234567}\#r\#nU(TF-(8) NIL NIL NIL 1423 44 NIL NIL NIL NIL)"#,
                 " UID 1",
                 expected: .failure
-            )
+            ),
         ]
     )
     func parseInvalidBody(_ fixture: ParseFixture<MessageAttribute.BodyStructure>) {

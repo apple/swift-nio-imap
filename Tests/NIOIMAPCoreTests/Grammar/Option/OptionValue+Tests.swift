@@ -24,7 +24,7 @@ struct OptionValueTests {
         EncodeFixture.optionValue(
             .array([.string("a"), .array([.string("E"), .string("F")]), .string("b")]),
             #"(("a" ("E" "F") "b"))"#
-        )
+        ),
     ])
     func encode(_ fixture: EncodeFixture<OptionValueComp>) {
         fixture.checkEncoding()

@@ -26,7 +26,7 @@ struct MessagePathByteRangeTests {
         EncodeFixture.messagePathByteRange(
             .init(range: .init(offset: 1, length: 2)),
             "/;PARTIAL=1.2"
-        )
+        ),
     ])
     func encode(_ fixture: EncodeFixture<MessagePath.ByteRange>) {
         fixture.checkEncoding()
@@ -39,7 +39,7 @@ struct MessagePathByteRangeTests {
             ParseFixture.parseWithSlash("/;PARTIAL=1.2", expected: .success(.init(range: .init(offset: 1, length: 2)))),
             ParseFixture.parseWithSlash("/;PARTIAL=a", expected: .failure),
             ParseFixture.parseWithSlash("PARTIAL=a", expected: .failure),
-            ParseFixture.parseWithSlash("/;PARTIAL=1", "", expected: .incompleteMessage)
+            ParseFixture.parseWithSlash("/;PARTIAL=1", "", expected: .incompleteMessage),
         ]
     )
     func parseWithSlash(_ fixture: ParseFixture<MessagePath.ByteRange>) {
@@ -59,7 +59,7 @@ struct MessagePathByteRangeTests {
             ),
             ParseFixture.parseWithoutSlash(";PARTIAL=a", expected: .failure),
             ParseFixture.parseWithoutSlash("PARTIAL=a", expected: .failure),
-            ParseFixture.parseWithoutSlash(";PARTIAL=1", "", expected: .incompleteMessage)
+            ParseFixture.parseWithoutSlash(";PARTIAL=1", "", expected: .incompleteMessage),
         ]
     )
     func parseWithoutSlash(_ fixture: ParseFixture<MessagePath.ByteRange>) {

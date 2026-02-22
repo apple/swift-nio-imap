@@ -40,7 +40,7 @@ struct ResponsePayloadTests {
         EncodeFixture.responsePayload(
             .jmapAccess(URL(string: "https://example.com/.well-known/jmap")!),
             #"JMAPACCESS "https://example.com/.well-known/jmap""#
-        )
+        ),
     ])
     func encode(_ fixture: EncodeFixture<ResponsePayload>) {
         fixture.checkEncoding()
@@ -93,7 +93,7 @@ struct ResponsePayloadTests {
                     .init("Root"),
                     [
                         QuotaResource(resourceName: "STORAGE", usage: 10, limit: 512),
-                        QuotaResource(resourceName: "BEANS", usage: 50, limit: 100)
+                        QuotaResource(resourceName: "BEANS", usage: 50, limit: 100),
                     ]
                 )
             )
@@ -106,7 +106,7 @@ struct ResponsePayloadTests {
         ParseFixture.responsePayload("QUOTA \"Root\" (STORAGE)", expected: .failure),
         ParseFixture.responsePayload("QUOTA \"Root\" (STORAGE 10", expected: .failure),
         ParseFixture.responsePayload("QUOTA \"Root\" (STORAGE 10)", expected: .failure),
-        ParseFixture.responsePayload("QUOTA \"Root\" (STORAGE 10 512 BEANS)", expected: .failure)
+        ParseFixture.responsePayload("QUOTA \"Root\" (STORAGE 10 512 BEANS)", expected: .failure),
     ])
     func parse(_ fixture: ParseFixture<ResponsePayload>) {
         fixture.checkParsing()

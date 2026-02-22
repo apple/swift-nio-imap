@@ -34,7 +34,7 @@ struct FetchResponseTests {
             " ",
             expected: .success(.simpleAttribute(.preview(.init("Lorem ipsum dolor sit amet"))))
         ),
-        ParseFixture.fetchResponse("PREVIEW NIL", " ", expected: .success(.simpleAttribute(.preview(nil))))
+        ParseFixture.fetchResponse("PREVIEW NIL", " ", expected: .success(.simpleAttribute(.preview(nil)))),
     ])
     func parse(_ fixture: ParseFixture<GrammarParser._FetchResponse>) {
         fixture.checkParsing()
@@ -44,7 +44,7 @@ struct FetchResponseTests {
         "parse start",
         arguments: [
             ParseFixture.fetchResponseStart("* 1 FETCH (", " ", expected: .success(.start(1))),
-            ParseFixture.fetchResponseStart("* 1 UIDFETCH (", " ", expected: .success(.startUID(1)))
+            ParseFixture.fetchResponseStart("* 1 UIDFETCH (", " ", expected: .success(.startUID(1))),
         ]
     )
     func parseStart(_ fixture: ParseFixture<GrammarParser._FetchResponse>) {

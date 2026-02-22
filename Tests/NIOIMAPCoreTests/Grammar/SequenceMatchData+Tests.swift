@@ -23,7 +23,7 @@ struct SequenceMatchDataTests {
         EncodeFixture.sequenceMatchData(
             .init(knownSequenceSet: .set([1, 2, 3]), knownUidSet: .set([4, 5, 6])),
             "(1:3 4:6)"
-        )
+        ),
     ])
     func encode(_ fixture: EncodeFixture<SequenceMatchData>) {
         fixture.checkEncoding()
@@ -41,7 +41,7 @@ struct SequenceMatchDataTests {
         ParseFixture.sequenceMatchData("()", "", expected: .failure),
         ParseFixture.sequenceMatchData("(* )", "", expected: .failure),
         ParseFixture.sequenceMatchData("(1", "", expected: .incompleteMessage),
-        ParseFixture.sequenceMatchData("(1111:2222", "", expected: .incompleteMessage)
+        ParseFixture.sequenceMatchData("(1111:2222", "", expected: .incompleteMessage),
     ])
     func parse(_ fixture: ParseFixture<SequenceMatchData>) {
         fixture.checkParsing()

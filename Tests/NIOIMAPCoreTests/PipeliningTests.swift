@@ -43,7 +43,7 @@ extension SearchKey {
         .uid(.set([1])),
         .answered,
         .subject("foo"),
-        .or(.unseen, .uid(.set([1])))
+        .or(.unseen, .uid(.set([1]))),
     ]
 
     fileprivate static let keysWithSequenceNumber: [SearchKey] = [
@@ -51,7 +51,7 @@ extension SearchKey {
         .or(.unseen, .sequenceNumbers(.set([1]))),
         .or(.uid(.set([1])), .sequenceNumbers(.set([1]))),
         .and([.unseen, .sequenceNumbers(.set([1]))]),
-        .and([.uid(.set([1])), .sequenceNumbers(.set([1]))])
+        .and([.uid(.set([1])), .sequenceNumbers(.set([1]))]),
     ]
 
     fileprivate static let keysWithoutUID: [SearchKey] = [
@@ -59,7 +59,7 @@ extension SearchKey {
         .sequenceNumbers(.set([1])),
         .answered,
         .subject("foo"),
-        .or(.unseen, .sequenceNumbers(.set([1])))
+        .or(.unseen, .sequenceNumbers(.set([1]))),
     ]
 
     fileprivate static let keysWithUID: [SearchKey] = [
@@ -67,7 +67,7 @@ extension SearchKey {
         .or(.unseen, .uid(.set([1]))),
         .or(.uid(.set([1])), .sequenceNumbers(.set([1]))),
         .and([.unseen, .uid(.set([1]))]),
-        .and([.uid(.set([1])), .sequenceNumbers(.set([1]))])
+        .and([.uid(.set([1])), .sequenceNumbers(.set([1]))]),
     ]
 
     fileprivate static let keysWithoutFlags: [SearchKey] = [
@@ -77,7 +77,7 @@ extension SearchKey {
         .uid(.set([1])),
         .subject("foo"),
         .or(.bcc("foo"), .uid(.set([1]))),
-        .and([.uid(.set([1])), .sequenceNumbers(.set([1]))])
+        .and([.uid(.set([1])), .sequenceNumbers(.set([1]))]),
     ]
 
     fileprivate static let keysWithFlags: [SearchKey] = [
@@ -94,7 +94,7 @@ extension SearchKey {
         .draft,
         .undraft,
         .or(.answered, .uid(.set([1]))),
-        .and([.answered, .sequenceNumbers(.set([1]))])
+        .and([.answered, .sequenceNumbers(.set([1]))]),
     ]
 
     fileprivate static let arbitraryKeys: [SearchKey] = [
@@ -122,7 +122,7 @@ extension SearchKey {
         .or(.unseen, .sequenceNumbers(.set([1]))),
         .or(.uid(.set([1])), .sequenceNumbers(.set([1]))),
         .and([.unseen, .sequenceNumbers(.set([1]))]),
-        .and([.uid(.set([1])), .sequenceNumbers(.set([1]))])
+        .and([.uid(.set([1])), .sequenceNumbers(.set([1]))]),
     ]
 }
 
@@ -132,7 +132,7 @@ extension MessageIdentifierSetNonEmpty where IdentifierType == UID {
             [100...200],
             [IdentifierType.min...IdentifierType.min],
             [43_195...43_195],
-            .all
+            .all,
         ]
     }
 }
@@ -147,7 +147,7 @@ extension PipeliningRequirement {
         .noFlagChanges([55...1000]),
         .noFlagReads(.all),
         .noFlagReads([1]),
-        .noFlagReads([55...1000])
+        .noFlagReads([55...1000]),
     ]
 }
 
@@ -558,7 +558,7 @@ struct PipeliningTests {
         #expect(
             append.pipeliningBehavior == [
                 .isUIDBased,
-                .mayTriggerUntaggedExpunge
+                .mayTriggerUntaggedExpunge,
             ]
         )
     }
@@ -618,7 +618,7 @@ struct PipeliningTests {
                 (#_sourceLocation, .setMetadata(mailbox: .food, entries: ["/shared/comment": nil])),
                 (#_sourceLocation, .resetKey(mailbox: nil, mechanisms: [.internal])),
                 (#_sourceLocation, .generateAuthorizedURL([.joe])),
-                (#_sourceLocation, .urlFetch([.joeURLFetch]))
+                (#_sourceLocation, .urlFetch([.joeURLFetch])),
             ],
             doNotRequire: .noMailboxCommandsRunning
         )
@@ -628,7 +628,7 @@ struct PipeliningTests {
                 (#_sourceLocation, .examine(.food)),
                 (#_sourceLocation, .select(.food)),
                 (#_sourceLocation, .unselect),
-                (#_sourceLocation, .close)
+                (#_sourceLocation, .close),
             ],
             require: .noMailboxCommandsRunning
         )
@@ -684,7 +684,7 @@ struct PipeliningTests {
                 (#_sourceLocation, .uidFetch(.set([1]), [.bodyStructure(extensions: false)], [])),
                 (#_sourceLocation, .uidStore(.set([1]), [], .flags(.add(silent: true, list: [.answered])))),
                 (#_sourceLocation, .uidCopy(.set([1]), .food)),
-                (#_sourceLocation, .uidMove(.set([1]), .food))
+                (#_sourceLocation, .uidMove(.set([1]), .food)),
             ],
             doNotRequire: .noUntaggedExpungeResponse
         )
@@ -697,7 +697,7 @@ struct PipeliningTests {
                 (#_sourceLocation, .copy(.set([1]), .food)),
                 (#_sourceLocation, .move(.set([1]), .food)),
                 (#_sourceLocation, .store(.set([1]), [], .flags(.add(silent: true, list: [.answered])))),
-                (#_sourceLocation, .store(.set([1]), [], .flags(.add(silent: false, list: [.answered]))))
+                (#_sourceLocation, .store(.set([1]), [], .flags(.add(silent: false, list: [.answered])))),
             ],
             require: .noUntaggedExpungeResponse
         )
@@ -709,7 +709,7 @@ struct PipeliningTests {
                 commands: [
                     (#_sourceLocation, .search(key: key, charset: nil, returnOptions: [])),
                     (#_sourceLocation, .extendedSearch(ExtendedSearchOptions(key: key))),
-                    (#_sourceLocation, .uidSearch(key: key, charset: nil, returnOptions: []))
+                    (#_sourceLocation, .uidSearch(key: key, charset: nil, returnOptions: [])),
                 ],
                 doNotRequire: .noUntaggedExpungeResponse,
                 "key: \(key)"
@@ -720,7 +720,7 @@ struct PipeliningTests {
                 commands: [
                     (#_sourceLocation, .search(key: key, charset: nil, returnOptions: [])),
                     (#_sourceLocation, .extendedSearch(ExtendedSearchOptions(key: key))),
-                    (#_sourceLocation, .uidSearch(key: key, charset: nil, returnOptions: []))
+                    (#_sourceLocation, .uidSearch(key: key, charset: nil, returnOptions: [])),
                 ],
                 require: .noUntaggedExpungeResponse,
                 "key: \(key)"
@@ -783,7 +783,7 @@ struct PipeliningTests {
                 (#_sourceLocation, .uidFetch(.set([1]), [.bodyStructure(extensions: false)], [])),
                 (#_sourceLocation, .uidStore(.set([1]), [], .flags(.add(silent: true, list: [.answered])))),
                 (#_sourceLocation, .uidCopy(.set([1]), .food)),
-                (#_sourceLocation, .uidMove(.set([1]), .food))
+                (#_sourceLocation, .uidMove(.set([1]), .food)),
             ],
             doNotRequire: .noUIDBasedCommandRunning
         )
@@ -800,7 +800,7 @@ struct PipeliningTests {
                 (#_sourceLocation, .copy(.set([1]), .food)),
                 (#_sourceLocation, .move(.set([1]), .food)),
                 (#_sourceLocation, .store(.set([1]), [], .flags(.add(silent: true, list: [.answered])))),
-                (#_sourceLocation, .store(.set([1]), [], .flags(.add(silent: false, list: [.answered]))))
+                (#_sourceLocation, .store(.set([1]), [], .flags(.add(silent: false, list: [.answered])))),
             ],
             require: .noUIDBasedCommandRunning
         )
@@ -812,7 +812,7 @@ struct PipeliningTests {
                 commands: [
                     (#_sourceLocation, .search(key: key, charset: nil, returnOptions: [])),
                     (#_sourceLocation, .extendedSearch(ExtendedSearchOptions(key: key))),
-                    (#_sourceLocation, .uidSearch(key: key, charset: nil, returnOptions: []))
+                    (#_sourceLocation, .uidSearch(key: key, charset: nil, returnOptions: [])),
                 ],
                 doNotRequire: .noUIDBasedCommandRunning,
                 "key: \(key)"
@@ -823,7 +823,7 @@ struct PipeliningTests {
                 commands: [
                     (#_sourceLocation, .search(key: key, charset: nil, returnOptions: [])),
                     (#_sourceLocation, .extendedSearch(ExtendedSearchOptions(key: key))),
-                    (#_sourceLocation, .uidSearch(key: key, charset: nil, returnOptions: []))
+                    (#_sourceLocation, .uidSearch(key: key, charset: nil, returnOptions: [])),
                 ],
                 require: .noUIDBasedCommandRunning,
                 "key: \(key)"
@@ -888,7 +888,7 @@ struct PipeliningTests {
                 (#_sourceLocation, .uidMove(.set([1]), .food)),
                 // STORE is ok if SILENT is set:
                 (#_sourceLocation, .uidStore(.set([1]), [], .flags(.add(silent: true, list: [.answered])))),
-                (#_sourceLocation, .store(.set([1]), [], .flags(.add(silent: true, list: [.answered]))))
+                (#_sourceLocation, .store(.set([1]), [], .flags(.add(silent: true, list: [.answered])))),
             ],
             doNotRequire: .noFlagChangesToAnyMessage
         )
@@ -900,7 +900,7 @@ struct PipeliningTests {
                 (#_sourceLocation, .fetch(.set([1]), [.uid, .flags], [])),
                 (#_sourceLocation, .uidFetch(.lastCommand, [.envelope, .uid, .flags], [])),
                 // STORE without SILENT will also return flags:
-                (#_sourceLocation, .store(.set([1]), [], .flags(.add(silent: false, list: [.answered]))))
+                (#_sourceLocation, .store(.set([1]), [], .flags(.add(silent: false, list: [.answered])))),
             ],
             require: .noFlagChangesToAnyMessage
         )
@@ -912,7 +912,7 @@ struct PipeliningTests {
                     (#_sourceLocation, .uidFetch(.set(uids), [.envelope, .uid, .flags], [])),
                     (#_sourceLocation, .uidFetch(.set(uids), [.uid, .flags], [])),
                     // UID STORE without SILENT will also return flags:
-                    (#_sourceLocation, .uidStore(.set(uids), [], .flags(.add(silent: false, list: [.answered]))))
+                    (#_sourceLocation, .uidStore(.set(uids), [], .flags(.add(silent: false, list: [.answered])))),
                 ],
                 require: .noFlagChanges(uids),
                 "uids: \(uids)"
@@ -926,7 +926,7 @@ struct PipeliningTests {
                 commands: [
                     (#_sourceLocation, .search(key: key, charset: nil, returnOptions: [])),
                     (#_sourceLocation, .extendedSearch(ExtendedSearchOptions(key: key))),
-                    (#_sourceLocation, .uidSearch(key: key, charset: nil, returnOptions: []))
+                    (#_sourceLocation, .uidSearch(key: key, charset: nil, returnOptions: [])),
                 ],
                 doNotRequire: .noFlagChangesToAnyMessage,
                 "key: \(key)"
@@ -937,7 +937,7 @@ struct PipeliningTests {
                 commands: [
                     (#_sourceLocation, .search(key: key, charset: nil, returnOptions: [])),
                     (#_sourceLocation, .extendedSearch(ExtendedSearchOptions(key: key))),
-                    (#_sourceLocation, .uidSearch(key: key, charset: nil, returnOptions: []))
+                    (#_sourceLocation, .uidSearch(key: key, charset: nil, returnOptions: [])),
                 ],
                 require: .noFlagChangesToAnyMessage,
                 "key: \(key)"
@@ -1001,7 +1001,7 @@ struct PipeliningTests {
                 (#_sourceLocation, .uidFetch(.set([1]), [.envelope, .uid, .flags], [])),
                 (#_sourceLocation, .uidFetch(.set([1]), [.uid, .flags], [])),
                 (#_sourceLocation, .uidCopy(.set([1]), .food)),
-                (#_sourceLocation, .uidMove(.set([1]), .food))
+                (#_sourceLocation, .uidMove(.set([1]), .food)),
             ],
             doNotRequire: .noFlagReadsFromAnyMessage
         )
@@ -1011,7 +1011,7 @@ struct PipeliningTests {
             commands: [
                 (#_sourceLocation, .uidStore(.lastCommand, [], .flags(.add(silent: false, list: [.answered])))),
                 (#_sourceLocation, .store(.set([1]), [], .flags(.add(silent: true, list: [.answered])))),
-                (#_sourceLocation, .store(.set([1]), [], .flags(.add(silent: false, list: [.answered]))))
+                (#_sourceLocation, .store(.set([1]), [], .flags(.add(silent: false, list: [.answered])))),
             ],
             require: .noFlagReadsFromAnyMessage
         )
@@ -1019,7 +1019,7 @@ struct PipeliningTests {
             expect(
                 commands: [
                     (#_sourceLocation, .uidStore(.set(uids), [], .flags(.add(silent: false, list: [.answered])))),
-                    (#_sourceLocation, .uidStore(.set(uids), [], .flags(.add(silent: true, list: [.answered]))))
+                    (#_sourceLocation, .uidStore(.set(uids), [], .flags(.add(silent: true, list: [.answered])))),
                 ],
                 require: .noFlagReads(uids),
                 "uids: \(uids)"
@@ -1032,7 +1032,7 @@ struct PipeliningTests {
                 commands: [
                     (#_sourceLocation, .search(key: key, charset: nil, returnOptions: [])),
                     (#_sourceLocation, .extendedSearch(ExtendedSearchOptions(key: key))),
-                    (#_sourceLocation, .uidSearch(key: key, charset: nil, returnOptions: []))
+                    (#_sourceLocation, .uidSearch(key: key, charset: nil, returnOptions: [])),
                 ],
                 doNotRequire: .noFlagReadsFromAnyMessage,
                 "key: \(key)"
@@ -1094,7 +1094,7 @@ struct PipeliningTests {
                 (#_sourceLocation, .uidFetch(.set([1]), [.envelope, .uid], [])),
                 (#_sourceLocation, .uidStore(.set([1]), [], .flags(.add(silent: true, list: [.answered])))),
                 (#_sourceLocation, .uidCopy(.set([1]), .food)),
-                (#_sourceLocation, .uidMove(.set([1]), .food))
+                (#_sourceLocation, .uidMove(.set([1]), .food)),
             ],
             doNotHaveBehavior: .changesMailboxSelection
         )
@@ -1104,7 +1104,7 @@ struct PipeliningTests {
                 (#_sourceLocation, .select(.food)),
                 (#_sourceLocation, .examine(.food)),
                 (#_sourceLocation, .unselect),
-                (#_sourceLocation, .close)
+                (#_sourceLocation, .close),
             ],
             haveBehavior: .changesMailboxSelection
         )
@@ -1151,7 +1151,7 @@ struct PipeliningTests {
 
                 (#_sourceLocation, .resetKey(mailbox: nil, mechanisms: [.internal])),
                 (#_sourceLocation, .generateAuthorizedURL([.joe])),
-                (#_sourceLocation, .urlFetch([.joeURLFetch]))
+                (#_sourceLocation, .urlFetch([.joeURLFetch])),
             ],
             doNotHaveBehavior: .dependsOnMailboxSelection
         )
@@ -1175,7 +1175,7 @@ struct PipeliningTests {
                 (#_sourceLocation, .move(.set([1]), .food)),
                 (#_sourceLocation, .store(.set([1]), [], .flags(.add(silent: true, list: [.answered])))),
                 (#_sourceLocation, .store(.set([1]), [], .flags(.add(silent: false, list: [.answered])))),
-                (#_sourceLocation, .idleStart)
+                (#_sourceLocation, .idleStart),
             ],
             haveBehavior: .dependsOnMailboxSelection
         )
@@ -1199,7 +1199,7 @@ struct PipeliningTests {
                 (#_sourceLocation, .startTLS),
                 (#_sourceLocation, .authenticate(mechanism: .plain, initialResponse: nil)),
                 (#_sourceLocation, .compress(.deflate)),
-                (#_sourceLocation, .logout)
+                (#_sourceLocation, .logout),
             ],
             doNotHaveBehavior: .mayTriggerUntaggedExpunge
         )
@@ -1246,7 +1246,7 @@ struct PipeliningTests {
                 (#_sourceLocation, .extendedSearch(ExtendedSearchOptions(key: .all))),
                 (#_sourceLocation, .resetKey(mailbox: nil, mechanisms: [.internal])),
                 (#_sourceLocation, .generateAuthorizedURL([.joe])),
-                (#_sourceLocation, .urlFetch([.joeURLFetch]))
+                (#_sourceLocation, .urlFetch([.joeURLFetch])),
             ],
             haveBehavior: .mayTriggerUntaggedExpunge
         )
@@ -1300,7 +1300,7 @@ struct PipeliningTests {
                 (#_sourceLocation, .getQuotaRoot(.food)),
                 (#_sourceLocation, .setQuota(QuotaRoot("foo"), [])),
                 (#_sourceLocation, .getMetadata(options: [], mailbox: .food, entries: ["/shared/comment"])),
-                (#_sourceLocation, .setMetadata(mailbox: .food, entries: ["/shared/comment": nil]))
+                (#_sourceLocation, .setMetadata(mailbox: .food, entries: ["/shared/comment": nil])),
             ],
             doNotHaveBehavior: .isUIDBased
         )
@@ -1314,7 +1314,7 @@ struct PipeliningTests {
                 (#_sourceLocation, .uidExpunge(.set([1]))),
                 // `GENURLAUTH` and `URLFETCH` (indirectly) reference UIDs:
                 (#_sourceLocation, .generateAuthorizedURL([.joe])),
-                (#_sourceLocation, .urlFetch([.joeURLFetch]))
+                (#_sourceLocation, .urlFetch([.joeURLFetch])),
             ],
             haveBehavior: .isUIDBased
         )
@@ -1332,7 +1332,7 @@ struct PipeliningTests {
             expect(
                 commands: [
                     (#_sourceLocation, .uidSearch(key: key, charset: nil, returnOptions: [])),
-                    (#_sourceLocation, .extendedSearch(ExtendedSearchOptions(key: key)))
+                    (#_sourceLocation, .extendedSearch(ExtendedSearchOptions(key: key))),
                 ],
                 haveBehavior: .isUIDBased,
                 "key: \(key)"
@@ -1343,7 +1343,7 @@ struct PipeliningTests {
                 commands: [
                     (#_sourceLocation, .search(key: key, charset: nil, returnOptions: [])),
                     (#_sourceLocation, .extendedSearch(ExtendedSearchOptions(key: key))),
-                    (#_sourceLocation, .uidSearch(key: key, charset: nil, returnOptions: []))
+                    (#_sourceLocation, .uidSearch(key: key, charset: nil, returnOptions: [])),
                 ],
                 haveBehavior: .isUIDBased,
                 "key: \(key)"
@@ -1405,7 +1405,7 @@ struct PipeliningTests {
                 (#_sourceLocation, .extendedSearch(ExtendedSearchOptions(key: .all))),
                 (#_sourceLocation, .resetKey(mailbox: nil, mechanisms: [.internal])),
                 (#_sourceLocation, .generateAuthorizedURL([.joe])),
-                (#_sourceLocation, .urlFetch([.joeURLFetch]))
+                (#_sourceLocation, .urlFetch([.joeURLFetch])),
             ],
             doNotHaveBehavior: .changesFlagsOnAnyMessage
         )
@@ -1414,7 +1414,7 @@ struct PipeliningTests {
             commands: [
                 (#_sourceLocation, .store(.set([1]), [], .flags(.add(silent: true, list: [.answered])))),
                 (#_sourceLocation, .store(.set([1]), [], .flags(.add(silent: false, list: [.answered])))),
-                (#_sourceLocation, .uidStore(.lastCommand, [], .flags(.add(silent: true, list: [.answered]))))
+                (#_sourceLocation, .uidStore(.lastCommand, [], .flags(.add(silent: true, list: [.answered])))),
             ],
             haveBehavior: .changesFlagsOnAnyMessage
         )
@@ -1422,7 +1422,7 @@ struct PipeliningTests {
             expect(
                 commands: [
                     (#_sourceLocation, .uidStore(.set(uids), [], .flags(.add(silent: true, list: [.answered])))),
-                    (#_sourceLocation, .uidStore(.set(uids), [], .flags(.add(silent: false, list: [.answered]))))
+                    (#_sourceLocation, .uidStore(.set(uids), [], .flags(.add(silent: false, list: [.answered])))),
                 ],
                 haveBehavior: .changesFlags(uids)
             )
@@ -1484,7 +1484,7 @@ struct PipeliningTests {
                 // FETCH is ok as long as it's not fetching flags:
                 (#_sourceLocation, .fetch(.set([1]), [.envelope, .uid], [])),
                 (#_sourceLocation, .fetch(.set([1]), [.bodyStructure(extensions: false)], [])),
-                (#_sourceLocation, .uidFetch(.set([1]), [.envelope, .uid], []))
+                (#_sourceLocation, .uidFetch(.set([1]), [.envelope, .uid], [])),
             ],
             doNotHaveBehavior: .readsFlagsFromAnyMessage
         )
@@ -1495,7 +1495,7 @@ struct PipeliningTests {
                 (#_sourceLocation, .fetch(.set([1]), [.uid, .flags], [])),
                 // This will also return flags:
                 (#_sourceLocation, .store(.set([1]), [], .flags(.add(silent: false, list: [.answered])))),
-                (#_sourceLocation, .uidStore(.lastCommand, [], .flags(.add(silent: false, list: [.answered]))))
+                (#_sourceLocation, .uidStore(.lastCommand, [], .flags(.add(silent: false, list: [.answered])))),
             ],
             haveBehavior: .readsFlagsFromAnyMessage
         )
@@ -1506,7 +1506,7 @@ struct PipeliningTests {
                     (#_sourceLocation, .uidFetch(.set(uids), [.uid, .flags], [])),
                     // This will also return flags:
                     (#_sourceLocation, .uidStore(.set(uids), [], .flags(.add(silent: false, list: [.answered])))),
-                    (#_sourceLocation, .uidStore(.set(uids), [], .flags(.add(silent: false, list: [.answered]))))
+                    (#_sourceLocation, .uidStore(.set(uids), [], .flags(.add(silent: false, list: [.answered])))),
                 ],
                 haveBehavior: .readsFlags(uids)
             )
@@ -1519,7 +1519,7 @@ struct PipeliningTests {
                 commands: [
                     (#_sourceLocation, .search(key: key, charset: nil, returnOptions: [])),
                     (#_sourceLocation, .extendedSearch(ExtendedSearchOptions(key: key))),
-                    (#_sourceLocation, .uidSearch(key: key, charset: nil, returnOptions: []))
+                    (#_sourceLocation, .uidSearch(key: key, charset: nil, returnOptions: [])),
                 ],
                 doNotHaveBehavior: .readsFlagsFromAnyMessage,
                 "key: \(key)"
@@ -1530,7 +1530,7 @@ struct PipeliningTests {
                 commands: [
                     (#_sourceLocation, .search(key: key, charset: nil, returnOptions: [])),
                     (#_sourceLocation, .extendedSearch(ExtendedSearchOptions(key: key))),
-                    (#_sourceLocation, .uidSearch(key: key, charset: nil, returnOptions: []))
+                    (#_sourceLocation, .uidSearch(key: key, charset: nil, returnOptions: [])),
                 ],
                 haveBehavior: .readsFlagsFromAnyMessage,
                 "key: \(key)"
@@ -1589,7 +1589,7 @@ struct PipeliningTests {
                 (#_sourceLocation, .extendedSearch(ExtendedSearchOptions(key: .all))),
                 (#_sourceLocation, .resetKey(mailbox: nil, mechanisms: [.internal])),
                 (#_sourceLocation, .generateAuthorizedURL([.joe])),
-                (#_sourceLocation, .urlFetch([.joeURLFetch]))
+                (#_sourceLocation, .urlFetch([.joeURLFetch])),
             ],
             doNotHaveBehavior: .barrier
         )
@@ -1600,7 +1600,7 @@ struct PipeliningTests {
                 (#_sourceLocation, .authenticate(mechanism: .plain, initialResponse: nil)),
                 (#_sourceLocation, .compress(.deflate)),
                 (#_sourceLocation, .logout),
-                (#_sourceLocation, .idleStart)
+                (#_sourceLocation, .idleStart),
             ],
             haveBehavior: .barrier
         )

@@ -34,7 +34,7 @@ struct AuthenticatedURLRumpTests {
                 access: .authenticateUser
             ),
             ";EXPIRE=1234-12-23T12:34:56;URLAUTH=authuser"
-        )
+        ),
     ])
     func encode(_ fixture: EncodeFixture<AuthenticatedURLRump>) {
         fixture.checkEncoding()
@@ -60,7 +60,7 @@ struct AuthenticatedURLRumpTests {
                     access: .anonymous
                 )
             )
-        )
+        ),
     ])
     func parse(_ fixture: ParseFixture<AuthenticatedURLRump>) {
         fixture.checkParsing()

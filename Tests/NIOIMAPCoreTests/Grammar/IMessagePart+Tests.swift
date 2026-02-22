@@ -54,7 +54,7 @@ struct MessagePathTests {
                 range: .init(range: .init(offset: 123, length: 4))
             ),
             "test/;UID=123/;SECTION=section/;PARTIAL=123.4"
-        )
+        ),
     ])
     func encode(_ fixture: EncodeFixture<MessagePath>) {
         fixture.checkEncoding()
@@ -115,7 +115,7 @@ struct MessagePathTests {
                     range: .init(range: .init(offset: 1, length: 2))
                 )
             )
-        )
+        ),
     ])
     func parse(_ fixture: ParseFixture<MessagePath>) {
         fixture.checkParsing()

@@ -78,7 +78,7 @@ extension ByteToMessageDecoderVerifierTests {
                                 .init("box4"),
                                 [
                                     .basic(.init(key: "k1", value: .sequence(.set([1])))),
-                                    .basic(.init(key: "k2", value: .sequence(.set([2]))))
+                                    .basic(.init(key: "k2", value: .sequence(.set([2])))),
                                 ]
                             )
                         )
@@ -101,7 +101,7 @@ extension ByteToMessageDecoderVerifierTests {
                                 .init("box4"),
                                 [
                                     .basic(.init(key: "k3", value: .sequence(.set([1])))),
-                                    .basic(.init(key: "k4", value: .sequence(.set([2]))))
+                                    .basic(.init(key: "k4", value: .sequence(.set([2])))),
                                 ]
                             )
                         )
@@ -151,7 +151,7 @@ extension ByteToMessageDecoderVerifierTests {
                                 .init("newBox4"),
                                 [
                                     .labelled(.init(key: "k5", value: .sequence(.set([5])))),
-                                    .labelled(.init(key: "k6", value: .sequence(.set([6]))))
+                                    .labelled(.init(key: "k6", value: .sequence(.set([6])))),
                                 ]
                             )
                         )
@@ -250,9 +250,9 @@ extension ByteToMessageDecoderVerifierTests {
                     ),
                     .append(.messageBytes("a")),
                     .append(.endMessage),
-                    .append(.finish)
+                    .append(.finish),
                 ]
-            )
+            ),
         ]
 
         let input = inoutPairs.map { ($0.0 + "\n", $0.1.map { SynchronizedCommand($0) }) }
@@ -408,7 +408,7 @@ extension ByteToMessageDecoderVerifierTests {
                     .fetch(.start(2)),
                     .fetch(.simpleAttribute(.uid(111))),
                     .fetch(.simpleAttribute(.flags([.seen, .deleted, .answered]))),
-                    .fetch(.finish)
+                    .fetch(.finish),
                 ]
             ),
 
@@ -422,7 +422,7 @@ extension ByteToMessageDecoderVerifierTests {
             (
                 "tag BAD [PARSE] Complete",
                 [.tagged(.init(tag: "tag", state: .bad(.init(code: .parse, text: "Complete"))))]
-            )
+            ),
         ]
 
         let inputs = inoutPairs.map { ($0.0 + "\n", $0.1.map { ResponseOrContinuationRequest.response($0) }) }

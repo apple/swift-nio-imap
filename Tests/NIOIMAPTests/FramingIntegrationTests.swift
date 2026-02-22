@@ -56,7 +56,9 @@ extension FramingIntegrationTests.Helper {
 
     func assertInbound(_ command: CommandStreamPart, sourceLocation: SourceLocation = #_sourceLocation) {
         var _inbound: CommandStreamPart?
-        #expect(throws: Never.self, sourceLocation: sourceLocation) { _inbound = try self.channel.readInbound(as: CommandStreamPart.self) }
+        #expect(throws: Never.self, sourceLocation: sourceLocation) {
+            _inbound = try self.channel.readInbound(as: CommandStreamPart.self)
+        }
 
         guard let inbound = _inbound else {
             Issue.record("Expected non-nil inbound value", sourceLocation: sourceLocation)

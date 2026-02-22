@@ -103,7 +103,7 @@ struct ResponseTextCodeTests {
             "URLMECH INTERNAL INTERNAL"
         ),
         EncodeFixture.responseTextCode(.urlMechanisms([]), "URLMECH INTERNAL"),
-        EncodeFixture.responseTextCode(.useAttribute, "USEATTR")
+        EncodeFixture.responseTextCode(.useAttribute, "USEATTR"),
     ])
     func encode(_ fixture: EncodeFixture<ResponseTextCode>) {
         fixture.checkEncoding()
@@ -215,7 +215,7 @@ struct ResponseTextCodeTests {
         ParseFixture.responseTextCode("URLMECH INTERNAL", expected: .success(.urlMechanisms([]))),
         ParseFixture.responseTextCode("USEATTR", expected: .success(.useAttribute)),
         ParseFixture.responseTextCode("some thing", expected: .success(.other("some", "thing"))),
-        ParseFixture.responseTextCode("some", expected: .success(.other("some", nil)))
+        ParseFixture.responseTextCode("some", expected: .success(.other("some", nil))),
     ])
     func parse(_ fixture: ParseFixture<ResponseTextCode>) {
         fixture.checkParsing()
@@ -233,7 +233,7 @@ struct ResponseTextCodeTests {
             DebugStringFixture<ResponseTextCode>(
                 sut: .permanentFlags([.wildcard, .wildcard]),
                 expected: #"PERMANENTFLAGS (\* \*)"#
-            )
+            ),
         ]
     )
     func debugStringDescription(_ fixture: DebugStringFixture<ResponseTextCode>) {

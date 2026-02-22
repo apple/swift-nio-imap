@@ -20,7 +20,7 @@ import Testing
 struct EntryTypeResponseTests {
     @Test(arguments: [
         EncodeFixture.entryKindResponse(.private, "priv"),
-        EncodeFixture.entryKindResponse(.shared, "shared")
+        EncodeFixture.entryKindResponse(.shared, "shared"),
     ])
     func encode(_ fixture: EncodeFixture<EntryKindResponse>) {
         fixture.checkEncoding()
@@ -32,7 +32,7 @@ struct EntryTypeResponseTests {
         ParseFixture.entryKindResponse("prIV", expected: .success(.private)),
         ParseFixture.entryKindResponse("shared", expected: .success(.shared)),
         ParseFixture.entryKindResponse("SHARED", expected: .success(.shared)),
-        ParseFixture.entryKindResponse("shaRED", expected: .success(.shared))
+        ParseFixture.entryKindResponse("shaRED", expected: .success(.shared)),
     ])
     func parse(_ fixture: ParseFixture<EntryKindResponse>) {
         fixture.checkParsing()

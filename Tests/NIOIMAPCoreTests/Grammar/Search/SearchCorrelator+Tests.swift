@@ -23,7 +23,7 @@ struct SearchCorrelatorTests {
         EncodeFixture.searchCorrelator(
             SearchCorrelator(tag: "some", mailbox: MailboxName("mb"), uidValidity: 5),
             #" (TAG "some" MAILBOX "mb" UIDVALIDITY 5)"#
-        )
+        ),
     ])
     func encode(_ fixture: EncodeFixture<SearchCorrelator>) {
         fixture.checkEncoding()
@@ -65,7 +65,7 @@ struct SearchCorrelatorTests {
         ParseFixture.searchCorrelator(
             " (UIDVALIDITY 5)",
             expected: .failure
-        )
+        ),
     ])
     func parse(_ fixture: ParseFixture<SearchCorrelator>) {
         fixture.checkParsing()

@@ -274,7 +274,7 @@ struct ExtendedSearchResponseTests {
         EncodeFixture.extendedSearchResponse(
             .init(correlator: SearchCorrelator(tag: "A286"), kind: .sequenceNumber, returnData: [.count(15)]),
             #"ESEARCH (TAG "A286") COUNT 15"#
-        )
+        ),
     ])
     func encode(_ fixture: EncodeFixture<ExtendedSearchResponse>) {
         fixture.checkEncoding()
@@ -302,7 +302,7 @@ struct ExtendedSearchResponseTests {
             expected: .success(
                 .init(correlator: SearchCorrelator(tag: "col"), kind: .uid, returnData: [.min(1), .max(2)])
             )
-        )
+        ),
     ])
     func parse(_ fixture: ParseFixture<ExtendedSearchResponse>) {
         fixture.checkParsing()

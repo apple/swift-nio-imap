@@ -26,7 +26,7 @@ struct SearchReturnOptionExtensionTests {
         EncodeFixture.searchReturnOptionExtension(
             .init(key: "modifier", value: .sequence(.set([4]))),
             "modifier 4"
-        )
+        ),
     ])
     func encode(_ fixture: EncodeFixture<KeyValue<String, ParameterValue?>>) {
         fixture.checkEncoding()
@@ -43,7 +43,7 @@ struct SearchReturnOptionExtensionTests {
             "\r",
             expected: .success(.init(key: "modifier", value: .sequence(.set([4]))))
         ),
-        ParseFixture.searchReturnOptionExtension("modifier ", "", expected: .incompleteMessage)
+        ParseFixture.searchReturnOptionExtension("modifier ", "", expected: .incompleteMessage),
     ])
     func parse(_ fixture: ParseFixture<KeyValue<String, ParameterValue?>>) {
         fixture.checkParsing()

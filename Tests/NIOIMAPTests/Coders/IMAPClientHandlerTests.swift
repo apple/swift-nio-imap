@@ -409,7 +409,7 @@ struct IMAPClientHandlerTests {
                     0x95,
                     0x69, 0xDB, 0x69, 0x49, 0x19, 0x74, 0x46, 0x1B, 0x28, 0x70, 0x4F, 0x8D, 0xDF, 0x2D, 0xFF, 0x5C,
                     0x79,
-                    0x62
+                    0x62,
                 ])
             )
         )
@@ -434,7 +434,7 @@ struct IMAPClientHandlerTests {
                     0x5D,
                     0x49, 0x64, 0xD0, 0x2B, 0x05, 0x2E, 0x86, 0xBC, 0x8F, 0xE8, 0x2F, 0x18, 0x39, 0x60, 0x1E, 0xEA,
                     0xB3,
-                    0x58, 0x73, 0xD2, 0x42
+                    0x58, 0x73, 0xD2, 0x42,
                 ])
             )
         )
@@ -693,7 +693,7 @@ struct IMAPClientHandlerTests {
             try helper.channel.pipeline.syncOperations.addHandlers([
                 PreTestHandler(),
                 IMAPClientHandler(),
-                PostTestHandler()
+                PostTestHandler(),
             ])
         }
         helper.writeOutbound(

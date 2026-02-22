@@ -86,7 +86,7 @@ struct SearchKeyTests {
             "(OR SMALLER 444 LARGER 333) UNDELETED"
         ),
         EncodeFixture.searchKey(.emailID(.init("123-456-789")!), "EMAILID 123-456-789"),
-        EncodeFixture.searchKey(.threadID(.init("123-456-789")!), "THREADID 123-456-789")
+        EncodeFixture.searchKey(.threadID(.init("123-456-789")!), "THREADID 123-456-789"),
     ])
     func encode(_ fixture: EncodeFixture<SearchKey>) {
         fixture.checkEncoding()
@@ -170,7 +170,7 @@ struct SearchKeyTests {
             expected: .success(.modificationSequence(.init(extensions: [:], sequenceValue: 5)))
         ),
         ParseFixture.searchKey("EMAILID 123-456-789", expected: .success(.emailID(.init("123-456-789")!))),
-        ParseFixture.searchKey("THREADID 123-456-789", expected: .success(.threadID(.init("123-456-789")!)))
+        ParseFixture.searchKey("THREADID 123-456-789", expected: .success(.threadID(.init("123-456-789")!))),
     ])
     func parse(_ fixture: ParseFixture<SearchKey>) {
         fixture.checkParsing()

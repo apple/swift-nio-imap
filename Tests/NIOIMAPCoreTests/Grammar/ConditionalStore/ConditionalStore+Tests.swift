@@ -35,7 +35,7 @@ struct ConditionalStoreTests {
     @Test(arguments: [
         ParseFixture.conditionalStoreParameter("condstore", " ", expected: .success(Dummy())),
         ParseFixture.conditionalStoreParameter("CONDSTORE", " ", expected: .success(Dummy())),
-        ParseFixture.conditionalStoreParameter("condSTORE", " ", expected: .success(Dummy()))
+        ParseFixture.conditionalStoreParameter("condSTORE", " ", expected: .success(Dummy())),
     ])
     fileprivate func parse(_ fixture: ParseFixture<Dummy>) {
         fixture.checkParsing()

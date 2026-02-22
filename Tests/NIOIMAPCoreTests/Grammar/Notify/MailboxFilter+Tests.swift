@@ -50,7 +50,7 @@ struct MailboxFilterTests {
         EncodeFixture.mailboxFilter(
             .subtreeOne(Mailboxes([.init("box1")])!),
             "subtree-one (\"box1\")"
-        )
+        ),
     ])
     func encode(_ fixture: EncodeFixture<MailboxFilter>) {
         fixture.checkEncoding()
@@ -79,7 +79,7 @@ struct MailboxFilterTests {
         ),
         ParseFixture.filterMailboxes("subtree ", expected: .failure),
         ParseFixture.filterMailboxes("subtree-one", expected: .failure),
-        ParseFixture.filterMailboxes("mailboxes", expected: .failure)
+        ParseFixture.filterMailboxes("mailboxes", expected: .failure),
     ])
     func parseFilterMailboxes(_ fixture: ParseFixture<MailboxFilter>) {
         fixture.checkParsing()

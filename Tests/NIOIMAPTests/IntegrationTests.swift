@@ -67,7 +67,7 @@ import Testing
                         try! channel.pipeline.syncOperations.addHandlers([
                             ByteToMessageHandler(FrameDecoder()),
                             IMAPServerHandler(),
-                            CollectEverythingHandler(collectionDonePromise: collectionDonePromise)
+                            CollectEverythingHandler(collectionDonePromise: collectionDonePromise),
                         ])
                     }
                 }
@@ -97,7 +97,7 @@ import Testing
 
         let expected: [CommandStreamPart] = [
             .tagged(.init(tag: "tag", command: .login(username: "1", password: "2"))),
-            .tagged(.init(tag: "tag", command: .noop))
+            .tagged(.init(tag: "tag", command: .noop)),
         ]
         var result: [CommandStreamPart]?
         #expect(throws: Never.self) {

@@ -24,7 +24,7 @@ struct ListSelectOptionTests {
             EncodeFixture.listSelectOption(.subscribed, "SUBSCRIBED"),
             EncodeFixture.listSelectOption(.remote, "REMOTE"),
             EncodeFixture.listSelectOption(.recursiveMatch, "RECURSIVEMATCH"),
-            EncodeFixture.listSelectOption(.specialUse, "SPECIAL-USE")
+            EncodeFixture.listSelectOption(.specialUse, "SPECIAL-USE"),
         ]
     )
     func encodeSingleOption(_ fixture: EncodeFixture<ListSelectOption>) {
@@ -42,7 +42,7 @@ struct ListSelectOptionTests {
             EncodeFixture.listSelectOptions(
                 .init(baseOption: .subscribed, options: [.specialUse, .recursiveMatch]),
                 "(SPECIAL-USE RECURSIVEMATCH SUBSCRIBED)"
-            )
+            ),
         ]
     )
     func encodeMultipleOptions(_ fixture: EncodeFixture<ListSelectOptions?>) {

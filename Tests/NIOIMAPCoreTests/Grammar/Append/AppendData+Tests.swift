@@ -38,7 +38,7 @@ struct AppendDataTests {
             .init(byteCount: 456, withoutContentTransferEncoding: true),
             .literalPlus,
             "~{456+}\r\n"
-        )
+        ),
     ])
     func encode(_ fixture: EncodeFixture<AppendData>) {
         fixture.checkEncoding()
@@ -70,7 +70,7 @@ struct AppendDataTests {
             expected: .success(.init(byteCount: .max, withoutContentTransferEncoding: true))
         ),
         ParseFixture.appendData("{-1}\r\n", "hello", expected: .failureIgnoringBufferModifications),
-        ParseFixture.appendData("{\(UInt(Int.max) + 1)}\r\n", "hello", expected: .failureIgnoringBufferModifications)
+        ParseFixture.appendData("{\(UInt(Int.max) + 1)}\r\n", "hello", expected: .failureIgnoringBufferModifications),
     ])
     func parse(_ fixture: ParseFixture<AppendData>) {
         fixture.checkParsing()

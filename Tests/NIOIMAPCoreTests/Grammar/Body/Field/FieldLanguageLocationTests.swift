@@ -26,7 +26,7 @@ struct FieldLanguageLocationTests {
         EncodeFixture.languageLocation(
             .init(languages: ["language"], location: .init(location: "location", extensions: [])),
             " (\"language\") \"location\""
-        )
+        ),
     ])
     func encoding(_ fixture: EncodeFixture<BodyStructure.LanguageLocation>) {
         fixture.checkEncoding()

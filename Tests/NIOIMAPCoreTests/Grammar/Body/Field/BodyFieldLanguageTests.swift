@@ -21,7 +21,7 @@ struct BodyFieldLanguageTests {
     @Test(arguments: [
         EncodeFixture.bodyLanguages([], "NIL"),
         EncodeFixture.bodyLanguages(["some1"], "(\"some1\")"),
-        EncodeFixture.bodyLanguages(["some1", "some2", "some3"], "(\"some1\" \"some2\" \"some3\")")
+        EncodeFixture.bodyLanguages(["some1", "some2", "some3"], "(\"some1\" \"some2\" \"some3\")"),
     ])
     func encoding(_ fixture: EncodeFixture<[String]>) {
         fixture.checkEncoding()
@@ -30,7 +30,7 @@ struct BodyFieldLanguageTests {
     @Test(arguments: [
         ParseFixture.bodyFieldLanguage(#""english""#, expected: .success(["english"])),
         ParseFixture.bodyFieldLanguage(#"("english")"#, expected: .success(["english"])),
-        ParseFixture.bodyFieldLanguage(#"("english" "french")"#, expected: .success(["english", "french"]))
+        ParseFixture.bodyFieldLanguage(#"("english" "french")"#, expected: .success(["english", "french"])),
     ])
     func parse(_ fixture: ParseFixture<[String]>) {
         fixture.checkParsing()

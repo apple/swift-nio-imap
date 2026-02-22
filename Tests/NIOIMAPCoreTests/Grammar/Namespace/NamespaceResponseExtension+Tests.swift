@@ -29,10 +29,10 @@ struct NamespaceResponseExtensionTests {
             [
                 "str1": ["str2"],
                 "str3": ["str4"],
-                "str5": ["str6"]
+                "str5": ["str6"],
             ],
             " \"str1\" (\"str2\") \"str3\" (\"str4\") \"str5\" (\"str6\")"
-        )
+        ),
     ])
     func encode(_ fixture: EncodeFixture<OrderedDictionary<ByteBuffer, [ByteBuffer]>>) {
         fixture.checkEncoding()
@@ -48,7 +48,7 @@ struct NamespaceResponseExtensionTests {
             " \"str1\" (\"str2\" \"str3\" \"str4\")",
             " ",
             expected: .success(KeyValue(key: "str1", value: ["str2", "str3", "str4"]))
-        )
+        ),
     ])
     func parse(_ fixture: ParseFixture<KeyValue<ByteBuffer, [ByteBuffer]>>) {
         fixture.checkParsing()

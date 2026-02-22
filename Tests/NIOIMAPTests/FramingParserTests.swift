@@ -359,7 +359,7 @@ import Testing
         }
         #expect(
             result == [
-                .complete(#"A1 LOGIN "foobar" {3}\#r\#n"#), .insideLiteral("hey", remainingBytes: 0), .complete("\r\n")
+                .complete(#"A1 LOGIN "foobar" {3}\#r\#n"#), .insideLiteral("hey", remainingBytes: 0), .complete("\r\n"),
             ]
         )
     }
@@ -375,7 +375,7 @@ import Testing
         #expect(
             result == [
                 .complete(#"A1 LOGIN "foo\"bar" {3}\#r\#n"#), .insideLiteral("hey", remainingBytes: 0),
-                .complete("\r\n")
+                .complete("\r\n"),
             ]
         )
     }

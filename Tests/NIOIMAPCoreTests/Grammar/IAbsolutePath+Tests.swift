@@ -26,7 +26,7 @@ struct AbsoluteMessagePathTests {
         EncodeFixture.absoluteMessagePath(
             .init(command: .messageList(.init(mailboxUIDValidity: .init(encodeMailbox: .init(mailbox: "INBOX"))))),
             "/INBOX"
-        )
+        ),
     ])
     func encode(_ fixture: EncodeFixture<AbsoluteMessagePath>) {
         fixture.checkEncoding()
@@ -42,7 +42,7 @@ struct AbsoluteMessagePathTests {
                     command: .messageList(.init(mailboxUIDValidity: .init(encodeMailbox: .init(mailbox: "test"))))
                 )
             )
-        )
+        ),
     ])
     func parse(_ fixture: ParseFixture<AbsoluteMessagePath>) {
         fixture.checkParsing()

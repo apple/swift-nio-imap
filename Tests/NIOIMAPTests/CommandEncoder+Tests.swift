@@ -96,7 +96,7 @@ struct CommandEncoder_Tests {
             (
                 .tagged(.init(tag: "A1", command: .search(key: .header("foo", "bar"), charset: "UTF-8"))),
                 #"A1 SEARCH CHARSET UTF-8 HEADER "foo" "bar"\#r\#n"#, #line
-            )
+            ),
         ]
 
         for (command, expected, _) in inputs {
@@ -191,7 +191,7 @@ struct CommandEncoder_Tests {
             ),
             (.append(.messageBytes(ByteBuffer(string: "foobar"))), "", #line),
             (.append(.endMessage), "∅", #line),
-            (.append(.finish), "\r\n", #line)
+            (.append(.finish), "\r\n", #line),
         ]
 
         for (command, expected, _) in inputs {

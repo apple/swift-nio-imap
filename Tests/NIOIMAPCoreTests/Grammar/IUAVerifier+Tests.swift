@@ -26,7 +26,7 @@ struct AuthenticatedURLVerifierTests {
         EncodeFixture.authenticatedURLVerifier(
             .init(urlAuthMechanism: .internal, encodedAuthenticationURL: .init(data: "verifier123")),
             ":INTERNAL:verifier123"
-        )
+        ),
     ])
     func encode(_ fixture: EncodeFixture<AuthenticatedURLVerifier>) {
         fixture.checkEncoding()

@@ -26,7 +26,7 @@ struct FetchModificationResponseTests {
         EncodeFixture.fetchModificationResponse(
             .init(modifierSequenceValue: 12345),
             "MODSEQ (12345)"
-        )
+        ),
     ])
     func encode(_ fixture: EncodeFixture<FetchModificationResponse>) {
         fixture.checkEncoding()

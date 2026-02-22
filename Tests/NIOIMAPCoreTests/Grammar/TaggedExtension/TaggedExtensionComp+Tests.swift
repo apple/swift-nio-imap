@@ -20,7 +20,7 @@ import Testing
 struct TaggedExtensionCompTests {
     @Test(arguments: [
         EncodeFixture.taggedExtensionComp(["hello"], "(\"hello\")"),
-        EncodeFixture.taggedExtensionComp(["hello", "goodbye"], "(\"hello\" \"goodbye\")")
+        EncodeFixture.taggedExtensionComp(["hello", "goodbye"], "(\"hello\" \"goodbye\")"),
     ])
     func encode(_ fixture: EncodeFixture<[String]>) {
         fixture.checkEncoding()

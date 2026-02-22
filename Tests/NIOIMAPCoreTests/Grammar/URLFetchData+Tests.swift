@@ -26,7 +26,7 @@ struct URLFetchDataTests {
         EncodeFixture.urlFetchData(
             .init(url: "url", data: "data"),
             "\"url\" \"data\""
-        )
+        ),
     ])
     func encode(_ fixture: EncodeFixture<URLFetchData>) {
         fixture.checkEncoding()
@@ -42,7 +42,7 @@ struct URLFetchDataTests {
             "url \"data\"",
             " ",
             expected: .success(.init(url: "url", data: "data"))
-        )
+        ),
     ])
     func parse(_ fixture: ParseFixture<URLFetchData>) {
         fixture.checkParsing()

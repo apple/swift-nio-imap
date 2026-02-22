@@ -24,7 +24,7 @@ struct AttributeFlagTests {
         EncodeFixture.attributeFlag(.draft, "\\\\draft"),
         EncodeFixture.attributeFlag(.flagged, "\\\\flagged"),
         EncodeFixture.attributeFlag(.seen, "\\\\seen"),
-        EncodeFixture.attributeFlag(.init("test"), "test")
+        EncodeFixture.attributeFlag(.init("test"), "test"),
     ])
     func encode(_ fixture: EncodeFixture<AttributeFlag>) {
         fixture.checkEncoding()
@@ -39,7 +39,7 @@ struct AttributeFlagTests {
 
     @Test(arguments: [
         ParseFixture.attributeFlag(#"\\Answered"#, expected: .success(.answered)),
-        ParseFixture.attributeFlag("some", expected: .success(.init("some")))
+        ParseFixture.attributeFlag("some", expected: .success(.init("some"))),
     ])
     func parse(_ fixture: ParseFixture<AttributeFlag>) {
         fixture.checkParsing()

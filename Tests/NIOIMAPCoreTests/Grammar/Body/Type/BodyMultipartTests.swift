@@ -93,13 +93,13 @@ struct BodyMultipartTests {
                                 ),
                                 extension: nil
                             )
-                        )
+                        ),
                     ],
                     mediaSubtype: .related,
                     extension: nil
                 ),
                 #"("TEXT" "HTML" NIL NIL NIL "BASE64" 6 5)("TEXT" "PLAIN" NIL NIL NIL "BASE64" 7 6) "RELATED""#
-            )
+            ),
         ]
     )
     func encodeMultipart(_ fixture: EncodeFixture<BodyStructure.Multipart>) {
@@ -122,7 +122,7 @@ struct BodyMultipartTests {
                     )
                 ),
                 "(\"f1\" \"v1\") (\"string\" (\"f2\" \"v2\"))"
-            )
+            ),
         ]
     )
     func encodeExtension(_ fixture: EncodeFixture<BodyStructure.Multipart.Extension>) {

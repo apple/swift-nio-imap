@@ -20,7 +20,7 @@ import Testing
 struct CoreTypealiasesTests {
     @Test(arguments: [
         EncodeFixture.nstring(nil, "NIL"),
-        EncodeFixture.nstring("hello", #""hello""#)
+        EncodeFixture.nstring("hello", #""hello""#),
     ])
     func encode(_ fixture: EncodeFixture<String?>) {
         fixture.checkEncoding()

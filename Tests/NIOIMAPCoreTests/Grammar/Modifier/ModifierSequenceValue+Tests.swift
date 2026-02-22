@@ -39,7 +39,7 @@ struct ModificationSequenceValueTests {
         EncodeFixture.modificationSequenceValue(.init(integerLiteral: 5000), "5000"),
         EncodeFixture.modificationSequenceValue(.init(integerLiteral: 9999), "9999"),
         EncodeFixture.modificationSequenceValue(.init(integerLiteral: 10000), "10000"),
-        EncodeFixture.modificationSequenceValue(ModificationSequenceValue(UInt64(Int64.max)), "\(Int64.max)")
+        EncodeFixture.modificationSequenceValue(ModificationSequenceValue(UInt64(Int64.max)), "\(Int64.max)"),
     ])
     func encode(_ fixture: EncodeFixture<ModificationSequenceValue>) {
         fixture.checkEncoding()
@@ -59,7 +59,7 @@ struct ModificationSequenceValueTests {
         ),
         ParseFixture.modificationSequenceValue("9223372036854775808", " ", expected: .failure),
         ParseFixture.modificationSequenceValue("13853076851840262211", " ", expected: .failure),
-        ParseFixture.modificationSequenceValue("18446744073709551615", " ", expected: .failure)
+        ParseFixture.modificationSequenceValue("18446744073709551615", " ", expected: .failure),
     ])
     func parse(_ fixture: ParseFixture<ModificationSequenceValue>) {
         fixture.checkParsing()

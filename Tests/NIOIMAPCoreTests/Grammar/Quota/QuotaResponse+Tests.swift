@@ -45,7 +45,7 @@ struct QuotaResponseTests {
                     ]
                 ),
                 ##"QUOTA "#user/alice" (MESSAGE 42 1000)"##
-            )
+            ),
         ]
     )
     func encodeQuotaResponse(
@@ -61,7 +61,7 @@ struct QuotaResponseTests {
                 [QuotaResource(resourceName: "STORAGE", usage: 10, limit: 512)],
                 "(STORAGE 10 512)"
             ),
-            EncodeFixture.quotaResources([], "()")
+            EncodeFixture.quotaResources([], "()"),
         ]
     )
     func encodeQuotaResources(_ fixture: EncodeFixture<[QuotaResource]>) {

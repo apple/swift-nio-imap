@@ -128,8 +128,8 @@ struct CommandParserTests {
             Array("eSequence468117eY SEARCH 4:1 000,0\n000059?000000600=)O".utf8),
             [
                 0x41, 0x5D, 0x20, 0x55, 0x49, 0x44, 0x20, 0x43, 0x4F, 0x50, 0x59, 0x20, 0x35, 0x2C, 0x35, 0x3A, 0x34,
-                0x00, 0x3D, 0x0C, 0x0A, 0x43, 0x20, 0x22, 0xE8
-            ]
+                0x00, 0x3D, 0x0C, 0x0A, 0x43, 0x20, 0x22, 0xE8,
+            ],
         ]
     )
     func randomDataDoesNotCrashParser(input: [UInt8]) {
@@ -159,7 +159,7 @@ struct CommandParserTests {
             ParseFixture.string("{3}\r\nfoo", " ", expected: .success(ByteBuffer(string: "foo"))),
             ParseFixture.string(#""aäb""#, " ", expected: .success(ByteBuffer(string: "aäb"))),
             ParseFixture.string(#"foo"#, " ", expected: .failure),
-            ParseFixture.string(#" "foo""#, " ", expected: .failure)
+            ParseFixture.string(#" "foo""#, " ", expected: .failure),
         ]
     )
     func parseStringParsesQuotedAndLiteralStrings(_ fixture: ParseFixture<ByteBuffer>) {
@@ -173,7 +173,7 @@ struct CommandParserTests {
             ParseFixture.stringAllowingNonASCII(#""äø""#, " ", expected: .success(ByteBuffer(string: "äø"))),
             ParseFixture.stringAllowingNonASCII(#""ä\"ø""#, " ", expected: .success(ByteBuffer(string: #"ä"ø"#))),
             ParseFixture.stringAllowingNonASCII(#""ä\\ø""#, " ", expected: .success(ByteBuffer(string: #"ä\ø"#))),
-            ParseFixture.stringAllowingNonASCII("{3}\r\nfoo", " ", expected: .success(ByteBuffer(string: "foo")))
+            ParseFixture.stringAllowingNonASCII("{3}\r\nfoo", " ", expected: .success(ByteBuffer(string: "foo"))),
         ]
     )
     func parseStringAllowingNonAsciiParsesStringsWithNonAsciiCharacters(_ fixture: ParseFixture<ByteBuffer>) {

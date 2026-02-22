@@ -80,7 +80,7 @@ struct AppendMessageTests {
             .init(options: .none, data: .init(byteCount: 456)),
             .literalPlus,
             " {456+}\r\n"
-        )
+        ),
     ])
     func encode(_ fixture: EncodeFixture<AppendMessage>) {
         fixture.checkEncoding()
@@ -106,7 +106,7 @@ struct AppendMessageTests {
                     data: .init(byteCount: 456, withoutContentTransferEncoding: true)
                 )
             )
-        )
+        ),
     ])
     func parse(_ fixture: ParseFixture<AppendMessage>) {
         fixture.checkParsing()

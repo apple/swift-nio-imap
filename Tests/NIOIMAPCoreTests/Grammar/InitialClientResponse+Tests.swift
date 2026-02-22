@@ -21,7 +21,7 @@ struct InitialResponseTests {
     @Test(arguments: [
         EncodeFixture.initialResponse(.empty, "="),
         EncodeFixture.initialResponse(.init("base64"), "YmFzZTY0"),
-        EncodeFixture.initialResponse(.init("response"), "cmVzcG9uc2U=")
+        EncodeFixture.initialResponse(.init("response"), "cmVzcG9uc2U="),
     ])
     func encode(_ fixture: EncodeFixture<InitialResponse>) {
         fixture.checkEncoding()
@@ -29,7 +29,7 @@ struct InitialResponseTests {
 
     @Test(arguments: [
         ParseFixture.initialResponse("=", expected: .success(.empty)),
-        ParseFixture.initialResponse("YQ==", expected: .success(.init("a")))
+        ParseFixture.initialResponse("YQ==", expected: .success(.init("a"))),
     ])
     func parse(_ fixture: ParseFixture<InitialResponse>) {
         fixture.checkParsing()

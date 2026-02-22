@@ -32,7 +32,7 @@ struct EncodedSearchQueryTests {
                 encodedSearch: .init(query: "search")
             ),
             "box?search"
-        )
+        ),
     ])
     func encode(_ fixture: EncodeFixture<EncodedSearchQuery>) {
         fixture.checkEncoding()
@@ -55,7 +55,7 @@ struct EncodedSearchQueryTests {
                     encodedSearch: .init(query: "query")
                 )
             )
-        )
+        ),
     ])
     func parse(_ fixture: ParseFixture<EncodedSearchQuery>) {
         fixture.checkParsing()

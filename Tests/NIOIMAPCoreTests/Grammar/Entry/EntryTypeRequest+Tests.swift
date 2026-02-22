@@ -21,7 +21,7 @@ struct EntryTypeRequestTests {
     @Test(arguments: [
         EncodeFixture.entryKindRequest(.all, "all"),
         EncodeFixture.entryKindRequest(.private, "priv"),
-        EncodeFixture.entryKindRequest(.shared, "shared")
+        EncodeFixture.entryKindRequest(.shared, "shared"),
     ])
     func encode(_ fixture: EncodeFixture<EntryKindRequest>) {
         fixture.checkEncoding()
@@ -34,7 +34,7 @@ struct EntryTypeRequestTests {
         ParseFixture.entryKindRequest("priv", expected: .success(.private)),
         ParseFixture.entryKindRequest("PRIV", expected: .success(.private)),
         ParseFixture.entryKindRequest("shared", expected: .success(.shared)),
-        ParseFixture.entryKindRequest("SHARED", expected: .success(.shared))
+        ParseFixture.entryKindRequest("SHARED", expected: .success(.shared)),
     ])
     func parse(_ fixture: ParseFixture<EntryKindRequest>) {
         fixture.checkParsing()

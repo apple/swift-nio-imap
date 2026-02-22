@@ -72,7 +72,7 @@ struct EnvelopeTests {
                 messageID: "1"
             ),
             "(\"01-02-03\" \"subject\" ((\"name1\" \"adl1\" \"mailbox1\" \"host1\")) ((\"name2\" \"adl2\" \"mailbox2\" \"host2\")) ((\"name3\" \"adl3\" \"mailbox3\" \"host3\")) ((\"name4\" \"adl4\" \"mailbox4\" \"host4\")) ((\"name5\" \"adl5\" \"mailbox5\" \"host5\")) ((\"name6\" \"adl6\" \"mailbox6\" \"host6\")) NIL \"1\")"
-        )
+        ),
     ])
     func encode(_ fixture: EncodeFixture<Envelope>) {
         fixture.checkEncoding()
@@ -108,7 +108,7 @@ struct EnvelopeTests {
                             ),
                             .singleAddress(
                                 .init(personName: "name5", sourceRoot: "adl5", mailbox: "mailbox5", host: "host5")
-                            )
+                            ),
                         ],
                         cc: [
                             .singleAddress(
@@ -116,7 +116,7 @@ struct EnvelopeTests {
                             ),
                             .singleAddress(
                                 .init(personName: "name7", sourceRoot: "adl7", mailbox: "mailbox7", host: "host7")
-                            )
+                            ),
                         ],
                         bcc: [
                             .singleAddress(
@@ -147,7 +147,7 @@ struct EnvelopeTests {
                 " ",
                 expected: .success([.init(personName: "a", sourceRoot: "b", mailbox: "c", host: "d")])
             ),
-            ParseFixture.envelopeEmailAddresses("NIL", " ", expected: .failure)
+            ParseFixture.envelopeEmailAddresses("NIL", " ", expected: .failure),
         ]
     )
     func parseEnvelopeEmailAddresses(_ fixture: ParseFixture<[EmailAddress]>) {
@@ -162,7 +162,7 @@ struct EnvelopeTests {
                 " ",
                 expected: .success([.singleAddress(.init(personName: "a", sourceRoot: "b", mailbox: "c", host: "d"))])
             ),
-            ParseFixture.optionalEnvelopeEmailAddresses("NIL", " ", expected: .success([]))
+            ParseFixture.optionalEnvelopeEmailAddresses("NIL", " ", expected: .success([])),
         ]
     )
     func parseOptionalEnvelopeEmailAddresses(_ fixture: ParseFixture<[EmailAddressListElement]>) {

@@ -212,7 +212,9 @@ import Testing
 
         // client starts authentication
         helper.writeInbound("A1 AUTHENTICATE GSSAPI\r\n")
-        helper.expectInbound(.tagged(.init(tag: "A1", command: .authenticate(mechanism: .gssAPI, initialResponse: nil))))
+        helper.expectInbound(
+            .tagged(.init(tag: "A1", command: .authenticate(mechanism: .gssAPI, initialResponse: nil)))
+        )
 
         // server sends challenge
         helper.writeOutbound(.authenticationChallenge("challenge1"))
@@ -354,7 +356,11 @@ extension IMAPServerHandlerTests.Helper {
     }
 
     @discardableResult
-    func writeOutbound(_ response: Response, wait: Bool = true, sourceLocation: SourceLocation = #_sourceLocation) -> EventLoopFuture<Void> {
+    func writeOutbound(
+        _ response: Response,
+        wait: Bool = true,
+        sourceLocation: SourceLocation = #_sourceLocation
+    ) -> EventLoopFuture<Void> {
         let result = self.channel.writeAndFlush(response)
         if wait {
             #expect(throws: Never.self, sourceLocation: sourceLocation) {

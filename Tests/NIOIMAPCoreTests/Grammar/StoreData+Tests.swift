@@ -32,7 +32,7 @@ struct StoreDataTests {
             ),
             ParseFixture.storeModifier("1", expected: .failure),
             ParseFixture.storeModifier("UNCHANGEDSINCE 1", "", expected: .incompleteMessage),
-            ParseFixture.storeModifier("test 1", "", expected: .incompleteMessage)
+            ParseFixture.storeModifier("test 1", "", expected: .incompleteMessage),
         ]
     )
     func parseStoreModifier(_ fixture: ParseFixture<StoreModifier>) {
@@ -53,7 +53,7 @@ struct StoreDataTests {
             ParseFixture.storeData(#"+SOMETHING \answered"#, expected: .failure),
             ParseFixture.storeData("+", "", expected: .incompleteMessage),
             ParseFixture.storeData("-", "", expected: .incompleteMessage),
-            ParseFixture.storeData("", "", expected: .incompleteMessage)
+            ParseFixture.storeData("", "", expected: .incompleteMessage),
         ]
     )
     func parseStoreData(_ fixture: ParseFixture<StoreData>) {
@@ -84,7 +84,7 @@ struct StoreDataTests {
             ParseFixture.storeGmailLabels("+X-GM-LABEL.SILEN (foo)", expected: .failure),
             ParseFixture.storeGmailLabels("+X-GM-LABELS ", "", expected: .incompleteMessage),
             ParseFixture.storeGmailLabels("-X-GM-LABELS ", "", expected: .incompleteMessage),
-            ParseFixture.storeGmailLabels("X-GM-LABELS ", "", expected: .incompleteMessage)
+            ParseFixture.storeGmailLabels("X-GM-LABELS ", "", expected: .incompleteMessage),
         ]
     )
     func parseStoreGmailLabels(_ fixture: ParseFixture<StoreGmailLabels>) {

@@ -23,7 +23,7 @@ struct ReturnOptionTests {
         EncodeFixture.returnOption(.children, "CHILDREN"),
         EncodeFixture.returnOption(.statusOption([.messageCount]), "STATUS (MESSAGES)"),
         EncodeFixture.returnOption(.optionExtension(.init(key: .standard("atom"), value: nil)), "atom"),
-        EncodeFixture.returnOption(.specialUse, "SPECIAL-USE")
+        EncodeFixture.returnOption(.specialUse, "SPECIAL-USE"),
     ])
     func encode(_ fixture: EncodeFixture<ReturnOption>) {
         fixture.checkEncoding()

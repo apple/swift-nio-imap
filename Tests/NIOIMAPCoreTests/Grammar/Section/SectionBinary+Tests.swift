@@ -21,7 +21,7 @@ struct SectionBinaryTests {
     @Test(arguments: [
         EncodeFixture.sectionBinary([], "[]"),
         EncodeFixture.sectionBinary([123], "[123]"),
-        EncodeFixture.sectionBinary([1, 2, 3], "[1.2.3]")
+        EncodeFixture.sectionBinary([1, 2, 3], "[1.2.3]"),
     ])
     func encode(_ fixture: EncodeFixture<SectionSpecifier.Part>) {
         fixture.checkEncoding()
@@ -36,7 +36,7 @@ struct SectionBinaryTests {
         ParseFixture.sectionBinary("[1.2", expected: .failure),
         ParseFixture.sectionBinary("[", "", expected: .incompleteMessage),
         ParseFixture.sectionBinary("[1.2", "", expected: .incompleteMessage),
-        ParseFixture.sectionBinary("[1.2.", "", expected: .incompleteMessage)
+        ParseFixture.sectionBinary("[1.2.", "", expected: .incompleteMessage),
     ])
     func parse(_ fixture: ParseFixture<SectionSpecifier.Part>) {
         fixture.checkParsing()

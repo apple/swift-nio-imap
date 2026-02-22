@@ -26,7 +26,7 @@ struct EncodedMailboxUIDValidityTests {
         EncodeFixture.mailboxUIDValidity(
             .init(encodeMailbox: .init(mailbox: "mailbox"), uidValidity: 123),
             "mailbox;UIDVALIDITY=123"
-        )
+        ),
     ])
     func encode(_ fixture: EncodeFixture<MailboxUIDValidity>) {
         fixture.checkEncoding()
@@ -57,7 +57,7 @@ struct EncodedMailboxUIDValidityTests {
             "abc123",
             "",
             expected: .incompleteMessage
-        )
+        ),
     ])
     func parse(_ fixture: ParseFixture<MailboxUIDValidity>) {
         fixture.checkParsing()

@@ -50,7 +50,7 @@ struct FullAuthenticatedURLTests {
                 )
             ),
             "imap://mail.example.com/INBOX/;UID=789;URLAUTH=user+alice:INTERNAL:verifier123"
-        )
+        ),
     ])
     func encode(_ fixture: EncodeFixture<FullAuthenticatedURL>) {
         fixture.checkEncoding()

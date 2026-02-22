@@ -23,7 +23,7 @@ struct MessageDataTests {
         EncodeFixture.messageData(.vanished(.all), "VANISHED 1:*"),
         EncodeFixture.messageData(.vanishedEarlier(.all), "VANISHED (EARLIER) 1:*"),
         EncodeFixture.messageData(.generateAuthorizedURL(["test"]), #"GENURLAUTH "test""#),
-        EncodeFixture.messageData(.generateAuthorizedURL(["test1", "test2"]), #"GENURLAUTH "test1" "test2""#)
+        EncodeFixture.messageData(.generateAuthorizedURL(["test1", "test2"]), #"GENURLAUTH "test1" "test2""#),
     ])
     func encode(_ fixture: EncodeFixture<MessageData>) {
         fixture.checkEncoding()
@@ -43,10 +43,10 @@ struct MessageDataTests {
             "URLFETCH url1 NIL url2 NIL url3 \"data\"",
             expected: .success(
                 .urlFetch([
-                    .init(url: "url1", data: nil), .init(url: "url2", data: nil), .init(url: "url3", data: "data")
+                    .init(url: "url1", data: nil), .init(url: "url2", data: nil), .init(url: "url3", data: "data"),
                 ])
             )
-        )
+        ),
     ])
     func parse(_ fixture: ParseFixture<MessageData>) {
         fixture.checkParsing()

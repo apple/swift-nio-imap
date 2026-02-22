@@ -20,7 +20,7 @@ import Testing
 struct IMAPURLAuthenticationMechanismTests {
     @Test(arguments: [
         EncodeFixture.imapURLAuthenticationMechanism(.any, ";AUTH=*"),
-        EncodeFixture.imapURLAuthenticationMechanism(.type(.init(authenticationType: "data")), ";AUTH=data")
+        EncodeFixture.imapURLAuthenticationMechanism(.type(.init(authenticationType: "data")), ";AUTH=data"),
     ])
     func encode(_ fixture: EncodeFixture<IMAPURLAuthenticationMechanism>) {
         fixture.checkEncoding()
@@ -32,7 +32,7 @@ struct IMAPURLAuthenticationMechanismTests {
             ";AUTH=test",
             " ",
             expected: .success(.type(.init(authenticationType: "test")))
-        )
+        ),
     ])
     func parse(_ fixture: ParseFixture<IMAPURLAuthenticationMechanism>) {
         fixture.checkParsing()

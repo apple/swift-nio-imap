@@ -26,7 +26,7 @@ struct BodyFieldDSPTests {
         EncodeFixture<BodyStructure.Disposition?>.bodyDisposition(
             .init(kind: "some", parameters: ["f1": "v1"]),
             "(\"some\" (\"f1\" \"v1\"))"
-        )
+        ),
     ])
     func encoding(_ fixture: EncodeFixture<BodyStructure.Disposition?>) {
         fixture.checkEncoding()
@@ -56,7 +56,7 @@ struct BodyFieldDSPTests {
             name: "invalid size value",
             disposition: .init(kind: "test", parameters: ["SIZE": "abc"]),
             expected: nil
-        )
+        ),
     ])
     func sizeProperty(_ fixture: SizeFixture) {
         #expect(fixture.disposition.size == fixture.expected)
@@ -85,7 +85,7 @@ struct BodyFieldDSPTests {
             name: "uppercase FILENAME parameter",
             disposition: .init(kind: "test", parameters: ["FILENAME": "world"]),
             expected: "world"
-        )
+        ),
     ])
     func filenameProperty(_ fixture: FilenameFixture) {
         #expect(fixture.disposition.filename == fixture.expected)
@@ -100,7 +100,7 @@ struct BodyFieldDSPTests {
             #"NIL"#,
             "",
             expected: .success(nil)
-        )
+        ),
     ])
     func parse(_ fixture: ParseFixture<BodyStructure.Disposition?>) {
         fixture.checkParsing()

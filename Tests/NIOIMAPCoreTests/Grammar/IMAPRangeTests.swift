@@ -20,7 +20,7 @@ import Testing
 struct IMAPRangeTests {
     @Test(arguments: [
         EncodeFixture.sequenceRange(MessageIdentifierRange<SequenceNumber>(5...), "5:*"),
-        EncodeFixture.sequenceRange(MessageIdentifierRange<SequenceNumber>(2...4), "2:4")
+        EncodeFixture.sequenceRange(MessageIdentifierRange<SequenceNumber>(2...4), "2:4"),
     ])
     func encode(_ fixture: EncodeFixture<MessageIdentifierRange<SequenceNumber>>) {
         fixture.checkEncoding()

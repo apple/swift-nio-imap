@@ -30,7 +30,7 @@ struct NamespaceDescriptionTests {
         EncodeFixture.namespaceDescription(
             .init(string: "string", char: nil, responseExtensions: ["str2": ["str3"]]),
             "(\"string\" NIL \"str2\" (\"str3\"))"
-        )
+        ),
     ])
     func encode(_ fixture: EncodeFixture<NamespaceDescription>) {
         fixture.checkEncoding()
@@ -46,7 +46,7 @@ struct NamespaceDescriptionTests {
             "(\"str\" \"a\")",
             " ",
             expected: .success(.init(string: "str", char: "a", responseExtensions: [:]))
-        )
+        ),
     ])
     func parse(_ fixture: ParseFixture<NamespaceDescription>) {
         fixture.checkParsing()

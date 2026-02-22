@@ -21,7 +21,7 @@ struct MailboxPatternsTests {
     @Test(arguments: [
         EncodeFixture.mailboxPatterns(.mailbox("inbox"), #""inbox""#),
         EncodeFixture.mailboxPatterns(.pattern(["pattern"]), #"("pattern")"#),
-        EncodeFixture.mailboxPatterns(.pattern(["aa", "bb"]), #"("aa" "bb")"#)
+        EncodeFixture.mailboxPatterns(.pattern(["aa", "bb"]), #"("aa" "bb")"#),
     ])
     func encode(_ fixture: EncodeFixture<MailboxPatterns>) {
         fixture.checkEncoding()

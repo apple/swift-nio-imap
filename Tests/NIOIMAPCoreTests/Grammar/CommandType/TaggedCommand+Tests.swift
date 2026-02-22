@@ -23,7 +23,7 @@ struct TaggedCommandTests {
         ParseFixture.taggedCommand("1 CAPABILITY", expected: .success(.init(tag: "1", command: .capability))),
         ParseFixture.taggedCommand("a1 CAPABILITY", expected: .success(.init(tag: "a1", command: .capability))),
         ParseFixture.taggedCommand("(", "CAPABILITY", expected: .failure),
-        ParseFixture.taggedCommand("a CAPABILITY", "", expected: .incompleteMessage)
+        ParseFixture.taggedCommand("a CAPABILITY", "", expected: .incompleteMessage),
     ])
     func parse(_ fixture: ParseFixture<TaggedCommand>) {
         fixture.checkParsing()

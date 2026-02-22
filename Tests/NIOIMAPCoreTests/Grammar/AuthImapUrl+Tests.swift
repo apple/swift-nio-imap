@@ -38,7 +38,7 @@ struct AuthImapUrlTests {
                 )
             ),
             "imap://mail.example.com:993/INBOX/;UID=999"
-        )
+        ),
     ])
     func encode(_ fixture: EncodeFixture<NetworkMessagePath>) {
         fixture.checkEncoding()

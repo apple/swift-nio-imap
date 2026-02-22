@@ -20,7 +20,7 @@ import Testing
 struct QuotaLimitTests {
     @Test(arguments: [
         EncodeFixture.quotaLimit(QuotaLimit(resourceName: "STORAGE", limit: 104), "STORAGE 104"),
-        EncodeFixture.quotaLimit(QuotaLimit(resourceName: "MESSAGE", limit: 42), "MESSAGE 42")
+        EncodeFixture.quotaLimit(QuotaLimit(resourceName: "MESSAGE", limit: 42), "MESSAGE 42"),
     ])
     func encode(_ fixture: EncodeFixture<QuotaLimit>) {
         fixture.checkEncoding()

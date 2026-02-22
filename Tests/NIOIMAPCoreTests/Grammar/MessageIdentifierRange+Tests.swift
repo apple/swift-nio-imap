@@ -34,7 +34,7 @@ struct MessageIdentifierRangeTests {
         ),
         ParseFixture.messageIdentifierRange("!", " ", expected: .failure),
         ParseFixture.messageIdentifierRange("a", " ", expected: .failure),
-        ParseFixture.messageIdentifierRange("1", "", expected: .incompleteMessage)
+        ParseFixture.messageIdentifierRange("1", "", expected: .incompleteMessage),
     ])
     func parse(_ fixture: ParseFixture<MessageIdentifierRange<UID>>) {
         fixture.checkParsing()

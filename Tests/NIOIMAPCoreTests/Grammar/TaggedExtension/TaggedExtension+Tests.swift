@@ -48,7 +48,7 @@ struct TaggedExtensionTests {
             ParseFixture.taggedExtensionComplex(
                 "test1 test2 (test3 test4) test5",
                 expected: .success(["test1", "test2", "test3", "test4", "test5"])
-            )
+            ),
         ]
     )
     func parseComplex(_ fixture: ParseFixture<[String]>) {

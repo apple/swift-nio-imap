@@ -26,7 +26,7 @@ struct RumpURLAndMechanismTests {
         EncodeFixture.rumpURLAndMechanism(
             .init(urlRump: "server.example.com", mechanism: .internal),
             "\"server.example.com\" INTERNAL"
-        )
+        ),
     ])
     func encode(_ fixture: EncodeFixture<RumpURLAndMechanism>) {
         fixture.checkEncoding()
@@ -47,7 +47,7 @@ struct RumpURLAndMechanismTests {
             "{4}\r\ntest INTERNAL",
             " ",
             expected: .success(.init(urlRump: "test", mechanism: .internal))
-        )
+        ),
     ])
     func parse(_ fixture: ParseFixture<RumpURLAndMechanism>) {
         fixture.checkParsing()

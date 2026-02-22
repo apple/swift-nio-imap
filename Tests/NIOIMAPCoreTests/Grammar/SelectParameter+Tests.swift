@@ -75,7 +75,7 @@ struct SelectParameterTests {
                 )
             ),
             "QRESYNC (999 50 2,5,10 (1:10 5:20))"
-        )
+        ),
     ])
     func encode(_ fixture: EncodeFixture<SelectParameter>) {
         fixture.checkEncoding()
@@ -116,7 +116,7 @@ struct SelectParameterTests {
         ParseFixture.selectParameter("1", expected: .failure),
         ParseFixture.selectParameter("test ", "", expected: .incompleteMessage),
         ParseFixture.selectParameter("QRESYNC (", "", expected: .incompleteMessage),
-        ParseFixture.selectParameter("QRESYNC (1 1", "", expected: .incompleteMessage)
+        ParseFixture.selectParameter("QRESYNC (1 1", "", expected: .incompleteMessage),
     ])
     func parse(_ fixture: ParseFixture<SelectParameter>) {
         fixture.checkParsing()

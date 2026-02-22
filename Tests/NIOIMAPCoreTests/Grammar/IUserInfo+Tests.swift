@@ -30,7 +30,7 @@ struct UserAuthenticationMechanismTests {
         EncodeFixture.userAuthenticationMechanism(
             .init(encodedUser: nil, authenticationMechanism: .any),
             ";AUTH=*"
-        )
+        ),
     ])
     func encode(_ fixture: EncodeFixture<UserAuthenticationMechanism>) {
         fixture.checkEncoding()
@@ -51,7 +51,7 @@ struct UserAuthenticationMechanismTests {
             "test;AUTH=*",
             " ",
             expected: .success(.init(encodedUser: .init(data: "test"), authenticationMechanism: .any))
-        )
+        ),
     ])
     func parse(_ fixture: ParseFixture<UserAuthenticationMechanism>) {
         fixture.checkParsing()

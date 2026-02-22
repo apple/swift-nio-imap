@@ -39,14 +39,14 @@ struct ResponseCodeCopyTests {
             .init(
                 destinationUIDValidity: 917_162_500,
                 sourceUIDs: [
-                    MessageIdentifierRange<UID>(1), MessageIdentifierRange<UID>(3), MessageIdentifierRange<UID>(5...7)
+                    MessageIdentifierRange<UID>(1), MessageIdentifierRange<UID>(3), MessageIdentifierRange<UID>(5...7),
                 ],
                 destinationUIDs: [
-                    MessageIdentifierRange<UID>(2), MessageIdentifierRange<UID>(4), MessageIdentifierRange<UID>(6...8)
+                    MessageIdentifierRange<UID>(2), MessageIdentifierRange<UID>(4), MessageIdentifierRange<UID>(6...8),
                 ]
             ),
             "COPYUID 917162500 1,3,5:7 2,4,6:8"
-        )
+        ),
     ])
     func encode(_ fixture: EncodeFixture<ResponseCodeCopy>) {
         fixture.checkEncoding()

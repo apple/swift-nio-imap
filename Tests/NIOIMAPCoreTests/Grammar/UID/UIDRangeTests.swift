@@ -136,7 +136,7 @@ struct UIDRangeTests {
         EncodeFixture.uidRange(MessageIdentifierRange<UID>(.max), "*"),
         EncodeFixture.uidRange(.all, "1:*"),
         EncodeFixture.uidRange(...55, "1:55"),
-        EncodeFixture.uidRange(66..., "66:*")
+        EncodeFixture.uidRange(66..., "66:*"),
     ])
     func encode(_ fixture: EncodeFixture<MessageIdentifierRange<UID>>) {
         fixture.checkEncoding()

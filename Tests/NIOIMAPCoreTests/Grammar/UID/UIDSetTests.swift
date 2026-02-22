@@ -27,7 +27,7 @@ struct UIDSetTests {
             ),
             DebugStringFixture(sut: [1...(UID.max)] as MessageIdentifierSet, expected: "1:*"),
             DebugStringFixture(sut: [MessageIdentifierRange<UID>(37)] as MessageIdentifierSet, expected: "37"),
-            DebugStringFixture(sut: [MessageIdentifierRange<UID>(.max)] as MessageIdentifierSet, expected: "*")
+            DebugStringFixture(sut: [MessageIdentifierRange<UID>(.max)] as MessageIdentifierSet, expected: "*"),
         ]
     )
     func customDebugStringConvertible(_ fixture: DebugStringFixture<MessageIdentifierSet<UID>>) {
@@ -45,10 +45,10 @@ struct UIDSetTests {
                 MessageIdentifierRange<UID>(22...30),
                 MessageIdentifierRange<UID>(47),
                 MessageIdentifierRange<UID>(55),
-                MessageIdentifierRange<UID>(66...)
+                MessageIdentifierRange<UID>(66...),
             ]),
             "1,22:30,47,55,66:*"
-        )
+        ),
     ])
     func encode(_ fixture: EncodeFixture<MessageIdentifierSet<UID>>) {
         fixture.checkEncoding()
@@ -431,7 +431,7 @@ struct UIDSetTests {
                 762 as UID, 7370, 8568, 11423, 11708, 11889, 12679,
                 18833, 22152, 22374, 22733, 23838, 30058, 30985, 32465,
                 33579, 39714, 43224, 44377, 46424, 53884, 61461, 71310,
-                75310, 77045, 81983, 82711, 85170, 95660, 99173
+                75310, 77045, 81983, 82711, 85170, 95660, 99173,
             ] {
                 sut.insert(uid)
             }
@@ -501,7 +501,7 @@ struct UIDSetTests {
             MessageIdentifierRange<UID>(655...657),
             MessageIdentifierRange<UID>(755...757),
             MessageIdentifierRange<UID>(855...857),
-            MessageIdentifierRange<UID>(955...957)
+            MessageIdentifierRange<UID>(955...957),
         ])
         #expect(sut.count == 30)
 
@@ -587,7 +587,7 @@ struct UIDSetTests {
             Array(MessageIdentifierSet([1, 4]).ranges)
                 == [
                     MessageIdentifierRange<UID>(1...1),
-                    MessageIdentifierRange<UID>(4...4)
+                    MessageIdentifierRange<UID>(4...4),
                 ]
         )
         #expect(
@@ -596,14 +596,14 @@ struct UIDSetTests {
                     17...32,
                     400...1_234,
                     2_001...2_001,
-                    20_800...21_044
+                    20_800...21_044,
                 ]).ranges
             )
                 == [
                     MessageIdentifierRange<UID>(17...32),
                     MessageIdentifierRange<UID>(400...1_234),
                     MessageIdentifierRange<UID>(2_001...2_001),
-                    MessageIdentifierRange<UID>(20_800...21_044)
+                    MessageIdentifierRange<UID>(20_800...21_044),
                 ]
         )
     }

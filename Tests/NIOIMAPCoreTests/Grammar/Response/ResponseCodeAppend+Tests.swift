@@ -30,7 +30,7 @@ struct ResponseCodeAppendTests {
         EncodeFixture.responseCodeAppend(
             .init(uidValidity: 67890, uids: .init(set: [8430, 17553, 19211, 22142])!),
             "APPENDUID 67890 8430,17553,19211,22142"
-        )
+        ),
     ])
     func encode(_ fixture: EncodeFixture<ResponseCodeAppend>) {
         fixture.checkEncoding()

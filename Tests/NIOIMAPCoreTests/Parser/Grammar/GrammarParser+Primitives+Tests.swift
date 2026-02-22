@@ -24,7 +24,7 @@ private struct GrammarParserPrimitivesTests {
             ParseFixture.atom("test", "\r", expected: .success("test")),
             ParseFixture.atom("hello", " ", expected: .success("hello")),
             ParseFixture.atom("hello", "", expected: .incompleteMessageIgnoringBufferModifications),
-            ParseFixture.atom(" ", "", expected: .failureIgnoringBufferModifications)
+            ParseFixture.atom(" ", "", expected: .failureIgnoringBufferModifications),
         ]
     )
     func parseAtom(_ fixture: ParseFixture<String>) {
@@ -35,7 +35,7 @@ private struct GrammarParserPrimitivesTests {
         "parse charset",
         arguments: [
             ParseFixture.charset("UTF8", " ", expected: .success("UTF8")),
-            ParseFixture.charset("\"UTF8\"", " ", expected: .success("UTF8"))
+            ParseFixture.charset("\"UTF8\"", " ", expected: .success("UTF8")),
         ]
     )
     func parseCharset(_ fixture: ParseFixture<String>) {
@@ -52,7 +52,7 @@ private struct GrammarParserPrimitivesTests {
             ParseFixture.nil("\"NIL\"", " ", expected: .failure),
             ParseFixture.nil("", "", expected: .incompleteMessage),
             ParseFixture.nil("N", "", expected: .incompleteMessage),
-            ParseFixture.nil("NI", "", expected: .incompleteMessage)
+            ParseFixture.nil("NI", "", expected: .incompleteMessage),
         ]
     )
     func parseNil(_ fixture: ParseFixture<Dummy>) {
@@ -66,7 +66,7 @@ private struct GrammarParserPrimitivesTests {
             ParseFixture.newline("\r", expected: .success(Dummy())),
             ParseFixture.newline("\r\n", expected: .success(Dummy())),
             ParseFixture.newline("\\", " ", expected: .failure),
-            ParseFixture.newline("", "", expected: .incompleteMessage)
+            ParseFixture.newline("", "", expected: .incompleteMessage),
         ]
     )
     func parseNewline(_ fixture: ParseFixture<Dummy>) {
@@ -89,7 +89,7 @@ private struct GrammarParserPrimitivesTests {
             ParseFixture.astring(#""a\bc""#, "", expected: .failure),
             ParseFixture.astring("\"", "", expected: .incompleteMessage),
             ParseFixture.astring(#""a\""#, "", expected: .incompleteMessage),
-            ParseFixture.astring("{1}\r\n", "", expected: .incompleteMessage)
+            ParseFixture.astring("{1}\r\n", "", expected: .incompleteMessage),
         ]
     )
     func parseAstring(_ fixture: ParseFixture<String>) {
@@ -110,7 +110,7 @@ private struct GrammarParserPrimitivesTests {
             ParseFixture.nstring(#""a\bc""#, "", expected: .failure),
             ParseFixture.nstring("\"", "", expected: .incompleteMessage),
             ParseFixture.nstring("NI", "", expected: .incompleteMessage),
-            ParseFixture.nstring("{1}\r\n", "", expected: .incompleteMessage)
+            ParseFixture.nstring("{1}\r\n", "", expected: .incompleteMessage),
         ]
     )
     func parseNstring(_ fixture: ParseFixture<String?>) {
@@ -124,7 +124,7 @@ private struct GrammarParserPrimitivesTests {
             ParseFixture.number("10", " ", expected: .success(10)),
             ParseFixture.number("0", " ", expected: .success(0)),
             ParseFixture.number("abcd", " ", expected: .failure),
-            ParseFixture.number("1234", "", expected: .incompleteMessage)
+            ParseFixture.number("1234", "", expected: .incompleteMessage),
         ]
     )
     func parseNumber(_ fixture: ParseFixture<Int>) {
@@ -139,7 +139,7 @@ private struct GrammarParserPrimitivesTests {
             ParseFixture.nzNumber("0123", " ", expected: .failure),
             ParseFixture.nzNumber("0000", " ", expected: .failure),
             ParseFixture.nzNumber("abcd", " ", expected: .failure),
-            ParseFixture.nzNumber("1234", "", expected: .incompleteMessage)
+            ParseFixture.nzNumber("1234", "", expected: .incompleteMessage),
         ]
     )
     func parseNzNumber(_ fixture: ParseFixture<Int>) {
@@ -151,7 +151,7 @@ private struct GrammarParserPrimitivesTests {
             .subtracting([
                 UInt8(ascii: "\r"),
                 UInt8(ascii: "\n"),
-                0
+                0,
             ])
             .sorted()
     }
@@ -167,7 +167,7 @@ private struct GrammarParserPrimitivesTests {
             ParseFixture.text("\r", "", expected: .failure),
             ParseFixture.text("\n", "", expected: .failure),
             ParseFixture.text(String(decoding: (UInt8(128)...UInt8.max), as: UTF8.self), " ", expected: .failure),
-            ParseFixture.text("a", "", expected: .incompleteMessage)
+            ParseFixture.text("a", "", expected: .incompleteMessage),
         ]
     )
     func parseText(_ fixture: ParseFixture<String>) {
@@ -198,7 +198,7 @@ private struct GrammarParserPrimitivesTests {
                 expected: .success([UInt8(ascii: "%"), UInt8(ascii: "F"), UInt8(ascii: "F")])
             ),
             ParseFixture.uchar("%GG", " ", expected: .failure),
-            ParseFixture.uchar("%", "", expected: .incompleteMessage)
+            ParseFixture.uchar("%", "", expected: .incompleteMessage),
         ]
     )
     func parseUchar(_ fixture: ParseFixture<[UInt8]>) {
@@ -216,7 +216,7 @@ private struct GrammarParserPrimitivesTests {
             ParseFixture.achar("&", "", expected: .success([UInt8(ascii: "&")])),
             ParseFixture.achar("=", "", expected: .success([UInt8(ascii: "=")])),
             ParseFixture.achar("£", " ", expected: .failure),
-            ParseFixture.achar("", "", expected: .incompleteMessage)
+            ParseFixture.achar("", "", expected: .incompleteMessage),
         ]
     )
     func parseAchar(_ fixture: ParseFixture<[UInt8]>) {
@@ -235,7 +235,7 @@ private struct GrammarParserPrimitivesTests {
             ParseFixture.bchar(":", "", expected: .success([UInt8(ascii: ":")])),
             ParseFixture.bchar("/", "", expected: .success([UInt8(ascii: "/")])),
             ParseFixture.bchar("£", " ", expected: .failure),
-            ParseFixture.bchar("", "", expected: .incompleteMessage)
+            ParseFixture.bchar("", "", expected: .incompleteMessage),
         ]
     )
     func parseBchar(_ fixture: ParseFixture<[UInt8]>) {
@@ -249,7 +249,7 @@ private struct GrammarParserPrimitivesTests {
             ParseFixture.twoDigit("ab", " ", expected: .failure),
             ParseFixture.twoDigit("1a", " ", expected: .failure),
             ParseFixture.twoDigit("", "", expected: .incompleteMessage),
-            ParseFixture.twoDigit("1", "", expected: .incompleteMessage)
+            ParseFixture.twoDigit("1", "", expected: .incompleteMessage),
         ]
     )
     func parse2Digit(_ fixture: ParseFixture<Int>) {
@@ -265,7 +265,7 @@ private struct GrammarParserPrimitivesTests {
             ParseFixture.fourDigit("", "", expected: .incompleteMessage),
             ParseFixture.fourDigit("1", "", expected: .incompleteMessage),
             ParseFixture.fourDigit("12", "", expected: .incompleteMessage),
-            ParseFixture.fourDigit("123", "", expected: .incompleteMessage)
+            ParseFixture.fourDigit("123", "", expected: .incompleteMessage),
         ]
     )
     func parse4Digit(_ fixture: ParseFixture<Int>) {
@@ -278,7 +278,7 @@ private struct GrammarParserPrimitivesTests {
             ParseFixture.tag("abc", "\r", expected: .success("abc")),
             ParseFixture.tag("abc", "+", expected: .success("abc")),
             ParseFixture.tag("+", "", expected: .failure),
-            ParseFixture.tag("", "", expected: .incompleteMessage)
+            ParseFixture.tag("", "", expected: .incompleteMessage),
         ]
     )
     func parseTag(_ fixture: ParseFixture<String>) {
@@ -291,7 +291,7 @@ private struct GrammarParserPrimitivesTests {
             ParseFixture.vendorToken("token", "-atom ", expected: .success("token")),
             ParseFixture.vendorToken("token", " ", expected: .success("token")),
             ParseFixture.vendorToken("1a", " ", expected: .failure),
-            ParseFixture.vendorToken("token", "", expected: .incompleteMessage)
+            ParseFixture.vendorToken("token", "", expected: .incompleteMessage),
         ]
     )
     func parseVendorToken(_ fixture: ParseFixture<String>) {

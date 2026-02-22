@@ -24,7 +24,7 @@ struct FieldLocationExtensionTests {
         EncodeFixture.locationAndExtensions(
             .init(location: "loc", extensions: [.number(1), .number(2)]),
             " \"loc\" (1 2)"
-        )
+        ),
     ])
     func encoding(_ fixture: EncodeFixture<BodyStructure.LocationAndExtensions>) {
         fixture.checkEncoding()

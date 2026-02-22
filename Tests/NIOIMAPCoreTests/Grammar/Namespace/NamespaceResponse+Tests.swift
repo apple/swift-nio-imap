@@ -30,7 +30,7 @@ struct NamespaceResponseTests {
                 sharedNamespace: [NamespaceDescription(string: "Public Folders/", responseExtensions: [:])],
             ),
             "NAMESPACE ((\"\" NIL)) ((\"#shared/\" \"/\")) ((\"Public Folders/\" NIL))"
-        )
+        ),
     ])
     func encode(_ fixture: EncodeFixture<NamespaceResponse>) {
         fixture.checkEncoding()

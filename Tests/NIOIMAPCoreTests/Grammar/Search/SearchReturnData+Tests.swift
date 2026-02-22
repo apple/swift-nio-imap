@@ -32,7 +32,7 @@ struct SearchReturnDataTests {
         EncodeFixture.searchReturnData(
             .dataExtension(.init(key: "modifier", value: .sequence(.set([3])))),
             "modifier 3"
-        )
+        ),
     ])
     func encode(_ fixture: EncodeFixture<SearchReturnData>) {
         fixture.checkEncoding()
@@ -54,7 +54,7 @@ struct SearchReturnDataTests {
         ParseFixture.searchReturnData(
             "modifier 5",
             expected: .success(.dataExtension(.init(key: "modifier", value: .sequence(.set([5])))))
-        )
+        ),
     ])
     func parse(_ fixture: ParseFixture<SearchReturnData>) {
         fixture.checkParsing()
@@ -70,7 +70,7 @@ struct SearchReturnDataTests {
             ParseFixture.searchReturnDataPartial(
                 "PARTIAL (-55:-700 NIL)",
                 expected: .success(.partial(.last(55...700), []))
-            )
+            ),
         ]
     )
     func parsePartial(_ fixture: ParseFixture<SearchReturnData>) {

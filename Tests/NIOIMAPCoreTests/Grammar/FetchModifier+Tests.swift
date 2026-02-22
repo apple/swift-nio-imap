@@ -24,7 +24,7 @@ struct FetchModifierTests {
             EncodeFixture.fetchModifier(.changedSince(.init(modificationSequence: 4)), "CHANGEDSINCE 4"),
             EncodeFixture.fetchModifier(.partial(.last(735...88_032)), "PARTIAL -735:-88032"),
             EncodeFixture.fetchModifier(.other(.init(key: "test", value: nil)), "test"),
-            EncodeFixture.fetchModifier(.other(.init(key: "test", value: .sequence(.set([4])))), "test 4")
+            EncodeFixture.fetchModifier(.other(.init(key: "test", value: .sequence(.set([4])))), "test 4"),
         ]
     )
     func encodeSingleModifier(_ fixture: EncodeFixture<FetchModifier>) {
@@ -46,7 +46,7 @@ struct FetchModifierTests {
                 [.other(.init(key: "test", value: nil)), .other(.init(key: "test", value: .sequence(.set([4]))))],
                 " (test test 4)"
             ),
-            EncodeFixture.fetchModifiers([], "")
+            EncodeFixture.fetchModifiers([], ""),
         ]
     )
     func encodeMultipleModifiers(_ fixture: EncodeFixture<[FetchModifier]>) {
@@ -68,7 +68,7 @@ struct FetchModifierTests {
         ),
         ParseFixture.fetchModifier("1", " ", expected: .failure),
         ParseFixture.fetchModifier("CHANGEDSINCE 1", "", expected: .incompleteMessage),
-        ParseFixture.fetchModifier("test 1", "", expected: .incompleteMessage)
+        ParseFixture.fetchModifier("test 1", "", expected: .incompleteMessage),
     ])
     func parse(_ fixture: ParseFixture<FetchModifier>) {
         fixture.checkParsing()
@@ -91,7 +91,7 @@ struct FetchModifierTests {
                 " (PARTIAL -1:-30 CHANGEDSINCE 98305)",
                 " ",
                 expected: .success([.partial(.last(1...30)), .changedSince(.init(modificationSequence: 98305))])
-            )
+            ),
         ]
     )
     func parseMultipleModifiers(_ fixture: ParseFixture<[FetchModifier]>) {

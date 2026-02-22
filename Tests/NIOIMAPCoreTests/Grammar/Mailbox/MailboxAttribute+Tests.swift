@@ -35,7 +35,7 @@ struct MailboxAttributeTests {
                 [MailboxAttribute.highestModificationSequence, .messageCount],
                 "HIGHESTMODSEQ MESSAGES"
             ),
-            EncodeFixture.mailboxAttributes([MailboxAttribute.mailboxID], "MAILBOXID")
+            EncodeFixture.mailboxAttributes([MailboxAttribute.mailboxID], "MAILBOXID"),
         ]
     )
     func encodeAttributes(_ fixture: EncodeFixture<[MailboxAttribute]>) {
@@ -67,7 +67,7 @@ struct MailboxAttributeTests {
             EncodeFixture.mailboxStatus(
                 .init(nextUID: 377_003),
                 "UIDNEXT 377003"
-            )
+            ),
         ]
     )
     func encodeStatus(_ fixture: EncodeFixture<MailboxStatus>) {
@@ -90,7 +90,7 @@ struct MailboxAttributeTests {
         "parse mailbox attribute errors",
         arguments: [
             ParseFixture.mailboxAttribute("a", "", expected: .incompleteMessageIgnoringBufferModifications),
-            ParseFixture.mailboxAttribute("a ", " ", expected: .failureIgnoringBufferModifications)
+            ParseFixture.mailboxAttribute("a ", " ", expected: .failureIgnoringBufferModifications),
         ]
     )
     func parseMailboxAttributeErrors(_ fixture: ParseFixture<MailboxAttribute>) {
@@ -131,7 +131,7 @@ struct MailboxAttributeTests {
             ParseFixture.mailboxStatus("MESSAGES UNSEEN 3 RECENT 4", "\r", expected: .failure),
             ParseFixture.mailboxStatus("2 UNSEEN 3 RECENT 4", "\r", expected: .failure),
             ParseFixture.mailboxStatus("", "", expected: .incompleteMessage),
-            ParseFixture.mailboxStatus("MESSAGES 2 UNSEEN ", "", expected: .incompleteMessage)
+            ParseFixture.mailboxStatus("MESSAGES 2 UNSEEN ", "", expected: .incompleteMessage),
         ]
     )
     func parseMailboxStatus(_ fixture: ParseFixture<MailboxStatus>) {

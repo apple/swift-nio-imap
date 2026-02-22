@@ -33,7 +33,7 @@ extension ResponseParserTests {
                 expected: [
                     .response(.fetch(.start(999))),
                     .response(.fetch(.simpleAttribute(.flags([.seen])))),
-                    .response(.fetch(.finish))
+                    .response(.fetch(.finish)),
                 ]
             ),
             ResponseStreamFixture(
@@ -92,7 +92,7 @@ extension ResponseParserTests {
                                                                 )
                                                             )
                                                         )
-                                                    )
+                                                    ),
                                                 ],
                                                 mediaSubtype: .alternative,
                                                 extension: .init(
@@ -115,7 +115,7 @@ extension ResponseParserTests {
                             )
                         )
                     ),
-                    .response(.fetch(.finish))
+                    .response(.fetch(.finish)),
                 ]
             ),
             ResponseStreamFixture(
@@ -173,8 +173,8 @@ extension ResponseParserTests {
                             )
                         )
                     ),
-                    .response(.fetch(.finish))
-                ],
+                    .response(.fetch(.finish)),
+                ]
             ),
             ResponseStreamFixture(
                 input:
@@ -232,14 +232,14 @@ extension ResponseParserTests {
                                                                 )
                                                             )
                                                         )
-                                                    )
+                                                    ),
                                                 ],
                                                 mediaSubtype: .alternative,
                                                 extension: .init(
                                                     parameters: [
                                                         "BOUNDARY":
                                                             "--==_mimepart_5efddab8ca39a_6a343f841aacb93410876c",
-                                                        "CHARSET": "UTF-8"
+                                                        "CHARSET": "UTF-8",
                                                     ],
                                                     dispositionAndLanguage: .init(
                                                         disposition: nil,
@@ -257,7 +257,7 @@ extension ResponseParserTests {
                             )
                         )
                     ),
-                    .response(.fetch(.finish))
+                    .response(.fetch(.finish)),
                 ]
             ),
             ResponseStreamFixture(
@@ -316,7 +316,7 @@ extension ResponseParserTests {
                                                                 )
                                                             )
                                                         )
-                                                    )
+                                                    ),
                                                 ],
                                                 mediaSubtype: .alternative,
                                                 extension: .init(
@@ -337,7 +337,7 @@ extension ResponseParserTests {
                             )
                         )
                     ),
-                    .response(.fetch(.finish))
+                    .response(.fetch(.finish)),
                 ]
             ),
             ResponseStreamFixture(
@@ -377,7 +377,7 @@ extension ResponseParserTests {
                             )
                         )
                     ),
-                    .response(.fetch(.finish))
+                    .response(.fetch(.finish)),
                 ]
             ),
             ResponseStreamFixture(
@@ -418,7 +418,7 @@ extension ResponseParserTests {
                             )
                         )
                     ),
-                    .response(.fetch(.finish))
+                    .response(.fetch(.finish)),
                 ]
             ),
             ResponseStreamFixture(
@@ -497,7 +497,7 @@ extension ResponseParserTests {
                                                                         fields: .init(
                                                                             parameters: [
                                                                                 "X-UNIX-MODE": "0644",
-                                                                                "NAME": "Whiteboard on Webex.key"
+                                                                                "NAME": "Whiteboard on Webex.key",
                                                                             ],
                                                                             id: nil,
                                                                             contentDescription: nil,
@@ -563,7 +563,7 @@ extension ResponseParserTests {
                                                                         fields: .init(
                                                                             parameters: [
                                                                                 "X-UNIX-MODE": "0644",
-                                                                                "NAME": "Whiteboard on Webex.pdf"
+                                                                                "NAME": "Whiteboard on Webex.pdf",
                                                                             ],
                                                                             id: nil,
                                                                             contentDescription: nil,
@@ -629,7 +629,7 @@ extension ResponseParserTests {
                                                                         fields: .init(
                                                                             parameters: [
                                                                                 "X-UNIX-MODE": "0666",
-                                                                                "NAME": "Resume.pdf"
+                                                                                "NAME": "Resume.pdf",
                                                                             ],
                                                                             id: nil,
                                                                             contentDescription: nil,
@@ -682,7 +682,7 @@ extension ResponseParserTests {
                                                                             )
                                                                         )
                                                                     )
-                                                                )
+                                                                ),
                                                             ],
                                                             mediaSubtype: .mixed,
                                                             extension: .init(
@@ -699,7 +699,7 @@ extension ResponseParserTests {
                                                                 )
                                                             )
                                                         )
-                                                    )
+                                                    ),
                                                 ],
                                                 mediaSubtype: .alternative,
                                                 extension: .init(
@@ -722,7 +722,7 @@ extension ResponseParserTests {
                             )
                         )
                     ),
-                    .response(.fetch(.finish))
+                    .response(.fetch(.finish)),
                 ]
             ),
             ResponseStreamFixture(
@@ -778,7 +778,7 @@ extension ResponseParserTests {
                             )
                         )
                     ),
-                    .response(.fetch(.finish))
+                    .response(.fetch(.finish)),
                 ]
             ),
             ResponseStreamFixture(
@@ -856,7 +856,7 @@ extension ResponseParserTests {
                                                                                         )
                                                                                     )
                                                                                 )
-                                                                            )
+                                                                            ),
                                                                         ],
                                                                         mediaSubtype: .alternative,
                                                                         extension: .init(
@@ -893,7 +893,7 @@ extension ResponseParserTests {
                                                                             )
                                                                         )
                                                                     )
-                                                                )
+                                                                ),
                                                             ],
                                                             mediaSubtype: .related,
                                                             extension: .init(
@@ -928,7 +928,7 @@ extension ResponseParserTests {
                                                                 )
                                                             )
                                                         )
-                                                    )
+                                                    ),
                                                 ],
                                                 mediaSubtype: .mixed,
                                                 extension: .init(
@@ -946,7 +946,7 @@ extension ResponseParserTests {
                             )
                         )
                     ),
-                    .response(.fetch(.finish))
+                    .response(.fetch(.finish)),
                 ]
             ),
             ResponseStreamFixture(
@@ -1009,7 +1009,7 @@ extension ResponseParserTests {
                                                                             )
                                                                         )
                                                                     )
-                                                                )
+                                                                ),
                                                             ],
                                                             mediaSubtype: .alternative,
                                                             extension: .init(
@@ -1042,7 +1042,7 @@ extension ResponseParserTests {
                                                                 )
                                                             )
                                                         )
-                                                    )
+                                                    ),
                                                 ],
                                                 mediaSubtype: .related,
                                                 extension: .init(
@@ -1060,7 +1060,7 @@ extension ResponseParserTests {
                             )
                         )
                     ),
-                    .response(.fetch(.finish))
+                    .response(.fetch(.finish)),
                 ]
             ),
             ResponseStreamFixture(
@@ -1070,7 +1070,7 @@ extension ResponseParserTests {
                     .response(.fetch(.simpleAttribute(.uid(2_282_556_735)))),
                     .response(.fetch(.simpleAttribute(.preview(.init("abc"))))),
                     .response(.fetch(.simpleAttribute(.flags([.seen])))),
-                    .response(.fetch(.finish))
+                    .response(.fetch(.finish)),
                 ]
             ),
             ResponseStreamFixture(
@@ -1083,9 +1083,9 @@ extension ResponseParserTests {
                     .response(.fetch(.simpleAttribute(.uid(127_139)))),
                     .response(.fetch(.simpleAttribute(.rfc822Size(1_008_880)))),
                     .response(.fetch(.simpleAttribute(.body(.invalid, hasExtensionData: true)))),
-                    .response(.fetch(.finish))
+                    .response(.fetch(.finish)),
                 ]
-            )
+            ),
         ]
     )
     fileprivate func parseResponseStream(

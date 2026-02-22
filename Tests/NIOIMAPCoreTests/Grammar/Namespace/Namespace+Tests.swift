@@ -27,10 +27,10 @@ struct NamespaceTests {
         EncodeFixture.namespace(
             [
                 .init(string: "str1", char: nil, responseExtensions: [:]),
-                .init(string: "str2", char: nil, responseExtensions: [:])
+                .init(string: "str2", char: nil, responseExtensions: [:]),
             ],
             "((\"str1\" NIL)(\"str2\" NIL))"
-        )
+        ),
     ])
     func encode(_ fixture: EncodeFixture<[NamespaceDescription]>) {
         fixture.checkEncoding()

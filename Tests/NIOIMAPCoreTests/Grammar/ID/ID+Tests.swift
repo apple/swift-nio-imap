@@ -21,7 +21,7 @@ import Testing
 struct IDTests {
     @Test(arguments: [
         EncodeFixture.idParameters([:], "NIL"),
-        EncodeFixture.idParameters(["key": "value"], #"("key" "value")"#)
+        EncodeFixture.idParameters(["key": "value"], #"("key" "value")"#),
     ])
     func encode(_ fixture: EncodeFixture<OrderedDictionary<String, String?>>) {
         fixture.checkEncoding()
@@ -39,7 +39,7 @@ struct IDTests {
             expected: .success(
                 .id([
                     "name": "Imap", "version": "1.5", "os": "centos", "os-version": "5.5",
-                    "support-url": "mailto:admin@xgen.in"
+                    "support-url": "mailto:admin@xgen.in",
                 ])
             )
         ),
@@ -49,10 +49,10 @@ struct IDTests {
             expected: .success(
                 .id([
                     "name": "Imap", "version": "1.5", "os": "centos", "os-version": "5.5",
-                    "support-url": "mailto:admin@xgen.in"
+                    "support-url": "mailto:admin@xgen.in",
                 ])
             )
-        )
+        ),
     ])
     func parse(_ fixture: ParseFixture<ResponsePayload>) {
         fixture.checkParsing()
@@ -111,7 +111,7 @@ struct IDTests {
                 #"("a"  "1"  "b"   "2")"#,
                 "",
                 expected: .success(["a": "1", "b": "2"])
-            )
+            ),
         ]
     )
     func parseIDParamsList(_ fixture: ParseFixture<OrderedDictionary<String, String?>>) {

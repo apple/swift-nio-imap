@@ -22,7 +22,7 @@ struct TaggedExtensionValueTests {
         EncodeFixture.parameterValue(.sequence(.set([123])), "123"),
         EncodeFixture.parameterValue(.sequence(.set([123, 124, 125])), "123:125"),
         EncodeFixture.parameterValue(.sequence(.set([316_999, 810_120, 880_169])), "316999,810120,880169"),
-        EncodeFixture.parameterValue(.comp(["testComp"]), "((\"testComp\"))")
+        EncodeFixture.parameterValue(.comp(["testComp"]), "((\"testComp\"))"),
     ])
     func encode(_ fixture: EncodeFixture<ParameterValue>) {
         fixture.checkEncoding()

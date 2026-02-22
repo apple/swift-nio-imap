@@ -273,7 +273,7 @@ extension ParserLibraryTests {
         arguments: [
             (" a", "a"),
             ("       a", "a"),
-            ("  a  ", "a  ")
+            ("  a  ", "a  "),
         ]
     )
     func parseSpacesConsumesLeadingSpaces(input: String, expectedRemaining: String) throws {
@@ -293,7 +293,7 @@ extension ParserLibraryTests {
             ("12345\r", 12345, 5),
             ("18446744073709551615\r", UInt64.max, 20),
             ("12345 a", 12345, 5),
-            ("18446744073709551615b", UInt64.max, 20)
+            ("18446744073709551615b", UInt64.max, 20),
         ]
     )
     func parseUnsignedInt64ParsesNumbersCorrectly(
@@ -357,7 +357,7 @@ extension ParserLibraryTests {
             " \r",
             "      \r\n",
             "      \n",
-            "      \r"
+            "      \r",
         ]
     )
     func parseNewlineHandlesVariousNewlineFormats(newline: String) throws {

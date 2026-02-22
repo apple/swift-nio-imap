@@ -32,7 +32,7 @@ struct MailboxesTests {
         EncodeFixture.mailboxes(
             Mailboxes([.init("box1"), .init("box2")])!,
             "(\"box1\" \"box2\")"
-        )
+        ),
     ])
     func encode(_ fixture: EncodeFixture<Mailboxes>) {
         fixture.checkEncoding()
@@ -45,7 +45,7 @@ struct MailboxesTests {
             "(\"box1\" \"box2\")",
             expected: .success(Mailboxes([.init("box1"), .init("box2")])!)
         ),
-        ParseFixture.oneOrMoreMailbox("()", expected: .failure)
+        ParseFixture.oneOrMoreMailbox("()", expected: .failure),
     ])
     func parseOneOrMoreMailbox(_ fixture: ParseFixture<Mailboxes>) {
         fixture.checkParsing()

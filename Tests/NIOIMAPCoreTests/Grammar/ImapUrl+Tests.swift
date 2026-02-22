@@ -26,7 +26,7 @@ struct IMAPURLTests {
         EncodeFixture.imapURL(
             .init(server: .init(host: "mail.example.com"), query: nil),
             "imap://mail.example.com/"
-        )
+        ),
     ])
     func encode(_ fixture: EncodeFixture<IMAPURL>) {
         fixture.checkEncoding()
@@ -53,7 +53,7 @@ struct IMAPURLTests {
                     )
                 )
             )
-        )
+        ),
     ])
     func parse(_ fixture: ParseFixture<IMAPURL>) {
         fixture.checkParsing()
