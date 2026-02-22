@@ -27,7 +27,7 @@ struct NamespaceResponseTests {
             .init(
                 userNamespace: [NamespaceDescription(string: "", responseExtensions: [:])],
                 otherUserNamespace: [NamespaceDescription(string: "#shared/", char: "/", responseExtensions: [:])],
-                sharedNamespace: [NamespaceDescription(string: "Public Folders/", responseExtensions: [:])],
+                sharedNamespace: [NamespaceDescription(string: "Public Folders/", responseExtensions: [:])]
             ),
             "NAMESPACE ((\"\" NIL)) ((\"#shared/\" \"/\")) ((\"Public Folders/\" NIL))"
         ),
