@@ -1,0 +1,66 @@
+//===----------------------------------------------------------------------===//
+//
+// This source file is part of the SwiftNIO open source project
+//
+// Copyright (c) 2026 Apple Inc. and the SwiftNIO project authors
+// Licensed under Apache License v2.0
+//
+// See LICENSE.txt for license information
+// See CONTRIBUTORS.txt for the list of SwiftNIO project authors
+//
+// SPDX-License-Identifier: Apache-2.0
+//
+//===----------------------------------------------------------------------===//
+
+import NIO
+@_spi(NIOIMAPInternal) @testable import NIOIMAPCore
+import Testing
+
+@Suite("GmailLabel")
+struct GmailLabelTests {
+    @Test(arguments: [
+        EncodeFixture.gmailLabel(GmailLabel(ByteBuffer(string: "Inbox")), #""Inbox""#),
+        EncodeFixture.gmailLabel(GmailLabel(ByteBuffer(string: "\\Sent")), #"\Sent"#),
+        EncodeFixture.gmailLabel(GmailLabel(ByteBuffer(string: "My Label")), #""My Label""#),
+    ])
+    func encode(_ fixture: EncodeFixture<GmailLabel>) {
+        fixture.checkEncoding()
+    }
+
+    @Test(arguments: [
+        ParseFixture.gmailLabel(#""Inbox""#, expected: .success(GmailLabel(ByteBuffer(string: "Inbox")))),
+        ParseFixture.gmailLabel(#"\Sent"#, expected: .success(GmailLabel(ByteBuffer(string: "\\Sent")))),
+        ParseFixture.gmailLabel("", "", expected: .incompleteMessage),
+    ])
+    func parse(_ fixture: ParseFixture<GmailLabel>) {
+        fixture.checkParsing()
+    }
+}
+
+// MARK: -
+
+extension EncodeFixture<GmailLabel> {
+    fileprivate static func gmailLabel(_ input: GmailLabel, _ expectedString: String) -> Self {
+        EncodeFixture(
+            input: input,
+            bufferKind: .defaultServer,
+            expectedString: expectedString,
+            encoder: { $0.writeGmailLabel($1) }
+        )
+    }
+}
+
+extension ParseFixture<GmailLabel> {
+    fileprivate static func gmailLabel(
+        _ input: String,
+        _ terminator: String = " ",
+        expected: Expected
+    ) -> Self {
+        ParseFixture(
+            input: input,
+            terminator: terminator,
+            expected: expected,
+            parser: GrammarParser().parseGmailLabel
+        )
+    }
+}

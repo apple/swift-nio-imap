@@ -29,6 +29,15 @@ struct OptionValueCompTests {
     func encode(_ fixture: EncodeFixture<OptionValueComp>) {
         fixture.checkEncoding()
     }
+
+    @Test(arguments: [
+        ParseFixture.optionValueComp(#""test""#, expected: .success(.string("test"))),
+        ParseFixture.optionValueComp("atom", ")", expected: .success(.string("atom"))),
+        ParseFixture.optionValueComp("", "", expected: .incompleteMessage),
+    ])
+    func parse(_ fixture: ParseFixture<OptionValueComp>) {
+        fixture.checkParsing()
+    }
 }
 
 // MARK: -
@@ -40,6 +49,21 @@ extension EncodeFixture<OptionValueComp> {
             bufferKind: .defaultServer,
             expectedString: expectedString,
             encoder: { $0.writeOptionValueComp($1) }
+        )
+    }
+}
+
+extension ParseFixture<OptionValueComp> {
+    fileprivate static func optionValueComp(
+        _ input: String,
+        _ terminator: String = " ",
+        expected: Expected
+    ) -> Self {
+        ParseFixture(
+            input: input,
+            terminator: terminator,
+            expected: expected,
+            parser: GrammarParser().parseOptionValueComp
         )
     }
 }

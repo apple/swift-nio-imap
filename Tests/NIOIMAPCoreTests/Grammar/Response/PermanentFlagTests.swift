@@ -25,6 +25,17 @@ struct PermanentFlagTests {
     func encode(_ fixture: EncodeFixture<PermanentFlag>) {
         fixture.checkEncoding()
     }
+
+    @Test(arguments: [
+        ParseFixture.permanentFlag(#"\*"#, expected: .success(.wildcard)),
+        ParseFixture.permanentFlag(#"\Answered"#, expected: .success(.flag(.answered))),
+        ParseFixture.permanentFlag(#"\Seen"#, expected: .success(.flag(.seen))),
+        ParseFixture.permanentFlag("$Forwarded", expected: .success(.flag("$Forwarded"))),
+        ParseFixture.permanentFlag("", "", expected: .incompleteMessage),
+    ])
+    func parse(_ fixture: ParseFixture<PermanentFlag>) {
+        fixture.checkParsing()
+    }
 }
 
 // MARK: -
@@ -39,6 +50,21 @@ extension EncodeFixture<PermanentFlag> {
             bufferKind: .defaultServer,
             expectedString: expectedString,
             encoder: { $0.writeFlagPerm($1) }
+        )
+    }
+}
+
+extension ParseFixture<PermanentFlag> {
+    fileprivate static func permanentFlag(
+        _ input: String,
+        _ terminator: String = " ",
+        expected: Expected
+    ) -> Self {
+        ParseFixture(
+            input: input,
+            terminator: terminator,
+            expected: expected,
+            parser: GrammarParser().parseFlagPerm
         )
     }
 }

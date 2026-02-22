@@ -2,7 +2,7 @@
 //
 // This source file is part of the SwiftNIO open source project
 //
-// Copyright (c) 2020 Apple Inc. and the SwiftNIO project authors
+// Copyright (c) 2026 Apple Inc. and the SwiftNIO project authors
 // Licensed under Apache License v2.0
 //
 // See LICENSE.txt for license information
@@ -16,42 +16,41 @@ import NIO
 @_spi(NIOIMAPInternal) @testable import NIOIMAPCore
 import Testing
 
-@Suite("QuotaRoot")
-struct QuotaRootTests {
+@Suite("ObjectID")
+struct ObjectIDTests {
     @Test(arguments: [
-        EncodeFixture.quotaRoot(QuotaRoot(""), #""""#),
-        EncodeFixture.quotaRoot(QuotaRoot("MassivePool"), #""MassivePool""#),
+        EncodeFixture.objectID(ObjectID("abc123")!, "abc123"),
+        EncodeFixture.objectID(ObjectID("M1-abc_XY")!, "M1-abc_XY"),
     ])
-    func encode(_ fixture: EncodeFixture<QuotaRoot>) {
+    func encode(_ fixture: EncodeFixture<ObjectID>) {
         fixture.checkEncoding()
     }
 
     @Test(arguments: [
-        ParseFixture.quotaRoot(#""MassivePool""#, expected: .success(QuotaRoot("MassivePool"))),
-        ParseFixture.quotaRoot("inbox", expected: .success(QuotaRoot("inbox"))),
-        ParseFixture.quotaRoot(#""""#, expected: .success(QuotaRoot(""))),
-        ParseFixture.quotaRoot("", "", expected: .incompleteMessage),
+        ParseFixture.objectID("abc123", expected: .success(ObjectID("abc123")!)),
+        ParseFixture.objectID("M1-abc_XY", expected: .success(ObjectID("M1-abc_XY")!)),
+        ParseFixture.objectID("", "", expected: .failure),
     ])
-    func parse(_ fixture: ParseFixture<QuotaRoot>) {
+    func parse(_ fixture: ParseFixture<ObjectID>) {
         fixture.checkParsing()
     }
 }
 
 // MARK: -
 
-extension EncodeFixture<QuotaRoot> {
-    fileprivate static func quotaRoot(_ input: QuotaRoot, _ expectedString: String) -> Self {
+extension EncodeFixture<ObjectID> {
+    fileprivate static func objectID(_ input: ObjectID, _ expectedString: String) -> Self {
         EncodeFixture(
             input: input,
             bufferKind: .defaultServer,
             expectedString: expectedString,
-            encoder: { $0.writeQuotaRoot($1) }
+            encoder: { $0.writeObjectID($1) }
         )
     }
 }
 
-extension ParseFixture<QuotaRoot> {
-    fileprivate static func quotaRoot(
+extension ParseFixture<ObjectID> {
+    fileprivate static func objectID(
         _ input: String,
         _ terminator: String = " ",
         expected: Expected
@@ -60,7 +59,7 @@ extension ParseFixture<QuotaRoot> {
             input: input,
             terminator: terminator,
             expected: expected,
-            parser: GrammarParser().parseQuotaRoot
+            parser: GrammarParser().parseObjectID
         )
     }
 }

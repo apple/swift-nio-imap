@@ -25,6 +25,23 @@ struct QuotaLimitTests {
     func encode(_ fixture: EncodeFixture<QuotaLimit>) {
         fixture.checkEncoding()
     }
+
+    @Test(arguments: [
+        ParseFixture.quotaLimits("()", expected: .success([])),
+        ParseFixture.quotaLimits("(STORAGE 104)", expected: .success([QuotaLimit(resourceName: "STORAGE", limit: 104)])),
+        ParseFixture.quotaLimits(
+            "(STORAGE 104 MESSAGE 42)",
+            expected: .success([
+                QuotaLimit(resourceName: "STORAGE", limit: 104),
+                QuotaLimit(resourceName: "MESSAGE", limit: 42),
+            ])
+        ),
+        ParseFixture.quotaLimits("", "", expected: .incompleteMessage),
+        ParseFixture.quotaLimits("STORAGE 104", expected: .failure),
+    ])
+    func parseList(_ fixture: ParseFixture<[QuotaLimit]>) {
+        fixture.checkParsing()
+    }
 }
 
 // MARK: -
@@ -36,6 +53,21 @@ extension EncodeFixture<QuotaLimit> {
             bufferKind: .defaultServer,
             expectedString: expectedString,
             encoder: { $0.writeQuotaLimit($1) }
+        )
+    }
+}
+
+extension ParseFixture<[QuotaLimit]> {
+    fileprivate static func quotaLimits(
+        _ input: String,
+        _ terminator: String = " ",
+        expected: Expected
+    ) -> Self {
+        ParseFixture(
+            input: input,
+            terminator: terminator,
+            expected: expected,
+            parser: GrammarParser().parseQuotaLimits
         )
     }
 }

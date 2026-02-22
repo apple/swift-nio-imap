@@ -35,6 +35,19 @@ struct ListSelectBaseOptionTests {
     func encodeQuoted(_ fixture: EncodeFixture<ListSelectBaseOption>) {
         fixture.checkEncoding()
     }
+
+    @Test(arguments: [
+        ParseFixture.listSelectBaseOption("SUBSCRIBED", ")", expected: .success(.subscribed)),
+        ParseFixture.listSelectBaseOption(
+            "REMOTE",
+            ")",
+            expected: .success(.option(.init(key: .standard("REMOTE"), value: nil)))
+        ),
+        ParseFixture.listSelectBaseOption("", "", expected: .incompleteMessage),
+    ])
+    func parse(_ fixture: ParseFixture<ListSelectBaseOption>) {
+        fixture.checkParsing()
+    }
 }
 
 // MARK: -
@@ -61,6 +74,21 @@ extension EncodeFixture<ListSelectBaseOption> {
             bufferKind: .defaultServer,
             expectedString: expectedString,
             encoder: { $0.writeListSelectBaseOptionQuoted($1) }
+        )
+    }
+}
+
+extension ParseFixture<ListSelectBaseOption> {
+    fileprivate static func listSelectBaseOption(
+        _ input: String,
+        _ terminator: String = " ",
+        expected: Expected
+    ) -> Self {
+        ParseFixture(
+            input: input,
+            terminator: terminator,
+            expected: expected,
+            parser: GrammarParser().parseListSelectBaseOption
         )
     }
 }
