@@ -39,7 +39,10 @@ struct CommandRoundtripHandler_PromiseTests {
                 guard
                     let error = $0 as? CommandRoundtripError,
                     error == .incompleteCommand
-                else { Issue.record("\($0)"); return false }
+                else {
+                    Issue.record("\($0)")
+                    return false
+                }
                 return true
             }
         )
