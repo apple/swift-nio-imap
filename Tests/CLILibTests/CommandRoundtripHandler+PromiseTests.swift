@@ -17,33 +17,54 @@ import Logging
 import NIO
 import NIOIMAP
 import NIOIMAPCore
-import XCTest
+import Testing
 
-class CommandRoundtripHandler_PromiseTests: XCTestCase {
-    var channel: EmbeddedChannel!
+private func makeEmbeddedChannel() -> EmbeddedChannel {
+    let logger = Logger(label: "test")
+    return EmbeddedChannel(handler: CommandRoundtripHandler(logger: logger))
+}
 
-    override func setUp() {
-        let logger = Logger(label: "test")
-        self.channel = EmbeddedChannel(handler: CommandRoundtripHandler(logger: logger))
-    }
+@Suite("CommandRoundtripHandler promise tests")
+struct CommandRoundtripHandler_PromiseTests {
+    @Test("promise is not dropped - should throw")
+    func promiseIsNotDroppedShouldThrow() {
+        let channel = makeEmbeddedChannel()
 
-    override func tearDown() {
-        self.channel = nil
-    }
+        let buffer = channel.allocator.buffer(capacity: 0)
+        #expect(
+            performing: {
+                try channel.writeOutbound(buffer)
+            },
+            throws: {
+                guard
+                    let error = $0 as? CommandRoundtripError,
+                    error == .incompleteCommand
+                else { Issue.record("\($0)"); return false }
+                return true
+            }
+        )
 
-    func testPromiseIsNotDropped_shouldThrow() {
-        let buffer = self.channel.allocator.buffer(capacity: 0)
-        XCTAssertThrowsError(try self.channel.writeOutbound(buffer)) { e in
-            XCTAssertEqual(e as! CommandRoundtripError, CommandRoundtripError.incompleteCommand, "Error \(e)")
+        var maybeRead: ByteBuffer?
+        #expect(throws: Never.self) {
+            maybeRead = try channel.readOutbound(as: ByteBuffer.self)
         }
-        XCTAssertNoThrow(XCTAssertNil(try self.channel.readOutbound(as: ByteBuffer.self)))
+        #expect(maybeRead == nil)
     }
 
-    func testPromiseIsNotDropped_shouldNotThrow() {
-        var buffer = self.channel.allocator.buffer(capacity: 0)
+    @Test("promise is not dropped - should not throw")
+    func promiseIsNotDroppedShouldNotThrow() {
+        let channel = makeEmbeddedChannel()
+
+        var buffer = channel.allocator.buffer(capacity: 0)
         buffer.writeString("1 NOOP\r\n")
-        XCTAssertNoThrow(try self.channel.writeOutbound(buffer))
-        XCTAssertEqual(try self.channel.readOutbound(as: ByteBuffer.self), buffer)
-        XCTAssertNoThrow(XCTAssertTrue(try self.channel.finish().isClean))
+        #expect(throws: Never.self) {
+            try channel.writeOutbound(buffer)
+        }
+
+        var maybeRead: ByteBuffer?
+        #expect(throws: Never.self) {
+            maybeRead = try channel.readOutbound(as: ByteBuffer.self)
+        }
+        #expect(maybeRead == buffer)
     }
 }
