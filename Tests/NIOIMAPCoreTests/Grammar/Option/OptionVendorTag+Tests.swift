@@ -24,6 +24,15 @@ struct OptionVendorTagTests {
     func encode(_ fixture: EncodeFixture<KeyValue<String, String>>) {
         fixture.checkEncoding()
     }
+
+    @Test(arguments: [
+        ParseFixture.optionVendorTag("ACME-SORT", ")", expected: .success(.init(key: "ACME", value: "SORT"))),
+        ParseFixture.optionVendorTag("FOO-BAR", ")", expected: .success(.init(key: "FOO", value: "BAR"))),
+        ParseFixture.optionVendorTag("", "", expected: .incompleteMessage),
+    ])
+    func parse(_ fixture: ParseFixture<KeyValue<String, String>>) {
+        fixture.checkParsing()
+    }
 }
 
 // MARK: -
@@ -38,6 +47,21 @@ extension EncodeFixture<KeyValue<String, String>> {
             bufferKind: .defaultServer,
             expectedString: expectedString,
             encoder: { $0.writeOptionVendorTag($1) }
+        )
+    }
+}
+
+extension ParseFixture<KeyValue<String, String>> {
+    fileprivate static func optionVendorTag(
+        _ input: String,
+        _ terminator: String = ")",
+        expected: Expected
+    ) -> Self {
+        ParseFixture(
+            input: input,
+            terminator: terminator,
+            expected: expected,
+            parser: GrammarParser().parseOptionVendorTag
         )
     }
 }

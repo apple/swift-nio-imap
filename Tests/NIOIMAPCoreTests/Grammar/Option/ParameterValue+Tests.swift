@@ -38,6 +38,16 @@ struct ParameterValueTests {
     func parse(_ fixture: ParseFixture<ParameterValue>) {
         fixture.checkParsing()
     }
+
+    @Test(arguments: [
+        ParseFixture.parameter("USE", ")", expected: .success(.init(key: "USE", value: nil))),
+        ParseFixture.parameter("USE 1", ")", expected: .success(.init(key: "USE", value: .sequence(.set(.init(range: .init(SequenceNumber(1)))))))),
+        ParseFixture.parameter("USE $", ")", expected: .success(.init(key: "USE", value: .sequence(.lastCommand)))),
+        ParseFixture.parameter("", "", expected: .incompleteMessage),
+    ])
+    func parseParameter(_ fixture: ParseFixture<KeyValue<String, ParameterValue?>>) {
+        fixture.checkParsing()
+    }
 }
 
 // MARK: -
@@ -64,6 +74,21 @@ extension ParseFixture<ParameterValue> {
             terminator: terminator,
             expected: expected,
             parser: GrammarParser().parseParameterValue
+        )
+    }
+}
+
+extension ParseFixture<KeyValue<String, ParameterValue?>> {
+    fileprivate static func parameter(
+        _ input: String,
+        _ terminator: String = ")",
+        expected: Expected
+    ) -> Self {
+        ParseFixture(
+            input: input,
+            terminator: terminator,
+            expected: expected,
+            parser: GrammarParser().parseParameter
         )
     }
 }

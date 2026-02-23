@@ -182,6 +182,16 @@ struct CapabilityTests {
     }
 
     @Test(arguments: [
+        ParseFixture.capabilitySuffix(" IMAP4rev1", expected: .success([.imap4rev1])),
+        ParseFixture.capabilitySuffix(" CONDSTORE ENABLE FILTERS", expected: .success([.condStore, .enable, .filters])),
+        ParseFixture.capabilitySuffix(" AUTH=PLAIN IMAP4rev1", expected: .success([.authenticate(.plain), .imap4rev1])),
+        ParseFixture.capabilitySuffix("", "", expected: .incompleteMessage),
+    ])
+    func parseCapabilitySuffix(_ fixture: ParseFixture<[Capability]>) {
+        fixture.checkParsing()
+    }
+
+    @Test(arguments: [
         ParseFixture.capabilityData("CAPABILITY IMAP4rev1", expected: .success([.imap4rev1])),
         ParseFixture.capabilityData("CAPABILITY IMAP4 IMAP4rev1", expected: .success([.imap4, .imap4rev1])),
         ParseFixture.capabilityData("CAPABILITY FILTERS IMAP4", expected: .success([.filters, .imap4])),
@@ -258,6 +268,19 @@ extension ParseFixture<[Capability]> {
             terminator: terminator,
             expected: expected,
             parser: GrammarParser().parseCapabilityData
+        )
+    }
+
+    fileprivate static func capabilitySuffix(
+        _ input: String,
+        _ terminator: String = "\r",
+        expected: Expected
+    ) -> Self {
+        ParseFixture(
+            input: input,
+            terminator: terminator,
+            expected: expected,
+            parser: GrammarParser().parseCapabilitySuffix
         )
     }
 }

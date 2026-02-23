@@ -48,6 +48,21 @@ struct ListSelectBaseOptionTests {
     func parse(_ fixture: ParseFixture<ListSelectBaseOption>) {
         fixture.checkParsing()
     }
+
+    @Test(arguments: [
+        ParseFixture.childinfoExtendedItem(
+            #"CHILDINFO ("SUBSCRIBED")"#,
+            expected: .success([.subscribed])
+        ),
+        ParseFixture.childinfoExtendedItem(
+            #"CHILDINFO ("SUBSCRIBED" "REMOTE")"#,
+            expected: .success([.subscribed, .option(.init(key: .standard("REMOTE"), value: nil))])
+        ),
+        ParseFixture.childinfoExtendedItem("", "", expected: .incompleteMessage),
+    ])
+    func parseChildinfoExtendedItem(_ fixture: ParseFixture<[ListSelectBaseOption]>) {
+        fixture.checkParsing()
+    }
 }
 
 // MARK: -
@@ -89,6 +104,21 @@ extension ParseFixture<ListSelectBaseOption> {
             terminator: terminator,
             expected: expected,
             parser: GrammarParser().parseListSelectBaseOption
+        )
+    }
+}
+
+extension ParseFixture<[ListSelectBaseOption]> {
+    fileprivate static func childinfoExtendedItem(
+        _ input: String,
+        _ terminator: String = "\r",
+        expected: Expected
+    ) -> Self {
+        ParseFixture(
+            input: input,
+            terminator: terminator,
+            expected: expected,
+            parser: GrammarParser().parseChildinfoExtendedItem
         )
     }
 }

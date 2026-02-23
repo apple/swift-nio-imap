@@ -505,3 +505,59 @@ extension ParseFixture<MessageAttribute> {
         )
     }
 }
+
+// MARK: - writeMessageAttribute_bodySection
+
+extension MessageAttributeTests {
+    @Test(
+        "encode body section attribute",
+        arguments: [
+            BodySectionFixture(section: nil, number: nil, string: nil, expected: "BODY[] NIL"),
+            BodySectionFixture(
+                section: .init(kind: .header), number: nil, string: "header data",
+                expected: #"BODY[HEADER] "header data""#
+            ),
+            BodySectionFixture(
+                section: .init(part: [1, 2], kind: .text), number: 0, string: "body text",
+                expected: #"BODY[1.2.TEXT]<0> "body text""#
+            ),
+            BodySectionFixture(
+                section: .init(kind: .complete), number: 512, string: nil,
+                expected: "BODY[]<512> NIL"
+            ),
+        ]
+    )
+    func encodeBodySection(_ fixture: BodySectionFixture) {
+        fixture.checkEncoding()
+    }
+}
+
+struct BodySectionFixture: Sendable, CustomTestStringConvertible {
+    var section: SectionSpecifier?
+    var number: Int?
+    var string: ByteBuffer?
+    var expected: String
+
+    init(section: SectionSpecifier?, number: Int?, string: ByteBuffer?, expected: String) {
+        self.section = section
+        self.number = number
+        self.string = string
+        self.expected = expected
+    }
+
+    var testDescription: String { expected }
+
+    func checkEncoding() {
+        var buffer = EncodeBuffer.serverEncodeBuffer(
+            buffer: ByteBufferAllocator().buffer(capacity: 128),
+            options: ResponseEncodingOptions(),
+            loggingMode: false
+        )
+        let size = buffer.writeMessageAttribute_bodySection(section, number: number, string: string)
+        var remaining = buffer
+        let chunk = remaining.nextChunk()
+        let actualString = String(buffer: chunk.bytes)
+        #expect(size == expected.utf8.count)
+        #expect(actualString.mappingControlPictures() == expected.mappingControlPictures())
+    }
+}
