@@ -15,7 +15,7 @@
 import struct NIO.ByteBuffer
 
 // TODO: Remove these
-#if os(macOS) || os(iOS) || os(watchOS) || os(tvOS)
+#if os(macOS) || os(iOS) || os(watchOS) || os(tvOS) || os(visionOS)
 import func Darwin.isalnum
 import func Darwin.isalpha
 #elseif canImport(Glibc)
