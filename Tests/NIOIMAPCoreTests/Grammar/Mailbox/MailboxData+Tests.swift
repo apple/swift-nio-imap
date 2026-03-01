@@ -61,6 +61,11 @@ struct MailboxDataTests {
             .search([20, 23], ModificationSequenceValue(917_162_500)),
             "SEARCH 20 23 (MODSEQ 917162500)"
         ),
+        EncodeFixture.mailboxData(.recent(5678), "5678 RECENT"),
+        EncodeFixture.mailboxData(
+            .searchSort(.init(identifiers: [1, 2, 3], modificationSequence: 2)),
+            "SEARCH 1 2 3 (MODSEQ 2)"
+        ),
         EncodeFixture.mailboxData(
             .uidBatches(
                 UIDBatchesResponse(

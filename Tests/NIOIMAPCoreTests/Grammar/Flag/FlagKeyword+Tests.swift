@@ -27,6 +27,12 @@ struct FlagKeywordTests {
         #expect(Flag.Keyword("a") != Flag.Keyword("b"))
     }
 
+    @Test("debug description")
+    func debugDescription() {
+        #expect(Flag.Keyword.forwarded.debugDescription == "$Forwarded")
+        #expect(Flag.Keyword.junk.debugDescription == "$Junk")
+    }
+
     @Test(arguments: [
         EncodeFixture.flagKeyword(
             .forwarded,

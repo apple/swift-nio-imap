@@ -30,6 +30,40 @@ struct ModificationSequenceValueTests {
         #expect(ModificationSequenceValue(exactly: UInt64.max) == nil)
     }
 
+    @Test("binary integer conversion")
+    func binaryIntegerConversion() {
+        let v = ModificationSequenceValue(integerLiteral: 42)
+        #expect(Int(v) == 42)
+        #expect(UInt64(v) == 42)
+    }
+
+    @Test("ordering operators")
+    func orderingOperators() {
+        let a = ModificationSequenceValue(integerLiteral: 10)
+        let b = ModificationSequenceValue(integerLiteral: 20)
+        #expect(a <= b)
+        #expect(b <= b)
+        #expect(!(b <= a))
+    }
+
+    @Test("distance and advanced")
+    func distanceAndAdvanced() {
+        let start = ModificationSequenceValue(integerLiteral: 10)
+        let end = ModificationSequenceValue(integerLiteral: 15)
+        #expect(start.distance(to: end) == 5)
+        #expect(end.distance(to: start) == -5)
+        let advanced = start.advanced(by: 5)
+        #expect(advanced == end)
+    }
+
+    #if swift(>=6.2)
+    @Test func overflowPreconditionFailure() async {
+        await #expect(processExitsWith: ExitTest.Condition.failure, performing: {
+            _ = ModificationSequenceValue(UInt64(Int64.max) + 1)
+        })
+    }
+    #endif
+
     @Test(arguments: [
         EncodeFixture.modificationSequenceValue(.init(integerLiteral: 0), "0"),
         EncodeFixture.modificationSequenceValue(.init(integerLiteral: 1), "1"),

@@ -41,6 +41,32 @@ struct BodyFieldEncodingTests {
     func parse(_ fixture: ParseFixture<BodyStructure.Encoding?>) {
         fixture.checkParsing()
     }
+
+    @Test("nil encoding encodes as NIL")
+    func nilEncodingEncodesAsNIL() {
+        let expected = "NIL"
+        var buffer = EncodeBuffer.serverEncodeBuffer(
+            buffer: ByteBufferAllocator().buffer(capacity: 32),
+            options: ResponseEncodingOptions(),
+            loggingMode: false
+        )
+        _ = buffer.writeBodyEncoding(nil)
+        var remaining = buffer
+        let chunk = remaining.nextChunk()
+        #expect(String(buffer: chunk.bytes) == expected)
+    }
+
+    @Test("debug description")
+    func debugDescription() {
+        #expect(BodyStructure.Encoding.sevenBit.debugDescription == "7BIT")
+        #expect(BodyStructure.Encoding.base64.debugDescription == "BASE64")
+    }
+
+    @Test("string conversion")
+    func stringConversion() {
+        #expect(String(BodyStructure.Encoding.sevenBit) == "7BIT")
+        #expect(String(BodyStructure.Encoding.quotedPrintable) == "QUOTED-PRINTABLE")
+    }
 }
 
 // MARK: -

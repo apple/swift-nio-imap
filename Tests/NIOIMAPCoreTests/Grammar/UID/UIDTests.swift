@@ -84,6 +84,14 @@ struct UIDTests {
         let unknown = UnknownMessageIdentifier(uid)
         #expect(unknown.rawValue == 99)
     }
+
+    #if swift(>=6.2)
+    @Test func advancedByOverflowPreconditionFailure() async {
+        await #expect(processExitsWith: ExitTest.Condition.failure, performing: {
+            _ = UID(1).advanced(by: Int64(UInt32.max) + 1)
+        })
+    }
+    #endif
 }
 
 // MARK: -

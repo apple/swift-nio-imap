@@ -126,6 +126,20 @@ struct FullDateTimeTests {
     func parseFullTime(_ fixture: ParseFixture<FullTime>) {
         fixture.checkParsing()
     }
+
+    #if swift(>=6.2)
+    @Test func invalidMonthPrecondition() async {
+        await #expect(processExitsWith: ExitTest.Condition.failure, performing: {
+            _ = FullDate(year: 2024, month: 0, day: 1)
+        })
+    }
+
+    @Test func invalidDayPrecondition() async {
+        await #expect(processExitsWith: ExitTest.Condition.failure, performing: {
+            _ = FullDate(year: 2024, month: 1, day: 0)
+        })
+    }
+    #endif
 }
 
 // MARK: -

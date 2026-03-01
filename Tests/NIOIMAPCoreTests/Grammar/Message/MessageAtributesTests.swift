@@ -98,6 +98,8 @@ struct MessageAttributeTests {
         EncodeFixture.messageAttribute(.emailID(.init("123-456-789")!), "EMAILID (123-456-789)"),
         EncodeFixture.messageAttribute(.threadID(.init("123-456-789")!), "THREADID (123-456-789)"),
         EncodeFixture.messageAttribute(.threadID(nil), "THREADID NIL"),
+        EncodeFixture.messageAttribute(.body(.invalid, hasExtensionData: false), "BODY ()"),
+        EncodeFixture.messageAttribute(.body(.invalid, hasExtensionData: true), "BODYSTRUCTURE ()"),
         EncodeFixture.messageAttribute(.nilBody(.rfc822Text), "RFC822.TEXT NIL"),
         EncodeFixture.messageAttribute(.nilBody(.rfc822Header), "RFC822.HEADER NIL"),
         EncodeFixture.messageAttribute(
@@ -506,7 +508,75 @@ extension ParseFixture<MessageAttribute> {
     }
 }
 
-// MARK: - writeMessageAttribute_bodySection
+// MARK: - writeMessageAttribute_rfc822 helpers
+
+extension MessageAttributeTests {
+    @Test(
+        "encode rfc822 helpers",
+        arguments: [
+            Rfc822Fixture(method: .rfc822, string: nil, expected: "RFC822 NIL"),
+            Rfc822Fixture(method: .rfc822, string: ByteBuffer(string: "hi"), expected: "RFC822 \"hi\""),
+            Rfc822Fixture(method: .rfc822Text, string: nil, expected: "RFC822.TEXT NIL"),
+            Rfc822Fixture(method: .rfc822Text, string: ByteBuffer(string: "body"), expected: "RFC822.TEXT \"body\""),
+            Rfc822Fixture(method: .rfc822Header, string: nil, expected: "RFC822.HEADER NIL"),
+            Rfc822Fixture(method: .rfc822Header, string: ByteBuffer(string: "hdr"), expected: "RFC822.HEADER \"hdr\""),
+        ]
+    )
+    func encodeRfc822Helpers(_ fixture: Rfc822Fixture) {
+        var buffer = EncodeBuffer.serverEncodeBuffer(
+            buffer: ByteBufferAllocator().buffer(capacity: 128),
+            options: ResponseEncodingOptions(),
+            loggingMode: false
+        )
+        switch fixture.method {
+        case .rfc822: _ = buffer.writeMessageAttribute_rfc822(fixture.string)
+        case .rfc822Text: _ = buffer.writeMessageAttribute_rfc822Text(fixture.string)
+        case .rfc822Header: _ = buffer.writeMessageAttribute_rfc822Header(fixture.string)
+        }
+        var remaining = buffer
+        let chunk = remaining.nextChunk()
+        let actualString = String(buffer: chunk.bytes)
+        #expect(actualString.mappingControlPictures() == fixture.expected.mappingControlPictures())
+    }
+
+    @Test(
+        "encode body section text",
+        arguments: [
+            BodySectionTextFixture(number: nil, size: 5, expected: "BODY[TEXT] {5}\r\n"),
+            BodySectionTextFixture(number: 3, size: 8, expected: "BODY[TEXT]<3> {8}\r\n"),
+        ]
+    )
+    func encodeBodySectionText(_ fixture: BodySectionTextFixture) {
+        var buffer = EncodeBuffer.serverEncodeBuffer(
+            buffer: ByteBufferAllocator().buffer(capacity: 128),
+            options: ResponseEncodingOptions(),
+            loggingMode: false
+        )
+        _ = buffer.writeMessageAttribute_bodySectionText(number: fixture.number, size: fixture.size)
+        var remaining = buffer
+        let chunk = remaining.nextChunk()
+        let actualString = String(buffer: chunk.bytes)
+        #expect(actualString.mappingControlPictures() == fixture.expected.mappingControlPictures())
+    }
+}
+
+enum Rfc822Method: Sendable { case rfc822, rfc822Text, rfc822Header }
+
+struct Rfc822Fixture: Sendable, CustomTestStringConvertible {
+    var method: Rfc822Method
+    var string: ByteBuffer?
+    var expected: String
+
+    var testDescription: String { expected }
+}
+
+struct BodySectionTextFixture: Sendable, CustomTestStringConvertible {
+    var number: Int?
+    var size: Int
+    var expected: String
+
+    var testDescription: String { expected }
+}
 
 extension MessageAttributeTests {
     @Test(
