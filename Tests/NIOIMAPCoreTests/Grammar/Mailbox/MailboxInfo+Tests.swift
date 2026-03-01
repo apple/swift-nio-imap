@@ -78,6 +78,22 @@ struct MailboxInfoTests {
             ),
             #"(\Subscribed \HasNoChildren) "." "Archive/2024""#
         ),
+        EncodeFixture.mailboxInfo(
+            MailboxInfo(
+                attributes: [.unmarked],
+                path: try! .init(name: MailboxName("Old"), pathSeparator: "\\"),
+                extensions: [:]
+            ),
+            #"(\Unmarked) "\" "Old""#
+        ),
+        EncodeFixture.mailboxInfo(
+            MailboxInfo(
+                attributes: [.nonExistent],
+                path: try! .init(name: MailboxName("Ghost"), pathSeparator: "\""),
+                extensions: [:]
+            ),
+            #"(\Nonexistent) "\\" "Ghost""#
+        ),
     ])
     func encode(_ fixture: EncodeFixture<MailboxInfo>) {
         fixture.checkEncoding()

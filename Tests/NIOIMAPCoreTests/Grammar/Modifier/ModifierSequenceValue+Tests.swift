@@ -46,6 +46,15 @@ struct ModificationSequenceValueTests {
         #expect(!(b <= a))
     }
 
+    @Test(arguments: [
+        (ModificationSequenceValue(integerLiteral: 10), ModificationSequenceValue(integerLiteral: 20), true),
+        (ModificationSequenceValue(integerLiteral: 20), ModificationSequenceValue(integerLiteral: 10), false),
+        (ModificationSequenceValue(integerLiteral: 10), ModificationSequenceValue(integerLiteral: 10), false),
+    ] as [(ModificationSequenceValue, ModificationSequenceValue, Bool)])
+    func lessThanOperator(_ fixture: (ModificationSequenceValue, ModificationSequenceValue, Bool)) {
+        #expect((fixture.0 < fixture.1) == fixture.2)
+    }
+
     @Test("distance and advanced")
     func distanceAndAdvanced() {
         let start = ModificationSequenceValue(integerLiteral: 10)

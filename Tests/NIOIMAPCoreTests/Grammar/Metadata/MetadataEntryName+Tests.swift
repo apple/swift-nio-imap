@@ -32,4 +32,10 @@ struct MetadataEntryNameTests {
         let b: MetadataEntryName = "/private/comment"
         #expect(a == b)
     }
+
+    @Test("init from String variable")
+    func initFromStringVariable() {
+        let a = "/private/variable"
+        #expect(String(MetadataEntryName(a)) == "/private/variable")
+    }
 }
