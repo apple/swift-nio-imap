@@ -34,6 +34,8 @@ struct FetchAttributeTests {
         EncodeFixture.fetchAttribute(.binarySize(section: [1]), "BINARY.SIZE[1]"),
         EncodeFixture.fetchAttribute(.binary(peek: true, section: [1, 2, 3], partial: nil), "BINARY.PEEK[1.2.3]"),
         EncodeFixture.fetchAttribute(.binary(peek: false, section: [3, 4, 5], partial: nil), "BINARY[3.4.5]"),
+        EncodeFixture.fetchAttribute(.binary(peek: false, section: [1], partial: 3...6), "BINARY[1]<3.4>"),
+        EncodeFixture.fetchAttribute(.binary(peek: true, section: [2], partial: 4...8), "BINARY.PEEK[2]<4.5>"),
         EncodeFixture.fetchAttribute(.modificationSequenceValue(.zero), "0"),
         EncodeFixture.fetchAttribute(.modificationSequenceValue(3), "3"),
         EncodeFixture.fetchAttribute(.modificationSequence, "MODSEQ"),

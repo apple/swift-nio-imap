@@ -32,6 +32,11 @@ struct ExtendedSearchScopeOptionsTests {
         fixture.checkEncoding()
     }
 
+    @Test("nil when empty")
+    func nilWhenEmpty() {
+        #expect(ExtendedSearchScopeOptions([:]) == nil)
+    }
+
     @Test(arguments: [
         ParseFixture.extendedSearchScopeOptions("name", expected: .success(ExtendedSearchScopeOptions(["name": nil])!)),
         ParseFixture.extendedSearchScopeOptions(

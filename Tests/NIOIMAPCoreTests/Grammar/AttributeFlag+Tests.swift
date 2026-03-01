@@ -37,6 +37,12 @@ struct AttributeFlagTests {
         #expect(AttributeFlag("test").stringValue == "test")
     }
 
+    @Test("String conversion")
+    func stringConversion() {
+        #expect(String(AttributeFlag.answered) == "\\\\answered")
+        #expect(String(AttributeFlag("custom")) == "custom")
+    }
+
     @Test(arguments: [
         ParseFixture.attributeFlag(#"\\Answered"#, expected: .success(.answered)),
         ParseFixture.attributeFlag("some", expected: .success(.init("some"))),
