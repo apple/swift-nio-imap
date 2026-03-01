@@ -62,6 +62,13 @@ extension SequenceNumberTests {
         #expect(min.advanced(by: min.distance(to: max)) == max)
         #expect(max.advanced(by: max.distance(to: min)) == min)
     }
+
+    @Test("conversion to UnknownMessageIdentifier")
+    func conversionToUnknownMessageIdentifier() {
+        let seq = SequenceNumber(42)
+        let unknown = UnknownMessageIdentifier(seq)
+        #expect(unknown.rawValue == 42)
+    }
 }
 
 // MARK: -

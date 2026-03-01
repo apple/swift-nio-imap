@@ -45,6 +45,13 @@ struct UIDValidityTests {
         #expect(UIDValidity(exactly: 4_294_967_295)?.rawValue == 4_294_967_295)
         #expect(UIDValidity(exactly: 4_294_967_296) == nil)
     }
+
+    @Test("binary integer conversion")
+    func binaryIntegerConversion() {
+        let v: UIDValidity = 42
+        #expect(Int(v) == 42)
+        #expect(UInt64(v) == 42)
+    }
 }
 
 // MARK: -

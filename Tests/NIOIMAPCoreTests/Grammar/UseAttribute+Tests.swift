@@ -46,6 +46,12 @@ struct UseAttributeTests {
         #expect(UseAttribute(MailboxInfo.Attribute(#"\All"#)).stringValue == #"\All"#)
     }
 
+    @Test("string conversion")
+    func stringConversion() {
+        #expect(String(UseAttribute.trash) == "\\Trash")
+        #expect(String(UseAttribute("\\Custom")) == "\\Custom")
+    }
+
     @Test(arguments: [
         ParseFixture.useAttribute("\\All", "", expected: .success(.all)),
         ParseFixture.useAttribute("\\Archive", "", expected: .success(.archive)),

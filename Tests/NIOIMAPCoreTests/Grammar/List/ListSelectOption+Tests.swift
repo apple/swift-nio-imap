@@ -25,6 +25,10 @@ struct ListSelectOptionTests {
             EncodeFixture.listSelectOption(.remote, "REMOTE"),
             EncodeFixture.listSelectOption(.recursiveMatch, "RECURSIVEMATCH"),
             EncodeFixture.listSelectOption(.specialUse, "SPECIAL-USE"),
+            EncodeFixture.listSelectOption(
+                .option(.init(key: .standard("MYEXT"), value: nil)),
+                "MYEXT"
+            ),
         ]
     )
     func encodeSingleOption(_ fixture: EncodeFixture<ListSelectOption>) {

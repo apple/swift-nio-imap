@@ -56,6 +56,14 @@ struct UserAuthenticationMechanismTests {
     func parse(_ fixture: ParseFixture<UserAuthenticationMechanism>) {
         fixture.checkParsing()
     }
+
+    #if swift(>=6.2)
+    @Test func bothNilPreconditionFailure() async {
+        await #expect(processExitsWith: ExitTest.Condition.failure, performing: {
+            _ = UserAuthenticationMechanism(encodedUser: nil, authenticationMechanism: nil)
+        })
+    }
+    #endif
 }
 
 // MARK: -

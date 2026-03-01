@@ -77,6 +77,13 @@ struct UIDTests {
         #expect(UID.min.advanced(by: UID.min.distance(to: UID.max)) == UID.max)
         #expect(UID.max.advanced(by: UID.max.distance(to: UID.min)) == UID.min)
     }
+
+    @Test("conversion to UnknownMessageIdentifier")
+    func conversionToUnknownMessageIdentifier() {
+        let uid = UID(99)
+        let unknown = UnknownMessageIdentifier(uid)
+        #expect(unknown.rawValue == 99)
+    }
 }
 
 // MARK: -

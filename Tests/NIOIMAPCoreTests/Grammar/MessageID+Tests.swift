@@ -2,7 +2,7 @@
 //
 // This source file is part of the SwiftNIO open source project
 //
-// Copyright (c) 2021 Apple Inc. and the SwiftNIO project authors
+// Copyright (c) 2020 Apple Inc. and the SwiftNIO project authors
 // Licensed under Apache License v2.0
 //
 // See LICENSE.txt for license information
@@ -13,33 +13,35 @@
 //===----------------------------------------------------------------------===//
 
 import NIO
-import Testing
 @_spi(NIOIMAPInternal) @testable import NIOIMAPCore
+import Testing
 
-@Suite("InternetMessageDate")
-struct InternetMessageDateTests {
+@Suite("MessageID")
+struct MessageIDTests {
     @Test(arguments: [
-        EncodeFixture.internetMessageDate(.init("test"), "test")
+        EncodeFixture.messageID(.init("<foo@bar.com>"), "\"<foo@bar.com>\""),
+        EncodeFixture.messageID(.init("<B27397-0100000@cac.washington.edu>"), "\"<B27397-0100000@cac.washington.edu>\""),
     ])
-    func encode(_ fixture: EncodeFixture<InternetMessageDate>) {
+    func encode(_ fixture: EncodeFixture<MessageID>) {
         fixture.checkEncoding()
     }
 
     @Test("string conversion")
     func stringConversion() {
-        #expect(String(InternetMessageDate("Mon, 01 Jan 2024 00:00:00 +0000")) == "Mon, 01 Jan 2024 00:00:00 +0000")
+        let id = MessageID("<foo@example.com>")
+        #expect(String(id) == "<foo@example.com>")
     }
 }
 
 // MARK: -
 
-extension EncodeFixture<InternetMessageDate> {
-    fileprivate static func internetMessageDate(_ input: T, _ expectedString: String) -> Self {
-        Self(
+extension EncodeFixture<MessageID> {
+    fileprivate static func messageID(_ input: MessageID, _ expectedString: String) -> Self {
+        EncodeFixture(
             input: input,
             bufferKind: .defaultServer,
             expectedString: expectedString,
-            encoder: { $0.writeInternetMessageDate($1) }
+            encoder: { $0.writeMessageID($1) }
         )
     }
 }
