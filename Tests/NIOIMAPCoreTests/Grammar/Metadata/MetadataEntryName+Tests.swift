@@ -18,18 +18,12 @@ import Testing
 
 @Suite("MetadataEntryName")
 struct MetadataEntryNameTests {
-    @Test("string init and round-trip")
-    func stringInitAndRoundTrip() {
-        let raw: String = "/private/vendor/example/color"
-        let name = MetadataEntryName(raw)
-        #expect(String(name) == "/private/vendor/example/color")
-    }
-
-    @Test("ByteBuffer init")
-    func byteBufferInit() {
-        let buf = ByteBuffer(string: "/shared/admin/quota")
-        let name = MetadataEntryName(buf)
-        #expect(String(name) == "/shared/admin/quota")
+    @Test(arguments: [
+        (MetadataEntryName("/private/vendor/example/color"), "/private/vendor/example/color"),
+        (MetadataEntryName(ByteBuffer(string: "/shared/admin/quota")), "/shared/admin/quota"),
+    ] as [(MetadataEntryName, String)])
+    func stringRoundTrip(_ fixture: (MetadataEntryName, String)) {
+        #expect(String(fixture.0) == fixture.1)
     }
 
     @Test("equality is based on content")

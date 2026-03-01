@@ -49,11 +49,13 @@ struct FlagTests {
         #expect(input == expected)
     }
 
-    @Test("String conversion")
-    func stringConversion() {
-        #expect(String(Flag.answered) == "\\Answered")
-        #expect(String(Flag.flagged) == "\\Flagged")
-        #expect(String(Flag("Custom")) == "Custom")
+    @Test(arguments: [
+        (Flag.answered, "\\Answered"),
+        (Flag.flagged, "\\Flagged"),
+        (Flag("Custom"), "Custom"),
+    ] as [(Flag, String)])
+    func stringConversion(_ fixture: (Flag, String)) {
+        #expect(String(fixture.0) == fixture.1)
     }
 
     #if swift(>=6.2)

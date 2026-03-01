@@ -37,10 +37,12 @@ struct AttributeFlagTests {
         #expect(AttributeFlag("test").stringValue == "test")
     }
 
-    @Test("String conversion")
-    func stringConversion() {
-        #expect(String(AttributeFlag.answered) == "\\\\answered")
-        #expect(String(AttributeFlag("custom")) == "custom")
+    @Test(arguments: [
+        (AttributeFlag.answered, "\\\\answered"),
+        (AttributeFlag("custom"), "custom"),
+    ] as [(AttributeFlag, String)])
+    func stringConversion(_ fixture: (AttributeFlag, String)) {
+        #expect(String(fixture.0) == fixture.1)
     }
 
     @Test(arguments: [

@@ -26,28 +26,22 @@ struct MailboxIDTests {
         fixture.checkEncoding()
     }
 
-    @Test("valid string init")
-    func validStringInit() {
-        let valid1: String = "ValidID123"
-        #expect(MailboxID(valid1) != nil)
-        let valid2: String = "a"
-        #expect(MailboxID(valid2) != nil)
+    @Test(arguments: [
+        ("ValidID123", true),
+        ("a", true),
+        ("", false),
+        ("has space", false),
+        ("has@symbol", false),
+    ] as [(String, Bool)])
+    func stringInit(_ fixture: (String, Bool)) {
+        #expect((MailboxID(fixture.0) != nil) == fixture.1)
     }
 
-    @Test("invalid string init returns nil")
-    func invalidStringInitReturnsNil() {
-        let empty: String = ""
-        #expect(MailboxID(empty) == nil)
-        let withSpace: String = "has space"
-        #expect(MailboxID(withSpace) == nil)
-        let withSymbol: String = "has@symbol"
-        #expect(MailboxID(withSymbol) == nil)
-    }
-
-    @Test("string conversion")
-    func stringConversion() {
-        let id: MailboxID = "ValidID"
-        #expect(String(id) == "ValidID")
+    @Test(arguments: [
+        ("ValidID", "ValidID"),
+    ] as [(MailboxID, String)])
+    func stringConversion(_ fixture: (MailboxID, String)) {
+        #expect(String(fixture.0) == fixture.1)
     }
 }
 
