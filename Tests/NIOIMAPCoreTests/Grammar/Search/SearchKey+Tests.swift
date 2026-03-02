@@ -87,6 +87,8 @@ struct SearchKeyTests {
         ),
         EncodeFixture.searchKey(.emailID(.init("123-456-789")!), "EMAILID 123-456-789"),
         EncodeFixture.searchKey(.threadID(.init("123-456-789")!), "THREADID 123-456-789"),
+        EncodeFixture.searchKey(.younger(34), "YOUNGER 34"),
+        EncodeFixture.searchKey(.older(45), "OLDER 45"),
     ])
     func encode(_ fixture: EncodeFixture<SearchKey>) {
         fixture.checkEncoding()
@@ -174,6 +176,23 @@ struct SearchKeyTests {
     ])
     func parse(_ fixture: ParseFixture<SearchKey>) {
         fixture.checkParsing()
+    }
+
+    @Test(arguments: [
+        (SearchKey.not(.bcc("test")), true),
+        (SearchKey.not(.all), false),
+        (SearchKey.or(.bcc("x"), .all), true),
+        (SearchKey.or(.all, .deleted), false),
+        (SearchKey.and([.bcc("x"), .deleted]), true),
+        (SearchKey.and([.all, .deleted]), false),
+    ] as [(SearchKey, Bool)])
+    func usesString(_ fixture: (SearchKey, Bool)) {
+        #expect(fixture.0.usesString == fixture.1)
+    }
+
+    @Test func debugDescription() {
+        #expect(SearchKey.all.debugDescription == "ALL")
+        #expect(SearchKey.not(.messageSizeLarger(444)).debugDescription == "NOT LARGER 444")
     }
 }
 

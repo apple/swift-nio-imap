@@ -35,6 +35,30 @@ struct QuotaRootTests {
     func parse(_ fixture: ParseFixture<QuotaRoot>) {
         fixture.checkParsing()
     }
+
+    @Test(arguments: [
+        (QuotaRoot("MassivePool"), "MassivePool" as String?),
+        (QuotaRoot(""), "" as String?),
+        (QuotaRoot(ByteBuffer(bytes: [0xFF, 0xFE])), nil as String?),
+    ] as [(QuotaRoot, String?)])
+    func stringConversion(_ fixture: (QuotaRoot, String?)) {
+        #expect(String(fixture.0) == fixture.1)
+    }
+
+    @Test(arguments: [
+        (QuotaRoot("MassivePool"), "MassivePool"),
+    ] as [(QuotaRoot, String)])
+    func debugDescription(_ fixture: (QuotaRoot, String)) {
+        #expect(fixture.0.debugDescription == fixture.1)
+    }
+
+    @Test func debugDescriptionInvalidUTF8() {
+        // Invalid UTF-8 falls back to String(buffer:), which produces a non-nil description.
+        let root = QuotaRoot(ByteBuffer(bytes: [0xFF, 0xFE]))
+        // String(self) returns nil, so debugDescription uses the fallback path.
+        #expect(String(root) == nil)
+        #expect(root.debugDescription.isEmpty == false)
+    }
 }
 
 // MARK: -

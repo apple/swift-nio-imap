@@ -24,6 +24,11 @@ struct MessageDataTests {
         EncodeFixture.messageData(.vanishedEarlier(.all), "VANISHED (EARLIER) 1:*"),
         EncodeFixture.messageData(.generateAuthorizedURL(["test"]), #"GENURLAUTH "test""#),
         EncodeFixture.messageData(.generateAuthorizedURL(["test1", "test2"]), #"GENURLAUTH "test1" "test2""#),
+        EncodeFixture.messageData(.urlFetch([.init(url: "url", data: nil)]), #"URLFETCH("url" NIL)"#),
+        EncodeFixture.messageData(
+            .urlFetch([.init(url: "url1", data: nil), .init(url: "url2", data: "data")]),
+            #"URLFETCH("url1" NIL "url2" "data")"#
+        ),
     ])
     func encode(_ fixture: EncodeFixture<MessageData>) {
         fixture.checkEncoding()
