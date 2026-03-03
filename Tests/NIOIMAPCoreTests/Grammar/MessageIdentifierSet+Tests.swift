@@ -45,6 +45,7 @@ struct MessageIdentifierSetTests {
         ),
         ParseFixture.messageIdentifierSet("1:*", "\r\n", expected: .success(.all)),
         ParseFixture.messageIdentifierSet("a", " ", expected: .failure),
+        ParseFixture.messageIdentifierSet("0", "\r\n", expected: .failure),
         ParseFixture.messageIdentifierSet("1234", "", expected: .incompleteMessage),
         ParseFixture.messageIdentifierSet("", "", expected: .incompleteMessage),
     ])

@@ -29,6 +29,24 @@ struct TaggedCommandTests {
         fixture.checkParsing()
     }
 
+    @Test(arguments: [
+        DebugStringFixture<TaggedCommand>(
+            sut: .init(tag: "A1", command: .capability),
+            expected: "A1 CAPABILITY\r\n"
+        ),
+        DebugStringFixture<TaggedCommand>(
+            sut: .init(tag: "A1", command: .select(.inbox)),
+            expected: "A1 SELECT \"INBOX\"\r\n"
+        ),
+        DebugStringFixture<TaggedCommand>(
+            sut: .init(tag: "A1", command: .login(username: "alice", password: "secret")),
+            expected: "A1 LOGIN \"alice\" \"secret\"\r\n"
+        ),
+    ])
+    func debugDescription(_ fixture: DebugStringFixture<TaggedCommand>) {
+        fixture.check()
+    }
+
     @Test("parse tagged command throws bad command") func parseTaggedCommandThrowsBadCommand() {
         // Test that the parser error occurs when parsing the command name
         var buffer1 = TestUtilities.makeParseBuffer(for: "A1 ()\r\n")

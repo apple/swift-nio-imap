@@ -170,9 +170,13 @@ struct CommandTypeTests {
             ),
             #"FOOBAR "A" "B""#
         ),
-        CommandEncodeFixture.command(
-            .custom(name: "FOOBAR", payloads: [.literal(.init(string: "¶"))]),
+        CommandEncodeFixture.command(.custom(name: "FOOBAR", payloads: [.literal(.init(string: "¶"))]),
             expectedStrings: ["FOOBAR {2}\r\n", "¶"]
+        ),
+        CommandEncodeFixture.command(.rename(from: .inbox, to: .init("other"), parameters: [:]), #"RENAME "INBOX" "other""#),
+        CommandEncodeFixture.command(
+            .rename(from: .inbox, to: .init("other"), parameters: ["test": nil]),
+            #"RENAME "INBOX" "other" (test)"#
         ),
     ])
     func encode(_ fixture: CommandEncodeFixture<Command>) {
@@ -498,6 +502,10 @@ struct CommandTypeTests {
                     returnOptions: [.min, .max]
                 )
             )
+        ),
+        ParseFixture.searchSuffix(
+            " (ALL SEEN)",
+            expected: .success(.search(key: .and([.all, .seen])))
         ),
     ])
     func parseSearchSuffix(_ fixture: ParseFixture<Command>) {

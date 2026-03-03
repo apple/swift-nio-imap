@@ -103,6 +103,15 @@ struct ResponseTextCodeTests {
             "URLMECH INTERNAL INTERNAL"
         ),
         EncodeFixture.responseTextCode(.urlMechanisms([]), "URLMECH INTERNAL"),
+        EncodeFixture.responseTextCode(
+            .uidCopy(.init(destinationUIDValidity: 443, sourceUIDs: [3...5], destinationUIDs: [6...8])),
+            "COPYUID 443 3:5 6:8"
+        ),
+        EncodeFixture.responseTextCode(
+            .uidAppend(.init(uidValidity: 1234, uids: [4, 5])),
+            "APPENDUID 1234 4:5"
+        ),
+        EncodeFixture.responseTextCode(.uidNotSticky, "UIDNOTSTICKY"),
         EncodeFixture.responseTextCode(.useAttribute, "USEATTR"),
     ])
     func encode(_ fixture: EncodeFixture<ResponseTextCode>) {

@@ -44,4 +44,25 @@ struct ResponseEncodeBufferTests {
         let outputString = String(buffer: buffer.readBytes())
         #expect(outputString == "* 1 FETCH (BODY[] {10}\r\n0123456789)\r\n")
     }
+
+    @Test("init with capabilities")
+    func initWithCapabilities() {
+        var buffer = ResponseEncodeBuffer(buffer: ByteBuffer(), capabilities: [.imap4rev1], loggingMode: false)
+        buffer.writeFetchResponse(.start(1))
+        buffer.writeFetchResponse(.finish)
+        let outputString = String(buffer: buffer.readBytes())
+        #expect(outputString == "* 1 FETCH ()\r\n")
+    }
+
+    @Test("correctly streams binary attribute")
+    func correctlyStreamsBinaryAttribute() {
+        var buffer = ResponseEncodeBuffer(buffer: ByteBuffer(string: ""), options: .rfc3501, loggingMode: false)
+        buffer.writeFetchResponse(.start(1))
+        buffer.writeFetchResponse(.streamingBegin(kind: .binary(section: [], offset: nil), byteCount: 5))
+        buffer.writeFetchResponse(.streamingBytes(ByteBuffer(string: "hello")))
+        buffer.writeFetchResponse(.streamingEnd)
+        buffer.writeFetchResponse(.finish)
+        let outputString = String(buffer: buffer.readBytes())
+        #expect(outputString == "* 1 FETCH (BINARY {5}\r\nhello)\r\n")
+    }
 }

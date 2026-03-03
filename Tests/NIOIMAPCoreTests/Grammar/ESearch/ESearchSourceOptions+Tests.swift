@@ -19,6 +19,16 @@ import Testing
 @Suite("ExtendedSearchSourceOptions")
 struct ExtendedSearchSourceOptionsTests {
     @Test(arguments: [
+        ([] as [MailboxFilter], false),
+        ([.inboxes] as [MailboxFilter], true),
+    ] as [([MailboxFilter], Bool)])
+    func failableInit(_ fixture: ([MailboxFilter], Bool)) {
+        let (sourceMailbox, shouldSucceed) = fixture
+        let result = ExtendedSearchSourceOptions(sourceMailbox: sourceMailbox)
+        #expect((result != nil) == shouldSucceed)
+    }
+
+    @Test(arguments: [
         EncodeFixture.extendedSearchSourceOptions(
             ExtendedSearchSourceOptions(sourceMailbox: [.inboxes])!,
             "IN (inboxes)"

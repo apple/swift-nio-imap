@@ -147,9 +147,145 @@ struct InternalDateTests {
         ),
         ParseFixture.internalDate(#""25-Jun-1994 01:02:03 +12""#, "", expected: .failureIgnoringBufferModifications),
         ParseFixture.internalDate(#""25-Jun-1994 01:02:03 abc""#, "", expected: .failureIgnoringBufferModifications),
+        ParseFixture.internalDate(
+            #"" 5-Jun-1994 01:02:03 +0000""#,
+            "\r",
+            expected: .success(
+                ServerMessageDate(
+                    ServerMessageDate.Components(
+                        year: 1994,
+                        month: 6,
+                        day: 5,
+                        hour: 1,
+                        minute: 2,
+                        second: 3,
+                        timeZoneMinutes: 0
+                    )!
+                )
+            )
+        ),
+        ParseFixture.internalDate(#""99-Jun-1994 01:02:03 +0000""#, "\r", expected: .failureIgnoringBufferModifications),
+        ParseFixture.internalDate(#""25-Jun-1994 01:02:03 +9999""#, "\r", expected: .failureIgnoringBufferModifications),
+        ParseFixture.internalDate(#""25-Jun-1994 01:02:03 -9999""#, "\r", expected: .failureIgnoringBufferModifications),
+        ParseFixture.internalDate(
+            #""15-Feb-2000 00:00:00 +0000""#,
+            "\r",
+            expected: .success(
+                ServerMessageDate(
+                    ServerMessageDate.Components(
+                        year: 2000, month: 2, day: 15, hour: 0, minute: 0, second: 0, timeZoneMinutes: 0
+                    )!
+                )
+            )
+        ),
+        ParseFixture.internalDate(
+            #""15-Mar-2000 00:00:00 +0000""#,
+            "\r",
+            expected: .success(
+                ServerMessageDate(
+                    ServerMessageDate.Components(
+                        year: 2000, month: 3, day: 15, hour: 0, minute: 0, second: 0, timeZoneMinutes: 0
+                    )!
+                )
+            )
+        ),
+        ParseFixture.internalDate(
+            #""15-Apr-2000 00:00:00 +0000""#,
+            "\r",
+            expected: .success(
+                ServerMessageDate(
+                    ServerMessageDate.Components(
+                        year: 2000, month: 4, day: 15, hour: 0, minute: 0, second: 0, timeZoneMinutes: 0
+                    )!
+                )
+            )
+        ),
+        ParseFixture.internalDate(
+            #""15-May-2000 00:00:00 +0000""#,
+            "\r",
+            expected: .success(
+                ServerMessageDate(
+                    ServerMessageDate.Components(
+                        year: 2000, month: 5, day: 15, hour: 0, minute: 0, second: 0, timeZoneMinutes: 0
+                    )!
+                )
+            )
+        ),
+        ParseFixture.internalDate(
+            #""15-Jul-2000 00:00:00 +0000""#,
+            "\r",
+            expected: .success(
+                ServerMessageDate(
+                    ServerMessageDate.Components(
+                        year: 2000, month: 7, day: 15, hour: 0, minute: 0, second: 0, timeZoneMinutes: 0
+                    )!
+                )
+            )
+        ),
+        ParseFixture.internalDate(
+            #""15-Aug-2000 00:00:00 +0000""#,
+            "\r",
+            expected: .success(
+                ServerMessageDate(
+                    ServerMessageDate.Components(
+                        year: 2000, month: 8, day: 15, hour: 0, minute: 0, second: 0, timeZoneMinutes: 0
+                    )!
+                )
+            )
+        ),
+        ParseFixture.internalDate(
+            #""15-Sep-2000 00:00:00 +0000""#,
+            "\r",
+            expected: .success(
+                ServerMessageDate(
+                    ServerMessageDate.Components(
+                        year: 2000, month: 9, day: 15, hour: 0, minute: 0, second: 0, timeZoneMinutes: 0
+                    )!
+                )
+            )
+        ),
+        ParseFixture.internalDate(
+            #""15-Oct-2000 00:00:00 +0000""#,
+            "\r",
+            expected: .success(
+                ServerMessageDate(
+                    ServerMessageDate.Components(
+                        year: 2000, month: 10, day: 15, hour: 0, minute: 0, second: 0, timeZoneMinutes: 0
+                    )!
+                )
+            )
+        ),
+        ParseFixture.internalDate(
+            #""15-Nov-2000 00:00:00 +0000""#,
+            "\r",
+            expected: .success(
+                ServerMessageDate(
+                    ServerMessageDate.Components(
+                        year: 2000, month: 11, day: 15, hour: 0, minute: 0, second: 0, timeZoneMinutes: 0
+                    )!
+                )
+            )
+        ),
     ])
     func parse(_ fixture: ParseFixture<ServerMessageDate>) {
         fixture.checkParsing()
+    }
+
+    @Test(
+        "encodes all month names",
+        arguments: [
+            (1, "Jan"), (2, "Feb"), (3, "Mar"), (4, "Apr"), (5, "May"),
+            (7, "Jul"), (8, "Aug"), (9, "Sep"), (10, "Oct"), (11, "Nov"), (12, "Dec"),
+        ] as [(Int, String)]
+    )
+    func encodesMonthName(_ fixture: (Int, String)) {
+        let (month, monthName) = fixture
+        let components = ServerMessageDate.Components(
+            year: 2000, month: month, day: 15,
+            hour: 12, minute: 0, second: 0, timeZoneMinutes: 0
+        )!
+        let date = ServerMessageDate(components)
+        #expect(String(reflecting: date) == "\"15-\(monthName)-2000 12:00:00 +0000\"")
     }
 }
 
