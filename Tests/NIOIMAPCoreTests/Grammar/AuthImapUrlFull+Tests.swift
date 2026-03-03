@@ -14,16 +14,53 @@
 
 import NIO
 @_spi(NIOIMAPInternal) @testable import NIOIMAPCore
-import XCTest
+import Testing
 
-class AuthIMAPURLFull_Tests: EncodeTestClass {}
+@Suite("FullAuthenticatedURL")
+struct FullAuthenticatedURLTests {
+    @Test(arguments: [
+        EncodeFixture.fullAuthenticatedURL(
+            .init(
+                networkMessagePath: .init(
+                    server: .init(host: "localhost"),
+                    messagePath: .init(
+                        mailboxReference: .init(encodeMailbox: .init(mailbox: "test")),
+                        iUID: .init(uid: 123)
+                    )
+                ),
+                authenticatedURL: .init(
+                    authenticatedURL: .init(access: .anonymous),
+                    verifier: .init(urlAuthMechanism: .internal, encodedAuthenticationURL: .init(data: "data"))
+                )
+            ),
+            "imap://localhost/test/;UID=123;URLAUTH=anonymous:INTERNAL:data"
+        ),
+        EncodeFixture.fullAuthenticatedURL(
+            .init(
+                networkMessagePath: .init(
+                    server: .init(host: "mail.example.com"),
+                    messagePath: .init(
+                        mailboxReference: .init(encodeMailbox: .init(mailbox: "INBOX")),
+                        iUID: .init(uid: 789)
+                    )
+                ),
+                authenticatedURL: .init(
+                    authenticatedURL: .init(access: .user(.init(data: "alice"))),
+                    verifier: .init(urlAuthMechanism: .internal, encodedAuthenticationURL: .init(data: "verifier123"))
+                )
+            ),
+            "imap://mail.example.com/INBOX/;UID=789;URLAUTH=user+alice:INTERNAL:verifier123"
+        ),
+    ])
+    func encode(_ fixture: EncodeFixture<FullAuthenticatedURL>) {
+        fixture.checkEncoding()
+    }
 
-// MARK: - Encoding
-
-extension AuthIMAPURLFull_Tests {
-    func testEncoding() {
-        let inputs: [(FullAuthenticatedURL, String, UInt)] = [
-            (
+    @Test(arguments: [
+        ParseFixture.fullAuthenticatedURL(
+            "imap://localhost/test/;UID=123;URLAUTH=anonymous:INTERNAL:01234567890123456789012345678901",
+            " ",
+            expected: .success(
                 .init(
                     networkMessagePath: .init(
                         server: .init(host: "localhost"),
@@ -34,13 +71,42 @@ extension AuthIMAPURLFull_Tests {
                     ),
                     authenticatedURL: .init(
                         authenticatedURL: .init(access: .anonymous),
-                        verifier: .init(urlAuthMechanism: .internal, encodedAuthenticationURL: .init(data: "data"))
+                        verifier: .init(
+                            urlAuthMechanism: .internal,
+                            encodedAuthenticationURL: .init(data: "01234567890123456789012345678901")
+                        )
                     )
-                ),
-                "imap://localhost/test/;UID=123;URLAUTH=anonymous:INTERNAL:data",
-                #line
+                )
             )
-        ]
-        self.iterateInputs(inputs: inputs, encoder: { self.testBuffer.writeAuthIMAPURLFull($0) })
+        )
+    ])
+    func parse(_ fixture: ParseFixture<FullAuthenticatedURL>) {
+        fixture.checkParsing()
+    }
+}
+
+extension EncodeFixture<FullAuthenticatedURL> {
+    fileprivate static func fullAuthenticatedURL(_ input: T, _ expectedString: String) -> Self {
+        .init(
+            input: input,
+            bufferKind: .defaultServer,
+            expectedStrings: [expectedString],
+            encoder: { $0.writeAuthIMAPURLFull($1) }
+        )
+    }
+}
+
+extension ParseFixture<FullAuthenticatedURL> {
+    fileprivate static func fullAuthenticatedURL(
+        _ input: String,
+        _ terminator: String,
+        expected: Expected
+    ) -> Self {
+        ParseFixture(
+            input: input,
+            terminator: terminator,
+            expected: expected,
+            parser: GrammarParser().parseAuthIMAPURLFull
+        )
     }
 }

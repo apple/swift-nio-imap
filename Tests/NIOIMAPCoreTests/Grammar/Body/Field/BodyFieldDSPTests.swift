@@ -14,53 +14,125 @@
 
 import NIO
 @_spi(NIOIMAPInternal) @testable import NIOIMAPCore
-import XCTest
+import Testing
 
-class BodyFieldDSPTests: EncodeTestClass {}
+@Suite("BodyStructure.Disposition")
+struct BodyFieldDSPTests {
+    @Test(arguments: [
+        EncodeFixture<BodyStructure.Disposition?>.bodyDisposition(
+            nil,
+            "NIL"
+        ),
+        EncodeFixture<BodyStructure.Disposition?>.bodyDisposition(
+            .init(kind: "some", parameters: ["f1": "v1"]),
+            "(\"some\" (\"f1\" \"v1\"))"
+        ),
+    ])
+    func encoding(_ fixture: EncodeFixture<BodyStructure.Disposition?>) {
+        fixture.checkEncoding()
+    }
 
-// MARK: - Encoding
+    struct SizeFixture: Sendable, CustomTestStringConvertible {
+        var name: String
+        var disposition: BodyStructure.Disposition
+        var expected: Int?
 
-extension BodyFieldDSPTests {
-    func testEncode() {
-        let inputs: [(BodyStructure.Disposition?, String, UInt)] = [
-            (nil, "NIL", #line),
-            (.init(kind: "some", parameters: ["f1": "v1"]), "(\"some\" (\"f1\" \"v1\"))", #line),
-        ]
+        var testDescription: String { name }
+    }
 
-        for (test, expectedString, line) in inputs {
-            self.testBuffer.clear()
-            let size = self.testBuffer.writeBodyDisposition(test)
-            XCTAssertEqual(size, expectedString.utf8.count, line: line)
-            XCTAssertEqual(self.testBufferString, expectedString, line: line)
-        }
+    @Test(arguments: [
+        SizeFixture(name: "no size parameter", disposition: .init(kind: "test", parameters: [:]), expected: nil),
+        SizeFixture(
+            name: "lowercase size parameter",
+            disposition: .init(kind: "test", parameters: ["size": "123"]),
+            expected: 123
+        ),
+        SizeFixture(
+            name: "uppercase SIZE parameter",
+            disposition: .init(kind: "test", parameters: ["SIZE": "456"]),
+            expected: 456
+        ),
+        SizeFixture(
+            name: "invalid size value",
+            disposition: .init(kind: "test", parameters: ["SIZE": "abc"]),
+            expected: nil
+        ),
+    ])
+    func sizeProperty(_ fixture: SizeFixture) {
+        #expect(fixture.disposition.size == fixture.expected)
+    }
+
+    struct FilenameFixture: Sendable, CustomTestStringConvertible {
+        var name: String
+        var disposition: BodyStructure.Disposition
+        var expected: String?
+
+        var testDescription: String { name }
+    }
+
+    @Test(arguments: [
+        FilenameFixture(
+            name: "no filename parameter",
+            disposition: .init(kind: "test", parameters: [:]),
+            expected: nil
+        ),
+        FilenameFixture(
+            name: "lowercase filename parameter",
+            disposition: .init(kind: "test", parameters: ["filename": "hello"]),
+            expected: "hello"
+        ),
+        FilenameFixture(
+            name: "uppercase FILENAME parameter",
+            disposition: .init(kind: "test", parameters: ["FILENAME": "world"]),
+            expected: "world"
+        ),
+    ])
+    func filenameProperty(_ fixture: FilenameFixture) {
+        #expect(fixture.disposition.filename == fixture.expected)
+    }
+
+    @Test(arguments: [
+        ParseFixture.bodyDisposition(
+            #"("astring" ("f1" "v1"))"#,
+            expected: .success(BodyStructure.Disposition(kind: "astring", parameters: ["f1": "v1"]))
+        ),
+        ParseFixture.bodyDisposition(
+            #"NIL"#,
+            "",
+            expected: .success(nil)
+        ),
+    ])
+    func parse(_ fixture: ParseFixture<BodyStructure.Disposition?>) {
+        fixture.checkParsing()
     }
 }
 
-// MARK: - Convenience methods
+// MARK: -
 
-extension BodyFieldDSPTests {
-    func testSize() {
-        let inputs: [(BodyStructure.Disposition, Int?, UInt)] = [
-            (.init(kind: "test", parameters: [:]), nil, #line),
-            (.init(kind: "test", parameters: ["size": "123"]), 123, #line),
-            (.init(kind: "test", parameters: ["SIZE": "456"]), 456, #line),
-            (.init(kind: "test", parameters: ["SIZE": "abc"]), nil, #line),
-        ]
-
-        for (dsp, expected, line) in inputs {
-            XCTAssertEqual(dsp.size, expected, line: line)
-        }
+extension EncodeFixture<BodyStructure.Disposition?> {
+    fileprivate static func bodyDisposition(
+        _ input: BodyStructure.Disposition?,
+        _ expectedString: String
+    ) -> Self {
+        EncodeFixture(
+            input: input,
+            expectedString: expectedString,
+            encoder: { $0.writeBodyDisposition($1) }
+        )
     }
+}
 
-    func testFilename() {
-        let inputs: [(BodyStructure.Disposition, String?, UInt)] = [
-            (.init(kind: "test", parameters: [:]), nil, #line),
-            (.init(kind: "test", parameters: ["filename": "hello"]), "hello", #line),
-            (.init(kind: "test", parameters: ["FILENAME": "world"]), "world", #line),
-        ]
-
-        for (dsp, expected, line) in inputs {
-            XCTAssertEqual(dsp.filename, expected, line: line)
-        }
+extension ParseFixture<BodyStructure.Disposition?> {
+    fileprivate static func bodyDisposition(
+        _ input: String,
+        _ terminator: String = "\r",
+        expected: Expected
+    ) -> Self {
+        ParseFixture(
+            input: input,
+            terminator: terminator,
+            expected: expected,
+            parser: GrammarParser().parseBodyFieldDsp
+        )
     }
 }

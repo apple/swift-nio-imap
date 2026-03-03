@@ -14,22 +14,77 @@
 
 import NIO
 @_spi(NIOIMAPInternal) @testable import NIOIMAPCore
-import XCTest
+import Testing
 
-class IURLAuth_Tests: EncodeTestClass {}
+@Suite("AuthenticatedURL")
+struct AuthenticatedURLTests {
+    @Test(arguments: [
+        EncodeFixture.authenticatedURL(
+            .init(
+                authenticatedURL: .init(access: .anonymous),
+                verifier: .init(urlAuthMechanism: .internal, encodedAuthenticationURL: .init(data: "test"))
+            ),
+            ";URLAUTH=anonymous:INTERNAL:test"
+        ),
+        EncodeFixture.authenticatedURL(
+            .init(
+                authenticatedURL: .init(access: .user(.init(data: "alice"))),
+                verifier: .init(urlAuthMechanism: .internal, encodedAuthenticationURL: .init(data: "verifier456"))
+            ),
+            ";URLAUTH=user+alice:INTERNAL:verifier456"
+        ),
+    ])
+    func encode(_ fixture: EncodeFixture<AuthenticatedURL>) {
+        fixture.checkEncoding()
+    }
 
-// MARK: - IMAP
-
-extension IURLAuth_Tests {
-    func testEncode() {
-        let inputs: [(AuthenticatedURL, String, UInt)] = [
-            (
+    @Test(arguments: [
+        ParseFixture.authenticatedURL(
+            ";URLAUTH=anonymous:INTERNAL:01234567890123456789012345678901",
+            " ",
+            expected: .success(
                 .init(
                     authenticatedURL: .init(access: .anonymous),
-                    verifier: .init(urlAuthMechanism: .internal, encodedAuthenticationURL: .init(data: "test"))
-                ), ";URLAUTH=anonymous:INTERNAL:test", #line
+                    verifier: .init(
+                        urlAuthMechanism: .internal,
+                        encodedAuthenticationURL: .init(data: "01234567890123456789012345678901")
+                    )
+                )
             )
-        ]
-        self.iterateInputs(inputs: inputs, encoder: { self.testBuffer.writeIAuthenticatedURL($0) })
+        )
+    ])
+    func parse(_ fixture: ParseFixture<AuthenticatedURL>) {
+        fixture.checkParsing()
+    }
+}
+
+// MARK: -
+
+extension EncodeFixture<AuthenticatedURL> {
+    fileprivate static func authenticatedURL(
+        _ input: AuthenticatedURL,
+        _ expectedString: String
+    ) -> Self {
+        EncodeFixture(
+            input: input,
+            bufferKind: .defaultServer,
+            expectedString: expectedString,
+            encoder: { $0.writeIAuthenticatedURL($1) }
+        )
+    }
+}
+
+extension ParseFixture<AuthenticatedURL> {
+    fileprivate static func authenticatedURL(
+        _ input: String,
+        _ terminator: String,
+        expected: Expected
+    ) -> Self {
+        ParseFixture(
+            input: input,
+            terminator: terminator,
+            expected: expected,
+            parser: GrammarParser().parseIURLAuth
+        )
     }
 }

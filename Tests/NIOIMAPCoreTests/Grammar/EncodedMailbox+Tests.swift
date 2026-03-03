@@ -13,18 +13,54 @@
 //===----------------------------------------------------------------------===//
 
 import NIO
+import Testing
 @_spi(NIOIMAPInternal) @testable import NIOIMAPCore
-import XCTest
 
-class EncodedMailbox_Tests: EncodeTestClass {}
+@Suite("EncodedMailbox")
+struct EncodedMailboxTests {
+    @Test(arguments: [
+        EncodeFixture.encodedMailbox(.init(mailbox: "hello"), "hello")
+    ])
+    func encode(_ fixture: EncodeFixture<EncodedMailbox>) {
+        fixture.checkEncoding()
+    }
 
-// MARK: - Encoding
+    @Test(arguments: [
+        ParseFixture.encodedMailbox(
+            "hello%FF",
+            " ",
+            expected: .success(.init(mailbox: "hello%FF"))
+        )
+    ])
+    func parse(_ fixture: ParseFixture<EncodedMailbox>) {
+        fixture.checkParsing()
+    }
+}
 
-extension EncodedMailbox_Tests {
-    func testEncode() {
-        let inputs: [(EncodedMailbox, String, UInt)] = [
-            (.init(mailbox: "hello"), "hello", #line)
-        ]
-        self.iterateInputs(inputs: inputs, encoder: { self.testBuffer.writeEncodedMailbox($0) })
+// MARK: -
+
+extension EncodeFixture<EncodedMailbox> {
+    fileprivate static func encodedMailbox(_ input: T, _ expectedString: String) -> Self {
+        Self(
+            input: input,
+            bufferKind: .defaultServer,
+            expectedString: expectedString,
+            encoder: { $0.writeEncodedMailbox($1) }
+        )
+    }
+}
+
+extension ParseFixture<EncodedMailbox> {
+    fileprivate static func encodedMailbox(
+        _ input: String,
+        _ terminator: String,
+        expected: Expected
+    ) -> Self {
+        ParseFixture(
+            input: input,
+            terminator: terminator,
+            expected: expected,
+            parser: GrammarParser().parseEncodedMailbox
+        )
     }
 }

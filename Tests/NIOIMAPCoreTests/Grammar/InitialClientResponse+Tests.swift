@@ -13,19 +13,53 @@
 //===----------------------------------------------------------------------===//
 
 import NIO
+import Testing
 @_spi(NIOIMAPInternal) @testable import NIOIMAPCore
-import XCTest
 
-class InitialResponse_Tests: EncodeTestClass {}
+@Suite("InitialResponse")
+struct InitialResponseTests {
+    @Test(arguments: [
+        EncodeFixture.initialResponse(.empty, "="),
+        EncodeFixture.initialResponse(.init("base64"), "YmFzZTY0"),
+        EncodeFixture.initialResponse(.init("response"), "cmVzcG9uc2U="),
+    ])
+    func encode(_ fixture: EncodeFixture<InitialResponse>) {
+        fixture.checkEncoding()
+    }
 
-// MARK: - IMAP
+    @Test(arguments: [
+        ParseFixture.initialResponse("=", expected: .success(.empty)),
+        ParseFixture.initialResponse("YQ==", expected: .success(.init("a"))),
+    ])
+    func parse(_ fixture: ParseFixture<InitialResponse>) {
+        fixture.checkParsing()
+    }
+}
 
-extension InitialResponse_Tests {
-    func testEncode() {
-        let inputs: [(InitialResponse, String, UInt)] = [
-            (.empty, "=", #line),
-            (.init("base64"), "YmFzZTY0", #line),
-        ]
-        self.iterateInputs(inputs: inputs, encoder: { self.testBuffer.writeInitialResponse($0) })
+// MARK: -
+
+extension EncodeFixture<InitialResponse> {
+    fileprivate static func initialResponse(_ input: T, _ expectedString: String) -> Self {
+        Self(
+            input: input,
+            bufferKind: .defaultServer,
+            expectedString: expectedString,
+            encoder: { $0.writeInitialResponse($1) }
+        )
+    }
+}
+
+extension ParseFixture<InitialResponse> {
+    fileprivate static func initialResponse(
+        _ input: String,
+        _ terminator: String = " ",
+        expected: Expected
+    ) -> Self {
+        ParseFixture(
+            input: input,
+            terminator: terminator,
+            expected: expected,
+            parser: GrammarParser().parseInitialResponse
+        )
     }
 }

@@ -13,61 +13,50 @@
 //===----------------------------------------------------------------------===//
 
 import NIO
-@testable import NIOIMAPCore
-import XCTest
+@_spi(NIOIMAPInternal) @testable import NIOIMAPCore
+import Testing
 
-class Base64_Tests: XCTestCase {}
+@Suite("Base64")
+struct Base64Tests {
+    static let testBuffers: [[UInt8]] = [
+        [
+            0x60, 0x33, 0x06, 0x09, 0x2A, 0x86, 0x48, 0x86, 0xF7, 0x12, 0x01, 0x02,
+            0x02, 0x02, 0x01, 0x00, 0x00, 0xFF, 0xFF, 0xFF, 0xFF, 0xEA, 0x37, 0x32,
+            0x1B, 0x81, 0x84, 0xDC, 0xA9, 0x13, 0xCC, 0x17, 0x81, 0x89, 0x51, 0xDE,
+            0x71, 0xE3, 0xF6, 0x09, 0x66, 0x34, 0x49, 0x1D, 0x1F, 0x01, 0x00, 0x20,
+            0x00, 0x04, 0x04, 0x04, 0x04,
+        ],
+        [
+            0x60, 0x33, 0x06, 0x09, 0x2A, 0x86, 0x48, 0x86, 0xF7, 0x12, 0x01, 0x02,
+            0x02, 0x02, 0x01, 0x00, 0x00, 0xFF, 0xFF, 0xFF, 0xFF, 0xDC, 0xB4, 0x01,
+            0x1D, 0x74, 0xE9, 0x15, 0xF6, 0x60, 0xAD, 0xE8, 0xE9, 0x2E, 0x52, 0xC8,
+            0x98, 0xFC, 0x24, 0x85, 0xB7, 0xDA, 0xD9, 0x0B, 0x5E, 0x01, 0x00, 0x20,
+            0x00, 0x6D, 0x72, 0x63, 0x01,
+        ],
+        [],
+        [0xFF],
+        [0x0],
+    ]
 
-extension Base64_Tests {
-    func testRoundTrip() {
-        let buffers: [(UInt, [UInt8])] = [
-            (
-                #line,
-                [
-                    0x60, 0x33, 0x06, 0x09, 0x2A, 0x86, 0x48, 0x86, 0xF7, 0x12, 0x01, 0x02,
-                    0x02, 0x02, 0x01, 0x00, 0x00, 0xFF, 0xFF, 0xFF, 0xFF, 0xEA, 0x37, 0x32,
-                    0x1B, 0x81, 0x84, 0xDC, 0xA9, 0x13, 0xCC, 0x17, 0x81, 0x89, 0x51, 0xDE,
-                    0x71, 0xE3, 0xF6, 0x09, 0x66, 0x34, 0x49, 0x1D, 0x1F, 0x01, 0x00, 0x20,
-                    0x00, 0x04, 0x04, 0x04, 0x04,
-                ]
-            ),
-            (
-                #line,
-                [
-                    0x60, 0x33, 0x06, 0x09, 0x2A, 0x86, 0x48, 0x86, 0xF7, 0x12, 0x01, 0x02,
-                    0x02, 0x02, 0x01, 0x00, 0x00, 0xFF, 0xFF, 0xFF, 0xFF, 0xDC, 0xB4, 0x01,
-                    0x1D, 0x74, 0xE9, 0x15, 0xF6, 0x60, 0xAD, 0xE8, 0xE9, 0x2E, 0x52, 0xC8,
-                    0x98, 0xFC, 0x24, 0x85, 0xB7, 0xDA, 0xD9, 0x0B, 0x5E, 0x01, 0x00, 0x20,
-                    0x00, 0x6D, 0x72, 0x63, 0x01,
-                ]
-            ),
-            (#line, []),
-            (#line, [0xFF]),
-            (#line, [0x0]),
-        ]
+    static let encodingOptions: [(Base64.EncodingOptions, Base64.DecodingOptions)] = [
+        ([], []),
+        ([.base64UrlAlphabet], [.base64UrlAlphabet]),
+    ]
 
-        let allOptions: [(Base64.EncodingOptions, Base64.DecodingOptions)] = [
-            ([], []),
-            ([.base64UrlAlphabet], [.base64UrlAlphabet]),
-        ]
-        allOptions.forEach { options in
-            buffers.enumerated().forEach { _, element in
-                let bytes = element.1
-                let encoded = Base64.encodeBytes(bytes: bytes, options: options.0)
-                do {
-                    let decoded = try Base64.decode(bytes: encoded, options: options.1)
-                    XCTAssertEqual(decoded, bytes, "options: \(options), encoded: \(encoded)", line: element.0)
-                } catch {
-                    XCTFail("options: \(options), encoded: \(encoded), error: \(error)", line: element.0)
-                }
-            }
-        }
+    @Test("round trip encodes and decodes successfully", arguments: testBuffers, encodingOptions)
+    func roundTripEncodesAndDecodesSuccessfully(
+        bytes: [UInt8],
+        options: (Base64.EncodingOptions, Base64.DecodingOptions)
+    ) throws {
+        let encoded = Base64.encodeBytes(bytes: bytes, options: options.0)
+        let decoded = try Base64.decode(bytes: encoded, options: options.1)
+        #expect(decoded == bytes)
     }
 
-    func testDecode() {
-        let buffers: [(UInt, String, [UInt8])] = [
+    @Test(
+        "decode converts Base64 strings to bytes",
+        arguments: [
             (
-                #line,
                 "YIIB+wYJKoZIhvcSAQICAQBuggHqMIIB5qADAgEFoQMCAQ6iBwMFACAAAACjggEmYYIBIjCCAR6gAwIBBaESGxB1Lndhc2hpbmd0b24uZWR1oi0wK6ADAgEDoSQwIhsEaW1hcBsac2hpdmFtcy5jYWMud2FzaGluZ3Rvbi5lZHWjgdMwgdCgAwIBAaEDAgEDooHDBIHAcS1GSa5b+fXnPZNmXB9SjL8Ollj2SKyb+3S0iXMljen/jNkpJXAleKTz6BQPzj8duz8EtoOuNfKgweViyn/9B9bccy1uuAE2HI0yC/PHXNNU9ZrBziJ8Lm0tTNc98kUpjXnHZhsMcz5Mx2GR6dGknbI0iaGcRerMUsWOuBmKKKRmVMMdR9T3EZdpqsBd7jZCNMWotjhivd5zovQlFqQ2Wjc2+y46vKP/iXxWIuQJuDiisyXF0Y8+5GTpALpHDc1/pIGmMIGjoAMCAQGigZsEgZg2on5mSuxoDHEA1w9bcW9nFdFxDKpdrQhVGVRDIzcCMCTzvUboqb5KjY1NJKJsfjRQiBYBdENKfzK+g5DlV8nrw81uOcP8NOQCLR5XkoMHC0Dr/80ziQzbNqhxO6652Npft0LQwJvenwDI13YxpwOdMXzkWZN/XrEqOWp6GCgXTBvCyLWLlWnbaUkZdEYbKHBPjd8t/1x5Yg==",
                 [
                     0x60, 0x82, 0x01, 0xFB, 0x06, 0x09, 0x2A, 0x86, 0x48, 0x86, 0xF7, 0x12,
@@ -116,7 +105,6 @@ extension Base64_Tests {
                 ]
             ),
             (
-                #line,
                 "YGgGCSqGSIb3EgECAgIAb1kwV6ADAgEFoQMCAQ+iSzBJoAMCAQGiQgRAtHTEuOP2BXb9sBYFR4SJlDZxmg39IxmRBOhXRKdDA0uHTCOT9Bq3OsUTXUlk0CsFLoa8j+gvGDlgHuqzWHPSQg==",
                 [
                     0x60, 0x68, 0x06, 0x09, 0x2A, 0x86, 0x48, 0x86, 0xF7, 0x12, 0x01, 0x02,
@@ -131,7 +119,7 @@ extension Base64_Tests {
                 ]
             ),
             (
-                #line, "YDMGCSqGSIb3EgECAgIBAAD/////6jcyG4GE3KkTzBeBiVHeceP2CWY0SR0fAQAgAAQEBAQ=",
+                "YDMGCSqGSIb3EgECAgIBAAD/////6jcyG4GE3KkTzBeBiVHeceP2CWY0SR0fAQAgAAQEBAQ=",
                 [
                     0x60, 0x33, 0x06, 0x09, 0x2A, 0x86, 0x48, 0x86, 0xF7, 0x12, 0x01, 0x02,
                     0x02, 0x02, 0x01, 0x00, 0x00, 0xFF, 0xFF, 0xFF, 0xFF, 0xEA, 0x37, 0x32,
@@ -141,7 +129,7 @@ extension Base64_Tests {
                 ]
             ),
             (
-                #line, "YDMGCSqGSIb3EgECAgIBAAD/////3LQBHXTpFfZgrejpLlLImPwkhbfa2QteAQAgAG1yYwE=",
+                "YDMGCSqGSIb3EgECAgIBAAD/////3LQBHXTpFfZgrejpLlLImPwkhbfa2QteAQAgAG1yYwE=",
                 [
                     0x60, 0x33, 0x06, 0x09, 0x2A, 0x86, 0x48, 0x86, 0xF7, 0x12, 0x01, 0x02,
                     0x02, 0x02, 0x01, 0x00, 0x00, 0xFF, 0xFF, 0xFF, 0xFF, 0xDC, 0xB4, 0x01,
@@ -151,15 +139,40 @@ extension Base64_Tests {
                 ]
             ),
         ]
+    )
+    func decodeConvertsBase64StringsToBytes(encoded: String, expected: [UInt8]) throws {
+        let decoded = try Base64.decode(bytes: encoded.utf8, options: [])
+        #expect(decoded == expected)
+    }
 
-        buffers.forEach { element in
-            let encoded = element.1
-            do {
-                let decoded = try Base64.decode(bytes: encoded.utf8, options: [])
-                XCTAssertEqual(decoded, element.2, "encoded: \(encoded)", line: element.0)
-            } catch {
-                XCTFail("encoded: \(encoded), error: \(error)", line: element.0)
+    @Test(
+        "parse base64",
+        arguments: [
+            ParseFixture.base64("YWFh", " ", expected: .success("aaa")),
+            ParseFixture.base64("YQ==", " ", expected: .success("a")),
+        ]
+    )
+    func parseBase64(_ fixture: ParseFixture<String>) {
+        fixture.checkParsing()
+    }
+}
+
+// MARK: -
+
+extension ParseFixture<String> {
+    fileprivate static func base64(
+        _ input: String,
+        _ terminator: String,
+        expected: Expected
+    ) -> Self {
+        ParseFixture(
+            input: input,
+            terminator: terminator,
+            expected: expected,
+            parser: {
+                let buffer = try GrammarParser().parseBase64(buffer: &$0, tracker: $1)
+                return String(buffer: buffer)
             }
-        }
+        )
     }
 }

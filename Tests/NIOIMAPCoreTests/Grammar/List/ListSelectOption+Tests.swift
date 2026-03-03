@@ -13,29 +13,63 @@
 //===----------------------------------------------------------------------===//
 
 import NIO
+import Testing
 @_spi(NIOIMAPInternal) @testable import NIOIMAPCore
-import XCTest
 
-class ListSelectOption_Tests: EncodeTestClass {}
-
-// MARK: - Encoding
-
-extension ListSelectOption_Tests {
-    func testEncode() {
-        let inputs: [(ListSelectOption, String, UInt)] = [
-            (.subscribed, "SUBSCRIBED", #line),
-            (.remote, "REMOTE", #line),
-            (.recursiveMatch, "RECURSIVEMATCH", #line),
-            (.specialUse, "SPECIAL-USE", #line),
+@Suite("ListSelectOption")
+struct ListSelectOptionTests {
+    @Test(
+        "encode single option",
+        arguments: [
+            EncodeFixture.listSelectOption(.subscribed, "SUBSCRIBED"),
+            EncodeFixture.listSelectOption(.remote, "REMOTE"),
+            EncodeFixture.listSelectOption(.recursiveMatch, "RECURSIVEMATCH"),
+            EncodeFixture.listSelectOption(.specialUse, "SPECIAL-USE"),
         ]
-        self.iterateInputs(inputs: inputs, encoder: { self.testBuffer.writeListSelectOption($0) })
+    )
+    func encodeSingleOption(_ fixture: EncodeFixture<ListSelectOption>) {
+        fixture.checkEncoding()
     }
 
-    func testEncode_multiple() {
-        let inputs: [(ListSelectOptions?, String, UInt)] = [
-            (nil, "()", #line),
-            (.init(baseOption: .subscribed, options: [.subscribed]), "(SUBSCRIBED SUBSCRIBED)", #line),
+    @Test(
+        "encode multiple options",
+        arguments: [
+            EncodeFixture.listSelectOptions(nil, "()"),
+            EncodeFixture.listSelectOptions(
+                .init(baseOption: .subscribed, options: [.subscribed]),
+                "(SUBSCRIBED SUBSCRIBED)"
+            ),
+            EncodeFixture.listSelectOptions(
+                .init(baseOption: .subscribed, options: [.specialUse, .recursiveMatch]),
+                "(SPECIAL-USE RECURSIVEMATCH SUBSCRIBED)"
+            ),
         ]
-        self.iterateInputs(inputs: inputs, encoder: { self.testBuffer.writeListSelectOptions($0) })
+    )
+    func encodeMultipleOptions(_ fixture: EncodeFixture<ListSelectOptions?>) {
+        fixture.checkEncoding()
+    }
+}
+
+// MARK: -
+
+extension EncodeFixture<ListSelectOption> {
+    fileprivate static func listSelectOption(_ input: T, _ expectedString: String) -> Self {
+        Self(
+            input: input,
+            bufferKind: .defaultServer,
+            expectedString: expectedString,
+            encoder: { $0.writeListSelectOption($1) }
+        )
+    }
+}
+
+extension EncodeFixture<ListSelectOptions?> {
+    fileprivate static func listSelectOptions(_ input: T, _ expectedString: String) -> Self {
+        Self(
+            input: input,
+            bufferKind: .defaultServer,
+            expectedString: expectedString,
+            encoder: { $0.writeListSelectOptions($1) }
+        )
     }
 }

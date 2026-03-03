@@ -14,57 +14,203 @@
 
 import NIO
 @_spi(NIOIMAPInternal) @testable import NIOIMAPCore
-import XCTest
+import Testing
 
-class MailboxInfo_Tests: EncodeTestClass {}
+@Suite("MailboxInfo")
+struct MailboxInfoTests {
+    @Test("attribute hashable")
+    func attributeHashable() {
+        #expect(
+            MailboxInfo.Attribute("test").hashValue == MailboxInfo.Attribute("TEST").hashValue,
+            "hashing should be case insensitive"
+        )
+        #expect(
+            MailboxInfo.Attribute("a").hashValue != MailboxInfo.Attribute("b").hashValue
+        )
+    }
 
-// MARK: - Attribute
+    @Test(arguments: [
+        EncodeFixture.mailboxInfo(
+            MailboxInfo(attributes: [], path: try! .init(name: .inbox), extensions: [:]),
+            #"() NIL "INBOX""#
+        ),
+        EncodeFixture.mailboxInfo(
+            MailboxInfo(attributes: [], path: try! .init(name: .inbox, pathSeparator: "/"), extensions: [:]),
+            #"() "/" "INBOX""#
+        ),
+        EncodeFixture.mailboxInfo(
+            MailboxInfo(
+                attributes: [.noSelect],
+                path: try! .init(name: MailboxName("Projects"), pathSeparator: "/"),
+                extensions: [:]
+            ),
+            #"(\Noselect) "/" "Projects""#
+        ),
+        EncodeFixture.mailboxInfo(
+            MailboxInfo(
+                attributes: [.marked, .hasChildren],
+                path: try! .init(name: MailboxName("INBOX"), pathSeparator: "/"),
+                extensions: [:]
+            ),
+            #"(\Marked \HasChildren) "/" "INBOX""#
+        ),
+        EncodeFixture.mailboxInfo(
+            MailboxInfo(
+                attributes: [.hasNoChildren],
+                path: try! .init(name: MailboxName("Sent"), pathSeparator: "/"),
+                extensions: [:]
+            ),
+            #"(\HasNoChildren) "/" "Sent""#
+        ),
+        EncodeFixture.mailboxInfo(
+            MailboxInfo(
+                attributes: [.noSelect, .hasChildren],
+                path: try! .init(name: MailboxName("[Gmail]"), pathSeparator: "/"),
+                extensions: [:]
+            ),
+            #"(\Noselect \HasChildren) "/" "[Gmail]""#
+        ),
+        EncodeFixture.mailboxInfo(
+            MailboxInfo(
+                attributes: [.subscribed, .hasNoChildren],
+                path: try! .init(name: MailboxName("Archive/2024"), pathSeparator: "."),
+                extensions: [:]
+            ),
+            #"(\Subscribed \HasNoChildren) "." "Archive/2024""#
+        ),
+    ])
+    func encode(_ fixture: EncodeFixture<MailboxInfo>) {
+        fixture.checkEncoding()
+    }
 
-extension MailboxInfo_Tests {
-    func testAttribute_hashable() {
-        var testSet = Set<MailboxInfo.Attribute>()
-        let attribute1 = MailboxInfo.Attribute("test")
-        let attribute2 = MailboxInfo.Attribute("TEST")
+    @Test(
+        "encode flags",
+        arguments: [
+            EncodeFixture.mailboxListFlags([], ""),
+            EncodeFixture.mailboxListFlags([.marked], #"\Marked"#),
+            EncodeFixture.mailboxListFlags([.noInferiors], #"\Noinferiors"#),
+            EncodeFixture.mailboxListFlags([.marked, .noInferiors, .init(#"\test"#)], #"\Marked \Noinferiors \test"#),
+        ]
+    )
+    func encodeFlags(_ fixture: EncodeFixture<[MailboxInfo.Attribute]>) {
+        fixture.checkEncoding()
+    }
 
-        // hashing should be case insensitive
-        testSet.insert(attribute1)
-        XCTAssertTrue(testSet.contains(attribute2))
+    @Test(arguments: [
+        ParseFixture.mailboxInfo(
+            "() NIL inbox",
+            "\r",
+            expected: .success(.init(attributes: [], path: try! .init(name: .inbox), extensions: [:]))
+        ),
+        ParseFixture.mailboxInfo(
+            #"() "d" inbox"#,
+            "\r",
+            expected: .success(
+                .init(attributes: [], path: try! .init(name: .inbox, pathSeparator: "d"), extensions: [:])
+            )
+        ),
+        ParseFixture.mailboxInfo(
+            "(\\oflag1 \\oflag2) NIL inbox",
+            "\r",
+            expected: .success(
+                .init(
+                    attributes: [.init("\\oflag1"), .init("\\oflag2")],
+                    path: try! .init(name: .inbox),
+                    extensions: [:]
+                )
+            )
+        ),
+        ParseFixture.mailboxInfo(
+            #"(\oflag1 \oflag2) "d" inbox"#,
+            "\r",
+            expected: .success(
+                .init(
+                    attributes: [.init("\\oflag1"), .init("\\oflag2")],
+                    path: try! .init(name: .inbox, pathSeparator: "d"),
+                    extensions: [:]
+                )
+            )
+        ),
+        ParseFixture.mailboxInfo(#"() ""#, "", expected: .incompleteMessageIgnoringBufferModifications),
+        ParseFixture.mailboxInfo(#"() "\" inbox"#, "", expected: .failureIgnoringBufferModifications),
+    ])
+    func parse(_ fixture: ParseFixture<MailboxInfo>) {
+        fixture.checkParsing()
+    }
+
+    @Test(
+        "parse flags",
+        arguments: [
+            ParseFixture.mailboxListFlags("\\marked", "\r", expected: .success([.marked])),
+            ParseFixture.mailboxListFlags("\\marked \\remote", "\r", expected: .success([.marked, .remote])),
+            ParseFixture.mailboxListFlags(
+                "\\marked \\o1 \\o2",
+                "\r",
+                expected: .success([.marked, .init("\\o1"), .init("\\o2")])
+            ),
+        ]
+    )
+    func parseFlags(_ fixture: ParseFixture<[MailboxInfo.Attribute]>) {
+        fixture.checkParsing()
     }
 }
 
-// MARK: - Encoding
+// MARK: -
 
-extension MailboxInfo_Tests {
-    func testEncode() {
-        let inputs: [(MailboxInfo, String, UInt)] = [
-            (MailboxInfo(attributes: [], path: try! .init(name: .inbox), extensions: [:]), "() NIL \"INBOX\"", #line),
-            (
-                MailboxInfo(attributes: [], path: try! .init(name: .inbox, pathSeparator: "a"), extensions: [:]),
-                "() \"a\" \"INBOX\"", #line
-            ),
-        ]
-
-        for (test, expectedString, line) in inputs {
-            self.testBuffer.clear()
-            let size = self.testBuffer.writeMailboxInfo(test)
-            XCTAssertEqual(size, expectedString.utf8.count, line: line)
-            XCTAssertEqual(self.testBufferString, expectedString, line: line)
-        }
+extension EncodeFixture<MailboxInfo> {
+    fileprivate static func mailboxInfo(
+        _ input: MailboxInfo,
+        _ expectedString: String
+    ) -> Self {
+        EncodeFixture(
+            input: input,
+            bufferKind: .defaultServer,
+            expectedString: expectedString,
+            encoder: { $0.writeMailboxInfo($1) }
+        )
     }
+}
 
-    func testEncode_flags() {
-        let inputs: [([MailboxInfo.Attribute], String, UInt)] = [
-            ([], "", #line),
-            ([.marked], "\\Marked", #line),
-            ([.noInferiors], "\\Noinferiors", #line),
-            ([.marked, .noInferiors, .init("\\test")], "\\Marked \\Noinferiors \\test", #line),
-        ]
+extension EncodeFixture<[MailboxInfo.Attribute]> {
+    fileprivate static func mailboxListFlags(
+        _ input: [MailboxInfo.Attribute],
+        _ expectedString: String
+    ) -> Self {
+        EncodeFixture(
+            input: input,
+            bufferKind: .defaultServer,
+            expectedString: expectedString,
+            encoder: { $0.writeMailboxListFlags($1) }
+        )
+    }
+}
 
-        for (test, expectedString, line) in inputs {
-            self.testBuffer.clear()
-            let size = self.testBuffer.writeMailboxListFlags(test)
-            XCTAssertEqual(size, expectedString.utf8.count, line: line)
-            XCTAssertEqual(self.testBufferString, expectedString, line: line)
-        }
+extension ParseFixture<MailboxInfo> {
+    fileprivate static func mailboxInfo(
+        _ input: String,
+        _ terminator: String,
+        expected: Expected
+    ) -> Self {
+        ParseFixture(
+            input: input,
+            terminator: terminator,
+            expected: expected,
+            parser: GrammarParser().parseMailboxList
+        )
+    }
+}
+
+extension ParseFixture<[MailboxInfo.Attribute]> {
+    fileprivate static func mailboxListFlags(
+        _ input: String,
+        _ terminator: String = "\r",
+        expected: Expected
+    ) -> Self {
+        ParseFixture(
+            input: input,
+            terminator: terminator,
+            expected: expected,
+            parser: GrammarParser().parseMailboxListFlags
+        )
     }
 }

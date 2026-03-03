@@ -15,32 +15,73 @@
 import NIO
 @_spi(NIOIMAPInternal) @testable import NIOIMAPCore
 import OrderedCollections
-import XCTest
+import Testing
 
-class NamespaceResponseExtension_Tests: EncodeTestClass {}
+@Suite("NamespaceResponse Extensions")
+struct NamespaceResponseExtensionTests {
+    @Test(arguments: [
+        EncodeFixture.namespaceResponseExtensions([:], ""),
+        EncodeFixture.namespaceResponseExtensions(
+            ["str1": ["str2"]],
+            " \"str1\" (\"str2\")"
+        ),
+        EncodeFixture.namespaceResponseExtensions(
+            [
+                "str1": ["str2"],
+                "str3": ["str4"],
+                "str5": ["str6"],
+            ],
+            " \"str1\" (\"str2\") \"str3\" (\"str4\") \"str5\" (\"str6\")"
+        ),
+    ])
+    func encode(_ fixture: EncodeFixture<OrderedDictionary<ByteBuffer, [ByteBuffer]>>) {
+        fixture.checkEncoding()
+    }
 
-// MARK: - Encoding
+    @Test(arguments: [
+        ParseFixture.namespaceResponseExtension(
+            " \"str1\" (\"str2\")",
+            " ",
+            expected: .success(KeyValue(key: "str1", value: ["str2"]))
+        ),
+        ParseFixture.namespaceResponseExtension(
+            " \"str1\" (\"str2\" \"str3\" \"str4\")",
+            " ",
+            expected: .success(KeyValue(key: "str1", value: ["str2", "str3", "str4"]))
+        ),
+    ])
+    func parse(_ fixture: ParseFixture<KeyValue<ByteBuffer, [ByteBuffer]>>) {
+        fixture.checkParsing()
+    }
+}
 
-extension NamespaceResponseExtension_Tests {
-    func testEncode() {
-        let inputs: [(OrderedDictionary<ByteBuffer, [ByteBuffer]>, String, UInt)] = [
-            ([:], "", #line),
-            (["str1": ["str2"]], " \"str1\" (\"str2\")", #line),
-            (
-                [
-                    "str1": ["str2"],
-                    "str3": ["str4"],
-                    "str5": ["str6"],
-                ],
-                " \"str1\" (\"str2\") \"str3\" (\"str4\") \"str5\" (\"str6\")", #line
-            ),
-        ]
+// MARK: -
 
-        for (test, expectedString, line) in inputs {
-            self.testBuffer.clear()
-            let size = self.testBuffer.writeNamespaceResponseExtensions(test)
-            XCTAssertEqual(size, expectedString.utf8.count, line: line)
-            XCTAssertEqual(self.testBufferString, expectedString, line: line)
-        }
+extension EncodeFixture<OrderedDictionary<ByteBuffer, [ByteBuffer]>> {
+    fileprivate static func namespaceResponseExtensions(
+        _ input: OrderedDictionary<ByteBuffer, [ByteBuffer]>,
+        _ expectedString: String
+    ) -> Self {
+        EncodeFixture(
+            input: input,
+            bufferKind: .defaultServer,
+            expectedString: expectedString,
+            encoder: { $0.writeNamespaceResponseExtensions($1) }
+        )
+    }
+}
+
+extension ParseFixture<KeyValue<ByteBuffer, [ByteBuffer]>> {
+    fileprivate static func namespaceResponseExtension(
+        _ input: String,
+        _ terminator: String = "\r",
+        expected: Expected
+    ) -> Self {
+        ParseFixture(
+            input: input,
+            terminator: terminator,
+            expected: expected,
+            parser: GrammarParser().parseNamespaceResponseExtension
+        )
     }
 }

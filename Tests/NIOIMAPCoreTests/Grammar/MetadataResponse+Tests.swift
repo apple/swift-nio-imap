@@ -14,23 +14,71 @@
 
 import NIO
 @_spi(NIOIMAPInternal) @testable import NIOIMAPCore
-import XCTest
+import Testing
 
-class MetadataResponse_Tests: EncodeTestClass {}
+@Suite("MetadataResponse")
+struct MetadataResponseTests {
+    @Test(arguments: [
+        EncodeFixture.metadataResponse(
+            .list(list: ["a"], mailbox: .inbox),
+            "METADATA \"INBOX\" \"a\""
+        ),
+        EncodeFixture.metadataResponse(
+            .list(list: ["a", "b", "c"], mailbox: .inbox),
+            "METADATA \"INBOX\" \"a\" \"b\" \"c\""
+        ),
+        EncodeFixture.metadataResponse(
+            .values(values: ["a": .init(nil)], mailbox: .inbox),
+            "METADATA \"INBOX\" (\"a\" NIL)"
+        ),
+    ])
+    func encode(_ fixture: EncodeFixture<MetadataResponse>) {
+        fixture.checkEncoding()
+    }
 
-// MARK: - IMAP
+    @Test(arguments: [
+        ParseFixture.metadataResponse("METADATA INBOX \"a\"", expected: .success(.list(list: ["a"], mailbox: .inbox))),
+        ParseFixture.metadataResponse(
+            "METADATA INBOX \"a\" \"b\" \"c\"",
+            expected: .success(.list(list: ["a", "b", "c"], mailbox: .inbox))
+        ),
+        ParseFixture.metadataResponse(
+            "METADATA INBOX (\"a\" NIL)",
+            expected: .success(.values(values: ["a": .init(nil)], mailbox: .inbox))
+        ),
+    ])
+    func parse(_ fixture: ParseFixture<MetadataResponse>) {
+        fixture.checkParsing()
+    }
+}
 
-extension MetadataResponse_Tests {
-    func testEncode() {
-        let inputs: [(MetadataResponse, String, UInt)] = [
-            (.list(list: ["a"], mailbox: .inbox), "METADATA \"INBOX\" \"a\"", #line),
-            (.list(list: ["a", "b", "c"], mailbox: .inbox), "METADATA \"INBOX\" \"a\" \"b\" \"c\"", #line),
-            (
-                .values(values: ["a": .init(nil)], mailbox: .inbox),
-                "METADATA \"INBOX\" (\"a\" NIL)",
-                #line
-            ),
-        ]
-        self.iterateInputs(inputs: inputs, encoder: { self.testBuffer.writeMetadataResponse($0) })
+// MARK: -
+
+extension EncodeFixture<MetadataResponse> {
+    fileprivate static func metadataResponse(
+        _ input: MetadataResponse,
+        _ expectedString: String
+    ) -> Self {
+        .init(
+            input: input,
+            bufferKind: .defaultServer,
+            expectedString: expectedString,
+            encoder: { $0.writeMetadataResponse($1) }
+        )
+    }
+}
+
+extension ParseFixture<MetadataResponse> {
+    fileprivate static func metadataResponse(
+        _ input: String,
+        _ terminator: String = "\r",
+        expected: Expected
+    ) -> Self {
+        ParseFixture(
+            input: input,
+            terminator: terminator,
+            expected: expected,
+            parser: GrammarParser().parseMetadataResponse
+        )
     }
 }

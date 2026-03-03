@@ -13,18 +13,54 @@
 //===----------------------------------------------------------------------===//
 
 import NIO
+import Testing
 @_spi(NIOIMAPInternal) @testable import NIOIMAPCore
-import XCTest
 
-class EncodedSection_Tests: EncodeTestClass {}
+@Suite("EncodedSection")
+struct EncodedSectionTests {
+    @Test(arguments: [
+        EncodeFixture.encodedSection(.init(section: "hello"), "hello")
+    ])
+    func encode(_ fixture: EncodeFixture<EncodedSection>) {
+        fixture.checkEncoding()
+    }
 
-// MARK: - Encoding
+    @Test(arguments: [
+        ParseFixture.encodedSection(
+            "query%FF",
+            " ",
+            expected: .success(.init(section: "query%FF"))
+        )
+    ])
+    func parse(_ fixture: ParseFixture<EncodedSection>) {
+        fixture.checkParsing()
+    }
+}
 
-extension EncodedSection_Tests {
-    func testEncode() {
-        let inputs: [(EncodedSection, String, UInt)] = [
-            (.init(section: "hello"), "hello", #line)
-        ]
-        self.iterateInputs(inputs: inputs, encoder: { self.testBuffer.writeEncodedSection($0) })
+// MARK: -
+
+extension EncodeFixture<EncodedSection> {
+    fileprivate static func encodedSection(_ input: T, _ expectedString: String) -> Self {
+        Self(
+            input: input,
+            bufferKind: .defaultServer,
+            expectedString: expectedString,
+            encoder: { $0.writeEncodedSection($1) }
+        )
+    }
+}
+
+extension ParseFixture<EncodedSection> {
+    fileprivate static func encodedSection(
+        _ input: String,
+        _ terminator: String,
+        expected: Expected
+    ) -> Self {
+        ParseFixture(
+            input: input,
+            terminator: terminator,
+            expected: expected,
+            parser: GrammarParser().parseEncodedSection
+        )
     }
 }

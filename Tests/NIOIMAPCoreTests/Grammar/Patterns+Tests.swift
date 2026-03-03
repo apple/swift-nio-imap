@@ -13,24 +13,29 @@
 //===----------------------------------------------------------------------===//
 
 import NIO
+import Testing
 @_spi(NIOIMAPInternal) @testable import NIOIMAPCore
-import XCTest
 
-class Patterns_Tests: EncodeTestClass {}
+@Suite("Patterns")
+struct PatternsTests {
+    @Test(arguments: [
+        EncodeFixture.patterns(["Mailbox1", "Mailbox2"], "(\"Mailbox1\" \"Mailbox2\")"),
+        EncodeFixture.patterns(["*"], "(\"*\")"),
+    ])
+    func encode(_ fixture: EncodeFixture<[ByteBuffer]>) {
+        fixture.checkEncoding()
+    }
+}
 
-// MARK: - Encoding
+// MARK: -
 
-extension Patterns_Tests {
-    func testEncode() {
-        let inputs: [([ByteBuffer], String, UInt)] = [
-            (["Mailbox1", "Mailbox2"], "(\"Mailbox1\" \"Mailbox2\")", #line)
-        ]
-
-        for (test, expectedString, line) in inputs {
-            self.testBuffer.clear()
-            let size = self.testBuffer.writePatterns(test)
-            XCTAssertEqual(size, expectedString.utf8.count, line: line)
-            XCTAssertEqual(self.testBufferString, expectedString, line: line)
-        }
+extension EncodeFixture<[ByteBuffer]> {
+    fileprivate static func patterns(_ input: T, _ expectedString: String) -> Self {
+        Self(
+            input: input,
+            bufferKind: .defaultServer,
+            expectedString: expectedString,
+            encoder: { $0.writePatterns($1) }
+        )
     }
 }

@@ -14,71 +14,88 @@
 
 import NIO
 @testable import NIOIMAPCore
-import XCTest
+import Testing
 
-class ModifiedUTF7_Tests: XCTestCase {}
-
-extension ModifiedUTF7_Tests {
-    func testEncode() {
-        let inputs: [(String, String, UInt)] = [
-            ("", "", #line),
-            ("abc", "abc", #line),
-            ("&", "&-", #line),
-            ("ab&12", "ab&-12", #line),
-            ("mail/€/£", "mail/&IKw-/&AKM-", #line),
-            ("Répertoire", "R&AOk-pertoire", #line),
-            ("パリ", "&MNEw6g-", #line),
-            ("雑件", "&ltFO9g-", #line),
-            ("🏣🏣", "&2Dzf49g83+M-", #line),
-            ("🧑🏽‍🦳", "&2D7d0dg83,0gDdg+3bM-", #line),
-            ("a/b/c", "a/b/c", #line),
-            (#"a\b\c"#, #"a\b\c"#, #line),
-            ("a+b", "a+b", #line),
-            ("~ab", "~ab", #line),
+@Suite("ModifiedUTF7")
+struct ModifiedUTF7Tests {
+    @Test(
+        "encode converts strings to Modified UTF-7",
+        arguments: [
+            ("", ""),
+            ("abc", "abc"),
+            ("&", "&-"),
+            ("ab&12", "ab&-12"),
+            ("mail/€/£", "mail/&IKw-/&AKM-"),
+            ("Répertoire", "R&AOk-pertoire"),
+            ("パリ", "&MNEw6g-"),
+            ("雑件", "&ltFO9g-"),
+            ("🏣🏣", "&2Dzf49g83+M-"),
+            ("🧑🏽‍🦳", "&2D7d0dg83,0gDdg+3bM-"),
+            ("a/b/c", "a/b/c"),
+            (#"a\b\c"#, #"a\b\c"#),
+            ("a+b", "a+b"),
+            ("~ab", "~ab"),
         ]
-        for (input, expected, line) in inputs {
-            let actual = ModifiedUTF7.encode(input)
-            XCTAssertEqual(expected, String(buffer: actual), line: line)
-        }
+    )
+    func encodeConvertsStringsToModifiedUTF7(input: String, expected: String) {
+        let actual = ModifiedUTF7.encode(input)
+        #expect(String(buffer: actual) == expected)
     }
 
-    func testDecode() {
-        let inputs: [(String, String, UInt)] = [
-            ("", "", #line),
-            ("abc", "abc", #line),
-            ("&-", "&", #line),
-            ("ab&-12", "ab&12", #line),
-            ("mail/&IKw-/&AKM-", "mail/€/£", #line),
-            ("R&AOk-pertoire", "Répertoire", #line),
-            ("&MNEw6g-", "パリ", #line),
-            ("&ltFO9g-", "雑件", #line),
-            ("&2Dzf49g83+M-", "🏣🏣", #line),
-            ("&2D7d0dg83,0gDdg+3bM-", "🧑🏽‍🦳", #line),
-            ("a/b/c", "a/b/c", #line),
-            (#"a\b\c"#, #"a\b\c"#, #line),
-            ("a+b", "a+b", #line),
-            ("~ab", "~ab", #line),
+    @Test(
+        "decode converts Modified UTF-7 to strings",
+        arguments: [
+            ("", ""),
+            ("abc", "abc"),
+            ("&-", "&"),
+            ("ab&-12", "ab&12"),
+            ("mail/&IKw-/&AKM-", "mail/€/£"),
+            ("R&AOk-pertoire", "Répertoire"),
+            ("&MNEw6g-", "パリ"),
+            ("&ltFO9g-", "雑件"),
+            ("&2Dzf49g83+M-", "🏣🏣"),
+            ("&2D7d0dg83,0gDdg+3bM-", "🧑🏽‍🦳"),
+            ("a/b/c", "a/b/c"),
+            (#"a\b\c"#, #"a\b\c"#),
+            ("a+b", "a+b"),
+            ("~ab", "~ab"),
         ]
-        for (input, expected, line) in inputs {
-            XCTAssertNoThrow(
-                XCTAssertEqual(expected, try ModifiedUTF7.decode(ByteBuffer(string: input)), line: line),
-                line: line
-            )
+    )
+    func decodeConvertsModifiedUTF7ToStrings(input: String, expected: String) throws {
+        let actual = try ModifiedUTF7.decode(ByteBuffer(string: input))
+        #expect(actual == expected)
+    }
+
+    @Test("decode throws error for invalid Modified UTF-7")
+    func decodeThrowsErrorForInvalidModifiedUTF7() {
+        #expect(throws: ModifiedUTF7.OddByteCountError.self) {
+            try ModifiedUTF7.decode(ByteBuffer(string: "&aa==-"))
         }
     }
 
-    func testDecode_error() {
-        XCTAssertThrowsError(try ModifiedUTF7.decode(ByteBuffer(string: "&aa==-"))) { e in
-            XCTAssertTrue(e is ModifiedUTF7.OddByteCountError)
-        }
+    @Test(
+        "validate accepts valid Modified UTF-7 strings",
+        arguments: [
+            "a",
+            "a/b/c",
+            "&2Dzf49g83+M-",
+            "&ltFO9g-",
+        ]
+    )
+    func validateAcceptsValidModifiedUTF7Strings(input: String) throws {
+        try ModifiedUTF7.validate(ByteBuffer(string: input))
     }
 
-    func testValidate() {
-        XCTAssertNoThrow(try ModifiedUTF7.validate("a"))
-        XCTAssertNoThrow(try ModifiedUTF7.validate("a/b/c"))
-        XCTAssertNoThrow(try ModifiedUTF7.validate("&2Dzf49g83+M-"))
-        XCTAssertNoThrow(try ModifiedUTF7.validate("&ltFO9g-"))
-        XCTAssertThrowsError(try ModifiedUTF7.validate("&Jjo!"))
-        XCTAssertThrowsError(try ModifiedUTF7.validate("&U,BTFw-&ZeVnLIqe-"))
+    @Test(
+        "validate rejects invalid Modified UTF-7 strings",
+        arguments: [
+            "&Jjo!",
+            "&U,BTFw-&ZeVnLIqe-",
+        ]
+    )
+    func validateRejectsInvalidModifiedUTF7Strings(input: String) {
+        #expect(throws: Error.self) {
+            try ModifiedUTF7.validate(ByteBuffer(string: input))
+        }
     }
 }

@@ -14,43 +14,104 @@
 
 import NIO
 @_spi(NIOIMAPInternal) @testable import NIOIMAPCore
-import XCTest
+import Testing
 
-class FlagKeyword_Tests: EncodeTestClass {}
+@Suite("FlagKeyword")
+struct FlagKeywordTests {
+    @Test("keyword equality")
+    func keywordEquality() {
+        #expect(Flag.Keyword("flag") == Flag.Keyword("flag"))
+        #expect(Flag.Keyword("flagA") != Flag.Keyword("flag"))
+        #expect(Flag.Keyword("flag") != Flag.Keyword("flagB"))
+        #expect(Flag.Keyword("a") == Flag.Keyword("a"))
+        #expect(Flag.Keyword("a") != Flag.Keyword("b"))
+    }
 
-// MARK: - Equatable
+    @Test(arguments: [
+        EncodeFixture.flagKeyword(
+            .forwarded,
+            "$Forwarded"
+        ),
+        EncodeFixture.flagKeyword(
+            .mdnSent,
+            "$MDNSent"
+        ),
+        EncodeFixture.flagKeyword(
+            .colorBit0,
+            "$MailFlagBit0"
+        ),
+        EncodeFixture.flagKeyword(
+            .colorBit1,
+            "$MailFlagBit1"
+        ),
+        EncodeFixture.flagKeyword(
+            .colorBit2,
+            "$MailFlagBit2"
+        ),
+        EncodeFixture.flagKeyword(
+            .junk,
+            "$Junk"
+        ),
+        EncodeFixture.flagKeyword(
+            .notJunk,
+            "$NotJunk"
+        ),
+        EncodeFixture.flagKeyword(
+            .unregistered_junk,
+            "Junk"
+        ),
+        EncodeFixture.flagKeyword(
+            .unregistered_notJunk,
+            "NotJunk"
+        ),
+        EncodeFixture.flagKeyword(
+            .unregistered_forwarded,
+            "Forwarded"
+        ),
+        EncodeFixture.flagKeyword(
+            .unregistered_redirected,
+            "Redirected"
+        ),
+    ])
+    func encode(_ fixture: EncodeFixture<Flag.Keyword>) {
+        fixture.checkEncoding()
+    }
 
-extension FlagKeyword_Tests {
-    func testEquatable() {
-        let flag1 = Flag.Keyword("flag")
-        let flag2 = Flag.Keyword("flag")
-        XCTAssertEqual(flag1, flag2)
+    @Test(arguments: [
+        ParseFixture.flagKeyword("keyword", expected: .success(Flag.Keyword("keyword")!))
+    ])
+    func parse(_ fixture: ParseFixture<Flag.Keyword>) {
+        fixture.checkParsing()
     }
 }
 
-// MARK: - Encoding
+// MARK: -
 
-extension FlagKeyword_Tests {
-    func testEncode() {
-        let inputs: [(Flag.Keyword, String, UInt)] = [
-            (.forwarded, "$Forwarded", #line),
-            (.mdnSent, "$MDNSent", #line),
-            (.colorBit0, "$MailFlagBit0", #line),
-            (.colorBit1, "$MailFlagBit1", #line),
-            (.colorBit2, "$MailFlagBit2", #line),
-            (.junk, "$Junk", #line),
-            (.notJunk, "$NotJunk", #line),
-            (.unregistered_junk, "Junk", #line),
-            (.unregistered_notJunk, "NotJunk", #line),
-            (.unregistered_forwarded, "Forwarded", #line),
-            (.unregistered_redirected, "Redirected", #line),
-        ]
+extension EncodeFixture<Flag.Keyword> {
+    fileprivate static func flagKeyword(
+        _ input: Flag.Keyword,
+        _ expectedString: String
+    ) -> Self {
+        .init(
+            input: input,
+            bufferKind: .defaultServer,
+            expectedString: expectedString,
+            encoder: { $0.writeFlagKeyword($1) }
+        )
+    }
+}
 
-        for (test, expectedString, line) in inputs {
-            self.testBuffer.clear()
-            let size = self.testBuffer.writeFlagKeyword(test)
-            XCTAssertEqual(size, expectedString.utf8.count, line: line)
-            XCTAssertEqual(self.testBufferString, expectedString, line: line)
-        }
+extension ParseFixture<Flag.Keyword> {
+    fileprivate static func flagKeyword(
+        _ input: String,
+        _ terminator: String = " ",
+        expected: Expected
+    ) -> Self {
+        ParseFixture(
+            input: input,
+            terminator: terminator,
+            expected: expected,
+            parser: GrammarParser().parseFlagKeyword
+        )
     }
 }

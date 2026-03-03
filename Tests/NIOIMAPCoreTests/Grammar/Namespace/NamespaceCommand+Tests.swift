@@ -14,23 +14,16 @@
 
 import NIO
 @_spi(NIOIMAPInternal) @testable import NIOIMAPCore
-import XCTest
+import Testing
 
-class NamespaceCommand_Tests: EncodeTestClass {}
-
-// MARK: - Encoding
-
-extension NamespaceCommand_Tests {
-    func testEncode() {
-        let inputs: [(String, UInt)] = [
-            ("NAMESPACE", #line)
-        ]
-
-        for (expectedString, line) in inputs {
-            self.testBuffer.clear()
-            let size = self.testBuffer.writeNamespaceCommand()
-            XCTAssertEqual(size, expectedString.utf8.count, line: line)
-            XCTAssertEqual(self.testBufferString, expectedString, line: line)
-        }
+@Suite("Namespace Command")
+struct NamespaceCommandTests {
+    func encode() {
+        EncodeFixture<Void>(
+            input: (),
+            bufferKind: .defaultServer,
+            expectedString: "NAMESPACE",
+            encoder: { b, _ in b.writeNamespaceCommand() }
+        ).checkEncoding()
     }
 }

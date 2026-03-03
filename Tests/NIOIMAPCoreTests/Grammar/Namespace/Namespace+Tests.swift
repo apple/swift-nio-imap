@@ -14,31 +14,41 @@
 
 import NIO
 @_spi(NIOIMAPInternal) @testable import NIOIMAPCore
-import XCTest
+import Testing
 
-class Namespace_Tests: EncodeTestClass {}
+@Suite("NamespaceDescription")
+struct NamespaceTests {
+    @Test(arguments: [
+        EncodeFixture.namespace([], "NIL"),
+        EncodeFixture.namespace(
+            [.init(string: "str1", char: nil, responseExtensions: [:])],
+            "((\"str1\" NIL))"
+        ),
+        EncodeFixture.namespace(
+            [
+                .init(string: "str1", char: nil, responseExtensions: [:]),
+                .init(string: "str2", char: nil, responseExtensions: [:]),
+            ],
+            "((\"str1\" NIL)(\"str2\" NIL))"
+        ),
+    ])
+    func encode(_ fixture: EncodeFixture<[NamespaceDescription]>) {
+        fixture.checkEncoding()
+    }
+}
 
-// MARK: - Encoding
+// MARK: -
 
-extension Namespace_Tests {
-    func testEncode() {
-        let inputs: [([NamespaceDescription], String, UInt)] = [
-            ([], "NIL", #line),
-            ([.init(string: "str1", char: nil, responseExtensions: [:])], "((\"str1\" NIL))", #line),
-            (
-                [
-                    .init(string: "str1", char: nil, responseExtensions: [:]),
-                    .init(string: "str2", char: nil, responseExtensions: [:]),
-                ],
-                "((\"str1\" NIL)(\"str2\" NIL))", #line
-            ),
-        ]
-
-        for (test, expectedString, line) in inputs {
-            self.testBuffer.clear()
-            let size = self.testBuffer.writeNamespace(test)
-            XCTAssertEqual(size, expectedString.utf8.count, line: line)
-            XCTAssertEqual(self.testBufferString, expectedString, line: line)
-        }
+extension EncodeFixture<[NamespaceDescription]> {
+    fileprivate static func namespace(
+        _ input: [NamespaceDescription],
+        _ expectedString: String
+    ) -> Self {
+        EncodeFixture(
+            input: input,
+            bufferKind: .defaultServer,
+            expectedString: expectedString,
+            encoder: { $0.writeNamespace($1) }
+        )
     }
 }

@@ -43,7 +43,10 @@ public struct ExceededLiteralSizeLimitError: Error {
 import struct NIO.ByteBuffer
 import struct OrderedCollections.OrderedDictionary
 
-struct GrammarParser {
+//
+// Note: The `parsedStringCache` is not (necessarily) sendable. We should fix this.
+//
+struct GrammarParser: @unchecked Sendable {
     static let defaultParsedStringCache: @Sendable (String) -> String = { str in
         str
     }
@@ -452,16 +455,6 @@ extension GrammarParser {
             buffer: &buffer,
             tracker: tracker
         )
-    }
-
-    // eitem-vendor-tag =  vendor-token "-" atom
-    func parseEitemVendorTag(buffer: inout ParseBuffer, tracker: StackTracker) throws -> EItemVendorTag {
-        try PL.composite(buffer: &buffer, tracker: tracker) { buffer, tracker -> EItemVendorTag in
-            let token = try self.parseVendorToken(buffer: &buffer, tracker: tracker)
-            try PL.parseFixedString("-", buffer: &buffer, tracker: tracker)
-            let atom = try self.parseAtom(buffer: &buffer, tracker: tracker)
-            return EItemVendorTag(token: token, atom: atom)
-        }
     }
 
     func parseEncodedAuthenticationType(

@@ -14,16 +14,14 @@
 
 import NIO
 @_spi(NIOIMAPInternal) @testable import NIOIMAPCore
-import XCTest
+import Testing
 
-class BodyMultipartTests: EncodeTestClass {}
-
-// MARK: - Encoding
-
-extension BodyMultipartTests {
-    func testEncode() {
-        let inputs: [(BodyStructure.Multipart, String, UInt)] = [
-            (
+@Suite("BodyStructure.Multipart")
+struct BodyMultipartTests {
+    @Test(
+        "encode multipart",
+        arguments: [
+            EncodeFixture.bodyMultipart(
                 .init(
                     parts: [
                         .singlepart(
@@ -43,10 +41,9 @@ extension BodyMultipartTests {
                     mediaSubtype: .mixed,
                     extension: nil
                 ),
-                #"("TEXT" "SUBTYPE" NIL NIL NIL "BASE64" 6 5) "MIXED""#,
-                #line
+                #"("TEXT" "SUBTYPE" NIL NIL NIL "BASE64" 6 5) "MIXED""#
             ),
-            (
+            EncodeFixture.bodyMultipart(
                 .init(
                     parts: [
                         .singlepart(
@@ -66,10 +63,9 @@ extension BodyMultipartTests {
                     mediaSubtype: .alternative,
                     extension: .init(parameters: [:], dispositionAndLanguage: nil)
                 ),
-                #"("TEXT" "HTML" NIL NIL NIL "BASE64" 6 5) "ALTERNATIVE" NIL"#,
-                #line
+                #"("TEXT" "HTML" NIL NIL NIL "BASE64" 6 5) "ALTERNATIVE" NIL"#
             ),
-            (
+            EncodeFixture.bodyMultipart(
                 .init(
                     parts: [
                         .singlepart(
@@ -102,17 +98,22 @@ extension BodyMultipartTests {
                     mediaSubtype: .related,
                     extension: nil
                 ),
-                #"("TEXT" "HTML" NIL NIL NIL "BASE64" 6 5)("TEXT" "PLAIN" NIL NIL NIL "BASE64" 7 6) "RELATED""#,
-                #line
+                #"("TEXT" "HTML" NIL NIL NIL "BASE64" 6 5)("TEXT" "PLAIN" NIL NIL NIL "BASE64" 7 6) "RELATED""#
             ),
         ]
-        self.iterateInputs(inputs: inputs, encoder: { self.testBuffer.writeBodyMultipart($0) })
+    )
+    func encodeMultipart(_ fixture: EncodeFixture<BodyStructure.Multipart>) {
+        fixture.checkEncoding()
     }
 
-    func testEncode_extension() {
-        let inputs: [(BodyStructure.Multipart.Extension, String, UInt)] = [
-            (.init(parameters: ["f": "v"], dispositionAndLanguage: nil), "(\"f\" \"v\")", #line),
-            (
+    @Test(
+        "encode extension",
+        arguments: [
+            EncodeFixture.bodyExtensionMultipart(
+                .init(parameters: ["f": "v"], dispositionAndLanguage: nil),
+                "(\"f\" \"v\")"
+            ),
+            EncodeFixture.bodyExtensionMultipart(
                 .init(
                     parameters: ["f1": "v1"],
                     dispositionAndLanguage: .init(
@@ -120,10 +121,38 @@ extension BodyMultipartTests {
                         language: nil
                     )
                 ),
-                "(\"f1\" \"v1\") (\"string\" (\"f2\" \"v2\"))",
-                #line
+                "(\"f1\" \"v1\") (\"string\" (\"f2\" \"v2\"))"
             ),
         ]
-        self.iterateInputs(inputs: inputs, encoder: { self.testBuffer.writeBodyExtensionMultipart($0) })
+    )
+    func encodeExtension(_ fixture: EncodeFixture<BodyStructure.Multipart.Extension>) {
+        fixture.checkEncoding()
+    }
+}
+
+// MARK: -
+
+extension EncodeFixture<BodyStructure.Multipart> {
+    fileprivate static func bodyMultipart(_ input: BodyStructure.Multipart, _ expectedString: String) -> Self {
+        EncodeFixture(
+            input: input,
+            bufferKind: .defaultServer,
+            expectedString: expectedString,
+            encoder: { $0.writeBodyMultipart($1) }
+        )
+    }
+}
+
+extension EncodeFixture<BodyStructure.Multipart.Extension> {
+    fileprivate static func bodyExtensionMultipart(
+        _ input: BodyStructure.Multipart.Extension,
+        _ expectedString: String
+    ) -> Self {
+        EncodeFixture(
+            input: input,
+            bufferKind: .defaultServer,
+            expectedString: expectedString,
+            encoder: { $0.writeBodyExtensionMultipart($1) }
+        )
     }
 }

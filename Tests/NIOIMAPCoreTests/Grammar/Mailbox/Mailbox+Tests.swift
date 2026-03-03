@@ -14,27 +14,34 @@
 
 import NIO
 @_spi(NIOIMAPInternal) @testable import NIOIMAPCore
-import XCTest
+import Testing
 
-class Mailbox_Tests: EncodeTestClass {}
+@Suite("Mailbox")
+struct MailboxTests {
+    @Test(arguments: [
+        EncodeFixture.mailbox(.inbox, #""INBOX""#),
+        EncodeFixture.mailbox(.init(""), #""""#),
+        EncodeFixture.mailbox(.init("box"), #""box""#),
+        EncodeFixture.mailbox(.init(#"a"b"#), #""a\"b""#),
+        EncodeFixture.mailbox(.init(ByteBuffer(string: #"&ltFO9g-\"#)), #""&ltFO9g-\\""#),
+    ])
+    func encode(_ fixture: EncodeFixture<MailboxName>) {
+        fixture.checkEncoding()
+    }
+}
 
-// MARK: - Encoding
+// MARK: -
 
-extension Mailbox_Tests {
-    func testEncode() {
-        let inputs: [(MailboxName, String, UInt)] = [
-            (.inbox, "\"INBOX\"", #line),
-            (.init(""), "\"\"", #line),
-            (.init("box"), "\"box\"", #line),
-            (.init(#"a"b"#), #""a\"b""#, #line),
-            (.init(ByteBuffer(string: #"&ltFO9g-\"#)), #""&ltFO9g-\\""#, #line),
-        ]
-
-        for (test, expectedString, line) in inputs {
-            self.testBuffer.clear()
-            let size = self.testBuffer.writeMailbox(test)
-            XCTAssertEqual(size, expectedString.utf8.count, line: line)
-            XCTAssertEqual(self.testBufferString, expectedString, line: line)
-        }
+extension EncodeFixture<MailboxName> {
+    fileprivate static func mailbox(
+        _ input: MailboxName,
+        _ expectedString: String
+    ) -> Self {
+        EncodeFixture(
+            input: input,
+            bufferKind: .defaultServer,
+            expectedString: expectedString,
+            encoder: { $0.writeMailbox($1) }
+        )
     }
 }

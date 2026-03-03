@@ -14,32 +14,81 @@
 
 import NIO
 @_spi(NIOIMAPInternal) @testable import NIOIMAPCore
-import XCTest
+import Testing
 
-class EncodedSearchQuery_Tests: EncodeTestClass {}
-
-// MARK: - IMAP
-
-extension EncodedSearchQuery_Tests {
-    func testEncode() {
-        let inputs: [(EncodedSearchQuery, String, UInt)] = [
-            (
-                .init(
-                    mailboxUIDValidity: .init(encodeMailbox: .init(mailbox: "box"), uidValidity: nil),
-                    encodedSearch: nil
-                ),
-                "box",
-                #line
+@Suite("EncodedSearchQuery")
+struct EncodedSearchQueryTests {
+    @Test(arguments: [
+        EncodeFixture.encodedSearchQuery(
+            .init(
+                mailboxUIDValidity: .init(encodeMailbox: .init(mailbox: "box"), uidValidity: nil),
+                encodedSearch: nil
             ),
-            (
-                .init(
-                    mailboxUIDValidity: .init(encodeMailbox: .init(mailbox: "box"), uidValidity: nil),
-                    encodedSearch: .init(query: "search")
-                ),
-                "box?search",
-                #line
+            "box"
+        ),
+        EncodeFixture.encodedSearchQuery(
+            .init(
+                mailboxUIDValidity: .init(encodeMailbox: .init(mailbox: "box"), uidValidity: nil),
+                encodedSearch: .init(query: "search")
             ),
-        ]
-        self.iterateInputs(inputs: inputs, encoder: { self.testBuffer.writeEncodedSearchQuery($0) })
+            "box?search"
+        ),
+    ])
+    func encode(_ fixture: EncodeFixture<EncodedSearchQuery>) {
+        fixture.checkEncoding()
+    }
+
+    @Test(arguments: [
+        ParseFixture.encodedSearchQuery(
+            "test",
+            " ",
+            expected: .success(
+                .init(mailboxUIDValidity: .init(encodeMailbox: .init(mailbox: "test"), uidValidity: nil))
+            )
+        ),
+        ParseFixture.encodedSearchQuery(
+            "test?query",
+            " ",
+            expected: .success(
+                .init(
+                    mailboxUIDValidity: .init(encodeMailbox: .init(mailbox: "test"), uidValidity: nil),
+                    encodedSearch: .init(query: "query")
+                )
+            )
+        ),
+    ])
+    func parse(_ fixture: ParseFixture<EncodedSearchQuery>) {
+        fixture.checkParsing()
+    }
+}
+
+// MARK: -
+
+extension EncodeFixture<EncodedSearchQuery> {
+    fileprivate static func encodedSearchQuery(
+        _ input: EncodedSearchQuery,
+        _ expectedString: String
+    ) -> Self {
+        EncodeFixture(
+            input: input,
+            bufferKind: .defaultServer,
+            expectedString: expectedString,
+            encoder: { $0.writeEncodedSearchQuery($1) }
+        )
+    }
+}
+
+extension ParseFixture<EncodedSearchQuery> {
+    fileprivate static func encodedSearchQuery(
+        _ input: String,
+        _ terminator: String = " ",
+        expected: Expected
+    ) -> Self {
+        ParseFixture(
+            input: input,
+            terminator: terminator,
+            expected: expected,
+            parser: GrammarParser().parseEncodedSearchQuery
+        )
     }
 }

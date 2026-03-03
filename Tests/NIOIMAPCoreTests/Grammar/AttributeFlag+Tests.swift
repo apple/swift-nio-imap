@@ -13,31 +13,63 @@
 //===----------------------------------------------------------------------===//
 
 import NIO
+import Testing
 @_spi(NIOIMAPInternal) @testable import NIOIMAPCore
-import XCTest
 
-class AttributeFlag_Tests: EncodeTestClass {}
-
-// MARK: - Encoding
-
-extension AttributeFlag_Tests {
-    func testEncoding() {
-        let inputs: [(AttributeFlag, String, UInt)] = [
-            (.answered, "\\\\answered", #line),
-            (.deleted, "\\\\deleted", #line),
-            (.draft, "\\\\draft", #line),
-            (.flagged, "\\\\flagged", #line),
-            (.seen, "\\\\seen", #line),
-            (.init("test"), "test", #line),
-        ]
-        self.iterateInputs(inputs: inputs, encoder: { self.testBuffer.writeAttributeFlag($0) })
+@Suite("AttributeFlag")
+struct AttributeFlagTests {
+    @Test(arguments: [
+        EncodeFixture.attributeFlag(.answered, "\\\\answered"),
+        EncodeFixture.attributeFlag(.deleted, "\\\\deleted"),
+        EncodeFixture.attributeFlag(.draft, "\\\\draft"),
+        EncodeFixture.attributeFlag(.flagged, "\\\\flagged"),
+        EncodeFixture.attributeFlag(.seen, "\\\\seen"),
+        EncodeFixture.attributeFlag(.init("test"), "test"),
+    ])
+    func encode(_ fixture: EncodeFixture<AttributeFlag>) {
+        fixture.checkEncoding()
     }
 
-    func testLowercased() {
-        let t1 = AttributeFlag("TEST")
-        let t2 = AttributeFlag("test")
-        XCTAssertEqual(t1, t2)
-        XCTAssertEqual(t1.stringValue, "test")
-        XCTAssertEqual(t2.stringValue, "test")
+    @Test("lowercased normalization")
+    func lowercasedNormalization() {
+        #expect(AttributeFlag("TEST") == AttributeFlag("test"))
+        #expect(AttributeFlag("TEST").stringValue == "test")
+        #expect(AttributeFlag("test").stringValue == "test")
+    }
+
+    @Test(arguments: [
+        ParseFixture.attributeFlag(#"\\Answered"#, expected: .success(.answered)),
+        ParseFixture.attributeFlag("some", expected: .success(.init("some"))),
+    ])
+    func parse(_ fixture: ParseFixture<AttributeFlag>) {
+        fixture.checkParsing()
+    }
+}
+
+// MARK: -
+
+extension EncodeFixture<AttributeFlag> {
+    fileprivate static func attributeFlag(_ input: T, _ expectedString: String) -> Self {
+        Self(
+            input: input,
+            bufferKind: .defaultServer,
+            expectedString: expectedString,
+            encoder: { $0.writeAttributeFlag($1) }
+        )
+    }
+}
+
+extension ParseFixture<AttributeFlag> {
+    fileprivate static func attributeFlag(
+        _ input: String,
+        _ terminator: String = " ",
+        expected: Expected
+    ) -> Self {
+        ParseFixture(
+            input: input,
+            terminator: terminator,
+            expected: expected,
+            parser: GrammarParser().parseAttributeFlag
+        )
     }
 }

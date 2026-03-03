@@ -17,16 +17,17 @@ import NIO
 @testable import NIOIMAPCore
 import NIOTestUtils
 
-import XCTest
+import Testing
 
-final class CommandDecoder_Tests: XCTestCase {}
+@Suite struct CommandDecoder_Tests {}
 
 extension CommandDecoder_Tests {
-    func testConsumeWhenReturningNotEnoughDataRegression() {
+    @Test("consume when returning not enough data regression")
+    func consumeWhenReturningNotEnoughDataRegression() {
         let channel = EmbeddedChannel(handler: ByteToMessageHandler(CommandDecoder()), loop: .init())
 
         for feed in ["tag APPEND box (\\Seen) {1+}\r\na\r\n", "t"] {
-            XCTAssertNoThrow(try channel.writeInbound(self.buffer(feed)), feed)
+            #expect(throws: Never.self) { try channel.writeInbound(self.buffer(feed)) }
         }
 
         let output: [(CommandStreamPart, UInt)] = [
@@ -44,16 +45,20 @@ extension CommandDecoder_Tests {
         ]
 
         for (expected, line) in output {
-            XCTAssertNoThrow(
-                XCTAssertEqual(
-                    try channel.readInbound(as: SynchronizedCommand.self),
-                    SynchronizedCommand(expected),
-                    line: line
-                ),
-                line: line
+            var result: SynchronizedCommand?
+            #expect(throws: Never.self) {
+                result = try channel.readInbound(as: SynchronizedCommand.self)
+            }
+            #expect(
+                result == SynchronizedCommand(expected),
+                sourceLocation: SourceLocation(fileID: #fileID, filePath: #filePath, line: Int(line), column: 1)
             )
         }
-        XCTAssertNoThrow(XCTAssertTrue(try channel.finish().isClean))
+        var isClean = false
+        #expect(throws: Never.self) {
+            isClean = try channel.finish().isClean
+        }
+        #expect(isClean)
     }
 }
 

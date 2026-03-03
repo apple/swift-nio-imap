@@ -14,28 +14,67 @@
 
 import NIO
 @_spi(NIOIMAPInternal) @testable import NIOIMAPCore
-import XCTest
+import Testing
 
-class ExtendedSearchScopeOptions_Tests: EncodeTestClass {}
+@Suite("ExtendedSearchScopeOptions")
+struct ExtendedSearchScopeOptionsTests {
+    @Test(arguments: [
+        EncodeFixture.extendedSearchScopeOptions(
+            ExtendedSearchScopeOptions(["test": nil])!,
+            "test"
+        ),
+        EncodeFixture.extendedSearchScopeOptions(
+            ExtendedSearchScopeOptions(["test": .sequence(.lastCommand), "test2": nil])!,
+            "test $ test2"
+        ),
+    ])
+    func encode(_ fixture: EncodeFixture<ExtendedSearchScopeOptions>) {
+        fixture.checkEncoding()
+    }
 
-// MARK: - Encoding
+    @Test(arguments: [
+        ParseFixture.extendedSearchScopeOptions("name", expected: .success(ExtendedSearchScopeOptions(["name": nil])!)),
+        ParseFixture.extendedSearchScopeOptions(
+            "name $",
+            expected: .success(ExtendedSearchScopeOptions(["name": .sequence(.lastCommand)])!)
+        ),
+        ParseFixture.extendedSearchScopeOptions(
+            "name name2",
+            expected: .success(ExtendedSearchScopeOptions(["name": nil, "name2": nil])!)
+        ),
+    ])
+    func parseExtendedSearchScopeOptions(_ fixture: ParseFixture<ExtendedSearchScopeOptions>) {
+        fixture.checkParsing()
+    }
+}
 
-extension ExtendedSearchScopeOptions_Tests {
-    func testEncode() {
-        let inputs: [(ExtendedSearchScopeOptions, String, UInt)] = [
-            (ExtendedSearchScopeOptions(["test": nil])!, "test", #line),
-            (
-                ExtendedSearchScopeOptions(["test": .sequence(.lastCommand), "test2": nil])!,
-                "test $ test2",
-                #line
-            ),
-        ]
+// MARK: -
 
-        for (test, expectedString, line) in inputs {
-            self.testBuffer.clear()
-            let size = self.testBuffer.writeExtendedSearchScopeOptions(test)
-            XCTAssertEqual(size, expectedString.utf8.count, line: line)
-            XCTAssertEqual(self.testBufferString, expectedString, line: line)
-        }
+extension EncodeFixture<ExtendedSearchScopeOptions> {
+    fileprivate static func extendedSearchScopeOptions(
+        _ input: ExtendedSearchScopeOptions,
+        _ expectedString: String
+    ) -> Self {
+        .init(
+            input: input,
+            bufferKind: .defaultServer,
+            expectedString: expectedString,
+            encoder: { $0.writeExtendedSearchScopeOptions($1) }
+        )
+    }
+}
+
+extension ParseFixture<ExtendedSearchScopeOptions> {
+    fileprivate static func extendedSearchScopeOptions(
+        _ input: String,
+        _ terminator: String = "\r",
+        expected: Expected
+    ) -> Self {
+        ParseFixture(
+            input: input,
+            terminator: terminator,
+            expected: expected,
+            parser: GrammarParser().parseExtendedSearchScopeOptions
+        )
     }
 }

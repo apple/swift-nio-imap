@@ -14,28 +14,41 @@
 
 import NIO
 @_spi(NIOIMAPInternal) @testable import NIOIMAPCore
-import XCTest
+import Testing
 
-class OptionExtension_Tests: EncodeTestClass {}
+@Suite("OptionExtension KeyValue")
+struct OptionExtensionTests {
+    @Test(arguments: [
+        EncodeFixture.optionExtension(
+            .init(key: .standard("test"), value: .string("string")),
+            "test (\"string\")"
+        ),
+        EncodeFixture.optionExtension(
+            .init(key: .vendor(.init(key: "token", value: "atom")), value: nil),
+            "token-atom"
+        ),
+        EncodeFixture.optionExtension(
+            .init(key: .vendor(.init(key: "token", value: "atom")), value: .string("value")),
+            "token-atom (\"value\")"
+        ),
+    ])
+    func encode(_ fixture: EncodeFixture<KeyValue<OptionExtensionKind, OptionValueComp?>>) {
+        fixture.checkEncoding()
+    }
+}
 
-// MARK: - Encoding
+// MARK: -
 
-extension OptionExtension_Tests {
-    func testEncode() {
-        let inputs: [(KeyValue<OptionExtensionKind, OptionValueComp?>, String, UInt)] = [
-            (.init(key: .standard("test"), value: .string("string")), "test (\"string\")", #line),
-            (.init(key: .vendor(.init(key: "token", value: "atom")), value: nil), "token-atom", #line),
-            (
-                .init(key: .vendor(.init(key: "token", value: "atom")), value: .string("value")),
-                "token-atom (\"value\")", #line
-            ),
-        ]
-
-        for (test, expectedString, line) in inputs {
-            self.testBuffer.clear()
-            let size = self.testBuffer.writeOptionExtension(test)
-            XCTAssertEqual(size, expectedString.utf8.count, line: line)
-            XCTAssertEqual(self.testBufferString, expectedString, line: line)
-        }
+extension EncodeFixture<KeyValue<OptionExtensionKind, OptionValueComp?>> {
+    fileprivate static func optionExtension(
+        _ input: KeyValue<OptionExtensionKind, OptionValueComp?>,
+        _ expectedString: String
+    ) -> Self {
+        EncodeFixture(
+            input: input,
+            bufferKind: .defaultServer,
+            expectedString: expectedString,
+            encoder: { $0.writeOptionExtension($1) }
+        )
     }
 }

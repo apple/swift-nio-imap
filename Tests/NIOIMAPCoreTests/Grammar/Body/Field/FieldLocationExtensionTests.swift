@@ -14,25 +14,31 @@
 
 import NIO
 @_spi(NIOIMAPInternal) @testable import NIOIMAPCore
-import XCTest
+import Testing
 
-class FieldLocationExtensionTests: EncodeTestClass {}
+@Suite("BodyStructure.LocationAndExtensions")
+struct FieldLocationExtensionTests {
+    @Test(arguments: [
+        EncodeFixture.locationAndExtensions(.init(location: "loc", extensions: []), " \"loc\""),
+        EncodeFixture.locationAndExtensions(.init(location: "loc", extensions: [.number(1)]), " \"loc\" (1)"),
+        EncodeFixture.locationAndExtensions(
+            .init(location: "loc", extensions: [.number(1), .number(2)]),
+            " \"loc\" (1 2)"
+        ),
+    ])
+    func encoding(_ fixture: EncodeFixture<BodyStructure.LocationAndExtensions>) {
+        fixture.checkEncoding()
+    }
+}
 
-// MARK: - Encoding
+// MARK: -
 
-extension FieldLocationExtensionTests {
-    func testEncode() {
-        let inputs: [(BodyStructure.LocationAndExtensions, String, UInt)] = [
-            (.init(location: "loc", extensions: []), " \"loc\"", #line),
-            (.init(location: "loc", extensions: [.number(1)]), " \"loc\" (1)", #line),
-            (.init(location: "loc", extensions: [.number(1), .number(2)]), " \"loc\" (1 2)", #line),
-        ]
-
-        for (test, expectedString, line) in inputs {
-            self.testBuffer.clear()
-            let size = self.testBuffer.writeBodyLocationAndExtensions(test)
-            XCTAssertEqual(size, expectedString.utf8.count, line: line)
-            XCTAssertEqual(self.testBufferString, expectedString, line: line)
-        }
+extension EncodeFixture<BodyStructure.LocationAndExtensions> {
+    fileprivate static func locationAndExtensions(_ input: T, _ expectedString: String) -> Self {
+        EncodeFixture(
+            input: input,
+            expectedString: expectedString,
+            encoder: { $0.writeBodyLocationAndExtensions($1) }
+        )
     }
 }

@@ -14,24 +14,63 @@
 
 import NIO
 @_spi(NIOIMAPInternal) @testable import NIOIMAPCore
-import XCTest
+import Testing
 
-class UIDValidity_Tests: EncodeTestClass {}
-
-// MARK: - Encoding
-
-extension UIDValidity_Tests {
-    func testEncode() {
-        let inputs: [(UIDValidity, String, UInt)] = [
-            (123, "123", #line)
-        ]
-        self.iterateInputs(inputs: inputs, encoder: { self.testBuffer.writeUIDValidity($0) })
+@Suite("UIDValidity")
+struct UIDValidityTests {
+    @Test(arguments: [
+        EncodeFixture.uidValidity(1, "1"),
+        EncodeFixture.uidValidity(123, "123"),
+        EncodeFixture.uidValidity(4_294_967_295, "4294967295"),
+    ])
+    func encode(_ fixture: EncodeFixture<UIDValidity>) {
+        fixture.checkEncoding()
     }
 
-    func testValidRange() {
-        XCTAssertNil(UIDValidity(exactly: 0))
-        XCTAssertEqual(UIDValidity(exactly: 1)?.rawValue, 1)
-        XCTAssertEqual(UIDValidity(exactly: 4_294_967_295)?.rawValue, 4_294_967_295)
-        XCTAssertNil(UIDValidity(exactly: 4_294_967_296))
+    @Test(arguments: [
+        ParseFixture.uidValidity("1", " ", expected: .success(1)),
+        ParseFixture.uidValidity("12", " ", expected: .success(12)),
+        ParseFixture.uidValidity("123", " ", expected: .success(123)),
+        ParseFixture.uidValidity("0", " ", expected: .failure),
+        ParseFixture.uidValidity("1", "", expected: .incompleteMessage),
+    ])
+    func parse(_ fixture: ParseFixture<UIDValidity>) {
+        fixture.checkParsing()
+    }
+
+    @Test("valid range")
+    func validRange() {
+        #expect(UIDValidity(exactly: 0) == nil)
+        #expect(UIDValidity(exactly: 1)?.rawValue == 1)
+        #expect(UIDValidity(exactly: 4_294_967_295)?.rawValue == 4_294_967_295)
+        #expect(UIDValidity(exactly: 4_294_967_296) == nil)
+    }
+}
+
+// MARK: -
+
+extension EncodeFixture<UIDValidity> {
+    fileprivate static func uidValidity(_ input: UIDValidity, _ expectedString: String) -> Self {
+        EncodeFixture(
+            input: input,
+            bufferKind: .defaultServer,
+            expectedString: expectedString,
+            encoder: { $0.writeUIDValidity($1) }
+        )
+    }
+}
+
+extension ParseFixture<UIDValidity> {
+    fileprivate static func uidValidity(
+        _ input: String,
+        _ terminator: String,
+        expected: Expected
+    ) -> Self {
+        ParseFixture(
+            input: input,
+            terminator: terminator,
+            expected: expected,
+            parser: GrammarParser().parseUIDValidity
+        )
     }
 }

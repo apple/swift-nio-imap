@@ -14,18 +14,68 @@
 
 import NIO
 @_spi(NIOIMAPInternal) @testable import NIOIMAPCore
-import XCTest
+import Testing
 
-class URLFetchData_Tests: EncodeTestClass {}
+@Suite("URLFetchData")
+struct URLFetchDataTests {
+    @Test(arguments: [
+        EncodeFixture.urlFetchData(
+            .init(url: "url", data: nil),
+            "\"url\" NIL"
+        ),
+        EncodeFixture.urlFetchData(
+            .init(url: "url", data: "data"),
+            "\"url\" \"data\""
+        ),
+    ])
+    func encode(_ fixture: EncodeFixture<URLFetchData>) {
+        fixture.checkEncoding()
+    }
 
-// MARK: - Encoding
+    @Test(arguments: [
+        ParseFixture.urlFetchData(
+            "url NIL",
+            " ",
+            expected: .success(.init(url: "url", data: nil))
+        ),
+        ParseFixture.urlFetchData(
+            "url \"data\"",
+            " ",
+            expected: .success(.init(url: "url", data: "data"))
+        ),
+    ])
+    func parse(_ fixture: ParseFixture<URLFetchData>) {
+        fixture.checkParsing()
+    }
+}
 
-extension URLFetchData_Tests {
-    func testEncode() {
-        let inputs: [(URLFetchData, String, UInt)] = [
-            (.init(url: "url", data: nil), "\"url\" NIL", #line),
-            (.init(url: "url", data: "data"), "\"url\" \"data\"", #line),
-        ]
-        self.iterateInputs(inputs: inputs, encoder: { self.testBuffer.writeURLFetchData($0) })
+// MARK: -
+
+extension EncodeFixture<URLFetchData> {
+    fileprivate static func urlFetchData(
+        _ input: URLFetchData,
+        _ expectedString: String
+    ) -> Self {
+        .init(
+            input: input,
+            bufferKind: .defaultServer,
+            expectedString: expectedString,
+            encoder: { $0.writeURLFetchData($1) }
+        )
+    }
+}
+
+extension ParseFixture<URLFetchData> {
+    fileprivate static func urlFetchData(
+        _ input: String,
+        _ terminator: String,
+        expected: Expected
+    ) -> Self {
+        ParseFixture(
+            input: input,
+            terminator: terminator,
+            expected: expected,
+            parser: GrammarParser().parseURLFetchData
+        )
     }
 }

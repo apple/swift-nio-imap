@@ -14,31 +14,69 @@
 
 import NIO
 @_spi(NIOIMAPInternal) @testable import NIOIMAPCore
-import XCTest
+import Testing
 
-class BodyFieldsTests: EncodeTestClass {}
+@Suite("BodyStructure.Fields")
+struct BodyFieldsTests {
+    @Test(arguments: [
+        EncodeFixture.bodyFields(
+            .init(
+                parameters: ["f1": "v1"],
+                id: "fieldID",
+                contentDescription: "desc",
+                encoding: .base64,
+                octetCount: 12
+            ),
+            "(\"f1\" \"v1\") \"fieldID\" \"desc\" \"BASE64\" 12"
+        )
+    ])
+    func encoding(_ fixture: EncodeFixture<BodyStructure.Fields>) {
+        fixture.checkEncoding()
+    }
 
-// MARK: - Encoding
-
-extension BodyFieldsTests {
-    func testEncode() {
-        let inputs: [(BodyStructure.Fields, String, UInt)] = [
-            (
-                .init(
+    @Test(arguments: [
+        ParseFixture.bodyFields(
+            #"("f1" "v1") "id" "desc" "8BIT" 1234"#,
+            " ",
+            expected: .success(
+                BodyStructure.Fields(
                     parameters: ["f1": "v1"],
-                    id: "fieldID",
+                    id: "id",
                     contentDescription: "desc",
-                    encoding: .base64,
-                    octetCount: 12
-                ), "(\"f1\" \"v1\") \"fieldID\" \"desc\" \"BASE64\" 12", #line
+                    encoding: .eightBit,
+                    octetCount: 1234
+                )
             )
-        ]
+        )
+    ])
+    func parse(_ fixture: ParseFixture<BodyStructure.Fields>) {
+        fixture.checkParsing()
+    }
+}
 
-        for (test, expectedString, line) in inputs {
-            self.testBuffer.clear()
-            let size = self.testBuffer.writeBodyFields(test)
-            XCTAssertEqual(size, expectedString.utf8.count, line: line)
-            XCTAssertEqual(self.testBufferString, expectedString, line: line)
-        }
+// MARK: -
+
+extension EncodeFixture<BodyStructure.Fields> {
+    fileprivate static func bodyFields(_ input: T, _ expectedString: String) -> Self {
+        EncodeFixture(
+            input: input,
+            expectedString: expectedString,
+            encoder: { $0.writeBodyFields($1) }
+        )
+    }
+}
+
+extension ParseFixture<BodyStructure.Fields> {
+    fileprivate static func bodyFields(
+        _ input: String,
+        _ terminator: String,
+        expected: Expected
+    ) -> Self {
+        ParseFixture(
+            input: input,
+            terminator: terminator,
+            expected: expected,
+            parser: GrammarParser().parseBodyFields
+        )
     }
 }

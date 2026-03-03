@@ -14,17 +14,62 @@
 
 import NIO
 @_spi(NIOIMAPInternal) @testable import NIOIMAPCore
-import XCTest
+import Testing
 
-class EncodedURLAuth_Tests: EncodeTestClass {}
+@Suite("EncodedAuthenticatedURL")
+struct EncodedAuthenticatedURLTests {
+    @Test(arguments: [
+        EncodeFixture.encodedAuthenticationURL(.init(data: "1F"), "1F"),
+        EncodeFixture.encodedAuthenticationURL(.init(data: "ABC123"), "ABC123"),
+    ])
+    func encode(_ fixture: EncodeFixture<EncodedAuthenticatedURL>) {
+        fixture.checkEncoding()
+    }
 
-// MARK: - Encoding
+    @Test(arguments: [
+        ParseFixture.encodedAuthenticationURL(
+            "0123456789abcdef01234567890abcde",
+            "",
+            expected: .success(.init(data: "0123456789abcdef01234567890abcde"))
+        ),
+        ParseFixture.encodedAuthenticationURL(
+            "0123456789zbcdef01234567890abcde",
+            "",
+            expected: .failure
+        ),
+        ParseFixture.encodedAuthenticationURL(
+            "0123456789",
+            "",
+            expected: .incompleteMessage
+        ),
+    ])
+    func parse(_ fixture: ParseFixture<EncodedAuthenticatedURL>) {
+        fixture.checkParsing()
+    }
+}
 
-extension EncodedURLAuth_Tests {
-    func testEncode() {
-        let inputs: [(EncodedAuthenticatedURL, String, UInt)] = [
-            (.init(data: "1F"), "1F", #line)
-        ]
-        self.iterateInputs(inputs: inputs, encoder: { self.testBuffer.writeEncodedAuthenticationURL($0) })
+extension EncodeFixture<EncodedAuthenticatedURL> {
+    fileprivate static func encodedAuthenticationURL(_ input: T, _ expectedString: String) -> Self {
+        .init(
+            input: input,
+            bufferKind: .defaultServer,
+            expectedStrings: [expectedString],
+            encoder: { $0.writeEncodedAuthenticationURL($1) }
+        )
+    }
+}
+
+extension ParseFixture<EncodedAuthenticatedURL> {
+    fileprivate static func encodedAuthenticationURL(
+        _ input: String,
+        _ terminator: String,
+        expected: Expected
+    ) -> Self {
+        ParseFixture(
+            input: input,
+            terminator: terminator,
+            expected: expected,
+            parser: GrammarParser().parseEncodedURLAuth
+        )
     }
 }

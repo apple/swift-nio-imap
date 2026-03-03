@@ -14,17 +14,52 @@
 
 import NIO
 @_spi(NIOIMAPInternal) @testable import NIOIMAPCore
-import XCTest
+import Testing
 
-class EncodedUser_Tests: EncodeTestClass {}
+@Suite("EncodedUser")
+struct EncodedUserTests {
+    @Test(arguments: [
+        EncodeFixture.encodedUser(.init(data: "hello"), "hello"),
+        EncodeFixture.encodedUser(.init(data: "test@example.com"), "test@example.com"),
+    ])
+    func encode(_ fixture: EncodeFixture<EncodedUser>) {
+        fixture.checkEncoding()
+    }
 
-// MARK: - Encoding
+    @Test(arguments: [
+        ParseFixture.encodedUser(
+            "query%FF",
+            " ",
+            expected: .success(.init(data: "query%FF"))
+        )
+    ])
+    func parse(_ fixture: ParseFixture<EncodedUser>) {
+        fixture.checkParsing()
+    }
+}
 
-extension EncodedUser_Tests {
-    func testEncode() {
-        let inputs: [(EncodedUser, String, UInt)] = [
-            (.init(data: "hello"), "hello", #line)
-        ]
-        self.iterateInputs(inputs: inputs, encoder: { self.testBuffer.writeEncodedUser($0) })
+extension EncodeFixture<EncodedUser> {
+    fileprivate static func encodedUser(_ input: T, _ expectedString: String) -> Self {
+        .init(
+            input: input,
+            bufferKind: .defaultServer,
+            expectedStrings: [expectedString],
+            encoder: { $0.writeEncodedUser($1) }
+        )
+    }
+}
+
+extension ParseFixture<EncodedUser> {
+    fileprivate static func encodedUser(
+        _ input: String,
+        _ terminator: String,
+        expected: Expected
+    ) -> Self {
+        ParseFixture(
+            input: input,
+            terminator: terminator,
+            expected: expected,
+            parser: GrammarParser().parseEncodedUser
+        )
     }
 }

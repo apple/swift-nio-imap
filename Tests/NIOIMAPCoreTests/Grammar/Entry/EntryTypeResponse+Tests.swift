@@ -14,20 +14,58 @@
 
 import NIO
 @_spi(NIOIMAPInternal) @testable import NIOIMAPCore
-import XCTest
+import Testing
 
-class EntryTypeResponse_Tests: EncodeTestClass {
-    func testEncoding() {
-        let inputs: [(EntryKindResponse, String, UInt)] = [
-            (.private, "priv", #line),
-            (.shared, "shared", #line),
-        ]
+@Suite("Entry Type Response")
+struct EntryTypeResponseTests {
+    @Test(arguments: [
+        EncodeFixture.entryKindResponse(.private, "priv"),
+        EncodeFixture.entryKindResponse(.shared, "shared"),
+    ])
+    func encode(_ fixture: EncodeFixture<EntryKindResponse>) {
+        fixture.checkEncoding()
+    }
 
-        for (input, expected, line) in inputs {
-            self.testBuffer.clear()
-            let size = self.testBuffer.writeEntryKindResponse(input)
-            XCTAssertEqual(size, expected.utf8.count, line: line)
-            XCTAssertEqual(self.testBufferString, expected, line: line)
-        }
+    @Test(arguments: [
+        ParseFixture.entryKindResponse("priv", expected: .success(.private)),
+        ParseFixture.entryKindResponse("PRIV", expected: .success(.private)),
+        ParseFixture.entryKindResponse("prIV", expected: .success(.private)),
+        ParseFixture.entryKindResponse("shared", expected: .success(.shared)),
+        ParseFixture.entryKindResponse("SHARED", expected: .success(.shared)),
+        ParseFixture.entryKindResponse("shaRED", expected: .success(.shared)),
+    ])
+    func parse(_ fixture: ParseFixture<EntryKindResponse>) {
+        fixture.checkParsing()
+    }
+}
+
+// MARK: -
+
+extension EncodeFixture<EntryKindResponse> {
+    fileprivate static func entryKindResponse(
+        _ input: EntryKindResponse,
+        _ expectedString: String
+    ) -> Self {
+        EncodeFixture(
+            input: input,
+            bufferKind: .defaultServer,
+            expectedString: expectedString,
+            encoder: { $0.writeEntryKindResponse($1) }
+        )
+    }
+}
+
+extension ParseFixture<EntryKindResponse> {
+    fileprivate static func entryKindResponse(
+        _ input: String,
+        _ terminator: String = " ",
+        expected: Expected
+    ) -> Self {
+        ParseFixture(
+            input: input,
+            terminator: terminator,
+            expected: expected,
+            parser: GrammarParser().parseEntryKindResponse
+        )
     }
 }

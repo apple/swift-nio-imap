@@ -14,25 +14,32 @@
 
 import NIO
 @_spi(NIOIMAPInternal) @testable import NIOIMAPCore
-import XCTest
+import Testing
 
-class ListReturnOptions_Tests: EncodeTestClass {}
+@Suite("ListReturnOptions")
+struct ListReturnOptionsTests {
+    @Test(arguments: [
+        EncodeFixture.listReturnOptions([], "RETURN ()"),
+        EncodeFixture.listReturnOptions([.subscribed], "RETURN (SUBSCRIBED)"),
+        EncodeFixture.listReturnOptions([.subscribed, .children], "RETURN (SUBSCRIBED CHILDREN)"),
+    ])
+    func encode(_ fixture: EncodeFixture<[ReturnOption]>) {
+        fixture.checkEncoding()
+    }
+}
 
-// MARK: - Encoding
+// MARK: -
 
-extension ListReturnOptions_Tests {
-    func testEncode() {
-        let inputs: [([ReturnOption], String, UInt)] = [
-            ([], "RETURN ()", #line),
-            ([.subscribed], "RETURN (SUBSCRIBED)", #line),
-            ([.subscribed, .children], "RETURN (SUBSCRIBED CHILDREN)", #line),
-        ]
-
-        for (test, expectedString, line) in inputs {
-            self.testBuffer.clear()
-            let size = self.testBuffer.writeListReturnOptions(test)
-            XCTAssertEqual(size, expectedString.utf8.count, line: line)
-            XCTAssertEqual(self.testBufferString, expectedString, line: line)
-        }
+extension EncodeFixture<[ReturnOption]> {
+    fileprivate static func listReturnOptions(
+        _ input: [ReturnOption],
+        _ expectedString: String
+    ) -> Self {
+        EncodeFixture(
+            input: input,
+            bufferKind: .defaultServer,
+            expectedString: expectedString,
+            encoder: { $0.writeListReturnOptions($1) }
+        )
     }
 }

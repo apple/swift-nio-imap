@@ -14,24 +14,54 @@
 
 import NIO
 @_spi(NIOIMAPInternal) @testable import NIOIMAPCore
-import XCTest
+import Testing
 
-class SearchCriteria_Tests: EncodeTestClass {}
+@Suite("SearchCriteria")
+struct SearchCriteriaTests {
+    @Test(arguments: [
+        EncodeFixture.searchCriteria([.all], "ALL"),
+        EncodeFixture.searchCriteria([.all, .answered, .deleted], "ALL ANSWERED DELETED"),
+    ])
+    func encode(_ fixture: EncodeFixture<[SearchKey]>) {
+        fixture.checkEncoding()
+    }
 
-// MARK: - Encoding
+    @Test(arguments: [
+        ParseFixture.searchCriteria("ALL", expected: .success([.all])),
+        ParseFixture.searchCriteria("ALL ANSWERED DELETED", expected: .success([.all, .answered, .deleted])),
+    ])
+    func parse(_ fixture: ParseFixture<[SearchKey]>) {
+        fixture.checkParsing()
+    }
+}
 
-extension SearchCriteria_Tests {
-    func testEncode() {
-        let inputs: [([SearchKey], String, UInt)] = [
-            ([.all], "ALL", #line),
-            ([.all, .answered, .deleted], "ALL ANSWERED DELETED", #line),
-        ]
+// MARK: -
 
-        for (test, expectedString, line) in inputs {
-            self.testBuffer.clear()
-            let size = self.testBuffer.writeSearchCriteria(test)
-            XCTAssertEqual(size, expectedString.utf8.count, line: line)
-            XCTAssertEqual(self.testBufferString, expectedString, line: line)
-        }
+extension EncodeFixture<[SearchKey]> {
+    fileprivate static func searchCriteria(
+        _ input: [SearchKey],
+        _ expectedString: String
+    ) -> Self {
+        EncodeFixture(
+            input: input,
+            bufferKind: .defaultServer,
+            expectedString: expectedString,
+            encoder: { $0.writeSearchCriteria($1) }
+        )
+    }
+}
+
+extension ParseFixture<[SearchKey]> {
+    fileprivate static func searchCriteria(
+        _ input: String,
+        _ terminator: String = "\r",
+        expected: Expected
+    ) -> Self {
+        ParseFixture(
+            input: input,
+            terminator: terminator,
+            expected: expected,
+            parser: GrammarParser().parseSearchCriteria
+        )
     }
 }

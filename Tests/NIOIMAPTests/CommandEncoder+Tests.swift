@@ -17,12 +17,12 @@ import NIO
 @testable import NIOIMAPCore
 import NIOTestUtils
 
-import XCTest
+import Testing
 
-final class CommandEncoder_Tests: XCTestCase {}
-
-extension CommandEncoder_Tests {
-    func testEncoding() {
+@Suite("CommandEncoder")
+struct CommandEncoder_Tests {
+    @Test
+    func encoding() {
         // For now this is a fairly limited sequence of test
         // just to ensure that CommandEncoder correctly uses
         // CommandEncodeBuffer.
@@ -99,20 +99,19 @@ extension CommandEncoder_Tests {
             ),
         ]
 
-        for (command, expected, line) in inputs {
+        for (command, expected, _) in inputs {
             var buffer = ByteBuffer()
             let encoder = CommandEncoder(loggingMode: false)
             encoder.encode(data: command, out: &buffer)
-            XCTAssertEqual(
-                expected,
-                buffer,
-                "\(String(buffer: expected)) is not equal to \(String(buffer: buffer))",
-                line: line
+            #expect(
+                expected == buffer,
+                "\(String(buffer: expected)) is not equal to \(String(buffer: buffer))"
             )
         }
     }
 
-    func testEncodingLoggingMode() {
+    @Test("encoding logging mode")
+    func encodingLoggingMode() {
         let inputs: [(CommandStreamPart, ByteBuffer, UInt)] = [
             // LOGIN / AUTHENTICATE
             (
@@ -195,16 +194,14 @@ extension CommandEncoder_Tests {
             (.append(.finish), "\r\n", #line),
         ]
 
-        for (command, expected, line) in inputs {
+        for (command, expected, _) in inputs {
             var buffer = ByteBuffer()
             let encoder = CommandEncoder(loggingMode: true)
             encoder.capabilities.append(.literalPlus)
             encoder.encode(data: command, out: &buffer)
-            XCTAssertEqual(
-                expected,
-                buffer,
-                "'\(String(buffer: expected))' is not equal to '\(String(buffer: buffer))'",
-                line: line
+            #expect(
+                expected == buffer,
+                "'\(String(buffer: expected))' is not equal to '\(String(buffer: buffer))'"
             )
         }
     }

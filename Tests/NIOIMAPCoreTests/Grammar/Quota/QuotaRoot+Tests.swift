@@ -14,24 +14,28 @@
 
 import NIO
 @_spi(NIOIMAPInternal) @testable import NIOIMAPCore
-import XCTest
+import Testing
 
-class QuotaRootTests: EncodeTestClass {}
+@Suite("QuotaRoot")
+struct QuotaRootTests {
+    @Test(arguments: [
+        EncodeFixture.quotaRoot(QuotaRoot(""), #""""#),
+        EncodeFixture.quotaRoot(QuotaRoot("MassivePool"), #""MassivePool""#),
+    ])
+    func encode(_ fixture: EncodeFixture<QuotaRoot>) {
+        fixture.checkEncoding()
+    }
+}
 
-// MARK: - Encoding
+// MARK: -
 
-extension QuotaRootTests {
-    func testEncode() {
-        let inputs: [(QuotaRoot, String, UInt)] = [
-            (QuotaRoot(""), "\"\"", #line),
-            (QuotaRoot("MassivePool"), "\"MassivePool\"", #line),
-        ]
-
-        for (test, expectedString, line) in inputs {
-            self.testBuffer.clear()
-            let size = self.testBuffer.writeQuotaRoot(test)
-            XCTAssertEqual(size, expectedString.utf8.count, line: line)
-            XCTAssertEqual(self.testBufferString, expectedString, line: line)
-        }
+extension EncodeFixture<QuotaRoot> {
+    fileprivate static func quotaRoot(_ input: QuotaRoot, _ expectedString: String) -> Self {
+        EncodeFixture(
+            input: input,
+            bufferKind: .defaultServer,
+            expectedString: expectedString,
+            encoder: { $0.writeQuotaRoot($1) }
+        )
     }
 }

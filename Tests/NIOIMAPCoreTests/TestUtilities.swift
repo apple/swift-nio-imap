@@ -15,7 +15,22 @@
 import Foundation
 import NIO
 @testable import NIOIMAPCore
-import XCTest
+import Testing
+
+func expectEqualAndEqualHash<T>(
+    _ a: T,
+    _ b: T,
+    sourceLocation: SourceLocation = #_sourceLocation
+) where T: Hashable {
+    func hash(_ value: T) -> Int {
+        var hasher = Hasher()
+        value.hash(into: &hasher)
+        return hasher.finalize()
+    }
+    #expect(a == b, sourceLocation: sourceLocation)
+    #expect(a.hashValue == b.hashValue, sourceLocation: sourceLocation)
+    #expect(hash(a) == hash(b), sourceLocation: sourceLocation)
+}
 
 enum TestUtilities {}
 
@@ -31,8 +46,7 @@ extension TestUtilities {
         _ string: String,
         terminator: String = "",
         shouldRemainUnchanged: Bool = false,
-        file: StaticString = (#filePath),
-        line: UInt = #line,
+        sourceLocation: SourceLocation = #_sourceLocation,
         _ body: (inout ParseBuffer) throws -> Void
     ) {
         var inputBuffer = ByteBufferAllocator().buffer(capacity: string.utf8.count + terminator.utf8.count + 10)
@@ -61,18 +75,21 @@ extension TestUtilities {
                 )) ?? ByteBuffer()
             let remainingString = String(buffer: remaining)
             if shouldRemainUnchanged {
-                XCTAssertEqual(String(buffer: beforeRunningBody), remainingString, file: file, line: line)
+                #expect(String(buffer: beforeRunningBody) == remainingString, sourceLocation: sourceLocation)
             } else {
-                XCTAssertEqual(remainingString, expectedString, file: file, line: line)
+                #expect(remainingString == expectedString, sourceLocation: sourceLocation)
             }
         }
 
-        XCTAssertNoThrow(try body(&parseBuffer), file: file, line: line)
+        #expect(
+            throws: Never.self,
+            sourceLocation: sourceLocation
+        ) {
+            try body(&parseBuffer)
+        }
     }
 }
 
-#if swift(>=5.8)
-#if hasFeature(RetroactiveAttribute)
 extension ByteBuffer: @retroactive ExpressibleByStringLiteral {
     public init(stringLiteral value: String) {
         let allocator = ByteBufferAllocator()
@@ -80,29 +97,87 @@ extension ByteBuffer: @retroactive ExpressibleByStringLiteral {
         self.writeString(value)
     }
 }
-#else
-extension ByteBuffer: ExpressibleByStringLiteral {
-    public init(stringLiteral value: String) {
-        let allocator = ByteBufferAllocator()
-        self = allocator.buffer(capacity: 0)
-        self.writeString(value)
-    }
-}
-#endif
-#else
-extension ByteBuffer: ExpressibleByStringLiteral {
-    public init(stringLiteral value: String) {
-        let allocator = ByteBufferAllocator()
-        self = allocator.buffer(capacity: 0)
-        self.writeString(value)
-    }
-}
-#endif
 
-extension TestUtilities {
-    static func roundTripCodable<A>(_ value: A) throws -> A where A: Codable {
-        let encoder = JSONEncoder()
-        let decoder = JSONDecoder()
-        return try decoder.decode(A.self, from: encoder.encode(value))
+func checkCodableRoundTrips<A>(
+    _ a: A,
+    sourceLocation: SourceLocation = #_sourceLocation
+) where A: Codable, A: Equatable {
+    let encoder = JSONEncoder()
+    let data: Data
+    do {
+        data = try encoder.encode(a)
+    } catch {
+        Issue.record("Failed to encode: \(error)", sourceLocation: sourceLocation)
+        return
+    }
+    let decoder = JSONDecoder()
+    let decoded: A
+    do {
+        decoded = try decoder.decode(A.self, from: data)
+    } catch {
+        Issue.record("Failed to decode: \(error)", sourceLocation: sourceLocation)
+        return
+    }
+    #expect(decoded == a, sourceLocation: sourceLocation)
+}
+
+extension CommandEncodingOptions {
+    static var literalPlus: CommandEncodingOptions {
+        var o = CommandEncodingOptions()
+        o.useNonSynchronizingLiteralPlus = true
+        return o
+    }
+
+    static var literalMinus: CommandEncodingOptions {
+        var o = CommandEncodingOptions()
+        o.useNonSynchronizingLiteralMinus = true
+        return o
+    }
+
+    static var noQuoted: CommandEncodingOptions {
+        var o = CommandEncodingOptions()
+        o.useQuotedString = false
+        return o
     }
 }
+
+extension ResponseEncodingOptions {
+    static var rfc3501: ResponseEncodingOptions { ResponseEncodingOptions() }
+}
+
+extension String {
+    /// Maps control characters to their visual representations in the Control Pictures Unicode block.
+    /// - 0x00-0x1F are mapped to U+2400-U+241F
+    /// - 0x20 (space) is mapped to U+2423 (OPEN BOX)
+    /// - All other characters pass through unchanged
+    func mappingControlPictures() -> String {
+        var result = ""
+        for scalar in unicodeScalars {
+            guard
+                scalar.isASCII,
+                scalar.value <= 0x20
+            else {
+                result.unicodeScalars.append(scalar)
+                continue
+            }
+            if scalar.value == 0x20 {
+                // Map space to OPEN BOX
+                result.unicodeScalars.append(UnicodeScalar(0x2423)!)
+            } else {
+                // Map control characters to Control Pictures block
+                result.unicodeScalars.append(UnicodeScalar(0x2400 + scalar.value)!)
+            }
+        }
+        return result
+    }
+}
+
+extension StackTracker {
+    static var testTracker: StackTracker {
+        StackTracker(maximumParserStackDepth: 30)
+    }
+}
+
+let CR = UInt8(ascii: "\r")
+let LF = UInt8(ascii: "\n")
+let CRLF = String(decoding: [CR, LF], as: Unicode.UTF8.self)

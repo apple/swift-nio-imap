@@ -14,184 +14,253 @@
 
 import NIO
 import NIOIMAP
-import XCTest
+import Testing
 
-class IMAPServerHandlerTests: XCTestCase {
-    var channel: EmbeddedChannel!
-    var handler: IMAPServerHandler!
-
-    // MARK: - Tests
-
-    func testSimpleCommandAndResponse() {
-        self.writeInbound("a LOGIN \"user\" \"password\"\r\n")
-        self.assertInbound(.tagged(.init(tag: "a", command: .login(username: "user", password: "password"))))
-        self.writeOutbound(.tagged(.init(tag: "a", state: .ok(.init(text: "yo")))))
-        self.assertOutboundString("a OK yo\r\n")
+@Suite struct IMAPServerHandlerTests {
+    @Test("simple command and response")
+    func simpleCommandAndResponse() {
+        let helper = Helper()
+        defer {
+            _ = try? helper.channel.finish()
+        }
+        helper.writeInbound("a LOGIN \"user\" \"password\"\r\n")
+        helper.expectInbound(.tagged(.init(tag: "a", command: .login(username: "user", password: "password"))))
+        helper.writeOutbound(.tagged(.init(tag: "a", state: .ok(.init(text: "yo")))))
+        helper.expectOutboundString("a OK yo\r\n")
     }
 
-    func testSimpleCommandWithContinuationRequestWorks() {
-        self.writeInbound("a LOGIN {4}\r\n")
-        XCTAssertNoThrow(XCTAssertNil(try self.channel.readInbound(as: CommandStreamPart.self)))
+    @Test("simple command with continuation request works")
+    func simpleCommandWithContinuationRequestWorks() {
+        let helper = Helper()
+        defer {
+            _ = try? helper.channel.finish()
+        }
+        helper.writeInbound("a LOGIN {4}\r\n")
+        var result: CommandStreamPart?
+        #expect(throws: Never.self) {
+            result = try helper.channel.readInbound(as: CommandStreamPart.self)
+        }
+        #expect(result == nil)
 
         // Nothing happens until `read()`
-        XCTAssertNoThrow(XCTAssertNil(try self.channel.readOutbound(as: ByteBuffer.self)))
+        var outbound: ByteBuffer?
+        #expect(throws: Never.self) {
+            outbound = try helper.channel.readOutbound(as: ByteBuffer.self)
+        }
+        #expect(outbound == nil)
 
-        self.channel.read()
-        self.assertOutboundString("+ OK\r\n")
+        helper.channel.read()
+        helper.expectOutboundString("+ OK\r\n")
 
-        self.writeInbound("user \"password\"\r\n")
+        helper.writeInbound("user \"password\"\r\n")
 
-        self.assertInbound(.tagged(.init(tag: "a", command: .login(username: "user", password: "password"))))
-        self.writeOutbound(.tagged(.init(tag: "a", state: .ok(.init(text: "yo")))))
-        self.assertOutboundString("a OK yo\r\n")
+        helper.expectInbound(.tagged(.init(tag: "a", command: .login(username: "user", password: "password"))))
+        helper.writeOutbound(.tagged(.init(tag: "a", state: .ok(.init(text: "yo")))))
+        helper.expectOutboundString("a OK yo\r\n")
     }
 
-    func testSimpleCommandWithContinuationRequestWorksEvenIfClientMisbehavesAndSendsWithoutWaiting() {
-        self.writeInbound("a LOGIN {4}\r\nuser \"password\"\r\n")
+    @Test("simple command with continuation request works even if client misbehaves and sends without waiting")
+    func simpleCommandWithContinuationRequestWorksEvenIfClientMisbehavesAndSendsWithoutWaiting() {
+        let helper = Helper()
+        defer {
+            _ = try? helper.channel.finish()
+        }
+        helper.writeInbound("a LOGIN {4}\r\nuser \"password\"\r\n")
         // Nothing happens until `read()`
-        XCTAssertNoThrow(XCTAssertNil(try self.channel.readOutbound(as: ByteBuffer.self)))
+        var outbound: ByteBuffer?
+        #expect(throws: Never.self) {
+            outbound = try helper.channel.readOutbound(as: ByteBuffer.self)
+        }
+        #expect(outbound == nil)
 
-        self.assertInbound(.tagged(.init(tag: "a", command: .login(username: "user", password: "password"))))
-        self.writeOutbound(.tagged(.init(tag: "a", state: .ok(.init(text: "yo")))))
-        self.assertOutboundString("a OK yo\r\n")
+        helper.expectInbound(.tagged(.init(tag: "a", command: .login(username: "user", password: "password"))))
+        helper.writeOutbound(.tagged(.init(tag: "a", state: .ok(.init(text: "yo")))))
+        helper.expectOutboundString("a OK yo\r\n")
 
-        self.channel.read()
-        self.assertOutboundString("+ OK\r\n")
+        helper.channel.read()
+        helper.expectOutboundString("+ OK\r\n")
     }
 
-    func testSettingContinuationRequestOnLiveHandler() {
-        self.handler.continuationRequest = ContinuationRequest.responseText(.init(text: "FoO"))
+    @Test("setting continuation request on live handler")
+    func settingContinuationRequestOnLiveHandler() {
+        let helper = Helper()
+        defer {
+            _ = try? helper.channel.finish()
+        }
+        helper.handler.continuationRequest = ContinuationRequest.responseText(.init(text: "FoO"))
 
-        self.writeInbound("a LOGIN {4}\r\n")
-        XCTAssertNoThrow(XCTAssertNil(try self.channel.readInbound(as: CommandStreamPart.self)))
+        helper.writeInbound("a LOGIN {4}\r\n")
+        var result: CommandStreamPart?
+        #expect(throws: Never.self) {
+            result = try helper.channel.readInbound(as: CommandStreamPart.self)
+        }
+        #expect(result == nil)
 
         // Nothing happens until `read()`
-        XCTAssertNoThrow(XCTAssertNil(try self.channel.readOutbound(as: ByteBuffer.self)))
+        var outbound: ByteBuffer?
+        #expect(throws: Never.self) {
+            outbound = try helper.channel.readOutbound(as: ByteBuffer.self)
+        }
+        #expect(outbound == nil)
 
-        self.channel.read()
-        self.assertOutboundString("+ FoO\r\n")
+        helper.channel.read()
+        helper.expectOutboundString("+ FoO\r\n")
 
-        self.writeInbound("user \"password\"\r\n")
+        helper.writeInbound("user \"password\"\r\n")
 
-        self.assertInbound(.tagged(.init(tag: "a", command: .login(username: "user", password: "password"))))
-        self.writeOutbound(.tagged(.init(tag: "a", state: .ok(.init(text: "yo")))))
-        self.assertOutboundString("a OK yo\r\n")
+        helper.expectInbound(.tagged(.init(tag: "a", command: .login(username: "user", password: "password"))))
+        helper.writeOutbound(.tagged(.init(tag: "a", state: .ok(.init(text: "yo")))))
+        helper.expectOutboundString("a OK yo\r\n")
     }
 
-    func testSettingContinuationRequestInInit() {
-        self.handler = IMAPServerHandler(continuationRequest: ContinuationRequest.responseText(.init(text: "FoO")))
-        self.channel = EmbeddedChannel(handlers: [ByteToMessageHandler(FrameDecoder()), self.handler])
+    @Test("setting continuation request in init")
+    mutating func settingContinuationRequestInInit() {
+        let handler = IMAPServerHandler(continuationRequest: ContinuationRequest.responseText(.init(text: "FoO")))
+        let helper = Helper(
+            channel: EmbeddedChannel(handlers: [ByteToMessageHandler(FrameDecoder()), handler]),
+            handler: handler
+        )
+        defer {
+            _ = try? helper.channel.finish()
+        }
 
-        self.writeInbound("a LOGIN {4}\r\n")
-        XCTAssertNoThrow(XCTAssertNil(try self.channel.readInbound(as: CommandStreamPart.self)))
+        helper.writeInbound("a LOGIN {4}\r\n")
+        var result: CommandStreamPart?
+        #expect(throws: Never.self) {
+            result = try helper.channel.readInbound(as: CommandStreamPart.self)
+        }
+        #expect(result == nil)
 
         // Nothing happens until `read()`
-        XCTAssertNoThrow(XCTAssertNil(try self.channel.readOutbound(as: ByteBuffer.self)))
+        var outbound: ByteBuffer?
+        #expect(throws: Never.self) {
+            outbound = try helper.channel.readOutbound(as: ByteBuffer.self)
+        }
+        #expect(outbound == nil)
 
-        self.channel.read()
-        self.assertOutboundString("+ FoO\r\n")
+        helper.channel.read()
+        helper.expectOutboundString("+ FoO\r\n")
 
-        self.writeInbound("user \"password\"\r\n")
+        helper.writeInbound("user \"password\"\r\n")
 
-        self.assertInbound(.tagged(.init(tag: "a", command: .login(username: "user", password: "password"))))
-        self.writeOutbound(.tagged(.init(tag: "a", state: .ok(.init(text: "yo")))))
-        self.assertOutboundString("a OK yo\r\n")
+        helper.expectInbound(.tagged(.init(tag: "a", command: .login(username: "user", password: "password"))))
+        helper.writeOutbound(.tagged(.init(tag: "a", state: .ok(.init(text: "yo")))))
+        helper.expectOutboundString("a OK yo\r\n")
     }
 
     // We previously had a bug where the response encode buffer was dropped with every
     // individual server response, meaning we lost the state. We need to state to insert
     // correct spaces in between streaming fetch attributes. This test prevents regression.
-    func testFetchResponsesIncludeSpaces() {
+    @Test("fetch responses include spaces")
+    mutating func fetchResponsesIncludeSpaces() {
         // note that the same handler (and therefore the same `ResponseEncodeBuffer` is used
         // throughout the test
-        self.handler = IMAPServerHandler()
-        self.channel = EmbeddedChannel(handler: self.handler)
+        let handler = IMAPServerHandler()
+        let helper = Helper(
+            channel: EmbeddedChannel(handler: handler),
+            handler: handler
+        )
+        defer {
+            _ = try? helper.channel.finish()
+        }
 
         // single attribute
-        self.writeOutbound(.fetch(.start(1)), wait: false)
-        self.assertOutboundString("* 1 FETCH (")
-        self.writeOutbound(.fetch(.simpleAttribute(.flags([.answered, .draft]))), wait: false)
-        self.assertOutboundString("FLAGS (\\Answered \\Draft)")
-        self.writeOutbound(.fetch(.finish), wait: false)
-        self.assertOutboundString(")\r\n")
+        helper.writeOutbound(.fetch(.start(1)), wait: false)
+        helper.expectOutboundString("* 1 FETCH (")
 
         // multiple attributes
-        self.writeOutbound(.fetch(.start(2)), wait: false)
-        self.assertOutboundString("* 2 FETCH (")
-        self.writeOutbound(.fetch(.simpleAttribute(.flags([.answered, .draft]))), wait: false)
-        self.assertOutboundString("FLAGS (\\Answered \\Draft)")
-        self.writeOutbound(.fetch(.simpleAttribute(.uid(999))), wait: false)
-        self.assertOutboundString(" UID 999")
-        self.writeOutbound(.fetch(.simpleAttribute(.rfc822Size(876))), wait: false)
-        self.assertOutboundString(" RFC822.SIZE 876")
-        self.writeOutbound(.fetch(.finish), wait: false)
-        self.assertOutboundString(")\r\n")
+        helper.writeOutbound(.fetch(.start(2)), wait: false)
+        helper.expectOutboundString("* 2 FETCH (")
+        helper.writeOutbound(.fetch(.simpleAttribute(.flags([.answered, .draft]))), wait: false)
+        helper.expectOutboundString("FLAGS (\\Answered \\Draft)")
+        helper.writeOutbound(.fetch(.simpleAttribute(.uid(999))), wait: false)
+        helper.expectOutboundString(" UID 999")
+        helper.writeOutbound(.fetch(.simpleAttribute(.rfc822Size(876))), wait: false)
+        helper.expectOutboundString(" RFC822.SIZE 876")
+        helper.writeOutbound(.fetch(.finish), wait: false)
+        helper.expectOutboundString(")\r\n")
 
         // multiple attributes with streaming
-        self.writeOutbound(.fetch(.start(2)), wait: false)
-        self.assertOutboundString("* 2 FETCH (")
-        self.writeOutbound(.fetch(.simpleAttribute(.flags([.answered, .draft]))), wait: false)
-        self.assertOutboundString("FLAGS (\\Answered \\Draft)")
-        self.writeOutbound(.fetch(.simpleAttribute(.uid(999))), wait: false)
-        self.assertOutboundString(" UID 999")
-        self.writeOutbound(.fetch(.streamingBegin(kind: .rfc822, byteCount: 5)), wait: false)
-        self.assertOutboundString(" RFC822 {5}\r\n")
-        self.writeOutbound(.fetch(.streamingBytes("12345")), wait: false)
-        self.assertOutboundString("12345")
-        self.writeOutbound(.fetch(.streamingEnd), wait: false)
-        self.assertOutboundString("")
-        self.writeOutbound(.fetch(.simpleAttribute(.rfc822Size(876))), wait: false)
-        self.assertOutboundString(" RFC822.SIZE 876")
-        self.writeOutbound(.fetch(.finish), wait: false)
-        self.assertOutboundString(")\r\n")
+        helper.writeOutbound(.fetch(.start(2)), wait: false)
+        helper.expectOutboundString("* 2 FETCH (")
+        helper.writeOutbound(.fetch(.simpleAttribute(.flags([.answered, .draft]))), wait: false)
+        helper.expectOutboundString("FLAGS (\\Answered \\Draft)")
+        helper.writeOutbound(.fetch(.simpleAttribute(.uid(999))), wait: false)
+        helper.expectOutboundString(" UID 999")
+        helper.writeOutbound(.fetch(.streamingBegin(kind: .rfc822, byteCount: 5)), wait: false)
+        helper.expectOutboundString(" RFC822 {5}\r\n")
+        helper.writeOutbound(.fetch(.streamingBytes("12345")), wait: false)
+        helper.expectOutboundString("12345")
+        helper.writeOutbound(.fetch(.streamingEnd), wait: false)
+        helper.expectOutboundString("")
+        helper.writeOutbound(.fetch(.simpleAttribute(.rfc822Size(876))), wait: false)
+        helper.expectOutboundString(" RFC822.SIZE 876")
+        helper.writeOutbound(.fetch(.finish), wait: false)
+        helper.expectOutboundString(")\r\n")
     }
 
-    func testAuthenticationFlow() {
-        self.handler = IMAPServerHandler()
-        self.channel = EmbeddedChannel(handlers: [ByteToMessageHandler(FrameDecoder()), self.handler])
+    @Test("authentication flow")
+    mutating func authenticationFlow() {
+        let handler = IMAPServerHandler()
+        let helper = Helper(
+            channel: EmbeddedChannel(handlers: [ByteToMessageHandler(FrameDecoder()), handler]),
+            handler: handler
+        )
+        defer {
+            _ = try? helper.channel.finish()
+        }
 
         // client starts authentication
-        self.writeInbound("A1 AUTHENTICATE GSSAPI\r\n")
-        self.assertInbound(.tagged(.init(tag: "A1", command: .authenticate(mechanism: .gssAPI, initialResponse: nil))))
+        helper.writeInbound("A1 AUTHENTICATE GSSAPI\r\n")
+        helper.expectInbound(
+            .tagged(.init(tag: "A1", command: .authenticate(mechanism: .gssAPI, initialResponse: nil)))
+        )
 
         // server sends challenge
-        self.writeOutbound(.authenticationChallenge("challenge1"))
-        self.assertOutboundBuffer("+ Y2hhbGxlbmdlMQ==\r\n")
+        helper.writeOutbound(.authenticationChallenge("challenge1"))
+        helper.expectOutboundBuffer("+ Y2hhbGxlbmdlMQ==\r\n")
 
         // client responds
-        self.writeInbound("cmVzcG9uc2Ux\r\n")
-        self.assertInbound(.continuationResponse("response1"))
+        helper.writeInbound("cmVzcG9uc2Ux\r\n")
+        helper.expectInbound(.continuationResponse("response1"))
 
         // server challenge 2
-        self.writeOutbound(.authenticationChallenge("challenge2"))
-        self.assertOutboundBuffer("+ Y2hhbGxlbmdlMg==\r\n")
+        helper.writeOutbound(.authenticationChallenge("challenge2"))
+        helper.expectOutboundBuffer("+ Y2hhbGxlbmdlMg==\r\n")
 
         // client responds
-        self.writeInbound("cmVzcG9uc2Uy\r\n")
-        self.assertInbound(.continuationResponse("response2"))
+        helper.writeInbound("cmVzcG9uc2Uy\r\n")
+        helper.expectInbound(.continuationResponse("response2"))
 
         // server challenge 3 (empty)
-        self.writeOutbound(.authenticationChallenge(""))
-        self.assertOutboundBuffer("+ \r\n")
+        helper.writeOutbound(.authenticationChallenge(""))
+        helper.expectOutboundBuffer("+ \r\n")
 
         // client responds
-        self.writeInbound("cmVzcG9uc2Uz\r\n")
-        self.assertInbound(.continuationResponse("response3"))
+        helper.writeInbound("cmVzcG9uc2Uz\r\n")
+        helper.expectInbound(.continuationResponse("response3"))
 
         // all done
-        self.writeOutbound(.tagged(.init(tag: "A1", state: .ok(.init(text: "Success")))))
-        self.assertOutboundBuffer("A1 OK Success\r\n")
+        helper.writeOutbound(.tagged(.init(tag: "A1", state: .ok(.init(text: "Success")))))
+        helper.expectOutboundBuffer("A1 OK Success\r\n")
     }
 
-    func testAppend() {
-        self.handler = IMAPServerHandler(
+    @Test("append")
+    mutating func append() {
+        let handler = IMAPServerHandler(
             continuationRequest: .responseText(ResponseText(text: "Ready for literal data"))
         )
-        self.channel = EmbeddedChannel(handlers: [ByteToMessageHandler(FrameDecoder()), self.handler])
+        let helper = Helper(
+            channel: EmbeddedChannel(handlers: [ByteToMessageHandler(FrameDecoder()), handler]),
+            handler: handler
+        )
+        defer {
+            _ = try? helper.channel.finish()
+        }
 
-        self.writeInbound("A1 APPEND saved-messages (\\Seen) {12}\r\n")
-        self.assertInbound(.append(.start(tag: "A1", appendingTo: MailboxName("saved-messages"))))
-        self.assertInbound(
+        helper.writeInbound("A1 APPEND saved-messages (\\Seen) {12}\r\n")
+        helper.expectInbound(.append(.start(tag: "A1", appendingTo: MailboxName("saved-messages"))))
+        helper.expectInbound(
             .append(
                 .beginMessage(
                     message: AppendMessage(
@@ -202,95 +271,106 @@ class IMAPServerHandlerTests: XCTestCase {
             )
         )
 
-        self.channel.read()
-        self.assertOutboundBuffer("+ Ready for literal data\r\n")
+        helper.channel.read()
+        helper.expectOutboundBuffer("+ Ready for literal data\r\n")
 
-        self.writeInbound("012345678901")
-        self.assertInbound(.append(.messageBytes(ByteBuffer(string: "012345678901"))))
+        helper.writeInbound("012345678901")
+        helper.expectInbound(.append(.messageBytes(ByteBuffer(string: "012345678901"))))
 
-        self.writeInbound("\r\n")
-        self.assertInbound(.append(.endMessage))
-        self.assertInbound(.append(.finish))
+        helper.writeInbound("\r\n")
+        helper.expectInbound(.append(.endMessage))
+        helper.expectInbound(.append(.finish))
 
-        self.channel.read()
-        self.assertOutboundBufferEmpty()
+        helper.channel.read()
+        helper.expectOutboundBufferEmpty()
 
-        self.writeOutbound(.tagged(TaggedResponse(tag: "A1", state: .ok(.init(text: "Done appending")))))
-        self.assertOutboundBuffer("A1 OK Done appending\r\n")
+        helper.writeOutbound(.tagged(TaggedResponse(tag: "A1", state: .ok(.init(text: "Done appending")))))
+        helper.expectOutboundBuffer("A1 OK Done appending\r\n")
 
-        self.writeInbound("A2 NOOP\r\n")
-        self.assertInbound(.tagged(.init(tag: "A2", command: .noop)))
-        self.channel.read()
-        self.assertOutboundBufferEmpty()
+        helper.writeInbound("A2 NOOP\r\n")
+        helper.expectInbound(.tagged(.init(tag: "A2", command: .noop)))
+        helper.channel.read()
+        helper.expectOutboundBufferEmpty()
     }
 
-    // MARK: - setup/tear down
+}
 
-    override func setUp() {
-        XCTAssertNil(self.handler)
-        XCTAssertNil(self.channel)
-        self.handler = IMAPServerHandler()
-        self.channel = EmbeddedChannel(handlers: [ByteToMessageHandler(FrameDecoder()), self.handler])
-    }
+// MARK: - Helper
 
-    override func tearDown() {
-        XCTAssertNotNil(self.channel)
-        XCTAssertNotNil(self.handler)
-        XCTAssertNoThrow(XCTAssertTrue(try self.channel.finish().isClean))
-        self.channel = nil
-        self.handler = nil
+extension IMAPServerHandlerTests {
+    struct Helper {
+        var channel: EmbeddedChannel
+        var handler: IMAPServerHandler
     }
 }
 
-// MARK: - Helpers
+extension IMAPServerHandlerTests.Helper {
+    init() {
+        let handler = IMAPServerHandler()
+        self.channel = EmbeddedChannel(handlers: [ByteToMessageHandler(FrameDecoder()), handler])
+        self.handler = handler
+    }
 
-extension IMAPServerHandlerTests {
-    private func assertInbound(_ command: CommandStreamPart, line: UInt = #line) {
+    func expectInbound(_ command: CommandStreamPart, sourceLocation: SourceLocation = #_sourceLocation) {
         var maybeRead: CommandStreamPart?
-        XCTAssertNoThrow(maybeRead = try self.channel.readInbound(), line: line)
+        #expect(throws: Never.self, sourceLocation: sourceLocation) {
+            maybeRead = try self.channel.readInbound()
+        }
         guard let read = maybeRead else {
-            XCTFail("Inbound buffer empty", line: line)
+            Issue.record("Inbound buffer empty", sourceLocation: sourceLocation)
             return
         }
-        XCTAssertEqual(command, read, line: line)
+        #expect(command == read, sourceLocation: sourceLocation)
     }
 
-    private func assertOutboundBuffer(_ buffer: ByteBuffer, line: UInt = #line) {
+    func expectOutboundBuffer(_ buffer: ByteBuffer, sourceLocation: SourceLocation = #_sourceLocation) {
         var maybeRead: ByteBuffer?
-        XCTAssertNoThrow(maybeRead = try self.channel.readOutbound(), line: line)
+        #expect(throws: Never.self, sourceLocation: sourceLocation) {
+            maybeRead = try self.channel.readOutbound()
+        }
         guard let read = maybeRead else {
-            XCTFail("Outbound buffer empty", line: line)
+            Issue.record("Outbound buffer empty", sourceLocation: sourceLocation)
             return
         }
-        XCTAssertEqual(buffer, read, "\(String(buffer: buffer)) != \(String(buffer: read))", line: line)
+        #expect(buffer == read, "\(String(buffer: buffer)) != \(String(buffer: read))", sourceLocation: sourceLocation)
     }
 
-    private func assertOutboundBufferEmpty(line: UInt = #line) {
+    func expectOutboundBufferEmpty(sourceLocation: SourceLocation = #_sourceLocation) {
         var maybeRead: ByteBuffer?
-        XCTAssertNoThrow(maybeRead = try self.channel.readOutbound(), line: line)
-        XCTAssertNil(maybeRead.map { String(buffer: $0) })
+        #expect(throws: Never.self, sourceLocation: sourceLocation) {
+            maybeRead = try self.channel.readOutbound()
+        }
+        #expect(maybeRead.map { String(buffer: $0) } == nil, sourceLocation: sourceLocation)
     }
 
-    private func assertOutboundString(_ string: String, line: UInt = #line) {
+    func expectOutboundString(_ string: String, sourceLocation: SourceLocation = #_sourceLocation) {
         var buffer = self.channel.allocator.buffer(capacity: string.utf8.count)
         buffer.writeString(string)
-        self.assertOutboundBuffer(buffer, line: line)
+        self.expectOutboundBuffer(buffer, sourceLocation: sourceLocation)
     }
 
-    private func writeInbound(_ string: String, line: UInt = #line) {
-        XCTAssertNoThrow(try self.channel.writeInbound(self.buffer(string: string)), line: line)
+    func writeInbound(_ string: String, sourceLocation: SourceLocation = #_sourceLocation) {
+        #expect(throws: Never.self, sourceLocation: sourceLocation) {
+            try self.channel.writeInbound(self.buffer(string: string))
+        }
     }
 
     @discardableResult
-    private func writeOutbound(_ response: Response, wait: Bool = true, line: UInt = #line) -> EventLoopFuture<Void> {
+    func writeOutbound(
+        _ response: Response,
+        wait: Bool = true,
+        sourceLocation: SourceLocation = #_sourceLocation
+    ) -> EventLoopFuture<Void> {
         let result = self.channel.writeAndFlush(response)
         if wait {
-            XCTAssertNoThrow(try result.wait(), line: line)
+            #expect(throws: Never.self, sourceLocation: sourceLocation) {
+                try result.wait()
+            }
         }
         return result
     }
 
-    private func buffer(string: String) -> ByteBuffer {
+    func buffer(string: String) -> ByteBuffer {
         var buffer = self.channel.allocator.buffer(capacity: string.utf8.count)
         buffer.writeString(string)
         return buffer

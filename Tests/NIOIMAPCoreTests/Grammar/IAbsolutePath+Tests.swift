@@ -14,20 +14,63 @@
 
 import NIO
 @_spi(NIOIMAPInternal) @testable import NIOIMAPCore
-import XCTest
+import Testing
 
-class AbsoluteMessagePath_Tests: EncodeTestClass {}
+@Suite("AbsoluteMessagePath")
+struct AbsoluteMessagePathTests {
+    @Test(arguments: [
+        EncodeFixture.absoluteMessagePath(
+            .init(command: .messageList(.init(mailboxUIDValidity: .init(encodeMailbox: .init(mailbox: "test"))))),
+            "/test"
+        ),
+        EncodeFixture.absoluteMessagePath(
+            .init(command: .messageList(.init(mailboxUIDValidity: .init(encodeMailbox: .init(mailbox: "INBOX"))))),
+            "/INBOX"
+        ),
+    ])
+    func encode(_ fixture: EncodeFixture<AbsoluteMessagePath>) {
+        fixture.checkEncoding()
+    }
 
-// MARK: - IMAP
-
-extension AbsoluteMessagePath_Tests {
-    func testEncode() {
-        let inputs: [(AbsoluteMessagePath, String, UInt)] = [
-            (
-                .init(command: .messageList(.init(mailboxUIDValidity: .init(encodeMailbox: .init(mailbox: "test"))))),
-                "/test", #line
+    @Test(arguments: [
+        ParseFixture.absoluteMessagePath("/", " ", expected: .success(.init(command: nil))),
+        ParseFixture.absoluteMessagePath(
+            "/test",
+            " ",
+            expected: .success(
+                .init(
+                    command: .messageList(.init(mailboxUIDValidity: .init(encodeMailbox: .init(mailbox: "test"))))
+                )
             )
-        ]
-        self.iterateInputs(inputs: inputs, encoder: { self.testBuffer.writeAbsoluteMessagePath($0) })
+        ),
+    ])
+    func parse(_ fixture: ParseFixture<AbsoluteMessagePath>) {
+        fixture.checkParsing()
+    }
+}
+
+extension EncodeFixture<AbsoluteMessagePath> {
+    fileprivate static func absoluteMessagePath(_ input: T, _ expectedString: String) -> Self {
+        .init(
+            input: input,
+            bufferKind: .defaultServer,
+            expectedStrings: [expectedString],
+            encoder: { $0.writeAbsoluteMessagePath($1) }
+        )
+    }
+}
+
+extension ParseFixture<AbsoluteMessagePath> {
+    fileprivate static func absoluteMessagePath(
+        _ input: String,
+        _ terminator: String = " ",
+        expected: Expected
+    ) -> Self {
+        ParseFixture(
+            input: input,
+            terminator: terminator,
+            expected: expected,
+            parser: GrammarParser().parseAbsoluteMessagePath
+        )
     }
 }

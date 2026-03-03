@@ -14,81 +14,83 @@
 
 import NIO
 @_spi(NIOIMAPInternal) @testable import NIOIMAPCore
-import XCTest
+import Testing
 
-class UIDTests: EncodeTestClass {}
-
-// MARK: - Integer literal
-
-extension UIDTests {
-    func testIntegerLiteral() {
+@Suite("UID")
+struct UIDTests {
+    @Test("integer literal")
+    func integerLiteral() {
         let num: UID = 5
-        XCTAssertEqual(num, 5)
+        #expect(num == 5)
     }
 
-    func testValidRange() {
-        XCTAssertNil(UID(exactly: 0))
-        XCTAssertEqual(UID(exactly: 1)?.rawValue, 1)
-        XCTAssertEqual(UID(exactly: 4_294_967_295)?.rawValue, 4_294_967_295)
-        XCTAssertNil(UID(exactly: 4_294_967_296))
-    }
-}
-
-// MARK: - Comparable
-
-extension UIDTests {
-    func testComparable() {
-        XCTAssertFalse(UID.max < .max)
-        XCTAssertFalse(UID.max < 999)
-        XCTAssertTrue(UID.max > 999)
-        XCTAssertTrue(UID(1) < 999)  // use .number to force type
-    }
-}
-
-// MARK: - CustomDebugStringConvertible
-
-extension UIDTests {
-    func testCustomDebugStringConvertible() {
-        XCTAssertEqual("\(UID.min)", "1")
-        XCTAssertEqual("\(UID.max)", "*")
-        XCTAssertEqual("\(UID(2))", "2")
-    }
-}
-
-// MARK: - Encoding
-
-extension UIDTests {
-    func testEncode_max() {
-        let expected = "*"
-        let size = self.testBuffer.writeMessageIdentifier(UID.max)
-        XCTAssertEqual(size, expected.utf8.count)
-        XCTAssertEqual(expected, self.testBufferString)
+    @Test("valid range")
+    func validRange() {
+        #expect(UID(exactly: 0) == nil)
+        #expect(UID(exactly: 1)?.rawValue == 1)
+        #expect(UID(exactly: 4_294_967_295)?.rawValue == 4_294_967_295)
+        #expect(UID(exactly: 4_294_967_296) == nil)
     }
 
-    func testEncode_number() {
-        let expected = "1234"
-        let size = self.testBuffer.writeMessageIdentifier(UID(1234))
-        XCTAssertEqual(size, expected.utf8.count)
-        XCTAssertEqual(expected, self.testBufferString)
+    @Test
+    func comparable() {
+        #expect((UID.max < UID.max) == false)
+        #expect((UID.max < 999) == false)
+        #expect(UID.max > 999)
+        #expect(UID(1) < 999)
     }
-}
 
-// MARK: - Codable
+    @Test(
+        "custom debug string",
+        arguments: [
+            DebugStringFixture(sut: UID.min, expected: "1"),
+            DebugStringFixture(sut: UID.max, expected: "*"),
+            DebugStringFixture(sut: UID(2), expected: "2"),
+        ]
+    )
+    func customDebugString(_ fixture: DebugStringFixture<UID>) {
+        fixture.check()
+    }
 
-extension UIDTests {
-    func testRoundTripCodable() {
-        XCTAssertEqual(try TestUtilities.roundTripCodable(1), 1)
-        XCTAssertEqual(try TestUtilities.roundTripCodable(45_678), 45_678)
-        XCTAssertEqual(try TestUtilities.roundTripCodable(UID.max), UID.max)
+    @Test(arguments: [
+        EncodeFixture.uid(.min, "1"),
+        EncodeFixture.uid(.max, "*"),
+        EncodeFixture.uid(UID(1234), "1234"),
+        EncodeFixture.uid(UID(392_972_163), "392972163"),
+    ])
+    func encode(_ fixture: EncodeFixture<UID>) {
+        fixture.checkEncoding()
+    }
+
+    @Test("round trip codable")
+    func roundTripCodable() {
+        checkCodableRoundTrips(UID(1))
+        checkCodableRoundTrips(UID(45_678))
+        checkCodableRoundTrips(UID.max)
+    }
+
+    @Test("strideable advanced by")
+    func strideableAdvancedBy() {
+        #expect(UID(1).advanced(by: 1) == UID(2))
+        #expect(UID(1).advanced(by: 2) == UID(3))
+        #expect(UID.max.advanced(by: 0) == UID.max)
+        #expect(UID.min.advanced(by: UID.min.distance(to: UID.max)) == UID.max)
+        #expect(UID.max.advanced(by: UID.max.distance(to: UID.min)) == UID.min)
     }
 }
 
-// MARK: - Strideable
+// MARK: -
 
-extension UIDTests {
-    func testAdvancedBy() {
-        XCTAssertEqual(UID.max.advanced(by: 0), UID.max)
-        XCTAssertEqual(UID.min.advanced(by: UID.min.distance(to: UID.max)), UID.max)
-        XCTAssertEqual(UID.max.advanced(by: UID.max.distance(to: UID.min)), UID.min)
+extension EncodeFixture<UID> {
+    fileprivate static func uid(
+        _ input: UID,
+        _ expectedString: String
+    ) -> Self {
+        EncodeFixture(
+            input: input,
+            bufferKind: .defaultServer,
+            expectedString: expectedString,
+            encoder: { $0.writeMessageIdentifier($1) }
+        )
     }
 }

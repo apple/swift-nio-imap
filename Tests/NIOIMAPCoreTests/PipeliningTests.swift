@@ -14,7 +14,7 @@
 
 import NIO
 @testable import NIOIMAPCore
-import XCTest
+import Testing
 
 extension MailboxName {
     fileprivate static let food = MailboxName(ByteBuffer(string: "Food"))
@@ -153,554 +153,551 @@ extension PipeliningRequirement {
 
 // MARK: -
 
-private func AssertCanStart(
+private func expect(
     _ requirements: Set<PipeliningRequirement>,
-    whileRunning behavior: Set<PipeliningBehavior>,
-    file: StaticString = #filePath,
-    line: UInt = #line
+    canStartWhileRunning behavior: Set<PipeliningBehavior>,
+    sourceLocation: SourceLocation = #_sourceLocation
 ) {
-    XCTAssert(behavior.satisfies(requirements), file: file, line: line)
+    #expect(behavior.satisfies(requirements), sourceLocation: sourceLocation)
 }
 
-private func AssertCanNotStart(
+private func expect(
     _ requirements: Set<PipeliningRequirement>,
-    whileRunning behavior: Set<PipeliningBehavior>,
-    file: StaticString = #filePath,
-    line: UInt = #line
+    canNotStartWhileRunning behavior: Set<PipeliningBehavior>,
+    sourceLocation: SourceLocation = #_sourceLocation
 ) {
-    XCTAssertFalse(behavior.satisfies(requirements), file: file, line: line)
+    #expect(!behavior.satisfies(requirements), sourceLocation: sourceLocation)
 }
 
-private func AssertFalse(
-    commands: [(UInt, Command)],
-    require requirement: PipeliningRequirement,
-    _ message: @autoclosure () -> String = "",
-    file: StaticString = #filePath
+private func expect(
+    commands: [(SourceLocation, Command)],
+    doNotRequire requirement: PipeliningRequirement,
+    _ message: @autoclosure () -> String = ""
 ) {
-    commands.forEach { line, command in
-        XCTAssertFalse(
-            command.pipeliningRequirements.contains(requirement),
+    commands.forEach { location, command in
+        #expect(
+            !command.pipeliningRequirements.contains(requirement),
             "Should not require \(requirement). \(message())",
-            file: file,
-            line: line
+            sourceLocation: location
         )
     }
 }
 
-private func Assert(
-    commands: [(UInt, Command)],
+private func expect(
+    commands: [(SourceLocation, Command)],
     require requirement: PipeliningRequirement,
-    _ message: @autoclosure () -> String = "",
-    file: StaticString = #filePath
+    _ message: @autoclosure () -> String = ""
 ) {
-    commands.forEach { line, command in
+    commands.forEach { location, command in
         let r = command.pipeliningRequirements
-        XCTAssert(
+        #expect(
             r.contains(requirement),
             "Should require \(requirement). Did: \(r). \(message())",
-            file: file,
-            line: line
+            sourceLocation: location
         )
     }
 }
 
-private func AssertFalse(
-    commands: [(UInt, Command)],
-    haveBehavior behavior: PipeliningBehavior,
-    _ message: @autoclosure () -> String = "",
-    file: StaticString = #filePath
+private func expect(
+    commands: [(SourceLocation, Command)],
+    doNotHaveBehavior behavior: PipeliningBehavior,
+    _ message: @autoclosure () -> String = ""
 ) {
-    commands.forEach { line, command in
-        XCTAssertFalse(
-            command.pipeliningBehavior.contains(behavior),
+    commands.forEach { location, command in
+        #expect(
+            !command.pipeliningBehavior.contains(behavior),
             "Should not have \(behavior) behavior. \(message())",
-            file: file,
-            line: line
+            sourceLocation: location
         )
     }
 }
 
-private func Assert(
-    commands: [(UInt, Command)],
+private func expect(
+    commands: [(SourceLocation, Command)],
     haveBehavior behavior: PipeliningBehavior,
-    _ message: @autoclosure () -> String = "",
-    file: StaticString = #filePath
+    _ message: @autoclosure () -> String = ""
 ) {
-    commands.forEach { line, command in
-        XCTAssert(
+    commands.forEach { location, command in
+        #expect(
             command.pipeliningBehavior.contains(behavior),
             "Should have \(behavior) behavior. \(message())",
-            file: file,
-            line: line
+            sourceLocation: location
         )
     }
 }
 
 // MARK: -
 
-final class PipeliningTests: XCTestCase {}
+@Suite("Pipelining")
+struct PipeliningTests {
+    // MARK: Interaction of Requirements and Behavior
 
-// MARK: Interaction of Requirements and Behavior
-
-extension PipeliningTests {
-    func testCanStartEmptyBehavior() {
-        // When the running command doesn’t have any requirements, anything can run:
-        AssertCanStart(
+    @Test("can start with empty behavior")
+    func canStartWithEmptyBehavior() {
+        // When the running command doesn't have any requirements, anything can run:
+        expect(
             [],
-            whileRunning: []
+            canStartWhileRunning: []
         )
-        AssertCanStart(
+        expect(
             [.noMailboxCommandsRunning],
-            whileRunning: []
+            canStartWhileRunning: []
         )
-        AssertCanStart(
+        expect(
             [.noUntaggedExpungeResponse],
-            whileRunning: []
+            canStartWhileRunning: []
         )
-        AssertCanStart(
+        expect(
             [.noUIDBasedCommandRunning],
-            whileRunning: []
+            canStartWhileRunning: []
         )
-        AssertCanStart(
+        expect(
             [.noFlagChangesToAnyMessage],
-            whileRunning: []
+            canStartWhileRunning: []
         )
-        AssertCanStart(
+        expect(
             [.noFlagReadsFromAnyMessage],
-            whileRunning: []
+            canStartWhileRunning: []
         )
-        AssertCanStart(
+        expect(
             Set(PipeliningRequirement.arbitraryRequirements),
-            whileRunning: []
+            canStartWhileRunning: []
         )
     }
 
-    func testCanStartChangesMailboxSelectionBehavior() {
-        AssertCanStart(
+    @Test("can start with changes mailbox selection behavior")
+    func canStartWithChangesMailboxSelectionBehavior() {
+        expect(
             [],
-            whileRunning: [.changesMailboxSelection]
+            canStartWhileRunning: [.changesMailboxSelection]
         )
-        // Don’t start a command that depends on the selected state
+        // Don't start a command that depends on the selected state
         // while changing the selected state.
-        AssertCanNotStart(
+        expect(
             [.noMailboxCommandsRunning],
-            whileRunning: [.changesMailboxSelection]
+            canNotStartWhileRunning: [.changesMailboxSelection]
         )
-        AssertCanStart(
+        expect(
             [.noUntaggedExpungeResponse],
-            whileRunning: [.changesMailboxSelection]
+            canStartWhileRunning: [.changesMailboxSelection]
         )
-        AssertCanStart(
+        expect(
             [.noUIDBasedCommandRunning],
-            whileRunning: [.changesMailboxSelection]
+            canStartWhileRunning: [.changesMailboxSelection]
         )
-        AssertCanStart(
+        expect(
             [.noFlagChangesToAnyMessage],
-            whileRunning: [.changesMailboxSelection]
+            canStartWhileRunning: [.changesMailboxSelection]
         )
-        AssertCanStart(
+        expect(
             [.noFlagReadsFromAnyMessage],
-            whileRunning: [.changesMailboxSelection]
+            canStartWhileRunning: [.changesMailboxSelection]
         )
 
-        AssertCanNotStart(
+        expect(
             Set(PipeliningRequirement.arbitraryRequirements),
-            whileRunning: [.changesMailboxSelection]
+            canNotStartWhileRunning: [.changesMailboxSelection]
         )
     }
 
-    func testCanStartDependsOnMailboxSelectionBehavior() {
-        AssertCanStart(
+    @Test("can start with depends on mailbox selection behavior")
+    func canStartWithDependsOnMailboxSelectionBehavior() {
+        expect(
             [],
-            whileRunning: [.dependsOnMailboxSelection]
+            canStartWhileRunning: [.dependsOnMailboxSelection]
         )
-        // Don’t start a command that requires no mailbox-specific commands,
-        // while mailbox-specific commands are running. E.g. don’t change the
+        // Don't start a command that requires no mailbox-specific commands,
+        // while mailbox-specific commands are running. E.g. don't change the
         // mailbox while running a FETCH.
-        AssertCanNotStart(
+        expect(
             [.noMailboxCommandsRunning],
-            whileRunning: [.dependsOnMailboxSelection]
+            canNotStartWhileRunning: [.dependsOnMailboxSelection]
         )
-        AssertCanStart(
+        expect(
             [.noUntaggedExpungeResponse],
-            whileRunning: [.dependsOnMailboxSelection]
+            canStartWhileRunning: [.dependsOnMailboxSelection]
         )
-        AssertCanStart(
+        expect(
             [.noUIDBasedCommandRunning],
-            whileRunning: [.dependsOnMailboxSelection]
+            canStartWhileRunning: [.dependsOnMailboxSelection]
         )
-        AssertCanStart(
+        expect(
             [.noFlagChangesToAnyMessage],
-            whileRunning: [.dependsOnMailboxSelection]
+            canStartWhileRunning: [.dependsOnMailboxSelection]
         )
-        AssertCanStart(
+        expect(
             [.noFlagReadsFromAnyMessage],
-            whileRunning: [.dependsOnMailboxSelection]
+            canStartWhileRunning: [.dependsOnMailboxSelection]
         )
 
-        AssertCanNotStart(
+        expect(
             Set(PipeliningRequirement.arbitraryRequirements),
-            whileRunning: [.dependsOnMailboxSelection]
+            canNotStartWhileRunning: [.dependsOnMailboxSelection]
         )
     }
 
-    func testCanStartMayTriggerUntaggedExpungeBehavior() {
-        AssertCanStart(
+    @Test("can start with may trigger untagged expunge behavior")
+    func canStartWithMayTriggerUntaggedExpungeBehavior() {
+        expect(
             [],
-            whileRunning: [.mayTriggerUntaggedExpunge]
+            canStartWhileRunning: [.mayTriggerUntaggedExpunge]
         )
-        AssertCanStart(
+        expect(
             [.noMailboxCommandsRunning],
-            whileRunning: [.mayTriggerUntaggedExpunge]
+            canStartWhileRunning: [.mayTriggerUntaggedExpunge]
         )
-        // If a command may trigger “untagged EXPUNGE”, don’t start a command
+        // If a command may trigger "untagged EXPUNGE", don't start a command
         // that requires this not to happen.
-        AssertCanNotStart(
+        expect(
             [.noUntaggedExpungeResponse],
-            whileRunning: [.mayTriggerUntaggedExpunge]
+            canNotStartWhileRunning: [.mayTriggerUntaggedExpunge]
         )
-        AssertCanStart(
+        expect(
             [.noUIDBasedCommandRunning],
-            whileRunning: [.mayTriggerUntaggedExpunge]
+            canStartWhileRunning: [.mayTriggerUntaggedExpunge]
         )
-        AssertCanStart(
+        expect(
             [.noFlagChangesToAnyMessage],
-            whileRunning: [.mayTriggerUntaggedExpunge]
+            canStartWhileRunning: [.mayTriggerUntaggedExpunge]
         )
-        AssertCanStart(
+        expect(
             [.noFlagReadsFromAnyMessage],
-            whileRunning: [.mayTriggerUntaggedExpunge]
+            canStartWhileRunning: [.mayTriggerUntaggedExpunge]
         )
 
-        AssertCanNotStart(
+        expect(
             Set(PipeliningRequirement.arbitraryRequirements),
-            whileRunning: [.mayTriggerUntaggedExpunge]
+            canNotStartWhileRunning: [.mayTriggerUntaggedExpunge]
         )
     }
 
-    func testCanStartIsUIDBasedBehavior() {
-        AssertCanStart(
+    @Test("can start with is UID based behavior")
+    func canStartWithIsUidBasedBehavior() {
+        expect(
             [],
-            whileRunning: [.isUIDBased]
+            canStartWhileRunning: [.isUIDBased]
         )
-        AssertCanStart(
+        expect(
             [.noMailboxCommandsRunning],
-            whileRunning: [.isUIDBased]
+            canStartWhileRunning: [.isUIDBased]
         )
-        AssertCanStart(
+        expect(
             [.noUntaggedExpungeResponse],
-            whileRunning: [.isUIDBased]
+            canStartWhileRunning: [.isUIDBased]
         )
-        AssertCanNotStart(
+        expect(
             [.noUIDBasedCommandRunning],
-            whileRunning: [.isUIDBased]
+            canNotStartWhileRunning: [.isUIDBased]
         )
-        AssertCanStart(
+        expect(
             [.noFlagChangesToAnyMessage],
-            whileRunning: [.isUIDBased]
+            canStartWhileRunning: [.isUIDBased]
         )
-        AssertCanStart(
+        expect(
             [.noFlagReadsFromAnyMessage],
-            whileRunning: [.isUIDBased]
+            canStartWhileRunning: [.isUIDBased]
         )
-        AssertCanNotStart(
+        expect(
             Set(PipeliningRequirement.arbitraryRequirements),
-            whileRunning: [.isUIDBased]
+            canNotStartWhileRunning: [.isUIDBased]
         )
     }
 
-    func testCanStartChangesFlagsBehavior() {
-        AssertCanStart(
+    @Test("can start with changes flags behavior")
+    func canStartWithChangesFlagsBehavior() {
+        expect(
             [],
-            whileRunning: [.changesFlagsOnAnyMessage]
+            canStartWhileRunning: [.changesFlagsOnAnyMessage]
         )
-        AssertCanStart(
+        expect(
             [.noMailboxCommandsRunning],
-            whileRunning: [.changesFlagsOnAnyMessage]
+            canStartWhileRunning: [.changesFlagsOnAnyMessage]
         )
-        AssertCanStart(
+        expect(
             [.noUntaggedExpungeResponse],
-            whileRunning: [.changesFlagsOnAnyMessage]
+            canStartWhileRunning: [.changesFlagsOnAnyMessage]
         )
-        AssertCanStart(
+        expect(
             [.noUIDBasedCommandRunning],
-            whileRunning: [.changesFlagsOnAnyMessage]
+            canStartWhileRunning: [.changesFlagsOnAnyMessage]
         )
-        AssertCanNotStart(
+        expect(
             [.noFlagChangesToAnyMessage],
-            whileRunning: [.changesFlagsOnAnyMessage]
+            canNotStartWhileRunning: [.changesFlagsOnAnyMessage]
         )
-        AssertCanStart(
+        expect(
             [.noFlagReadsFromAnyMessage],
-            whileRunning: [.changesFlagsOnAnyMessage]
+            canStartWhileRunning: [.changesFlagsOnAnyMessage]
         )
-        AssertCanNotStart(
+        expect(
             Set(PipeliningRequirement.arbitraryRequirements),
-            whileRunning: [.changesFlagsOnAnyMessage]
+            canNotStartWhileRunning: [.changesFlagsOnAnyMessage]
         )
 
-        AssertCanStart(
+        expect(
             [.noFlagChanges([200...300])],
-            whileRunning: [.changesFlags([1...100]), .changesFlags([400...500])]
+            canStartWhileRunning: [.changesFlags([1...100]), .changesFlags([400...500])]
         )
-        AssertCanNotStart(
+        expect(
             [.noFlagChanges([200...300])],
-            whileRunning: [.changesFlags([100...200])]
+            canNotStartWhileRunning: [.changesFlags([100...200])]
         )
-        AssertCanStart(
+        expect(
             [.noFlagChanges([200...300])],
-            whileRunning: [.readsFlags([100...200])]
+            canStartWhileRunning: [.readsFlags([100...200])]
         )
     }
 
-    func testCanStartReadsFlagsBehavior() {
-        AssertCanStart(
+    @Test("can start with reads flags behavior")
+    func canStartWithReadsFlagsBehavior() {
+        expect(
             [],
-            whileRunning: [.readsFlagsFromAnyMessage]
+            canStartWhileRunning: [.readsFlagsFromAnyMessage]
         )
-        AssertCanStart(
+        expect(
             [.noMailboxCommandsRunning],
-            whileRunning: [.readsFlagsFromAnyMessage]
+            canStartWhileRunning: [.readsFlagsFromAnyMessage]
         )
-        AssertCanStart(
+        expect(
             [.noUntaggedExpungeResponse],
-            whileRunning: [.readsFlagsFromAnyMessage]
+            canStartWhileRunning: [.readsFlagsFromAnyMessage]
         )
-        AssertCanStart(
+        expect(
             [.noUIDBasedCommandRunning],
-            whileRunning: [.readsFlagsFromAnyMessage]
+            canStartWhileRunning: [.readsFlagsFromAnyMessage]
         )
-        AssertCanStart(
+        expect(
             [.noFlagChangesToAnyMessage],
-            whileRunning: [.readsFlagsFromAnyMessage]
+            canStartWhileRunning: [.readsFlagsFromAnyMessage]
         )
-        AssertCanNotStart(
+        expect(
             [.noFlagReadsFromAnyMessage],
-            whileRunning: [.readsFlagsFromAnyMessage]
+            canNotStartWhileRunning: [.readsFlagsFromAnyMessage]
         )
-        AssertCanNotStart(
+        expect(
             Set(PipeliningRequirement.arbitraryRequirements),
-            whileRunning: [.readsFlagsFromAnyMessage]
+            canNotStartWhileRunning: [.readsFlagsFromAnyMessage]
         )
 
-        AssertCanStart(
+        expect(
             [.noFlagReads([200...300])],
-            whileRunning: [.readsFlags([1...100]), .readsFlags([400...500])]
+            canStartWhileRunning: [.readsFlags([1...100]), .readsFlags([400...500])]
         )
-        AssertCanNotStart(
+        expect(
             [.noFlagReads([200...300])],
-            whileRunning: [.readsFlags([100...200])]
+            canNotStartWhileRunning: [.readsFlags([100...200])]
         )
-        AssertCanStart(
+        expect(
             [.noFlagReads([200...300])],
-            whileRunning: [.changesFlags([100...200])]
+            canStartWhileRunning: [.changesFlags([100...200])]
         )
     }
 
-    func testCanStartBarrierBehavior() {
+    @Test("can start with barrier behavior")
+    func canStartWithBarrierBehavior() {
         // Nothing can be started, while a barrier is running.
-        AssertCanNotStart(
+        expect(
             [],
-            whileRunning: [.barrier]
+            canNotStartWhileRunning: [.barrier]
         )
-        AssertCanNotStart(
+        expect(
             [.noMailboxCommandsRunning],
-            whileRunning: [.barrier]
+            canNotStartWhileRunning: [.barrier]
         )
-        AssertCanNotStart(
+        expect(
             [.noUntaggedExpungeResponse],
-            whileRunning: [.barrier]
+            canNotStartWhileRunning: [.barrier]
         )
-        AssertCanNotStart(
+        expect(
             [.noUIDBasedCommandRunning],
-            whileRunning: [.barrier]
+            canNotStartWhileRunning: [.barrier]
         )
-        AssertCanNotStart(
+        expect(
             [.noFlagChangesToAnyMessage],
-            whileRunning: [.barrier]
+            canNotStartWhileRunning: [.barrier]
         )
-        AssertCanNotStart(
+        expect(
             [.noFlagReadsFromAnyMessage],
-            whileRunning: [.barrier]
+            canNotStartWhileRunning: [.barrier]
         )
-        AssertCanNotStart(
+        expect(
             Set(PipeliningRequirement.arbitraryRequirements),
-            whileRunning: [.barrier]
+            canNotStartWhileRunning: [.barrier]
         )
     }
-}
 
-// MARK: Command Requirements
+    // MARK: Command Requirements
 
-extension PipeliningTests {
-    func testAppend() {
+    @Test("append")
+    func append() {
         let append = CommandStreamPart.append(.start(tag: "A1", appendingTo: .food))
-        XCTAssertEqual(append.pipeliningRequirements, [])
-        XCTAssertEqual(
-            append.pipeliningBehavior,
-            [
+        #expect(append.pipeliningRequirements == [])
+        #expect(
+            append.pipeliningBehavior == [
                 .mayTriggerUntaggedExpunge
             ]
         )
     }
 
-    func testCatenatePart() {
+    @Test("catenate part")
+    func catenatePart() {
         // CATENATE may reference other messages by UID:
         let append = CommandStreamPart.append(.catenateURL(.joeURLFetch))
-        XCTAssertEqual(append.pipeliningRequirements, [])
-        XCTAssertEqual(
-            append.pipeliningBehavior,
-            [
+        #expect(append.pipeliningRequirements == [])
+        #expect(
+            append.pipeliningBehavior == [
                 .isUIDBased
             ]
         )
     }
 
-    func testUIDBatches() {
+    @Test("UID batches")
+    func uidBatches() {
         let append = CommandStreamPart.tagged(.init(tag: "A1", command: .uidBatches(batchSize: 1_000)))
-        XCTAssertEqual(append.pipeliningRequirements, [])
-        XCTAssertEqual(
-            append.pipeliningBehavior,
-            [
+        #expect(append.pipeliningRequirements == [])
+        #expect(
+            append.pipeliningBehavior == [
                 .isUIDBased,
                 .mayTriggerUntaggedExpunge,
             ]
         )
     }
 
-    func testCommandRequires_noMailboxCommandsRunning() {
+    @Test("command requires no mailbox commands running")
+    func commandRequiresNoMailboxCommandsRunning() {
         // Which commands have the requirements that:
         // > No command that depend on the _Selected State_ must be running.
 
-        AssertFalse(
+        expect(
             commands: [
-                (#line, .capability),
-                (#line, .noop),
+                (#_sourceLocation, .capability),
+                (#_sourceLocation, .noop),
 
-                (#line, .startTLS),
-                (#line, .authenticate(mechanism: .plain, initialResponse: nil)),
-                (#line, .login(username: "user", password: "password")),
-                (#line, .logout),
+                (#_sourceLocation, .startTLS),
+                (#_sourceLocation, .authenticate(mechanism: .plain, initialResponse: nil)),
+                (#_sourceLocation, .login(username: "user", password: "password")),
+                (#_sourceLocation, .logout),
 
-                (#line, .list(nil, reference: .food, .food, [])),
-                (#line, .listIndependent([], reference: .food, .food, [])),
-                (#line, .lsub(reference: .food, pattern: "Food")),
+                (#_sourceLocation, .list(nil, reference: .food, .food, [])),
+                (#_sourceLocation, .listIndependent([], reference: .food, .food, [])),
+                (#_sourceLocation, .lsub(reference: .food, pattern: "Food")),
 
-                (#line, .create(.food, [])),
-                (#line, .delete(.food)),
-                (#line, .rename(from: .food, to: .food, parameters: [:])),
+                (#_sourceLocation, .create(.food, [])),
+                (#_sourceLocation, .delete(.food)),
+                (#_sourceLocation, .rename(from: .food, to: .food, parameters: [:])),
 
-                (#line, .status(.food, [.messageCount])),
-                (#line, .copy(.set([1]), .food)),
-                (#line, .uidCopy(.set([1]), .food)),
-                (#line, .move(.set([1]), .food)),
-                (#line, .uidMove(.set([1]), .food)),
-                (#line, .check),
-                (#line, .expunge),
-                (#line, .uidExpunge(.set([1]))),
-                (#line, .search(key: .all, charset: nil, returnOptions: [.all])),
-                (#line, .uidSearch(key: .all, charset: nil, returnOptions: [])),
-                (#line, .extendedSearch(ExtendedSearchOptions(key: .all))),
-                (#line, .fetch(.set([1]), [.envelope, .uid], [])),
-                (#line, .fetch(.set([1]), [.bodyStructure(extensions: false)], [])),
-                (#line, .uidFetch(.set([1]), [.envelope, .uid], [])),
-                (#line, .store(.set([1]), [], .flags(.add(silent: true, list: [.answered])))),
-                (#line, .store(.set([1]), [], .flags(.add(silent: false, list: [.answered])))),
-                (#line, .uidStore(.set([1]), [], .flags(.add(silent: true, list: [.answered])))),
+                (#_sourceLocation, .status(.food, [.messageCount])),
+                (#_sourceLocation, .copy(.set([1]), .food)),
+                (#_sourceLocation, .uidCopy(.set([1]), .food)),
+                (#_sourceLocation, .move(.set([1]), .food)),
+                (#_sourceLocation, .uidMove(.set([1]), .food)),
+                (#_sourceLocation, .check),
+                (#_sourceLocation, .expunge),
+                (#_sourceLocation, .uidExpunge(.set([1]))),
+                (#_sourceLocation, .search(key: .all, charset: nil, returnOptions: [.all])),
+                (#_sourceLocation, .uidSearch(key: .all, charset: nil, returnOptions: [])),
+                (#_sourceLocation, .extendedSearch(ExtendedSearchOptions(key: .all))),
+                (#_sourceLocation, .fetch(.set([1]), [.envelope, .uid], [])),
+                (#_sourceLocation, .fetch(.set([1]), [.bodyStructure(extensions: false)], [])),
+                (#_sourceLocation, .uidFetch(.set([1]), [.envelope, .uid], [])),
+                (#_sourceLocation, .store(.set([1]), [], .flags(.add(silent: true, list: [.answered])))),
+                (#_sourceLocation, .store(.set([1]), [], .flags(.add(silent: false, list: [.answered])))),
+                (#_sourceLocation, .uidStore(.set([1]), [], .flags(.add(silent: true, list: [.answered])))),
 
-                (#line, .subscribe(.food)),
-                (#line, .unsubscribe(.food)),
-                (#line, .enable([.condStore])),
+                (#_sourceLocation, .subscribe(.food)),
+                (#_sourceLocation, .unsubscribe(.food)),
+                (#_sourceLocation, .enable([.condStore])),
 
-                (#line, .idleStart),
-                (#line, .id([:])),
-                (#line, .namespace),
-                (#line, .getQuota(QuotaRoot("foo"))),
-                (#line, .getQuotaRoot(.food)),
-                (#line, .setQuota(QuotaRoot("foo"), [])),
-                (#line, .getMetadata(options: [], mailbox: .food, entries: ["/shared/comment"])),
-                (#line, .setMetadata(mailbox: .food, entries: ["/shared/comment": nil])),
-                (#line, .resetKey(mailbox: nil, mechanisms: [.internal])),
-                (#line, .generateAuthorizedURL([.joe])),
-                (#line, .urlFetch([.joeURLFetch])),
+                (#_sourceLocation, .idleStart),
+                (#_sourceLocation, .id([:])),
+                (#_sourceLocation, .namespace),
+                (#_sourceLocation, .getQuota(QuotaRoot("foo"))),
+                (#_sourceLocation, .getQuotaRoot(.food)),
+                (#_sourceLocation, .setQuota(QuotaRoot("foo"), [])),
+                (#_sourceLocation, .getMetadata(options: [], mailbox: .food, entries: ["/shared/comment"])),
+                (#_sourceLocation, .setMetadata(mailbox: .food, entries: ["/shared/comment": nil])),
+                (#_sourceLocation, .resetKey(mailbox: nil, mechanisms: [.internal])),
+                (#_sourceLocation, .generateAuthorizedURL([.joe])),
+                (#_sourceLocation, .urlFetch([.joeURLFetch])),
             ],
-            require: .noMailboxCommandsRunning
+            doNotRequire: .noMailboxCommandsRunning
         )
 
-        Assert(
+        expect(
             commands: [
-                (#line, .examine(.food)),
-                (#line, .select(.food)),
-                (#line, .unselect),
-                (#line, .close),
+                (#_sourceLocation, .examine(.food)),
+                (#_sourceLocation, .select(.food)),
+                (#_sourceLocation, .unselect),
+                (#_sourceLocation, .close),
             ],
             require: .noMailboxCommandsRunning
         )
     }
 
-    func testCommandRequires_noUntaggedExpungeResponse() {
+    @Test("command requires no untagged expunge response")
+    func commandRequiresNoUntaggedExpungeResponse() {
         // Which commands have the requirements that:
         // > No command besides `FETCH`, `STORE`, and `SEARCH` is running.
         // This is a requirement for all sequence number based commands.
 
-        AssertFalse(
+        expect(
             commands: [
-                (#line, .capability),
-                (#line, .noop),
+                (#_sourceLocation, .capability),
+                (#_sourceLocation, .noop),
 
-                (#line, .startTLS),
-                (#line, .authenticate(mechanism: .plain, initialResponse: nil)),
-                (#line, .compress(.deflate)),
-                (#line, .login(username: "user", password: "password")),
-                (#line, .logout),
-                (#line, .listIndependent([], reference: .food, .food, [])),
-                (#line, .lsub(reference: .food, pattern: "Food")),
-                (#line, .subscribe(.food)),
-                (#line, .unsubscribe(.food)),
-                (#line, .enable([.condStore])),
-                (#line, .unselect),
-                (#line, .idleStart),
+                (#_sourceLocation, .startTLS),
+                (#_sourceLocation, .authenticate(mechanism: .plain, initialResponse: nil)),
+                (#_sourceLocation, .compress(.deflate)),
+                (#_sourceLocation, .login(username: "user", password: "password")),
+                (#_sourceLocation, .logout),
+                (#_sourceLocation, .listIndependent([], reference: .food, .food, [])),
+                (#_sourceLocation, .lsub(reference: .food, pattern: "Food")),
+                (#_sourceLocation, .subscribe(.food)),
+                (#_sourceLocation, .unsubscribe(.food)),
+                (#_sourceLocation, .enable([.condStore])),
+                (#_sourceLocation, .unselect),
+                (#_sourceLocation, .idleStart),
 
-                (#line, .id([:])),
-                (#line, .namespace),
-                (#line, .getQuota(QuotaRoot("foo"))),
-                (#line, .getQuotaRoot(.food)),
-                (#line, .setQuota(QuotaRoot("foo"), [])),
-                (#line, .getMetadata(options: [], mailbox: .food, entries: ["/shared/comment"])),
-                (#line, .setMetadata(mailbox: .food, entries: ["/shared/comment": nil])),
-                (#line, .resetKey(mailbox: nil, mechanisms: [.internal])),
-                (#line, .generateAuthorizedURL([.joe])),
-                (#line, .urlFetch([.joeURLFetch])),
+                (#_sourceLocation, .id([:])),
+                (#_sourceLocation, .namespace),
+                (#_sourceLocation, .getQuota(QuotaRoot("foo"))),
+                (#_sourceLocation, .getQuotaRoot(.food)),
+                (#_sourceLocation, .setQuota(QuotaRoot("foo"), [])),
+                (#_sourceLocation, .getMetadata(options: [], mailbox: .food, entries: ["/shared/comment"])),
+                (#_sourceLocation, .setMetadata(mailbox: .food, entries: ["/shared/comment": nil])),
+                (#_sourceLocation, .resetKey(mailbox: nil, mechanisms: [.internal])),
+                (#_sourceLocation, .generateAuthorizedURL([.joe])),
+                (#_sourceLocation, .urlFetch([.joeURLFetch])),
 
-                (#line, .select(.food)),
-                (#line, .delete(.food)),
-                (#line, .rename(from: .food, to: .food, parameters: [:])),
-                (#line, .examine(.food)),
-                (#line, .create(.food, [])),
-                (#line, .list(nil, reference: .food, .food, [])),
-                (#line, .status(.food, [.messageCount])),
-                (#line, .check),
-                (#line, .close),
-                (#line, .expunge),
-                (#line, .uidExpunge(.set([1]))),
-                (#line, .uidFetch(.set([1]), [.envelope, .uid], [])),
-                (#line, .uidFetch(.set([1]), [.bodyStructure(extensions: false)], [])),
-                (#line, .uidStore(.set([1]), [], .flags(.add(silent: true, list: [.answered])))),
-                (#line, .uidCopy(.set([1]), .food)),
-                (#line, .uidMove(.set([1]), .food)),
+                (#_sourceLocation, .select(.food)),
+                (#_sourceLocation, .delete(.food)),
+                (#_sourceLocation, .rename(from: .food, to: .food, parameters: [:])),
+                (#_sourceLocation, .examine(.food)),
+                (#_sourceLocation, .create(.food, [])),
+                (#_sourceLocation, .list(nil, reference: .food, .food, [])),
+                (#_sourceLocation, .status(.food, [.messageCount])),
+                (#_sourceLocation, .check),
+                (#_sourceLocation, .close),
+                (#_sourceLocation, .expunge),
+                (#_sourceLocation, .uidExpunge(.set([1]))),
+                (#_sourceLocation, .uidFetch(.set([1]), [.envelope, .uid], [])),
+                (#_sourceLocation, .uidFetch(.set([1]), [.bodyStructure(extensions: false)], [])),
+                (#_sourceLocation, .uidStore(.set([1]), [], .flags(.add(silent: true, list: [.answered])))),
+                (#_sourceLocation, .uidCopy(.set([1]), .food)),
+                (#_sourceLocation, .uidMove(.set([1]), .food)),
             ],
-            require: .noUntaggedExpungeResponse
+            doNotRequire: .noUntaggedExpungeResponse
         )
 
         // All commands that reference messages by sequence numbers have this requirement:
-        Assert(
+        expect(
             commands: [
-                (#line, .fetch(.set([1]), [.envelope, .uid], [])),
-                (#line, .fetch(.set([1]), [.bodyStructure(extensions: false)], [])),
-                (#line, .copy(.set([1]), .food)),
-                (#line, .move(.set([1]), .food)),
-                (#line, .store(.set([1]), [], .flags(.add(silent: true, list: [.answered])))),
-                (#line, .store(.set([1]), [], .flags(.add(silent: false, list: [.answered])))),
+                (#_sourceLocation, .fetch(.set([1]), [.envelope, .uid], [])),
+                (#_sourceLocation, .fetch(.set([1]), [.bodyStructure(extensions: false)], [])),
+                (#_sourceLocation, .copy(.set([1]), .food)),
+                (#_sourceLocation, .move(.set([1]), .food)),
+                (#_sourceLocation, .store(.set([1]), [], .flags(.add(silent: true, list: [.answered])))),
+                (#_sourceLocation, .store(.set([1]), [], .flags(.add(silent: false, list: [.answered])))),
             ],
             require: .noUntaggedExpungeResponse
         )
@@ -708,22 +705,22 @@ extension PipeliningTests {
         // SEARCH, ESEARCH, and UID SEARCH
         // only have this requirement if a search key references sequence numbers.
         SearchKey.keysWithoutSequenceNumber.forEach { key in
-            AssertFalse(
+            expect(
                 commands: [
-                    (#line, .search(key: key, charset: nil, returnOptions: [])),
-                    (#line, .extendedSearch(ExtendedSearchOptions(key: key))),
-                    (#line, .uidSearch(key: key, charset: nil, returnOptions: [])),
+                    (#_sourceLocation, .search(key: key, charset: nil, returnOptions: [])),
+                    (#_sourceLocation, .extendedSearch(ExtendedSearchOptions(key: key))),
+                    (#_sourceLocation, .uidSearch(key: key, charset: nil, returnOptions: [])),
                 ],
-                require: .noUntaggedExpungeResponse,
+                doNotRequire: .noUntaggedExpungeResponse,
                 "key: \(key)"
             )
         }
         SearchKey.keysWithSequenceNumber.forEach { key in
-            Assert(
+            expect(
                 commands: [
-                    (#line, .search(key: key, charset: nil, returnOptions: [])),
-                    (#line, .extendedSearch(ExtendedSearchOptions(key: key))),
-                    (#line, .uidSearch(key: key, charset: nil, returnOptions: [])),
+                    (#_sourceLocation, .search(key: key, charset: nil, returnOptions: [])),
+                    (#_sourceLocation, .extendedSearch(ExtendedSearchOptions(key: key))),
+                    (#_sourceLocation, .uidSearch(key: key, charset: nil, returnOptions: [])),
                 ],
                 require: .noUntaggedExpungeResponse,
                 "key: \(key)"
@@ -731,78 +728,79 @@ extension PipeliningTests {
         }
     }
 
-    func testCommandRequires_noUIDBasedCommandRunning() {
+    @Test("command requires no UID based command running")
+    func commandRequiresNoUidBasedCommandRunning() {
         // Which commands have the requirements that:
         // > No command is running that uses UIDs to specify messages.
 
-        AssertFalse(
+        expect(
             commands: [
-                (#line, .capability),
-                (#line, .noop),
+                (#_sourceLocation, .capability),
+                (#_sourceLocation, .noop),
 
-                (#line, .startTLS),
-                (#line, .authenticate(mechanism: .plain, initialResponse: nil)),
-                (#line, .compress(.deflate)),
-                (#line, .login(username: "user", password: "password")),
-                (#line, .logout),
-                (#line, .listIndependent([], reference: .food, .food, [])),
-                (#line, .lsub(reference: .food, pattern: "Food")),
-                (#line, .subscribe(.food)),
-                (#line, .unsubscribe(.food)),
-                (#line, .enable([.condStore])),
-                (#line, .unselect),
-                (#line, .idleStart),
+                (#_sourceLocation, .startTLS),
+                (#_sourceLocation, .authenticate(mechanism: .plain, initialResponse: nil)),
+                (#_sourceLocation, .compress(.deflate)),
+                (#_sourceLocation, .login(username: "user", password: "password")),
+                (#_sourceLocation, .logout),
+                (#_sourceLocation, .listIndependent([], reference: .food, .food, [])),
+                (#_sourceLocation, .lsub(reference: .food, pattern: "Food")),
+                (#_sourceLocation, .subscribe(.food)),
+                (#_sourceLocation, .unsubscribe(.food)),
+                (#_sourceLocation, .enable([.condStore])),
+                (#_sourceLocation, .unselect),
+                (#_sourceLocation, .idleStart),
 
-                (#line, .id([:])),
-                (#line, .namespace),
-                (#line, .getQuota(QuotaRoot("foo"))),
-                (#line, .getQuotaRoot(.food)),
-                (#line, .setQuota(QuotaRoot("foo"), [])),
-                (#line, .getMetadata(options: [], mailbox: .food, entries: ["/shared/comment"])),
-                (#line, .setMetadata(mailbox: .food, entries: ["/shared/comment": nil])),
-                (#line, .resetKey(mailbox: nil, mechanisms: [.internal])),
-                (#line, .generateAuthorizedURL([.joe])),
-                (#line, .urlFetch([.joeURLFetch])),
+                (#_sourceLocation, .id([:])),
+                (#_sourceLocation, .namespace),
+                (#_sourceLocation, .getQuota(QuotaRoot("foo"))),
+                (#_sourceLocation, .getQuotaRoot(.food)),
+                (#_sourceLocation, .setQuota(QuotaRoot("foo"), [])),
+                (#_sourceLocation, .getMetadata(options: [], mailbox: .food, entries: ["/shared/comment"])),
+                (#_sourceLocation, .setMetadata(mailbox: .food, entries: ["/shared/comment": nil])),
+                (#_sourceLocation, .resetKey(mailbox: nil, mechanisms: [.internal])),
+                (#_sourceLocation, .generateAuthorizedURL([.joe])),
+                (#_sourceLocation, .urlFetch([.joeURLFetch])),
 
-                (#line, .select(.food)),
-                (#line, .delete(.food)),
-                (#line, .rename(from: .food, to: .food, parameters: [:])),
-                (#line, .examine(.food)),
-                (#line, .create(.food, [])),
-                (#line, .list(nil, reference: .food, .food, [])),
-                (#line, .status(.food, [.messageCount])),
-                (#line, .check),
-                (#line, .close),
-                (#line, .expunge),
-                (#line, .uidExpunge(.set([1]))),
-                (#line, .extendedSearch(ExtendedSearchOptions(key: .bcc("foo")))),
-                (#line, .extendedSearch(ExtendedSearchOptions(key: .uid(.set([1]))))),
-                (#line, .search(key: .bcc("foo"), charset: nil, returnOptions: [])),
-                (#line, .search(key: .uid(.set([1])), charset: nil, returnOptions: [])),
-                (#line, .uidSearch(key: .bcc("foo"), charset: nil, returnOptions: [])),
-                (#line, .uidSearch(key: .uid(.set([1])), charset: nil, returnOptions: [])),
-                (#line, .uidFetch(.set([1]), [.envelope, .uid], [])),
-                (#line, .uidFetch(.set([1]), [.bodyStructure(extensions: false)], [])),
-                (#line, .uidStore(.set([1]), [], .flags(.add(silent: true, list: [.answered])))),
-                (#line, .uidCopy(.set([1]), .food)),
-                (#line, .uidMove(.set([1]), .food)),
+                (#_sourceLocation, .select(.food)),
+                (#_sourceLocation, .delete(.food)),
+                (#_sourceLocation, .rename(from: .food, to: .food, parameters: [:])),
+                (#_sourceLocation, .examine(.food)),
+                (#_sourceLocation, .create(.food, [])),
+                (#_sourceLocation, .list(nil, reference: .food, .food, [])),
+                (#_sourceLocation, .status(.food, [.messageCount])),
+                (#_sourceLocation, .check),
+                (#_sourceLocation, .close),
+                (#_sourceLocation, .expunge),
+                (#_sourceLocation, .uidExpunge(.set([1]))),
+                (#_sourceLocation, .extendedSearch(ExtendedSearchOptions(key: .bcc("foo")))),
+                (#_sourceLocation, .extendedSearch(ExtendedSearchOptions(key: .uid(.set([1]))))),
+                (#_sourceLocation, .search(key: .bcc("foo"), charset: nil, returnOptions: [])),
+                (#_sourceLocation, .search(key: .uid(.set([1])), charset: nil, returnOptions: [])),
+                (#_sourceLocation, .uidSearch(key: .bcc("foo"), charset: nil, returnOptions: [])),
+                (#_sourceLocation, .uidSearch(key: .uid(.set([1])), charset: nil, returnOptions: [])),
+                (#_sourceLocation, .uidFetch(.set([1]), [.envelope, .uid], [])),
+                (#_sourceLocation, .uidFetch(.set([1]), [.bodyStructure(extensions: false)], [])),
+                (#_sourceLocation, .uidStore(.set([1]), [], .flags(.add(silent: true, list: [.answered])))),
+                (#_sourceLocation, .uidCopy(.set([1]), .food)),
+                (#_sourceLocation, .uidMove(.set([1]), .food)),
             ],
-            require: .noUIDBasedCommandRunning
+            doNotRequire: .noUIDBasedCommandRunning
         )
 
         // All commands that reference messages by sequence numbers have this requirement:
-        Assert(
+        expect(
             commands: [
-                (#line, .uidSearch(key: .sequenceNumbers(.set([1])), charset: nil, returnOptions: [])),
-                (#line, .search(key: .sequenceNumbers(.set([1])), charset: nil, returnOptions: [.all])),
-                (#line, .extendedSearch(ExtendedSearchOptions(key: .sequenceNumbers(.set([1]))))),
+                (#_sourceLocation, .uidSearch(key: .sequenceNumbers(.set([1])), charset: nil, returnOptions: [])),
+                (#_sourceLocation, .search(key: .sequenceNumbers(.set([1])), charset: nil, returnOptions: [.all])),
+                (#_sourceLocation, .extendedSearch(ExtendedSearchOptions(key: .sequenceNumbers(.set([1]))))),
 
-                (#line, .fetch(.set([1]), [.envelope, .uid], [])),
-                (#line, .fetch(.set([1]), [.bodyStructure(extensions: false)], [])),
-                (#line, .copy(.set([1]), .food)),
-                (#line, .move(.set([1]), .food)),
-                (#line, .store(.set([1]), [], .flags(.add(silent: true, list: [.answered])))),
-                (#line, .store(.set([1]), [], .flags(.add(silent: false, list: [.answered])))),
+                (#_sourceLocation, .fetch(.set([1]), [.envelope, .uid], [])),
+                (#_sourceLocation, .fetch(.set([1]), [.bodyStructure(extensions: false)], [])),
+                (#_sourceLocation, .copy(.set([1]), .food)),
+                (#_sourceLocation, .move(.set([1]), .food)),
+                (#_sourceLocation, .store(.set([1]), [], .flags(.add(silent: true, list: [.answered])))),
+                (#_sourceLocation, .store(.set([1]), [], .flags(.add(silent: false, list: [.answered])))),
             ],
             require: .noUIDBasedCommandRunning
         )
@@ -810,22 +808,22 @@ extension PipeliningTests {
         // SEARCH, ESEARCH, and UID SEARCH
         // only have this requirement if a search key references sequence numbers.
         SearchKey.keysWithoutSequenceNumber.forEach { key in
-            AssertFalse(
+            expect(
                 commands: [
-                    (#line, .search(key: key, charset: nil, returnOptions: [])),
-                    (#line, .extendedSearch(ExtendedSearchOptions(key: key))),
-                    (#line, .uidSearch(key: key, charset: nil, returnOptions: [])),
+                    (#_sourceLocation, .search(key: key, charset: nil, returnOptions: [])),
+                    (#_sourceLocation, .extendedSearch(ExtendedSearchOptions(key: key))),
+                    (#_sourceLocation, .uidSearch(key: key, charset: nil, returnOptions: [])),
                 ],
-                require: .noUIDBasedCommandRunning,
+                doNotRequire: .noUIDBasedCommandRunning,
                 "key: \(key)"
             )
         }
         SearchKey.keysWithSequenceNumber.forEach { key in
-            Assert(
+            expect(
                 commands: [
-                    (#line, .search(key: key, charset: nil, returnOptions: [])),
-                    (#line, .extendedSearch(ExtendedSearchOptions(key: key))),
-                    (#line, .uidSearch(key: key, charset: nil, returnOptions: [])),
+                    (#_sourceLocation, .search(key: key, charset: nil, returnOptions: [])),
+                    (#_sourceLocation, .extendedSearch(ExtendedSearchOptions(key: key))),
+                    (#_sourceLocation, .uidSearch(key: key, charset: nil, returnOptions: [])),
                 ],
                 require: .noUIDBasedCommandRunning,
                 "key: \(key)"
@@ -833,87 +831,88 @@ extension PipeliningTests {
         }
     }
 
-    func testCommandRequires_noFlagChanges() {
+    @Test("command requires no flag changes")
+    func commandRequiresNoFlagChanges() {
         // Which commands have the requirements that:
         // > No STORE command is running.
         // (i.e. no flags are being changed)
 
-        AssertFalse(
+        expect(
             commands: [
-                (#line, .capability),
-                (#line, .noop),
+                (#_sourceLocation, .capability),
+                (#_sourceLocation, .noop),
 
-                (#line, .startTLS),
-                (#line, .authenticate(mechanism: .plain, initialResponse: nil)),
-                (#line, .compress(.deflate)),
-                (#line, .login(username: "user", password: "password")),
+                (#_sourceLocation, .startTLS),
+                (#_sourceLocation, .authenticate(mechanism: .plain, initialResponse: nil)),
+                (#_sourceLocation, .compress(.deflate)),
+                (#_sourceLocation, .login(username: "user", password: "password")),
 
-                (#line, .logout),
-                (#line, .subscribe(.food)),
-                (#line, .unsubscribe(.food)),
-                (#line, .enable([.condStore])),
-                (#line, .unselect),
-                (#line, .idleStart),
-                (#line, .copy(.set([1]), .food)),
-                (#line, .move(.set([1]), .food)),
-                (#line, .id([:])),
-                (#line, .namespace),
-                (#line, .uidExpunge(.set([1]))),
-                (#line, .getQuota(QuotaRoot("foo"))),
-                (#line, .getQuotaRoot(.food)),
-                (#line, .setQuota(QuotaRoot("foo"), [])),
-                (#line, .getMetadata(options: [], mailbox: .food, entries: ["/shared/comment"])),
-                (#line, .setMetadata(mailbox: .food, entries: ["/shared/comment": nil])),
-                (#line, .resetKey(mailbox: nil, mechanisms: [.internal])),
-                (#line, .generateAuthorizedURL([.joe])),
-                (#line, .urlFetch([.joeURLFetch])),
+                (#_sourceLocation, .logout),
+                (#_sourceLocation, .subscribe(.food)),
+                (#_sourceLocation, .unsubscribe(.food)),
+                (#_sourceLocation, .enable([.condStore])),
+                (#_sourceLocation, .unselect),
+                (#_sourceLocation, .idleStart),
+                (#_sourceLocation, .copy(.set([1]), .food)),
+                (#_sourceLocation, .move(.set([1]), .food)),
+                (#_sourceLocation, .id([:])),
+                (#_sourceLocation, .namespace),
+                (#_sourceLocation, .uidExpunge(.set([1]))),
+                (#_sourceLocation, .getQuota(QuotaRoot("foo"))),
+                (#_sourceLocation, .getQuotaRoot(.food)),
+                (#_sourceLocation, .setQuota(QuotaRoot("foo"), [])),
+                (#_sourceLocation, .getMetadata(options: [], mailbox: .food, entries: ["/shared/comment"])),
+                (#_sourceLocation, .setMetadata(mailbox: .food, entries: ["/shared/comment": nil])),
+                (#_sourceLocation, .resetKey(mailbox: nil, mechanisms: [.internal])),
+                (#_sourceLocation, .generateAuthorizedURL([.joe])),
+                (#_sourceLocation, .urlFetch([.joeURLFetch])),
 
-                (#line, .select(.food)),
-                (#line, .delete(.food)),
-                (#line, .rename(from: .food, to: .food, parameters: [:])),
-                (#line, .examine(.food)),
-                (#line, .create(.food, [])),
-                (#line, .list(nil, reference: .food, .food, [])),
-                (#line, .listIndependent([], reference: .food, .food, [])),
-                (#line, .lsub(reference: .food, pattern: "Food")),
-                (#line, .status(.food, [.messageCount])),
-                (#line, .check),
-                (#line, .close),
-                (#line, .expunge),
-                (#line, .fetch(.set([1]), [.envelope, .uid], [])),
-                (#line, .fetch(.set([1]), [.bodyStructure(extensions: false)], [])),
-                (#line, .uidFetch(.set([1]), [.envelope, .uid], [])),
-                (#line, .uidFetch(.set([1]), [.bodyStructure(extensions: false)], [])),
-                (#line, .uidStore(.set([1]), [], .flags(.add(silent: true, list: [.answered])))),
-                (#line, .uidCopy(.set([1]), .food)),
-                (#line, .uidMove(.set([1]), .food)),
+                (#_sourceLocation, .select(.food)),
+                (#_sourceLocation, .delete(.food)),
+                (#_sourceLocation, .rename(from: .food, to: .food, parameters: [:])),
+                (#_sourceLocation, .examine(.food)),
+                (#_sourceLocation, .create(.food, [])),
+                (#_sourceLocation, .list(nil, reference: .food, .food, [])),
+                (#_sourceLocation, .listIndependent([], reference: .food, .food, [])),
+                (#_sourceLocation, .lsub(reference: .food, pattern: "Food")),
+                (#_sourceLocation, .status(.food, [.messageCount])),
+                (#_sourceLocation, .check),
+                (#_sourceLocation, .close),
+                (#_sourceLocation, .expunge),
+                (#_sourceLocation, .fetch(.set([1]), [.envelope, .uid], [])),
+                (#_sourceLocation, .fetch(.set([1]), [.bodyStructure(extensions: false)], [])),
+                (#_sourceLocation, .uidFetch(.set([1]), [.envelope, .uid], [])),
+                (#_sourceLocation, .uidFetch(.set([1]), [.bodyStructure(extensions: false)], [])),
+                (#_sourceLocation, .uidStore(.set([1]), [], .flags(.add(silent: true, list: [.answered])))),
+                (#_sourceLocation, .uidCopy(.set([1]), .food)),
+                (#_sourceLocation, .uidMove(.set([1]), .food)),
                 // STORE is ok if SILENT is set:
-                (#line, .uidStore(.set([1]), [], .flags(.add(silent: true, list: [.answered])))),
-                (#line, .store(.set([1]), [], .flags(.add(silent: true, list: [.answered])))),
+                (#_sourceLocation, .uidStore(.set([1]), [], .flags(.add(silent: true, list: [.answered])))),
+                (#_sourceLocation, .store(.set([1]), [], .flags(.add(silent: true, list: [.answered])))),
             ],
-            require: .noFlagChangesToAnyMessage
+            doNotRequire: .noFlagChangesToAnyMessage
         )
 
-        Assert(
+        expect(
             commands: [
                 // FETCH that return flags:
-                (#line, .fetch(.set([1]), [.envelope, .uid, .flags], [])),
-                (#line, .fetch(.set([1]), [.uid, .flags], [])),
-                (#line, .uidFetch(.lastCommand, [.envelope, .uid, .flags], [])),
+                (#_sourceLocation, .fetch(.set([1]), [.envelope, .uid, .flags], [])),
+                (#_sourceLocation, .fetch(.set([1]), [.uid, .flags], [])),
+                (#_sourceLocation, .uidFetch(.lastCommand, [.envelope, .uid, .flags], [])),
                 // STORE without SILENT will also return flags:
-                (#line, .store(.set([1]), [], .flags(.add(silent: false, list: [.answered])))),
+                (#_sourceLocation, .store(.set([1]), [], .flags(.add(silent: false, list: [.answered])))),
             ],
             require: .noFlagChangesToAnyMessage
         )
 
         MessageIdentifierSetNonEmpty<UID>.arbitrarySets.forEach { uids in
-            Assert(
+            expect(
                 commands: [
                     // UID FETCH that return flags:
-                    (#line, .uidFetch(.set(uids), [.envelope, .uid, .flags], [])),
-                    (#line, .uidFetch(.set(uids), [.uid, .flags], [])),
+                    (#_sourceLocation, .uidFetch(.set(uids), [.envelope, .uid, .flags], [])),
+                    (#_sourceLocation, .uidFetch(.set(uids), [.uid, .flags], [])),
                     // UID STORE without SILENT will also return flags:
-                    (#line, .uidStore(.set(uids), [], .flags(.add(silent: false, list: [.answered])))),
+                    (#_sourceLocation, .uidStore(.set(uids), [], .flags(.add(silent: false, list: [.answered])))),
                 ],
                 require: .noFlagChanges(uids),
                 "uids: \(uids)"
@@ -923,22 +922,22 @@ extension PipeliningTests {
         // SEARCH, ESEARCH, and UID SEARCH have this requirement only if they
         // reference flags:
         SearchKey.keysWithoutFlags.forEach { key in
-            AssertFalse(
+            expect(
                 commands: [
-                    (#line, .search(key: key, charset: nil, returnOptions: [])),
-                    (#line, .extendedSearch(ExtendedSearchOptions(key: key))),
-                    (#line, .uidSearch(key: key, charset: nil, returnOptions: [])),
+                    (#_sourceLocation, .search(key: key, charset: nil, returnOptions: [])),
+                    (#_sourceLocation, .extendedSearch(ExtendedSearchOptions(key: key))),
+                    (#_sourceLocation, .uidSearch(key: key, charset: nil, returnOptions: [])),
                 ],
-                require: .noFlagChangesToAnyMessage,
+                doNotRequire: .noFlagChangesToAnyMessage,
                 "key: \(key)"
             )
         }
         SearchKey.keysWithFlags.forEach { key in
-            Assert(
+            expect(
                 commands: [
-                    (#line, .search(key: key, charset: nil, returnOptions: [])),
-                    (#line, .extendedSearch(ExtendedSearchOptions(key: key))),
-                    (#line, .uidSearch(key: key, charset: nil, returnOptions: [])),
+                    (#_sourceLocation, .search(key: key, charset: nil, returnOptions: [])),
+                    (#_sourceLocation, .extendedSearch(ExtendedSearchOptions(key: key))),
+                    (#_sourceLocation, .uidSearch(key: key, charset: nil, returnOptions: [])),
                 ],
                 require: .noFlagChangesToAnyMessage,
                 "key: \(key)"
@@ -946,80 +945,81 @@ extension PipeliningTests {
         }
     }
 
-    func testCommandRequires_noFlagReads() {
+    @Test("command requires no flag reads")
+    func commandRequiresNoFlagReads() {
         // Which commands have the requirements that:
         /// > No command is running that retrieves flags.
 
-        AssertFalse(
+        expect(
             commands: [
-                (#line, .capability),
-                (#line, .noop),
+                (#_sourceLocation, .capability),
+                (#_sourceLocation, .noop),
 
-                (#line, .startTLS),
-                (#line, .authenticate(mechanism: .plain, initialResponse: nil)),
-                (#line, .compress(.deflate)),
-                (#line, .login(username: "user", password: "password")),
-                (#line, .logout),
-                (#line, .subscribe(.food)),
-                (#line, .unsubscribe(.food)),
-                (#line, .enable([.condStore])),
-                (#line, .unselect),
-                (#line, .idleStart),
-                (#line, .id([:])),
-                (#line, .namespace),
-                (#line, .uidExpunge(.set([1]))),
-                (#line, .getQuota(QuotaRoot("foo"))),
-                (#line, .getQuotaRoot(.food)),
-                (#line, .setQuota(QuotaRoot("foo"), [])),
-                (#line, .getMetadata(options: [], mailbox: .food, entries: ["/shared/comment"])),
-                (#line, .setMetadata(mailbox: .food, entries: ["/shared/comment": nil])),
-                (#line, .resetKey(mailbox: nil, mechanisms: [.internal])),
-                (#line, .generateAuthorizedURL([.joe])),
-                (#line, .urlFetch([.joeURLFetch])),
+                (#_sourceLocation, .startTLS),
+                (#_sourceLocation, .authenticate(mechanism: .plain, initialResponse: nil)),
+                (#_sourceLocation, .compress(.deflate)),
+                (#_sourceLocation, .login(username: "user", password: "password")),
+                (#_sourceLocation, .logout),
+                (#_sourceLocation, .subscribe(.food)),
+                (#_sourceLocation, .unsubscribe(.food)),
+                (#_sourceLocation, .enable([.condStore])),
+                (#_sourceLocation, .unselect),
+                (#_sourceLocation, .idleStart),
+                (#_sourceLocation, .id([:])),
+                (#_sourceLocation, .namespace),
+                (#_sourceLocation, .uidExpunge(.set([1]))),
+                (#_sourceLocation, .getQuota(QuotaRoot("foo"))),
+                (#_sourceLocation, .getQuotaRoot(.food)),
+                (#_sourceLocation, .setQuota(QuotaRoot("foo"), [])),
+                (#_sourceLocation, .getMetadata(options: [], mailbox: .food, entries: ["/shared/comment"])),
+                (#_sourceLocation, .setMetadata(mailbox: .food, entries: ["/shared/comment": nil])),
+                (#_sourceLocation, .resetKey(mailbox: nil, mechanisms: [.internal])),
+                (#_sourceLocation, .generateAuthorizedURL([.joe])),
+                (#_sourceLocation, .urlFetch([.joeURLFetch])),
 
-                (#line, .select(.food)),
-                (#line, .delete(.food)),
-                (#line, .rename(from: .food, to: .food, parameters: [:])),
-                (#line, .examine(.food)),
-                (#line, .create(.food, [])),
-                (#line, .list(nil, reference: .food, .food, [])),
-                (#line, .listIndependent([], reference: .food, .food, [])),
-                (#line, .lsub(reference: .food, pattern: "Food")),
+                (#_sourceLocation, .select(.food)),
+                (#_sourceLocation, .delete(.food)),
+                (#_sourceLocation, .rename(from: .food, to: .food, parameters: [:])),
+                (#_sourceLocation, .examine(.food)),
+                (#_sourceLocation, .create(.food, [])),
+                (#_sourceLocation, .list(nil, reference: .food, .food, [])),
+                (#_sourceLocation, .listIndependent([], reference: .food, .food, [])),
+                (#_sourceLocation, .lsub(reference: .food, pattern: "Food")),
 
-                (#line, .copy(.set([1]), .food)),
-                (#line, .move(.set([1]), .food)),
-                (#line, .status(.food, [.messageCount])),
-                (#line, .check),
-                (#line, .close),
-                (#line, .expunge),
-                (#line, .fetch(.set([1]), [.envelope, .uid], [])),
-                (#line, .fetch(.set([1]), [.bodyStructure(extensions: false)], [])),
-                (#line, .fetch(.set([1]), [.envelope, .uid, .flags], [])),
-                (#line, .fetch(.set([1]), [.uid, .flags], [])),
-                (#line, .uidFetch(.set([1]), [.envelope, .uid], [])),
-                (#line, .uidFetch(.set([1]), [.bodyStructure(extensions: false)], [])),
-                (#line, .uidFetch(.set([1]), [.envelope, .uid, .flags], [])),
-                (#line, .uidFetch(.set([1]), [.uid, .flags], [])),
-                (#line, .uidCopy(.set([1]), .food)),
-                (#line, .uidMove(.set([1]), .food)),
+                (#_sourceLocation, .copy(.set([1]), .food)),
+                (#_sourceLocation, .move(.set([1]), .food)),
+                (#_sourceLocation, .status(.food, [.messageCount])),
+                (#_sourceLocation, .check),
+                (#_sourceLocation, .close),
+                (#_sourceLocation, .expunge),
+                (#_sourceLocation, .fetch(.set([1]), [.envelope, .uid], [])),
+                (#_sourceLocation, .fetch(.set([1]), [.bodyStructure(extensions: false)], [])),
+                (#_sourceLocation, .fetch(.set([1]), [.envelope, .uid, .flags], [])),
+                (#_sourceLocation, .fetch(.set([1]), [.uid, .flags], [])),
+                (#_sourceLocation, .uidFetch(.set([1]), [.envelope, .uid], [])),
+                (#_sourceLocation, .uidFetch(.set([1]), [.bodyStructure(extensions: false)], [])),
+                (#_sourceLocation, .uidFetch(.set([1]), [.envelope, .uid, .flags], [])),
+                (#_sourceLocation, .uidFetch(.set([1]), [.uid, .flags], [])),
+                (#_sourceLocation, .uidCopy(.set([1]), .food)),
+                (#_sourceLocation, .uidMove(.set([1]), .food)),
             ],
-            require: .noFlagReadsFromAnyMessage
+            doNotRequire: .noFlagReadsFromAnyMessage
         )
 
         // STORE / UID STORE are the only ones with this requirement:
-        Assert(
+        expect(
             commands: [
-                (#line, .uidStore(.lastCommand, [], .flags(.add(silent: false, list: [.answered])))),
-                (#line, .store(.set([1]), [], .flags(.add(silent: true, list: [.answered])))),
-                (#line, .store(.set([1]), [], .flags(.add(silent: false, list: [.answered])))),
+                (#_sourceLocation, .uidStore(.lastCommand, [], .flags(.add(silent: false, list: [.answered])))),
+                (#_sourceLocation, .store(.set([1]), [], .flags(.add(silent: true, list: [.answered])))),
+                (#_sourceLocation, .store(.set([1]), [], .flags(.add(silent: false, list: [.answered])))),
             ],
             require: .noFlagReadsFromAnyMessage
         )
         MessageIdentifierSetNonEmpty<UID>.arbitrarySets.forEach { uids in
-            Assert(
+            expect(
                 commands: [
-                    (#line, .uidStore(.set(uids), [], .flags(.add(silent: false, list: [.answered])))),
-                    (#line, .uidStore(.set(uids), [], .flags(.add(silent: true, list: [.answered])))),
+                    (#_sourceLocation, .uidStore(.set(uids), [], .flags(.add(silent: false, list: [.answered])))),
+                    (#_sourceLocation, .uidStore(.set(uids), [], .flags(.add(silent: true, list: [.answered])))),
                 ],
                 require: .noFlagReads(uids),
                 "uids: \(uids)"
@@ -1028,320 +1028,322 @@ extension PipeliningTests {
 
         // SEARCH, ESEARCH, and UID SEARCH never have this requirement.
         SearchKey.arbitraryKeys.forEach { key in
-            AssertFalse(
+            expect(
                 commands: [
-                    (#line, .search(key: key, charset: nil, returnOptions: [])),
-                    (#line, .extendedSearch(ExtendedSearchOptions(key: key))),
-                    (#line, .uidSearch(key: key, charset: nil, returnOptions: [])),
+                    (#_sourceLocation, .search(key: key, charset: nil, returnOptions: [])),
+                    (#_sourceLocation, .extendedSearch(ExtendedSearchOptions(key: key))),
+                    (#_sourceLocation, .uidSearch(key: key, charset: nil, returnOptions: [])),
                 ],
-                require: .noFlagReadsFromAnyMessage,
+                doNotRequire: .noFlagReadsFromAnyMessage,
                 "key: \(key)"
             )
         }
     }
-}
 
-// MARK: Command Behavior
+    // MARK: Command Behavior
 
-extension PipeliningTests {
-    func testCommandBehavior_changesMailboxSelection() {
+    @Test("command behavior changes mailbox selection")
+    func commandBehaviorChangesMailboxSelection() {
         /// Commands that change the _mailbox selection_.
 
-        AssertFalse(
+        expect(
             commands: [
-                (#line, .capability),
-                (#line, .noop),
+                (#_sourceLocation, .capability),
+                (#_sourceLocation, .noop),
 
-                (#line, .startTLS),
-                (#line, .authenticate(mechanism: .plain, initialResponse: nil)),
-                (#line, .compress(.deflate)),
-                (#line, .login(username: "user", password: "password")),
-                (#line, .logout),
+                (#_sourceLocation, .startTLS),
+                (#_sourceLocation, .authenticate(mechanism: .plain, initialResponse: nil)),
+                (#_sourceLocation, .compress(.deflate)),
+                (#_sourceLocation, .login(username: "user", password: "password")),
+                (#_sourceLocation, .logout),
 
-                (#line, .list(nil, reference: .food, .food, [])),
-                (#line, .listIndependent([], reference: .food, .food, [])),
-                (#line, .lsub(reference: .food, pattern: "Food")),
-                (#line, .subscribe(.food)),
-                (#line, .unsubscribe(.food)),
-                (#line, .enable([.condStore])),
-                (#line, .idleStart),
-                (#line, .copy(.set([1]), .food)),
-                (#line, .move(.set([1]), .food)),
-                (#line, .store(.set([1]), [], .flags(.add(silent: true, list: [.answered])))),
-                (#line, .store(.set([1]), [], .flags(.add(silent: false, list: [.answered])))),
-                (#line, .id([:])),
-                (#line, .namespace),
-                (#line, .uidExpunge(.set([1]))),
-                (#line, .getQuota(QuotaRoot("foo"))),
-                (#line, .getQuotaRoot(.food)),
-                (#line, .setQuota(QuotaRoot("foo"), [])),
-                (#line, .getMetadata(options: [], mailbox: .food, entries: ["/shared/comment"])),
-                (#line, .setMetadata(mailbox: .food, entries: ["/shared/comment": nil])),
-                (#line, .resetKey(mailbox: nil, mechanisms: [.internal])),
-                (#line, .generateAuthorizedURL([.joe])),
-                (#line, .urlFetch([.joeURLFetch])),
+                (#_sourceLocation, .list(nil, reference: .food, .food, [])),
+                (#_sourceLocation, .listIndependent([], reference: .food, .food, [])),
+                (#_sourceLocation, .lsub(reference: .food, pattern: "Food")),
+                (#_sourceLocation, .subscribe(.food)),
+                (#_sourceLocation, .unsubscribe(.food)),
+                (#_sourceLocation, .enable([.condStore])),
+                (#_sourceLocation, .idleStart),
+                (#_sourceLocation, .copy(.set([1]), .food)),
+                (#_sourceLocation, .move(.set([1]), .food)),
+                (#_sourceLocation, .store(.set([1]), [], .flags(.add(silent: true, list: [.answered])))),
+                (#_sourceLocation, .store(.set([1]), [], .flags(.add(silent: false, list: [.answered])))),
+                (#_sourceLocation, .id([:])),
+                (#_sourceLocation, .namespace),
+                (#_sourceLocation, .uidExpunge(.set([1]))),
+                (#_sourceLocation, .getQuota(QuotaRoot("foo"))),
+                (#_sourceLocation, .getQuotaRoot(.food)),
+                (#_sourceLocation, .setQuota(QuotaRoot("foo"), [])),
+                (#_sourceLocation, .getMetadata(options: [], mailbox: .food, entries: ["/shared/comment"])),
+                (#_sourceLocation, .setMetadata(mailbox: .food, entries: ["/shared/comment": nil])),
+                (#_sourceLocation, .resetKey(mailbox: nil, mechanisms: [.internal])),
+                (#_sourceLocation, .generateAuthorizedURL([.joe])),
+                (#_sourceLocation, .urlFetch([.joeURLFetch])),
 
-                (#line, .delete(.food)),
-                (#line, .rename(from: .food, to: .food, parameters: [:])),
-                (#line, .create(.food, [])),
-                (#line, .status(.food, [.messageCount])),
-                (#line, .check),
-                (#line, .expunge),
-                (#line, .search(key: .all, charset: nil, returnOptions: [.all])),
-                (#line, .uidSearch(key: .all, charset: nil, returnOptions: [])),
-                (#line, .extendedSearch(ExtendedSearchOptions(key: .all))),
-                (#line, .fetch(.set([1]), [.envelope, .uid], [])),
-                (#line, .fetch(.set([1]), [.bodyStructure(extensions: false)], [])),
-                (#line, .uidFetch(.set([1]), [.envelope, .uid], [])),
-                (#line, .uidStore(.set([1]), [], .flags(.add(silent: true, list: [.answered])))),
-                (#line, .uidCopy(.set([1]), .food)),
-                (#line, .uidMove(.set([1]), .food)),
+                (#_sourceLocation, .delete(.food)),
+                (#_sourceLocation, .rename(from: .food, to: .food, parameters: [:])),
+                (#_sourceLocation, .create(.food, [])),
+                (#_sourceLocation, .status(.food, [.messageCount])),
+                (#_sourceLocation, .check),
+                (#_sourceLocation, .expunge),
+                (#_sourceLocation, .search(key: .all, charset: nil, returnOptions: [.all])),
+                (#_sourceLocation, .uidSearch(key: .all, charset: nil, returnOptions: [])),
+                (#_sourceLocation, .extendedSearch(ExtendedSearchOptions(key: .all))),
+                (#_sourceLocation, .fetch(.set([1]), [.envelope, .uid], [])),
+                (#_sourceLocation, .fetch(.set([1]), [.bodyStructure(extensions: false)], [])),
+                (#_sourceLocation, .uidFetch(.set([1]), [.envelope, .uid], [])),
+                (#_sourceLocation, .uidStore(.set([1]), [], .flags(.add(silent: true, list: [.answered])))),
+                (#_sourceLocation, .uidCopy(.set([1]), .food)),
+                (#_sourceLocation, .uidMove(.set([1]), .food)),
             ],
-            haveBehavior: .changesMailboxSelection
+            doNotHaveBehavior: .changesMailboxSelection
         )
 
-        Assert(
+        expect(
             commands: [
-                (#line, .select(.food)),
-                (#line, .examine(.food)),
-                (#line, .unselect),
-                (#line, .close),
+                (#_sourceLocation, .select(.food)),
+                (#_sourceLocation, .examine(.food)),
+                (#_sourceLocation, .unselect),
+                (#_sourceLocation, .close),
             ],
             haveBehavior: .changesMailboxSelection
         )
     }
 
-    func testCommandBehavior_dependsOnMailboxSelection() {
+    @Test("command behavior depends on mailbox selection")
+    func commandBehaviorDependsOnMailboxSelection() {
         /// Commands that depend on the _mailbox selection_.
 
-        AssertFalse(
+        expect(
             commands: [
-                (#line, .capability),
+                (#_sourceLocation, .capability),
 
-                (#line, .startTLS),
-                (#line, .authenticate(mechanism: .plain, initialResponse: nil)),
-                (#line, .compress(.deflate)),
-                (#line, .login(username: "user", password: "password")),
-                (#line, .logout),
-                (#line, .enable([.condStore])),
-                (#line, .id([:])),
-                (#line, .namespace),
+                (#_sourceLocation, .startTLS),
+                (#_sourceLocation, .authenticate(mechanism: .plain, initialResponse: nil)),
+                (#_sourceLocation, .compress(.deflate)),
+                (#_sourceLocation, .login(username: "user", password: "password")),
+                (#_sourceLocation, .logout),
+                (#_sourceLocation, .enable([.condStore])),
+                (#_sourceLocation, .id([:])),
+                (#_sourceLocation, .namespace),
 
-                (#line, .delete(.food)),
-                (#line, .rename(from: .food, to: .food, parameters: [:])),
-                (#line, .examine(.food)),
-                (#line, .create(.food, [])),
-                (#line, .list(nil, reference: .food, .food, [])),
-                (#line, .listIndependent([], reference: .food, .food, [])),
-                (#line, .lsub(reference: .food, pattern: "Food")),
-                (#line, .status(.food, [.messageCount])),
+                (#_sourceLocation, .delete(.food)),
+                (#_sourceLocation, .rename(from: .food, to: .food, parameters: [:])),
+                (#_sourceLocation, .examine(.food)),
+                (#_sourceLocation, .create(.food, [])),
+                (#_sourceLocation, .list(nil, reference: .food, .food, [])),
+                (#_sourceLocation, .listIndependent([], reference: .food, .food, [])),
+                (#_sourceLocation, .lsub(reference: .food, pattern: "Food")),
+                (#_sourceLocation, .status(.food, [.messageCount])),
 
-                (#line, .close),
-                (#line, .select(.food)),
-                (#line, .unselect),
+                (#_sourceLocation, .close),
+                (#_sourceLocation, .select(.food)),
+                (#_sourceLocation, .unselect),
 
-                (#line, .subscribe(.food)),
-                (#line, .unsubscribe(.food)),
+                (#_sourceLocation, .subscribe(.food)),
+                (#_sourceLocation, .unsubscribe(.food)),
 
-                (#line, .getQuota(QuotaRoot("foo"))),
-                (#line, .getQuotaRoot(.food)),
-                (#line, .setQuota(QuotaRoot("foo"), [])),
-                (#line, .getMetadata(options: [], mailbox: .food, entries: ["/shared/comment"])),
-                (#line, .setMetadata(mailbox: .food, entries: ["/shared/comment": nil])),
+                (#_sourceLocation, .getQuota(QuotaRoot("foo"))),
+                (#_sourceLocation, .getQuotaRoot(.food)),
+                (#_sourceLocation, .setQuota(QuotaRoot("foo"), [])),
+                (#_sourceLocation, .getMetadata(options: [], mailbox: .food, entries: ["/shared/comment"])),
+                (#_sourceLocation, .setMetadata(mailbox: .food, entries: ["/shared/comment": nil])),
 
-                (#line, .resetKey(mailbox: nil, mechanisms: [.internal])),
-                (#line, .generateAuthorizedURL([.joe])),
-                (#line, .urlFetch([.joeURLFetch])),
+                (#_sourceLocation, .resetKey(mailbox: nil, mechanisms: [.internal])),
+                (#_sourceLocation, .generateAuthorizedURL([.joe])),
+                (#_sourceLocation, .urlFetch([.joeURLFetch])),
             ],
-            haveBehavior: .dependsOnMailboxSelection
+            doNotHaveBehavior: .dependsOnMailboxSelection
         )
 
-        Assert(
+        expect(
             commands: [
-                (#line, .noop),
-                (#line, .check),
-                (#line, .uidExpunge(.set([1]))),
-                (#line, .expunge),
-                (#line, .search(key: .all, charset: nil, returnOptions: [.all])),
-                (#line, .uidSearch(key: .all, charset: nil, returnOptions: [])),
-                (#line, .extendedSearch(ExtendedSearchOptions(key: .all))),
-                (#line, .fetch(.set([1]), [.envelope, .uid], [])),
-                (#line, .fetch(.set([1]), [.bodyStructure(extensions: false)], [])),
-                (#line, .uidFetch(.set([1]), [.envelope, .uid], [])),
-                (#line, .uidStore(.set([1]), [], .flags(.add(silent: true, list: [.answered])))),
-                (#line, .uidCopy(.set([1]), .food)),
-                (#line, .uidMove(.set([1]), .food)),
-                (#line, .copy(.set([1]), .food)),
-                (#line, .move(.set([1]), .food)),
-                (#line, .store(.set([1]), [], .flags(.add(silent: true, list: [.answered])))),
-                (#line, .store(.set([1]), [], .flags(.add(silent: false, list: [.answered])))),
-                (#line, .idleStart),
+                (#_sourceLocation, .noop),
+                (#_sourceLocation, .check),
+                (#_sourceLocation, .uidExpunge(.set([1]))),
+                (#_sourceLocation, .expunge),
+                (#_sourceLocation, .search(key: .all, charset: nil, returnOptions: [.all])),
+                (#_sourceLocation, .uidSearch(key: .all, charset: nil, returnOptions: [])),
+                (#_sourceLocation, .extendedSearch(ExtendedSearchOptions(key: .all))),
+                (#_sourceLocation, .fetch(.set([1]), [.envelope, .uid], [])),
+                (#_sourceLocation, .fetch(.set([1]), [.bodyStructure(extensions: false)], [])),
+                (#_sourceLocation, .uidFetch(.set([1]), [.envelope, .uid], [])),
+                (#_sourceLocation, .uidStore(.set([1]), [], .flags(.add(silent: true, list: [.answered])))),
+                (#_sourceLocation, .uidCopy(.set([1]), .food)),
+                (#_sourceLocation, .uidMove(.set([1]), .food)),
+                (#_sourceLocation, .copy(.set([1]), .food)),
+                (#_sourceLocation, .move(.set([1]), .food)),
+                (#_sourceLocation, .store(.set([1]), [], .flags(.add(silent: true, list: [.answered])))),
+                (#_sourceLocation, .store(.set([1]), [], .flags(.add(silent: false, list: [.answered])))),
+                (#_sourceLocation, .idleStart),
             ],
             haveBehavior: .dependsOnMailboxSelection
         )
     }
 
-    func testCommandBehavior_mayTriggerUntaggedExpunge() {
+    @Test("command behavior may trigger untagged expunge")
+    func commandBehaviorMayTriggerUntaggedExpunge() {
         // All commands, except for FETCH, STORE, and SEARCH can
         // trigger an untagged EXPUNGE.
-        AssertFalse(
+        expect(
             commands: [
                 // FETCH, STORE, and SEARCH
-                (#line, .fetch(.set([1]), [.envelope, .uid], [])),
-                (#line, .fetch(.set([1]), [.bodyStructure(extensions: false)], [])),
-                (#line, .store(.set([1]), [], .flags(.add(silent: true, list: [.answered])))),
-                (#line, .store(.set([1]), [], .flags(.add(silent: false, list: [.answered])))),
-                (#line, .search(key: .all, charset: nil, returnOptions: [.all])),
-                (#line, .search(key: .answered, charset: nil, returnOptions: [.all])),
+                (#_sourceLocation, .fetch(.set([1]), [.envelope, .uid], [])),
+                (#_sourceLocation, .fetch(.set([1]), [.bodyStructure(extensions: false)], [])),
+                (#_sourceLocation, .store(.set([1]), [], .flags(.add(silent: true, list: [.answered])))),
+                (#_sourceLocation, .store(.set([1]), [], .flags(.add(silent: false, list: [.answered])))),
+                (#_sourceLocation, .search(key: .all, charset: nil, returnOptions: [.all])),
+                (#_sourceLocation, .search(key: .answered, charset: nil, returnOptions: [.all])),
                 // Does not make sense for these:
-                (#line, .login(username: "user", password: "password")),
-                (#line, .startTLS),
-                (#line, .authenticate(mechanism: .plain, initialResponse: nil)),
-                (#line, .compress(.deflate)),
-                (#line, .logout),
+                (#_sourceLocation, .login(username: "user", password: "password")),
+                (#_sourceLocation, .startTLS),
+                (#_sourceLocation, .authenticate(mechanism: .plain, initialResponse: nil)),
+                (#_sourceLocation, .compress(.deflate)),
+                (#_sourceLocation, .logout),
             ],
-            haveBehavior: .mayTriggerUntaggedExpunge
+            doNotHaveBehavior: .mayTriggerUntaggedExpunge
         )
 
-        Assert(
+        expect(
             commands: [
-                (#line, .capability),
-                (#line, .noop),
+                (#_sourceLocation, .capability),
+                (#_sourceLocation, .noop),
 
-                (#line, .delete(.food)),
-                (#line, .rename(from: .food, to: .food, parameters: [:])),
-                (#line, .examine(.food)),
-                (#line, .create(.food, [])),
-                (#line, .list(nil, reference: .food, .food, [])),
-                (#line, .status(.food, [.messageCount])),
-                (#line, .close),
-                (#line, .select(.food)),
+                (#_sourceLocation, .delete(.food)),
+                (#_sourceLocation, .rename(from: .food, to: .food, parameters: [:])),
+                (#_sourceLocation, .examine(.food)),
+                (#_sourceLocation, .create(.food, [])),
+                (#_sourceLocation, .list(nil, reference: .food, .food, [])),
+                (#_sourceLocation, .status(.food, [.messageCount])),
+                (#_sourceLocation, .close),
+                (#_sourceLocation, .select(.food)),
 
-                (#line, .check),
-                (#line, .expunge),
-                (#line, .uidSearch(key: .all, charset: nil, returnOptions: [])),
-                (#line, .uidFetch(.set([1]), [.envelope, .uid], [])),
-                (#line, .uidStore(.set([1]), [], .flags(.add(silent: true, list: [.answered])))),
-                (#line, .uidCopy(.set([1]), .food)),
-                (#line, .uidMove(.set([1]), .food)),
+                (#_sourceLocation, .check),
+                (#_sourceLocation, .expunge),
+                (#_sourceLocation, .uidSearch(key: .all, charset: nil, returnOptions: [])),
+                (#_sourceLocation, .uidFetch(.set([1]), [.envelope, .uid], [])),
+                (#_sourceLocation, .uidStore(.set([1]), [], .flags(.add(silent: true, list: [.answered])))),
+                (#_sourceLocation, .uidCopy(.set([1]), .food)),
+                (#_sourceLocation, .uidMove(.set([1]), .food)),
 
-                (#line, .listIndependent([], reference: .food, .food, [])),
-                (#line, .lsub(reference: .food, pattern: "Food")),
-                (#line, .subscribe(.food)),
-                (#line, .unsubscribe(.food)),
-                (#line, .enable([.condStore])),
-                (#line, .unselect),
-                (#line, .idleStart),
-                (#line, .copy(.set([1]), .food)),
-                (#line, .move(.set([1]), .food)),
-                (#line, .id([:])),
-                (#line, .namespace),
-                (#line, .uidExpunge(.set([1]))),
-                (#line, .getQuota(QuotaRoot("foo"))),
-                (#line, .getQuotaRoot(.food)),
-                (#line, .setQuota(QuotaRoot("foo"), [])),
-                (#line, .getMetadata(options: [], mailbox: .food, entries: ["/shared/comment"])),
-                (#line, .setMetadata(mailbox: .food, entries: ["/shared/comment": nil])),
-                (#line, .extendedSearch(ExtendedSearchOptions(key: .all))),
-                (#line, .resetKey(mailbox: nil, mechanisms: [.internal])),
-                (#line, .generateAuthorizedURL([.joe])),
-                (#line, .urlFetch([.joeURLFetch])),
+                (#_sourceLocation, .listIndependent([], reference: .food, .food, [])),
+                (#_sourceLocation, .lsub(reference: .food, pattern: "Food")),
+                (#_sourceLocation, .subscribe(.food)),
+                (#_sourceLocation, .unsubscribe(.food)),
+                (#_sourceLocation, .enable([.condStore])),
+                (#_sourceLocation, .unselect),
+                (#_sourceLocation, .idleStart),
+                (#_sourceLocation, .copy(.set([1]), .food)),
+                (#_sourceLocation, .move(.set([1]), .food)),
+                (#_sourceLocation, .id([:])),
+                (#_sourceLocation, .namespace),
+                (#_sourceLocation, .uidExpunge(.set([1]))),
+                (#_sourceLocation, .getQuota(QuotaRoot("foo"))),
+                (#_sourceLocation, .getQuotaRoot(.food)),
+                (#_sourceLocation, .setQuota(QuotaRoot("foo"), [])),
+                (#_sourceLocation, .getMetadata(options: [], mailbox: .food, entries: ["/shared/comment"])),
+                (#_sourceLocation, .setMetadata(mailbox: .food, entries: ["/shared/comment": nil])),
+                (#_sourceLocation, .extendedSearch(ExtendedSearchOptions(key: .all))),
+                (#_sourceLocation, .resetKey(mailbox: nil, mechanisms: [.internal])),
+                (#_sourceLocation, .generateAuthorizedURL([.joe])),
+                (#_sourceLocation, .urlFetch([.joeURLFetch])),
             ],
             haveBehavior: .mayTriggerUntaggedExpunge
         )
     }
 
-    func testCommandBehavior_isUIDBased() {
+    @Test("command behavior is UID based")
+    func commandBehaviorIsUidBased() {
         /// Commands that use UIDs to specify messages.
 
-        AssertFalse(
+        expect(
             commands: [
-                (#line, .capability),
-                (#line, .noop),
+                (#_sourceLocation, .capability),
+                (#_sourceLocation, .noop),
 
-                (#line, .startTLS),
-                (#line, .authenticate(mechanism: .plain, initialResponse: nil)),
-                (#line, .compress(.deflate)),
-                (#line, .login(username: "user", password: "password")),
-                (#line, .logout),
-                (#line, .enable([.condStore])),
-                (#line, .id([:])),
-                (#line, .namespace),
+                (#_sourceLocation, .startTLS),
+                (#_sourceLocation, .authenticate(mechanism: .plain, initialResponse: nil)),
+                (#_sourceLocation, .compress(.deflate)),
+                (#_sourceLocation, .login(username: "user", password: "password")),
+                (#_sourceLocation, .logout),
+                (#_sourceLocation, .enable([.condStore])),
+                (#_sourceLocation, .id([:])),
+                (#_sourceLocation, .namespace),
 
-                (#line, .delete(.food)),
-                (#line, .rename(from: .food, to: .food, parameters: [:])),
-                (#line, .examine(.food)),
-                (#line, .create(.food, [])),
-                (#line, .list(nil, reference: .food, .food, [])),
-                (#line, .listIndependent([], reference: .food, .food, [])),
-                (#line, .lsub(reference: .food, pattern: "Food")),
-                (#line, .subscribe(.food)),
-                (#line, .unsubscribe(.food)),
-                (#line, .status(.food, [.messageCount])),
-                (#line, .close),
-                (#line, .select(.food)),
-                (#line, .unselect),
-                (#line, .idleStart),
+                (#_sourceLocation, .delete(.food)),
+                (#_sourceLocation, .rename(from: .food, to: .food, parameters: [:])),
+                (#_sourceLocation, .examine(.food)),
+                (#_sourceLocation, .create(.food, [])),
+                (#_sourceLocation, .list(nil, reference: .food, .food, [])),
+                (#_sourceLocation, .listIndependent([], reference: .food, .food, [])),
+                (#_sourceLocation, .lsub(reference: .food, pattern: "Food")),
+                (#_sourceLocation, .subscribe(.food)),
+                (#_sourceLocation, .unsubscribe(.food)),
+                (#_sourceLocation, .status(.food, [.messageCount])),
+                (#_sourceLocation, .close),
+                (#_sourceLocation, .select(.food)),
+                (#_sourceLocation, .unselect),
+                (#_sourceLocation, .idleStart),
 
-                (#line, .check),
-                (#line, .expunge),
-                (#line, .fetch(.set([1]), [.envelope, .uid], [])),
-                (#line, .fetch(.set([1]), [.bodyStructure(extensions: false)], [])),
-                (#line, .copy(.set([1]), .food)),
-                (#line, .move(.set([1]), .food)),
-                (#line, .store(.set([1]), [], .flags(.add(silent: true, list: [.answered])))),
-                (#line, .store(.set([1]), [], .flags(.add(silent: false, list: [.answered])))),
+                (#_sourceLocation, .check),
+                (#_sourceLocation, .expunge),
+                (#_sourceLocation, .fetch(.set([1]), [.envelope, .uid], [])),
+                (#_sourceLocation, .fetch(.set([1]), [.bodyStructure(extensions: false)], [])),
+                (#_sourceLocation, .copy(.set([1]), .food)),
+                (#_sourceLocation, .move(.set([1]), .food)),
+                (#_sourceLocation, .store(.set([1]), [], .flags(.add(silent: true, list: [.answered])))),
+                (#_sourceLocation, .store(.set([1]), [], .flags(.add(silent: false, list: [.answered])))),
 
-                (#line, .resetKey(mailbox: nil, mechanisms: [.internal])),
+                (#_sourceLocation, .resetKey(mailbox: nil, mechanisms: [.internal])),
 
-                (#line, .getQuota(QuotaRoot("foo"))),
-                (#line, .getQuotaRoot(.food)),
-                (#line, .setQuota(QuotaRoot("foo"), [])),
-                (#line, .getMetadata(options: [], mailbox: .food, entries: ["/shared/comment"])),
-                (#line, .setMetadata(mailbox: .food, entries: ["/shared/comment": nil])),
+                (#_sourceLocation, .getQuota(QuotaRoot("foo"))),
+                (#_sourceLocation, .getQuotaRoot(.food)),
+                (#_sourceLocation, .setQuota(QuotaRoot("foo"), [])),
+                (#_sourceLocation, .getMetadata(options: [], mailbox: .food, entries: ["/shared/comment"])),
+                (#_sourceLocation, .setMetadata(mailbox: .food, entries: ["/shared/comment": nil])),
             ],
-            haveBehavior: .isUIDBased
+            doNotHaveBehavior: .isUIDBased
         )
 
-        Assert(
+        expect(
             commands: [
-                (#line, .uidFetch(.set([1]), [.envelope, .uid], [])),
-                (#line, .uidStore(.set([1]), [], .flags(.add(silent: true, list: [.answered])))),
-                (#line, .uidCopy(.set([1]), .food)),
-                (#line, .uidMove(.set([1]), .food)),
-                (#line, .uidExpunge(.set([1]))),
+                (#_sourceLocation, .uidFetch(.set([1]), [.envelope, .uid], [])),
+                (#_sourceLocation, .uidStore(.set([1]), [], .flags(.add(silent: true, list: [.answered])))),
+                (#_sourceLocation, .uidCopy(.set([1]), .food)),
+                (#_sourceLocation, .uidMove(.set([1]), .food)),
+                (#_sourceLocation, .uidExpunge(.set([1]))),
                 // `GENURLAUTH` and `URLFETCH` (indirectly) reference UIDs:
-                (#line, .generateAuthorizedURL([.joe])),
-                (#line, .urlFetch([.joeURLFetch])),
+                (#_sourceLocation, .generateAuthorizedURL([.joe])),
+                (#_sourceLocation, .urlFetch([.joeURLFetch])),
             ],
             haveBehavior: .isUIDBased
         )
 
         SearchKey.keysWithoutUID.forEach { key in
-            AssertFalse(
+            expect(
                 commands: [
-                    (#line, .search(key: key, charset: nil, returnOptions: []))
+                    (#_sourceLocation, .search(key: key, charset: nil, returnOptions: []))
                 ],
-                haveBehavior: .isUIDBased,
+                doNotHaveBehavior: .isUIDBased,
                 "key: \(key)"
             )
             // UID SEARCH has this behavior even if the key does not
             // reference UIDs:
-            Assert(
+            expect(
                 commands: [
-                    (#line, .uidSearch(key: key, charset: nil, returnOptions: [])),
-                    (#line, .extendedSearch(ExtendedSearchOptions(key: key))),
+                    (#_sourceLocation, .uidSearch(key: key, charset: nil, returnOptions: [])),
+                    (#_sourceLocation, .extendedSearch(ExtendedSearchOptions(key: key))),
                 ],
                 haveBehavior: .isUIDBased,
                 "key: \(key)"
             )
         }
         SearchKey.keysWithUID.forEach { key in
-            Assert(
+            expect(
                 commands: [
-                    (#line, .search(key: key, charset: nil, returnOptions: [])),
-                    (#line, .extendedSearch(ExtendedSearchOptions(key: key))),
-                    (#line, .uidSearch(key: key, charset: nil, returnOptions: [])),
+                    (#_sourceLocation, .search(key: key, charset: nil, returnOptions: [])),
+                    (#_sourceLocation, .extendedSearch(ExtendedSearchOptions(key: key))),
+                    (#_sourceLocation, .uidSearch(key: key, charset: nil, returnOptions: [])),
                 ],
                 haveBehavior: .isUIDBased,
                 "key: \(key)"
@@ -1349,160 +1351,162 @@ extension PipeliningTests {
         }
     }
 
-    func testCommandBehavior_changesFlags() {
+    @Test("command behavior changes flags")
+    func commandBehaviorChangesFlags() {
         /// Commands that change flags on messages.
 
-        AssertFalse(
+        expect(
             commands: [
-                (#line, .capability),
-                (#line, .noop),
+                (#_sourceLocation, .capability),
+                (#_sourceLocation, .noop),
 
-                (#line, .startTLS),
-                (#line, .authenticate(mechanism: .plain, initialResponse: nil)),
-                (#line, .compress(.deflate)),
-                (#line, .login(username: "user", password: "password")),
-                (#line, .logout),
-                (#line, .enable([.condStore])),
-                (#line, .id([:])),
-                (#line, .namespace),
+                (#_sourceLocation, .startTLS),
+                (#_sourceLocation, .authenticate(mechanism: .plain, initialResponse: nil)),
+                (#_sourceLocation, .compress(.deflate)),
+                (#_sourceLocation, .login(username: "user", password: "password")),
+                (#_sourceLocation, .logout),
+                (#_sourceLocation, .enable([.condStore])),
+                (#_sourceLocation, .id([:])),
+                (#_sourceLocation, .namespace),
 
-                (#line, .delete(.food)),
-                (#line, .rename(from: .food, to: .food, parameters: [:])),
-                (#line, .examine(.food)),
-                (#line, .create(.food, [])),
-                (#line, .list(nil, reference: .food, .food, [])),
-                (#line, .listIndependent([], reference: .food, .food, [])),
-                (#line, .lsub(reference: .food, pattern: "Food")),
-                (#line, .status(.food, [.messageCount])),
-                (#line, .close),
-                (#line, .select(.food)),
-                (#line, .unselect),
-                (#line, .subscribe(.food)),
-                (#line, .unsubscribe(.food)),
-                (#line, .idleStart),
+                (#_sourceLocation, .delete(.food)),
+                (#_sourceLocation, .rename(from: .food, to: .food, parameters: [:])),
+                (#_sourceLocation, .examine(.food)),
+                (#_sourceLocation, .create(.food, [])),
+                (#_sourceLocation, .list(nil, reference: .food, .food, [])),
+                (#_sourceLocation, .listIndependent([], reference: .food, .food, [])),
+                (#_sourceLocation, .lsub(reference: .food, pattern: "Food")),
+                (#_sourceLocation, .status(.food, [.messageCount])),
+                (#_sourceLocation, .close),
+                (#_sourceLocation, .select(.food)),
+                (#_sourceLocation, .unselect),
+                (#_sourceLocation, .subscribe(.food)),
+                (#_sourceLocation, .unsubscribe(.food)),
+                (#_sourceLocation, .idleStart),
 
-                (#line, .check),
-                (#line, .expunge),
-                (#line, .uidExpunge(.set([1]))),
-                (#line, .fetch(.set([1]), [.envelope, .uid], [])),
-                (#line, .fetch(.set([1]), [.bodyStructure(extensions: false)], [])),
-                (#line, .search(key: .all, charset: nil, returnOptions: [.all])),
-                (#line, .uidSearch(key: .all, charset: nil, returnOptions: [])),
-                (#line, .uidFetch(.set([1]), [.envelope, .uid], [])),
-                (#line, .uidCopy(.set([1]), .food)),
-                (#line, .uidMove(.set([1]), .food)),
-                (#line, .copy(.set([1]), .food)),
-                (#line, .move(.set([1]), .food)),
+                (#_sourceLocation, .check),
+                (#_sourceLocation, .expunge),
+                (#_sourceLocation, .uidExpunge(.set([1]))),
+                (#_sourceLocation, .fetch(.set([1]), [.envelope, .uid], [])),
+                (#_sourceLocation, .fetch(.set([1]), [.bodyStructure(extensions: false)], [])),
+                (#_sourceLocation, .search(key: .all, charset: nil, returnOptions: [.all])),
+                (#_sourceLocation, .uidSearch(key: .all, charset: nil, returnOptions: [])),
+                (#_sourceLocation, .uidFetch(.set([1]), [.envelope, .uid], [])),
+                (#_sourceLocation, .uidCopy(.set([1]), .food)),
+                (#_sourceLocation, .uidMove(.set([1]), .food)),
+                (#_sourceLocation, .copy(.set([1]), .food)),
+                (#_sourceLocation, .move(.set([1]), .food)),
 
-                (#line, .getQuota(QuotaRoot("foo"))),
-                (#line, .getQuotaRoot(.food)),
-                (#line, .setQuota(QuotaRoot("foo"), [])),
-                (#line, .getMetadata(options: [], mailbox: .food, entries: ["/shared/comment"])),
-                (#line, .setMetadata(mailbox: .food, entries: ["/shared/comment": nil])),
-                (#line, .extendedSearch(ExtendedSearchOptions(key: .all))),
-                (#line, .resetKey(mailbox: nil, mechanisms: [.internal])),
-                (#line, .generateAuthorizedURL([.joe])),
-                (#line, .urlFetch([.joeURLFetch])),
+                (#_sourceLocation, .getQuota(QuotaRoot("foo"))),
+                (#_sourceLocation, .getQuotaRoot(.food)),
+                (#_sourceLocation, .setQuota(QuotaRoot("foo"), [])),
+                (#_sourceLocation, .getMetadata(options: [], mailbox: .food, entries: ["/shared/comment"])),
+                (#_sourceLocation, .setMetadata(mailbox: .food, entries: ["/shared/comment": nil])),
+                (#_sourceLocation, .extendedSearch(ExtendedSearchOptions(key: .all))),
+                (#_sourceLocation, .resetKey(mailbox: nil, mechanisms: [.internal])),
+                (#_sourceLocation, .generateAuthorizedURL([.joe])),
+                (#_sourceLocation, .urlFetch([.joeURLFetch])),
             ],
-            haveBehavior: .changesFlagsOnAnyMessage
+            doNotHaveBehavior: .changesFlagsOnAnyMessage
         )
 
-        Assert(
+        expect(
             commands: [
-                (#line, .store(.set([1]), [], .flags(.add(silent: true, list: [.answered])))),
-                (#line, .store(.set([1]), [], .flags(.add(silent: false, list: [.answered])))),
-                (#line, .uidStore(.lastCommand, [], .flags(.add(silent: true, list: [.answered])))),
+                (#_sourceLocation, .store(.set([1]), [], .flags(.add(silent: true, list: [.answered])))),
+                (#_sourceLocation, .store(.set([1]), [], .flags(.add(silent: false, list: [.answered])))),
+                (#_sourceLocation, .uidStore(.lastCommand, [], .flags(.add(silent: true, list: [.answered])))),
             ],
             haveBehavior: .changesFlagsOnAnyMessage
         )
         MessageIdentifierSetNonEmpty<UID>.arbitrarySets.forEach { uids in
-            Assert(
+            expect(
                 commands: [
-                    (#line, .uidStore(.set(uids), [], .flags(.add(silent: true, list: [.answered])))),
-                    (#line, .uidStore(.set(uids), [], .flags(.add(silent: false, list: [.answered])))),
+                    (#_sourceLocation, .uidStore(.set(uids), [], .flags(.add(silent: true, list: [.answered])))),
+                    (#_sourceLocation, .uidStore(.set(uids), [], .flags(.add(silent: false, list: [.answered])))),
                 ],
                 haveBehavior: .changesFlags(uids)
             )
         }
     }
 
-    func testCommandBehavior_readsFlags() {
+    @Test("command behavior reads flags")
+    func commandBehaviorReadsFlags() {
         /// Command that are querying / reading flags.
 
-        AssertFalse(
+        expect(
             commands: [
-                (#line, .capability),
-                (#line, .noop),
+                (#_sourceLocation, .capability),
+                (#_sourceLocation, .noop),
 
-                (#line, .startTLS),
-                (#line, .authenticate(mechanism: .plain, initialResponse: nil)),
-                (#line, .compress(.deflate)),
-                (#line, .login(username: "user", password: "password")),
-                (#line, .logout),
-                (#line, .id([:])),
-                (#line, .namespace),
-                (#line, .idleStart),
-                (#line, .enable([.condStore])),
+                (#_sourceLocation, .startTLS),
+                (#_sourceLocation, .authenticate(mechanism: .plain, initialResponse: nil)),
+                (#_sourceLocation, .compress(.deflate)),
+                (#_sourceLocation, .login(username: "user", password: "password")),
+                (#_sourceLocation, .logout),
+                (#_sourceLocation, .id([:])),
+                (#_sourceLocation, .namespace),
+                (#_sourceLocation, .idleStart),
+                (#_sourceLocation, .enable([.condStore])),
 
-                (#line, .delete(.food)),
-                (#line, .rename(from: .food, to: .food, parameters: [:])),
-                (#line, .examine(.food)),
-                (#line, .create(.food, [])),
-                (#line, .list(nil, reference: .food, .food, [])),
-                (#line, .listIndependent([], reference: .food, .food, [])),
-                (#line, .lsub(reference: .food, pattern: "Food")),
-                (#line, .status(.food, [.messageCount])),
-                (#line, .close),
-                (#line, .select(.food)),
-                (#line, .unselect),
-                (#line, .check),
-                (#line, .expunge),
-                (#line, .uidExpunge(.set([1]))),
-                (#line, .uidCopy(.set([1]), .food)),
-                (#line, .copy(.set([1]), .food)),
-                (#line, .uidMove(.set([1]), .food)),
-                (#line, .move(.set([1]), .food)),
-                (#line, .subscribe(.food)),
-                (#line, .unsubscribe(.food)),
-                (#line, .getQuota(QuotaRoot("foo"))),
-                (#line, .getQuotaRoot(.food)),
-                (#line, .setQuota(QuotaRoot("foo"), [])),
-                (#line, .getMetadata(options: [], mailbox: .food, entries: ["/shared/comment"])),
-                (#line, .setMetadata(mailbox: .food, entries: ["/shared/comment": nil])),
-                (#line, .resetKey(mailbox: nil, mechanisms: [.internal])),
-                (#line, .generateAuthorizedURL([.joe])),
-                (#line, .urlFetch([.joeURLFetch])),
+                (#_sourceLocation, .delete(.food)),
+                (#_sourceLocation, .rename(from: .food, to: .food, parameters: [:])),
+                (#_sourceLocation, .examine(.food)),
+                (#_sourceLocation, .create(.food, [])),
+                (#_sourceLocation, .list(nil, reference: .food, .food, [])),
+                (#_sourceLocation, .listIndependent([], reference: .food, .food, [])),
+                (#_sourceLocation, .lsub(reference: .food, pattern: "Food")),
+                (#_sourceLocation, .status(.food, [.messageCount])),
+                (#_sourceLocation, .close),
+                (#_sourceLocation, .select(.food)),
+                (#_sourceLocation, .unselect),
+                (#_sourceLocation, .check),
+                (#_sourceLocation, .expunge),
+                (#_sourceLocation, .uidExpunge(.set([1]))),
+                (#_sourceLocation, .uidCopy(.set([1]), .food)),
+                (#_sourceLocation, .copy(.set([1]), .food)),
+                (#_sourceLocation, .uidMove(.set([1]), .food)),
+                (#_sourceLocation, .move(.set([1]), .food)),
+                (#_sourceLocation, .subscribe(.food)),
+                (#_sourceLocation, .unsubscribe(.food)),
+                (#_sourceLocation, .getQuota(QuotaRoot("foo"))),
+                (#_sourceLocation, .getQuotaRoot(.food)),
+                (#_sourceLocation, .setQuota(QuotaRoot("foo"), [])),
+                (#_sourceLocation, .getMetadata(options: [], mailbox: .food, entries: ["/shared/comment"])),
+                (#_sourceLocation, .setMetadata(mailbox: .food, entries: ["/shared/comment": nil])),
+                (#_sourceLocation, .resetKey(mailbox: nil, mechanisms: [.internal])),
+                (#_sourceLocation, .generateAuthorizedURL([.joe])),
+                (#_sourceLocation, .urlFetch([.joeURLFetch])),
 
                 // STORE is ok as long as it is SILENT
-                (#line, .uidStore(.set([1]), [], .flags(.add(silent: true, list: [.answered])))),
-                (#line, .store(.set([1]), [], .flags(.add(silent: true, list: [.answered])))),
+                (#_sourceLocation, .uidStore(.set([1]), [], .flags(.add(silent: true, list: [.answered])))),
+                (#_sourceLocation, .store(.set([1]), [], .flags(.add(silent: true, list: [.answered])))),
 
-                // FETCH is ok as long as it’s not fetching flags:
-                (#line, .fetch(.set([1]), [.envelope, .uid], [])),
-                (#line, .fetch(.set([1]), [.bodyStructure(extensions: false)], [])),
-                (#line, .uidFetch(.set([1]), [.envelope, .uid], [])),
+                // FETCH is ok as long as it's not fetching flags:
+                (#_sourceLocation, .fetch(.set([1]), [.envelope, .uid], [])),
+                (#_sourceLocation, .fetch(.set([1]), [.bodyStructure(extensions: false)], [])),
+                (#_sourceLocation, .uidFetch(.set([1]), [.envelope, .uid], [])),
             ],
-            haveBehavior: .readsFlagsFromAnyMessage
+            doNotHaveBehavior: .readsFlagsFromAnyMessage
         )
 
-        Assert(
+        expect(
             commands: [
-                (#line, .fetch(.set([1]), [.envelope, .uid, .flags], [])),
-                (#line, .fetch(.set([1]), [.uid, .flags], [])),
+                (#_sourceLocation, .fetch(.set([1]), [.envelope, .uid, .flags], [])),
+                (#_sourceLocation, .fetch(.set([1]), [.uid, .flags], [])),
                 // This will also return flags:
-                (#line, .store(.set([1]), [], .flags(.add(silent: false, list: [.answered])))),
-                (#line, .uidStore(.lastCommand, [], .flags(.add(silent: false, list: [.answered])))),
+                (#_sourceLocation, .store(.set([1]), [], .flags(.add(silent: false, list: [.answered])))),
+                (#_sourceLocation, .uidStore(.lastCommand, [], .flags(.add(silent: false, list: [.answered])))),
             ],
             haveBehavior: .readsFlagsFromAnyMessage
         )
         MessageIdentifierSetNonEmpty<UID>.arbitrarySets.forEach { uids in
-            Assert(
+            expect(
                 commands: [
-                    (#line, .uidFetch(.set(uids), [.envelope, .uid, .flags], [])),
-                    (#line, .uidFetch(.set(uids), [.uid, .flags], [])),
+                    (#_sourceLocation, .uidFetch(.set(uids), [.envelope, .uid, .flags], [])),
+                    (#_sourceLocation, .uidFetch(.set(uids), [.uid, .flags], [])),
                     // This will also return flags:
-                    (#line, .uidStore(.set(uids), [], .flags(.add(silent: false, list: [.answered])))),
-                    (#line, .uidStore(.set(uids), [], .flags(.add(silent: false, list: [.answered])))),
+                    (#_sourceLocation, .uidStore(.set(uids), [], .flags(.add(silent: false, list: [.answered])))),
+                    (#_sourceLocation, .uidStore(.set(uids), [], .flags(.add(silent: false, list: [.answered])))),
                 ],
                 haveBehavior: .readsFlags(uids)
             )
@@ -1511,22 +1515,22 @@ extension PipeliningTests {
         // SEARCH, ESEARCH, and UID SEARCH have this behavior only if they
         // reference flags:
         SearchKey.keysWithoutFlags.forEach { key in
-            AssertFalse(
+            expect(
                 commands: [
-                    (#line, .search(key: key, charset: nil, returnOptions: [])),
-                    (#line, .extendedSearch(ExtendedSearchOptions(key: key))),
-                    (#line, .uidSearch(key: key, charset: nil, returnOptions: [])),
+                    (#_sourceLocation, .search(key: key, charset: nil, returnOptions: [])),
+                    (#_sourceLocation, .extendedSearch(ExtendedSearchOptions(key: key))),
+                    (#_sourceLocation, .uidSearch(key: key, charset: nil, returnOptions: [])),
                 ],
-                haveBehavior: .readsFlagsFromAnyMessage,
+                doNotHaveBehavior: .readsFlagsFromAnyMessage,
                 "key: \(key)"
             )
         }
         SearchKey.keysWithFlags.forEach { key in
-            Assert(
+            expect(
                 commands: [
-                    (#line, .search(key: key, charset: nil, returnOptions: [])),
-                    (#line, .extendedSearch(ExtendedSearchOptions(key: key))),
-                    (#line, .uidSearch(key: key, charset: nil, returnOptions: [])),
+                    (#_sourceLocation, .search(key: key, charset: nil, returnOptions: [])),
+                    (#_sourceLocation, .extendedSearch(ExtendedSearchOptions(key: key))),
+                    (#_sourceLocation, .uidSearch(key: key, charset: nil, returnOptions: [])),
                 ],
                 haveBehavior: .readsFlagsFromAnyMessage,
                 "key: \(key)"
@@ -1534,68 +1538,69 @@ extension PipeliningTests {
         }
     }
 
-    func testCommandBehavior_barrier() {
+    @Test("command behavior barrier")
+    func commandBehaviorBarrier() {
         /// No additional commands may be sent until these commands complete.
 
-        AssertFalse(
+        expect(
             commands: [
-                (#line, .capability),
-                (#line, .noop),
+                (#_sourceLocation, .capability),
+                (#_sourceLocation, .noop),
 
-                (#line, .login(username: "user", password: "password")),
+                (#_sourceLocation, .login(username: "user", password: "password")),
 
-                (#line, .delete(.food)),
-                (#line, .rename(from: .food, to: .food, parameters: [:])),
-                (#line, .examine(.food)),
-                (#line, .create(.food, [])),
-                (#line, .list(nil, reference: .food, .food, [])),
-                (#line, .listIndependent([], reference: .food, .food, [])),
-                (#line, .lsub(reference: .food, pattern: "Food")),
-                (#line, .unsubscribe(.food)),
-                (#line, .subscribe(.food)),
-                (#line, .status(.food, [.messageCount])),
-                (#line, .close),
-                (#line, .select(.food)),
-                (#line, .unselect),
-                (#line, .enable([.condStore])),
-                (#line, .id([:])),
-                (#line, .namespace),
+                (#_sourceLocation, .delete(.food)),
+                (#_sourceLocation, .rename(from: .food, to: .food, parameters: [:])),
+                (#_sourceLocation, .examine(.food)),
+                (#_sourceLocation, .create(.food, [])),
+                (#_sourceLocation, .list(nil, reference: .food, .food, [])),
+                (#_sourceLocation, .listIndependent([], reference: .food, .food, [])),
+                (#_sourceLocation, .lsub(reference: .food, pattern: "Food")),
+                (#_sourceLocation, .unsubscribe(.food)),
+                (#_sourceLocation, .subscribe(.food)),
+                (#_sourceLocation, .status(.food, [.messageCount])),
+                (#_sourceLocation, .close),
+                (#_sourceLocation, .select(.food)),
+                (#_sourceLocation, .unselect),
+                (#_sourceLocation, .enable([.condStore])),
+                (#_sourceLocation, .id([:])),
+                (#_sourceLocation, .namespace),
 
-                (#line, .check),
-                (#line, .expunge),
-                (#line, .fetch(.set([1]), [.envelope, .uid], [])),
-                (#line, .fetch(.set([1]), [.bodyStructure(extensions: false)], [])),
-                (#line, .uidSearch(key: .all, charset: nil, returnOptions: [])),
-                (#line, .uidFetch(.set([1]), [.envelope, .uid], [])),
-                (#line, .uidCopy(.set([1]), .food)),
-                (#line, .uidMove(.set([1]), .food)),
-                (#line, .uidStore(.set([1]), [], .flags(.add(silent: true, list: [.answered])))),
-                (#line, .copy(.set([1]), .food)),
-                (#line, .move(.set([1]), .food)),
-                (#line, .store(.set([1]), [], .flags(.add(silent: true, list: [.answered])))),
-                (#line, .store(.set([1]), [], .flags(.add(silent: false, list: [.answered])))),
-                (#line, .search(key: .all, charset: nil, returnOptions: [.all])),
-                (#line, .uidExpunge(.set([1]))),
-                (#line, .getQuota(QuotaRoot("foo"))),
-                (#line, .getQuotaRoot(.food)),
-                (#line, .setQuota(QuotaRoot("foo"), [])),
-                (#line, .getMetadata(options: [], mailbox: .food, entries: ["/shared/comment"])),
-                (#line, .setMetadata(mailbox: .food, entries: ["/shared/comment": nil])),
-                (#line, .extendedSearch(ExtendedSearchOptions(key: .all))),
-                (#line, .resetKey(mailbox: nil, mechanisms: [.internal])),
-                (#line, .generateAuthorizedURL([.joe])),
-                (#line, .urlFetch([.joeURLFetch])),
+                (#_sourceLocation, .check),
+                (#_sourceLocation, .expunge),
+                (#_sourceLocation, .fetch(.set([1]), [.envelope, .uid], [])),
+                (#_sourceLocation, .fetch(.set([1]), [.bodyStructure(extensions: false)], [])),
+                (#_sourceLocation, .uidSearch(key: .all, charset: nil, returnOptions: [])),
+                (#_sourceLocation, .uidFetch(.set([1]), [.envelope, .uid], [])),
+                (#_sourceLocation, .uidCopy(.set([1]), .food)),
+                (#_sourceLocation, .uidMove(.set([1]), .food)),
+                (#_sourceLocation, .uidStore(.set([1]), [], .flags(.add(silent: true, list: [.answered])))),
+                (#_sourceLocation, .copy(.set([1]), .food)),
+                (#_sourceLocation, .move(.set([1]), .food)),
+                (#_sourceLocation, .store(.set([1]), [], .flags(.add(silent: true, list: [.answered])))),
+                (#_sourceLocation, .store(.set([1]), [], .flags(.add(silent: false, list: [.answered])))),
+                (#_sourceLocation, .search(key: .all, charset: nil, returnOptions: [.all])),
+                (#_sourceLocation, .uidExpunge(.set([1]))),
+                (#_sourceLocation, .getQuota(QuotaRoot("foo"))),
+                (#_sourceLocation, .getQuotaRoot(.food)),
+                (#_sourceLocation, .setQuota(QuotaRoot("foo"), [])),
+                (#_sourceLocation, .getMetadata(options: [], mailbox: .food, entries: ["/shared/comment"])),
+                (#_sourceLocation, .setMetadata(mailbox: .food, entries: ["/shared/comment": nil])),
+                (#_sourceLocation, .extendedSearch(ExtendedSearchOptions(key: .all))),
+                (#_sourceLocation, .resetKey(mailbox: nil, mechanisms: [.internal])),
+                (#_sourceLocation, .generateAuthorizedURL([.joe])),
+                (#_sourceLocation, .urlFetch([.joeURLFetch])),
             ],
-            haveBehavior: .barrier
+            doNotHaveBehavior: .barrier
         )
 
-        Assert(
+        expect(
             commands: [
-                (#line, .startTLS),
-                (#line, .authenticate(mechanism: .plain, initialResponse: nil)),
-                (#line, .compress(.deflate)),
-                (#line, .logout),
-                (#line, .idleStart),
+                (#_sourceLocation, .startTLS),
+                (#_sourceLocation, .authenticate(mechanism: .plain, initialResponse: nil)),
+                (#_sourceLocation, .compress(.deflate)),
+                (#_sourceLocation, .logout),
+                (#_sourceLocation, .idleStart),
             ],
             haveBehavior: .barrier
         )

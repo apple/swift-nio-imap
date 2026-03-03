@@ -14,28 +14,58 @@
 
 import NIO
 @_spi(NIOIMAPInternal) @testable import NIOIMAPCore
-import XCTest
+import Testing
 
-class BodyEncodingTests: EncodeTestClass {}
+@Suite("BodyStructure.Encoding")
+struct BodyFieldEncodingTests {
+    @Test(arguments: [
+        EncodeFixture.bodyEncoding(.sevenBit, #""7BIT""#),
+        EncodeFixture.bodyEncoding(.eightBit, #""8BIT""#),
+        EncodeFixture.bodyEncoding(.binary, #""BINARY""#),
+        EncodeFixture.bodyEncoding(.base64, #""BASE64""#),
+        EncodeFixture.bodyEncoding(.quotedPrintable, #""QUOTED-PRINTABLE""#),
+        EncodeFixture.bodyEncoding(.init("some"), "\"SOME\""),
+    ])
+    func encoding(_ fixture: EncodeFixture<BodyStructure.Encoding>) {
+        fixture.checkEncoding()
+    }
 
-// MARK: - Encoding
+    @Test(arguments: [
+        ParseFixture.bodyEncoding(#""BASE64""#, expected: .success(.base64)),
+        ParseFixture.bodyEncoding(#""BINARY""#, expected: .success(.binary)),
+        ParseFixture.bodyEncoding(#""7BIT""#, expected: .success(.sevenBit)),
+        ParseFixture.bodyEncoding(#""8BIT""#, expected: .success(.eightBit)),
+        ParseFixture.bodyEncoding(#""QUOTED-PRINTABLE""#, expected: .success(.quotedPrintable)),
+        ParseFixture.bodyEncoding(#""other""#, expected: .success(.init("other"))),
+    ])
+    func parse(_ fixture: ParseFixture<BodyStructure.Encoding?>) {
+        fixture.checkParsing()
+    }
+}
 
-extension BodyEncodingTests {
-    func testEncode() {
-        let inputs: [(BodyStructure.Encoding, String, UInt)] = [
-            (.sevenBit, #""7BIT""#, #line),
-            (.eightBit, #""8BIT""#, #line),
-            (.binary, #""BINARY""#, #line),
-            (.base64, #""BASE64""#, #line),
-            (.quotedPrintable, #""QUOTED-PRINTABLE""#, #line),
-            (.init("some"), "\"SOME\"", #line),
-        ]
+// MARK: -
 
-        for (test, expectedString, line) in inputs {
-            self.testBuffer.clear()
-            let size = self.testBuffer.writeBodyEncoding(test)
-            XCTAssertEqual(size, expectedString.utf8.count, line: line)
-            XCTAssertEqual(self.testBufferString, expectedString, line: line)
-        }
+extension EncodeFixture<BodyStructure.Encoding> {
+    fileprivate static func bodyEncoding(_ input: T, _ expectedString: String) -> Self {
+        EncodeFixture(
+            input: input,
+            expectedString: expectedString,
+            encoder: { $0.writeBodyEncoding($1) }
+        )
+    }
+}
+
+extension ParseFixture<BodyStructure.Encoding?> {
+    fileprivate static func bodyEncoding(
+        _ input: String,
+        _ terminator: String = " ",
+        expected: Expected
+    ) -> Self {
+        ParseFixture(
+            input: input,
+            terminator: terminator,
+            expected: expected,
+            parser: GrammarParser().parseBodyEncoding
+        )
     }
 }

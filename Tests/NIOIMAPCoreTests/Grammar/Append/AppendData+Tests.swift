@@ -14,19 +14,97 @@
 
 import NIO
 @_spi(NIOIMAPInternal) @testable import NIOIMAPCore
-import XCTest
+import Testing
 
-class AppendData_Tests: EncodeTestClass {}
+@Suite("AppendData")
+struct AppendDataTests {
+    @Test(arguments: [
+        EncodeFixture.appendData(
+            .init(byteCount: 123),
+            .rfc3501,
+            "{123}\r\n"
+        ),
+        EncodeFixture.appendData(
+            .init(byteCount: 456, withoutContentTransferEncoding: true),
+            .rfc3501,
+            "~{456}\r\n"
+        ),
+        EncodeFixture.appendData(
+            .init(byteCount: 123),
+            .literalPlus,
+            "{123+}\r\n"
+        ),
+        EncodeFixture.appendData(
+            .init(byteCount: 456, withoutContentTransferEncoding: true),
+            .literalPlus,
+            "~{456+}\r\n"
+        ),
+    ])
+    func encode(_ fixture: EncodeFixture<AppendData>) {
+        fixture.checkEncoding()
+    }
 
-extension AppendData_Tests {
-    func testEncode() {
-        let inputs: [(AppendData, CommandEncodingOptions, [String], UInt)] = [
-            (.init(byteCount: 123), .rfc3501, ["{123}\r\n"], #line),
-            (.init(byteCount: 456, withoutContentTransferEncoding: true), .rfc3501, ["~{456}\r\n"], #line),
-            (.init(byteCount: 123), .literalPlus, ["{123+}\r\n"], #line),
-            (.init(byteCount: 456, withoutContentTransferEncoding: true), .literalPlus, ["~{456+}\r\n"], #line),
-        ]
+    @Test(arguments: [
+        ParseFixture.appendData("{123}\r\n", "hello", expected: .success(.init(byteCount: 123))),
+        ParseFixture.appendData(
+            "~{456}\r\n",
+            "hello",
+            expected: .success(.init(byteCount: 456, withoutContentTransferEncoding: true))
+        ),
+        ParseFixture.appendData("{0}\r\n", "hello", expected: .success(.init(byteCount: 0))),
+        ParseFixture.appendData(
+            "~{\(Int.max)}\r\n",
+            "hello",
+            expected: .success(.init(byteCount: .max, withoutContentTransferEncoding: true))
+        ),
+        ParseFixture.appendData("{123+}\r\n", "hello", expected: .success(.init(byteCount: 123))),
+        ParseFixture.appendData(
+            "~{456+}\r\n",
+            "hello",
+            expected: .success(.init(byteCount: 456, withoutContentTransferEncoding: true))
+        ),
+        ParseFixture.appendData("{0+}\r\n", "hello", expected: .success(.init(byteCount: 0))),
+        ParseFixture.appendData(
+            "~{\(Int.max)+}\r\n",
+            "hello",
+            expected: .success(.init(byteCount: .max, withoutContentTransferEncoding: true))
+        ),
+        ParseFixture.appendData("{-1}\r\n", "hello", expected: .failureIgnoringBufferModifications),
+        ParseFixture.appendData("{\(UInt(Int.max) + 1)}\r\n", "hello", expected: .failureIgnoringBufferModifications),
+    ])
+    func parse(_ fixture: ParseFixture<AppendData>) {
+        fixture.checkParsing()
+    }
+}
 
-        self.iterateInputs(inputs: inputs, encoder: { self.testBuffer.writeAppendData($0) })
+// MARK: -
+
+extension EncodeFixture<AppendData> {
+    fileprivate static func appendData(
+        _ input: AppendData,
+        _ options: CommandEncodingOptions,
+        _ expectedString: String
+    ) -> Self {
+        .init(
+            input: input,
+            bufferKind: .client(options),
+            expectedString: expectedString,
+            encoder: { $0.writeAppendData($1) }
+        )
+    }
+}
+
+extension ParseFixture<AppendData> {
+    fileprivate static func appendData(
+        _ input: String,
+        _ terminator: String,
+        expected: Expected
+    ) -> Self {
+        ParseFixture(
+            input: input,
+            terminator: terminator,
+            expected: expected,
+            parser: GrammarParser().parseAppendData
+        )
     }
 }

@@ -15,164 +15,148 @@
 @testable import NIOIMAPCore
 
 import NIO
-import XCTest
+import Testing
 
-final class ParserLibraryTests: XCTestCase {}
+@Suite("ParserLibrary")
+struct ParserLibraryTests {}
 
 // MARK: - parseOptional
 
 extension ParserLibraryTests {
-    func test_parseOptionalWorksForNothing() {
+    @Test("parseOptional throws incomplete message when buffer is empty")
+    func parseOptionalThrowsIncompleteMessageWhenBufferIsEmpty() {
         var buffer = TestUtilities.makeParseBuffer(for: "")
-        XCTAssertThrowsError(
+        #expect(throws: IncompleteMessage.self) {
             try PL.parseOptional(buffer: &buffer, tracker: StackTracker.testTracker) { buffer, tracker in
                 try PL.parseFixedString("x", buffer: &buffer, tracker: tracker)
             }
-        ) { error in
-            XCTAssertTrue(error is IncompleteMessage)
         }
     }
 
-    func test_parseOptionalWorks() {
+    @Test("parseOptional succeeds when element is present")
+    func parseOptionalSucceedsWhenElementIsPresent() throws {
         var buffer = TestUtilities.makeParseBuffer(for: "x")
-        XCTAssertNoThrow(
-            try PL.parseOptional(buffer: &buffer, tracker: StackTracker.testTracker) { buffer, tracker in
-                try PL.parseFixedString("x", buffer: &buffer, tracker: tracker)
-            }
-        )
+        try PL.parseOptional(buffer: &buffer, tracker: StackTracker.testTracker) { buffer, tracker in
+            try PL.parseFixedString("x", buffer: &buffer, tracker: tracker)
+        }
     }
 
-    func test_parseOptionalWorksIfNotPresent() {
+    @Test("parseOptional succeeds when element is not present")
+    func parseOptionalSucceedsWhenElementIsNotPresent() throws {
         var buffer = TestUtilities.makeParseBuffer(for: "y")
-        XCTAssertNoThrow(
-            try PL.parseOptional(buffer: &buffer, tracker: StackTracker.testTracker) { buffer, tracker in
-                try PL.parseFixedString("x", buffer: &buffer, tracker: tracker)
-            }
-        )
-        XCTAssertEqual(1, buffer.readableBytes)
-    }
-
-    func test_parseOptionalCorrectlyResetsForCompositesIfNotEnough() {
-        var buffer = TestUtilities.makeParseBuffer(for: "x")
-        XCTAssertThrowsError(
-            try PL.parseOptional(buffer: &buffer, tracker: StackTracker.testTracker) { buffer, tracker in
-                try PL.parseFixedString("x", buffer: &buffer, tracker: tracker)
-                try PL.parseFixedString("y", buffer: &buffer, tracker: tracker)
-            }
-        ) { error in
-            XCTAssertTrue(error is IncompleteMessage)
+        try PL.parseOptional(buffer: &buffer, tracker: StackTracker.testTracker) { buffer, tracker in
+            try PL.parseFixedString("x", buffer: &buffer, tracker: tracker)
         }
-        XCTAssertEqual(1, buffer.readableBytes)
+        #expect(buffer.readableBytes == 1)
     }
 
-    func test_parseOptionalCorrectlyResetsForCompositesIfNotMatching() {
-        var buffer = TestUtilities.makeParseBuffer(for: "xz")
-        XCTAssertNoThrow(
+    @Test("parseOptional resets buffer correctly for composite parsers with incomplete input")
+    func parseOptionalResetsBufferCorrectlyForCompositeParsersWithIncompleteInput() {
+        var buffer = TestUtilities.makeParseBuffer(for: "x")
+        #expect(throws: IncompleteMessage.self) {
             try PL.parseOptional(buffer: &buffer, tracker: StackTracker.testTracker) { buffer, tracker in
                 try PL.parseFixedString("x", buffer: &buffer, tracker: tracker)
                 try PL.parseFixedString("y", buffer: &buffer, tracker: tracker)
             }
-        )
-        XCTAssertEqual(2, buffer.readableBytes)
+        }
+        #expect(buffer.readableBytes == 1)
+    }
+
+    @Test("parseOptional resets buffer correctly for composite parsers with non-matching input")
+    func parseOptionalResetsBufferCorrectlyForCompositeParsersWithNonMatchingInput() throws {
+        var buffer = TestUtilities.makeParseBuffer(for: "xz")
+        try PL.parseOptional(buffer: &buffer, tracker: StackTracker.testTracker) { buffer, tracker in
+            try PL.parseFixedString("x", buffer: &buffer, tracker: tracker)
+            try PL.parseFixedString("y", buffer: &buffer, tracker: tracker)
+        }
+        #expect(buffer.readableBytes == 2)
     }
 }
 
 // MARK: - parseFixedString
 
 extension ParserLibraryTests {
-    func test_fixedStringCaseSensitively() {
+    @Test("parseFixedString with case sensitive matching")
+    func parseFixedStringWithCaseSensitiveMatching() throws {
         var buffer = TestUtilities.makeParseBuffer(for: "fooFooFOO")
 
-        XCTAssertNoThrow(
-            try PL.parseFixedString(
-                "fooFooFOO",
-                caseSensitive: true,
-                buffer: &buffer,
-                tracker: .testTracker
-            )
+        try PL.parseFixedString(
+            "fooFooFOO",
+            caseSensitive: true,
+            buffer: &buffer,
+            tracker: .testTracker
         )
 
         buffer = TestUtilities.makeParseBuffer(for: "fooFooFOO")
-        XCTAssertThrowsError(
+        #expect(throws: ParserError.self) {
             try PL.parseFixedString(
                 "foofoofoo",
                 caseSensitive: true,
                 buffer: &buffer,
                 tracker: .testTracker
             )
-        ) { error in
-            XCTAssert(error is ParserError)
         }
 
         buffer = TestUtilities.makeParseBuffer(for: "foo")
-        XCTAssertThrowsError(
+        #expect(throws: IncompleteMessage.self) {
             try PL.parseFixedString(
                 "fooFooFOO",
                 caseSensitive: true,
                 buffer: &buffer,
                 tracker: .testTracker
             )
-        ) { error in
-            XCTAssertTrue(error is IncompleteMessage)
         }
     }
 
-    func test_fixedStringCaseInsensitively() {
+    @Test("parseFixedString with case insensitive matching")
+    func parseFixedStringWithCaseInsensitiveMatching() throws {
         var buffer = TestUtilities.makeParseBuffer(for: "fooFooFOO")
 
-        XCTAssertNoThrow(
-            try PL.parseFixedString(
-                "fooFooFOO",
-                buffer: &buffer,
-                tracker: .testTracker
-            )
+        try PL.parseFixedString(
+            "fooFooFOO",
+            buffer: &buffer,
+            tracker: .testTracker
         )
 
         buffer = TestUtilities.makeParseBuffer(for: "fooFooFOO")
-        XCTAssertNoThrow(
-            try PL.parseFixedString(
-                "foofoofoo",
-                buffer: &buffer,
-                tracker: .testTracker
-            )
+        try PL.parseFixedString(
+            "foofoofoo",
+            buffer: &buffer,
+            tracker: .testTracker
         )
 
         buffer = TestUtilities.makeParseBuffer(for: "foo")
-        XCTAssertThrowsError(
+        #expect(throws: IncompleteMessage.self) {
             try PL.parseFixedString(
                 "fooFooFOO",
                 buffer: &buffer,
                 tracker: .testTracker
             )
-        ) { error in
-            XCTAssertTrue(error is IncompleteMessage)
         }
     }
 
-    func test_fixedStringNonASCII() {
+    @Test("parseFixedString rejects non-ASCII characters")
+    func parseFixedStringRejectsNonAsciiCharacters() {
         var buffer = TestUtilities.makeParseBuffer(for: "fooFooFOÖ")
-        XCTAssertThrowsError(
+        #expect(throws: ParserError.self) {
             try PL.parseFixedString(
                 "fooFooFOO",
                 caseSensitive: true,
                 buffer: &buffer,
                 tracker: .testTracker
             )
-        ) { error in
-            XCTAssert(error is ParserError, "\(error)")
         }
     }
 
-    func test_fixedStringWithLeadingSpaces() {
+    @Test("parseFixedString with leading spaces")
+    func parseFixedStringWithLeadingSpaces() throws {
         var buffer = TestUtilities.makeParseBuffer(for: String(repeating: " ", count: 500) + "fooFooFOO")
-        XCTAssertNoThrow(
-            try PL.parseFixedString(
-                "fooFooFOO",
-                caseSensitive: true,
-                allowLeadingSpaces: true,
-                buffer: &buffer,
-                tracker: .testTracker
-            )
+        try PL.parseFixedString(
+            "fooFooFOO",
+            caseSensitive: true,
+            allowLeadingSpaces: true,
+            buffer: &buffer,
+            tracker: .testTracker
         )
     }
 }
@@ -180,61 +164,51 @@ extension ParserLibraryTests {
 // MARK: - parseZeroOrMore
 
 extension ParserLibraryTests {
-    func test_parseZeroOrMoreParsesNothingButThereIsData() {
+    @Test("parseZeroOrMore parses nothing when no match but data present")
+    func parseZeroOrMoreParsesNothingWhenNoMatchButDataPresent() throws {
         TestUtilities.withParseBuffer("", terminator: "xy") { buffer in
-            XCTAssertNoThrow(
-                XCTAssertEqual(
-                    [],
-                    try PL.parseZeroOrMore(buffer: &buffer, tracker: .testTracker) { buffer, tracker -> Int in
-                        try PL.parseFixedString("x", buffer: &buffer, tracker: tracker)
-                        try PL.parseFixedString("x", buffer: &buffer, tracker: tracker)
-                        return 1
-                    }
-                )
-            )
+            let result = try PL.parseZeroOrMore(buffer: &buffer, tracker: .testTracker) { buffer, tracker -> Int in
+                try PL.parseFixedString("x", buffer: &buffer, tracker: tracker)
+                try PL.parseFixedString("x", buffer: &buffer, tracker: tracker)
+                return 1
+            }
+            #expect(result == [])
         }
     }
 
-    func test_parseZeroOrMoreParsesNothingNoData() {
+    @Test("parseZeroOrMore throws incomplete message when no data")
+    func parseZeroOrMoreThrowsIncompleteMessageWhenNoData() throws {
         TestUtilities.withParseBuffer("") { buffer in
-            XCTAssertThrowsError(
+            #expect(throws: IncompleteMessage.self) {
                 try PL.parseZeroOrMore(buffer: &buffer, tracker: .testTracker) { buffer, tracker in
                     try PL.parseFixedString("x", buffer: &buffer, tracker: tracker)
                     try PL.parseFixedString("x", buffer: &buffer, tracker: tracker)
                 }
-            ) { error in
-                XCTAssertTrue(error is IncompleteMessage)
             }
         }
     }
 
-    func test_parseZeroOrMoreParsesOneItemAndThereIsMore() {
+    @Test("parseZeroOrMore parses one item when more data present")
+    func parseZeroOrMoreParsesOneItemWhenMoreDataPresent() throws {
         TestUtilities.withParseBuffer("xx", terminator: "xy") { buffer in
-            XCTAssertNoThrow(
-                XCTAssertEqual(
-                    [1],
-                    try PL.parseZeroOrMore(buffer: &buffer, tracker: .testTracker) { buffer, tracker -> Int in
-                        try PL.parseFixedString("x", buffer: &buffer, tracker: tracker)
-                        try PL.parseFixedString("x", buffer: &buffer, tracker: tracker)
-                        return 1
-                    }
-                )
-            )
+            let result = try PL.parseZeroOrMore(buffer: &buffer, tracker: .testTracker) { buffer, tracker -> Int in
+                try PL.parseFixedString("x", buffer: &buffer, tracker: tracker)
+                try PL.parseFixedString("x", buffer: &buffer, tracker: tracker)
+                return 1
+            }
+            #expect(result == [1])
         }
     }
 
-    func test_parseZeroOrMoreParsesTwoItemsAndThereIsMore() {
+    @Test("parseZeroOrMore parses two items when more data present")
+    func parseZeroOrMoreParsesTwoItemsWhenMoreDataPresent() throws {
         TestUtilities.withParseBuffer("xxxx", terminator: "xy") { buffer in
-            XCTAssertNoThrow(
-                XCTAssertEqual(
-                    [1, 1],
-                    try PL.parseZeroOrMore(buffer: &buffer, tracker: .testTracker) { buffer, tracker -> Int in
-                        try PL.parseFixedString("x", buffer: &buffer, tracker: tracker)
-                        try PL.parseFixedString("x", buffer: &buffer, tracker: tracker)
-                        return 1
-                    }
-                )
-            )
+            let result = try PL.parseZeroOrMore(buffer: &buffer, tracker: .testTracker) { buffer, tracker -> Int in
+                try PL.parseFixedString("x", buffer: &buffer, tracker: tracker)
+                try PL.parseFixedString("x", buffer: &buffer, tracker: tracker)
+                return 1
+            }
+            #expect(result == [1, 1])
         }
     }
 }
@@ -242,59 +216,51 @@ extension ParserLibraryTests {
 // MARK: - parseOneOrMore
 
 extension ParserLibraryTests {
-    func test_parseOneOrMoreParsesNothingButThereIsData() {
+    @Test("parseOneOrMore throws parser error when no match but data present")
+    func parseOneOrMoreThrowsParserErrorWhenNoMatchButDataPresent() throws {
         TestUtilities.withParseBuffer("", terminator: "xy") { buffer in
-            XCTAssertThrowsError(
+            #expect(throws: ParserError.self) {
                 try PL.parseOneOrMore(buffer: &buffer, tracker: .testTracker) { buffer, tracker in
                     try PL.parseFixedString("x", buffer: &buffer, tracker: tracker)
                     try PL.parseFixedString("x", buffer: &buffer, tracker: tracker)
                 }
-            ) { error in
-                XCTAssert(error is ParserError)
             }
         }
     }
 
-    func test_parseOneOrMoreParsesNothingNoData() {
+    @Test("parseOneOrMore throws incomplete message when no data")
+    func parseOneOrMoreThrowsIncompleteMessageWhenNoData() throws {
         TestUtilities.withParseBuffer("") { buffer in
-            XCTAssertThrowsError(
+            #expect(throws: IncompleteMessage.self) {
                 try PL.parseOneOrMore(buffer: &buffer, tracker: .testTracker) { buffer, tracker in
                     try PL.parseFixedString("x", buffer: &buffer, tracker: tracker)
                     try PL.parseFixedString("x", buffer: &buffer, tracker: tracker)
                 }
-            ) { error in
-                XCTAssertTrue(error is IncompleteMessage)
             }
         }
     }
 
-    func test_parseOneOrMoreParsesOneItemAndThereIsMore() {
+    @Test("parseOneOrMore parses one item when more data present")
+    func parseOneOrMoreParsesOneItemWhenMoreDataPresent() throws {
         TestUtilities.withParseBuffer("xx", terminator: "xy") { buffer in
-            XCTAssertNoThrow(
-                XCTAssertEqual(
-                    [1],
-                    try PL.parseOneOrMore(buffer: &buffer, tracker: .testTracker) { buffer, tracker -> Int in
-                        try PL.parseFixedString("x", buffer: &buffer, tracker: tracker)
-                        try PL.parseFixedString("x", buffer: &buffer, tracker: tracker)
-                        return 1
-                    }
-                )
-            )
+            let result = try PL.parseOneOrMore(buffer: &buffer, tracker: .testTracker) { buffer, tracker -> Int in
+                try PL.parseFixedString("x", buffer: &buffer, tracker: tracker)
+                try PL.parseFixedString("x", buffer: &buffer, tracker: tracker)
+                return 1
+            }
+            #expect(result == [1])
         }
     }
 
-    func test_parseOneOrMoreParsesTwoItemsAndThereIsMore() {
+    @Test("parseOneOrMore parses two items when more data present")
+    func parseOneOrMoreParsesTwoItemsWhenMoreDataPresent() throws {
         TestUtilities.withParseBuffer("xxxx", terminator: "xy") { buffer in
-            XCTAssertNoThrow(
-                XCTAssertEqual(
-                    [1, 1],
-                    try PL.parseOneOrMore(buffer: &buffer, tracker: .testTracker) { buffer, tracker -> Int in
-                        try PL.parseFixedString("x", buffer: &buffer, tracker: tracker)
-                        try PL.parseFixedString("x", buffer: &buffer, tracker: tracker)
-                        return 1
-                    }
-                )
-            )
+            let result = try PL.parseOneOrMore(buffer: &buffer, tracker: .testTracker) { buffer, tracker -> Int in
+                try PL.parseFixedString("x", buffer: &buffer, tracker: tracker)
+                try PL.parseFixedString("x", buffer: &buffer, tracker: tracker)
+                return 1
+            }
+            #expect(result == [1, 1])
         }
     }
 }
@@ -302,117 +268,124 @@ extension ParserLibraryTests {
 // MARK: - parseSpace
 
 extension ParserLibraryTests {
-    func testParseSpace() {
-        let inputs: [(String, String, UInt)] = [
-            (" a", "a", #line),
-            ("       a", "a", #line),
-            ("  a  ", "a  ", #line),
+    @Test(
+        "parseSpaces consumes leading spaces",
+        arguments: [
+            (" a", "a"),
+            ("       a", "a"),
+            ("  a  ", "a  "),
         ]
-        for (string, remaining, line) in inputs {
-            var string = ParseBuffer(ByteBuffer(string: string))
-            let remaining = ParseBuffer(ByteBuffer(string: remaining))
-            XCTAssertNoThrow(try PL.parseSpaces(buffer: &string, tracker: .makeNewDefault), line: line)
-            XCTAssertEqual(string, remaining, line: line)
-        }
+    )
+    func parseSpacesConsumesLeadingSpaces(input: String, expectedRemaining: String) throws {
+        var buffer = ParseBuffer(ByteBuffer(string: input))
+        let remaining = ParseBuffer(ByteBuffer(string: expectedRemaining))
+        try PL.parseSpaces(buffer: &buffer, tracker: .makeNewDefault)
+        #expect(buffer == remaining)
     }
 }
 
 // MARK: - parseUInt64
 
 extension ParserLibraryTests {
-    func testParseUInt64() {
-        let inputs: [(String, UInt64, Int, UInt)] = [
-            ("12345\r", 12345, 5, #line),
-            ("18446744073709551615\r", UInt64.max, 20, #line),
-            ("12345 a", 12345, 5, #line),
-            ("18446744073709551615b", UInt64.max, 20, #line),
+    @Test(
+        "parseUnsignedInt64 parses numbers correctly",
+        arguments: [
+            ("12345\r", 12345, 5),
+            ("18446744073709551615\r", UInt64.max, 20),
+            ("12345 a", 12345, 5),
+            ("18446744073709551615b", UInt64.max, 20),
         ]
-        for (string, result, consumed, line) in inputs {
-            var string = ParseBuffer(ByteBuffer(string: string))
-            var id = UInt64(0)
-            var actualConsumed = 0
-            XCTAssertNoThrow(
-                (id, actualConsumed) = try PL.parseUnsignedInt64(
-                    buffer: &string,
-                    tracker: .makeNewDefault
-                ),
-                line: line
-            )
-            XCTAssertEqual(actualConsumed, consumed, line: line)
-            XCTAssertEqual(id, result, line: line)
-        }
+    )
+    func parseUnsignedInt64ParsesNumbersCorrectly(
+        input: String,
+        expectedResult: UInt64,
+        expectedConsumed: Int
+    ) throws {
+        var buffer = ParseBuffer(ByteBuffer(string: input))
+        let (id, actualConsumed) = try PL.parseUnsignedInt64(
+            buffer: &buffer,
+            tracker: .makeNewDefault
+        )
+        #expect(actualConsumed == expectedConsumed)
+        #expect(id == expectedResult)
     }
 }
 
 // MARK: - parseBufferAsUTF8
 
 extension ParserLibraryTests {
-    func testParseBufferAsUTF8() {
+    @Test("parseBufferAsUTF8 with ASCII string")
+    func parseBufferAsUtf8WithAsciiString() throws {
         let test1 = ByteBuffer(string: "hello, world")
-        XCTAssertEqual(try ParserLibrary.parseBufferAsUTF8(test1), "hello, world")
+        #expect(try ParserLibrary.parseBufferAsUTF8(test1) == "hello, world")
+    }
 
+    @Test("parseBufferAsUTF8 with multi-byte UTF-8 characters")
+    func parseBufferAsUtf8WithMultiByteUtf8Characters() throws {
         let test2 = ByteBuffer(bytes: [0xE2, 0x9A, 0xA1, 0xE2, 0x9A, 0xA2, 0xE2, 0x9A, 0xA3, 0xE2, 0x9A, 0xA4])
-        XCTAssertEqual(try ParserLibrary.parseBufferAsUTF8(test2), "⚡⚢⚣⚤")
+        #expect(try ParserLibrary.parseBufferAsUTF8(test2) == "⚡⚢⚣⚤")
+    }
 
+    @Test("parseBufferAsUTF8 with incomplete UTF-8 sequence")
+    func parseBufferAsUtf8WithIncompleteUtf8Sequence() throws {
         let test3 = ByteBuffer(bytes: [0xC2])
-        XCTAssertThrowsError(try ParserLibrary.parseBufferAsUTF8(test3))
+        #expect(throws: (any Error).self) {
+            try ParserLibrary.parseBufferAsUTF8(test3)
+        }
+    }
 
+    @Test("parseBufferAsUTF8 with truncated multi-byte sequence")
+    func parseBufferAsUtf8WithTruncatedMultiByteSequence() throws {
         let test4 = ByteBuffer(bytes: [0xE1, 0x80])
-        XCTAssertThrowsError(try ParserLibrary.parseBufferAsUTF8(test4))
+        #expect(throws: (any Error).self) {
+            try ParserLibrary.parseBufferAsUTF8(test4)
+        }
     }
 }
 
 // MARK: - parseNewline
 
 extension ParserLibraryTests {
-    func checkParseNewline(newline: String, line: UInt = #line) {
+    @Test(
+        "parseNewline handles various newline formats",
+        arguments: [
+            "\r\n",
+            "\n",
+            "\r",
+            " \r\n",
+            " \n",
+            " \r",
+            "      \r\n",
+            "      \n",
+            "      \r",
+        ]
+    )
+    func parseNewlineHandlesVariousNewlineFormats(newline: String) throws {
         var buffer = TestUtilities.makeParseBuffer(for: newline + "hello, world")
-        XCTAssertNoThrow(
-            try ParserLibrary.parseNewline(buffer: &buffer, tracker: StackTracker.makeNewDefault),
-            line: line
-        )
-        XCTAssertNoThrow(
-            try ParserLibrary.parseFixedString(
-                "hello, world",
-                buffer: &buffer,
-                tracker: StackTracker.makeNewDefault
-            ),
-            line: line
+        try ParserLibrary.parseNewline(buffer: &buffer, tracker: StackTracker.makeNewDefault)
+        try ParserLibrary.parseFixedString(
+            "hello, world",
+            buffer: &buffer,
+            tracker: StackTracker.makeNewDefault
         )
     }
 
-    func testParseNewline() {
-        self.checkParseNewline(newline: "\r\n")
-        self.checkParseNewline(newline: "\n")
-        self.checkParseNewline(newline: "\r")
-
-        self.checkParseNewline(newline: " \r\n")
-        self.checkParseNewline(newline: " \n")
-        self.checkParseNewline(newline: " \r")
-
-        self.checkParseNewline(newline: "      \r\n")
-        self.checkParseNewline(newline: "      \n")
-        self.checkParseNewline(newline: "      \r")
-    }
-
-    func testParseNewlineRecursion() {
+    @Test("parseNewline with acceptable recursion depth")
+    func parseNewlineWithAcceptableRecursionDepth() throws {
         var buffer = TestUtilities.makeParseBuffer(for: String(repeating: " ", count: 80) + "\r\nhello, world")
-        XCTAssertNoThrow(
-            try ParserLibrary.parseNewline(buffer: &buffer, tracker: StackTracker(maximumParserStackDepth: 100))
-        )
-        XCTAssertNoThrow(
-            try ParserLibrary.parseFixedString(
-                "hello, world",
-                buffer: &buffer,
-                tracker: StackTracker.makeNewDefault
-            )
+        try ParserLibrary.parseNewline(buffer: &buffer, tracker: StackTracker(maximumParserStackDepth: 100))
+        try ParserLibrary.parseFixedString(
+            "hello, world",
+            buffer: &buffer,
+            tracker: StackTracker.makeNewDefault
         )
     }
 
-    func testParseNewlineTooMuchRecursion() {
+    @Test("parseNewline throws when exceeding recursion limit")
+    func parseNewlineThrowsWhenExceedingRecursionLimit() {
         var buffer = TestUtilities.makeParseBuffer(for: String(repeating: " ", count: 200) + "\r\nhello, world")
-        XCTAssertThrowsError(
+        #expect(throws: (any Error).self) {
             try ParserLibrary.parseNewline(buffer: &buffer, tracker: StackTracker(maximumParserStackDepth: 100))
-        )
+        }
     }
 }

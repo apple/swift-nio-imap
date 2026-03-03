@@ -14,27 +14,33 @@
 
 import NIO
 @_spi(NIOIMAPInternal) @testable import NIOIMAPCore
-import XCTest
+import Testing
 
-class FieldLanguageLocationTests: EncodeTestClass {}
+@Suite("BodyStructure.LanguageLocation")
+struct FieldLanguageLocationTests {
+    @Test(arguments: [
+        EncodeFixture.languageLocation(
+            .init(languages: ["language"], location: nil),
+            " (\"language\")"
+        ),
+        EncodeFixture.languageLocation(
+            .init(languages: ["language"], location: .init(location: "location", extensions: [])),
+            " (\"language\") \"location\""
+        ),
+    ])
+    func encoding(_ fixture: EncodeFixture<BodyStructure.LanguageLocation>) {
+        fixture.checkEncoding()
+    }
+}
 
-// MARK: - Encoding
+// MARK: -
 
-extension FieldLanguageLocationTests {
-    func testEncode() {
-        let inputs: [(BodyStructure.LanguageLocation, String, UInt)] = [
-            (.init(languages: ["language"], location: nil), " (\"language\")", #line),
-            (
-                .init(languages: ["language"], location: .init(location: "location", extensions: [])),
-                " (\"language\") \"location\"", #line
-            ),
-        ]
-
-        for (test, expectedString, line) in inputs {
-            self.testBuffer.clear()
-            let size = self.testBuffer.writeBodyFieldLanguageLocation(test)
-            XCTAssertEqual(size, expectedString.utf8.count, line: line)
-            XCTAssertEqual(self.testBufferString, expectedString, line: line)
-        }
+extension EncodeFixture<BodyStructure.LanguageLocation> {
+    fileprivate static func languageLocation(_ input: T, _ expectedString: String) -> Self {
+        EncodeFixture(
+            input: input,
+            expectedString: expectedString,
+            encoder: { $0.writeBodyFieldLanguageLocation($1) }
+        )
     }
 }

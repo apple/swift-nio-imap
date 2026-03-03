@@ -14,27 +14,128 @@
 
 import NIO
 @_spi(NIOIMAPInternal) @testable import NIOIMAPCore
-import XCTest
+import Testing
 
-class MetadataOption_Tests: EncodeTestClass {}
-
-// MARK: - Encoding
-
-extension MetadataOption_Tests {
-    func testEncode() {
-        let inputs: [(MetadataOption, String, UInt)] = [
-            (.maxSize(123), "MAXSIZE 123", #line),
-            (.scope(.one), "DEPTH 1", #line),
-            (.other(.init(key: "param", value: nil)), "param", #line),
+@Suite("MetadataOption")
+struct MetadataOptionTests {
+    @Test(
+        "encodes single metadata option",
+        arguments: [
+            EncodeFixture.metadataOption(
+                .maxSize(123),
+                "MAXSIZE 123"
+            ),
+            EncodeFixture.metadataOption(
+                .scope(.one),
+                "DEPTH 1"
+            ),
+            EncodeFixture.metadataOption(
+                .other(.init(key: "param", value: nil)),
+                "param"
+            ),
         ]
-        self.iterateInputs(inputs: inputs, encoder: { self.testBuffer.writeMetadataOption($0) })
+    )
+    func encodesSingleMetadataOption(_ fixture: EncodeFixture<MetadataOption>) {
+        fixture.checkEncoding()
     }
 
-    func testEncode_array() {
-        let inputs: [([MetadataOption], String, UInt)] = [
-            ([.maxSize(123)], "(MAXSIZE 123)", #line),
-            ([.maxSize(1), .scope(.one)], "(MAXSIZE 1 DEPTH 1)", #line),
+    @Test(
+        "encodes array of metadata options",
+        arguments: [
+            EncodeFixture.metadataOptions(
+                [.maxSize(123)],
+                "(MAXSIZE 123)"
+            ),
+            EncodeFixture.metadataOptions(
+                [.maxSize(1), .scope(.one)],
+                "(MAXSIZE 1 DEPTH 1)"
+            ),
         ]
-        self.iterateInputs(inputs: inputs, encoder: { self.testBuffer.writeMetadataOptions($0) })
+    )
+    func encodesArrayOfMetadataOptions(_ fixture: EncodeFixture<[MetadataOption]>) {
+        fixture.checkEncoding()
+    }
+
+    @Test(
+        "parse metadata option",
+        arguments: [
+            ParseFixture.metadataOption("MAXSIZE 123", expected: .success(.maxSize(123))),
+            ParseFixture.metadataOption("DEPTH 1", expected: .success(.scope(.one))),
+            ParseFixture.metadataOption("param", expected: .success(.other(.init(key: "param", value: nil)))),
+        ]
+    )
+    func parseMetadataOption(_ fixture: ParseFixture<MetadataOption>) {
+        fixture.checkParsing()
+    }
+
+    @Test(
+        "parse metadata options",
+        arguments: [
+            ParseFixture.metadataOptions("(MAXSIZE 123)", expected: .success([.maxSize(123)])),
+            ParseFixture.metadataOptions("(DEPTH 1 MAXSIZE 123)", expected: .success([.scope(.one), .maxSize(123)])),
+        ]
+    )
+    func parseMetadataOptions(_ fixture: ParseFixture<[MetadataOption]>) {
+        fixture.checkParsing()
+    }
+}
+
+// MARK: -
+
+extension EncodeFixture<MetadataOption> {
+    fileprivate static func metadataOption(
+        _ input: MetadataOption,
+        _ expectedString: String
+    ) -> Self {
+        .init(
+            input: input,
+            bufferKind: .defaultServer,
+            expectedString: expectedString,
+            encoder: { $0.writeMetadataOption($1) }
+        )
+    }
+}
+
+extension EncodeFixture<[MetadataOption]> {
+    fileprivate static func metadataOptions(
+        _ input: [MetadataOption],
+        _ expectedString: String
+    ) -> Self {
+        .init(
+            input: input,
+            bufferKind: .defaultServer,
+            expectedString: expectedString,
+            encoder: { $0.writeMetadataOptions($1) }
+        )
+    }
+}
+
+extension ParseFixture<MetadataOption> {
+    fileprivate static func metadataOption(
+        _ input: String,
+        _ terminator: String = "\r",
+        expected: Expected
+    ) -> Self {
+        ParseFixture(
+            input: input,
+            terminator: terminator,
+            expected: expected,
+            parser: GrammarParser().parseMetadataOption
+        )
+    }
+}
+
+extension ParseFixture<[MetadataOption]> {
+    fileprivate static func metadataOptions(
+        _ input: String,
+        _ terminator: String = "\r",
+        expected: Expected
+    ) -> Self {
+        ParseFixture(
+            input: input,
+            terminator: terminator,
+            expected: expected,
+            parser: GrammarParser().parseMetadataOptions
+        )
     }
 }

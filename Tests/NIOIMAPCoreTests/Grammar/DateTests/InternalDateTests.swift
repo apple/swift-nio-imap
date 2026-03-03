@@ -13,14 +13,12 @@
 //===----------------------------------------------------------------------===//
 
 @testable import NIOIMAPCore
-import XCTest
+import Testing
 
-class InternalDateTests: XCTestCase {}
-
-// MARK: - ServerMessageDate init
-
-extension InternalDateTests {
-    func testInternalDateInit_1() {
+@Suite("ServerMessageDate")
+struct InternalDateTests {
+    @Test("component initialization and roundtrip with typical values")
+    func componentInitializationAndRoundtripWithTypicalValues() {
         let components = ServerMessageDate.Components(
             year: 1994,
             month: 6,
@@ -32,17 +30,18 @@ extension InternalDateTests {
         )!
         let date = ServerMessageDate(components)
         let c = date.components
-        XCTAssertEqual(c.year, 1994)
-        XCTAssertEqual(c.month, 6)
-        XCTAssertEqual(c.day, 25)
-        XCTAssertEqual(c.hour, 1)
-        XCTAssertEqual(c.minute, 2)
-        XCTAssertEqual(c.second, 3)
-        XCTAssertEqual(c.zoneMinutes, 620)
-        XCTAssertEqual(String(reflecting: date), #""25-Jun-1994 01:02:03 +1020""#)
+        #expect(c.year == 1994)
+        #expect(c.month == 6)
+        #expect(c.day == 25)
+        #expect(c.hour == 1)
+        #expect(c.minute == 2)
+        #expect(c.second == 3)
+        #expect(c.zoneMinutes == 620)
+        #expect(String(reflecting: date) == #""25-Jun-1994 01:02:03 +1020""#)
     }
 
-    func testInternalDateInit_2() {
+    @Test("component initialization with minimum boundary values")
+    func componentInitializationWithMinimumBoundaryValues() {
         let components = ServerMessageDate.Components(
             year: 1900,
             month: 1,
@@ -54,17 +53,18 @@ extension InternalDateTests {
         )!
         let date = ServerMessageDate(components)
         let c = date.components
-        XCTAssertEqual(c.year, 1900)
-        XCTAssertEqual(c.month, 1)
-        XCTAssertEqual(c.day, 1)
-        XCTAssertEqual(c.hour, 0)
-        XCTAssertEqual(c.minute, 0)
-        XCTAssertEqual(c.second, 0)
-        XCTAssertEqual(c.zoneMinutes, -959)
-        XCTAssertEqual(String(reflecting: date), #""1-Jan-1900 00:00:00 -1559""#)
+        #expect(c.year == 1900)
+        #expect(c.month == 1)
+        #expect(c.day == 1)
+        #expect(c.hour == 0)
+        #expect(c.minute == 0)
+        #expect(c.second == 0)
+        #expect(c.zoneMinutes == -959)
+        #expect(String(reflecting: date) == #""1-Jan-1900 00:00:00 -1559""#)
     }
 
-    func testInternalDateInit_3() {
+    @Test("component initialization with maximum boundary values")
+    func componentInitializationWithMaximumBoundaryValues() {
         let components = ServerMessageDate.Components(
             year: 2579,
             month: 12,
@@ -76,13 +76,96 @@ extension InternalDateTests {
         )!
         let date = ServerMessageDate(components)
         let c = date.components
-        XCTAssertEqual(c.year, 2579)
-        XCTAssertEqual(c.month, 12)
-        XCTAssertEqual(c.day, 31)
-        XCTAssertEqual(c.hour, 23)
-        XCTAssertEqual(c.minute, 59)
-        XCTAssertEqual(c.second, 59)
-        XCTAssertEqual(c.zoneMinutes, 959)
-        XCTAssertEqual(String(reflecting: date), #""31-Dec-2579 23:59:59 +1559""#)
+        #expect(c.year == 2579)
+        #expect(c.month == 12)
+        #expect(c.day == 31)
+        #expect(c.hour == 23)
+        #expect(c.minute == 59)
+        #expect(c.second == 59)
+        #expect(c.zoneMinutes == 959)
+        #expect(String(reflecting: date) == #""31-Dec-2579 23:59:59 +1559""#)
+    }
+
+    @Test(arguments: [
+        ParseFixture.internalDate(
+            #""25-Jun-1994 01:02:03 +1020""#,
+            "\r",
+            expected: .success(
+                ServerMessageDate(
+                    ServerMessageDate.Components(
+                        year: 1994,
+                        month: 6,
+                        day: 25,
+                        hour: 1,
+                        minute: 2,
+                        second: 3,
+                        timeZoneMinutes: 620
+                    )!
+                )
+            )
+        ),
+        ParseFixture.internalDate(
+            #""01-Jan-1900 00:00:00 -1559""#,
+            "\r",
+            expected: .success(
+                ServerMessageDate(
+                    ServerMessageDate.Components(
+                        year: 1900,
+                        month: 1,
+                        day: 1,
+                        hour: 0,
+                        minute: 0,
+                        second: 0,
+                        timeZoneMinutes: -959
+                    )!
+                )
+            )
+        ),
+        ParseFixture.internalDate(
+            #""31-Dec-2579 23:59:59 +1559""#,
+            "\r",
+            expected: .success(
+                ServerMessageDate(
+                    ServerMessageDate.Components(
+                        year: 2579,
+                        month: 12,
+                        day: 31,
+                        hour: 23,
+                        minute: 59,
+                        second: 59,
+                        timeZoneMinutes: 959
+                    )!
+                )
+            )
+        ),
+        ParseFixture.internalDate(#""25-Jun-1994 01"#, "", expected: .incompleteMessageIgnoringBufferModifications),
+        ParseFixture.internalDate(#""25-Jun-199401:02:03+1020""#, "", expected: .failureIgnoringBufferModifications),
+        ParseFixture.internalDate(
+            #""25-Jun-1994 01:02:03 +12345678\n""#,
+            "",
+            expected: .failureIgnoringBufferModifications
+        ),
+        ParseFixture.internalDate(#""25-Jun-1994 01:02:03 +12""#, "", expected: .failureIgnoringBufferModifications),
+        ParseFixture.internalDate(#""25-Jun-1994 01:02:03 abc""#, "", expected: .failureIgnoringBufferModifications),
+    ])
+    func parse(_ fixture: ParseFixture<ServerMessageDate>) {
+        fixture.checkParsing()
+    }
+}
+
+// MARK: -
+
+extension ParseFixture<ServerMessageDate> {
+    fileprivate static func internalDate(
+        _ input: String,
+        _ terminator: String,
+        expected: Expected
+    ) -> Self {
+        ParseFixture(
+            input: input,
+            terminator: terminator,
+            expected: expected,
+            parser: GrammarParser().parseInternalDate
+        )
     }
 }

@@ -14,25 +14,52 @@
 
 import NIO
 @_spi(NIOIMAPInternal) @testable import NIOIMAPCore
-import XCTest
+import Testing
 
-class BodyFieldLanguageTests: EncodeTestClass {}
+@Suite("BodyStructure.Languages")
+struct BodyFieldLanguageTests {
+    @Test(arguments: [
+        EncodeFixture.bodyLanguages([], "NIL"),
+        EncodeFixture.bodyLanguages(["some1"], "(\"some1\")"),
+        EncodeFixture.bodyLanguages(["some1", "some2", "some3"], "(\"some1\" \"some2\" \"some3\")"),
+    ])
+    func encoding(_ fixture: EncodeFixture<[String]>) {
+        fixture.checkEncoding()
+    }
 
-// MARK: - Encoding
+    @Test(arguments: [
+        ParseFixture.bodyFieldLanguage(#""english""#, expected: .success(["english"])),
+        ParseFixture.bodyFieldLanguage(#"("english")"#, expected: .success(["english"])),
+        ParseFixture.bodyFieldLanguage(#"("english" "french")"#, expected: .success(["english", "french"])),
+    ])
+    func parse(_ fixture: ParseFixture<[String]>) {
+        fixture.checkParsing()
+    }
+}
 
-extension BodyFieldLanguageTests {
-    func testEncode() {
-        let inputs: [([String], String, UInt)] = [
-            ([], "NIL", #line),
-            (["some1"], "(\"some1\")", #line),
-            (["some1", "some2", "some3"], "(\"some1\" \"some2\" \"some3\")", #line),
-        ]
+// MARK: -
 
-        for (test, expectedString, line) in inputs {
-            self.testBuffer.clear()
-            let size = self.testBuffer.writeBodyLanguages(test)
-            XCTAssertEqual(size, expectedString.utf8.count, line: line)
-            XCTAssertEqual(self.testBufferString, expectedString, line: line)
-        }
+extension EncodeFixture<[String]> {
+    fileprivate static func bodyLanguages(_ input: T, _ expectedString: String) -> Self {
+        EncodeFixture(
+            input: input,
+            expectedString: expectedString,
+            encoder: { $0.writeBodyLanguages($1) }
+        )
+    }
+}
+
+extension ParseFixture<[String]> {
+    fileprivate static func bodyFieldLanguage(
+        _ input: String,
+        _ terminator: String = " ",
+        expected: Expected
+    ) -> Self {
+        ParseFixture(
+            input: input,
+            terminator: terminator,
+            expected: expected,
+            parser: GrammarParser().parseBodyFieldLanguage
+        )
     }
 }

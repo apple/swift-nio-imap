@@ -14,56 +14,141 @@
 
 import NIO
 @_spi(NIOIMAPInternal) @testable import NIOIMAPCore
-import XCTest
+import Testing
 
-class MessagePath_Tests: EncodeTestClass {}
+@Suite("MessagePath")
+struct MessagePathTests {
+    @Test(arguments: [
+        EncodeFixture.messagePath(
+            .init(
+                mailboxReference: .init(encodeMailbox: .init(mailbox: "test")),
+                iUID: .init(uid: 123),
+                section: nil,
+                range: nil
+            ),
+            "test/;UID=123"
+        ),
+        EncodeFixture.messagePath(
+            .init(
+                mailboxReference: .init(encodeMailbox: .init(mailbox: "test")),
+                iUID: .init(uid: 123),
+                section: .init(encodedSection: .init(section: "section")),
+                range: nil
+            ),
+            "test/;UID=123/;SECTION=section"
+        ),
+        EncodeFixture.messagePath(
+            .init(
+                mailboxReference: .init(encodeMailbox: .init(mailbox: "test")),
+                iUID: .init(uid: 123),
+                section: nil,
+                range: .init(range: .init(offset: 123, length: 4))
+            ),
+            "test/;UID=123/;PARTIAL=123.4"
+        ),
+        EncodeFixture.messagePath(
+            .init(
+                mailboxReference: .init(encodeMailbox: .init(mailbox: "test")),
+                iUID: .init(uid: 123),
+                section: .init(encodedSection: .init(section: "section")),
+                range: .init(range: .init(offset: 123, length: 4))
+            ),
+            "test/;UID=123/;SECTION=section/;PARTIAL=123.4"
+        ),
+    ])
+    func encode(_ fixture: EncodeFixture<MessagePath>) {
+        fixture.checkEncoding()
+    }
 
-// MARK: - IMAP
-
-extension MessagePath_Tests {
-    func testEncode() {
-        let inputs: [(MessagePath, String, UInt)] = [
-            (
+    @Test(arguments: [
+        ParseFixture.messagePath(
+            "test/;UID=123",
+            expected: .success(
                 .init(
                     mailboxReference: .init(encodeMailbox: .init(mailbox: "test")),
                     iUID: .init(uid: 123),
                     section: nil,
                     range: nil
-                ),
-                "test/;UID=123",
-                #line
-            ),
-            (
+                )
+            )
+        ),
+        ParseFixture.messagePath(
+            "test/;UID=123/;SECTION=section",
+            expected: .success(
                 .init(
                     mailboxReference: .init(encodeMailbox: .init(mailbox: "test")),
                     iUID: .init(uid: 123),
                     section: .init(encodedSection: .init(section: "section")),
                     range: nil
-                ),
-                "test/;UID=123/;SECTION=section",
-                #line
-            ),
-            (
+                )
+            )
+        ),
+        ParseFixture.messagePath(
+            "test/;UID=123/;PARTIAL=1.2",
+            expected: .success(
                 .init(
                     mailboxReference: .init(encodeMailbox: .init(mailbox: "test")),
                     iUID: .init(uid: 123),
                     section: nil,
-                    range: .init(range: .init(offset: 123, length: 4))
-                ),
-                "test/;UID=123/;PARTIAL=123.4",
-                #line
-            ),
-            (
+                    range: .init(range: .init(offset: 1, length: 2))
+                )
+            )
+        ),
+        ParseFixture.messagePath(
+            "test/;UID=123/;SECTION=section/;PARTIAL=1.2",
+            expected: .success(
                 .init(
                     mailboxReference: .init(encodeMailbox: .init(mailbox: "test")),
                     iUID: .init(uid: 123),
                     section: .init(encodedSection: .init(section: "section")),
-                    range: .init(range: .init(offset: 123, length: 4))
-                ),
-                "test/;UID=123/;SECTION=section/;PARTIAL=123.4",
-                #line
-            ),
-        ]
-        self.iterateInputs(inputs: inputs, encoder: { self.testBuffer.writeMessagePath($0) })
+                    range: .init(range: .init(offset: 1, length: 2))
+                )
+            )
+        ),
+        ParseFixture.messagePath(
+            "test/;UIDVALIDITY=123/;UID=123/;SECTION=section/;PARTIAL=1.2",
+            expected: .success(
+                .init(
+                    mailboxReference: .init(encodeMailbox: .init(mailbox: "test/"), uidValidity: 123),
+                    iUID: .init(uid: 123),
+                    section: .init(encodedSection: .init(section: "section")),
+                    range: .init(range: .init(offset: 1, length: 2))
+                )
+            )
+        ),
+    ])
+    func parse(_ fixture: ParseFixture<MessagePath>) {
+        fixture.checkParsing()
+    }
+}
+
+// MARK: -
+
+extension EncodeFixture<MessagePath> {
+    fileprivate static func messagePath(
+        _ input: MessagePath,
+        _ expectedString: String
+    ) -> Self {
+        EncodeFixture(
+            input: input,
+            bufferKind: .defaultServer,
+            expectedString: expectedString,
+            encoder: { $0.writeMessagePath($1) }
+        )
+    }
+}
+
+extension ParseFixture<MessagePath> {
+    fileprivate static func messagePath(
+        _ input: String,
+        _ terminator: String = " ",
+        expected: Expected
+    ) -> Self {
+        ParseFixture(
+            input: input,
+            terminator: terminator,
+            expected: expected,
+            parser: GrammarParser().parseMessagePath
+        )
     }
 }

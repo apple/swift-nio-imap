@@ -14,24 +14,28 @@
 
 import NIO
 @_spi(NIOIMAPInternal) @testable import NIOIMAPCore
-import XCTest
+import Testing
 
-class TaggedExtensionComp_Tests: EncodeTestClass {}
+@Suite("TaggedExtensionComp ([String])")
+struct TaggedExtensionCompTests {
+    @Test(arguments: [
+        EncodeFixture.taggedExtensionComp(["hello"], "(\"hello\")"),
+        EncodeFixture.taggedExtensionComp(["hello", "goodbye"], "(\"hello\" \"goodbye\")"),
+    ])
+    func encode(_ fixture: EncodeFixture<[String]>) {
+        fixture.checkEncoding()
+    }
+}
 
-// MARK: - Encoding
+// MARK: -
 
-extension TaggedExtensionComp_Tests {
-    func testEncode() {
-        let inputs: [([String], String, UInt)] = [
-            (["hello"], "(\"hello\")", #line),
-            (["hello", "goodbye"], "(\"hello\" \"goodbye\")", #line),
-        ]
-
-        for (test, expectedString, line) in inputs {
-            self.testBuffer.clear()
-            let size = self.testBuffer.writeTaggedExtensionComp(test)
-            XCTAssertEqual(size, expectedString.utf8.count, line: line)
-            XCTAssertEqual(self.testBufferString, expectedString, line: line)
-        }
+extension EncodeFixture<[String]> {
+    fileprivate static func taggedExtensionComp(_ input: [String], _ expectedString: String) -> Self {
+        EncodeFixture(
+            input: input,
+            bufferKind: .defaultServer,
+            expectedString: expectedString,
+            encoder: { $0.writeTaggedExtensionComp($1) }
+        )
     }
 }

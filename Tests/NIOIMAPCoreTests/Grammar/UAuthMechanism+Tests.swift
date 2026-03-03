@@ -14,18 +14,68 @@
 
 import NIO
 @_spi(NIOIMAPInternal) @testable import NIOIMAPCore
-import XCTest
+import Testing
 
-class UAuthMechanism_Tests: EncodeTestClass {}
+@Suite("URLAuthenticationMechanism")
+struct URLAuthenticationMechanismTests {
+    @Test(arguments: [
+        EncodeFixture.urlAuthenticationMechanism(
+            .internal,
+            "INTERNAL"
+        ),
+        EncodeFixture.urlAuthenticationMechanism(
+            .init("test"),
+            "test"
+        ),
+    ])
+    func encode(_ fixture: EncodeFixture<URLAuthenticationMechanism>) {
+        fixture.checkEncoding()
+    }
 
-// MARK: - Encoding
+    @Test(arguments: [
+        ParseFixture.urlAuthenticationMechanism(
+            "INTERNAL",
+            " ",
+            expected: .success(.internal)
+        ),
+        ParseFixture.urlAuthenticationMechanism(
+            "abcdEFG0123456789",
+            " ",
+            expected: .success(.init("abcdEFG0123456789"))
+        ),
+    ])
+    func parse(_ fixture: ParseFixture<URLAuthenticationMechanism>) {
+        fixture.checkParsing()
+    }
+}
 
-extension UAuthMechanism_Tests {
-    func testEncode() {
-        let inputs: [(URLAuthenticationMechanism, String, UInt)] = [
-            (.internal, "INTERNAL", #line),
-            (.init("test"), "test", #line),
-        ]
-        self.iterateInputs(inputs: inputs, encoder: { self.testBuffer.writeURLAuthenticationMechanism($0) })
+// MARK: -
+
+extension EncodeFixture<URLAuthenticationMechanism> {
+    fileprivate static func urlAuthenticationMechanism(
+        _ input: URLAuthenticationMechanism,
+        _ expectedString: String
+    ) -> Self {
+        .init(
+            input: input,
+            bufferKind: .defaultServer,
+            expectedString: expectedString,
+            encoder: { $0.writeURLAuthenticationMechanism($1) }
+        )
+    }
+}
+
+extension ParseFixture<URLAuthenticationMechanism> {
+    fileprivate static func urlAuthenticationMechanism(
+        _ input: String,
+        _ terminator: String,
+        expected: Expected
+    ) -> Self {
+        ParseFixture(
+            input: input,
+            terminator: terminator,
+            expected: expected,
+            parser: GrammarParser().parseUAuthMechanism
+        )
     }
 }

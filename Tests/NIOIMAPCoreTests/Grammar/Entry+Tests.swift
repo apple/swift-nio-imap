@@ -13,67 +13,251 @@
 //===----------------------------------------------------------------------===//
 
 import NIO
-@_spi(NIOIMAPInternal) @testable import NIOIMAPCore
+import Testing
 import OrderedCollections
-import XCTest
+@_spi(NIOIMAPInternal) @testable import NIOIMAPCore
 
-class Entry_Tests: EncodeTestClass {}
-
-// MARK: - Encoding
-
-extension Entry_Tests {
-    func testEncode() {
-        let inputs: [(KeyValue<MetadataEntryName, MetadataValue>, String, UInt)] = [
-            (.init(key: "name", value: .init("value")), "\"name\" ~{5}\r\nvalue", #line)
+@Suite("Entry")
+struct EntryTests {
+    @Test(
+        "encode single entry",
+        arguments: [
+            EncodeFixture.entry(.init(key: "name", value: .init("value")), "\"name\" ~{5}\r\nvalue")
         ]
-        self.iterateInputs(inputs: inputs, encoder: { self.testBuffer.writeEntry($0) })
+    )
+    func encodeSingleEntry(_ fixture: EncodeFixture<KeyValue<MetadataEntryName, MetadataValue>>) {
+        fixture.checkEncoding()
     }
 
-    func testEncode_entryValues() {
-        let inputs: [(OrderedDictionary<MetadataEntryName, MetadataValue>, String, UInt)] = [
-            (
+    @Test(
+        "encode entry values",
+        arguments: [
+            EncodeFixture.entryValues(
                 ["name": .init("value")],
-                "(\"name\" ~{5}\r\nvalue)",
-                #line
+                "(\"name\" ~{5}\r\nvalue)"
             ),
-            (
+            EncodeFixture.entryValues(
                 ["name1": .init("value1"), "name2": .init("value2")],
-                "(\"name1\" ~{6}\r\nvalue1 \"name2\" ~{6}\r\nvalue2)",
-                #line
+                "(\"name1\" ~{6}\r\nvalue1 \"name2\" ~{6}\r\nvalue2)"
             ),
         ]
-        self.iterateInputs(inputs: inputs, encoder: { self.testBuffer.writeEntryValues($0) })
+    )
+    func encodeEntryValues(_ fixture: EncodeFixture<OrderedDictionary<MetadataEntryName, MetadataValue>>) {
+        fixture.checkEncoding()
     }
 
-    func testEncode_entries() {
-        let inputs: [([MetadataEntryName], String, UInt)] = [
-            (
+    @Test(
+        "encode entries list",
+        arguments: [
+            EncodeFixture.entries(
                 ["name"],
-                "(\"name\")",
-                #line
+                "(\"name\")"
             ),
-            (
+            EncodeFixture.entries(
                 ["name1", "name2"],
-                "(\"name1\" \"name2\")",
-                #line
+                "(\"name1\" \"name2\")"
             ),
         ]
-        self.iterateInputs(inputs: inputs, encoder: { self.testBuffer.writeEntries($0) })
+    )
+    func encodeEntriesList(_ fixture: EncodeFixture<[MetadataEntryName]>) {
+        fixture.checkEncoding()
     }
 
-    func testEncode_entryList() {
-        let inputs: [([MetadataEntryName], String, UInt)] = [
-            (
+    @Test(
+        "encode entry list",
+        arguments: [
+            EncodeFixture.entryList(
                 ["name"],
+                "\"name\""
+            ),
+            EncodeFixture.entryList(
+                ["name1", "name2"],
+                "\"name1\" \"name2\""
+            ),
+        ]
+    )
+    func encodeEntryList(_ fixture: EncodeFixture<[MetadataEntryName]>) {
+        fixture.checkEncoding()
+    }
+
+    @Test(
+        "parse entry value",
+        arguments: [
+            ParseFixture.entryValue(
+                "\"name\" \"value\"",
+                "",
+                expected: .success(.init(key: "name", value: .init("value")))
+            ),
+            ParseFixture.entryValue(
+                "\"name\" NIL",
+                "",
+                expected: .success(.init(key: "name", value: .init(nil)))
+            ),
+        ]
+    )
+    func parseEntryValue(_ fixture: ParseFixture<KeyValue<MetadataEntryName, MetadataValue>>) {
+        fixture.checkParsing()
+    }
+
+    @Test(
+        "parse entry values",
+        arguments: [
+            ParseFixture.entryValues(
+                "(\"name\" \"value\")",
+                "",
+                expected: .success(["name": .init("value")])
+            ),
+            ParseFixture.entryValues(
+                "(\"name1\" \"value1\" \"name2\" \"value2\")",
+                "",
+                expected: .success(["name1": .init("value1"), "name2": .init("value2")])
+            ),
+        ]
+    )
+    func parseEntryValues(_ fixture: ParseFixture<OrderedDictionary<MetadataEntryName, MetadataValue>>) {
+        fixture.checkParsing()
+    }
+
+    @Test(
+        "parse entries",
+        arguments: [
+            ParseFixture.entries(
                 "\"name\"",
-                #line
+                "",
+                expected: .success(["name"])
             ),
-            (
-                ["name1", "name2"],
-                "\"name1\" \"name2\"",
-                #line
+            ParseFixture.entries(
+                "(\"name\")",
+                "",
+                expected: .success(["name"])
+            ),
+            ParseFixture.entries(
+                "(\"name1\" \"name2\")",
+                "",
+                expected: .success(["name1", "name2"])
             ),
         ]
-        self.iterateInputs(inputs: inputs, encoder: { self.testBuffer.writeEntryList($0) })
+    )
+    func parseEntries(_ fixture: ParseFixture<[MetadataEntryName]>) {
+        fixture.checkParsing()
+    }
+
+    @Test(
+        "parse entry list",
+        arguments: [
+            ParseFixture.entryList(
+                "\"name\"",
+                expected: .success(["name"])
+            ),
+            ParseFixture.entryList(
+                "\"name1\" \"name2\"",
+                expected: .success(["name1", "name2"])
+            ),
+        ]
+    )
+    func parseEntryList(_ fixture: ParseFixture<[MetadataEntryName]>) {
+        fixture.checkParsing()
+    }
+}
+
+// MARK: -
+
+extension EncodeFixture<KeyValue<MetadataEntryName, MetadataValue>> {
+    fileprivate static func entry(_ input: T, _ expectedString: String) -> Self {
+        Self(
+            input: input,
+            bufferKind: .defaultServer,
+            expectedString: expectedString,
+            encoder: { $0.writeEntry($1) }
+        )
+    }
+}
+
+extension EncodeFixture<OrderedDictionary<MetadataEntryName, MetadataValue>> {
+    fileprivate static func entryValues(_ input: T, _ expectedString: String) -> Self {
+        Self(
+            input: input,
+            bufferKind: .defaultServer,
+            expectedString: expectedString,
+            encoder: { $0.writeEntryValues($1) }
+        )
+    }
+}
+
+extension EncodeFixture<[MetadataEntryName]> {
+    fileprivate static func entries(_ input: T, _ expectedString: String) -> Self {
+        Self(
+            input: input,
+            bufferKind: .defaultServer,
+            expectedString: expectedString,
+            encoder: { $0.writeEntries($1) }
+        )
+    }
+
+    fileprivate static func entryList(_ input: T, _ expectedString: String) -> Self {
+        Self(
+            input: input,
+            bufferKind: .defaultServer,
+            expectedString: expectedString,
+            encoder: { $0.writeEntryList($1) }
+        )
+    }
+}
+
+extension ParseFixture<KeyValue<MetadataEntryName, MetadataValue>> {
+    fileprivate static func entryValue(
+        _ input: String,
+        _ terminator: String,
+        expected: Expected
+    ) -> Self {
+        ParseFixture(
+            input: input,
+            terminator: terminator,
+            expected: expected,
+            parser: GrammarParser().parseEntryValue
+        )
+    }
+}
+
+extension ParseFixture<OrderedDictionary<MetadataEntryName, MetadataValue>> {
+    fileprivate static func entryValues(
+        _ input: String,
+        _ terminator: String,
+        expected: Expected
+    ) -> Self {
+        ParseFixture(
+            input: input,
+            terminator: terminator,
+            expected: expected,
+            parser: GrammarParser().parseEntryValues
+        )
+    }
+}
+
+extension ParseFixture<[MetadataEntryName]> {
+    fileprivate static func entries(
+        _ input: String,
+        _ terminator: String,
+        expected: Expected
+    ) -> Self {
+        ParseFixture(
+            input: input,
+            terminator: terminator,
+            expected: expected,
+            parser: GrammarParser().parseEntries
+        )
+    }
+
+    fileprivate static func entryList(
+        _ input: String,
+        _ terminator: String = "\r",
+        expected: Expected
+    ) -> Self {
+        ParseFixture(
+            input: input,
+            terminator: terminator,
+            expected: expected,
+            parser: GrammarParser().parseEntryList
+        )
     }
 }

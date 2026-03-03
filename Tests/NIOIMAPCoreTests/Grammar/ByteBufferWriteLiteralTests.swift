@@ -14,96 +14,150 @@
 
 import NIO
 @_spi(NIOIMAPInternal) @testable import NIOIMAPCore
-import XCTest
+import Testing
 
-class ByteBufferWriteLiteralTests: EncodeTestClass {}
-
-// MARK: writeIMAPString
-
-extension ByteBufferWriteLiteralTests {
-    func testWriteIMAPString_client() {
-        let inputs: [(ByteBuffer, CommandEncodingOptions, [String], UInt)] = [
-            ("", .rfc3501, ["\"\""], #line),
-            ("", .noQuoted, ["{0}\r\n"], #line),
-            ("a", .rfc3501, [#""a""#], #line),
-            ("a", .literalPlus, [#""a""#], #line),
-            ("abc", .rfc3501, [#""abc""#], #line),
+@Suite("ByteBuffer Literal Writing")
+struct ByteBufferWriteLiteralTests {
+    @Test(
+        "writeIMAPString with client buffers",
+        arguments: [
+            EncodeFixture.imapStringClient("", expectedStrings: ["\"\""], options: .rfc3501),
+            EncodeFixture.imapStringClient("", expectedStrings: ["{0}\r\n"], options: .noQuoted),
+            EncodeFixture.imapStringClient("a", expectedStrings: [#""a""#], options: .rfc3501),
+            EncodeFixture.imapStringClient("a", expectedStrings: [#""a""#], options: .literalPlus),
+            EncodeFixture.imapStringClient("abc", expectedStrings: [#""abc""#], options: .rfc3501),
             // Spaces are ok:
-            ("a b c", .rfc3501, [#""a b c""#], #line),
-            /// We’ll use quoted-string even if the input contains `\` and `"`, but those then need to be escaped.
-            (#"""#, .rfc3501, [#""\"""#], #line),
-            (#"""#, .literalPlus, [#""\"""#], #line),
-            (#"\"#, .rfc3501, [#""\\""#], #line),
-            (#"\"#, .literalPlus, [#""\\""#], #line),
-            (#"a\b"#, .rfc3501, [#""a\\b""#], #line),
-            (#"a\b"#, .literalPlus, [#""a\\b""#], #line),
-            (#"a"b"#, .rfc3501, [#""a\"b""#], #line),
-            (#"a"b"#, .literalPlus, [#""a\"b""#], #line),
-            (#"a"b\c"#, .rfc3501, [#""a\"b\\c""#], #line),
-            (#"a"b\c"#, .literalPlus, [#""a\"b\\c""#], #line),
-            /// But we’ll fall back to literals if there are too many `\` and/or `"` in the string:
-            (#"a""""b\\\\c"#, .rfc3501, ["{11}\r\n", #"a""""b\\\\c"#], #line),
-            // We’ll use literal (plus) if the string contains any non-ASCII:
-            ("båd", .literalPlus, ["{4+}\r\nbåd"], #line),
-            ("パリ", .literalPlus, ["{6+}\r\nパリ"], #line),
+            EncodeFixture.imapStringClient("a b c", expectedStrings: [#""a b c""#], options: .rfc3501),
+            /// We'll use quoted-string even if the input contains `\` and `"`, but those then need to be escaped.
+            EncodeFixture.imapStringClient(#"""#, expectedStrings: [#""\"""#], options: .rfc3501),
+            EncodeFixture.imapStringClient(#"""#, expectedStrings: [#""\"""#], options: .literalPlus),
+            EncodeFixture.imapStringClient(#"\"#, expectedStrings: [#""\\""#], options: .rfc3501),
+            EncodeFixture.imapStringClient(#"\"#, expectedStrings: [#""\\""#], options: .literalPlus),
+            EncodeFixture.imapStringClient(#"a\b"#, expectedStrings: [#""a\\b""#], options: .rfc3501),
+            EncodeFixture.imapStringClient(#"a\b"#, expectedStrings: [#""a\\b""#], options: .literalPlus),
+            EncodeFixture.imapStringClient(#"a"b"#, expectedStrings: [#""a\"b""#], options: .rfc3501),
+            EncodeFixture.imapStringClient(#"a"b"#, expectedStrings: [#""a\"b""#], options: .literalPlus),
+            EncodeFixture.imapStringClient(#"a"b\c"#, expectedStrings: [#""a\"b\\c""#], options: .rfc3501),
+            EncodeFixture.imapStringClient(#"a"b\c"#, expectedStrings: [#""a\"b\\c""#], options: .literalPlus),
+            /// But we'll fall back to literals if there are too many `\` and/or `"` in the string:
+            EncodeFixture.imapStringClient(
+                #"a""""b\\\\c"#,
+                expectedStrings: ["{11}\r\n", #"a""""b\\\\c"#],
+                options: .rfc3501
+            ),
+            // We'll use literal (plus) if the string contains any non-ASCII:
+            EncodeFixture.imapStringClient("båd", expectedStrings: ["{4+}\r\nbåd"], options: .literalPlus),
+            EncodeFixture.imapStringClient("パリ", expectedStrings: ["{6+}\r\nパリ"], options: .literalPlus),
             // Will also use literals if there are any control characters in the string:
-            ("a\u{007}b", .literalPlus, ["{3+}\r\na\u{007}b"], #line),
-            // Will also use literals if there are any control characters in the string:
-            ("a\nb", .literalPlus, ["{3+}\r\na\nb"], #line),
-
-            /// If the string is very long, we’ll always use literals:
-            (
+            EncodeFixture.imapStringClient("a\u{007}b", expectedStrings: ["{3+}\r\na\u{007}b"], options: .literalPlus),
+            EncodeFixture.imapStringClient("a\nb", expectedStrings: ["{3+}\r\na\nb"], options: .literalPlus),
+            /// If the string is very long, we'll always use literals:
+            EncodeFixture.imapStringClient(
                 "01234567890123456789012345678901234567890123456789012345678901234567890",
-                .rfc3501,
-                ["{71}\r\n", "01234567890123456789012345678901234567890123456789012345678901234567890"],
-                #line
+                expectedStrings: [
+                    "{71}\r\n", "01234567890123456789012345678901234567890123456789012345678901234567890",
+                ],
+                options: .rfc3501
             ),
-            (
-                ByteBuffer(string: String(repeating: "a", count: 100)), .literalMinus,
-                ["{100+}\r\n" + String(repeating: "a", count: 100)], #line
+            EncodeFixture.imapStringClient(
+                String(repeating: "a", count: 100),
+                expectedStrings: ["{100+}\r\n" + String(repeating: "a", count: 100)],
+                options: .literalMinus
             ),
-            (
-                ByteBuffer(string: String(repeating: "a", count: 4096)), .literalMinus,
-                ["{4096+}\r\n" + String(repeating: "a", count: 4096)], #line
+            EncodeFixture.imapStringClient(
+                String(repeating: "a", count: 4096),
+                expectedStrings: ["{4096+}\r\n" + String(repeating: "a", count: 4096)],
+                options: .literalMinus
             ),
-            (
-                ByteBuffer(string: String(repeating: "a", count: 4097)), .literalMinus,
-                ["{4097}\r\n", String(repeating: "a", count: 4097)], #line
+            EncodeFixture.imapStringClient(
+                String(repeating: "a", count: 4097),
+                expectedStrings: ["{4097}\r\n", String(repeating: "a", count: 4097)],
+                options: .literalMinus
             ),
         ]
-        self.iterateInputs(inputs: inputs, encoder: { self.testBuffer.writeIMAPString($0) })
+    )
+    func writeIMAPStringWithClientBuffers(_ fixture: EncodeFixture<ByteBuffer>) {
+        fixture.checkEncoding()
     }
 
-    func testWriteIMAPString_server() {
-        let inputs: [(ByteBuffer, ResponseEncodingOptions, String, UInt)] = [
-            ("", .rfc3501, "\"\"", #line),
-            ("abc", .rfc3501, #""abc""#, #line),
-            (#"""#, .rfc3501, #""\"""#, #line),
-            (#"\"#, .rfc3501, #""\\""#, #line),
-            (#"\""#, .rfc3501, #""\\\"""#, #line),
-            (#"a""""b\\\\c"#, .rfc3501, #"{11}\#r\#na""""b\\\\c"#, #line),
-            ("a", .rfc3501, "\"a\"", #line),
-            ("båd", .rfc3501, "{4}\r\nbåd", #line),
-            ("パリ", .rfc3501, "{6}\r\nパリ", #line),
-            (
+    @Test(
+        "writeIMAPString with server buffers",
+        arguments: [
+            EncodeFixture.imapStringServer("", expectedString: "\"\"", options: .rfc3501),
+            EncodeFixture.imapStringServer("abc", expectedString: #""abc""#, options: .rfc3501),
+            EncodeFixture.imapStringServer(#"""#, expectedString: #""\"""#, options: .rfc3501),
+            EncodeFixture.imapStringServer(#"\"#, expectedString: #""\\""#, options: .rfc3501),
+            EncodeFixture.imapStringServer(#"\""#, expectedString: #""\\\"""#, options: .rfc3501),
+            EncodeFixture.imapStringServer(
+                #"a""""b\\\\c"#,
+                expectedString: #"{11}\#r\#na""""b\\\\c"#,
+                options: .rfc3501
+            ),
+            EncodeFixture.imapStringServer("a", expectedString: "\"a\"", options: .rfc3501),
+            EncodeFixture.imapStringServer("båd", expectedString: "{4}\r\nbåd", options: .rfc3501),
+            EncodeFixture.imapStringServer("パリ", expectedString: "{6}\r\nパリ", options: .rfc3501),
+            EncodeFixture.imapStringServer(
                 "01234567890123456789012345678901234567890123456789012345678901234567890",
-                .rfc3501,
-                "{71}\r\n01234567890123456789012345678901234567890123456789012345678901234567890",
-                #line
+                expectedString: "{71}\r\n01234567890123456789012345678901234567890123456789012345678901234567890",
+                options: .rfc3501
             ),
         ]
-        self.iterateInputs(inputs: inputs, encoder: { self.testBuffer.writeIMAPString($0) })
+    )
+    func writeIMAPStringWithServerBuffers(_ fixture: EncodeFixture<ByteBuffer>) {
+        fixture.checkEncoding()
+    }
+
+    @Test(
+        "writeLiteral8 with client buffers",
+        arguments: [
+            EncodeFixture.literal8("", expectedStrings: ["~{0}\r\n"], options: .rfc3501),
+            EncodeFixture.literal8("abc", expectedStrings: ["~{3}\r\n", "abc"], options: .rfc3501),
+        ]
+    )
+    func writeLiteral8WithClientBuffers(_ fixture: EncodeFixture<ByteBuffer>) {
+        fixture.checkEncoding()
     }
 }
 
-// MARK: writeLiteral8
+// MARK: -
 
-extension ByteBufferWriteLiteralTests {
-    func testWriteLiteral8() {
-        let inputs: [(ByteBuffer, CommandEncodingOptions, [String], UInt)] = [
-            ("", .rfc3501, ["~{0}\r\n"], #line),
-            ("abc", .rfc3501, ["~{3}\r\n", "abc"], #line),
-        ]
-        self.iterateInputs(inputs: inputs, encoder: { self.testBuffer.writeLiteral8($0.readableBytesView) })
+extension EncodeFixture<ByteBuffer> {
+    fileprivate static func imapStringClient(
+        _ input: String,
+        expectedStrings: [String],
+        options: CommandEncodingOptions = CommandEncodingOptions()
+    ) -> Self {
+        EncodeFixture(
+            input: ByteBuffer(string: input),
+            bufferKind: .client(options),
+            expectedStrings: expectedStrings,
+            encoder: { $0.writeIMAPString($1) }
+        )
+    }
+
+    fileprivate static func literal8(
+        _ input: ByteBuffer,
+        expectedStrings: [String],
+        options: CommandEncodingOptions
+    ) -> Self {
+        EncodeFixture(
+            input: input,
+            bufferKind: .client(options),
+            expectedStrings: expectedStrings,
+            encoder: { $0.writeLiteral8($1.readableBytesView) }
+        )
+    }
+
+    fileprivate static func imapStringServer(
+        _ input: String,
+        expectedString: String,
+        options: ResponseEncodingOptions = ResponseEncodingOptions()
+    ) -> Self {
+        EncodeFixture(
+            input: ByteBuffer(string: input),
+            bufferKind: .server(options),
+            expectedString: expectedString,
+            encoder: { $0.writeIMAPString($1) }
+        )
     }
 }

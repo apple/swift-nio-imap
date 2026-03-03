@@ -14,22 +14,18 @@
 
 import NIO
 @_spi(NIOIMAPInternal) @testable import NIOIMAPCore
-import XCTest
+import Testing
 
-class CommandStream_Tests: EncodeTestClass {}
-
-// MARK: - Encoding
-
-extension CommandStream_Tests {
-    func testEncode() {
-        let inputs: [(CommandStreamPart, String, UInt)] = [
-            (.append(.start(tag: "1", appendingTo: .inbox)), "1 APPEND \"INBOX\"", #line),
-            (
+@Suite("CommandStreamPart")
+private struct CommandStreamTests {
+    @Test(
+        arguments: [
+            CommandEncodeFixture.commandStream(.append(.start(tag: "1", appendingTo: .inbox)), "1 APPEND \"INBOX\""),
+            CommandEncodeFixture.commandStream(
                 .append(.beginMessage(message: .init(options: .none, data: .init(byteCount: 3)))),
-                " {3}\r\n",
-                #line
+                " {3}\r\n"
             ),
-            (
+            CommandEncodeFixture.commandStream(
                 .append(
                     .beginMessage(
                         message: .init(
@@ -38,25 +34,21 @@ extension CommandStream_Tests {
                         )
                     )
                 ),
-                " (\\Seen \\Deleted) {3}\r\n",
-                #line
+                " (\\Seen \\Deleted) {3}\r\n"
             ),
-            (.append(.messageBytes("123")), "123", #line),
-            (.append(.endMessage), "", #line),  // dummy command, we don't expect anything
-            (.append(.finish), "\r\n", #line),
-            (.tagged(.init(tag: "1", command: .noop)), "1 NOOP\r\n", #line),
-            (.idleDone, "DONE\r\n", #line),
-            (.continuationResponse("test"), "dGVzdA==\r\n", #line),
-        ]
-
-        for (command, expected, line) in inputs {
-            var commandEncodeBuffer = CommandEncodeBuffer(buffer: "", capabilities: [], loggingMode: false)
-            commandEncodeBuffer.writeCommandStream(command)
-            XCTAssertEqual(String(buffer: commandEncodeBuffer.buffer.buffer), expected, line: line)
-        }
+            CommandEncodeFixture.commandStream(.append(.messageBytes("123")), "123"),
+            CommandEncodeFixture.commandStream(.append(.endMessage), ""),
+            CommandEncodeFixture.commandStream(.append(.finish), "\r\n"),
+            CommandEncodeFixture.commandStream(.tagged(.init(tag: "1", command: .noop)), "1 NOOP\r\n"),
+            CommandEncodeFixture.commandStream(.idleDone, "DONE\r\n"),
+            CommandEncodeFixture.commandStream(.continuationResponse("test"), "dGVzdA==\r\n"),
+        ] as [CommandEncodeFixture<CommandStreamPart>]
+    )
+    func encode(_ fixture: CommandEncodeFixture<CommandStreamPart>) {
+        fixture.checkEncoding()
     }
 
-    func testContinuation_synchronizing() throws {
+    @Test("continuation synchronizing literal") func continuationSynchronizingLiteral() throws {
         let parts: [AppendCommand] = [
             .start(tag: "1", appendingTo: .inbox),
             .beginMessage(message: .init(options: .none, data: .init(byteCount: 7))),
@@ -71,17 +63,17 @@ extension CommandStream_Tests {
         }
 
         let encodedCommand = buffer.buffer.nextChunk()
-        XCTAssertEqual(String(buffer: encodedCommand.bytes), #"1 APPEND "INBOX" {7}\#r\#n"#)
+        #expect(String(buffer: encodedCommand.bytes) == #"1 APPEND "INBOX" {7}\#r\#n"#)
         guard encodedCommand.waitForContinuation else {
-            XCTFail("Should have had a continuation.")
+            Issue.record("Should have had a continuation.")
             return
         }
         let continuation = buffer.buffer.nextChunk()
-        XCTAssertEqual(String(buffer: continuation.bytes), "Foo Bar\r\n")
-        XCTAssertFalse(continuation.waitForContinuation, "Should not have additional continuations.")
+        #expect(String(buffer: continuation.bytes) == "Foo Bar\r\n")
+        #expect(!continuation.waitForContinuation, "Should not have additional continuations.")
     }
 
-    func testContinuation_nonSynchronizing() throws {
+    @Test("continuation non-synchronizing literal plus") func continuationNonSynchronizingLiteralPlus() throws {
         let parts: [AppendCommand] = [
             .start(tag: "1", appendingTo: .inbox),
             .beginMessage(message: .init(options: .none, data: .init(byteCount: 3))),
@@ -98,14 +90,15 @@ extension CommandStream_Tests {
         }
 
         let encodedCommand = buffer.buffer.nextChunk()
-        XCTAssertEqual(String(buffer: encodedCommand.bytes), #"1 APPEND "INBOX" {3+}\#r\#nabc\#r\#n"#)
+        #expect(String(buffer: encodedCommand.bytes) == #"1 APPEND "INBOX" {3+}\#r\#nabc\#r\#n"#)
         guard !encodedCommand.waitForContinuation else {
-            XCTFail("Should not have had a continuation.")
+            Issue.record("Should not have had a continuation.")
             return
         }
     }
 
-    func testCatenate_exampleOne() throws {
+    @Test("catenate example one with synchronizing literals") func catenateExampleOneWithSynchronizingLiterals() throws
+    {
         let parts: [AppendCommand] = [
             .start(tag: "A003", appendingTo: MailboxName("Drafts")),
             .beginCatenate(options: .init(flagList: [.seen, .draft, .keyword(.mdnSent)], extensions: [:])),
@@ -132,44 +125,45 @@ extension CommandStream_Tests {
         }
 
         var encodedCommand = buffer.buffer.nextChunk()
-        XCTAssertEqual(
-            String(buffer: encodedCommand.bytes),
-            #"A003 APPEND "Drafts" (\Seen \Draft $MDNSent) CATENATE (URL "/Drafts;UIDVALIDITY=385759045/;UID=20/;section=HEADER" TEXT {42}\#r\#n"#
+        #expect(
+            String(buffer: encodedCommand.bytes)
+                == #"A003 APPEND "Drafts" (\Seen \Draft $MDNSent) CATENATE (URL "/Drafts;UIDVALIDITY=385759045/;UID=20/;section=HEADER" TEXT {42}\#r\#n"#
         )
         guard encodedCommand.waitForContinuation else {
-            XCTFail("Should have had a continuation.")
+            Issue.record("Should have had a continuation.")
             return
         }
 
         encodedCommand = buffer.buffer.nextChunk()
-        XCTAssertEqual(
-            String(buffer: encodedCommand.bytes),
-            #"\#r\#n--------------030308070208000400050907\#r\#n URL "/Drafts;UIDVALIDITY=385759045/;UID=20/;section=1.MIME" URL "/Drafts;UIDVALIDITY=385759045/;UID=20/;section=1" TEXT {42}\#r\#n"#
+        #expect(
+            String(buffer: encodedCommand.bytes)
+                == #"\#r\#n--------------030308070208000400050907\#r\#n URL "/Drafts;UIDVALIDITY=385759045/;UID=20/;section=1.MIME" URL "/Drafts;UIDVALIDITY=385759045/;UID=20/;section=1" TEXT {42}\#r\#n"#
         )
         guard encodedCommand.waitForContinuation else {
-            XCTFail("Should have had a continuation.")
+            Issue.record("Should have had a continuation.")
             return
         }
 
         encodedCommand = buffer.buffer.nextChunk()
-        XCTAssertEqual(
-            String(buffer: encodedCommand.bytes),
-            #"\#r\#n--------------030308070208000400050907\#r\#n URL "/Drafts;UIDVALIDITY=385759045/;UID=30" TEXT {44}\#r\#n"#
+        #expect(
+            String(buffer: encodedCommand.bytes)
+                == #"\#r\#n--------------030308070208000400050907\#r\#n URL "/Drafts;UIDVALIDITY=385759045/;UID=30" TEXT {44}\#r\#n"#
         )
         guard encodedCommand.waitForContinuation else {
-            XCTFail("Should have had a continuation.")
+            Issue.record("Should have had a continuation.")
             return
         }
 
         encodedCommand = buffer.buffer.nextChunk()
-        XCTAssertEqual(
-            String(buffer: encodedCommand.bytes),
-            #"\#r\#n--------------030308070208000400050907--\#r\#n)\#r\#n"#
+        #expect(
+            String(buffer: encodedCommand.bytes) == #"\#r\#n--------------030308070208000400050907--\#r\#n)\#r\#n"#
         )
-        XCTAssertFalse(encodedCommand.waitForContinuation, "Should not have additional continuations.")
+        #expect(!encodedCommand.waitForContinuation, "Should not have additional continuations.")
     }
 
-    func testCatenate_exampleOne_nonSynchronizing() throws {
+    @Test("catenate example one with non-synchronizing literals") func catenateExampleOneWithNonSynchronizingLiterals()
+        throws
+    {
         let parts: [AppendCommand] = [
             .start(tag: "A003", appendingTo: MailboxName("Drafts")),
             .beginCatenate(options: .init(flagList: [.seen, .draft, .keyword(.mdnSent)], extensions: [:])),
@@ -198,17 +192,17 @@ extension CommandStream_Tests {
         }
 
         let encodedCommand = buffer.buffer.nextChunk()
-        XCTAssertEqual(
-            String(buffer: encodedCommand.bytes),
-            #"A003 APPEND "Drafts" (\Seen \Draft $MDNSent) CATENATE (URL "/Drafts;UIDVALIDITY=385759045/;UID=20/;section=HEADER" TEXT {42+}\#r\#n"#
+        #expect(
+            String(buffer: encodedCommand.bytes)
+                == #"A003 APPEND "Drafts" (\Seen \Draft $MDNSent) CATENATE (URL "/Drafts;UIDVALIDITY=385759045/;UID=20/;section=HEADER" TEXT {42+}\#r\#n"#
                 + #"\#r\#n--------------030308070208000400050907\#r\#n URL "/Drafts;UIDVALIDITY=385759045/;UID=20/;section=1.MIME" URL "/Drafts;UIDVALIDITY=385759045/;UID=20/;section=1" TEXT {42+}\#r\#n"#
                 + #"\#r\#n--------------030308070208000400050907\#r\#n URL "/Drafts;UIDVALIDITY=385759045/;UID=30" TEXT {44+}\#r\#n"#
                 + #"\#r\#n--------------030308070208000400050907--\#r\#n)\#r\#n"#
         )
-        XCTAssertFalse(encodedCommand.waitForContinuation, "Should not have additional continuations.")
+        #expect(!encodedCommand.waitForContinuation, "Should not have additional continuations.")
     }
 
-    func testCatenate_sequential() throws {
+    @Test("catenate sequential commands") func catenateSequentialCommands() throws {
         let parts: [AppendCommand] = [
             .start(tag: "A003", appendingTo: MailboxName("Drafts")),
             .beginCatenate(options: .init(flagList: [.seen, .draft, .keyword(.mdnSent)], extensions: [:])),
@@ -227,40 +221,43 @@ extension CommandStream_Tests {
         }
 
         var encodedCommand = buffer.buffer.nextChunk()
-        XCTAssertEqual(
-            String(buffer: encodedCommand.bytes),
-            #"A003 APPEND "Drafts" (\Seen \Draft $MDNSent) CATENATE (URL "/Drafts;UIDVALIDITY=385759045/;UID=20/;section=HEADER" TEXT {5}\#r\#n"#
+        #expect(
+            String(buffer: encodedCommand.bytes)
+                == #"A003 APPEND "Drafts" (\Seen \Draft $MDNSent) CATENATE (URL "/Drafts;UIDVALIDITY=385759045/;UID=20/;section=HEADER" TEXT {5}\#r\#n"#
         )
         guard encodedCommand.waitForContinuation else {
-            XCTFail("Should have had a continuation.")
+            Issue.record("Should have had a continuation.")
             return
         }
 
         encodedCommand = buffer.buffer.nextChunk()
-        XCTAssertEqual(
-            String(buffer: encodedCommand.bytes),
-            #"hello)\#r\#nA003 APPEND "Drafts" (\Seen \Draft $MDNSent) CATENATE (URL "/Drafts;UIDVALIDITY=385759045/;UID=20/;section=HEADER" TEXT {5}\#r\#n"#
+        #expect(
+            String(buffer: encodedCommand.bytes)
+                == #"hello)\#r\#nA003 APPEND "Drafts" (\Seen \Draft $MDNSent) CATENATE (URL "/Drafts;UIDVALIDITY=385759045/;UID=20/;section=HEADER" TEXT {5}\#r\#n"#
         )
         guard encodedCommand.waitForContinuation else {
-            XCTFail("Should have had a continuation.")
+            Issue.record("Should have had a continuation.")
             return
         }
 
         encodedCommand = buffer.buffer.nextChunk()
-        XCTAssertEqual(String(buffer: encodedCommand.bytes), #"hello)\#r\#n"#)
-        XCTAssertFalse(encodedCommand.waitForContinuation, "Should not have additional continuations.")
+        #expect(String(buffer: encodedCommand.bytes) == #"hello)\#r\#n"#)
+        #expect(!encodedCommand.waitForContinuation, "Should not have additional continuations.")
     }
 
-    func testDescriptionWithoutPII() {
-        let inputs: [(CommandStreamPart, String, UInt)] = [
-            (.append(.start(tag: "1", appendingTo: .inbox)), "1 APPEND \"∅\"", #line),
-            (
-                .append(.beginMessage(message: .init(options: .none, data: .init(byteCount: 3)))),
-                " {3}\r\n",
-                #line
+    @Test(
+        "description without PII",
+        arguments: [
+            PIIFixture(
+                input: .append(.start(tag: "1", appendingTo: .inbox)),
+                expected: "1 APPEND \"∅\""
             ),
-            (
-                .append(
+            PIIFixture(
+                input: .append(.beginMessage(message: .init(options: .none, data: .init(byteCount: 3)))),
+                expected: " {3}\r\n"
+            ),
+            PIIFixture(
+                input: .append(
                     .beginMessage(
                         message: .init(
                             options: .init(flagList: [.seen, .deleted], extensions: [:]),
@@ -268,16 +265,47 @@ extension CommandStream_Tests {
                         )
                     )
                 ),
-                " (\\Seen \\Deleted) {3}\r\n",
-                #line
+                expected: " (\\Seen \\Deleted) {3}\r\n"
             ),
-            (.tagged(.init(tag: "1", command: .noop)), "1 NOOP\r\n", #line),
-            (.idleDone, "DONE\r\n", #line),
-            (.continuationResponse("test"), "[8 bytes]\r\n", #line),
+            PIIFixture(
+                input: .tagged(.init(tag: "1", command: .noop)),
+                expected: "1 NOOP\r\n"
+            ),
+            PIIFixture(
+                input: .idleDone,
+                expected: "DONE\r\n"
+            ),
+            PIIFixture(
+                input: .continuationResponse("test"),
+                expected: "[8 bytes]\r\n"
+            ),
         ]
-
-        for (part, expected, line) in inputs {
-            XCTAssertEqual(CommandStreamPart.descriptionWithoutPII([part]), expected, line: line)
-        }
+    )
+    func descriptionWithoutPII(_ fixture: PIIFixture) {
+        #expect(CommandStreamPart.descriptionWithoutPII([fixture.input]) == fixture.expected)
     }
+}
+
+// MARK: -
+
+extension CommandEncodeFixture<CommandStreamPart> {
+    fileprivate static func commandStream(
+        _ input: CommandStreamPart,
+        _ expectedString: String,
+        options: CommandEncodingOptions = CommandEncodingOptions()
+    ) -> Self {
+        CommandEncodeFixture(
+            input: input,
+            options: options,
+            expectedString: expectedString,
+            encoder: { $0.writeCommandStream($1) }
+        )
+    }
+}
+
+private struct PIIFixture: Sendable, CustomTestStringConvertible {
+    let input: CommandStreamPart
+    let expected: String
+
+    var testDescription: String { expected.mappingControlPictures() }
 }

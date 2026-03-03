@@ -13,37 +13,77 @@
 //===----------------------------------------------------------------------===//
 
 import NIO
+import Testing
 @_spi(NIOIMAPInternal) @testable import NIOIMAPCore
-import XCTest
 
-class UseAttribute_Tests: EncodeTestClass {}
-
-// MARK: - Encoding
-
-extension UseAttribute_Tests {
-    func testEncode() {
-        let inputs: [(UseAttribute, String, UInt)] = [
-            (.all, "\\All", #line),
-            (.archive, "\\Archive", #line),
-            (.drafts, "\\Drafts", #line),
-            (.flagged, "\\Flagged", #line),
-            (.junk, "\\Junk", #line),
-            (.sent, "\\Sent", #line),
-            (.trash, "\\Trash", #line),
-            (.init("\\test"), "\\test", #line),
-        ]
-        self.iterateInputs(inputs: inputs, encoder: { self.testBuffer.writeUseAttribute($0) })
+@Suite("UseAttribute")
+struct UseAttributeTests {
+    @Test(arguments: [
+        EncodeFixture.useAttribute(.all, "\\All"),
+        EncodeFixture.useAttribute(.archive, "\\Archive"),
+        EncodeFixture.useAttribute(.drafts, "\\Drafts"),
+        EncodeFixture.useAttribute(.flagged, "\\Flagged"),
+        EncodeFixture.useAttribute(.junk, "\\Junk"),
+        EncodeFixture.useAttribute(.sent, "\\Sent"),
+        EncodeFixture.useAttribute(.trash, "\\Trash"),
+        EncodeFixture.useAttribute(.init("\\test"), "\\test"),
+    ])
+    func encode(_ fixture: EncodeFixture<UseAttribute>) {
+        fixture.checkEncoding()
     }
 
-    func testLowercasing() {
+    @Test("lowercasing behavior")
+    func lowercasingBehavior() {
         let t1 = UseAttribute("TEST")
         let t2 = UseAttribute("test")
-        XCTAssertEqual(t1, t2)
-        XCTAssertEqual(t1.stringValue, "TEST")
-        XCTAssertEqual(t2.stringValue, "test")
+        #expect(t1 == t2)
+        #expect(t1.stringValue == "TEST")
+        #expect(t2.stringValue == "test")
     }
 
-    func testConvertFromMailboxInfoAttribute() {
-        XCTAssertEqual(UseAttribute(MailboxInfo.Attribute(#"\All"#)).stringValue, #"\All"#)
+    @Test("convert from mailbox info attribute")
+    func convertFromMailboxInfoAttribute() {
+        #expect(UseAttribute(MailboxInfo.Attribute(#"\All"#)).stringValue == #"\All"#)
+    }
+
+    @Test(arguments: [
+        ParseFixture.useAttribute("\\All", "", expected: .success(.all)),
+        ParseFixture.useAttribute("\\Archive", "", expected: .success(.archive)),
+        ParseFixture.useAttribute("\\Flagged", "", expected: .success(.flagged)),
+        ParseFixture.useAttribute("\\Trash", "", expected: .success(.trash)),
+        ParseFixture.useAttribute("\\Sent", "", expected: .success(.sent)),
+        ParseFixture.useAttribute("\\Drafts", "", expected: .success(.drafts)),
+        ParseFixture.useAttribute("\\Other", " ", expected: .success(.init("\\Other"))),
+    ])
+    func parse(_ fixture: ParseFixture<UseAttribute>) {
+        fixture.checkParsing()
+    }
+}
+
+// MARK: -
+
+extension EncodeFixture<UseAttribute> {
+    fileprivate static func useAttribute(_ input: T, _ expectedString: String) -> Self {
+        Self(
+            input: input,
+            bufferKind: .defaultServer,
+            expectedString: expectedString,
+            encoder: { $0.writeUseAttribute($1) }
+        )
+    }
+}
+
+extension ParseFixture<UseAttribute> {
+    fileprivate static func useAttribute(
+        _ input: String,
+        _ terminator: String = "\r",
+        expected: Expected
+    ) -> Self {
+        ParseFixture(
+            input: input,
+            terminator: terminator,
+            expected: expected,
+            parser: GrammarParser().parseUseAttribute
+        )
     }
 }

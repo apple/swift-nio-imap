@@ -14,24 +14,32 @@
 
 import NIO
 @_spi(NIOIMAPInternal) @testable import NIOIMAPCore
-import XCTest
+import Testing
 
-class MailboxPatterns_Tests: EncodeTestClass {}
+@Suite("MailboxPatterns")
+struct MailboxPatternsTests {
+    @Test(arguments: [
+        EncodeFixture.mailboxPatterns(.mailbox("inbox"), #""inbox""#),
+        EncodeFixture.mailboxPatterns(.pattern(["pattern"]), #"("pattern")"#),
+        EncodeFixture.mailboxPatterns(.pattern(["aa", "bb"]), #"("aa" "bb")"#),
+    ])
+    func encode(_ fixture: EncodeFixture<MailboxPatterns>) {
+        fixture.checkEncoding()
+    }
+}
 
-// MARK: - Encoding
+// MARK: -
 
-extension MailboxPatterns_Tests {
-    func testEncode() {
-        let inputs: [(MailboxPatterns, String, UInt)] = [
-            (.mailbox("inbox"), "\"inbox\"", #line),
-            (.pattern(["pattern"]), "(\"pattern\")", #line),
-        ]
-
-        for (test, expectedString, line) in inputs {
-            self.testBuffer.clear()
-            let size = self.testBuffer.writeMailboxPatterns(test)
-            XCTAssertEqual(size, expectedString.utf8.count, line: line)
-            XCTAssertEqual(self.testBufferString, expectedString, line: line)
-        }
+extension EncodeFixture<MailboxPatterns> {
+    fileprivate static func mailboxPatterns(
+        _ input: MailboxPatterns,
+        _ expectedString: String
+    ) -> Self {
+        EncodeFixture(
+            input: input,
+            bufferKind: .defaultServer,
+            expectedString: expectedString,
+            encoder: { $0.writeMailboxPatterns($1) }
+        )
     }
 }

@@ -14,19 +14,77 @@
 
 import NIO
 @_spi(NIOIMAPInternal) @testable import NIOIMAPCore
-import XCTest
+import Testing
 
-class UserAuthenticationMechanism_Tests: EncodeTestClass {}
+@Suite("UserAuthenticationMechanism")
+struct UserAuthenticationMechanismTests {
+    @Test(arguments: [
+        EncodeFixture.userAuthenticationMechanism(
+            .init(encodedUser: .init(data: "test"), authenticationMechanism: .any),
+            "test;AUTH=*"
+        ),
+        EncodeFixture.userAuthenticationMechanism(
+            .init(encodedUser: .init(data: "test"), authenticationMechanism: nil),
+            "test"
+        ),
+        EncodeFixture.userAuthenticationMechanism(
+            .init(encodedUser: nil, authenticationMechanism: .any),
+            ";AUTH=*"
+        ),
+    ])
+    func encode(_ fixture: EncodeFixture<UserAuthenticationMechanism>) {
+        fixture.checkEncoding()
+    }
 
-// MARK: - IMAP
+    @Test(arguments: [
+        ParseFixture.userAuthenticationMechanism(
+            ";AUTH=*",
+            " ",
+            expected: .success(.init(encodedUser: nil, authenticationMechanism: .any))
+        ),
+        ParseFixture.userAuthenticationMechanism(
+            "test",
+            " ",
+            expected: .success(.init(encodedUser: .init(data: "test"), authenticationMechanism: nil))
+        ),
+        ParseFixture.userAuthenticationMechanism(
+            "test;AUTH=*",
+            " ",
+            expected: .success(.init(encodedUser: .init(data: "test"), authenticationMechanism: .any))
+        ),
+    ])
+    func parse(_ fixture: ParseFixture<UserAuthenticationMechanism>) {
+        fixture.checkParsing()
+    }
+}
 
-extension UserAuthenticationMechanism_Tests {
-    func testEncode() {
-        let inputs: [(UserAuthenticationMechanism, String, UInt)] = [
-            (.init(encodedUser: .init(data: "test"), authenticationMechanism: .any), "test;AUTH=*", #line),
-            (.init(encodedUser: .init(data: "test"), authenticationMechanism: nil), "test", #line),
-            (.init(encodedUser: nil, authenticationMechanism: .any), ";AUTH=*", #line),
-        ]
-        self.iterateInputs(inputs: inputs, encoder: { self.testBuffer.writeUserAuthenticationMechanism($0) })
+// MARK: -
+
+extension EncodeFixture<UserAuthenticationMechanism> {
+    fileprivate static func userAuthenticationMechanism(
+        _ input: UserAuthenticationMechanism,
+        _ expectedString: String
+    ) -> Self {
+        EncodeFixture(
+            input: input,
+            bufferKind: .defaultServer,
+            expectedString: expectedString,
+            encoder: { $0.writeUserAuthenticationMechanism($1) }
+        )
+    }
+}
+
+extension ParseFixture<UserAuthenticationMechanism> {
+    fileprivate static func userAuthenticationMechanism(
+        _ input: String,
+        _ terminator: String,
+        expected: Expected
+    ) -> Self {
+        ParseFixture(
+            input: input,
+            terminator: terminator,
+            expected: expected,
+            parser: GrammarParser().parseUserAuthenticationMechanism
+        )
     }
 }

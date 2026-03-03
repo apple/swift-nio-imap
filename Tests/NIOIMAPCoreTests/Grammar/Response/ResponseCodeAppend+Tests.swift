@@ -14,17 +14,38 @@
 
 import NIO
 @_spi(NIOIMAPInternal) @testable import NIOIMAPCore
-import XCTest
+import Testing
 
-class ResponseCodeAppend_Tests: EncodeTestClass {}
+@Suite("ResponseCodeAppend")
+struct ResponseCodeAppendTests {
+    @Test(arguments: [
+        EncodeFixture.responseCodeAppend(
+            .init(uidValidity: 1, uids: [MessageIdentifierRange<UID>(.max)]),
+            "APPENDUID 1 *"
+        ),
+        EncodeFixture.responseCodeAppend(
+            .init(uidValidity: 12345, uids: .init(range: 3_599_075...10_565_347)),
+            "APPENDUID 12345 3599075:10565347"
+        ),
+        EncodeFixture.responseCodeAppend(
+            .init(uidValidity: 67890, uids: .init(set: [8430, 17553, 19211, 22142])!),
+            "APPENDUID 67890 8430,17553,19211,22142"
+        ),
+    ])
+    func encode(_ fixture: EncodeFixture<ResponseCodeAppend>) {
+        fixture.checkEncoding()
+    }
+}
 
-// MARK: - Encoding
+// MARK: -
 
-extension ResponseCodeAppend_Tests {
-    func testEncode() {
-        let inputs: [(ResponseCodeAppend, String, UInt)] = [
-            (.init(uidValidity: 1, uids: [MessageIdentifierRange<UID>(.max)]), "APPENDUID 1 *", #line)
-        ]
-        self.iterateInputs(inputs: inputs, encoder: { self.testBuffer.writeResponseCodeAppend($0) })
+extension EncodeFixture<ResponseCodeAppend> {
+    fileprivate static func responseCodeAppend(_ input: ResponseCodeAppend, _ expectedString: String) -> Self {
+        EncodeFixture(
+            input: input,
+            bufferKind: .defaultServer,
+            expectedString: expectedString,
+            encoder: { $0.writeResponseCodeAppend($1) }
+        )
     }
 }

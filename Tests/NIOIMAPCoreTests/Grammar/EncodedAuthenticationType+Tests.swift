@@ -13,18 +13,54 @@
 //===----------------------------------------------------------------------===//
 
 import NIO
+import Testing
 @_spi(NIOIMAPInternal) @testable import NIOIMAPCore
-import XCTest
 
-class EncodedAuthenticationType_Tests: EncodeTestClass {}
+@Suite("EncodedAuthenticationType")
+struct EncodedAuthenticationTypeTests {
+    @Test(arguments: [
+        EncodeFixture.encodedAuthenticationType(.init(authenticationType: "hello"), "hello")
+    ])
+    func encode(_ fixture: EncodeFixture<EncodedAuthenticationType>) {
+        fixture.checkEncoding()
+    }
 
-// MARK: - Encoding
+    @Test(arguments: [
+        ParseFixture.encodedAuthenticationType(
+            "hello%FF",
+            " ",
+            expected: .success(.init(authenticationType: "hello%FF"))
+        )
+    ])
+    func parse(_ fixture: ParseFixture<EncodedAuthenticationType>) {
+        fixture.checkParsing()
+    }
+}
 
-extension EncodedAuthenticationType_Tests {
-    func testEncode() {
-        let inputs: [(EncodedAuthenticationType, String, UInt)] = [
-            (.init(authenticationType: "hello"), "hello", #line)
-        ]
-        self.iterateInputs(inputs: inputs, encoder: { self.testBuffer.writeEncodedAuthenticationType($0) })
+// MARK: -
+
+extension EncodeFixture<EncodedAuthenticationType> {
+    fileprivate static func encodedAuthenticationType(_ input: T, _ expectedString: String) -> Self {
+        Self(
+            input: input,
+            bufferKind: .defaultServer,
+            expectedString: expectedString,
+            encoder: { $0.writeEncodedAuthenticationType($1) }
+        )
+    }
+}
+
+extension ParseFixture<EncodedAuthenticationType> {
+    fileprivate static func encodedAuthenticationType(
+        _ input: String,
+        _ terminator: String,
+        expected: Expected
+    ) -> Self {
+        ParseFixture(
+            input: input,
+            terminator: terminator,
+            expected: expected,
+            parser: GrammarParser().parseEncodedAuthenticationType
+        )
     }
 }

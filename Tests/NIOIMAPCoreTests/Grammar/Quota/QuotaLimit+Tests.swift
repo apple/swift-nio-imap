@@ -14,23 +14,28 @@
 
 import NIO
 @_spi(NIOIMAPInternal) @testable import NIOIMAPCore
-import XCTest
+import Testing
 
-class QuotaLimitTests: EncodeTestClass {}
+@Suite("QuotaLimit")
+struct QuotaLimitTests {
+    @Test(arguments: [
+        EncodeFixture.quotaLimit(QuotaLimit(resourceName: "STORAGE", limit: 104), "STORAGE 104"),
+        EncodeFixture.quotaLimit(QuotaLimit(resourceName: "MESSAGE", limit: 42), "MESSAGE 42"),
+    ])
+    func encode(_ fixture: EncodeFixture<QuotaLimit>) {
+        fixture.checkEncoding()
+    }
+}
 
-// MARK: - Encoding
+// MARK: -
 
-extension QuotaLimitTests {
-    func testEncode() {
-        let inputs: [(QuotaLimit, String, UInt)] = [
-            (QuotaLimit(resourceName: "STORAGE", limit: 512), "STORAGE 512", #line)
-        ]
-
-        for (test, expectedString, line) in inputs {
-            self.testBuffer.clear()
-            let size = self.testBuffer.writeQuotaLimit(test)
-            XCTAssertEqual(size, expectedString.utf8.count, line: line)
-            XCTAssertEqual(self.testBufferString, expectedString, line: line)
-        }
+extension EncodeFixture<QuotaLimit> {
+    fileprivate static func quotaLimit(_ input: QuotaLimit, _ expectedString: String) -> Self {
+        EncodeFixture(
+            input: input,
+            bufferKind: .defaultServer,
+            expectedString: expectedString,
+            encoder: { $0.writeQuotaLimit($1) }
+        )
     }
 }

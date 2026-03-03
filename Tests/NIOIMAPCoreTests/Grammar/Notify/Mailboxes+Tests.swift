@@ -14,29 +14,71 @@
 
 import NIO
 @_spi(NIOIMAPInternal) @testable import NIOIMAPCore
-import XCTest
+import Testing
 
-class Mailboxes_Tests: EncodeTestClass {}
-
-// MARK: - Encoding
-
-extension Mailboxes_Tests {
-    func testLimits() {
-        XCTAssertNil(Mailboxes([]))
-        XCTAssertNotNil(Mailboxes([.inbox]))
+@Suite("Mailboxes")
+struct MailboxesTests {
+    @Test("rejects empty mailbox list")
+    func rejectsEmptyMailboxList() {
+        #expect(Mailboxes([]) == nil)
+        #expect(Mailboxes([.inbox]) != nil)
     }
 
-    func testEncode() {
-        let inputs: [(Mailboxes, String, UInt)] = [
-            (Mailboxes([.init("box1")])!, "(\"box1\")", #line),
-            (Mailboxes([.init("box1"), .init("box2")])!, "(\"box1\" \"box2\")", #line),
-        ]
+    @Test(arguments: [
+        EncodeFixture.mailboxes(
+            Mailboxes([.init("box1")])!,
+            "(\"box1\")"
+        ),
+        EncodeFixture.mailboxes(
+            Mailboxes([.init("box1"), .init("box2")])!,
+            "(\"box1\" \"box2\")"
+        ),
+    ])
+    func encode(_ fixture: EncodeFixture<Mailboxes>) {
+        fixture.checkEncoding()
+    }
 
-        for (test, expectedString, line) in inputs {
-            self.testBuffer.clear()
-            let size = self.testBuffer.writeMailboxes(test)
-            XCTAssertEqual(size, expectedString.utf8.count, line: line)
-            XCTAssertEqual(self.testBufferString, expectedString, line: line)
-        }
+    @Test(arguments: [
+        ParseFixture.oneOrMoreMailbox("\"box1\"", expected: .success(Mailboxes([.init("box1")])!)),
+        ParseFixture.oneOrMoreMailbox("(\"box1\")", expected: .success(Mailboxes([.init("box1")])!)),
+        ParseFixture.oneOrMoreMailbox(
+            "(\"box1\" \"box2\")",
+            expected: .success(Mailboxes([.init("box1"), .init("box2")])!)
+        ),
+        ParseFixture.oneOrMoreMailbox("()", expected: .failure),
+    ])
+    func parseOneOrMoreMailbox(_ fixture: ParseFixture<Mailboxes>) {
+        fixture.checkParsing()
+    }
+}
+
+// MARK: -
+
+extension EncodeFixture<Mailboxes> {
+    fileprivate static func mailboxes(
+        _ input: Mailboxes,
+        _ expectedString: String
+    ) -> Self {
+        .init(
+            input: input,
+            bufferKind: .defaultServer,
+            expectedString: expectedString,
+            encoder: { $0.writeMailboxes($1) }
+        )
+    }
+}
+
+extension ParseFixture<Mailboxes> {
+    fileprivate static func oneOrMoreMailbox(
+        _ input: String,
+        _ terminator: String = "\r",
+        expected: Expected
+    ) -> Self {
+        ParseFixture(
+            input: input,
+            terminator: terminator,
+            expected: expected,
+            parser: GrammarParser().parseOneOrMoreMailbox
+        )
     }
 }

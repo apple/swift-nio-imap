@@ -14,18 +14,58 @@
 
 import NIO
 @_spi(NIOIMAPInternal) @testable import NIOIMAPCore
-import XCTest
+import Testing
 
-class IMAPURLAuthenticationMechanism_Tests: EncodeTestClass {}
+@Suite("IMAPURLAuthenticationMechanism")
+struct IMAPURLAuthenticationMechanismTests {
+    @Test(arguments: [
+        EncodeFixture.imapURLAuthenticationMechanism(.any, ";AUTH=*"),
+        EncodeFixture.imapURLAuthenticationMechanism(.type(.init(authenticationType: "data")), ";AUTH=data"),
+    ])
+    func encode(_ fixture: EncodeFixture<IMAPURLAuthenticationMechanism>) {
+        fixture.checkEncoding()
+    }
 
-// MARK: - IMAP
+    @Test(arguments: [
+        ParseFixture.imapURLAuthenticationMechanism(";AUTH=*", " ", expected: .success(.any)),
+        ParseFixture.imapURLAuthenticationMechanism(
+            ";AUTH=test",
+            " ",
+            expected: .success(.type(.init(authenticationType: "test")))
+        ),
+    ])
+    func parse(_ fixture: ParseFixture<IMAPURLAuthenticationMechanism>) {
+        fixture.checkParsing()
+    }
+}
 
-extension IMAPURLAuthenticationMechanism_Tests {
-    func testEncode() {
-        let inputs: [(IMAPURLAuthenticationMechanism, String, UInt)] = [
-            (.any, ";AUTH=*", #line),
-            (.type(.init(authenticationType: "data")), ";AUTH=data", #line),
-        ]
-        self.iterateInputs(inputs: inputs, encoder: { self.testBuffer.writeIMAPURLAuthenticationMechanism($0) })
+// MARK: -
+
+extension EncodeFixture<IMAPURLAuthenticationMechanism> {
+    fileprivate static func imapURLAuthenticationMechanism(
+        _ input: IMAPURLAuthenticationMechanism,
+        _ expectedString: String
+    ) -> Self {
+        EncodeFixture(
+            input: input,
+            bufferKind: .defaultServer,
+            expectedString: expectedString,
+            encoder: { $0.writeIMAPURLAuthenticationMechanism($1) }
+        )
+    }
+}
+
+extension ParseFixture<IMAPURLAuthenticationMechanism> {
+    fileprivate static func imapURLAuthenticationMechanism(
+        _ input: String,
+        _ terminator: String = " ",
+        expected: Expected
+    ) -> Self {
+        ParseFixture(
+            input: input,
+            terminator: terminator,
+            expected: expected,
+            parser: GrammarParser().parseIMAPURLAuthenticationMechanism
+        )
     }
 }

@@ -13,38 +13,85 @@
 //===----------------------------------------------------------------------===//
 
 import NIO
+import Testing
 @_spi(NIOIMAPInternal) @testable import NIOIMAPCore
-import XCTest
 
-class ByteRange_Tests: EncodeTestClass {}
-
-// MARK: - Encoding
-
-extension ByteRange_Tests {
-    func testEncode() {
-        let inputs: [(ClosedRange<UInt32>, String, UInt)] = [
-            /// Encoded format is `<offset.count>`:
-            (0...199, "<0.200>", #line),
-            (1...2, "<1.2>", #line),
-            (10...20, "<10.11>", #line),
-            (100...199, "<100.100>", #line),
-            (400...479, "<400.80>", #line),
-            (843...1_369, "<843.527>", #line),
+@Suite("ByteRange")
+struct ByteRangeTests {
+    @Test(
+        "encode closed range",
+        arguments: [
+            EncodeFixture.byteRange(0...199, "<0.200>"),
+            EncodeFixture.byteRange(1...2, "<1.2>"),
+            EncodeFixture.byteRange(10...20, "<10.11>"),
+            EncodeFixture.byteRange(100...199, "<100.100>"),
+            EncodeFixture.byteRange(400...479, "<400.80>"),
+            EncodeFixture.byteRange(843...1_369, "<843.527>"),
         ]
-
-        for (test, expectedString, line) in inputs {
-            self.testBuffer.clear()
-            let size = self.testBuffer.writeByteRange(test)
-            XCTAssertEqual(size, expectedString.utf8.count, line: line)
-            XCTAssertEqual(self.testBufferString, expectedString, line: line)
-        }
+    )
+    func encodeClosedRange(_ fixture: EncodeFixture<ClosedRange<UInt32>>) {
+        fixture.checkEncoding()
     }
 
-    func testEncode_ByteRange() {
-        let inputs: [(ByteRange, String, UInt)] = [
-            (.init(offset: 1, length: nil), "1", #line),
-            (.init(offset: 1, length: 2), "1.2", #line),
+    @Test(
+        "encode ByteRange struct",
+        arguments: [
+            EncodeFixture.byteRangeStruct(.init(offset: 1, length: nil), "1"),
+            EncodeFixture.byteRangeStruct(.init(offset: 1, length: 2), "1.2"),
         ]
-        self.iterateInputs(inputs: inputs, encoder: { self.testBuffer.writeByteRange($0) })
+    )
+    func encodeByteRangeStruct(_ fixture: EncodeFixture<ByteRange>) {
+        fixture.checkEncoding()
+    }
+
+    @Test(arguments: [
+        ParseFixture.byteRange("1", " ", expected: .success(.init(offset: 1, length: nil))),
+        ParseFixture.byteRange("1.2", " ", expected: .success(.init(offset: 1, length: 2))),
+        ParseFixture.byteRange("a.1", " ", expected: .failure),
+        ParseFixture.byteRange("1", "", expected: .incompleteMessage),
+        ParseFixture.byteRange("1.2", "", expected: .incompleteMessage),
+        ParseFixture.byteRange("1.", "", expected: .incompleteMessage),
+    ])
+    func parse(_ fixture: ParseFixture<ByteRange>) {
+        fixture.checkParsing()
+    }
+}
+
+// MARK: -
+
+extension EncodeFixture<ClosedRange<UInt32>> {
+    fileprivate static func byteRange(_ input: T, _ expectedString: String) -> Self {
+        Self(
+            input: input,
+            bufferKind: .defaultServer,
+            expectedString: expectedString,
+            encoder: { $0.writeByteRange($1) }
+        )
+    }
+}
+
+extension EncodeFixture<ByteRange> {
+    fileprivate static func byteRangeStruct(_ input: T, _ expectedString: String) -> Self {
+        Self(
+            input: input,
+            bufferKind: .defaultServer,
+            expectedString: expectedString,
+            encoder: { $0.writeByteRange($1) }
+        )
+    }
+}
+
+extension ParseFixture<ByteRange> {
+    fileprivate static func byteRange(
+        _ input: String,
+        _ terminator: String,
+        expected: Expected
+    ) -> Self {
+        ParseFixture(
+            input: input,
+            terminator: terminator,
+            expected: expected,
+            parser: GrammarParser().parseByteRange
+        )
     }
 }

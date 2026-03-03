@@ -14,22 +14,60 @@
 
 import NIO
 @_spi(NIOIMAPInternal) @testable import NIOIMAPCore
-import XCTest
+import Testing
 
-class MessageIdentifierRange_Tests: EncodeTestClass {}
-
-// MARK: - Conversion
-
-extension MessageIdentifierRange_Tests {
-    func testConvert_sequenceNumber() {
-        let input = MessageIdentifierRange<UnknownMessageIdentifier>(UnknownMessageIdentifier(1)...2)
-        let output = MessageIdentifierRange<SequenceNumber>(input)
-        XCTAssertEqual(output, 1...2)
+@Suite("MessageIdentifierRange")
+struct MessageIdentifierRangeTests {
+    @Test(arguments: [
+        ParseFixture.messageIdentifierRange("*", "\r\n", expected: .success(MessageIdentifierRange<UID>(.max))),
+        ParseFixture.messageIdentifierRange("1:*", "\r\n", expected: .success(MessageIdentifierRange<UID>.all)),
+        ParseFixture.messageIdentifierRange("12:34", "\r\n", expected: .success(MessageIdentifierRange<UID>(12...34))),
+        ParseFixture.messageIdentifierRange(
+            "12:*",
+            "\r\n",
+            expected: .success(MessageIdentifierRange<UID>(12 ... .max))
+        ),
+        ParseFixture.messageIdentifierRange(
+            "1:34",
+            "\r\n",
+            expected: .success(MessageIdentifierRange<UID>((.min)...34))
+        ),
+        ParseFixture.messageIdentifierRange("!", " ", expected: .failure),
+        ParseFixture.messageIdentifierRange("a", " ", expected: .failure),
+        ParseFixture.messageIdentifierRange("1", "", expected: .incompleteMessage),
+    ])
+    func parse(_ fixture: ParseFixture<MessageIdentifierRange<UID>>) {
+        fixture.checkParsing()
     }
 
-    func testConvert_uid() {
+    @Test("convert to sequence number")
+    func convertToSequenceNumber() {
+        let input = MessageIdentifierRange<UnknownMessageIdentifier>(UnknownMessageIdentifier(1)...2)
+        let output = MessageIdentifierRange<SequenceNumber>(input)
+        #expect(output == 1...2)
+    }
+
+    @Test("convert to UID")
+    func convertToUID() {
         let input = MessageIdentifierRange<UnknownMessageIdentifier>(UnknownMessageIdentifier(5)...6)
         let output = MessageIdentifierRange<UID>(input)
-        XCTAssertEqual(output, 5...6)
+        #expect(output == 5...6)
+    }
+}
+
+// MARK: -
+
+extension ParseFixture<MessageIdentifierRange<UID>> {
+    fileprivate static func messageIdentifierRange(
+        _ input: String,
+        _ terminator: String,
+        expected: Expected
+    ) -> Self {
+        ParseFixture(
+            input: input,
+            terminator: terminator,
+            expected: expected,
+            parser: GrammarParser().parseMessageIdentifierRange
+        )
     }
 }

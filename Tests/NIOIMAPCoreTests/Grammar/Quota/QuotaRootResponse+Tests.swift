@@ -14,18 +14,40 @@
 
 import NIO
 @_spi(NIOIMAPInternal) @testable import NIOIMAPCore
-import XCTest
+import Testing
 
-class QuotaRootResponseTests: EncodeTestClass {}
+@Suite("QuotaRootResponse")
+struct QuotaRootResponseTests {
+    @Test(arguments: [
+        EncodeFixture.quotaRootResponse(
+            MailboxName("INBOX"),
+            QuotaRoot("Root"),
+            #"QUOTAROOT "INBOX" "Root""#
+        ),
+        EncodeFixture.quotaRootResponse(
+            MailboxName("INBOX"),
+            QuotaRoot("#user/alice"),
+            ##"QUOTAROOT "INBOX" "#user/alice""##
+        ),
+    ])
+    func encode(_ fixture: EncodeFixture<(MailboxName, QuotaRoot)>) {
+        fixture.checkEncoding()
+    }
+}
 
-// MARK: - Encoding
+// MARK: -
 
-extension QuotaRootResponseTests {
-    func testEncode() {
-        let expectedString = "QUOTAROOT \"INBOX\" \"Root\""
-        self.testBuffer.clear()
-        let size = self.testBuffer.writeQuotaRootResponse(mailbox: .init("INBOX"), quotaRoot: .init("Root"))
-        XCTAssertEqual(size, expectedString.utf8.count)
-        XCTAssertEqual(self.testBufferString, expectedString)
+extension EncodeFixture<(MailboxName, QuotaRoot)> {
+    fileprivate static func quotaRootResponse(
+        _ mailbox: MailboxName,
+        _ quotaRoot: QuotaRoot,
+        _ expectedString: String
+    ) -> Self {
+        EncodeFixture(
+            input: (mailbox, quotaRoot),
+            bufferKind: .defaultServer,
+            expectedString: expectedString,
+            encoder: { $0.writeQuotaRootResponse(mailbox: $1.0, quotaRoot: $1.1) }
+        )
     }
 }

@@ -14,63 +14,68 @@
 
 import NIO
 @_spi(NIOIMAPInternal) @testable import NIOIMAPCore
-import XCTest
+import Testing
 
-class SequenceNumberTests: EncodeTestClass {}
-
-// MARK: - Integer literal
+@Suite("SequenceNumber")
+struct SequenceNumberTests {}
 
 extension SequenceNumberTests {
-    func testIntegerLiteral() {
+    @Test("integer literal")
+    func integerLiteral() {
         let num: SequenceNumber = 5
-        XCTAssertEqual(num, 5)
+        #expect(num == 5)
     }
 
-    func testValidRange() {
-        XCTAssertNil(SequenceNumber(exactly: 0))
-        XCTAssertEqual(SequenceNumber(exactly: 1)?.rawValue, 1)
-        XCTAssertEqual(SequenceNumber(exactly: 4_294_967_295)?.rawValue, 4_294_967_295)
-        XCTAssertNil(SequenceNumber(exactly: 4_294_967_296))
-    }
-}
-
-// MARK: - Comparable
-
-extension SequenceNumberTests {
-    func testComparable() {
-        XCTAssertFalse(SequenceNumber.max < .max)
-        XCTAssertFalse(SequenceNumber.max < 999)
-        XCTAssertTrue(SequenceNumber.max > 999)
-        XCTAssertTrue(SequenceNumber(1) < 999)  // use .number to force type
-    }
-}
-
-// MARK: - Encoding
-
-extension SequenceNumberTests {
-    func testEncode_max() {
-        let expected = "4294967295"
-        let size = self.testBuffer.writeSequenceNumber(.max)
-        XCTAssertEqual(size, expected.utf8.count)
-        XCTAssertEqual(expected, self.testBufferString)
+    @Test("valid range")
+    func validRange() {
+        #expect(SequenceNumber(exactly: 0) == nil)
+        #expect(SequenceNumber(exactly: 1)?.rawValue == 1)
+        #expect(SequenceNumber(exactly: 4_294_967_295)?.rawValue == 4_294_967_295)
+        #expect(SequenceNumber(exactly: 4_294_967_296) == nil)
     }
 
-    func testEncode_number() {
-        let expected = "1234"
-        let size = self.testBuffer.writeSequenceNumber(1234)
-        XCTAssertEqual(size, expected.utf8.count)
-        XCTAssertEqual(expected, self.testBufferString)
+    @Test func comparable() {
+        #expect(!(SequenceNumber.max < .max))
+        #expect(!(SequenceNumber.max < 999))
+        #expect(SequenceNumber.max > 999)
+        #expect(SequenceNumber(1) < 999)
     }
-}
 
-// MARK: - Strideable
+    @Test(arguments: [
+        EncodeFixture.sequenceNumber(1, "1"),
+        EncodeFixture.sequenceNumber(123, "123"),
+        EncodeFixture.sequenceNumber(1234, "1234"),
+        EncodeFixture.sequenceNumber(9999, "9999"),
+        EncodeFixture.sequenceNumber(65535, "65535"),
+        EncodeFixture.sequenceNumber(1_000_000, "1000000"),
+        EncodeFixture.sequenceNumber(.max, "4294967295"),
+    ])
+    func encode(_ fixture: EncodeFixture<SequenceNumber>) {
+        fixture.checkEncoding()
+    }
 
-extension SequenceNumberTests {
-    func testAdvancedBy() {
+    @Test("advanced by")
+    func advancedBy() {
         let min = SequenceNumber(1)
         let max = SequenceNumber.max
-        XCTAssertEqual(max.advanced(by: 0), max)
-        XCTAssertEqual(min.advanced(by: min.distance(to: max)), max)
-        XCTAssertEqual(max.advanced(by: max.distance(to: min)), min)
+        #expect(max.advanced(by: 0) == max)
+        #expect(min.advanced(by: min.distance(to: max)) == max)
+        #expect(max.advanced(by: max.distance(to: min)) == min)
+    }
+}
+
+// MARK: -
+
+extension EncodeFixture<SequenceNumber> {
+    fileprivate static func sequenceNumber(
+        _ input: SequenceNumber,
+        _ expectedString: String
+    ) -> Self {
+        EncodeFixture(
+            input: input,
+            bufferKind: .defaultServer,
+            expectedString: expectedString,
+            encoder: { $0.writeSequenceNumber($1) }
+        )
     }
 }

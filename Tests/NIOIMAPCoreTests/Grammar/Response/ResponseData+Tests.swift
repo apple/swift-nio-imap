@@ -14,23 +14,60 @@
 
 import NIO
 @_spi(NIOIMAPInternal) @testable import NIOIMAPCore
-import XCTest
+import Testing
 
-class ResponseDataTests: EncodeTestClass {}
+@Suite("ResponsePayload")
+struct ResponseDataTests {
+    @Test(arguments: [
+        EncodeFixture.responsePayload(.messageData(.expunge(3)), "* 3 EXPUNGE\r\n"),
+        EncodeFixture.responsePayload(.messageData(.vanished([42, 77])), "* VANISHED 42,77\r\n"),
+    ])
+    func encode(_ fixture: EncodeFixture<ResponsePayload>) {
+        fixture.checkEncoding()
+    }
 
-// MARK: - Encoding
+    @Test(arguments: [
+        ParseFixture.responseData(
+            "* CAPABILITY ENABLE\r\n",
+            expected: .success(.capabilityData([.enable]))
+        ),
+        ParseFixture.responseData(
+            "* 3 EXPUNGE\r\n",
+            expected: .success(.messageData(.expunge(3)))
+        ),
+    ])
+    func parse(_ fixture: ParseFixture<ResponsePayload>) {
+        fixture.checkParsing()
+    }
+}
 
-extension ResponseDataTests {
-    func testEncode() {
-        let inputs: [(ResponsePayload, String, UInt)] = [
-            (.messageData(.expunge(3)), "* 3 EXPUNGE\r\n", #line)
-        ]
+// MARK: -
 
-        for (test, expectedString, line) in inputs {
-            self.testBuffer.clear()
-            let size = self.testBuffer.writeResponseData(test)
-            XCTAssertEqual(size, expectedString.utf8.count, line: line)
-            XCTAssertEqual(self.testBufferString, expectedString, line: line)
-        }
+extension EncodeFixture<ResponsePayload> {
+    fileprivate static func responsePayload(
+        _ input: ResponsePayload,
+        _ expectedString: String
+    ) -> Self {
+        EncodeFixture(
+            input: input,
+            bufferKind: .defaultServer,
+            expectedString: expectedString,
+            encoder: { $0.writeResponseData($1) }
+        )
+    }
+}
+
+extension ParseFixture<ResponsePayload> {
+    fileprivate static func responseData(
+        _ input: String,
+        _ terminator: String = " ",
+        expected: Expected
+    ) -> Self {
+        ParseFixture(
+            input: input,
+            terminator: terminator,
+            expected: expected,
+            parser: GrammarParser().parseResponseData
+        )
     }
 }

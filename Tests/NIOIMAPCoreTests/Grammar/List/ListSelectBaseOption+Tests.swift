@@ -14,37 +14,53 @@
 
 import NIO
 @_spi(NIOIMAPInternal) @testable import NIOIMAPCore
-import XCTest
+import Testing
 
-class ListSelectBaseOption_Tests: EncodeTestClass {}
-
-// MARK: - Encoding
-
-extension ListSelectBaseOption_Tests {
-    func testEncode() {
-        let inputs: [(ListSelectBaseOption, String, UInt)] = [
-            (.subscribed, "SUBSCRIBED", #line),
-            (.option(.init(key: .standard("test"), value: nil)), "test", #line),
-        ]
-
-        for (test, expectedString, line) in inputs {
-            self.testBuffer.clear()
-            let size = self.testBuffer.writeListSelectBaseOption(test)
-            XCTAssertEqual(size, expectedString.utf8.count, line: line)
-            XCTAssertEqual(self.testBufferString, expectedString, line: line)
-        }
+@Suite("ListSelectBaseOption")
+struct ListSelectBaseOptionTests {
+    @Test(arguments: [
+        EncodeFixture.listSelectBaseOption(.subscribed, "SUBSCRIBED"),
+        EncodeFixture.listSelectBaseOption(.option(.init(key: .standard("test"), value: nil)), "test"),
+    ])
+    func encode(_ fixture: EncodeFixture<ListSelectBaseOption>) {
+        fixture.checkEncoding()
     }
 
-    func testEncodeQuoted() {
-        let inputs: [(ListSelectBaseOption, String, UInt)] = [
-            (.subscribed, #""SUBSCRIBED""#, #line)
+    @Test(
+        "encode quoted",
+        arguments: [
+            EncodeFixture.listSelectBaseOptionQuoted(.subscribed, #""SUBSCRIBED""#)
         ]
+    )
+    func encodeQuoted(_ fixture: EncodeFixture<ListSelectBaseOption>) {
+        fixture.checkEncoding()
+    }
+}
 
-        for (test, expectedString, line) in inputs {
-            self.testBuffer.clear()
-            let size = self.testBuffer.writeListSelectBaseOptionQuoted(test)
-            XCTAssertEqual(size, expectedString.utf8.count, line: line)
-            XCTAssertEqual(self.testBufferString, expectedString, line: line)
-        }
+// MARK: -
+
+extension EncodeFixture<ListSelectBaseOption> {
+    fileprivate static func listSelectBaseOption(
+        _ input: ListSelectBaseOption,
+        _ expectedString: String
+    ) -> Self {
+        EncodeFixture(
+            input: input,
+            bufferKind: .defaultServer,
+            expectedString: expectedString,
+            encoder: { $0.writeListSelectBaseOption($1) }
+        )
+    }
+
+    fileprivate static func listSelectBaseOptionQuoted(
+        _ input: ListSelectBaseOption,
+        _ expectedString: String
+    ) -> Self {
+        EncodeFixture(
+            input: input,
+            bufferKind: .defaultServer,
+            expectedString: expectedString,
+            encoder: { $0.writeListSelectBaseOptionQuoted($1) }
+        )
     }
 }

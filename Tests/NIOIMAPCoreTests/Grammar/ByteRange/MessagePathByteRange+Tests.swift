@@ -14,18 +14,94 @@
 
 import NIO
 @_spi(NIOIMAPInternal) @testable import NIOIMAPCore
-import XCTest
+import Testing
 
-class MessagePathByteRange_Tests: EncodeTestClass {}
+@Suite("MessagePath.ByteRange")
+struct MessagePathByteRangeTests {
+    @Test(arguments: [
+        EncodeFixture.messagePathByteRange(
+            .init(range: .init(offset: 1, length: nil)),
+            "/;PARTIAL=1"
+        ),
+        EncodeFixture.messagePathByteRange(
+            .init(range: .init(offset: 1, length: 2)),
+            "/;PARTIAL=1.2"
+        ),
+    ])
+    func encode(_ fixture: EncodeFixture<MessagePath.ByteRange>) {
+        fixture.checkEncoding()
+    }
 
-// MARK: - Encoding
-
-extension MessagePathByteRange_Tests {
-    func testEncode_MessagePathByteRange() {
-        let inputs: [(MessagePath.ByteRange, String, UInt)] = [
-            (.init(range: .init(offset: 1, length: nil)), "/;PARTIAL=1", #line),
-            (.init(range: .init(offset: 1, length: 2)), "/;PARTIAL=1.2", #line),
+    @Test(
+        "parse with slash",
+        arguments: [
+            ParseFixture.parseWithSlash("/;PARTIAL=1", expected: .success(.init(range: .init(offset: 1, length: nil)))),
+            ParseFixture.parseWithSlash("/;PARTIAL=1.2", expected: .success(.init(range: .init(offset: 1, length: 2)))),
+            ParseFixture.parseWithSlash("/;PARTIAL=a", expected: .failure),
+            ParseFixture.parseWithSlash("PARTIAL=a", expected: .failure),
+            ParseFixture.parseWithSlash("/;PARTIAL=1", "", expected: .incompleteMessage),
         ]
-        self.iterateInputs(inputs: inputs, encoder: { self.testBuffer.writeMessagePathByteRange($0) })
+    )
+    func parseWithSlash(_ fixture: ParseFixture<MessagePath.ByteRange>) {
+        fixture.checkParsing()
+    }
+
+    @Test(
+        "parse without slash",
+        arguments: [
+            ParseFixture.parseWithoutSlash(
+                ";PARTIAL=1",
+                expected: .success(.init(range: .init(offset: 1, length: nil)))
+            ),
+            ParseFixture.parseWithoutSlash(
+                ";PARTIAL=1.2",
+                expected: .success(.init(range: .init(offset: 1, length: 2)))
+            ),
+            ParseFixture.parseWithoutSlash(";PARTIAL=a", expected: .failure),
+            ParseFixture.parseWithoutSlash("PARTIAL=a", expected: .failure),
+            ParseFixture.parseWithoutSlash(";PARTIAL=1", "", expected: .incompleteMessage),
+        ]
+    )
+    func parseWithoutSlash(_ fixture: ParseFixture<MessagePath.ByteRange>) {
+        fixture.checkParsing()
+    }
+}
+
+extension EncodeFixture<MessagePath.ByteRange> {
+    fileprivate static func messagePathByteRange(_ input: T, _ expectedString: String) -> Self {
+        .init(
+            input: input,
+            bufferKind: .defaultServer,
+            expectedStrings: [expectedString],
+            encoder: { $0.writeMessagePathByteRange($1) }
+        )
+    }
+}
+
+extension ParseFixture<MessagePath.ByteRange> {
+    fileprivate static func parseWithSlash(
+        _ input: String,
+        _ terminator: String = " ",
+        expected: Expected
+    ) -> Self {
+        ParseFixture(
+            input: input,
+            terminator: terminator,
+            expected: expected,
+            parser: GrammarParser().parseMessagePathByteRange
+        )
+    }
+
+    fileprivate static func parseWithoutSlash(
+        _ input: String,
+        _ terminator: String = " ",
+        expected: Expected
+    ) -> Self {
+        ParseFixture(
+            input: input,
+            terminator: terminator,
+            expected: expected,
+            parser: GrammarParser().parseMessagePathByteRangeOnly
+        )
     }
 }

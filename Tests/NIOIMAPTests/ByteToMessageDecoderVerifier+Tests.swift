@@ -13,19 +13,21 @@
 //===----------------------------------------------------------------------===//
 
 import Foundation
-import XCTest
+import Testing
 
 import NIO
 @testable import NIOIMAP
 import NIOIMAPCore
 import NIOTestUtils
 
-final class B2MV_Tests: XCTestCase {}
+@Suite("ByteToMessageDecoderVerifier")
+struct ByteToMessageDecoderVerifierTests {}
 
 // MARK: - Command
 
-extension B2MV_Tests {
-    func testCommand() {
+extension ByteToMessageDecoderVerifierTests {
+    @Test("command")
+    func command() {
         let inoutPairs: [(String, [CommandStreamPart])] = [
             // MARK: Capability
 
@@ -267,32 +269,33 @@ extension B2MV_Tests {
             }
             switch error.errorCode {
             case .underProduction(let command):
-                XCTFail("UNDER PRODUCTION")
+                Issue.record("UNDER PRODUCTION")
                 print(command)
                 return
             case .wrongProduction(actual: let actualCommand, expected: let expectedCommand):
-                XCTFail("WRONG PRODUCTION")
+                Issue.record("WRONG PRODUCTION")
                 print(actualCommand)
                 print(expectedCommand)
                 return
             case .overProduction(let command):
-                XCTFail("OVER PRODUCTION")
+                Issue.record("OVER PRODUCTION")
                 print(command)
                 return
             default:
-                XCTFail("\(error)")
+                Issue.record("\(error)")
                 return
             }
         } catch {
-            XCTFail("unhandled error: \(error)")
+            Issue.record("unhandled error: \(error)")
         }
     }
 }
 
 // MARK: - Response
 
-extension B2MV_Tests {
-    func testResponse() {
+extension ByteToMessageDecoderVerifierTests {
+    @Test("response")
+    func response() {
         let inoutPairs: [(String, [Response])] = [
             // MARK: State responses
 
@@ -436,24 +439,24 @@ extension B2MV_Tests {
             }
             switch error.errorCode {
             case .underProduction(let command):
-                XCTFail("UNDER PRODUCTION")
+                Issue.record("UNDER PRODUCTION")
                 print(command)
                 return
             case .wrongProduction(actual: let actualCommand, expected: let expectedCommand):
-                XCTFail("WRONG PRODUCTION")
+                Issue.record("WRONG PRODUCTION")
                 print(actualCommand)
                 print(expectedCommand)
                 return
             case .overProduction(let command):
-                XCTFail("OVER PRODUCTION")
+                Issue.record("OVER PRODUCTION")
                 print(command)
                 return
             default:
-                XCTFail("\(error)")
+                Issue.record("\(error)")
                 return
             }
         } catch {
-            XCTFail("unhandled error: \(error)")
+            Issue.record("unhandled error: \(error)")
         }
     }
 }

@@ -13,71 +13,54 @@
 //===----------------------------------------------------------------------===//
 
 @testable import NIOIMAPCore
-import XCTest
+import Testing
 
-final class UInt8ParseTypeMembershipTests: XCTestCase {
+@Suite("UInt8 Parse Type Membership")
+struct UInt8ParseTypeMembershipTests {
     let allChars = Set(UInt8.min...UInt8.max)
-}
 
-// MARK: - test isCR
-
-extension UInt8ParseTypeMembershipTests {
-    func testCR() {
+    @Test
+    func CR() {
         let valid: Set<UInt8> = [UInt8(ascii: "\r")]
-        let invalid = self.allChars.subtracting(valid)
-        XCTAssertTrue(valid.allSatisfy(\.isCR))
-        XCTAssertTrue(invalid.allSatisfy { !$0.isCR })
+        let invalid = allChars.subtracting(valid)
+        #expect(valid.allSatisfy { $0.isCR })
+        #expect(invalid.allSatisfy { !$0.isCR })
     }
-}
 
-// MARK: - test isLF
-
-extension UInt8ParseTypeMembershipTests {
-    func testLF() {
+    @Test
+    func LF() {
         let valid: Set<UInt8> = [UInt8(ascii: "\n")]
-        let invalid = self.allChars.subtracting(valid)
-        XCTAssertTrue(valid.allSatisfy(\.isLF))
-        XCTAssertTrue(invalid.allSatisfy { !$0.isLF })
+        let invalid = allChars.subtracting(valid)
+        #expect(valid.allSatisfy { $0.isLF })
+        #expect(invalid.allSatisfy { !$0.isLF })
     }
-}
 
-// MARK: - test isResponseSpecial
-
-extension UInt8ParseTypeMembershipTests {
-    func testResponseSpecial() {
+    @Test("response special")
+    func responseSpecial() {
         let valid: Set<UInt8> = [UInt8(ascii: "]")]
-        let invalid = self.allChars.subtracting(valid)
-        XCTAssertTrue(valid.allSatisfy(\.isResponseSpecial))
-        XCTAssertTrue(invalid.allSatisfy { !$0.isResponseSpecial })
+        let invalid = allChars.subtracting(valid)
+        #expect(valid.allSatisfy { $0.isResponseSpecial })
+        #expect(invalid.allSatisfy { !$0.isResponseSpecial })
     }
-}
 
-// MARK: - test isListWildcard
-
-extension UInt8ParseTypeMembershipTests {
-    func testListWildcard() {
+    @Test("list wildcard")
+    func listWildcard() {
         let valid: Set<UInt8> = [UInt8(ascii: "%"), UInt8(ascii: "*")]
-        let invalid = self.allChars.subtracting(valid)
-        XCTAssertTrue(valid.allSatisfy(\.isListWildcard))
-        XCTAssertTrue(invalid.allSatisfy { !$0.isListWildcard })
+        let invalid = allChars.subtracting(valid)
+        #expect(valid.allSatisfy { $0.isListWildcard })
+        #expect(invalid.allSatisfy { !$0.isListWildcard })
     }
-}
 
-// MARK: - test isQuotedSpecial
-
-extension UInt8ParseTypeMembershipTests {
-    func testQuotedSpecial() {
+    @Test("quoted special")
+    func quotedSpecial() {
         let valid: Set<UInt8> = [UInt8(ascii: "\\"), UInt8(ascii: "\"")]
-        let invalid = self.allChars.subtracting(valid)
-        XCTAssertTrue(valid.allSatisfy(\.isQuotedSpecial))
-        XCTAssertTrue(invalid.allSatisfy { !$0.isQuotedSpecial })
+        let invalid = allChars.subtracting(valid)
+        #expect(valid.allSatisfy { $0.isQuotedSpecial })
+        #expect(invalid.allSatisfy { !$0.isQuotedSpecial })
     }
-}
 
-// MARK: - test isAtomSpecial
-
-extension UInt8ParseTypeMembershipTests {
-    func testAtomSpecial() {
+    @Test("atom special")
+    func atomSpecial() {
         var valid: Set<UInt8> = [
             UInt8(ascii: "("), UInt8(ascii: ")"), UInt8(ascii: " "), UInt8(ascii: "{"),
             UInt8(ascii: "]"),  // ResponseSpecial
@@ -85,55 +68,46 @@ extension UInt8ParseTypeMembershipTests {
             UInt8(ascii: "\""), UInt8(ascii: "\\"),  // QuotedSpecial
         ]
         valid = valid.union(0...31)
-        self.allChars.forEach { char in
+        allChars.forEach { char in
             if valid.contains(char) {
-                XCTAssertTrue(char.isAtomSpecial)
+                #expect(char.isAtomSpecial)
             } else {
-                XCTAssertFalse(char.isAtomSpecial)
+                #expect(!char.isAtomSpecial)
             }
         }
     }
-}
 
-// MARK: - test isTextChar
-
-extension UInt8ParseTypeMembershipTests {
-    // thanks Johannes
-    func testTextChar() {
+    @Test("text char")
+    func textChar() {
+        // thanks Johannes
         let invalid: Set<UInt8> = [UInt8(ascii: "\r"), .init(ascii: "\n"), 0]
-        let valid = self.allChars.subtracting(invalid).subtracting(128...UInt8.max)
-        XCTAssertTrue(valid.allSatisfy(\.isTextChar))
-        XCTAssertTrue(invalid.allSatisfy { !$0.isTextChar })
+        let valid = allChars.subtracting(invalid).subtracting(128...UInt8.max)
+        #expect(valid.allSatisfy { $0.isTextChar })
+        #expect(invalid.allSatisfy { !$0.isTextChar })
     }
-}
 
-// MARK: - test isHexChar
-
-extension UInt8ParseTypeMembershipTests {
-    func testHexCharacter() {
+    @Test("hex character")
+    func hexCharacter() {
         var valid = Set<UInt8>()
         valid = valid.union(UInt8(ascii: "0")...UInt8(ascii: "9"))
         valid = valid.union(UInt8(ascii: "a")...UInt8(ascii: "f"))
         valid = valid.union(UInt8(ascii: "A")...UInt8(ascii: "F"))
 
-        let invalid = self.allChars.subtracting(valid)
-        XCTAssertTrue(valid.allSatisfy(\.isHexCharacter))
-        XCTAssertTrue(invalid.allSatisfy { !$0.isHexCharacter })
+        let invalid = allChars.subtracting(valid)
+        #expect(valid.allSatisfy { $0.isHexCharacter })
+        #expect(invalid.allSatisfy { !$0.isHexCharacter })
     }
-}
 
-// MARK: - test isBase64Char
-
-extension UInt8ParseTypeMembershipTests {
-    func testBase64Character() {
+    @Test("base64 character")
+    func base64Character() {
         var valid = Set<UInt8>()
         valid = valid.union(UInt8(ascii: "0")...UInt8(ascii: "9"))
         valid = valid.union(UInt8(ascii: "a")...UInt8(ascii: "z"))
         valid = valid.union(UInt8(ascii: "A")...UInt8(ascii: "Z"))
         valid = valid.union([UInt8(ascii: "+"), UInt8(ascii: "/")])
 
-        let invalid = self.allChars.subtracting(valid)
-        XCTAssertTrue(valid.allSatisfy(\.isBase64Char))
-        XCTAssertTrue(invalid.allSatisfy { !$0.isBase64Char })
+        let invalid = allChars.subtracting(valid)
+        #expect(valid.allSatisfy { $0.isBase64Char })
+        #expect(invalid.allSatisfy { !$0.isBase64Char })
     }
 }

@@ -14,32 +14,81 @@
 
 import NIO
 @_spi(NIOIMAPInternal) @testable import NIOIMAPCore
-import XCTest
+import Testing
 
-class QuotaResponseTests: EncodeTestClass {}
-
-// MARK: - Encoding
-
-extension QuotaResponseTests {
-    func testEncode() {
-        let expectedString = "QUOTA \"Root\" ()"
-        self.testBuffer.clear()
-        let size = self.testBuffer.writeQuotaResponse(quotaRoot: .init("Root"), resources: [])
-        XCTAssertEqual(size, expectedString.utf8.count)
-        XCTAssertEqual(self.testBufferString, expectedString)
+@Suite("QuotaResponse")
+struct QuotaResponseTests {
+    @Test(
+        "encode quota response",
+        arguments: [
+            EncodeFixture.quota(
+                (
+                    QuotaRoot("Root"),
+                    []
+                ),
+                #"QUOTA "Root" ()"#
+            ),
+            EncodeFixture.quota(
+                (
+                    QuotaRoot("!partition/sda4"),
+                    [
+                        QuotaResource(resourceName: "STORAGE", usage: 104, limit: 10_923_847)
+                    ]
+                ),
+                #"QUOTA "!partition/sda4" (STORAGE 104 10923847)"#
+            ),
+            EncodeFixture.quota(
+                (
+                    QuotaRoot("#user/alice"),
+                    [
+                        QuotaResource(resourceName: "MESSAGE", usage: 42, limit: 1000)
+                    ]
+                ),
+                ##"QUOTA "#user/alice" (MESSAGE 42 1000)"##
+            ),
+        ]
+    )
+    func encodeQuotaResponse(
+        fixture: EncodeFixture<(QuotaRoot, [QuotaResource])>
+    ) {
+        fixture.checkEncoding()
     }
 
-    func testEncodeQuoteResources() {
-        let inputs: [([QuotaResource], String, UInt)] = [
-            ([QuotaResource(resourceName: "STORAGE", usage: 10, limit: 512)], "(STORAGE 10 512)", #line),
-            ([], "()", #line),
+    @Test(
+        "encode quota resources",
+        arguments: [
+            EncodeFixture.quotaResources(
+                [QuotaResource(resourceName: "STORAGE", usage: 10, limit: 512)],
+                "(STORAGE 10 512)"
+            ),
+            EncodeFixture.quotaResources([], "()"),
         ]
+    )
+    func encodeQuotaResources(_ fixture: EncodeFixture<[QuotaResource]>) {
+        fixture.checkEncoding()
+    }
+}
 
-        for (test, expectedString, line) in inputs {
-            self.testBuffer.clear()
-            let size = self.testBuffer.writeQuotaResources(test)
-            XCTAssertEqual(size, expectedString.utf8.count, line: line)
-            XCTAssertEqual(self.testBufferString, expectedString, line: line)
-        }
+// MARK: -
+
+extension EncodeFixture<(QuotaRoot, [QuotaResource])> {
+    fileprivate static func quota(_ input: (QuotaRoot, [QuotaResource]), _ expectedString: String) -> Self {
+        EncodeFixture(
+            input: input,
+            bufferKind: .defaultServer,
+            expectedString: expectedString,
+            encoder: { $0.writeQuotaResponse(quotaRoot: $1.0, resources: $1.1) }
+        )
+    }
+}
+
+extension EncodeFixture<[QuotaResource]> {
+    fileprivate static func quotaResources(_ input: [QuotaResource], _ expectedString: String) -> Self {
+        EncodeFixture(
+            input: input,
+            bufferKind: .defaultServer,
+            expectedString: expectedString,
+            encoder: { $0.writeQuotaResources($1) }
+        )
     }
 }

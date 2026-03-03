@@ -14,18 +14,83 @@
 
 import NIO
 @_spi(NIOIMAPInternal) @testable import NIOIMAPCore
-import XCTest
+import Testing
 
-class EncodedMailboxUIDValidity_Tests: EncodeTestClass {}
+@Suite("Mailbox UID Validity")
+struct EncodedMailboxUIDValidityTests {
+    @Test(arguments: [
+        EncodeFixture.mailboxUIDValidity(
+            .init(encodeMailbox: .init(mailbox: "mailbox"), uidValidity: nil),
+            "mailbox"
+        ),
+        EncodeFixture.mailboxUIDValidity(
+            .init(encodeMailbox: .init(mailbox: "mailbox"), uidValidity: 123),
+            "mailbox;UIDVALIDITY=123"
+        ),
+    ])
+    func encode(_ fixture: EncodeFixture<MailboxUIDValidity>) {
+        fixture.checkEncoding()
+    }
 
-// MARK: - IMAP
+    @Test(arguments: [
+        ParseFixture.mailboxUIDValidity(
+            "abc",
+            " ",
+            expected: .success(.init(encodeMailbox: .init(mailbox: "abc"), uidValidity: nil))
+        ),
+        ParseFixture.mailboxUIDValidity(
+            "abc;UIDVALIDITY=123",
+            " ",
+            expected: .success(.init(encodeMailbox: .init(mailbox: "abc"), uidValidity: 123))
+        ),
+        ParseFixture.mailboxUIDValidity(
+            "¢",
+            " ",
+            expected: .failure
+        ),
+        ParseFixture.mailboxUIDValidity(
+            "abc",
+            "",
+            expected: .incompleteMessage
+        ),
+        ParseFixture.mailboxUIDValidity(
+            "abc123",
+            "",
+            expected: .incompleteMessage
+        ),
+    ])
+    func parse(_ fixture: ParseFixture<MailboxUIDValidity>) {
+        fixture.checkParsing()
+    }
+}
 
-extension EncodedMailboxUIDValidity_Tests {
-    func testEncode() {
-        let inputs: [(MailboxUIDValidity, String, UInt)] = [
-            (.init(encodeMailbox: .init(mailbox: "mailbox"), uidValidity: nil), "mailbox", #line),
-            (.init(encodeMailbox: .init(mailbox: "mailbox"), uidValidity: 123), "mailbox;UIDVALIDITY=123", #line),
-        ]
-        self.iterateInputs(inputs: inputs, encoder: { self.testBuffer.writeEncodedMailboxUIDValidity($0) })
+// MARK: -
+
+extension EncodeFixture<MailboxUIDValidity> {
+    fileprivate static func mailboxUIDValidity(
+        _ input: MailboxUIDValidity,
+        _ expectedString: String
+    ) -> Self {
+        EncodeFixture(
+            input: input,
+            bufferKind: .defaultServer,
+            expectedString: expectedString,
+            encoder: { $0.writeEncodedMailboxUIDValidity($1) }
+        )
+    }
+}
+
+extension ParseFixture<MailboxUIDValidity> {
+    fileprivate static func mailboxUIDValidity(
+        _ input: String,
+        _ terminator: String,
+        expected: Expected
+    ) -> Self {
+        ParseFixture(
+            input: input,
+            terminator: terminator,
+            expected: expected,
+            parser: GrammarParser().parseEncodedMailboxUIDValidity
+        )
     }
 }

@@ -15,7 +15,7 @@
 import NIO
 @testable import NIOIMAP
 @_spi(NIOIMAPInternal) @testable import NIOIMAPCore
-import XCTest
+import Testing
 
 extension CommandEncodingOptions {
     static var a: CommandEncodingOptions {
@@ -39,49 +39,51 @@ extension CommandEncodingOptions {
     }
 }
 
-class ClientEncodingOptionsTests: XCTestCase {
-    func testGettingEffectiveOptions() {
-        XCTAssertEqual(
+@Suite struct ClientEncodingOptionsTests {
+    @Test("getting effective options")
+    func gettingEffectiveOptions() {
+        #expect(
             ClientEncodingOptions(
                 userOptions: .automatic,
                 automatic: .a
-            ).encodingOptions,
-            .a
+            ).encodingOptions
+                == .a
         )
-        XCTAssertEqual(
+        #expect(
             ClientEncodingOptions(
                 userOptions: .automatic,
                 automatic: .b
-            ).encodingOptions,
-            .b
+            ).encodingOptions
+                == .b
         )
-        XCTAssertEqual(
+        #expect(
             ClientEncodingOptions(
                 userOptions: .fixed(.a),
                 automatic: .b
-            ).encodingOptions,
-            .a
+            ).encodingOptions
+                == .a
         )
-        XCTAssertEqual(
+        #expect(
             ClientEncodingOptions(
                 userOptions: .fixed(.b),
                 automatic: .a
-            ).encodingOptions,
-            .b
+            ).encodingOptions
+                == .b
         )
     }
 
-    func testUpdateWithResponse() {
+    @Test("update with response")
+    func updateWithResponse() {
         var sut = ClientEncodingOptions(userOptions: .automatic)
 
-        XCTAssertEqual(sut.encodingOptions, CommandEncodingOptions())
+        #expect(sut.encodingOptions == CommandEncodingOptions())
 
         sut.updateAutomaticOptions(response: .untagged(.capabilityData([.imap4, .literalMinus])))
-        XCTAssertEqual(
-            sut.encodingOptions,
-            CommandEncodingOptions(
-                useNonSynchronizingLiteralMinus: true
-            )
+        #expect(
+            sut.encodingOptions
+                == CommandEncodingOptions(
+                    useNonSynchronizingLiteralMinus: true
+                )
         )
 
         sut.updateAutomaticOptions(
@@ -97,29 +99,30 @@ class ClientEncodingOptionsTests: XCTestCase {
                 )
             )
         )
-        XCTAssertEqual(
-            sut.encodingOptions,
-            CommandEncodingOptions(
-                useNonSynchronizingLiteralPlus: true,
-                useBinaryLiteral: true
-            )
+        #expect(
+            sut.encodingOptions
+                == CommandEncodingOptions(
+                    useNonSynchronizingLiteralPlus: true,
+                    useBinaryLiteral: true
+                )
         )
     }
 
-    func testUpdatingAutoWhenUsingFixed() {
+    @Test("updating auto when using fixed")
+    func updatingAutoWhenUsingFixed() {
         var sut = ClientEncodingOptions(userOptions: .fixed(.a))
 
-        XCTAssertEqual(sut.encodingOptions, .a)
+        #expect(sut.encodingOptions == .a)
 
         sut.updateAutomaticOptions(response: .untagged(.capabilityData([.imap4, .literalMinus])))
-        XCTAssertEqual(sut.encodingOptions, .a)
+        #expect(sut.encodingOptions == .a)
 
         sut.userOptions = .automatic
-        XCTAssertEqual(
-            sut.encodingOptions,
-            CommandEncodingOptions(
-                useNonSynchronizingLiteralMinus: true
-            )
+        #expect(
+            sut.encodingOptions
+                == CommandEncodingOptions(
+                    useNonSynchronizingLiteralMinus: true
+                )
         )
     }
 }

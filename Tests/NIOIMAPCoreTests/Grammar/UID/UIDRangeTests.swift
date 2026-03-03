@@ -14,182 +14,193 @@
 
 import NIO
 @_spi(NIOIMAPInternal) @testable import NIOIMAPCore
-import XCTest
+import Testing
 
-class UIDRangeTests: EncodeTestClass {}
-
-// MARK: - last
-
-extension UIDRangeTests {
-    func testWildcard() {
+@Suite("UIDRange")
+struct UIDRangeTests {
+    @Test func wildcard() {
         let range = MessageIdentifierRange<UID>.all.range
-        XCTAssertEqual(range.lowerBound, UID.min)
-        XCTAssertEqual(range.upperBound, UID.max)
+        #expect(range.lowerBound == UID.min)
+        #expect(range.upperBound == UID.max)
     }
-}
 
-// MARK: - single
-
-extension UIDRangeTests {
-    func testSingle() {
+    @Test func single() {
         let range = MessageIdentifierRange<UID>(999).range
-        XCTAssertEqual(range.lowerBound, 999)
-        XCTAssertEqual(range.upperBound, 999)
+        #expect(range.lowerBound == 999)
+        #expect(range.upperBound == 999)
     }
-}
 
-// MARK: - init
-
-extension UIDRangeTests {
-    // here we always expect the smaller number on the left
-
-    func testInit_range() {
+    @Test("init range")
+    func initRange() {
         let range = MessageIdentifierRange<UID>(1...999).range
-        XCTAssertEqual(range.lowerBound, 1)
-        XCTAssertEqual(range.upperBound, 999)
+        #expect(range.lowerBound == 1)
+        #expect(range.upperBound == 999)
     }
 
-    func testInit_integer() {
+    @Test("init integer")
+    func initInteger() {
         let range: MessageIdentifierRange<UID> = 654
-        XCTAssertEqual(range.range.lowerBound, 654)
-        XCTAssertEqual(range.range.upperBound, 654)
-    }
-}
-
-// MARK: - Convenience
-
-extension UIDRangeTests {
-    func testCount() {
-        XCTAssertEqual(MessageIdentifierRange<UID>(654...654).count, 1)
-        XCTAssertEqual(MessageIdentifierRange<UID>(654).count, 1)
-        XCTAssertEqual(MessageIdentifierRange<UID>(654...655).count, 2)
-        XCTAssertEqual(MessageIdentifierRange<UID>(UID.min...UID.max).count, 4_294_967_295)
-        XCTAssertEqual(MessageIdentifierRange<UID>(777...999).count, 223)
+        #expect(range.range.lowerBound == 654)
+        #expect(range.range.upperBound == 654)
     }
 
-    func testBounds() {
-        XCTAssertEqual(MessageIdentifierRange<UID>(654).lowerBound, 654)
-        XCTAssertEqual(MessageIdentifierRange<UID>(654).upperBound, 654)
-
-        XCTAssertEqual(MessageIdentifierRange<UID>(777...999).lowerBound, 777)
-        XCTAssertEqual(MessageIdentifierRange<UID>(777...999).upperBound, 999)
+    @Test func count() {
+        #expect(MessageIdentifierRange<UID>(654...654).count == 1)
+        #expect(MessageIdentifierRange<UID>(654).count == 1)
+        #expect(MessageIdentifierRange<UID>(654...655).count == 2)
+        #expect(MessageIdentifierRange<UID>(UID.min...UID.max).count == 4_294_967_295)
+        #expect(MessageIdentifierRange<UID>(777...999).count == 223)
     }
 
-    func testIsEmpty() {
-        XCTAssertFalse(MessageIdentifierRange<UID>(654...654).isEmpty)
-        XCTAssertFalse(MessageIdentifierRange<UID>(654).isEmpty)
-        XCTAssertFalse(MessageIdentifierRange<UID>(654...655).isEmpty)
-        XCTAssertFalse(MessageIdentifierRange<UID>(UID.min...UID.max).isEmpty)
+    @Test func bounds() {
+        #expect(MessageIdentifierRange<UID>(654).lowerBound == 654)
+        #expect(MessageIdentifierRange<UID>(654).upperBound == 654)
+
+        #expect(MessageIdentifierRange<UID>(777...999).lowerBound == 777)
+        #expect(MessageIdentifierRange<UID>(777...999).upperBound == 999)
     }
 
-    func testClamping() {
-        XCTAssertEqual(
+    @Test func isEmpty() {
+        #expect(!MessageIdentifierRange<UID>(654...654).isEmpty)
+        #expect(!MessageIdentifierRange<UID>(654).isEmpty)
+        #expect(!MessageIdentifierRange<UID>(654...655).isEmpty)
+        #expect(!MessageIdentifierRange<UID>(UID.min...UID.max).isEmpty)
+    }
+
+    @Test func clamping() {
+        #expect(
             MessageIdentifierRange<UID>(654...655)
-                .clamped(to: MessageIdentifierRange<UID>(654...655)),
-            MessageIdentifierRange<UID>(654...655)
+                .clamped(to: MessageIdentifierRange<UID>(654...655))
+                == MessageIdentifierRange<UID>(654...655)
         )
-        XCTAssertEqual(
+        #expect(
             MessageIdentifierRange<UID>(654...655)
-                .clamped(to: MessageIdentifierRange<UID>(UID.min...UID.max)),
-            MessageIdentifierRange<UID>(654...655)
+                .clamped(to: MessageIdentifierRange<UID>(UID.min...UID.max))
+                == MessageIdentifierRange<UID>(654...655)
         )
-        XCTAssertEqual(
+        #expect(
             MessageIdentifierRange<UID>(UID.min...UID.max)
-                .clamped(to: MessageIdentifierRange<UID>(654...655)),
-            MessageIdentifierRange<UID>(654...655)
+                .clamped(to: MessageIdentifierRange<UID>(654...655))
+                == MessageIdentifierRange<UID>(654...655)
         )
-        XCTAssertEqual(
+        #expect(
             MessageIdentifierRange<UID>(654...655)
-                .clamped(to: MessageIdentifierRange<UID>(100...200)),
-            MessageIdentifierRange<UID>(200)
+                .clamped(to: MessageIdentifierRange<UID>(100...200))
+                == MessageIdentifierRange<UID>(200)
         )
     }
 
-    func testOverlaps() {
-        XCTAssert(
+    @Test func overlaps() {
+        #expect(
             MessageIdentifierRange<UID>(654...655)
                 .overlaps(MessageIdentifierRange<UID>(654...655))
         )
-        XCTAssert(
+        #expect(
             MessageIdentifierRange<UID>(654...655)
                 .overlaps(MessageIdentifierRange<UID>(600...700))
         )
-        XCTAssert(
+        #expect(
             MessageIdentifierRange<UID>(654...655)
                 .overlaps(MessageIdentifierRange<UID>(600...654))
         )
-        XCTAssert(
+        #expect(
             MessageIdentifierRange<UID>(600...700)
                 .overlaps(MessageIdentifierRange<UID>(654...655))
         )
-        XCTAssert(
+        #expect(
             MessageIdentifierRange<UID>(654...655)
                 .overlaps(MessageIdentifierRange<UID>(UID.min...UID.max))
         )
-        XCTAssertFalse(
-            MessageIdentifierRange<UID>(100...600)
+        #expect(
+            !MessageIdentifierRange<UID>(100...600)
                 .overlaps(MessageIdentifierRange<UID>(654...655))
         )
-        XCTAssertFalse(
-            MessageIdentifierRange<UID>(654...655)
+        #expect(
+            !MessageIdentifierRange<UID>(654...655)
                 .overlaps(MessageIdentifierRange<UID>(100...600))
         )
     }
 
-    func testContains() {
-        XCTAssert(MessageIdentifierRange<UID>(654...655).contains(654))
-        XCTAssert(MessageIdentifierRange<UID>(654...655).contains(654))
-        XCTAssertFalse(MessageIdentifierRange<UID>(654...655).contains(653))
-        XCTAssertFalse(MessageIdentifierRange<UID>(654...655).contains(656))
-        XCTAssertFalse(MessageIdentifierRange<UID>(654...655).contains(UID.min))
-        XCTAssertFalse(MessageIdentifierRange<UID>(654...655).contains(UID.max))
+    @Test func contains() {
+        #expect(MessageIdentifierRange<UID>(654...655).contains(654))
+        #expect(MessageIdentifierRange<UID>(654...655).contains(654))
+        #expect(!MessageIdentifierRange<UID>(654...655).contains(653))
+        #expect(!MessageIdentifierRange<UID>(654...655).contains(656))
+        #expect(!MessageIdentifierRange<UID>(654...655).contains(UID.min))
+        #expect(!MessageIdentifierRange<UID>(654...655).contains(UID.max))
     }
-}
 
-// MARK: - Encoding
-
-extension UIDRangeTests {
-    func testEncode() {
-        let inputs: [(MessageIdentifierRange<UID>, String, UInt)] = [
-            (33...44, "33:44", #line),
-            (5, "5", #line),
-            (MessageIdentifierRange<UID>(.max), "*", #line),
-            (.all, "1:*", #line),
-            (...55, "1:55", #line),
-            (66..., "66:*", #line),
-        ]
-
-        for (test, expectedString, line) in inputs {
-            self.testBuffer.clear()
-            let size = self.testBuffer.writeMessageIdentifierRange(test)
-            XCTAssertEqual(size, expectedString.utf8.count, line: line)
-            XCTAssertEqual(self.testBufferString, expectedString, line: line)
-            XCTAssertEqual("\(test)", expectedString, line: line)
-        }
+    @Test(arguments: [
+        EncodeFixture.uidRange(33...44, "33:44"),
+        EncodeFixture.uidRange(5, "5"),
+        EncodeFixture.uidRange(MessageIdentifierRange<UID>(.max), "*"),
+        EncodeFixture.uidRange(.all, "1:*"),
+        EncodeFixture.uidRange(...55, "1:55"),
+        EncodeFixture.uidRange(66..., "66:*"),
+    ])
+    func encode(_ fixture: EncodeFixture<MessageIdentifierRange<UID>>) {
+        fixture.checkEncoding()
+        #expect("\(fixture.input)" == fixture.expectedStrings.joined())
     }
-}
 
-// MARK: - Range operators
-
-extension UIDRangeTests {
-    func testRangeOperator_prefix() {
+    @Test("range operator prefix")
+    func rangeOperatorPrefix() {
+        var buffer = EncodeBuffer.serverEncodeBuffer(
+            buffer: ByteBuffer(),
+            options: ResponseEncodingOptions(),
+            loggingMode: false
+        )
         let expected = "5:*"
-        let size = self.testBuffer.writeMessageIdentifierRange(MessageIdentifierRange<UID>(5...(.max)))
-        XCTAssertEqual(size, expected.utf8.count)
-        XCTAssertEqual(expected, self.testBufferString)
+        let size = buffer.writeMessageIdentifierRange(MessageIdentifierRange<UID>(5...(.max)))
+        #expect(size == expected.utf8.count)
+        var remaining = buffer
+        let actualString = String(buffer: remaining.nextChunk().bytes)
+        #expect(actualString == expected)
     }
 
-    func testRangeOperator_postfix() {
+    @Test("range operator postfix")
+    func rangeOperatorPostfix() {
+        var buffer = EncodeBuffer.serverEncodeBuffer(
+            buffer: ByteBuffer(),
+            options: ResponseEncodingOptions(),
+            loggingMode: false
+        )
         let expected = "5:*"
-        let size = self.testBuffer.writeMessageIdentifierRange(MessageIdentifierRange<UID>(5...(.max)))
-        XCTAssertEqual(size, expected.utf8.count)
-        XCTAssertEqual(expected, self.testBufferString)
+        let size = buffer.writeMessageIdentifierRange(MessageIdentifierRange<UID>(5...(.max)))
+        #expect(size == expected.utf8.count)
+        var remaining = buffer
+        let actualString = String(buffer: remaining.nextChunk().bytes)
+        #expect(actualString == expected)
     }
 
-    func testRangeOperator_postfix_complete_right_larger() {
+    @Test("range operator postfix complete right larger")
+    func rangeOperatorPostfixCompleteRightLarger() {
+        var buffer = EncodeBuffer.serverEncodeBuffer(
+            buffer: ByteBuffer(),
+            options: ResponseEncodingOptions(),
+            loggingMode: false
+        )
         let expected = "44:55"
-        let size = self.testBuffer.writeMessageIdentifierRange(MessageIdentifierRange<UID>(44...55))
-        XCTAssertEqual(size, expected.utf8.count)
-        XCTAssertEqual(expected, self.testBufferString)
+        let size = buffer.writeMessageIdentifierRange(MessageIdentifierRange<UID>(44...55))
+        #expect(size == expected.utf8.count)
+        var remaining = buffer
+        let actualString = String(buffer: remaining.nextChunk().bytes)
+        #expect(actualString == expected)
+    }
+}
+
+// MARK: -
+
+extension EncodeFixture<MessageIdentifierRange<UID>> {
+    fileprivate static func uidRange(
+        _ input: MessageIdentifierRange<UID>,
+        _ expectedString: String
+    ) -> Self {
+        EncodeFixture(
+            input: input,
+            bufferKind: .defaultServer,
+            expectedString: expectedString,
+            encoder: { $0.writeMessageIdentifierRange($1) }
+        )
     }
 }
