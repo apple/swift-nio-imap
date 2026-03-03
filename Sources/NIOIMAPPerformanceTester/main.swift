@@ -217,18 +217,21 @@ let commands: [(String, Command)] = [
 
 // MARK: Test Harness
 
-// TODO: Migrate this debug mode check.
+private func makeWarning() -> String {
+    var warning = ""
+    assert(
+        {
+            print("======================================================")
+            print("= YOU ARE RUNNING NIOPerformanceTester IN DEBUG MODE =")
+            print("======================================================")
+            warning = " <<< DEBUG MODE >>>"
+            return true
+        }()
+    )
+    return warning
+}
 
-//var warning: String = ""
-//assert(
-//    {
-//        print("======================================================")
-//        print("= YOU ARE RUNNING NIOPerformanceTester IN DEBUG MODE =")
-//        print("======================================================")
-//        warning = " <<< DEBUG MODE >>>"
-//        return true
-//    }()
-//)
+private let warning = makeWarning()
 
 func measure(_ fn: () throws -> Int) rethrows -> [TimeInterval] {
     func measureOne(_ fn: () throws -> Int) rethrows -> TimeInterval {
