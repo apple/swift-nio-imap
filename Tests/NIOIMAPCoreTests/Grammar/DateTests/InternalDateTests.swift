@@ -17,6 +17,16 @@ import Testing
 
 @Suite("ServerMessageDate")
 struct InternalDateTests {
+    @Test("UInt64 conversion")
+    func uint64Conversion() {
+        let components = ServerMessageDate.Components(
+            year: 2024, month: 3, day: 15, hour: 10, minute: 30, second: 45, timeZoneMinutes: 0
+        )!
+        let date = ServerMessageDate(components)
+        let raw = UInt64(date)
+        #expect(raw == date.rawValue)
+    }
+
     @Test("component initialization and roundtrip with typical values")
     func componentInitializationAndRoundtripWithTypicalValues() {
         let components = ServerMessageDate.Components(

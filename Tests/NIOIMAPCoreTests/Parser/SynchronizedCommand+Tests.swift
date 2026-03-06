@@ -268,6 +268,33 @@ struct SynchronizedCommandTests {
         #expect(c2_5 == SynchronizedCommand(.append(.finish)))
     }
 
+    @Test("CATENATE with non-synchronizing literal TEXT part")
+    func catenateWithNonSynchronizingLiteralTextPart() throws {
+        // Uses TEXT {N+}\r\n (non-synchronizing literal with '+')
+        var buffer = ByteBuffer(
+            string: "A1 APPEND Drafts CATENATE (TEXT {5+}\r\nhello)\r\n"
+        )
+
+        var parser = CommandParser()
+
+        let c1 = try parser.parseCommandStream(buffer: &buffer)
+        let c2 = try parser.parseCommandStream(buffer: &buffer)
+        let c3 = try parser.parseCommandStream(buffer: &buffer)
+        let c4 = try parser.parseCommandStream(buffer: &buffer)
+        let c5 = try parser.parseCommandStream(buffer: &buffer)
+        let c6 = try parser.parseCommandStream(buffer: &buffer)
+        let c7 = try parser.parseCommandStream(buffer: &buffer)
+
+        #expect(buffer.readableBytes == 0)
+        #expect(c1 == SynchronizedCommand(.append(.start(tag: "A1", appendingTo: MailboxName("Drafts")))))
+        #expect(c2 == SynchronizedCommand(.append(.beginCatenate(options: .none))))
+        #expect(c3 == SynchronizedCommand(.append(.catenateData(.begin(size: 5)))))
+        #expect(c4 == SynchronizedCommand(.append(.catenateData(.bytes("hello")))))
+        #expect(c5 == SynchronizedCommand(.append(.catenateData(.end))))
+        #expect(c6 == SynchronizedCommand(.append(.endCatenate)))
+        #expect(c7 == SynchronizedCommand(.append(.finish)))
+    }
+
     // MARK: - IDLE Command Tests
 
     @Test("IDLE command lifecycle with mode transitions")

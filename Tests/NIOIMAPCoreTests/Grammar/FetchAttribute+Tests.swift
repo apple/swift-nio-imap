@@ -202,6 +202,9 @@ struct FetchAttributeTests {
         ParseFixture.fetchAttribute("PREVIEW (LAZY)", " ", expected: .success(.preview(lazy: true))),
         ParseFixture.fetchAttribute("EMAILID", " ", expected: .success(.emailID)),
         ParseFixture.fetchAttribute("THREADID", " ", expected: .success(.threadID)),
+        // Numeric inputs fall back to parseFetchAttribute_modificationSequence
+        ParseFixture.fetchAttribute("0", " ", expected: .success(.modificationSequenceValue(.zero))),
+        ParseFixture.fetchAttribute("42", " ", expected: .success(.modificationSequenceValue(42))),
     ])
     func parse(_ fixture: ParseFixture<FetchAttribute>) {
         fixture.checkParsing()
