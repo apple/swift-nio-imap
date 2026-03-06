@@ -52,6 +52,22 @@ struct ListSelectOptionTests {
     func encodeMultipleOptions(_ fixture: EncodeFixture<ListSelectOptions?>) {
         fixture.checkEncoding()
     }
+
+    @Test(
+        "parse single option",
+        arguments: [
+            ParseFixture.listSelectOption("SUBSCRIBED", " ", expected: .success(.subscribed)),
+            ParseFixture.listSelectOption("REMOTE", " ", expected: .success(.remote)),
+            ParseFixture.listSelectOption("RECURSIVEMATCH", " ", expected: .success(.recursiveMatch)),
+            ParseFixture.listSelectOption("SPECIAL-USE", " ", expected: .success(.specialUse)),
+            ParseFixture.listSelectOption("MYEXT", expected: .success(.option(.init(key: .standard("MYEXT"), value: nil)))),
+            ParseFixture.listSelectOption("(invalid)", "", expected: .failure),
+            ParseFixture.listSelectOption("", "", expected: .incompleteMessage),
+        ]
+    )
+    func parseSingleOption(_ fixture: ParseFixture<ListSelectOption>) {
+        fixture.checkParsing()
+    }
 }
 
 // MARK: -
@@ -74,6 +90,21 @@ extension EncodeFixture<ListSelectOptions?> {
             bufferKind: .defaultServer,
             expectedString: expectedString,
             encoder: { $0.writeListSelectOptions($1) }
+        )
+    }
+}
+
+extension ParseFixture<ListSelectOption> {
+    fileprivate static func listSelectOption(
+        _ input: String,
+        _ terminator: String = "\r",
+        expected: Expected
+    ) -> Self {
+        ParseFixture(
+            input: input,
+            terminator: terminator,
+            expected: expected,
+            parser: GrammarParser().parseListSelectOption
         )
     }
 }

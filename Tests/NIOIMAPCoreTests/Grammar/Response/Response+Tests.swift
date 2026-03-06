@@ -174,6 +174,69 @@ private struct ResponseTests {
                 == fixture.expected.mappingControlPictures()
         )
     }
+
+    @Test(
+        "Response tag property",
+        arguments: [
+            ResponseTagFixture(response: .untagged(.id([:])), expectedTag: nil),
+            ResponseTagFixture(response: .fetch(.start(1)), expectedTag: nil),
+            ResponseTagFixture(response: .fatal(.init(text: "fatal")), expectedTag: nil),
+            ResponseTagFixture(response: .authenticationChallenge("data"), expectedTag: nil),
+            ResponseTagFixture(response: .idleStarted, expectedTag: nil),
+            ResponseTagFixture(
+                response: .tagged(.init(tag: "A1", state: .ok(.init(text: "ok")))),
+                expectedTag: "A1"
+            ),
+        ] as [ResponseTagFixture]
+    )
+    func responseTag(_ fixture: ResponseTagFixture) {
+        #expect(fixture.response.tag == fixture.expectedTag)
+    }
+
+    @Test(
+        "StreamingKind sectionSpecifier",
+        arguments: [
+            StreamingKindSectionSpecifierFixture(
+                kind: .binary(section: [1, 2], offset: nil),
+                expected: SectionSpecifier(part: [1, 2], kind: .text)
+            ),
+            StreamingKindSectionSpecifierFixture(
+                kind: .body(section: SectionSpecifier(part: [3], kind: .header), offset: nil),
+                expected: SectionSpecifier(part: [3], kind: .header)
+            ),
+            StreamingKindSectionSpecifierFixture(
+                kind: .rfc822,
+                expected: SectionSpecifier()
+            ),
+            StreamingKindSectionSpecifierFixture(
+                kind: .rfc822Text,
+                expected: SectionSpecifier(part: [], kind: .text)
+            ),
+            StreamingKindSectionSpecifierFixture(
+                kind: .rfc822Header,
+                expected: SectionSpecifier(part: [], kind: .header)
+            ),
+        ] as [StreamingKindSectionSpecifierFixture]
+    )
+    func streamingKindSectionSpecifier(_ fixture: StreamingKindSectionSpecifierFixture) {
+        #expect(fixture.kind.sectionSpecifier == fixture.expected)
+    }
+
+    @Test(
+        "StreamingKind offset",
+        arguments: [
+            StreamingKindOffsetFixture(kind: .binary(section: [1], offset: 42), expected: 42),
+            StreamingKindOffsetFixture(kind: .binary(section: [1], offset: nil), expected: nil),
+            StreamingKindOffsetFixture(kind: .body(section: SectionSpecifier(), offset: 10), expected: 10),
+            StreamingKindOffsetFixture(kind: .body(section: SectionSpecifier(), offset: nil), expected: nil),
+            StreamingKindOffsetFixture(kind: .rfc822, expected: nil),
+            StreamingKindOffsetFixture(kind: .rfc822Text, expected: nil),
+            StreamingKindOffsetFixture(kind: .rfc822Header, expected: nil),
+        ] as [StreamingKindOffsetFixture]
+    )
+    func streamingKindOffset(_ fixture: StreamingKindOffsetFixture) {
+        #expect(fixture.kind.offset == fixture.expected)
+    }
 }
 
 // MARK: -
@@ -231,4 +294,25 @@ private struct PIIFixture: Sendable, CustomTestStringConvertible {
     let expected: String
 
     var testDescription: String { expected.mappingControlPictures() }
+}
+
+private struct ResponseTagFixture: Sendable, CustomTestStringConvertible {
+    let response: Response
+    let expectedTag: String?
+
+    var testDescription: String { expectedTag ?? "(nil)" }
+}
+
+private struct StreamingKindSectionSpecifierFixture: Sendable, CustomTestStringConvertible {
+    let kind: StreamingKind
+    let expected: SectionSpecifier
+
+    var testDescription: String { "\(kind)" }
+}
+
+private struct StreamingKindOffsetFixture: Sendable, CustomTestStringConvertible {
+    let kind: StreamingKind
+    let expected: Int?
+
+    var testDescription: String { "\(kind)" }
 }

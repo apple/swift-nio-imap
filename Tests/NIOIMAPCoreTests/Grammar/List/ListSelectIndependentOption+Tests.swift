@@ -26,6 +26,15 @@ struct ListSelectIndependentOptionTests {
     func encode(_ fixture: EncodeFixture<ListSelectIndependentOption>) {
         fixture.checkEncoding()
     }
+
+    @Test(arguments: [
+        ParseFixture.listSelectIndependentOption("REMOTE", " ", expected: .success(.remote)),
+        ParseFixture.listSelectIndependentOption("SPECIAL-USE", " ", expected: .failure),
+        ParseFixture.listSelectIndependentOption("", "", expected: .incompleteMessage),
+    ])
+    func parse(_ fixture: ParseFixture<ListSelectIndependentOption>) {
+        fixture.checkParsing()
+    }
 }
 
 // MARK: -
@@ -40,6 +49,21 @@ extension EncodeFixture<ListSelectIndependentOption> {
             bufferKind: .defaultServer,
             expectedString: expectedString,
             encoder: { $0.writeListSelectIndependentOption($1) }
+        )
+    }
+}
+
+extension ParseFixture<ListSelectIndependentOption> {
+    fileprivate static func listSelectIndependentOption(
+        _ input: String,
+        _ terminator: String = "\r",
+        expected: Expected
+    ) -> Self {
+        ParseFixture(
+            input: input,
+            terminator: terminator,
+            expected: expected,
+            parser: GrammarParser().parseListSelectIndependentOption
         )
     }
 }

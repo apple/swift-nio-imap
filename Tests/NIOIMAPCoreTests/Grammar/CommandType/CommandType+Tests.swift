@@ -178,9 +178,97 @@ struct CommandTypeTests {
             .rename(from: .inbox, to: .init("other"), parameters: ["test": nil]),
             #"RENAME "INBOX" "other" (test)"#
         ),
+
+        // listIndependent: select options and return options combinations
+        CommandEncodeFixture.command(
+            .listIndependent([.remote], reference: .inbox, .mailbox("*"), [.children]),
+            #"LIST(REMOTE) "INBOX" "*" RETURN (CHILDREN)"#
+        ),
+        CommandEncodeFixture.command(
+            .listIndependent([.specialUse], reference: .inbox, .mailbox("*"), []),
+            #"LIST(SPECIAL-USE) "INBOX" "*""#
+        ),
+        CommandEncodeFixture.command(
+            .listIndependent([.remote, .specialUse], reference: .inbox, .mailbox("*"), [.children]),
+            #"LIST(REMOTE SPECIAL-USE) "INBOX" "*" RETURN (CHILDREN)"#
+        ),
+        CommandEncodeFixture.command(
+            .listIndependent([], reference: .inbox, .mailbox("*"), [.children]),
+            #"LIST "INBOX" "*" RETURN (CHILDREN)"#
+        ),
+        CommandEncodeFixture.command(
+            .listIndependent([], reference: .inbox, .mailbox("*"), []),
+            #"LIST "INBOX" "*""#
+        ),
+
+        // authenticate with initial response
+        CommandEncodeFixture.command(
+            .authenticate(mechanism: .gssAPI, initialResponse: .init(ByteBuffer(string: "hey"))),
+            "AUTHENTICATE GSSAPI aGV5"
+        ),
+        CommandEncodeFixture.command(
+            .authenticate(mechanism: .gssAPI, initialResponse: .empty),
+            "AUTHENTICATE GSSAPI ="
+        ),
+
+        // enable
+        CommandEncodeFixture.command(.enable([.binary]), "ENABLE BINARY"),
+        CommandEncodeFixture.command(.enable([.binary, .acl]), "ENABLE BINARY ACL"),
+
+        // setQuota
+        CommandEncodeFixture.command(
+            .setQuota(.init("ROOT"), [.init(resourceName: "STORAGE", limit: 512)]),
+            #"SETQUOTA "ROOT" (STORAGE 512)"#
+        ),
+        CommandEncodeFixture.command(
+            .setQuota(.init(""), [.init(resourceName: "STORAGE", limit: 0), .init(resourceName: "BANDWIDTH", limit: 99)]),
+            #"SETQUOTA "" (STORAGE 0 BANDWIDTH 99)"#
+        ),
+
+        // store with modifiers (covers write(if: modifiers.count >= 1) branch)
+        CommandEncodeFixture.command(
+            .store(.set([1]), [.unchangedSince(.init(modificationSequence: 5))], .flags(.add(silent: false, list: [.seen]))),
+            "STORE 1 (UNCHANGEDSINCE 5) +FLAGS (\\Seen)"
+        ),
+        CommandEncodeFixture.command(
+            .uidStore(.set(.init(range: 1...5)), [.unchangedSince(.init(modificationSequence: 10))], .flags(.remove(silent: true, list: [.answered]))),
+            "UID STORE 1:5 (UNCHANGEDSINCE 10) -FLAGS.SILENT (\\Answered)"
+        ),
     ])
     func encode(_ fixture: CommandEncodeFixture<Command>) {
         fixture.checkEncoding()
+    }
+
+    @Test("Command debugDescription")
+    func commandDebugDescription() {
+        #expect(Command.noop.debugDescription == "NOOP")
+        #expect(Command.capability.debugDescription == "CAPABILITY")
+        #expect(Command.select(.inbox, []).debugDescription == "SELECT \"INBOX\"")
+    }
+
+    @Test("authenticate with initialResponse in loggingMode")
+    func authenticateWithInitialResponseLoggingMode() {
+        var buffer = CommandEncodeBuffer(buffer: ByteBufferAllocator().buffer(capacity: 64), capabilities: [], loggingMode: true)
+        _ = buffer.writeCommand(.authenticate(mechanism: .gssAPI, initialResponse: .init(ByteBuffer(string: "secret"))))
+        #expect(String(buffer: buffer.buffer.nextChunk().bytes) == "AUTHENTICATE GSSAPI ∅")
+    }
+
+    @Test("UID convenience functions return nil for empty UIDSet")
+    func uidConvenienceFunctionsReturnNilForEmpty() {
+        #expect(Command.uidMove(messages: UIDSet(), mailbox: .inbox) == nil)
+        #expect(Command.uidCopy(messages: UIDSet(), mailbox: .inbox) == nil)
+        #expect(Command.uidFetch(messages: UIDSet(), attributes: [.flags], modifiers: []) == nil)
+        #expect(Command.uidStore(messages: UIDSet(), modifiers: [], data: .flags(.add(silent: false, list: [.seen]))) == nil)
+        #expect(Command.uidExpunge(messages: UIDSet(), mailbox: .inbox) == nil)
+    }
+
+    @Test("UID convenience functions return command for non-empty UIDSet")
+    func uidConvenienceFunctionsReturnCommandForNonEmpty() {
+        #expect(Command.uidMove(messages: [1...10], mailbox: .inbox) != nil)
+        #expect(Command.uidCopy(messages: [1...10], mailbox: .inbox) != nil)
+        #expect(Command.uidFetch(messages: [1...10], attributes: [.flags], modifiers: []) != nil)
+        #expect(Command.uidStore(messages: [1...10], modifiers: [], data: .flags(.add(silent: false, list: [.seen]))) != nil)
+        #expect(Command.uidExpunge(messages: [1...10], mailbox: .inbox) != nil)
     }
 
     @Test(arguments: [
@@ -585,7 +673,51 @@ struct CommandTypeTests {
         ParseFixture.listSuffix(
             #" "" """#,
             expected: .success(.list(nil, reference: MailboxName(""), .mailbox(""), []))
-        )
+        ),
+        // with return options only
+        ParseFixture.listSuffix(
+            #" "" "" RETURN (CHILDREN)"#,
+            expected: .success(.list(nil, reference: MailboxName(""), .mailbox(""), [.children]))
+        ),
+        ParseFixture.listSuffix(
+            #" "" "" RETURN (CHILDREN SUBSCRIBED)"#,
+            expected: .success(.list(nil, reference: MailboxName(""), .mailbox(""), [.children, .subscribed]))
+        ),
+        // with select options (triggers parseListSelectOptions)
+        ParseFixture.listSuffix(
+            " (SUBSCRIBED) \"\" \"\"",
+            expected: .success(
+                .list(.init(baseOption: .subscribed, options: []), reference: MailboxName(""), .mailbox(""), [])
+            )
+        ),
+        ParseFixture.listSuffix(
+            " (REMOTE SUBSCRIBED) \"\" \"\"",
+            expected: .success(
+                .list(.init(baseOption: .subscribed, options: [.remote]), reference: MailboxName(""), .mailbox(""), [])
+            )
+        ),
+        ParseFixture.listSuffix(
+            " (SPECIAL-USE SUBSCRIBED) INBOX * RETURN (CHILDREN)",
+            expected: .success(
+                .list(
+                    .init(baseOption: .subscribed, options: [.specialUse]),
+                    reference: .inbox,
+                    .mailbox("*"),
+                    [.children]
+                )
+            )
+        ),
+        ParseFixture.listSuffix(
+            " (RECURSIVEMATCH SUBSCRIBED) \"\" \"\"",
+            expected: .success(
+                .list(
+                    .init(baseOption: .subscribed, options: [.recursiveMatch]),
+                    reference: MailboxName(""),
+                    .mailbox(""),
+                    []
+                )
+            )
+        ),
     ])
     func parseListSuffix(_ fixture: ParseFixture<Command>) {
         fixture.checkParsing()

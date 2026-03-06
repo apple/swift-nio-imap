@@ -1939,6 +1939,114 @@ private struct BodyStructureTests {
     func parseInvalidBody(_ fixture: ParseFixture<MessageAttribute.BodyStructure>) {
         fixture.checkParsing()
     }
+
+    @Test("underestimatedCount")
+    func underestimatedCount() {
+        let basic = BodyStructure.singlepart(.init(
+            kind: .basic(.init(topLevel: .application, sub: .mixed)),
+            fields: .init(parameters: [:], id: nil, contentDescription: nil, encoding: nil, octetCount: 0)
+        ))
+        #expect(basic.underestimatedCount == 1)
+
+        let multipart = BodyStructure.multipart(.init(
+            parts: [basic, basic],
+            mediaSubtype: .mixed
+        ))
+        #expect(multipart.underestimatedCount == 3)
+    }
+
+    @Test("isEmpty always false")
+    func isEmpty() {
+        let basic = BodyStructure.singlepart(.init(
+            kind: .basic(.init(topLevel: .application, sub: .mixed)),
+            fields: .init(parameters: [:], id: nil, contentDescription: nil, encoding: nil, octetCount: 0)
+        ))
+        #expect(!basic.isEmpty)
+    }
+
+    @Test("find returns nil for invalid positions")
+    func findReturnsNilForInvalidPositions() {
+        let basic = BodyStructure.singlepart(.init(
+            kind: .basic(.init(topLevel: .application, sub: .mixed)),
+            fields: .init(parameters: [:], id: nil, contentDescription: nil, encoding: nil, octetCount: 0)
+        ))
+        let multipart = BodyStructure.multipart(.init(
+            parts: [basic, basic],
+            mediaSubtype: .mixed
+        ))
+        // index 0 is out-of-range (1-based)
+        #expect(basic.find(SectionSpecifier.Part([0])) == nil)
+        // index exceeds multipart count
+        #expect(multipart.find(SectionSpecifier.Part([10])) == nil)
+        // sub-structure of basic part that has no children
+        #expect(multipart.find(SectionSpecifier.Part([1, 1])) == nil)
+    }
+
+    @Test(
+        "encode body",
+        arguments: [
+            EncodeFixture.body(
+                .valid(.singlepart(.init(
+                    kind: .text(.init(mediaSubtype: .init("plain"), lineCount: 5)),
+                    fields: .init(parameters: [:], id: nil, contentDescription: nil, encoding: nil, octetCount: 100)
+                ))),
+                #"("TEXT" "PLAIN" NIL NIL NIL NIL 100 5)"#
+            ),
+            EncodeFixture.body(
+                .invalid,
+                "()"
+            ),
+        ] as [EncodeFixture<MessageAttribute.BodyStructure>]
+    )
+    func encodeBodyMessageAttribute(_ fixture: EncodeFixture<MessageAttribute.BodyStructure>) {
+        fixture.checkEncoding()
+    }
+
+    @Test("encode multipart body")
+    func encodeMultipartBody() {
+        let basic = BodyStructure.singlepart(.init(
+            kind: .text(.init(mediaSubtype: .init("plain"), lineCount: 5)),
+            fields: .init(parameters: [:], id: nil, contentDescription: nil, encoding: nil, octetCount: 100)
+        ))
+        let multipart = BodyStructure.multipart(.init(
+            parts: [basic],
+            mediaSubtype: .mixed
+        ))
+        let fixture = EncodeFixture.bodyStructure(multipart, #"(("TEXT" "PLAIN" NIL NIL NIL NIL 100 5) "MIXED")"#)
+        fixture.checkEncoding()
+    }
+
+    #if swift(>=6.2)
+    @Test func subscriptFatalErrorForInvalidPart() async {
+        await #expect(processExitsWith: ExitTest.Condition.failure, performing: {
+            let basic = BodyStructure.singlepart(.init(
+                kind: .basic(.init(topLevel: .application, sub: .mixed)),
+                fields: .init(parameters: [:], id: nil, contentDescription: nil, encoding: nil, octetCount: 0)
+            ))
+            _ = basic[SectionSpecifier.Part([5])]
+        })
+    }
+
+    @Test func indexBeforeFatalErrorAtStartIndex() async {
+        await #expect(processExitsWith: ExitTest.Condition.failure, performing: {
+            let basic = BodyStructure.singlepart(.init(
+                kind: .basic(.init(topLevel: .application, sub: .mixed)),
+                fields: .init(parameters: [:], id: nil, contentDescription: nil, encoding: nil, octetCount: 0)
+            ))
+            _ = basic.index(before: basic.startIndex)
+        })
+    }
+
+    @Test func indexAfterFatalErrorForInvalidPart() async {
+        await #expect(processExitsWith: ExitTest.Condition.failure, performing: {
+            let basic = BodyStructure.singlepart(.init(
+                kind: .basic(.init(topLevel: .application, sub: .mixed)),
+                fields: .init(parameters: [:], id: nil, contentDescription: nil, encoding: nil, octetCount: 0)
+            ))
+            _ = basic.index(after: SectionSpecifier.Part([1]))
+        })
+    }
+    #endif
 }
 
 // MARK: -
@@ -2007,6 +2115,34 @@ extension ParseFixture<MessageAttribute.BodyStructure> {
             terminator: terminator,
             expected: expected,
             parser: GrammarParser().parseInvalidBody
+        )
+    }
+}
+
+extension EncodeFixture<MessageAttribute.BodyStructure> {
+    fileprivate static func body(
+        _ input: MessageAttribute.BodyStructure,
+        _ expectedString: String
+    ) -> Self {
+        EncodeFixture(
+            input: input,
+            bufferKind: .defaultServer,
+            expectedString: expectedString,
+            encoder: { $0.writeBody($1) }
+        )
+    }
+}
+
+extension EncodeFixture<BodyStructure> {
+    fileprivate static func bodyStructure(
+        _ input: BodyStructure,
+        _ expectedString: String
+    ) -> Self {
+        EncodeFixture(
+            input: input,
+            bufferKind: .defaultServer,
+            expectedString: expectedString,
+            encoder: { $0.writeBody($1) }
         )
     }
 }
