@@ -49,7 +49,7 @@ struct ListSelectBaseOptionTests {
         fixture.checkParsing()
     }
 
-    @Test(arguments: [
+    @Test("parse CHILDINFO extended item", arguments: [
         ParseFixture.childinfoExtendedItem(
             #"CHILDINFO ("SUBSCRIBED")"#,
             expected: .success([.subscribed])

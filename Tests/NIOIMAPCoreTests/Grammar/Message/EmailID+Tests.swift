@@ -19,6 +19,7 @@ import Testing
 @Suite("EmailID")
 struct EmailIDTests {
     @Test(
+        "failable init",
         arguments: [
             ("abc123", true),
             ("ABC-XYZ_123", true),

@@ -68,7 +68,7 @@ struct NamespaceDescriptionTests {
         fixture.checkParsing()
     }
 
-    @Test(arguments: [
+    @Test("parse NAMESPACE", arguments: [
         ParseFixture.namespace(
             "NIL",
             expected: .success([])

@@ -26,7 +26,7 @@ struct QuotaLimitTests {
         fixture.checkEncoding()
     }
 
-    @Test(arguments: [
+    @Test("parse LIST", arguments: [
         ParseFixture.quotaLimits("()", expected: .success([])),
         ParseFixture.quotaLimits(
             "(STORAGE 104)",

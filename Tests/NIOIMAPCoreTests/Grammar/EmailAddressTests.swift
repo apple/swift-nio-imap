@@ -32,7 +32,7 @@ struct EmailAddressTestsSuite {
         #expect(address.host == host)
     }
 
-    @Test(arguments: [
+    @Test("encode email address", arguments: [
         EmailAddressFixture(
             name: "all nil",
             address: .init(personName: nil, sourceRoot: nil, mailbox: nil, host: nil),
@@ -82,7 +82,7 @@ struct EmailAddressTestsSuite {
         fixture.checkParsing()
     }
 
-    @Test(arguments: [
+    @Test("parse envelope email address groups", arguments: [
         EnvelopeGroupingFixture(
             addresses: [],
             expected: []

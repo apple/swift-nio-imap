@@ -18,7 +18,7 @@ import Testing
 
 @Suite("MailboxGroup")
 struct MailboxGroupTests {
-    @Test(arguments: [
+    @Test("encode email address group", arguments: [
         EncodeFixture.emailAddressGroup(
             EmailAddressGroup(
                 groupName: ByteBuffer(string: "Team"),
@@ -41,7 +41,7 @@ struct MailboxGroupTests {
         fixture.checkEncoding()
     }
 
-    @Test(arguments: [
+    @Test("encode email address or group", arguments: [
         EncodeFixture.emailAddressOrGroup(
             .group(
                 EmailAddressGroup(

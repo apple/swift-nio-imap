@@ -40,7 +40,7 @@ struct BodyFieldDSPTests {
         var testDescription: String { name }
     }
 
-    @Test(arguments: [
+    @Test("size property", arguments: [
         SizeFixture(name: "no size parameter", disposition: .init(kind: "test", parameters: [:]), expected: nil),
         SizeFixture(
             name: "lowercase size parameter",
@@ -70,7 +70,7 @@ struct BodyFieldDSPTests {
         var testDescription: String { name }
     }
 
-    @Test(arguments: [
+    @Test("filename property", arguments: [
         FilenameFixture(
             name: "no filename parameter",
             disposition: .init(kind: "test", parameters: [:]),

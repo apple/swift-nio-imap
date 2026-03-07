@@ -39,7 +39,7 @@ struct ParameterValueTests {
         fixture.checkParsing()
     }
 
-    @Test(arguments: [
+    @Test("parse parameter", arguments: [
         ParseFixture.parameter("USE", ")", expected: .success(.init(key: "USE", value: nil))),
         ParseFixture.parameter(
             "USE 1",

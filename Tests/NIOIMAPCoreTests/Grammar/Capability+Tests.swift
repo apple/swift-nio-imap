@@ -181,7 +181,7 @@ struct CapabilityTests {
         fixture.checkParsing()
     }
 
-    @Test(arguments: [
+    @Test("parse CAPABILITY suffix", arguments: [
         ParseFixture.capabilitySuffix(" IMAP4rev1", expected: .success([.imap4rev1])),
         ParseFixture.capabilitySuffix(
             " CONDSTORE ENABLE FILTERS",
@@ -197,7 +197,7 @@ struct CapabilityTests {
         fixture.checkParsing()
     }
 
-    @Test(arguments: [
+    @Test("parse capability data", arguments: [
         ParseFixture.capabilityData("CAPABILITY IMAP4rev1", expected: .success([.imap4rev1])),
         ParseFixture.capabilityData("CAPABILITY IMAP4 IMAP4rev1", expected: .success([.imap4, .imap4rev1])),
         ParseFixture.capabilityData("CAPABILITY FILTERS IMAP4", expected: .success([.filters, .imap4])),
@@ -227,6 +227,7 @@ struct CapabilityTests {
     }
 
     @Test(
+        "case-insensitive kind initializers",
         arguments: [
             (Capability.context(Capability.ContextKind("search")), Capability.context(.search)),
             (Capability.context(Capability.ContextKind("SEARCH")), Capability.context(.search)),

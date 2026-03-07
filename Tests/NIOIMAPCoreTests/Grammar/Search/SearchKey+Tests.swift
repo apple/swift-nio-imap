@@ -179,6 +179,7 @@ struct SearchKeyTests {
     }
 
     @Test(
+        "uses string",
         arguments: [
             (SearchKey.not(.bcc("test")), true),
             (SearchKey.not(.all), false),

@@ -55,7 +55,7 @@ struct ExtendedSearchSourceOptionsTests {
         fixture.checkEncoding()
     }
 
-    @Test(arguments: [
+    @Test("parse extended search source options", arguments: [
         ParseFixture.extendedSearchSourceOptions(
             "IN (inboxes)",
             expected: .success(ExtendedSearchSourceOptions(sourceMailbox: [.inboxes])!)

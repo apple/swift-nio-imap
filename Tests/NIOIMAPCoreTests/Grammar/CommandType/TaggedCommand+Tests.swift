@@ -29,7 +29,7 @@ struct TaggedCommandTests {
         fixture.checkParsing()
     }
 
-    @Test(arguments: [
+    @Test("debug description", arguments: [
         DebugStringFixture<TaggedCommand>(
             sut: .init(tag: "A1", command: .capability),
             expected: "A1 CAPABILITY\r\n"

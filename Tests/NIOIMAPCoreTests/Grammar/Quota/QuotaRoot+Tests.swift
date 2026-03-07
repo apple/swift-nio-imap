@@ -49,6 +49,7 @@ struct QuotaRootTests {
     }
 
     @Test(
+        "debug description",
         arguments: [
             (QuotaRoot("MassivePool"), "MassivePool")
         ] as [(QuotaRoot, String)]

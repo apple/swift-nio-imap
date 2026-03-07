@@ -435,7 +435,7 @@ struct CommandTypeTests {
         }
     }
 
-    @Test(arguments: [
+    @Test("parse ID suffix", arguments: [
         ParseFixture.idSuffix(" ()", expected: .success(.id([:]))),
         ParseFixture.idSuffix(" nil", expected: .success(.id([:]))),
         ParseFixture.idSuffix(#" ("name" "some")"#, expected: .success(.id(["name": "some"]))),
@@ -459,7 +459,7 @@ struct CommandTypeTests {
         fixture.checkParsing()
     }
 
-    @Test(arguments: [
+    @Test("parse GETMETADATA suffix", arguments: [
         ParseFixture.getMetadataSuffix(
             " INBOX a",
             " ",
@@ -479,7 +479,7 @@ struct CommandTypeTests {
         fixture.checkParsing()
     }
 
-    @Test(arguments: [
+    @Test("parse SETMETADATA suffix", arguments: [
         ParseFixture.setMetadataSuffix(
             " INBOX (a NIL)",
             " ",
@@ -494,7 +494,7 @@ struct CommandTypeTests {
         fixture.checkParsing()
     }
 
-    @Test(arguments: [
+    @Test("parse RESETKEY suffix", arguments: [
         ParseFixture.resetKeySuffix("", expected: .success(.resetKey(mailbox: nil, mechanisms: []))),
         ParseFixture.resetKeySuffix(" INBOX", expected: .success(.resetKey(mailbox: .inbox, mechanisms: []))),
         ParseFixture.resetKeySuffix(
@@ -513,7 +513,7 @@ struct CommandTypeTests {
         fixture.checkParsing()
     }
 
-    @Test(arguments: [
+    @Test("parse GENURLAUTH suffix", arguments: [
         ParseFixture.genURLAuthSuffix(
             " test INTERNAL",
             expected: .success(.generateAuthorizedURL([.init(urlRump: "test", mechanism: .internal)]))
@@ -546,7 +546,7 @@ struct CommandTypeTests {
         fixture.checkParsing()
     }
 
-    @Test(arguments: [
+    @Test("parse COPY suffix", arguments: [
         ParseFixture.copySuffix(" $ inbox", expected: .success(.copy(.lastCommand, .inbox))),
         ParseFixture.copySuffix(" 1 inbox", expected: .success(.copy(.set([1]), .inbox))),
         ParseFixture.copySuffix(" 1,5,7 inbox", expected: .success(.copy(.set([1, 5, 7]), .inbox))),
@@ -569,7 +569,7 @@ struct CommandTypeTests {
         fixture.checkParsing()
     }
 
-    @Test(arguments: [
+    @Test("parse MOVE suffix", arguments: [
         ParseFixture.moveSuffix(" $ inbox", expected: .success(.move(.lastCommand, .inbox))),
         ParseFixture.moveSuffix(" 1 inbox", expected: .success(.move(.set([1]), .inbox))),
         ParseFixture.moveSuffix(" 1,5,7 inbox", expected: .success(.move(.set([1, 5, 7]), .inbox))),
@@ -583,7 +583,7 @@ struct CommandTypeTests {
         fixture.checkParsing()
     }
 
-    @Test(arguments: [
+    @Test("parse SEARCH suffix", arguments: [
         ParseFixture.searchSuffix(" ALL", expected: .success(.search(key: .all))),
         ParseFixture.searchSuffix(
             " ALL DELETED FLAGGED",
@@ -629,7 +629,7 @@ struct CommandTypeTests {
         fixture.checkParsing()
     }
 
-    @Test(arguments: [
+    @Test("parse ESEARCH suffix", arguments: [
         ParseFixture.esearchSuffix(" ALL", expected: .success(.extendedSearch(.init(key: .all)))),
         ParseFixture.esearchSuffix(
             " IN (mailboxes \"folder1\" subtree \"folder2\") unseen",
@@ -653,7 +653,7 @@ struct CommandTypeTests {
         fixture.checkParsing()
     }
 
-    @Test(arguments: [
+    @Test("parse STORE suffix", arguments: [
         ParseFixture.storeSuffix(
             " 1 +FLAGS \\answered",
             expected: .success(.store(.set([1]), [], .flags(.add(silent: false, list: [.answered]))))
@@ -698,7 +698,7 @@ struct CommandTypeTests {
         fixture.checkParsing()
     }
 
-    @Test(arguments: [
+    @Test("parse LIST suffix", arguments: [
         ParseFixture.listSuffix(
             #" "" """#,
             expected: .success(.list(nil, reference: MailboxName(""), .mailbox(""), []))
@@ -752,7 +752,7 @@ struct CommandTypeTests {
         fixture.checkParsing()
     }
 
-    @Test(arguments: [
+    @Test("parse LSUB suffix", arguments: [
         ParseFixture.LSUBSuffix(
             " inbox someList",
             " ",
@@ -771,7 +771,7 @@ struct CommandTypeTests {
         fixture.checkParsing()
     }
 
-    @Test(arguments: [
+    @Test("parse RENAME suffix", arguments: [
         ParseFixture.renameSuffix(
             " box1 box2",
             expected: .success(
@@ -800,7 +800,7 @@ struct CommandTypeTests {
         fixture.checkParsing()
     }
 
-    @Test(arguments: [
+    @Test("parse STATUS suffix", arguments: [
         ParseFixture.statusSuffix(
             " inbox (messages unseen)",
             "\r\n",
@@ -839,7 +839,7 @@ struct CommandTypeTests {
         fixture.checkParsing()
     }
 
-    @Test(arguments: [
+    @Test("parse UID suffix", arguments: [
         ParseFixture.uidSuffix(" EXPUNGE 1", "\r\n", expected: .success(.uidExpunge(.set([1])))),
         ParseFixture.uidSuffix(" COPY 1 Inbox", "\r\n", expected: .success(.uidCopy(.set([1]), .inbox))),
         ParseFixture.uidSuffix(" FETCH 1 FLAGS", "\r\n", expected: .success(.uidFetch(.set([1]), [.flags], []))),
@@ -875,7 +875,7 @@ struct CommandTypeTests {
         fixture.checkParsing()
     }
 
-    @Test(arguments: [
+    @Test("parse FETCH suffix", arguments: [
         ParseFixture.fetchSuffix(" 1:3 ALL", expected: .success(.fetch(.set([1...3]), .all, []))),
         ParseFixture.fetchSuffix(" 2:4 FULL", expected: .success(.fetch(.set([2...4]), .full, []))),
         ParseFixture.fetchSuffix(" 3:5 FAST", expected: .success(.fetch(.set([3...5]), .fast, []))),
@@ -897,7 +897,7 @@ struct CommandTypeTests {
         fixture.checkParsing()
     }
 
-    @Test(arguments: [
+    @Test("parse LOGIN suffix", arguments: [
         ParseFixture.loginSuffix(
             " email password",
             expected: .success(.login(username: "email", password: "password"))
@@ -932,7 +932,7 @@ struct CommandTypeTests {
         fixture.checkParsing()
     }
 
-    @Test(arguments: [
+    @Test("parse AUTHENTICATE suffix", arguments: [
         ParseFixture.authenticateSuffix(
             " GSSAPI",
             expected: .success(.authenticate(mechanism: .gssAPI, initialResponse: nil))
@@ -948,7 +948,7 @@ struct CommandTypeTests {
         fixture.checkParsing()
     }
 
-    @Test(arguments: [
+    @Test("parse CREATE suffix", arguments: [
         ParseFixture.createSuffix(" inbox", expected: .success(.create(.inbox, []))),
         ParseFixture.createSuffix(
             " inbox (some)",
@@ -988,7 +988,7 @@ struct CommandTypeTests {
         fixture.checkParsing()
     }
 
-    @Test(arguments: [
+    @Test("parse SETQUOTA suffix", arguments: [
         ParseFixture.setQuotaSuffix(
             #" "" (STORAGE 512)"#,
             expected: .success(.setQuota(.init(""), [.init(resourceName: "STORAGE", limit: 512)]))

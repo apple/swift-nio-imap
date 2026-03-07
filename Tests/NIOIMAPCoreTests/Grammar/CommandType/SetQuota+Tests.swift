@@ -18,7 +18,7 @@ import Testing
 
 @Suite("Quota Commands")
 struct QuotaCommandTests {
-    @Test(arguments: [
+    @Test("parse SETQUOTA", arguments: [
         ParseFixture.setQuota(
             "SETQUOTA \"\" (STORAGE 512)",
             expected: .success(.setQuota(QuotaRoot(""), [QuotaLimit(resourceName: "STORAGE", limit: 512)]))
@@ -53,7 +53,7 @@ struct QuotaCommandTests {
         fixture.checkParsing()
     }
 
-    @Test(arguments: [
+    @Test("parse GETQUOTA", arguments: [
         ParseFixture.getQuota("GETQUOTA \"\"", expected: .success(.getQuota(QuotaRoot("")))),
         ParseFixture.getQuota("GETQUOTA \"MASSIVE_POOL\"", expected: .success(.getQuota(QuotaRoot("MASSIVE_POOL")))),
         ParseFixture.getQuota("GETQUOTA", expected: .failure),
@@ -62,7 +62,7 @@ struct QuotaCommandTests {
         fixture.checkParsing()
     }
 
-    @Test(arguments: [
+    @Test("parse GETQUOTAROOT", arguments: [
         ParseFixture.getQuotaRoot("GETQUOTAROOT INBOX", expected: .success(.getQuotaRoot(MailboxName("INBOX")))),
         ParseFixture.getQuotaRoot("GETQUOTAROOT Other", expected: .success(.getQuotaRoot(MailboxName("Other")))),
         ParseFixture.getQuotaRoot("GETQUOTAROOT", expected: .failure),

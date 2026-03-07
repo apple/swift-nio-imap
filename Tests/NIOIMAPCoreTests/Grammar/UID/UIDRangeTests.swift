@@ -60,7 +60,7 @@ struct UIDRangeTests {
         #expect(MessageIdentifierRange<UID>(777...999).upperBound == 999)
     }
 
-    @Test func isEmpty() {
+    @Test("isEmpty") func isEmpty() {
         #expect(!MessageIdentifierRange<UID>(654...654).isEmpty)
         #expect(!MessageIdentifierRange<UID>(654).isEmpty)
         #expect(!MessageIdentifierRange<UID>(654...655).isEmpty)

@@ -18,6 +18,7 @@ import Testing
 @Suite("EncodingOptions")
 private struct EncodingOptionsTests {
     @Test(
+        "command options from capabilities",
         arguments: [
             OptionsFixture(capabilities: [], expected: CommandEncodingOptions()),
             OptionsFixture(

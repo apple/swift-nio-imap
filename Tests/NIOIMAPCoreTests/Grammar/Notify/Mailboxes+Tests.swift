@@ -38,7 +38,7 @@ struct MailboxesTests {
         fixture.checkEncoding()
     }
 
-    @Test(arguments: [
+    @Test("parse one or more mailboxes", arguments: [
         ParseFixture.oneOrMoreMailbox("\"box1\"", expected: .success(Mailboxes([.init("box1")])!)),
         ParseFixture.oneOrMoreMailbox("(\"box1\")", expected: .success(Mailboxes([.init("box1")])!)),
         ParseFixture.oneOrMoreMailbox(

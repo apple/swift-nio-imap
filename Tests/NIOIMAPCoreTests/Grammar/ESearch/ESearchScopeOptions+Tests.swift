@@ -37,7 +37,7 @@ struct ExtendedSearchScopeOptionsTests {
         #expect(ExtendedSearchScopeOptions([:]) == nil)
     }
 
-    @Test(arguments: [
+    @Test("parse extended search scope options", arguments: [
         ParseFixture.extendedSearchScopeOptions("name", expected: .success(ExtendedSearchScopeOptions(["name": nil])!)),
         ParseFixture.extendedSearchScopeOptions(
             "name $",

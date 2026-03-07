@@ -56,7 +56,7 @@ struct MailboxFilterTests {
         fixture.checkEncoding()
     }
 
-    @Test(arguments: [
+    @Test("parse filter mailboxes", arguments: [
         ParseFixture.filterMailboxes("inboxes", " ", expected: .success(.inboxes)),
         ParseFixture.filterMailboxes("personal", " ", expected: .success(.personal)),
         ParseFixture.filterMailboxes("subscribed", " ", expected: .success(.subscribed)),

@@ -51,7 +51,7 @@ struct FetchResponseTests {
         fixture.checkParsing()
     }
 
-    @Test(arguments: [
+    @Test("parse streaming response", arguments: [
         // BODY without section brackets triggers the nil-section path (offset present)
         ParseFixture.fetchStreamingResponse("BODY<0>", " ", expected: .success(.body(section: .init(), offset: 0))),
         // BODY with section and offset

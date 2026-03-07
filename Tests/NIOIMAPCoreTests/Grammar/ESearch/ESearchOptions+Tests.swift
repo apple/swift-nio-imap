@@ -81,7 +81,7 @@ struct ExtendedSearchOptionsTests {
         fixture.checkEncoding()
     }
 
-    @Test(arguments: [
+    @Test("parse extended search options", arguments: [
         ParseFixture.extendedSearchOptions(
             " ALL",
             expected: .success(ExtendedSearchOptions(key: .all))
