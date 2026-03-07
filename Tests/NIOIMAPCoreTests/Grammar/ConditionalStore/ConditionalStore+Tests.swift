@@ -101,7 +101,10 @@ struct StoreModifierTests {
     }
 
     @Test(arguments: [
-        ParseFixture.storeModifier("UNCHANGEDSINCE 12345", expected: .success(.unchangedSince(.init(modificationSequence: 12345)))),
+        ParseFixture.storeModifier(
+            "UNCHANGEDSINCE 12345",
+            expected: .success(.unchangedSince(.init(modificationSequence: 12345)))
+        ),
         ParseFixture.storeModifier("MYEXT", ")", expected: .success(.other(.init(key: "MYEXT", value: nil)))),
         ParseFixture.storeModifier("", "", expected: .incompleteMessage),
     ])
@@ -124,7 +127,10 @@ struct StoreModifiersTests {
     }
 
     @Test(arguments: [
-        ParseFixture.storeModifiers(" (UNCHANGEDSINCE 42)", expected: .success([.unchangedSince(.init(modificationSequence: 42))])),
+        ParseFixture.storeModifiers(
+            " (UNCHANGEDSINCE 42)",
+            expected: .success([.unchangedSince(.init(modificationSequence: 42))])
+        ),
         ParseFixture.storeModifiers("", "", expected: .incompleteMessage),
     ])
     func parse(_ fixture: ParseFixture<[StoreModifier]>) {

@@ -64,9 +64,12 @@ struct UserAuthenticationMechanismTests {
 
     #if swift(>=6.2)
     @Test("both nil arguments triggers precondition failure") func bothNilPreconditionFailure() async {
-        await #expect(processExitsWith: ExitTest.Condition.failure, performing: {
-            _ = UserAuthenticationMechanism(encodedUser: nil, authenticationMechanism: nil)
-        })
+        await #expect(
+            processExitsWith: ExitTest.Condition.failure,
+            performing: {
+                _ = UserAuthenticationMechanism(encodedUser: nil, authenticationMechanism: nil)
+            }
+        )
     }
     #endif
 }

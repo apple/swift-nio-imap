@@ -295,7 +295,10 @@ private struct SectionSpecifierTests {
     @Test(
         "static factory headerFields / headerFieldsNot",
         arguments: [
-            (SectionSpecifier.headerFields(["FROM", "DATE"]), SectionSpecifier(kind: .headerFields(["FROM", "DATE"]))),
+            (
+                SectionSpecifier.headerFields(["FROM", "DATE"]),
+                SectionSpecifier(kind: .headerFields(["FROM", "DATE"]))
+            ),
             (SectionSpecifier.headerFieldsNot(["FROM"]), SectionSpecifier(kind: .headerFieldsNot(["FROM"]))),
         ] as [(SectionSpecifier, SectionSpecifier)]
     )
@@ -304,10 +307,15 @@ private struct SectionSpecifierTests {
     }
 
     #if swift(>=6.2)
-    @Test("MIME header with empty part triggers precondition failure") func mimeHeaderWithEmptyPartPreconditionFailure() async {
-        await #expect(processExitsWith: ExitTest.Condition.failure, performing: {
-            _ = SectionSpecifier(kind: .MIMEHeader)
-        })
+    @Test("MIME header with empty part triggers precondition failure") func mimeHeaderWithEmptyPartPreconditionFailure()
+        async
+    {
+        await #expect(
+            processExitsWith: ExitTest.Condition.failure,
+            performing: {
+                _ = SectionSpecifier(kind: .MIMEHeader)
+            }
+        )
     }
     #endif
 }

@@ -46,11 +46,13 @@ struct ModificationSequenceValueTests {
         #expect(!(b <= a))
     }
 
-    @Test(arguments: [
-        (ModificationSequenceValue(integerLiteral: 10), ModificationSequenceValue(integerLiteral: 20), true),
-        (ModificationSequenceValue(integerLiteral: 20), ModificationSequenceValue(integerLiteral: 10), false),
-        (ModificationSequenceValue(integerLiteral: 10), ModificationSequenceValue(integerLiteral: 10), false),
-    ] as [(ModificationSequenceValue, ModificationSequenceValue, Bool)])
+    @Test(
+        arguments: [
+            (ModificationSequenceValue(integerLiteral: 10), ModificationSequenceValue(integerLiteral: 20), true),
+            (ModificationSequenceValue(integerLiteral: 20), ModificationSequenceValue(integerLiteral: 10), false),
+            (ModificationSequenceValue(integerLiteral: 10), ModificationSequenceValue(integerLiteral: 10), false),
+        ] as [(ModificationSequenceValue, ModificationSequenceValue, Bool)]
+    )
     func lessThanOperator(_ fixture: (ModificationSequenceValue, ModificationSequenceValue, Bool)) {
         #expect((fixture.0 < fixture.1) == fixture.2)
     }
@@ -67,9 +69,12 @@ struct ModificationSequenceValueTests {
 
     #if swift(>=6.2)
     @Test("overflow triggers precondition failure") func overflowPreconditionFailure() async {
-        await #expect(processExitsWith: ExitTest.Condition.failure, performing: {
-            _ = ModificationSequenceValue(UInt64(Int64.max) + 1)
-        })
+        await #expect(
+            processExitsWith: ExitTest.Condition.failure,
+            performing: {
+                _ = ModificationSequenceValue(UInt64(Int64.max) + 1)
+            }
+        )
     }
     #endif
 

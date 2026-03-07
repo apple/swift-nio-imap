@@ -47,14 +47,17 @@ struct AppendDataTests {
     #if swift(>=6.2)
     @Test
     func encodeInServerModeCallsPreconditionFailure() async {
-        await #expect(processExitsWith: ExitTest.Condition.failure, performing: {
-            var buffer = EncodeBuffer.serverEncodeBuffer(
-                buffer: ByteBufferAllocator().buffer(capacity: 128),
-                options: ResponseEncodingOptions(),
-                loggingMode: false
-            )
-            buffer.writeAppendData(.init(byteCount: 123))
-        })
+        await #expect(
+            processExitsWith: ExitTest.Condition.failure,
+            performing: {
+                var buffer = EncodeBuffer.serverEncodeBuffer(
+                    buffer: ByteBufferAllocator().buffer(capacity: 128),
+                    options: ResponseEncodingOptions(),
+                    loggingMode: false
+                )
+                buffer.writeAppendData(.init(byteCount: 123))
+            }
+        )
     }
     #endif
 

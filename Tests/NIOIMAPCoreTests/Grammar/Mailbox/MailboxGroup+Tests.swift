@@ -35,7 +35,7 @@ struct MailboxGroupTests {
                 ]
             ),
             #"(NIL "root" "Team" NIL)("Alice" NIL "alice" "example.com")(NIL "root" NIL NIL)"#
-        ),
+        )
     ])
     func encodeEmailAddressGroup(_ fixture: EncodeFixture<EmailAddressGroup>) {
         fixture.checkEncoding()
@@ -51,7 +51,7 @@ struct MailboxGroupTests {
                 )
             ),
             #"(NIL NIL "Mgmt" NIL)(NIL NIL NIL NIL)"#
-        ),
+        )
     ])
     func encodeEmailAddressOrGroup(_ fixture: EncodeFixture<EmailAddressListElement>) {
         fixture.checkEncoding()

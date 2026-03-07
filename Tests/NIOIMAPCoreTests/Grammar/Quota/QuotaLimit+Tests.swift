@@ -28,7 +28,10 @@ struct QuotaLimitTests {
 
     @Test(arguments: [
         ParseFixture.quotaLimits("()", expected: .success([])),
-        ParseFixture.quotaLimits("(STORAGE 104)", expected: .success([QuotaLimit(resourceName: "STORAGE", limit: 104)])),
+        ParseFixture.quotaLimits(
+            "(STORAGE 104)",
+            expected: .success([QuotaLimit(resourceName: "STORAGE", limit: 104)])
+        ),
         ParseFixture.quotaLimits(
             "(STORAGE 104 MESSAGE 42)",
             expected: .success([

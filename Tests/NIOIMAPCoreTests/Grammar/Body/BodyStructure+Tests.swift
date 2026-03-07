@@ -1954,38 +1954,48 @@ private struct BodyStructureTests {
 
     @Test("underestimatedCount")
     func underestimatedCount() {
-        let basic = BodyStructure.singlepart(.init(
-            kind: .basic(.init(topLevel: .application, sub: .mixed)),
-            fields: .init(parameters: [:], id: nil, contentDescription: nil, encoding: nil, octetCount: 0)
-        ))
+        let basic = BodyStructure.singlepart(
+            .init(
+                kind: .basic(.init(topLevel: .application, sub: .mixed)),
+                fields: .init(parameters: [:], id: nil, contentDescription: nil, encoding: nil, octetCount: 0)
+            )
+        )
         #expect(basic.underestimatedCount == 1)
 
-        let multipart = BodyStructure.multipart(.init(
-            parts: [basic, basic],
-            mediaSubtype: .mixed
-        ))
+        let multipart = BodyStructure.multipart(
+            .init(
+                parts: [basic, basic],
+                mediaSubtype: .mixed
+            )
+        )
         #expect(multipart.underestimatedCount == 3)
     }
 
     @Test("isEmpty always false")
     func isEmpty() {
-        let basic = BodyStructure.singlepart(.init(
-            kind: .basic(.init(topLevel: .application, sub: .mixed)),
-            fields: .init(parameters: [:], id: nil, contentDescription: nil, encoding: nil, octetCount: 0)
-        ))
+        let basic = BodyStructure.singlepart(
+            .init(
+                kind: .basic(.init(topLevel: .application, sub: .mixed)),
+                fields: .init(parameters: [:], id: nil, contentDescription: nil, encoding: nil, octetCount: 0)
+            )
+        )
         #expect(!basic.isEmpty)
     }
 
     @Test("find returns nil for invalid positions")
     func findReturnsNilForInvalidPositions() {
-        let basic = BodyStructure.singlepart(.init(
-            kind: .basic(.init(topLevel: .application, sub: .mixed)),
-            fields: .init(parameters: [:], id: nil, contentDescription: nil, encoding: nil, octetCount: 0)
-        ))
-        let multipart = BodyStructure.multipart(.init(
-            parts: [basic, basic],
-            mediaSubtype: .mixed
-        ))
+        let basic = BodyStructure.singlepart(
+            .init(
+                kind: .basic(.init(topLevel: .application, sub: .mixed)),
+                fields: .init(parameters: [:], id: nil, contentDescription: nil, encoding: nil, octetCount: 0)
+            )
+        )
+        let multipart = BodyStructure.multipart(
+            .init(
+                parts: [basic, basic],
+                mediaSubtype: .mixed
+            )
+        )
         // index 0 is out-of-range (1-based)
         #expect(basic.find(SectionSpecifier.Part([0])) == nil)
         // index exceeds multipart count
@@ -1998,10 +2008,20 @@ private struct BodyStructureTests {
         "encode body",
         arguments: [
             EncodeFixture.body(
-                .valid(.singlepart(.init(
-                    kind: .text(.init(mediaSubtype: .init("plain"), lineCount: 5)),
-                    fields: .init(parameters: [:], id: nil, contentDescription: nil, encoding: nil, octetCount: 100)
-                ))),
+                .valid(
+                    .singlepart(
+                        .init(
+                            kind: .text(.init(mediaSubtype: .init("plain"), lineCount: 5)),
+                            fields: .init(
+                                parameters: [:],
+                                id: nil,
+                                contentDescription: nil,
+                                encoding: nil,
+                                octetCount: 100
+                            )
+                        )
+                    )
+                ),
                 #"("TEXT" "PLAIN" NIL NIL NIL NIL 100 5)"#
             ),
             EncodeFixture.body(
@@ -2016,47 +2036,66 @@ private struct BodyStructureTests {
 
     @Test("encode multipart body")
     func encodeMultipartBody() {
-        let basic = BodyStructure.singlepart(.init(
-            kind: .text(.init(mediaSubtype: .init("plain"), lineCount: 5)),
-            fields: .init(parameters: [:], id: nil, contentDescription: nil, encoding: nil, octetCount: 100)
-        ))
-        let multipart = BodyStructure.multipart(.init(
-            parts: [basic],
-            mediaSubtype: .mixed
-        ))
+        let basic = BodyStructure.singlepart(
+            .init(
+                kind: .text(.init(mediaSubtype: .init("plain"), lineCount: 5)),
+                fields: .init(parameters: [:], id: nil, contentDescription: nil, encoding: nil, octetCount: 100)
+            )
+        )
+        let multipart = BodyStructure.multipart(
+            .init(
+                parts: [basic],
+                mediaSubtype: .mixed
+            )
+        )
         let fixture = EncodeFixture.bodyStructure(multipart, #"(("TEXT" "PLAIN" NIL NIL NIL NIL 100 5) "MIXED")"#)
         fixture.checkEncoding()
     }
 
     #if swift(>=6.2)
     @Test("subscript fatal error for invalid part") func subscriptFatalErrorForInvalidPart() async {
-        await #expect(processExitsWith: ExitTest.Condition.failure, performing: {
-            let basic = BodyStructure.singlepart(.init(
-                kind: .basic(.init(topLevel: .application, sub: .mixed)),
-                fields: .init(parameters: [:], id: nil, contentDescription: nil, encoding: nil, octetCount: 0)
-            ))
-            _ = basic[SectionSpecifier.Part([5])]
-        })
+        await #expect(
+            processExitsWith: ExitTest.Condition.failure,
+            performing: {
+                let basic = BodyStructure.singlepart(
+                    .init(
+                        kind: .basic(.init(topLevel: .application, sub: .mixed)),
+                        fields: .init(parameters: [:], id: nil, contentDescription: nil, encoding: nil, octetCount: 0)
+                    )
+                )
+                _ = basic[SectionSpecifier.Part([5])]
+            }
+        )
     }
 
     @Test("index(before:) fatal error at start index") func indexBeforeFatalErrorAtStartIndex() async {
-        await #expect(processExitsWith: ExitTest.Condition.failure, performing: {
-            let basic = BodyStructure.singlepart(.init(
-                kind: .basic(.init(topLevel: .application, sub: .mixed)),
-                fields: .init(parameters: [:], id: nil, contentDescription: nil, encoding: nil, octetCount: 0)
-            ))
-            _ = basic.index(before: basic.startIndex)
-        })
+        await #expect(
+            processExitsWith: ExitTest.Condition.failure,
+            performing: {
+                let basic = BodyStructure.singlepart(
+                    .init(
+                        kind: .basic(.init(topLevel: .application, sub: .mixed)),
+                        fields: .init(parameters: [:], id: nil, contentDescription: nil, encoding: nil, octetCount: 0)
+                    )
+                )
+                _ = basic.index(before: basic.startIndex)
+            }
+        )
     }
 
     @Test("index(after:) fatal error for invalid part") func indexAfterFatalErrorForInvalidPart() async {
-        await #expect(processExitsWith: ExitTest.Condition.failure, performing: {
-            let basic = BodyStructure.singlepart(.init(
-                kind: .basic(.init(topLevel: .application, sub: .mixed)),
-                fields: .init(parameters: [:], id: nil, contentDescription: nil, encoding: nil, octetCount: 0)
-            ))
-            _ = basic.index(after: SectionSpecifier.Part([1]))
-        })
+        await #expect(
+            processExitsWith: ExitTest.Condition.failure,
+            performing: {
+                let basic = BodyStructure.singlepart(
+                    .init(
+                        kind: .basic(.init(topLevel: .application, sub: .mixed)),
+                        fields: .init(parameters: [:], id: nil, contentDescription: nil, encoding: nil, octetCount: 0)
+                    )
+                )
+                _ = basic.index(after: SectionSpecifier.Part([1]))
+            }
+        )
     }
     #endif
 }

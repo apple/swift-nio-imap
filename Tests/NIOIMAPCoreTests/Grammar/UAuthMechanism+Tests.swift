@@ -48,10 +48,12 @@ struct URLAuthenticationMechanismTests {
         fixture.checkParsing()
     }
 
-    @Test(arguments: [
-        (URLAuthenticationMechanism.internal, "INTERNAL"),
-        (URLAuthenticationMechanism("CUSTOM"), "CUSTOM"),
-    ] as [(URLAuthenticationMechanism, String)])
+    @Test(
+        arguments: [
+            (URLAuthenticationMechanism.internal, "INTERNAL"),
+            (URLAuthenticationMechanism("CUSTOM"), "CUSTOM"),
+        ] as [(URLAuthenticationMechanism, String)]
+    )
     func stringConversion(_ fixture: (URLAuthenticationMechanism, String)) {
         #expect(String(fixture.0) == fixture.1)
     }

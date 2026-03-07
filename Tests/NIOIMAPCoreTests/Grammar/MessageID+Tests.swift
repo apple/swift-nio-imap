@@ -20,7 +20,10 @@ import Testing
 struct MessageIDTests {
     @Test(arguments: [
         EncodeFixture.messageID(.init("<foo@bar.com>"), "\"<foo@bar.com>\""),
-        EncodeFixture.messageID(.init("<B27397-0100000@cac.washington.edu>"), "\"<B27397-0100000@cac.washington.edu>\""),
+        EncodeFixture.messageID(
+            .init("<B27397-0100000@cac.washington.edu>"),
+            "\"<B27397-0100000@cac.washington.edu>\""
+        ),
     ])
     func encode(_ fixture: EncodeFixture<MessageID>) {
         fixture.checkEncoding()

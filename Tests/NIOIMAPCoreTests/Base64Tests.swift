@@ -184,8 +184,8 @@ struct Base64Tests {
         "decode(string:) decodes valid base64",
         arguments: [
             ("YWJj", [0x61, 0x62, 0x63]),  // "abc"
-            ("YQ==", [0x61]),               // "a"
-            ("YWI=", [0x61, 0x62]),         // "ab"
+            ("YQ==", [0x61]),  // "a"
+            ("YWI=", [0x61, 0x62]),  // "ab"
         ] as [(String, [UInt8])]
     )
     func decodeStringDecodesValidBase64(_ fixture: (String, [UInt8])) throws {

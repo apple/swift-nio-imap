@@ -36,18 +36,22 @@ struct QuotaRootTests {
         fixture.checkParsing()
     }
 
-    @Test(arguments: [
-        (QuotaRoot("MassivePool"), "MassivePool" as String?),
-        (QuotaRoot(""), "" as String?),
-        (QuotaRoot(ByteBuffer(bytes: [0xFF, 0xFE])), nil as String?),
-    ] as [(QuotaRoot, String?)])
+    @Test(
+        arguments: [
+            (QuotaRoot("MassivePool"), "MassivePool" as String?),
+            (QuotaRoot(""), "" as String?),
+            (QuotaRoot(ByteBuffer(bytes: [0xFF, 0xFE])), nil as String?),
+        ] as [(QuotaRoot, String?)]
+    )
     func stringConversion(_ fixture: (QuotaRoot, String?)) {
         #expect(String(fixture.0) == fixture.1)
     }
 
-    @Test(arguments: [
-        (QuotaRoot("MassivePool"), "MassivePool"),
-    ] as [(QuotaRoot, String)])
+    @Test(
+        arguments: [
+            (QuotaRoot("MassivePool"), "MassivePool")
+        ] as [(QuotaRoot, String)]
+    )
     func debugDescription(_ fixture: (QuotaRoot, String)) {
         #expect(fixture.0.debugDescription == fixture.1)
     }

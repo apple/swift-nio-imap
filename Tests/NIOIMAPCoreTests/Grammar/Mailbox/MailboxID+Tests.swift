@@ -26,20 +26,24 @@ struct MailboxIDTests {
         fixture.checkEncoding()
     }
 
-    @Test(arguments: [
-        ("ValidID123", true),
-        ("a", true),
-        ("", false),
-        ("has space", false),
-        ("has@symbol", false),
-    ] as [(String, Bool)])
+    @Test(
+        arguments: [
+            ("ValidID123", true),
+            ("a", true),
+            ("", false),
+            ("has space", false),
+            ("has@symbol", false),
+        ] as [(String, Bool)]
+    )
     func stringInit(_ fixture: (String, Bool)) {
         #expect((MailboxID(fixture.0) != nil) == fixture.1)
     }
 
-    @Test(arguments: [
-        ("ValidID", "ValidID"),
-    ] as [(MailboxID, String)])
+    @Test(
+        arguments: [
+            ("ValidID", "ValidID")
+        ] as [(MailboxID, String)]
+    )
     func stringConversion(_ fixture: (MailboxID, String)) {
         #expect(String(fixture.0) == fixture.1)
     }

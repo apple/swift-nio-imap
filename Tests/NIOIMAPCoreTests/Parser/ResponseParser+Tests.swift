@@ -242,4 +242,3 @@ struct ResponseParserTests {
         #expect(result == .response(.untagged(.mailboxData(.exists(5)))))
     }
 }
-

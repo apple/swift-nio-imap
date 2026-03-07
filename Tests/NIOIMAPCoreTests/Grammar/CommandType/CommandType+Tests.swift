@@ -170,10 +170,14 @@ struct CommandTypeTests {
             ),
             #"FOOBAR "A" "B""#
         ),
-        CommandEncodeFixture.command(.custom(name: "FOOBAR", payloads: [.literal(.init(string: "¶"))]),
+        CommandEncodeFixture.command(
+            .custom(name: "FOOBAR", payloads: [.literal(.init(string: "¶"))]),
             expectedStrings: ["FOOBAR {2}\r\n", "¶"]
         ),
-        CommandEncodeFixture.command(.rename(from: .inbox, to: .init("other"), parameters: [:]), #"RENAME "INBOX" "other""#),
+        CommandEncodeFixture.command(
+            .rename(from: .inbox, to: .init("other"), parameters: [:]),
+            #"RENAME "INBOX" "other""#
+        ),
         CommandEncodeFixture.command(
             .rename(from: .inbox, to: .init("other"), parameters: ["test": nil]),
             #"RENAME "INBOX" "other" (test)"#
@@ -221,17 +225,28 @@ struct CommandTypeTests {
             #"SETQUOTA "ROOT" (STORAGE 512)"#
         ),
         CommandEncodeFixture.command(
-            .setQuota(.init(""), [.init(resourceName: "STORAGE", limit: 0), .init(resourceName: "BANDWIDTH", limit: 99)]),
+            .setQuota(
+                .init(""),
+                [.init(resourceName: "STORAGE", limit: 0), .init(resourceName: "BANDWIDTH", limit: 99)]
+            ),
             #"SETQUOTA "" (STORAGE 0 BANDWIDTH 99)"#
         ),
 
         // store with modifiers (covers write(if: modifiers.count >= 1) branch)
         CommandEncodeFixture.command(
-            .store(.set([1]), [.unchangedSince(.init(modificationSequence: 5))], .flags(.add(silent: false, list: [.seen]))),
+            .store(
+                .set([1]),
+                [.unchangedSince(.init(modificationSequence: 5))],
+                .flags(.add(silent: false, list: [.seen]))
+            ),
             "STORE 1 (UNCHANGEDSINCE 5) +FLAGS (\\Seen)"
         ),
         CommandEncodeFixture.command(
-            .uidStore(.set(.init(range: 1...5)), [.unchangedSince(.init(modificationSequence: 10))], .flags(.remove(silent: true, list: [.answered]))),
+            .uidStore(
+                .set(.init(range: 1...5)),
+                [.unchangedSince(.init(modificationSequence: 10))],
+                .flags(.remove(silent: true, list: [.answered]))
+            ),
             "UID STORE 1:5 (UNCHANGEDSINCE 10) -FLAGS.SILENT (\\Answered)"
         ),
     ])
@@ -248,7 +263,11 @@ struct CommandTypeTests {
 
     @Test("authenticate with initialResponse in loggingMode")
     func authenticateWithInitialResponseLoggingMode() {
-        var buffer = CommandEncodeBuffer(buffer: ByteBufferAllocator().buffer(capacity: 64), capabilities: [], loggingMode: true)
+        var buffer = CommandEncodeBuffer(
+            buffer: ByteBufferAllocator().buffer(capacity: 64),
+            capabilities: [],
+            loggingMode: true
+        )
         _ = buffer.writeCommand(.authenticate(mechanism: .gssAPI, initialResponse: .init(ByteBuffer(string: "secret"))))
         #expect(String(buffer: buffer.buffer.nextChunk().bytes) == "AUTHENTICATE GSSAPI ∅")
     }
@@ -258,7 +277,9 @@ struct CommandTypeTests {
         #expect(Command.uidMove(messages: UIDSet(), mailbox: .inbox) == nil)
         #expect(Command.uidCopy(messages: UIDSet(), mailbox: .inbox) == nil)
         #expect(Command.uidFetch(messages: UIDSet(), attributes: [.flags], modifiers: []) == nil)
-        #expect(Command.uidStore(messages: UIDSet(), modifiers: [], data: .flags(.add(silent: false, list: [.seen]))) == nil)
+        #expect(
+            Command.uidStore(messages: UIDSet(), modifiers: [], data: .flags(.add(silent: false, list: [.seen]))) == nil
+        )
         #expect(Command.uidExpunge(messages: UIDSet(), mailbox: .inbox) == nil)
     }
 
@@ -267,7 +288,9 @@ struct CommandTypeTests {
         #expect(Command.uidMove(messages: [1...10], mailbox: .inbox) != nil)
         #expect(Command.uidCopy(messages: [1...10], mailbox: .inbox) != nil)
         #expect(Command.uidFetch(messages: [1...10], attributes: [.flags], modifiers: []) != nil)
-        #expect(Command.uidStore(messages: [1...10], modifiers: [], data: .flags(.add(silent: false, list: [.seen]))) != nil)
+        #expect(
+            Command.uidStore(messages: [1...10], modifiers: [], data: .flags(.add(silent: false, list: [.seen]))) != nil
+        )
         #expect(Command.uidExpunge(messages: [1...10], mailbox: .inbox) != nil)
     }
 

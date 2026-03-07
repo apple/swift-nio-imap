@@ -129,15 +129,21 @@ struct FullDateTimeTests {
 
     #if swift(>=6.2)
     @Test("invalid month triggers precondition failure") func invalidMonthPrecondition() async {
-        await #expect(processExitsWith: ExitTest.Condition.failure, performing: {
-            _ = FullDate(year: 2024, month: 0, day: 1)
-        })
+        await #expect(
+            processExitsWith: ExitTest.Condition.failure,
+            performing: {
+                _ = FullDate(year: 2024, month: 0, day: 1)
+            }
+        )
     }
 
     @Test("invalid day triggers precondition failure") func invalidDayPrecondition() async {
-        await #expect(processExitsWith: ExitTest.Condition.failure, performing: {
-            _ = FullDate(year: 2024, month: 1, day: 0)
-        })
+        await #expect(
+            processExitsWith: ExitTest.Condition.failure,
+            performing: {
+                _ = FullDate(year: 2024, month: 1, day: 0)
+            }
+        )
     }
     #endif
 }

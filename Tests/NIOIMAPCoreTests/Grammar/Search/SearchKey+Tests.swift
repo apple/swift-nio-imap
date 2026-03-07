@@ -178,14 +178,16 @@ struct SearchKeyTests {
         fixture.checkParsing()
     }
 
-    @Test(arguments: [
-        (SearchKey.not(.bcc("test")), true),
-        (SearchKey.not(.all), false),
-        (SearchKey.or(.bcc("x"), .all), true),
-        (SearchKey.or(.all, .deleted), false),
-        (SearchKey.and([.bcc("x"), .deleted]), true),
-        (SearchKey.and([.all, .deleted]), false),
-    ] as [(SearchKey, Bool)])
+    @Test(
+        arguments: [
+            (SearchKey.not(.bcc("test")), true),
+            (SearchKey.not(.all), false),
+            (SearchKey.or(.bcc("x"), .all), true),
+            (SearchKey.or(.all, .deleted), false),
+            (SearchKey.and([.bcc("x"), .deleted]), true),
+            (SearchKey.and([.all, .deleted]), false),
+        ] as [(SearchKey, Bool)]
+    )
     func usesString(_ fixture: (SearchKey, Bool)) {
         #expect(fixture.0.usesString == fixture.1)
     }

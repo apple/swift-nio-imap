@@ -222,7 +222,13 @@ extension BodySinglepartTests {
             expected: .success(
                 .init(
                     kind: .text(.init(mediaSubtype: "plain", lineCount: 10)),
-                    fields: .init(parameters: [:], id: nil, contentDescription: nil, encoding: .sevenBit, octetCount: 100),
+                    fields: .init(
+                        parameters: [:],
+                        id: nil,
+                        contentDescription: nil,
+                        encoding: .sevenBit,
+                        octetCount: 100
+                    ),
                     extension: .init(digest: "md5hash", dispositionAndLanguage: nil)
                 )
             )
@@ -234,7 +240,13 @@ extension BodySinglepartTests {
             expected: .success(
                 .init(
                     kind: .text(.init(mediaSubtype: "plain", lineCount: 10)),
-                    fields: .init(parameters: [:], id: nil, contentDescription: nil, encoding: .sevenBit, octetCount: 100),
+                    fields: .init(
+                        parameters: [:],
+                        id: nil,
+                        contentDescription: nil,
+                        encoding: .sevenBit,
+                        octetCount: 100
+                    ),
                     extension: .init(
                         digest: "md5hash",
                         dispositionAndLanguage: .init(

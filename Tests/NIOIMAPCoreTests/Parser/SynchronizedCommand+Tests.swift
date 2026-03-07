@@ -309,7 +309,12 @@ struct SynchronizedCommandTests {
         #expect(c1 == SynchronizedCommand(.append(.start(tag: "1", appendingTo: .inbox))))
 
         let c2 = try parser.parseCommandStream(buffer: &buf)
-        #expect(c2 == SynchronizedCommand(.append(.beginMessage(message: .init(options: .none, data: .init(byteCount: 10))))))
+        #expect(
+            c2
+                == SynchronizedCommand(
+                    .append(.beginMessage(message: .init(options: .none, data: .init(byteCount: 10))))
+                )
+        )
         #expect(parser.mode == .streamingBytes(10))
 
         // Only 5 bytes available — should enter the else branch and leave 5 remaining
@@ -422,7 +427,9 @@ struct SynchronizedCommandTests {
         #expect(c1 == SynchronizedCommand(.append(.start(tag: "1", appendingTo: .inbox))))
 
         let c2 = try parser.parseCommandStream(buffer: &buf)
-        #expect(c2 == SynchronizedCommand(.append(.beginMessage(message: .init(options: .none, data: .init(byteCount: 0))))))
+        #expect(
+            c2 == SynchronizedCommand(.append(.beginMessage(message: .init(options: .none, data: .init(byteCount: 0)))))
+        )
 
         let c3 = try parser.parseCommandStream(buffer: &buf)  // .messageBytes(empty) — 0-byte literal
         #expect(c3 == SynchronizedCommand(.append(.messageBytes(ByteBuffer()))))

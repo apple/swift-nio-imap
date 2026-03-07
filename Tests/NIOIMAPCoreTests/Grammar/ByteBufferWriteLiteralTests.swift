@@ -161,7 +161,11 @@ struct ByteBufferWriteLiteralTests {
         // client non-synchronizing literal in logging mode
         var clientNonSyncBuffer = EncodeBuffer.clientEncodeBuffer(
             buffer: ByteBufferAllocator().buffer(capacity: 128),
-            options: CommandEncodingOptions(useQuotedString: false, useSynchronizingLiteral: false, useNonSynchronizingLiteralPlus: true),
+            options: CommandEncodingOptions(
+                useQuotedString: false,
+                useSynchronizingLiteral: false,
+                useNonSynchronizingLiteralPlus: true
+            ),
             loggingMode: true
         )
         _ = clientNonSyncBuffer.writeIMAPString(ByteBuffer(string: "hello"))

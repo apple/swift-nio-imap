@@ -37,10 +37,12 @@ struct PermanentFlagTests {
         fixture.checkParsing()
     }
 
-    @Test(arguments: [
-        (PermanentFlag.wildcard, #"\*"#),
-        (PermanentFlag.flag(.answered), #"\Answered"#),
-    ] as [(PermanentFlag, String)])
+    @Test(
+        arguments: [
+            (PermanentFlag.wildcard, #"\*"#),
+            (PermanentFlag.flag(.answered), #"\Answered"#),
+        ] as [(PermanentFlag, String)]
+    )
     func debugDescription(_ fixture: (PermanentFlag, String)) {
         #expect(fixture.0.debugDescription == fixture.1)
     }

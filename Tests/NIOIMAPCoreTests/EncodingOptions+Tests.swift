@@ -17,19 +17,29 @@ import Testing
 
 @Suite("EncodingOptions")
 private struct EncodingOptionsTests {
-    @Test(arguments: [
-        OptionsFixture(capabilities: [], expected: CommandEncodingOptions()),
-        OptionsFixture(capabilities: [.literalPlus], expected: CommandEncodingOptions(useNonSynchronizingLiteralPlus: true)),
-        OptionsFixture(capabilities: [.literalMinus], expected: CommandEncodingOptions(useNonSynchronizingLiteralMinus: true)),
-        OptionsFixture(capabilities: [.binary], expected: CommandEncodingOptions(useBinaryLiteral: true)),
-    ] as [OptionsFixture<CommandEncodingOptions>])
+    @Test(
+        arguments: [
+            OptionsFixture(capabilities: [], expected: CommandEncodingOptions()),
+            OptionsFixture(
+                capabilities: [.literalPlus],
+                expected: CommandEncodingOptions(useNonSynchronizingLiteralPlus: true)
+            ),
+            OptionsFixture(
+                capabilities: [.literalMinus],
+                expected: CommandEncodingOptions(useNonSynchronizingLiteralMinus: true)
+            ),
+            OptionsFixture(capabilities: [.binary], expected: CommandEncodingOptions(useBinaryLiteral: true)),
+        ] as [OptionsFixture<CommandEncodingOptions>]
+    )
     func commandOptionsFromCapabilities(_ fixture: OptionsFixture<CommandEncodingOptions>) {
         #expect(CommandEncodingOptions(capabilities: fixture.capabilities) == fixture.expected)
     }
 
-    @Test(arguments: [
-        OptionsFixture(capabilities: [.imap4rev1], expected: ResponseEncodingOptions()),
-    ] as [OptionsFixture<ResponseEncodingOptions>])
+    @Test(
+        arguments: [
+            OptionsFixture(capabilities: [.imap4rev1], expected: ResponseEncodingOptions())
+        ] as [OptionsFixture<ResponseEncodingOptions>]
+    )
     func responseOptionsFromCapabilities(_ fixture: OptionsFixture<ResponseEncodingOptions>) {
         #expect(ResponseEncodingOptions(capabilities: fixture.capabilities) == fixture.expected)
     }

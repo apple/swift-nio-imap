@@ -60,7 +60,10 @@ struct ListSelectOptionTests {
             ParseFixture.listSelectOption("REMOTE", " ", expected: .success(.remote)),
             ParseFixture.listSelectOption("RECURSIVEMATCH", " ", expected: .success(.recursiveMatch)),
             ParseFixture.listSelectOption("SPECIAL-USE", " ", expected: .success(.specialUse)),
-            ParseFixture.listSelectOption("MYEXT", expected: .success(.option(.init(key: .standard("MYEXT"), value: nil)))),
+            ParseFixture.listSelectOption(
+                "MYEXT",
+                expected: .success(.option(.init(key: .standard("MYEXT"), value: nil)))
+            ),
             ParseFixture.listSelectOption("(invalid)", "", expected: .failure),
             ParseFixture.listSelectOption("", "", expected: .incompleteMessage),
         ]

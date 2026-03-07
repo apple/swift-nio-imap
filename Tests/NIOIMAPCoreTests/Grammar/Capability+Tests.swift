@@ -183,8 +183,14 @@ struct CapabilityTests {
 
     @Test(arguments: [
         ParseFixture.capabilitySuffix(" IMAP4rev1", expected: .success([.imap4rev1])),
-        ParseFixture.capabilitySuffix(" CONDSTORE ENABLE FILTERS", expected: .success([.condStore, .enable, .filters])),
-        ParseFixture.capabilitySuffix(" AUTH=PLAIN IMAP4rev1", expected: .success([.authenticate(.plain), .imap4rev1])),
+        ParseFixture.capabilitySuffix(
+            " CONDSTORE ENABLE FILTERS",
+            expected: .success([.condStore, .enable, .filters])
+        ),
+        ParseFixture.capabilitySuffix(
+            " AUTH=PLAIN IMAP4rev1",
+            expected: .success([.authenticate(.plain), .imap4rev1])
+        ),
         ParseFixture.capabilitySuffix("", "", expected: .incompleteMessage),
     ])
     func parseCapabilitySuffix(_ fixture: ParseFixture<[Capability]>) {
@@ -208,31 +214,35 @@ struct CapabilityTests {
         fixture.checkParsing()
     }
 
-    @Test(arguments: [
-        (Capability.acl, "ACL"),
-        (Capability.idle, "IDLE"),
-        (Capability.authenticate(.plain), "AUTH=PLAIN"),
-    ] as [(Capability, String)])
+    @Test(
+        arguments: [
+            (Capability.acl, "ACL"),
+            (Capability.idle, "IDLE"),
+            (Capability.authenticate(.plain), "AUTH=PLAIN"),
+        ] as [(Capability, String)]
+    )
     func stringConversion(_ fixture: (Capability, String)) {
         #expect(String(fixture.0) == fixture.1)
     }
 
-    @Test(arguments: [
-        (Capability.context(Capability.ContextKind("search")), Capability.context(.search)),
-        (Capability.context(Capability.ContextKind("SEARCH")), Capability.context(.search)),
-        (Capability.sort(Capability.SortKind("display")), Capability.sort(.display)),
-        (Capability.sort(Capability.SortKind("DISPLAY")), Capability.sort(.display)),
-        (Capability.thread(Capability.ThreadKind("orderedsubject")), Capability.thread(.orderedSubject)),
-        (Capability.thread(Capability.ThreadKind("ORDEREDSUBJECT")), Capability.thread(.orderedSubject)),
-        (Capability.status(Capability.StatusKind("size")), Capability.status(.size)),
-        (Capability.status(Capability.StatusKind("SIZE")), Capability.status(.size)),
-        (Capability.utf8(Capability.UTF8Kind("accept")), Capability.utf8(.accept)),
-        (Capability.utf8(Capability.UTF8Kind("ACCEPT")), Capability.utf8(.accept)),
-        (Capability.rights(Capability.RightsKind("tekx")), Capability.rights(.tekx)),
-        (Capability.rights(Capability.RightsKind("TEKX")), Capability.rights(.tekx)),
-        (Capability.compression(Capability.CompressionKind("deflate")), Capability.compression(.deflate)),
-        (Capability.compression(Capability.CompressionKind("DEFLATE")), Capability.compression(.deflate)),
-    ] as [(Capability, Capability)])
+    @Test(
+        arguments: [
+            (Capability.context(Capability.ContextKind("search")), Capability.context(.search)),
+            (Capability.context(Capability.ContextKind("SEARCH")), Capability.context(.search)),
+            (Capability.sort(Capability.SortKind("display")), Capability.sort(.display)),
+            (Capability.sort(Capability.SortKind("DISPLAY")), Capability.sort(.display)),
+            (Capability.thread(Capability.ThreadKind("orderedsubject")), Capability.thread(.orderedSubject)),
+            (Capability.thread(Capability.ThreadKind("ORDEREDSUBJECT")), Capability.thread(.orderedSubject)),
+            (Capability.status(Capability.StatusKind("size")), Capability.status(.size)),
+            (Capability.status(Capability.StatusKind("SIZE")), Capability.status(.size)),
+            (Capability.utf8(Capability.UTF8Kind("accept")), Capability.utf8(.accept)),
+            (Capability.utf8(Capability.UTF8Kind("ACCEPT")), Capability.utf8(.accept)),
+            (Capability.rights(Capability.RightsKind("tekx")), Capability.rights(.tekx)),
+            (Capability.rights(Capability.RightsKind("TEKX")), Capability.rights(.tekx)),
+            (Capability.compression(Capability.CompressionKind("deflate")), Capability.compression(.deflate)),
+            (Capability.compression(Capability.CompressionKind("DEFLATE")), Capability.compression(.deflate)),
+        ] as [(Capability, Capability)]
+    )
     func caseInsensitiveKindInitializers(_ fixture: (Capability, Capability)) {
         #expect(fixture.0 == fixture.1)
     }

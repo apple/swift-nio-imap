@@ -41,7 +41,11 @@ struct ParameterValueTests {
 
     @Test(arguments: [
         ParseFixture.parameter("USE", ")", expected: .success(.init(key: "USE", value: nil))),
-        ParseFixture.parameter("USE 1", ")", expected: .success(.init(key: "USE", value: .sequence(.set(.init(range: .init(SequenceNumber(1)))))))),
+        ParseFixture.parameter(
+            "USE 1",
+            ")",
+            expected: .success(.init(key: "USE", value: .sequence(.set(.init(range: .init(SequenceNumber(1)))))))
+        ),
         ParseFixture.parameter("USE $", ")", expected: .success(.init(key: "USE", value: .sequence(.lastCommand)))),
         ParseFixture.parameter("", "", expected: .incompleteMessage),
     ])

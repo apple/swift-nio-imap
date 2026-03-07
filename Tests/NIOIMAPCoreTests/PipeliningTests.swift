@@ -1644,13 +1644,13 @@ struct PipeliningTests {
         // Silent store with gmail labels requires noFlagReadsFromAnyMessage but NOT noFlagChangesToAnyMessage
         expect(
             commands: [
-                (#_sourceLocation, .store(.set([1]), [], .gmailLabels(.add(silent: true, gmailLabels: [])))),
+                (#_sourceLocation, .store(.set([1]), [], .gmailLabels(.add(silent: true, gmailLabels: []))))
             ],
             require: .noFlagReadsFromAnyMessage
         )
         expect(
             commands: [
-                (#_sourceLocation, .store(.set([1]), [], .gmailLabels(.add(silent: true, gmailLabels: [])))),
+                (#_sourceLocation, .store(.set([1]), [], .gmailLabels(.add(silent: true, gmailLabels: []))))
             ],
             doNotRequire: .noFlagChangesToAnyMessage
         )
@@ -1658,13 +1658,13 @@ struct PipeliningTests {
         // Non-silent store with gmail labels requires both
         expect(
             commands: [
-                (#_sourceLocation, .store(.set([1]), [], .gmailLabels(.add(silent: false, gmailLabels: [])))),
+                (#_sourceLocation, .store(.set([1]), [], .gmailLabels(.add(silent: false, gmailLabels: []))))
             ],
             require: .noFlagReadsFromAnyMessage
         )
         expect(
             commands: [
-                (#_sourceLocation, .store(.set([1]), [], .gmailLabels(.add(silent: false, gmailLabels: [])))),
+                (#_sourceLocation, .store(.set([1]), [], .gmailLabels(.add(silent: false, gmailLabels: []))))
             ],
             require: .noFlagChangesToAnyMessage
         )
@@ -1672,13 +1672,13 @@ struct PipeliningTests {
         // uidStore(.lastCommand) with flags, silent=true — requires noFlagReadsFromAnyMessage only
         expect(
             commands: [
-                (#_sourceLocation, .uidStore(.lastCommand, [], .flags(.add(silent: true, list: [.answered])))),
+                (#_sourceLocation, .uidStore(.lastCommand, [], .flags(.add(silent: true, list: [.answered]))))
             ],
             require: .noFlagReadsFromAnyMessage
         )
         expect(
             commands: [
-                (#_sourceLocation, .uidStore(.lastCommand, [], .flags(.add(silent: true, list: [.answered])))),
+                (#_sourceLocation, .uidStore(.lastCommand, [], .flags(.add(silent: true, list: [.answered]))))
             ],
             doNotRequire: .noFlagChangesToAnyMessage
         )
@@ -1686,25 +1686,25 @@ struct PipeliningTests {
         // uidStore(.lastCommand) with gmail labels, both silent variants
         expect(
             commands: [
-                (#_sourceLocation, .uidStore(.lastCommand, [], .gmailLabels(.add(silent: true, gmailLabels: [])))),
+                (#_sourceLocation, .uidStore(.lastCommand, [], .gmailLabels(.add(silent: true, gmailLabels: []))))
             ],
             require: .noFlagReadsFromAnyMessage
         )
         expect(
             commands: [
-                (#_sourceLocation, .uidStore(.lastCommand, [], .gmailLabels(.add(silent: true, gmailLabels: [])))),
+                (#_sourceLocation, .uidStore(.lastCommand, [], .gmailLabels(.add(silent: true, gmailLabels: []))))
             ],
             doNotRequire: .noFlagChangesToAnyMessage
         )
         expect(
             commands: [
-                (#_sourceLocation, .uidStore(.lastCommand, [], .gmailLabels(.add(silent: false, gmailLabels: [])))),
+                (#_sourceLocation, .uidStore(.lastCommand, [], .gmailLabels(.add(silent: false, gmailLabels: []))))
             ],
             require: .noFlagReadsFromAnyMessage
         )
         expect(
             commands: [
-                (#_sourceLocation, .uidStore(.lastCommand, [], .gmailLabels(.add(silent: false, gmailLabels: [])))),
+                (#_sourceLocation, .uidStore(.lastCommand, [], .gmailLabels(.add(silent: false, gmailLabels: []))))
             ],
             require: .noFlagChangesToAnyMessage
         )
@@ -1713,25 +1713,25 @@ struct PipeliningTests {
         MessageIdentifierSetNonEmpty<UID>.arbitrarySets.forEach { uids in
             expect(
                 commands: [
-                    (#_sourceLocation, .uidStore(.set(uids), [], .gmailLabels(.add(silent: true, gmailLabels: [])))),
+                    (#_sourceLocation, .uidStore(.set(uids), [], .gmailLabels(.add(silent: true, gmailLabels: []))))
                 ],
                 require: .noFlagReads(uids)
             )
             expect(
                 commands: [
-                    (#_sourceLocation, .uidStore(.set(uids), [], .gmailLabels(.add(silent: true, gmailLabels: [])))),
+                    (#_sourceLocation, .uidStore(.set(uids), [], .gmailLabels(.add(silent: true, gmailLabels: []))))
                 ],
                 doNotRequire: .noFlagChanges(uids)
             )
             expect(
                 commands: [
-                    (#_sourceLocation, .uidStore(.set(uids), [], .gmailLabels(.add(silent: false, gmailLabels: [])))),
+                    (#_sourceLocation, .uidStore(.set(uids), [], .gmailLabels(.add(silent: false, gmailLabels: []))))
                 ],
                 require: .noFlagReads(uids)
             )
             expect(
                 commands: [
-                    (#_sourceLocation, .uidStore(.set(uids), [], .gmailLabels(.add(silent: false, gmailLabels: [])))),
+                    (#_sourceLocation, .uidStore(.set(uids), [], .gmailLabels(.add(silent: false, gmailLabels: []))))
                 ],
                 require: .noFlagChanges(uids)
             )
@@ -1743,20 +1743,20 @@ struct PipeliningTests {
         // store gmailLabels silent=true changes flags but doesn't read them
         expect(
             commands: [
-                (#_sourceLocation, .store(.set([1]), [], .gmailLabels(.add(silent: true, gmailLabels: [])))),
+                (#_sourceLocation, .store(.set([1]), [], .gmailLabels(.add(silent: true, gmailLabels: []))))
             ],
             haveBehavior: .changesFlagsOnAnyMessage
         )
         expect(
             commands: [
-                (#_sourceLocation, .store(.set([1]), [], .gmailLabels(.add(silent: true, gmailLabels: [])))),
+                (#_sourceLocation, .store(.set([1]), [], .gmailLabels(.add(silent: true, gmailLabels: []))))
             ],
             doNotHaveBehavior: .readsFlagsFromAnyMessage
         )
         // store gmailLabels silent=false changes and reads flags
         expect(
             commands: [
-                (#_sourceLocation, .store(.set([1]), [], .gmailLabels(.add(silent: false, gmailLabels: [])))),
+                (#_sourceLocation, .store(.set([1]), [], .gmailLabels(.add(silent: false, gmailLabels: []))))
             ],
             haveBehavior: .readsFlagsFromAnyMessage
         )
@@ -1764,45 +1764,45 @@ struct PipeliningTests {
         // uidStore(.lastCommand) flags silent=true
         expect(
             commands: [
-                (#_sourceLocation, .uidStore(.lastCommand, [], .flags(.add(silent: true, list: [.answered])))),
+                (#_sourceLocation, .uidStore(.lastCommand, [], .flags(.add(silent: true, list: [.answered]))))
             ],
             haveBehavior: .changesFlagsOnAnyMessage
         )
         expect(
             commands: [
-                (#_sourceLocation, .uidStore(.lastCommand, [], .flags(.add(silent: true, list: [.answered])))),
+                (#_sourceLocation, .uidStore(.lastCommand, [], .flags(.add(silent: true, list: [.answered]))))
             ],
             doNotHaveBehavior: .readsFlagsFromAnyMessage
         )
         // uidStore(.lastCommand) flags silent=false
         expect(
             commands: [
-                (#_sourceLocation, .uidStore(.lastCommand, [], .flags(.add(silent: false, list: [.answered])))),
+                (#_sourceLocation, .uidStore(.lastCommand, [], .flags(.add(silent: false, list: [.answered]))))
             ],
             haveBehavior: .changesFlagsOnAnyMessage
         )
         expect(
             commands: [
-                (#_sourceLocation, .uidStore(.lastCommand, [], .flags(.add(silent: false, list: [.answered])))),
+                (#_sourceLocation, .uidStore(.lastCommand, [], .flags(.add(silent: false, list: [.answered]))))
             ],
             haveBehavior: .readsFlagsFromAnyMessage
         )
         // uidStore(.lastCommand) gmailLabels both silent variants
         expect(
             commands: [
-                (#_sourceLocation, .uidStore(.lastCommand, [], .gmailLabels(.add(silent: true, gmailLabels: [])))),
+                (#_sourceLocation, .uidStore(.lastCommand, [], .gmailLabels(.add(silent: true, gmailLabels: []))))
             ],
             haveBehavior: .changesFlagsOnAnyMessage
         )
         expect(
             commands: [
-                (#_sourceLocation, .uidStore(.lastCommand, [], .gmailLabels(.add(silent: true, gmailLabels: [])))),
+                (#_sourceLocation, .uidStore(.lastCommand, [], .gmailLabels(.add(silent: true, gmailLabels: []))))
             ],
             doNotHaveBehavior: .readsFlagsFromAnyMessage
         )
         expect(
             commands: [
-                (#_sourceLocation, .uidStore(.lastCommand, [], .gmailLabels(.add(silent: false, gmailLabels: [])))),
+                (#_sourceLocation, .uidStore(.lastCommand, [], .gmailLabels(.add(silent: false, gmailLabels: []))))
             ],
             haveBehavior: .readsFlagsFromAnyMessage
         )
@@ -1811,13 +1811,13 @@ struct PipeliningTests {
         MessageIdentifierSetNonEmpty<UID>.arbitrarySets.forEach { uids in
             expect(
                 commands: [
-                    (#_sourceLocation, .uidStore(.set(uids), [], .gmailLabels(.add(silent: true, gmailLabels: [])))),
+                    (#_sourceLocation, .uidStore(.set(uids), [], .gmailLabels(.add(silent: true, gmailLabels: []))))
                 ],
                 doNotHaveBehavior: .readsFlags(uids)
             )
             expect(
                 commands: [
-                    (#_sourceLocation, .uidStore(.set(uids), [], .gmailLabels(.add(silent: false, gmailLabels: [])))),
+                    (#_sourceLocation, .uidStore(.set(uids), [], .gmailLabels(.add(silent: false, gmailLabels: []))))
                 ],
                 haveBehavior: .readsFlags(uids)
             )
@@ -1831,14 +1831,14 @@ struct PipeliningTests {
         // Without flags — does not read flags
         expect(
             commands: [
-                (#_sourceLocation, .uidFetch(.lastCommand, [.envelope, .uid], [])),
+                (#_sourceLocation, .uidFetch(.lastCommand, [.envelope, .uid], []))
             ],
             doNotHaveBehavior: .readsFlagsFromAnyMessage
         )
         // With flags — reads flags from any message
         expect(
             commands: [
-                (#_sourceLocation, .uidFetch(.lastCommand, [.uid, .flags], [])),
+                (#_sourceLocation, .uidFetch(.lastCommand, [.uid, .flags], []))
             ],
             haveBehavior: .readsFlagsFromAnyMessage
         )

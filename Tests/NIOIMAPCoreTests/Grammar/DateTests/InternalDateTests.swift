@@ -20,7 +20,13 @@ struct InternalDateTests {
     @Test("UInt64 conversion")
     func uint64Conversion() {
         let components = ServerMessageDate.Components(
-            year: 2024, month: 3, day: 15, hour: 10, minute: 30, second: 45, timeZoneMinutes: 0
+            year: 2024,
+            month: 3,
+            day: 15,
+            hour: 10,
+            minute: 30,
+            second: 45,
+            timeZoneMinutes: 0
         )!
         let date = ServerMessageDate(components)
         let raw = UInt64(date)
@@ -174,16 +180,34 @@ struct InternalDateTests {
                 )
             )
         ),
-        ParseFixture.internalDate(#""99-Jun-1994 01:02:03 +0000""#, "\r", expected: .failureIgnoringBufferModifications),
-        ParseFixture.internalDate(#""25-Jun-1994 01:02:03 +9999""#, "\r", expected: .failureIgnoringBufferModifications),
-        ParseFixture.internalDate(#""25-Jun-1994 01:02:03 -9999""#, "\r", expected: .failureIgnoringBufferModifications),
+        ParseFixture.internalDate(
+            #""99-Jun-1994 01:02:03 +0000""#,
+            "\r",
+            expected: .failureIgnoringBufferModifications
+        ),
+        ParseFixture.internalDate(
+            #""25-Jun-1994 01:02:03 +9999""#,
+            "\r",
+            expected: .failureIgnoringBufferModifications
+        ),
+        ParseFixture.internalDate(
+            #""25-Jun-1994 01:02:03 -9999""#,
+            "\r",
+            expected: .failureIgnoringBufferModifications
+        ),
         ParseFixture.internalDate(
             #""15-Feb-2000 00:00:00 +0000""#,
             "\r",
             expected: .success(
                 ServerMessageDate(
                     ServerMessageDate.Components(
-                        year: 2000, month: 2, day: 15, hour: 0, minute: 0, second: 0, timeZoneMinutes: 0
+                        year: 2000,
+                        month: 2,
+                        day: 15,
+                        hour: 0,
+                        minute: 0,
+                        second: 0,
+                        timeZoneMinutes: 0
                     )!
                 )
             )
@@ -194,7 +218,13 @@ struct InternalDateTests {
             expected: .success(
                 ServerMessageDate(
                     ServerMessageDate.Components(
-                        year: 2000, month: 3, day: 15, hour: 0, minute: 0, second: 0, timeZoneMinutes: 0
+                        year: 2000,
+                        month: 3,
+                        day: 15,
+                        hour: 0,
+                        minute: 0,
+                        second: 0,
+                        timeZoneMinutes: 0
                     )!
                 )
             )
@@ -205,7 +235,13 @@ struct InternalDateTests {
             expected: .success(
                 ServerMessageDate(
                     ServerMessageDate.Components(
-                        year: 2000, month: 4, day: 15, hour: 0, minute: 0, second: 0, timeZoneMinutes: 0
+                        year: 2000,
+                        month: 4,
+                        day: 15,
+                        hour: 0,
+                        minute: 0,
+                        second: 0,
+                        timeZoneMinutes: 0
                     )!
                 )
             )
@@ -216,7 +252,13 @@ struct InternalDateTests {
             expected: .success(
                 ServerMessageDate(
                     ServerMessageDate.Components(
-                        year: 2000, month: 5, day: 15, hour: 0, minute: 0, second: 0, timeZoneMinutes: 0
+                        year: 2000,
+                        month: 5,
+                        day: 15,
+                        hour: 0,
+                        minute: 0,
+                        second: 0,
+                        timeZoneMinutes: 0
                     )!
                 )
             )
@@ -227,7 +269,13 @@ struct InternalDateTests {
             expected: .success(
                 ServerMessageDate(
                     ServerMessageDate.Components(
-                        year: 2000, month: 7, day: 15, hour: 0, minute: 0, second: 0, timeZoneMinutes: 0
+                        year: 2000,
+                        month: 7,
+                        day: 15,
+                        hour: 0,
+                        minute: 0,
+                        second: 0,
+                        timeZoneMinutes: 0
                     )!
                 )
             )
@@ -238,7 +286,13 @@ struct InternalDateTests {
             expected: .success(
                 ServerMessageDate(
                     ServerMessageDate.Components(
-                        year: 2000, month: 8, day: 15, hour: 0, minute: 0, second: 0, timeZoneMinutes: 0
+                        year: 2000,
+                        month: 8,
+                        day: 15,
+                        hour: 0,
+                        minute: 0,
+                        second: 0,
+                        timeZoneMinutes: 0
                     )!
                 )
             )
@@ -249,7 +303,13 @@ struct InternalDateTests {
             expected: .success(
                 ServerMessageDate(
                     ServerMessageDate.Components(
-                        year: 2000, month: 9, day: 15, hour: 0, minute: 0, second: 0, timeZoneMinutes: 0
+                        year: 2000,
+                        month: 9,
+                        day: 15,
+                        hour: 0,
+                        minute: 0,
+                        second: 0,
+                        timeZoneMinutes: 0
                     )!
                 )
             )
@@ -260,7 +320,13 @@ struct InternalDateTests {
             expected: .success(
                 ServerMessageDate(
                     ServerMessageDate.Components(
-                        year: 2000, month: 10, day: 15, hour: 0, minute: 0, second: 0, timeZoneMinutes: 0
+                        year: 2000,
+                        month: 10,
+                        day: 15,
+                        hour: 0,
+                        minute: 0,
+                        second: 0,
+                        timeZoneMinutes: 0
                     )!
                 )
             )
@@ -271,7 +337,13 @@ struct InternalDateTests {
             expected: .success(
                 ServerMessageDate(
                     ServerMessageDate.Components(
-                        year: 2000, month: 11, day: 15, hour: 0, minute: 0, second: 0, timeZoneMinutes: 0
+                        year: 2000,
+                        month: 11,
+                        day: 15,
+                        hour: 0,
+                        minute: 0,
+                        second: 0,
+                        timeZoneMinutes: 0
                     )!
                 )
             )
@@ -291,8 +363,13 @@ struct InternalDateTests {
     func encodesMonthName(_ fixture: (Int, String)) {
         let (month, monthName) = fixture
         let components = ServerMessageDate.Components(
-            year: 2000, month: month, day: 15,
-            hour: 12, minute: 0, second: 0, timeZoneMinutes: 0
+            year: 2000,
+            month: month,
+            day: 15,
+            hour: 12,
+            minute: 0,
+            second: 0,
+            timeZoneMinutes: 0
         )!
         let date = ServerMessageDate(components)
         #expect(String(reflecting: date) == "\"15-\(monthName)-2000 12:00:00 +0000\"")

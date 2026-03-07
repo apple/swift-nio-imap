@@ -584,15 +584,21 @@ extension MessageAttributeTests {
         arguments: [
             BodySectionFixture(section: nil, number: nil, string: nil, expected: "BODY[] NIL"),
             BodySectionFixture(
-                section: .init(kind: .header), number: nil, string: "header data",
+                section: .init(kind: .header),
+                number: nil,
+                string: "header data",
                 expected: #"BODY[HEADER] "header data""#
             ),
             BodySectionFixture(
-                section: .init(part: [1, 2], kind: .text), number: 0, string: "body text",
+                section: .init(part: [1, 2], kind: .text),
+                number: 0,
+                string: "body text",
                 expected: #"BODY[1.2.TEXT]<0> "body text""#
             ),
             BodySectionFixture(
-                section: .init(kind: .complete), number: 512, string: nil,
+                section: .init(kind: .complete),
+                number: 512,
+                string: nil,
                 expected: "BODY[]<512> NIL"
             ),
         ]

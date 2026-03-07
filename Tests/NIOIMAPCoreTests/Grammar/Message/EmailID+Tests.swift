@@ -18,24 +18,28 @@ import Testing
 
 @Suite("EmailID")
 struct EmailIDTests {
-    @Test(arguments: [
-        ("abc123", true),
-        ("ABC-XYZ_123", true),
-        ("a", true),
-        (String(repeating: "a", count: 255), true),
-        ("", false),
-        ("abc!", false),
-        (String(repeating: "a", count: 256), false),
-    ] as [(String, Bool)])
+    @Test(
+        arguments: [
+            ("abc123", true),
+            ("ABC-XYZ_123", true),
+            ("a", true),
+            (String(repeating: "a", count: 255), true),
+            ("", false),
+            ("abc!", false),
+            (String(repeating: "a", count: 256), false),
+        ] as [(String, Bool)]
+    )
     func faillableInit(_ fixture: (String, Bool)) {
         let result = EmailID(fixture.0)
         #expect((result != nil) == fixture.1)
     }
 
-    @Test(arguments: [
-        ("abc123", "abc123"),
-        ("ABC-XYZ_123", "ABC-XYZ_123"),
-    ] as [(String, String)])
+    @Test(
+        arguments: [
+            ("abc123", "abc123"),
+            ("ABC-XYZ_123", "ABC-XYZ_123"),
+        ] as [(String, String)]
+    )
     func stringConversion(_ fixture: (String, String)) {
         let id = EmailID(fixture.0)!
         #expect(String(id) == fixture.1)
@@ -47,10 +51,12 @@ struct EmailIDTests {
         #expect(String(id) == "abc123")
     }
 
-    @Test(arguments: [
-        ("abc123", "(abc123)"),
-        ("XYZ-789", "(XYZ-789)"),
-    ] as [(String, String)])
+    @Test(
+        arguments: [
+            ("abc123", "(abc123)"),
+            ("XYZ-789", "(XYZ-789)"),
+        ] as [(String, String)]
+    )
     func debugDescription(_ fixture: (String, String)) {
         let id = EmailID(fixture.0)!
         #expect(id.debugDescription == fixture.1)

@@ -18,10 +18,12 @@ import Testing
 
 @Suite("ExtendedSearchSourceOptions")
 struct ExtendedSearchSourceOptionsTests {
-    @Test(arguments: [
-        ([] as [MailboxFilter], false),
-        ([.inboxes] as [MailboxFilter], true),
-    ] as [([MailboxFilter], Bool)])
+    @Test(
+        arguments: [
+            ([] as [MailboxFilter], false),
+            ([.inboxes] as [MailboxFilter], true),
+        ] as [([MailboxFilter], Bool)]
+    )
     func failableInit(_ fixture: ([MailboxFilter], Bool)) {
         let (sourceMailbox, shouldSucceed) = fixture
         let result = ExtendedSearchSourceOptions(sourceMailbox: sourceMailbox)

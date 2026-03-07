@@ -43,10 +43,12 @@ struct GmailLabelTests {
         #expect(encoded == "\\Sent")
     }
 
-    @Test(arguments: [
-        (GmailLabel(ByteBuffer(string: "Inbox")), "Inbox"),
-        (GmailLabel(ByteBuffer(string: "&invalid-")), "&invalid-"),  // invalid modified UTF-7 falls back to UTF-8
-    ] as [(GmailLabel, String)])
+    @Test(
+        arguments: [
+            (GmailLabel(ByteBuffer(string: "Inbox")), "Inbox"),
+            (GmailLabel(ByteBuffer(string: "&invalid-")), "&invalid-"),  // invalid modified UTF-7 falls back to UTF-8
+        ] as [(GmailLabel, String)]
+    )
     func makeDisplayString(_ fixture: (GmailLabel, String)) {
         #expect(fixture.0.makeDisplayString() == fixture.1)
     }

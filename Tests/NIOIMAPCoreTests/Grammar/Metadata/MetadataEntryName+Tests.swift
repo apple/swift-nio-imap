@@ -18,10 +18,12 @@ import Testing
 
 @Suite("MetadataEntryName")
 struct MetadataEntryNameTests {
-    @Test(arguments: [
-        (MetadataEntryName("/private/vendor/example/color"), "/private/vendor/example/color"),
-        (MetadataEntryName(ByteBuffer(string: "/shared/admin/quota")), "/shared/admin/quota"),
-    ] as [(MetadataEntryName, String)])
+    @Test(
+        arguments: [
+            (MetadataEntryName("/private/vendor/example/color"), "/private/vendor/example/color"),
+            (MetadataEntryName(ByteBuffer(string: "/shared/admin/quota")), "/shared/admin/quota"),
+        ] as [(MetadataEntryName, String)]
+    )
     func stringRoundTrip(_ fixture: (MetadataEntryName, String)) {
         #expect(String(fixture.0) == fixture.1)
     }

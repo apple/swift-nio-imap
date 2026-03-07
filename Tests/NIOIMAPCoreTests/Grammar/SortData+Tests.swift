@@ -34,7 +34,11 @@ struct SortDataTests {
 
     @Test(arguments: [
         ParseFixture.sortData("SORT", "\r", expected: .success(nil)),
-        ParseFixture.sortData("SORT 1 (MODSEQ 2)", "\r", expected: .success(.init(identifiers: [1], modificationSequence: 2))),
+        ParseFixture.sortData(
+            "SORT 1 (MODSEQ 2)",
+            "\r",
+            expected: .success(.init(identifiers: [1], modificationSequence: 2))
+        ),
         ParseFixture.sortData(
             "SORT 1 3 5 (MODSEQ 42)",
             "\r",
