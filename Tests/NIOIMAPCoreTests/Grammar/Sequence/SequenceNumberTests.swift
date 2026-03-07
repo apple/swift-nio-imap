@@ -41,15 +41,18 @@ extension SequenceNumberTests {
         #expect(SequenceNumber(1) < 999)
     }
 
-    @Test(arguments: [
-        EncodeFixture.sequenceNumber(1, "1"),
-        EncodeFixture.sequenceNumber(123, "123"),
-        EncodeFixture.sequenceNumber(1234, "1234"),
-        EncodeFixture.sequenceNumber(9999, "9999"),
-        EncodeFixture.sequenceNumber(65535, "65535"),
-        EncodeFixture.sequenceNumber(1_000_000, "1000000"),
-        EncodeFixture.sequenceNumber(.max, "4294967295"),
-    ])
+    @Test(
+        "encode",
+        arguments: [
+            EncodeFixture.sequenceNumber(1, "1"),
+            EncodeFixture.sequenceNumber(123, "123"),
+            EncodeFixture.sequenceNumber(1234, "1234"),
+            EncodeFixture.sequenceNumber(9999, "9999"),
+            EncodeFixture.sequenceNumber(65535, "65535"),
+            EncodeFixture.sequenceNumber(1_000_000, "1000000"),
+            EncodeFixture.sequenceNumber(.max, "4294967295"),
+        ]
+    )
     func encode(_ fixture: EncodeFixture<SequenceNumber>) {
         fixture.checkEncoding()
     }
@@ -61,6 +64,13 @@ extension SequenceNumberTests {
         #expect(max.advanced(by: 0) == max)
         #expect(min.advanced(by: min.distance(to: max)) == max)
         #expect(max.advanced(by: max.distance(to: min)) == min)
+    }
+
+    @Test("conversion to UnknownMessageIdentifier")
+    func conversionToUnknownMessageIdentifier() {
+        let seq = SequenceNumber(42)
+        let unknown = UnknownMessageIdentifier(seq)
+        #expect(unknown.rawValue == 42)
     }
 }
 

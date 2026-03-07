@@ -231,4 +231,14 @@ struct ResponseParserTests {
             try parser.parseResponseStream(buffer: &input)
         }
     }
+
+    @Test("parse untagged non-fetch response")
+    func parseUntaggedNonFetchResponse() throws {
+        // An EXISTS response is not a FETCH, so parseResponse_fetch fails and
+        // parseResponse_normal succeeds, exercising the .untaggedResponse branch.
+        var parser = ResponseParser()
+        var buffer: ByteBuffer = "* 5 EXISTS\r\n"
+        let result = try parser.parseResponseStream(buffer: &buffer)
+        #expect(result == .response(.untagged(.mailboxData(.exists(5)))))
+    }
 }

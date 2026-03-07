@@ -90,12 +90,19 @@ extension DateTests {
         fixture.checkEncoding()
     }
 
-    @Test(arguments: [
-        ParseFixture.date("25-Jun-1994", " ", expected: .success(IMAPCalendarDay(year: 1994, month: 6, day: 25)!)),
-        ParseFixture.date("\"25-Jun-1994\"", "\r", expected: .success(IMAPCalendarDay(year: 1994, month: 6, day: 25)!)),
-        ParseFixture.date("\"25-Jun-1994 ", "\r", expected: .failure),
-        ParseFixture.date("\"\"", "\r", expected: .failure),
-    ])
+    @Test(
+        "parse date",
+        arguments: [
+            ParseFixture.date("25-Jun-1994", " ", expected: .success(IMAPCalendarDay(year: 1994, month: 6, day: 25)!)),
+            ParseFixture.date(
+                "\"25-Jun-1994\"",
+                "\r",
+                expected: .success(IMAPCalendarDay(year: 1994, month: 6, day: 25)!)
+            ),
+            ParseFixture.date("\"25-Jun-1994 ", "\r", expected: .failure),
+            ParseFixture.date("\"\"", "\r", expected: .failure),
+        ]
+    )
     func parse(_ fixture: ParseFixture<IMAPCalendarDay>) {
         fixture.checkParsing()
     }
@@ -136,6 +143,7 @@ extension DateTests {
                 expected: .success(IMAPCalendarDay(year: 1994, month: 6, day: 25)!)
             ),
             ParseFixture.dateText("25-Jun-", "", expected: .incompleteMessageIgnoringBufferModifications),
+            ParseFixture.dateText("99-Jun-1994", " ", expected: .failureIgnoringBufferModifications),
         ]
     )
     func parseDateText(_ fixture: ParseFixture<IMAPCalendarDay>) {

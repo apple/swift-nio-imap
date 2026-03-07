@@ -23,6 +23,16 @@ private struct SectionSpecifierTests {
         EncodeFixture.sectionSpecifier(.init(kind: .header), "HEADER"),
         EncodeFixture.sectionSpecifier(.init(part: [1, 2, 3, 4], kind: .complete), "1.2.3.4"),
         EncodeFixture.sectionSpecifier(.init(part: [1, 2, 3, 4], kind: .header), "1.2.3.4.HEADER"),
+        EncodeFixture.sectionSpecifier(.init(part: [1, 2], kind: .MIMEHeader), "1.2.MIME"),
+        EncodeFixture.sectionSpecifier(.init(part: [1], kind: .text), "1.TEXT"),
+        EncodeFixture.sectionSpecifier(
+            .init(part: [1, 2, 3], kind: .headerFieldsNot(["FROM", "DATE"])),
+            #"1.2.3.HEADER.FIELDS.NOT ("FROM" "DATE")"#
+        ),
+        EncodeFixture.sectionSpecifier(
+            .init(part: [1], kind: .headerFields(["SUBJECT"])),
+            #"1.HEADER.FIELDS ("SUBJECT")"#
+        ),
     ])
     func encode(_ fixture: EncodeFixture<SectionSpecifier?>) {
         fixture.checkEncoding()
@@ -130,6 +140,9 @@ private struct SectionSpecifierTests {
             ComparableFixture<SectionSpecifier.Part>(lhs: [1, 2, 3, 4], rhs: [1, 2, 3, 4], expected: false),
             ComparableFixture<SectionSpecifier.Part>(lhs: [1, 2, 3, 4], rhs: [1, 2, 3, 4, 5, 6], expected: true),
             ComparableFixture<SectionSpecifier.Part>(lhs: [1, 2, 3, 4, 5, 6], rhs: [1, 2, 3], expected: false),
+            // Elements differ at position i
+            ComparableFixture<SectionSpecifier.Part>(lhs: [1, 3], rhs: [1, 4], expected: true),
+            ComparableFixture<SectionSpecifier.Part>(lhs: [1, 4], rhs: [1, 3], expected: false),
         ]
     )
     func comparableSectionSpecifierPart(_ fixture: ComparableFixture<SectionSpecifier.Part>) {
@@ -278,6 +291,33 @@ private struct SectionSpecifierTests {
     func parseSectionSpecifierKind(_ fixture: ParseFixture<SectionSpecifier.Kind>) {
         fixture.checkParsing()
     }
+
+    @Test(
+        "static factory headerFields / headerFieldsNot",
+        arguments: [
+            (
+                SectionSpecifier.headerFields(["FROM", "DATE"]),
+                SectionSpecifier(kind: .headerFields(["FROM", "DATE"]))
+            ),
+            (SectionSpecifier.headerFieldsNot(["FROM"]), SectionSpecifier(kind: .headerFieldsNot(["FROM"]))),
+        ] as [(SectionSpecifier, SectionSpecifier)]
+    )
+    func staticFactories(_ fixture: (SectionSpecifier, SectionSpecifier)) {
+        #expect(fixture.0 == fixture.1)
+    }
+
+    #if swift(>=6.2)
+    @Test("MIME header with empty part triggers precondition failure") func mimeHeaderWithEmptyPartPreconditionFailure()
+        async
+    {
+        await #expect(
+            processExitsWith: ExitTest.Condition.failure,
+            performing: {
+                _ = SectionSpecifier(kind: .MIMEHeader)
+            }
+        )
+    }
+    #endif
 }
 
 // MARK: -

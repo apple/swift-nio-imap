@@ -49,6 +49,29 @@ struct FlagTests {
         #expect(input == expected)
     }
 
+    @Test(
+        "string conversion",
+        arguments: [
+            (Flag.answered, "\\Answered"),
+            (Flag.flagged, "\\Flagged"),
+            (Flag("Custom"), "Custom"),
+        ] as [(Flag, String)]
+    )
+    func stringConversion(_ fixture: (Flag, String)) {
+        #expect(String(fixture.0) == fixture.1)
+    }
+
+    #if swift(>=6.2)
+    @Test("extension(_:) precondition failure without backslash") func extensionPreconditionFailure() async {
+        await #expect(
+            processExitsWith: ExitTest.Condition.failure,
+            performing: {
+                _ = Flag.extension("NoBackslash")
+            }
+        )
+    }
+    #endif
+
     @Test("equality checks")
     func equalityChecks() {
         expectEqualAndEqualHash(Flag.answered, .answered)

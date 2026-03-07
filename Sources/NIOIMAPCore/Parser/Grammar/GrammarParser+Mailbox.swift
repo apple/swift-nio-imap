@@ -265,24 +265,6 @@ extension GrammarParser {
         }
     }
 
-    // mbox-or-pat =  list-mailbox / patterns
-    func parseMailboxOrPat(buffer: inout ParseBuffer, tracker: StackTracker) throws -> MailboxPatterns {
-        func parseMailboxOrPat_list(buffer: inout ParseBuffer, tracker: StackTracker) throws -> MailboxPatterns {
-            .mailbox(try self.parseListMailbox(buffer: &buffer, tracker: tracker))
-        }
-
-        func parseMailboxOrPat_patterns(buffer: inout ParseBuffer, tracker: StackTracker) throws -> MailboxPatterns {
-            .pattern(try self.parsePatterns(buffer: &buffer, tracker: tracker))
-        }
-
-        return try PL.parseOneOf(
-            parseMailboxOrPat_list,
-            parseMailboxOrPat_patterns,
-            buffer: &buffer,
-            tracker: tracker
-        )
-    }
-
     // mbx-list-flags  = *(mbx-list-oflag SP) mbx-list-sflag
     //                   *(SP mbx-list-oflag) /
     //                   mbx-list-oflag *(SP mbx-list-oflag)

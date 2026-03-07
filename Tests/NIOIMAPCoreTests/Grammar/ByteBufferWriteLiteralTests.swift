@@ -117,6 +117,63 @@ struct ByteBufferWriteLiteralTests {
     func writeLiteral8WithClientBuffers(_ fixture: EncodeFixture<ByteBuffer>) {
         fixture.checkEncoding()
     }
+
+    @Test("writeIMAPString in logging mode redacts content")
+    func writeIMAPStringLoggingMode() {
+        // quoted string in logging mode → "∅" (with enclosing quotes)
+        var quotedBuffer = EncodeBuffer.serverEncodeBuffer(
+            buffer: ByteBufferAllocator().buffer(capacity: 128),
+            options: ResponseEncodingOptions(),
+            loggingMode: true
+        )
+        _ = quotedBuffer.writeIMAPString(ByteBuffer(string: "hello"))
+        var chunk = quotedBuffer.nextChunk()
+        let quotedOutput = String(buffer: chunk.bytes)
+        while chunk.waitForContinuation { chunk = quotedBuffer.nextChunk() }
+        #expect(quotedOutput == #""∅""#)
+
+        // server literal in logging mode
+        var serverOptions = ResponseEncodingOptions()
+        serverOptions.useQuotedString = false
+        var serverLiteralBuffer = EncodeBuffer.serverEncodeBuffer(
+            buffer: ByteBufferAllocator().buffer(capacity: 128),
+            options: serverOptions,
+            loggingMode: true
+        )
+        _ = serverLiteralBuffer.writeIMAPString(ByteBuffer(string: "hello"))
+        chunk = serverLiteralBuffer.nextChunk()
+        let serverLiteralOutput = String(buffer: chunk.bytes)
+        while chunk.waitForContinuation { chunk = serverLiteralBuffer.nextChunk() }
+        #expect(serverLiteralOutput == "{5}\r\n∅")
+
+        // client synchronizing literal in logging mode
+        var clientSyncBuffer = EncodeBuffer.clientEncodeBuffer(
+            buffer: ByteBufferAllocator().buffer(capacity: 128),
+            options: CommandEncodingOptions(useQuotedString: false, useSynchronizingLiteral: true),
+            loggingMode: true
+        )
+        _ = clientSyncBuffer.writeIMAPString(ByteBuffer(string: "hello"))
+        chunk = clientSyncBuffer.nextChunk()
+        let clientSyncFirstChunk = String(buffer: chunk.bytes)
+        #expect(clientSyncFirstChunk == "{5}\r\n")
+        #expect(chunk.waitForContinuation)
+
+        // client non-synchronizing literal in logging mode
+        var clientNonSyncBuffer = EncodeBuffer.clientEncodeBuffer(
+            buffer: ByteBufferAllocator().buffer(capacity: 128),
+            options: CommandEncodingOptions(
+                useQuotedString: false,
+                useSynchronizingLiteral: false,
+                useNonSynchronizingLiteralPlus: true
+            ),
+            loggingMode: true
+        )
+        _ = clientNonSyncBuffer.writeIMAPString(ByteBuffer(string: "hello"))
+        chunk = clientNonSyncBuffer.nextChunk()
+        let clientNonSyncOutput = String(buffer: chunk.bytes)
+        while chunk.waitForContinuation { chunk = clientNonSyncBuffer.nextChunk() }
+        #expect(clientNonSyncOutput == "{5+}\r\n∅")
+    }
 }
 
 // MARK: -

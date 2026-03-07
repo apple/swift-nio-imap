@@ -74,6 +74,11 @@ struct IMAPServerTests {
                 )
             )
         ),
+        ParseFixture.imapServer(
+            "[someHost]",
+            " ",
+            expected: .success(.init(userAuthenticationMechanism: nil, host: "someHost", port: nil))
+        ),
     ])
     func parse(_ fixture: ParseFixture<IMAPServer>) {
         fixture.checkParsing()

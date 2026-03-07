@@ -19,7 +19,7 @@ import Testing
 struct UInt8ParseTypeMembershipTests {
     let allChars = Set(UInt8.min...UInt8.max)
 
-    @Test
+    @Test("CR")
     func CR() {
         let valid: Set<UInt8> = [UInt8(ascii: "\r")]
         let invalid = allChars.subtracting(valid)
@@ -27,7 +27,7 @@ struct UInt8ParseTypeMembershipTests {
         #expect(invalid.allSatisfy { !$0.isCR })
     }
 
-    @Test
+    @Test("LF")
     func LF() {
         let valid: Set<UInt8> = [UInt8(ascii: "\n")]
         let invalid = allChars.subtracting(valid)

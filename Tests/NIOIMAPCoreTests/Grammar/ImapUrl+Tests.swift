@@ -27,6 +27,19 @@ struct IMAPURLTests {
             .init(server: .init(host: "mail.example.com"), query: nil),
             "imap://mail.example.com/"
         ),
+        EncodeFixture.imapURL(
+            .init(
+                server: .init(host: "localhost"),
+                query: .fetch(
+                    path: .init(
+                        mailboxReference: .init(encodeMailbox: .init(mailbox: "test")),
+                        iUID: .init(uid: 123)
+                    ),
+                    authenticatedURL: nil
+                )
+            ),
+            "imap://localhost/test/;UID=123"
+        ),
     ])
     func encode(_ fixture: EncodeFixture<IMAPURL>) {
         fixture.checkEncoding()

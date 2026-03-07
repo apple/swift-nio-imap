@@ -61,6 +61,11 @@ struct MailboxDataTests {
             .search([20, 23], ModificationSequenceValue(917_162_500)),
             "SEARCH 20 23 (MODSEQ 917162500)"
         ),
+        EncodeFixture.mailboxData(.recent(5678), "5678 RECENT"),
+        EncodeFixture.mailboxData(
+            .searchSort(.init(identifiers: [1, 2, 3], modificationSequence: 2)),
+            "SEARCH 1 2 3 (MODSEQ 2)"
+        ),
         EncodeFixture.mailboxData(
             .uidBatches(
                 UIDBatchesResponse(
@@ -187,6 +192,7 @@ struct MailboxDataTests {
         ParseFixture.mailboxData("SEARCH", "\r\n", expected: .success(.search([]))),
         ParseFixture.mailboxData("SEARCH 1", "\r\n", expected: .success(.search([1]))),
         ParseFixture.mailboxData("SEARCH 1 2 3 4 5", "\r\n", expected: .success(.search([1, 2, 3, 4, 5]))),
+        ParseFixture.mailboxData("SEARCH", " 4294967296\r\n", expected: .success(.search([]))),
         ParseFixture.mailboxData(
             "NAMESPACE NIL NIL NIL",
             "\r\n",

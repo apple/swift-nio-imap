@@ -32,7 +32,7 @@ struct UIDTests {
         #expect(UID(exactly: 4_294_967_296) == nil)
     }
 
-    @Test
+    @Test("comparable")
     func comparable() {
         #expect((UID.max < UID.max) == false)
         #expect((UID.max < 999) == false)
@@ -52,12 +52,15 @@ struct UIDTests {
         fixture.check()
     }
 
-    @Test(arguments: [
-        EncodeFixture.uid(.min, "1"),
-        EncodeFixture.uid(.max, "*"),
-        EncodeFixture.uid(UID(1234), "1234"),
-        EncodeFixture.uid(UID(392_972_163), "392972163"),
-    ])
+    @Test(
+        "encode",
+        arguments: [
+            EncodeFixture.uid(.min, "1"),
+            EncodeFixture.uid(.max, "*"),
+            EncodeFixture.uid(UID(1234), "1234"),
+            EncodeFixture.uid(UID(392_972_163), "392972163"),
+        ]
+    )
     func encode(_ fixture: EncodeFixture<UID>) {
         fixture.checkEncoding()
     }
@@ -77,6 +80,24 @@ struct UIDTests {
         #expect(UID.min.advanced(by: UID.min.distance(to: UID.max)) == UID.max)
         #expect(UID.max.advanced(by: UID.max.distance(to: UID.min)) == UID.min)
     }
+
+    @Test("conversion to UnknownMessageIdentifier")
+    func conversionToUnknownMessageIdentifier() {
+        let uid = UID(99)
+        let unknown = UnknownMessageIdentifier(uid)
+        #expect(unknown.rawValue == 99)
+    }
+
+    #if swift(>=6.2)
+    @Test("advanced(by:) overflow triggers precondition failure") func advancedByOverflowPreconditionFailure() async {
+        await #expect(
+            processExitsWith: ExitTest.Condition.failure,
+            performing: {
+                _ = UID(1).advanced(by: Int64(UInt32.max) + 1)
+            }
+        )
+    }
+    #endif
 }
 
 // MARK: -

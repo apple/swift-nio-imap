@@ -47,8 +47,49 @@ struct NamespaceDescriptionTests {
             " ",
             expected: .success(.init(string: "str", char: "a", responseExtensions: [:]))
         ),
+        ParseFixture.namespaceDescription(
+            "(\"str\" \"\r\")",
+            " ",
+            expected: .failureIgnoringBufferModifications
+        ),
+        ParseFixture.namespaceDescription(
+            "(\"str\" NIL \"ext-key\" (\"val1\" \"val2\"))",
+            " ",
+            expected: .success(
+                .init(
+                    string: "str",
+                    char: nil,
+                    responseExtensions: ["ext-key": ["val1", "val2"]]
+                )
+            )
+        ),
     ])
     func parse(_ fixture: ParseFixture<NamespaceDescription>) {
+        fixture.checkParsing()
+    }
+
+    @Test(
+        "parse NAMESPACE",
+        arguments: [
+            ParseFixture.namespace(
+                "NIL",
+                expected: .success([])
+            ),
+            ParseFixture.namespace(
+                "((\"#mh/\" \"/\"))",
+                expected: .success([.init(string: "#mh/", char: "/", responseExtensions: [:])])
+            ),
+            ParseFixture.namespace(
+                "((\"\" \"/\")(\"#mh/\" \"/\"))",
+                expected: .success([
+                    .init(string: "", char: "/", responseExtensions: [:]),
+                    .init(string: "#mh/", char: "/", responseExtensions: [:]),
+                ])
+            ),
+            ParseFixture.namespace("", "", expected: .incompleteMessage),
+        ]
+    )
+    func parseNamespace(_ fixture: ParseFixture<[NamespaceDescription]>) {
         fixture.checkParsing()
     }
 }
@@ -80,6 +121,21 @@ extension ParseFixture<NamespaceDescription> {
             terminator: terminator,
             expected: expected,
             parser: GrammarParser().parseNamespaceDescription
+        )
+    }
+}
+
+extension ParseFixture<[NamespaceDescription]> {
+    fileprivate static func namespace(
+        _ input: String,
+        _ terminator: String = "\r",
+        expected: Expected
+    ) -> Self {
+        ParseFixture(
+            input: input,
+            terminator: terminator,
+            expected: expected,
+            parser: GrammarParser().parseNamespace
         )
     }
 }
