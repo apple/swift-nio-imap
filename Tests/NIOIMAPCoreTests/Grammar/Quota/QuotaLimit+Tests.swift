@@ -18,7 +18,7 @@ import Testing
 
 @Suite("QuotaLimit")
 struct QuotaLimitTests {
-    @Test(arguments: [
+    @Test("encode", arguments: [
         EncodeFixture.quotaLimit(QuotaLimit(resourceName: "STORAGE", limit: 104), "STORAGE 104"),
         EncodeFixture.quotaLimit(QuotaLimit(resourceName: "MESSAGE", limit: 42), "MESSAGE 42"),
     ])

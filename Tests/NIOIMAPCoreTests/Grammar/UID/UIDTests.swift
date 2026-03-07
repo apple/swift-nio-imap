@@ -32,7 +32,7 @@ struct UIDTests {
         #expect(UID(exactly: 4_294_967_296) == nil)
     }
 
-    @Test
+    @Test("comparable")
     func comparable() {
         #expect((UID.max < UID.max) == false)
         #expect((UID.max < 999) == false)
@@ -52,7 +52,7 @@ struct UIDTests {
         fixture.check()
     }
 
-    @Test(arguments: [
+    @Test("encode", arguments: [
         EncodeFixture.uid(.min, "1"),
         EncodeFixture.uid(.max, "*"),
         EncodeFixture.uid(UID(1234), "1234"),

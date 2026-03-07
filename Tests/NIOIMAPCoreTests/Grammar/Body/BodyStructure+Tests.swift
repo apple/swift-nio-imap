@@ -1952,7 +1952,7 @@ private struct BodyStructureTests {
         fixture.checkParsing()
     }
 
-    @Test("underestimatedCount")
+    @Test("underestimatedCount is 1 for singlepart, 3 for 2-part multipart")
     func underestimatedCount() {
         let basic = BodyStructure.singlepart(
             .init(

@@ -18,7 +18,7 @@ import Testing
 
 @Suite("TaggedCommand")
 struct TaggedCommandTests {
-    @Test(arguments: [
+    @Test("parse", arguments: [
         ParseFixture.taggedCommand("a CAPABILITY", expected: .success(.init(tag: "a", command: .capability))),
         ParseFixture.taggedCommand("1 CAPABILITY", expected: .success(.init(tag: "1", command: .capability))),
         ParseFixture.taggedCommand("a1 CAPABILITY", expected: .success(.init(tag: "a1", command: .capability))),

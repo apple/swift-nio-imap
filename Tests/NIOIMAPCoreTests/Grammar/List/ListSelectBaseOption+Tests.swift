@@ -18,7 +18,7 @@ import Testing
 
 @Suite("ListSelectBaseOption")
 struct ListSelectBaseOptionTests {
-    @Test(arguments: [
+    @Test("encode", arguments: [
         EncodeFixture.listSelectBaseOption(.subscribed, "SUBSCRIBED"),
         EncodeFixture.listSelectBaseOption(.option(.init(key: .standard("test"), value: nil)), "test"),
     ])
@@ -36,7 +36,7 @@ struct ListSelectBaseOptionTests {
         fixture.checkEncoding()
     }
 
-    @Test(arguments: [
+    @Test("parse", arguments: [
         ParseFixture.listSelectBaseOption("SUBSCRIBED", ")", expected: .success(.subscribed)),
         ParseFixture.listSelectBaseOption(
             "REMOTE",

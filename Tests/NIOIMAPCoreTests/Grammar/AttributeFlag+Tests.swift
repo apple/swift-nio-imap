@@ -18,7 +18,7 @@ import Testing
 
 @Suite("AttributeFlag")
 struct AttributeFlagTests {
-    @Test(arguments: [
+    @Test("encode", arguments: [
         EncodeFixture.attributeFlag(.answered, "\\\\answered"),
         EncodeFixture.attributeFlag(.deleted, "\\\\deleted"),
         EncodeFixture.attributeFlag(.draft, "\\\\draft"),
@@ -38,6 +38,7 @@ struct AttributeFlagTests {
     }
 
     @Test(
+        "string conversion",
         arguments: [
             (AttributeFlag.answered, "\\\\answered"),
             (AttributeFlag("custom"), "custom"),
@@ -47,7 +48,7 @@ struct AttributeFlagTests {
         #expect(String(fixture.0) == fixture.1)
     }
 
-    @Test(arguments: [
+    @Test("parse", arguments: [
         ParseFixture.attributeFlag(#"\\Answered"#, expected: .success(.answered)),
         ParseFixture.attributeFlag("some", expected: .success(.init("some"))),
     ])

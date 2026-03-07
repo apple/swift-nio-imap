@@ -18,7 +18,7 @@ import Testing
 
 @Suite("OptionValueComp")
 struct OptionValueCompTests {
-    @Test(arguments: [
+    @Test("encode", arguments: [
         EncodeFixture.optionValueComp(.string("test"), #""test""#),
         EncodeFixture.optionValueComp([.string("test1"), .string("test2")], #"("test1" "test2")"#),
         EncodeFixture.optionValueComp(
@@ -30,7 +30,7 @@ struct OptionValueCompTests {
         fixture.checkEncoding()
     }
 
-    @Test(arguments: [
+    @Test("parse", arguments: [
         ParseFixture.optionValueComp(#""test""#, expected: .success(.string("test"))),
         ParseFixture.optionValueComp("atom", ")", expected: .success(.string("atom"))),
         ParseFixture.optionValueComp(#"("val")"#, " ", expected: .success(.array([.string("val")]))),

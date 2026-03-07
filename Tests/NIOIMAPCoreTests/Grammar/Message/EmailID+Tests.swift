@@ -35,6 +35,7 @@ struct EmailIDTests {
     }
 
     @Test(
+        "string conversion",
         arguments: [
             ("abc123", "abc123"),
             ("ABC-XYZ_123", "ABC-XYZ_123"),
@@ -52,6 +53,7 @@ struct EmailIDTests {
     }
 
     @Test(
+        "debug description",
         arguments: [
             ("abc123", "(abc123)"),
             ("XYZ-789", "(XYZ-789)"),
@@ -62,7 +64,7 @@ struct EmailIDTests {
         #expect(id.debugDescription == fixture.1)
     }
 
-    @Test(arguments: [
+    @Test("encode", arguments: [
         EncodeFixture.emailID("abc123", "abc123"),
         EncodeFixture.emailID("XYZ-789_000", "XYZ-789_000"),
     ])

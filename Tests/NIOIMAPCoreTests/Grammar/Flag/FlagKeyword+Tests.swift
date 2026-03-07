@@ -83,7 +83,7 @@ struct FlagKeywordTests {
         fixture.checkEncoding()
     }
 
-    @Test(arguments: [
+    @Test("parse", arguments: [
         ParseFixture.flagKeyword("keyword", expected: .success(Flag.Keyword("keyword")!))
     ])
     func parse(_ fixture: ParseFixture<Flag.Keyword>) {

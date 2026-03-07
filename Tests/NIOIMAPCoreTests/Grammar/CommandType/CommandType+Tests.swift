@@ -449,7 +449,7 @@ struct CommandTypeTests {
         fixture.checkParsing()
     }
 
-    @Test(arguments: [
+    @Test("parse ENABLE suffix", arguments: [
         ParseFixture.enableSuffix(" ACL", expected: .success(.enable([.acl]))),
         ParseFixture.enableSuffix(" ACL BINARY CHILDREN", expected: .success(.enable([.acl, .binary, .children]))),
         ParseFixture.enableSuffix(" (ACL)", expected: .failure),
@@ -535,7 +535,7 @@ struct CommandTypeTests {
         fixture.checkParsing()
     }
 
-    @Test(arguments: [
+    @Test("parse URLFETCH suffix", arguments: [
         ParseFixture.urlFetchSuffix(" test", expected: .success(.urlFetch(["test"]))),
         ParseFixture.urlFetchSuffix(" test1 test2", expected: .success(.urlFetch(["test1", "test2"]))),
         ParseFixture.urlFetchSuffix(" \\ ", "", expected: .failure),
@@ -560,7 +560,7 @@ struct CommandTypeTests {
         fixture.checkParsing()
     }
 
-    @Test(arguments: [
+    @Test("parse DELETE suffix", arguments: [
         ParseFixture.deleteSuffix(" INBOX", "\r\n", expected: .success(.delete(.inbox))),
         ParseFixture.deleteSuffix(" {5}12345", " ", expected: .failure),
         ParseFixture.deleteSuffix(" INBOX", "", expected: .incompleteMessage),
@@ -686,7 +686,7 @@ struct CommandTypeTests {
         fixture.checkParsing()
     }
 
-    @Test(arguments: [
+    @Test("parse EXAMINE suffix", arguments: [
         ParseFixture.examineSuffix("EXAMINE inbox", expected: .success(.examine(.inbox, []))),
         ParseFixture.examineSuffix("examine inbox", expected: .success(.examine(.inbox, []))),
         ParseFixture.examineSuffix(
@@ -787,7 +787,7 @@ struct CommandTypeTests {
         fixture.checkParsing()
     }
 
-    @Test(arguments: [
+    @Test("parse SELECT suffix", arguments: [
         ParseFixture.selectSuffix(" inbox", expected: .success(.select(.inbox, []))),
         ParseFixture.selectSuffix(
             " inbox (some1)",
@@ -821,7 +821,7 @@ struct CommandTypeTests {
         fixture.checkParsing()
     }
 
-    @Test(arguments: [
+    @Test("parse SUBSCRIBE suffix", arguments: [
         ParseFixture.subscribeSuffix(" INBOX", expected: .success(.subscribe(.inbox))),
         ParseFixture.subscribeSuffix("inbox", "", expected: .failure),
         ParseFixture.subscribeSuffix(" inbox", "", expected: .incompleteMessage),
@@ -830,7 +830,7 @@ struct CommandTypeTests {
         fixture.checkParsing()
     }
 
-    @Test(arguments: [
+    @Test("parse UNSUBSCRIBE suffix", arguments: [
         ParseFixture.unsubscribeSuffix(" inbox", expected: .success(.unsubscribe(.inbox))),
         ParseFixture.unsubscribeSuffix("inbox", "", expected: .failure),
         ParseFixture.unsubscribeSuffix(" inbox", "", expected: .incompleteMessage),
@@ -919,7 +919,7 @@ struct CommandTypeTests {
         fixture.checkParsing()
     }
 
-    @Test(arguments: [
+    @Test("parse user ID", arguments: [
         ParseFixture.userId("test", " ", expected: .success("test")),
         ParseFixture.userId("{4}\r\ntest", " ", expected: .success("test")),
         ParseFixture.userId("{4+}\r\ntest", " ", expected: .success("test")),
@@ -978,7 +978,7 @@ struct CommandTypeTests {
         fixture.checkParsing()
     }
 
-    @Test(arguments: [
+    @Test("parse GETQUOTA suffix", arguments: [
         ParseFixture.getQuotaSuffix(" \"\"", expected: .success(.getQuota(.init("")))),
         ParseFixture.getQuotaSuffix(" \"quota\"", expected: .success(.getQuota(.init("quota")))),
         ParseFixture.getQuotaSuffix(" {5}quota", expected: .failure),
@@ -1013,7 +1013,7 @@ struct CommandTypeTests {
         fixture.checkParsing()
     }
 
-    @Test(arguments: [
+    @Test("parse GETQUOTAROOT suffix", arguments: [
         ParseFixture.getQuotaRootSuffix(" INBOX", expected: .success(.getQuotaRoot(.inbox))),
         ParseFixture.getQuotaRootSuffix(" \"INBOX\"", expected: .success(.getQuotaRoot(.inbox))),
         ParseFixture.getQuotaRootSuffix(" {5}\r\nINBOX", expected: .success(.getQuotaRoot(.inbox))),
@@ -1464,7 +1464,7 @@ extension CommandEncodeFixture<Command> {
 
 @Suite("AuthenticationMechanism")
 struct AuthenticationMechanismTests {
-    @Test(arguments: [
+    @Test("encode", arguments: [
         EncodeFixture.authenticationMechanism(.gssAPI, "GSSAPI"),
         EncodeFixture.authenticationMechanism(.plain, "PLAIN"),
         EncodeFixture.authenticationMechanism(.init("myAuth"), "MYAUTH"),

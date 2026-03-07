@@ -47,6 +47,7 @@ struct UseAttributeTests {
     }
 
     @Test(
+        "string conversion",
         arguments: [
             (UseAttribute.trash, "\\Trash"),
             (UseAttribute("\\Custom"), "\\Custom"),

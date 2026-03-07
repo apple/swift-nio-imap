@@ -49,6 +49,7 @@ struct URLAuthenticationMechanismTests {
     }
 
     @Test(
+        "string conversion",
         arguments: [
             (URLAuthenticationMechanism.internal, "INTERNAL"),
             (URLAuthenticationMechanism("CUSTOM"), "CUSTOM"),

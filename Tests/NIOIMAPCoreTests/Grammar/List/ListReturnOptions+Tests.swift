@@ -18,7 +18,7 @@ import Testing
 
 @Suite("ListReturnOptions")
 struct ListReturnOptionsTests {
-    @Test(arguments: [
+    @Test("encode", arguments: [
         EncodeFixture.listReturnOptions([], "RETURN ()"),
         EncodeFixture.listReturnOptions([.subscribed], "RETURN (SUBSCRIBED)"),
         EncodeFixture.listReturnOptions([.subscribed, .children], "RETURN (SUBSCRIBED CHILDREN)"),

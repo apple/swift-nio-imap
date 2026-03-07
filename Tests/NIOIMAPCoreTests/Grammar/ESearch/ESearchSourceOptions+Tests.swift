@@ -19,6 +19,7 @@ import Testing
 @Suite("ExtendedSearchSourceOptions")
 struct ExtendedSearchSourceOptionsTests {
     @Test(
+        "failable init",
         arguments: [
             ([] as [MailboxFilter], false),
             ([.inboxes] as [MailboxFilter], true),

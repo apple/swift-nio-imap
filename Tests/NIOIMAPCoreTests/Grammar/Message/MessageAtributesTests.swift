@@ -146,7 +146,7 @@ struct MessageAttributeTests {
         fixture.check()
     }
 
-    @Test(arguments: Self.parseMessageAttributeFixtures())
+    @Test("parse", arguments: Self.parseMessageAttributeFixtures())
     func parse(_ fixture: ParseFixture<MessageAttribute>) {
         fixture.checkParsing()
     }

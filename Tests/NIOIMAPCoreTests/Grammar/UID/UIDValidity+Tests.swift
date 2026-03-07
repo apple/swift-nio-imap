@@ -18,7 +18,7 @@ import Testing
 
 @Suite("UIDValidity")
 struct UIDValidityTests {
-    @Test(arguments: [
+    @Test("encode", arguments: [
         EncodeFixture.uidValidity(1, "1"),
         EncodeFixture.uidValidity(123, "123"),
         EncodeFixture.uidValidity(4_294_967_295, "4294967295"),
@@ -27,7 +27,7 @@ struct UIDValidityTests {
         fixture.checkEncoding()
     }
 
-    @Test(arguments: [
+    @Test("parse", arguments: [
         ParseFixture.uidValidity("1", " ", expected: .success(1)),
         ParseFixture.uidValidity("12", " ", expected: .success(12)),
         ParseFixture.uidValidity("123", " ", expected: .success(123)),

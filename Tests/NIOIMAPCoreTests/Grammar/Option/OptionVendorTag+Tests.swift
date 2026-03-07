@@ -18,14 +18,14 @@ import Testing
 
 @Suite("KeyValue<String, String>")
 struct OptionVendorTagTests {
-    @Test(arguments: [
+    @Test("encode", arguments: [
         EncodeFixture.optionVendorTag(.init(key: "some", value: "thing"), "some-thing")
     ])
     func encode(_ fixture: EncodeFixture<KeyValue<String, String>>) {
         fixture.checkEncoding()
     }
 
-    @Test(arguments: [
+    @Test("parse", arguments: [
         ParseFixture.optionVendorTag("ACME-SORT", ")", expected: .success(.init(key: "ACME", value: "SORT"))),
         ParseFixture.optionVendorTag("FOO-BAR", ")", expected: .success(.init(key: "FOO", value: "BAR"))),
         ParseFixture.optionVendorTag("", "", expected: .incompleteMessage),

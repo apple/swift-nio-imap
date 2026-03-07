@@ -18,7 +18,7 @@ import Testing
 
 @Suite("MailboxID")
 struct MailboxIDTests {
-    @Test(arguments: [
+    @Test("encode", arguments: [
         EncodeFixture.mailboxID("Abc123", "Abc123"),
         EncodeFixture.mailboxID("a-b_c", "a-b_c"),
     ])
@@ -27,6 +27,7 @@ struct MailboxIDTests {
     }
 
     @Test(
+        "string literal init",
         arguments: [
             ("ValidID123", true),
             ("a", true),
@@ -40,6 +41,7 @@ struct MailboxIDTests {
     }
 
     @Test(
+        "string conversion",
         arguments: [
             ("ValidID", "ValidID")
         ] as [(MailboxID, String)]

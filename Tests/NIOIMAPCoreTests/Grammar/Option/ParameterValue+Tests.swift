@@ -18,7 +18,7 @@ import Testing
 
 @Suite("ParameterValue")
 struct ParameterValueTests {
-    @Test(arguments: [
+    @Test("encode", arguments: [
         EncodeFixture.parameterValue(.sequence(.set(.init(range: .init(SequenceNumber(1))))), "1"),
         EncodeFixture.parameterValue(.sequence(.lastCommand), "$"),
         EncodeFixture.parameterValue(.comp(["foo", "bar"]), #"(("foo" "bar"))"#),
@@ -28,7 +28,7 @@ struct ParameterValueTests {
         fixture.checkEncoding()
     }
 
-    @Test(arguments: [
+    @Test("parse", arguments: [
         ParseFixture.parameterValue("1", expected: .success(.sequence(.set(.init(range: .init(SequenceNumber(1))))))),
         ParseFixture.parameterValue("$", expected: .success(.sequence(.lastCommand))),
         ParseFixture.parameterValue(#"(("foo" "bar"))"#, ")", expected: .success(.comp(["foo", "bar"]))),

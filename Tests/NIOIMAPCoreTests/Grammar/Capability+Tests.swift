@@ -215,6 +215,7 @@ struct CapabilityTests {
     }
 
     @Test(
+        "string conversion",
         arguments: [
             (Capability.acl, "ACL"),
             (Capability.idle, "IDLE"),

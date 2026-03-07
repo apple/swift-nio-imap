@@ -18,7 +18,7 @@ import Testing
 
 @Suite("QuotaRoot")
 struct QuotaRootTests {
-    @Test(arguments: [
+    @Test("encode", arguments: [
         EncodeFixture.quotaRoot(QuotaRoot(""), #""""#),
         EncodeFixture.quotaRoot(QuotaRoot("MassivePool"), #""MassivePool""#),
     ])
@@ -26,7 +26,7 @@ struct QuotaRootTests {
         fixture.checkEncoding()
     }
 
-    @Test(arguments: [
+    @Test("parse", arguments: [
         ParseFixture.quotaRoot(#""MassivePool""#, expected: .success(QuotaRoot("MassivePool"))),
         ParseFixture.quotaRoot("inbox", expected: .success(QuotaRoot("inbox"))),
         ParseFixture.quotaRoot(#""""#, expected: .success(QuotaRoot(""))),
@@ -37,6 +37,7 @@ struct QuotaRootTests {
     }
 
     @Test(
+        "string conversion",
         arguments: [
             (QuotaRoot("MassivePool"), "MassivePool" as String?),
             (QuotaRoot(""), "" as String?),

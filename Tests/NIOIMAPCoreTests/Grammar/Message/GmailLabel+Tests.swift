@@ -18,7 +18,7 @@ import Testing
 
 @Suite("GmailLabel")
 struct GmailLabelTests {
-    @Test(arguments: [
+    @Test("encode", arguments: [
         EncodeFixture.gmailLabel(GmailLabel(ByteBuffer(string: "Inbox")), #""Inbox""#),
         EncodeFixture.gmailLabel(GmailLabel(ByteBuffer(string: "\\Sent")), #"\Sent"#),
         EncodeFixture.gmailLabel(GmailLabel(ByteBuffer(string: "My Label")), #""My Label""#),
@@ -44,6 +44,7 @@ struct GmailLabelTests {
     }
 
     @Test(
+        "makeDisplayString",
         arguments: [
             (GmailLabel(ByteBuffer(string: "Inbox")), "Inbox"),
             (GmailLabel(ByteBuffer(string: "&invalid-")), "&invalid-"),  // invalid modified UTF-7 falls back to UTF-8
@@ -53,7 +54,7 @@ struct GmailLabelTests {
         #expect(fixture.0.makeDisplayString() == fixture.1)
     }
 
-    @Test(arguments: [
+    @Test("parse", arguments: [
         ParseFixture.gmailLabel(#""Inbox""#, expected: .success(GmailLabel(ByteBuffer(string: "Inbox")))),
         ParseFixture.gmailLabel(#"\Sent"#, expected: .success(GmailLabel(ByteBuffer(string: "\\Sent")))),
         ParseFixture.gmailLabel("", "", expected: .incompleteMessage),

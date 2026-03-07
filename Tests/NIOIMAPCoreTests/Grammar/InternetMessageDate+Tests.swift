@@ -18,7 +18,7 @@ import Testing
 
 @Suite("InternetMessageDate")
 struct InternetMessageDateTests {
-    @Test(arguments: [
+    @Test("encode", arguments: [
         EncodeFixture.internetMessageDate(.init("test"), "test")
     ])
     func encode(_ fixture: EncodeFixture<InternetMessageDate>) {

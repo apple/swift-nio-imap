@@ -90,7 +90,7 @@ extension DateTests {
         fixture.checkEncoding()
     }
 
-    @Test(arguments: [
+    @Test("parse date", arguments: [
         ParseFixture.date("25-Jun-1994", " ", expected: .success(IMAPCalendarDay(year: 1994, month: 6, day: 25)!)),
         ParseFixture.date("\"25-Jun-1994\"", "\r", expected: .success(IMAPCalendarDay(year: 1994, month: 6, day: 25)!)),
         ParseFixture.date("\"25-Jun-1994 ", "\r", expected: .failure),

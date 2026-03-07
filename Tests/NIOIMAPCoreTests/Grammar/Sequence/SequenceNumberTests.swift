@@ -41,7 +41,7 @@ extension SequenceNumberTests {
         #expect(SequenceNumber(1) < 999)
     }
 
-    @Test(arguments: [
+    @Test("encode", arguments: [
         EncodeFixture.sequenceNumber(1, "1"),
         EncodeFixture.sequenceNumber(123, "123"),
         EncodeFixture.sequenceNumber(1234, "1234"),

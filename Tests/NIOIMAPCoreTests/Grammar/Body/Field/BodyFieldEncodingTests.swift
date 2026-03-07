@@ -18,7 +18,7 @@ import Testing
 
 @Suite("BodyStructure.Encoding")
 struct BodyFieldEncodingTests {
-    @Test(arguments: [
+    @Test("encoding", arguments: [
         EncodeFixture.bodyEncoding(.sevenBit, #""7BIT""#),
         EncodeFixture.bodyEncoding(.eightBit, #""8BIT""#),
         EncodeFixture.bodyEncoding(.binary, #""BINARY""#),
@@ -30,7 +30,7 @@ struct BodyFieldEncodingTests {
         fixture.checkEncoding()
     }
 
-    @Test(arguments: [
+    @Test("parse", arguments: [
         ParseFixture.bodyEncoding(#""BASE64""#, expected: .success(.base64)),
         ParseFixture.bodyEncoding(#""BINARY""#, expected: .success(.binary)),
         ParseFixture.bodyEncoding(#""7BIT""#, expected: .success(.sevenBit)),

@@ -18,7 +18,7 @@ import Testing
 
 @Suite("ListSelectIndependentOption")
 struct ListSelectIndependentOptionTests {
-    @Test(arguments: [
+    @Test("encode", arguments: [
         EncodeFixture.listSelectIndependentOption(.remote, "REMOTE"),
         EncodeFixture.listSelectIndependentOption(.option(.init(key: .standard("test"), value: nil)), "test"),
         EncodeFixture.listSelectIndependentOption(.specialUse, "SPECIAL-USE"),
@@ -27,7 +27,7 @@ struct ListSelectIndependentOptionTests {
         fixture.checkEncoding()
     }
 
-    @Test(arguments: [
+    @Test("parse", arguments: [
         ParseFixture.listSelectIndependentOption("REMOTE", " ", expected: .success(.remote)),
         ParseFixture.listSelectIndependentOption("SPECIAL-USE", " ", expected: .failure),
         ParseFixture.listSelectIndependentOption("", "", expected: .incompleteMessage),

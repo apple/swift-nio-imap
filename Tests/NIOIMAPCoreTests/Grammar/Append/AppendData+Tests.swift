@@ -45,7 +45,7 @@ struct AppendDataTests {
     }
 
     #if swift(>=6.2)
-    @Test
+    @Test("encode in server mode calls preconditionFailure")
     func encodeInServerModeCallsPreconditionFailure() async {
         await #expect(
             processExitsWith: ExitTest.Condition.failure,

@@ -18,7 +18,7 @@ import Testing
 
 @Suite("PermanentFlag")
 struct PermanentFlagTests {
-    @Test(arguments: [
+    @Test("encode", arguments: [
         EncodeFixture.permanentFlag(.wildcard, #"\*"#),
         EncodeFixture.permanentFlag(.flag(.answered), #"\Answered"#),
     ])
@@ -26,7 +26,7 @@ struct PermanentFlagTests {
         fixture.checkEncoding()
     }
 
-    @Test(arguments: [
+    @Test("parse", arguments: [
         ParseFixture.permanentFlag(#"\*"#, expected: .success(.wildcard)),
         ParseFixture.permanentFlag(#"\Answered"#, expected: .success(.flag(.answered))),
         ParseFixture.permanentFlag(#"\Seen"#, expected: .success(.flag(.seen))),
@@ -38,6 +38,7 @@ struct PermanentFlagTests {
     }
 
     @Test(
+        "debug description",
         arguments: [
             (PermanentFlag.wildcard, #"\*"#),
             (PermanentFlag.flag(.answered), #"\Answered"#),

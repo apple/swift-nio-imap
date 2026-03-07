@@ -36,6 +36,7 @@ private struct EncodingOptionsTests {
     }
 
     @Test(
+        "response options from capabilities",
         arguments: [
             OptionsFixture(capabilities: [.imap4rev1], expected: ResponseEncodingOptions())
         ] as [OptionsFixture<ResponseEncodingOptions>]
@@ -44,7 +45,7 @@ private struct EncodingOptionsTests {
         #expect(ResponseEncodingOptions(capabilities: fixture.capabilities) == fixture.expected)
     }
 
-    @Test
+    @Test("updateEnabledOptions removes useSearchCharset")
     func updateEnabledOptionsRemovesSearchCharset() {
         var options = CommandEncodingOptions()
         #expect(options.useSearchCharset == true)

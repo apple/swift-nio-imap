@@ -18,7 +18,7 @@ import Testing
 
 @Suite("MessageID")
 struct MessageIDTests {
-    @Test(arguments: [
+    @Test("encode", arguments: [
         EncodeFixture.messageID(.init("<foo@bar.com>"), "\"<foo@bar.com>\""),
         EncodeFixture.messageID(
             .init("<B27397-0100000@cac.washington.edu>"),

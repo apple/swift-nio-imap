@@ -18,7 +18,7 @@ import Testing
 
 @Suite("StoreOperation")
 struct StoreOperationTests {
-    @Test(arguments: [
+    @Test("encode", arguments: [
         EncodeFixture.storeOperation(.add, "+"),
         EncodeFixture.storeOperation(.remove, "-"),
         EncodeFixture.storeOperation(.replace, ""),
@@ -27,7 +27,7 @@ struct StoreOperationTests {
         fixture.checkEncoding()
     }
 
-    @Test(arguments: [
+    @Test("parse", arguments: [
         ParseFixture.storeOperation("+", expected: .success(.add)),
         ParseFixture.storeOperation("-", expected: .success(.remove)),
         // .replace matches the empty prefix — succeeds on any input without consuming bytes

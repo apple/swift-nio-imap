@@ -19,6 +19,7 @@ import Testing
 @Suite("MetadataEntryName")
 struct MetadataEntryNameTests {
     @Test(
+        "string round trip",
         arguments: [
             (MetadataEntryName("/private/vendor/example/color"), "/private/vendor/example/color"),
             (MetadataEntryName(ByteBuffer(string: "/shared/admin/quota")), "/shared/admin/quota"),

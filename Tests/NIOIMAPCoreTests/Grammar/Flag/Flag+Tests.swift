@@ -50,6 +50,7 @@ struct FlagTests {
     }
 
     @Test(
+        "string conversion",
         arguments: [
             (Flag.answered, "\\Answered"),
             (Flag.flagged, "\\Flagged"),

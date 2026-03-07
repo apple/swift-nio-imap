@@ -47,6 +47,7 @@ struct ModificationSequenceValueTests {
     }
 
     @Test(
+        "less-than operator",
         arguments: [
             (ModificationSequenceValue(integerLiteral: 10), ModificationSequenceValue(integerLiteral: 20), true),
             (ModificationSequenceValue(integerLiteral: 20), ModificationSequenceValue(integerLiteral: 10), false),
