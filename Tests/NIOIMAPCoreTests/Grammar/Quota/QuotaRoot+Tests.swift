@@ -52,7 +52,7 @@ struct QuotaRootTests {
         #expect(fixture.0.debugDescription == fixture.1)
     }
 
-    @Test func debugDescriptionInvalidUTF8() {
+    @Test("debug description falls back for invalid UTF-8") func debugDescriptionInvalidUTF8() {
         // Invalid UTF-8 falls back to String(buffer:), which produces a non-nil description.
         let root = QuotaRoot(ByteBuffer(bytes: [0xFF, 0xFE]))
         // String(self) returns nil, so debugDescription uses the fallback path.

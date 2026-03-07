@@ -304,7 +304,7 @@ private struct SectionSpecifierTests {
     }
 
     #if swift(>=6.2)
-    @Test func mimeHeaderWithEmptyPartPreconditionFailure() async {
+    @Test("MIME header with empty part triggers precondition failure") func mimeHeaderWithEmptyPartPreconditionFailure() async {
         await #expect(processExitsWith: ExitTest.Condition.failure, performing: {
             _ = SectionSpecifier(kind: .MIMEHeader)
         })

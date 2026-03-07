@@ -190,7 +190,7 @@ struct SearchKeyTests {
         #expect(fixture.0.usesString == fixture.1)
     }
 
-    @Test func debugDescription() {
+    @Test("debug description") func debugDescription() {
         #expect(SearchKey.all.debugDescription == "ALL")
         #expect(SearchKey.not(.messageSizeLarger(444)).debugDescription == "NOT LARGER 444")
     }

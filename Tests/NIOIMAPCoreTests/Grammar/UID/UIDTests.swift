@@ -86,7 +86,7 @@ struct UIDTests {
     }
 
     #if swift(>=6.2)
-    @Test func advancedByOverflowPreconditionFailure() async {
+    @Test("advanced(by:) overflow triggers precondition failure") func advancedByOverflowPreconditionFailure() async {
         await #expect(processExitsWith: ExitTest.Condition.failure, performing: {
             _ = UID(1).advanced(by: Int64(UInt32.max) + 1)
         })

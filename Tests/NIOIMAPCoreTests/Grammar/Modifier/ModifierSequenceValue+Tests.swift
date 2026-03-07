@@ -66,7 +66,7 @@ struct ModificationSequenceValueTests {
     }
 
     #if swift(>=6.2)
-    @Test func overflowPreconditionFailure() async {
+    @Test("overflow triggers precondition failure") func overflowPreconditionFailure() async {
         await #expect(processExitsWith: ExitTest.Condition.failure, performing: {
             _ = ModificationSequenceValue(UInt64(Int64.max) + 1)
         })

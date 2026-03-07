@@ -41,7 +41,7 @@ extension UIDSetNonEmptyTests {
     }
 
     #if swift(>=6.2)
-    @Test func emptyArrayLiteralPreconditionFailure() async {
+    @Test("empty array literal triggers precondition failure") func emptyArrayLiteralPreconditionFailure() async {
         await #expect(processExitsWith: ExitTest.Condition.failure, performing: {
             let _: MessageIdentifierSetNonEmpty<UID> = []
         })

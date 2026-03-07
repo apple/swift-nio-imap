@@ -2029,7 +2029,7 @@ private struct BodyStructureTests {
     }
 
     #if swift(>=6.2)
-    @Test func subscriptFatalErrorForInvalidPart() async {
+    @Test("subscript fatal error for invalid part") func subscriptFatalErrorForInvalidPart() async {
         await #expect(processExitsWith: ExitTest.Condition.failure, performing: {
             let basic = BodyStructure.singlepart(.init(
                 kind: .basic(.init(topLevel: .application, sub: .mixed)),
@@ -2039,7 +2039,7 @@ private struct BodyStructureTests {
         })
     }
 
-    @Test func indexBeforeFatalErrorAtStartIndex() async {
+    @Test("index(before:) fatal error at start index") func indexBeforeFatalErrorAtStartIndex() async {
         await #expect(processExitsWith: ExitTest.Condition.failure, performing: {
             let basic = BodyStructure.singlepart(.init(
                 kind: .basic(.init(topLevel: .application, sub: .mixed)),
@@ -2049,7 +2049,7 @@ private struct BodyStructureTests {
         })
     }
 
-    @Test func indexAfterFatalErrorForInvalidPart() async {
+    @Test("index(after:) fatal error for invalid part") func indexAfterFatalErrorForInvalidPart() async {
         await #expect(processExitsWith: ExitTest.Condition.failure, performing: {
             let basic = BodyStructure.singlepart(.init(
                 kind: .basic(.init(topLevel: .application, sub: .mixed)),
