@@ -1934,6 +1934,18 @@ private struct BodyStructureTests {
                 " UID 1",
                 expected: .failure
             ),
+            // Quoted string with backslash escapes inside an invalid body (covers the 0x5C case)
+            ParseFixture.invalidBodyStructure(
+                #"("\"hello\"")"#,
+                " UID 1",
+                expected: .success(.invalid)
+            ),
+            // Run-away body: >200,000 non-special bytes → throws "Run-away body structure"
+            ParseFixture.invalidBodyStructure(
+                "(" + String(repeating: "(", count: 200_000),
+                " UID 1",
+                expected: .failure
+            ),
         ]
     )
     func parseInvalidBody(_ fixture: ParseFixture<MessageAttribute.BodyStructure>) {

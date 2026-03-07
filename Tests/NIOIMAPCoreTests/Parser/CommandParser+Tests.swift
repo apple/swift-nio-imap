@@ -32,6 +32,22 @@ struct CommandParserTests {
         #expect(parser.bufferLimit == 80_000)
     }
 
+    @Test("isStreamingAppend is false for non-streaming modes")
+    func isStreamingAppendIsFalseForNonStreamingModes() {
+        #expect(!CommandParser.Mode.lines.isStreamingAppend)
+        #expect(!CommandParser.Mode.idle.isStreamingAppend)
+        #expect(!CommandParser.Mode.waitingForMessage.isStreamingAppend)
+        #expect(!CommandParser.Mode.streamingEnd.isStreamingAppend)
+        #expect(!CommandParser.Mode.waitingForCatenatePart(seenPreviousPart: false).isStreamingAppend)
+        #expect(!CommandParser.Mode.streamingCatenateBytes(1).isStreamingAppend)
+        #expect(!CommandParser.Mode.streamingCatenateEnd.isStreamingAppend)
+    }
+
+    @Test("isStreamingAppend is true only for streamingBytes mode")
+    func isStreamingAppendIsTrueOnlyForStreamingBytesMode() {
+        #expect(CommandParser.Mode.streamingBytes(1).isStreamingAppend)
+    }
+
     // MARK: - Integration Tests
 
     @Test("parse empty byte buffer for APPEND does not return empty bytes")

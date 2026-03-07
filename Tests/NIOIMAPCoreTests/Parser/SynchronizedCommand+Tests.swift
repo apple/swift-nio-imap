@@ -297,6 +297,148 @@ struct SynchronizedCommandTests {
 
     // MARK: - IDLE Command Tests
 
+    // MARK: - Streaming byte chunking
+
+    @Test("partial APPEND streaming bytes triggers intermediate streaming mode")
+    func partialAppendStreamingBytesTriggersIntermediateStreamingMode() throws {
+        var parser = CommandParser()
+        // Start APPEND with 10-byte non-synchronising literal, but only provide 5 bytes
+        var buf = ByteBuffer("1 APPEND INBOX {10+}\r\nHello")
+
+        let c1 = try parser.parseCommandStream(buffer: &buf)
+        #expect(c1 == SynchronizedCommand(.append(.start(tag: "1", appendingTo: .inbox))))
+
+        let c2 = try parser.parseCommandStream(buffer: &buf)
+        #expect(c2 == SynchronizedCommand(.append(.beginMessage(message: .init(options: .none, data: .init(byteCount: 10))))))
+        #expect(parser.mode == .streamingBytes(10))
+
+        // Only 5 bytes available — should enter the else branch and leave 5 remaining
+        let c3 = try parser.parseCommandStream(buffer: &buf)
+        #expect(c3 == SynchronizedCommand(.append(.messageBytes(ByteBuffer(string: "Hello")))))
+        #expect(parser.mode == .streamingBytes(5))
+
+        // Provide the remaining 5 bytes
+        buf.writeString("World")
+        let c4 = try parser.parseCommandStream(buffer: &buf)
+        #expect(c4 == SynchronizedCommand(.append(.messageBytes(ByteBuffer(string: "World")))))
+        #expect(parser.mode == .streamingEnd)
+
+        buf.writeString("\r\n")
+        let c5 = try parser.parseCommandStream(buffer: &buf)
+        #expect(c5 == SynchronizedCommand(.append(.endMessage)))
+
+        let c6 = try parser.parseCommandStream(buffer: &buf)
+        #expect(c6 == SynchronizedCommand(.append(.finish)))
+    }
+
+    @Test("partial CATENATE streaming bytes triggers intermediate streaming mode")
+    func partialCatenateStreamingBytesTriggersIntermediateStreamingMode() throws {
+        var parser = CommandParser()
+        // CATENATE with 5-byte TEXT literal but only 3 bytes provided initially
+        var buf = ByteBuffer("A1 APPEND Drafts CATENATE (TEXT {5+}\r\nhel")
+
+        let c1 = try parser.parseCommandStream(buffer: &buf)
+        #expect(c1 == SynchronizedCommand(.append(.start(tag: "A1", appendingTo: MailboxName("Drafts")))))
+
+        let c2 = try parser.parseCommandStream(buffer: &buf)
+        #expect(c2 == SynchronizedCommand(.append(.beginCatenate(options: .none))))
+
+        let c3 = try parser.parseCommandStream(buffer: &buf)
+        #expect(c3 == SynchronizedCommand(.append(.catenateData(.begin(size: 5)))))
+
+        // Only 3 of 5 bytes available — enters the else branch
+        let c4 = try parser.parseCommandStream(buffer: &buf)
+        #expect(c4 == SynchronizedCommand(.append(.catenateData(.bytes(ByteBuffer(string: "hel"))))))
+        #expect(parser.mode == .streamingCatenateBytes(2))
+
+        // Provide the remaining 2 bytes
+        buf.writeString("lo")
+        let c5 = try parser.parseCommandStream(buffer: &buf)
+        #expect(c5 == SynchronizedCommand(.append(.catenateData(.bytes(ByteBuffer(string: "lo"))))))
+        #expect(parser.mode == .streamingCatenateEnd)
+
+        buf.writeString(")\r\n")
+        let c6 = try parser.parseCommandStream(buffer: &buf)
+        #expect(c6 == SynchronizedCommand(.append(.catenateData(.end))))
+
+        let c7 = try parser.parseCommandStream(buffer: &buf)
+        #expect(c7 == SynchronizedCommand(.append(.endCatenate)))
+
+        let c8 = try parser.parseCommandStream(buffer: &buf)
+        #expect(c8 == SynchronizedCommand(.append(.finish)))
+    }
+
+    // MARK: - Incomplete input and synchronising literals
+
+    @Test("incomplete command with no synchronising literals returns nil")
+    func incompleteCommandWithNoSynchronisingLiteralsReturnsNil() throws {
+        // Buffer has bytes but no complete command line yet — no newline found
+        var parser = CommandParser()
+        var buf = ByteBuffer("1 NOO")
+        let result = try parser.parseCommandStream(buffer: &buf)
+        #expect(result == nil)
+    }
+
+    @Test("synchronising literal without literal data returns SynchronizedCommand with count only")
+    func synchronisingLiteralWithoutLiteralDataReturnsSynchronizedCommandWithCountOnly() throws {
+        // The framing parser finds 1 synchronising literal but the literal bytes are absent.
+        // parseCommand() returns nil (IncompleteMessage), but synchronizingLiteralCount == 1.
+        var parser = CommandParser()
+        var buf = ByteBuffer("1 LOGIN {5}\r\n")
+        let result = try parser.parseCommandStream(buffer: &buf)
+        #expect(result == SynchronizedCommand(numberOfSynchronisingLiterals: 1))
+    }
+
+    // MARK: - Continuation response
+
+    @Test("authentication continuation response is parsed from base64 line")
+    func authenticationContinuationResponseIsParsedFromBase64Line() throws {
+        // A base64-encoded line (not a tagged command or APPEND) is parsed as a
+        // continuationResponse via parseAuthenticationChallengeResponse.
+        var parser = CommandParser()
+        // "AHRlc3R1c2VyAHRlc3RwYXNz" is base64 for "\0testuser\0testpass"
+        var buf = ByteBuffer("AHRlc3R1c2VyAHRlc3RwYXNz\r\n")
+        let result = try parser.parseCommandStream(buffer: &buf)
+        guard case .continuationResponse = result?.commandPart else {
+            Issue.record("Expected continuationResponse, got \(String(describing: result))")
+            return
+        }
+        #expect(buf.readableBytes == 0)
+    }
+
+    // MARK: - Incomplete CRLF in waitingForMessage mode
+
+    @Test("invalid bytes in waitingForMessage triggers buffer restore and rethrow")
+    func invalidBytesInWaitingForMessageTriggersBufferRestoreAndRethrow() throws {
+        // After all message bytes are streamed, the parser is in .waitingForMessage.
+        // If the next line is neither a new message header nor a CRLF (e.g. garbage text),
+        // parseAppendOrCatenateMessage throws ParserError, then parseNewline also fails
+        // on the non-newline byte — triggering the buffer-restore path (line 231 in
+        // CommandParser.swift) before rethrowing.
+        var parser = CommandParser()
+        var buf = ByteBuffer("1 APPEND INBOX {0+}\r\ngarbage\r\n")
+
+        let c1 = try parser.parseCommandStream(buffer: &buf)
+        #expect(c1 == SynchronizedCommand(.append(.start(tag: "1", appendingTo: .inbox))))
+
+        let c2 = try parser.parseCommandStream(buffer: &buf)
+        #expect(c2 == SynchronizedCommand(.append(.beginMessage(message: .init(options: .none, data: .init(byteCount: 0))))))
+
+        let c3 = try parser.parseCommandStream(buffer: &buf)  // .messageBytes(empty) — 0-byte literal
+        #expect(c3 == SynchronizedCommand(.append(.messageBytes(ByteBuffer()))))
+
+        let c4 = try parser.parseCommandStream(buffer: &buf)  // .endMessage, mode = .waitingForMessage
+        #expect(c4 == SynchronizedCommand(.append(.endMessage)))
+
+        // "garbage" is not a valid append-continue token or newline; parseNewline fails on "g",
+        // which triggers the buffer restore (line 231) and a rethrow.
+        #expect(throws: (any Error).self) {
+            try parser.parseCommandStream(buffer: &buf)
+        }
+    }
+
+    // MARK: - IDLE Command Tests
+
     @Test("IDLE command lifecycle with mode transitions")
     func idleCommandLifecycleWithModeTransitions() throws {
         // 1 NOOP
