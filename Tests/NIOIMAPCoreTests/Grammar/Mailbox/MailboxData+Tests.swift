@@ -192,6 +192,7 @@ struct MailboxDataTests {
         ParseFixture.mailboxData("SEARCH", "\r\n", expected: .success(.search([]))),
         ParseFixture.mailboxData("SEARCH 1", "\r\n", expected: .success(.search([1]))),
         ParseFixture.mailboxData("SEARCH 1 2 3 4 5", "\r\n", expected: .success(.search([1, 2, 3, 4, 5]))),
+        ParseFixture.mailboxData("SEARCH", " 4294967296\r\n", expected: .success(.search([]))),
         ParseFixture.mailboxData(
             "NAMESPACE NIL NIL NIL",
             "\r\n",

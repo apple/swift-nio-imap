@@ -58,6 +58,7 @@ struct UseAttributeTests {
         ParseFixture.useAttribute("\\All", "", expected: .success(.all)),
         ParseFixture.useAttribute("\\Archive", "", expected: .success(.archive)),
         ParseFixture.useAttribute("\\Flagged", "", expected: .success(.flagged)),
+        ParseFixture.useAttribute("\\Junk", "", expected: .success(.junk)),
         ParseFixture.useAttribute("\\Trash", "", expected: .success(.trash)),
         ParseFixture.useAttribute("\\Sent", "", expected: .success(.sent)),
         ParseFixture.useAttribute("\\Drafts", "", expected: .success(.drafts)),

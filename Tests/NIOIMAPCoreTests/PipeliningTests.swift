@@ -52,6 +52,7 @@ extension SearchKey {
         .or(.uid(.set([1])), .sequenceNumbers(.set([1]))),
         .and([.unseen, .sequenceNumbers(.set([1]))]),
         .and([.uid(.set([1])), .sequenceNumbers(.set([1]))]),
+        .not(.sequenceNumbers(.set([1]))),
     ]
 
     fileprivate static let keysWithoutUID: [SearchKey] = [
@@ -68,6 +69,7 @@ extension SearchKey {
         .or(.uid(.set([1])), .sequenceNumbers(.set([1]))),
         .and([.unseen, .uid(.set([1]))]),
         .and([.uid(.set([1])), .sequenceNumbers(.set([1]))]),
+        .not(.uid(.set([1]))),
     ]
 
     fileprivate static let keysWithoutFlags: [SearchKey] = [
@@ -78,6 +80,8 @@ extension SearchKey {
         .subject("foo"),
         .or(.bcc("foo"), .uid(.set([1]))),
         .and([.uid(.set([1])), .sequenceNumbers(.set([1]))]),
+        // modificationSequence with no extensions does not reference flags
+        .modificationSequence(.init(extensions: [:], sequenceValue: 1)),
     ]
 
     fileprivate static let keysWithFlags: [SearchKey] = [
@@ -95,6 +99,9 @@ extension SearchKey {
         .undraft,
         .or(.answered, .uid(.set([1]))),
         .and([.answered, .sequenceNumbers(.set([1]))]),
+        .not(.answered),
+        // modificationSequence with non-empty extensions references flags
+        .modificationSequence(.init(extensions: [EntryFlagName(flag: .answered): .shared], sequenceValue: 1)),
     ]
 
     fileprivate static let arbitraryKeys: [SearchKey] = [
@@ -1604,5 +1611,249 @@ struct PipeliningTests {
             ],
             haveBehavior: .barrier
         )
+    }
+
+    // MARK: CommandStreamPart pipelining
+
+    @Test("command stream part pipelining requirements and behavior")
+    func commandStreamPartPipelining() {
+        // idleDone has no requirements
+        #expect(CommandStreamPart.idleDone.pipeliningRequirements == [])
+        // continuationResponse has no requirements
+        #expect(CommandStreamPart.continuationResponse(ByteBuffer(string: "")).pipeliningRequirements == [])
+
+        // idleDone has specific behaviors
+        #expect(CommandStreamPart.idleDone.pipeliningBehavior.contains(.barrier))
+        #expect(CommandStreamPart.idleDone.pipeliningBehavior.contains(.mayTriggerUntaggedExpunge))
+
+        // tagged part delegates to the wrapped command's behavior
+        let tagged = CommandStreamPart.tagged(TaggedCommand(tag: "A1", command: .capability))
+        #expect(tagged.pipeliningBehavior == Command.capability.pipeliningBehavior)
+
+        // non-start/non-catenateURL append commands have empty behavior
+        #expect(CommandStreamPart.append(.endMessage).pipeliningBehavior == [])
+
+        // continuationResponse has no behavior
+        #expect(CommandStreamPart.continuationResponse(ByteBuffer(string: "")).pipeliningBehavior == [])
+    }
+
+    // MARK: Gmail-label store pipelining
+
+    @Test("store with gmail labels pipelining requirements")
+    func commandGmailLabelsRequirements() {
+        // Silent store with gmail labels requires noFlagReadsFromAnyMessage but NOT noFlagChangesToAnyMessage
+        expect(
+            commands: [
+                (#_sourceLocation, .store(.set([1]), [], .gmailLabels(.add(silent: true, gmailLabels: [])))),
+            ],
+            require: .noFlagReadsFromAnyMessage
+        )
+        expect(
+            commands: [
+                (#_sourceLocation, .store(.set([1]), [], .gmailLabels(.add(silent: true, gmailLabels: [])))),
+            ],
+            doNotRequire: .noFlagChangesToAnyMessage
+        )
+
+        // Non-silent store with gmail labels requires both
+        expect(
+            commands: [
+                (#_sourceLocation, .store(.set([1]), [], .gmailLabels(.add(silent: false, gmailLabels: [])))),
+            ],
+            require: .noFlagReadsFromAnyMessage
+        )
+        expect(
+            commands: [
+                (#_sourceLocation, .store(.set([1]), [], .gmailLabels(.add(silent: false, gmailLabels: [])))),
+            ],
+            require: .noFlagChangesToAnyMessage
+        )
+
+        // uidStore(.lastCommand) with flags, silent=true — requires noFlagReadsFromAnyMessage only
+        expect(
+            commands: [
+                (#_sourceLocation, .uidStore(.lastCommand, [], .flags(.add(silent: true, list: [.answered])))),
+            ],
+            require: .noFlagReadsFromAnyMessage
+        )
+        expect(
+            commands: [
+                (#_sourceLocation, .uidStore(.lastCommand, [], .flags(.add(silent: true, list: [.answered])))),
+            ],
+            doNotRequire: .noFlagChangesToAnyMessage
+        )
+
+        // uidStore(.lastCommand) with gmail labels, both silent variants
+        expect(
+            commands: [
+                (#_sourceLocation, .uidStore(.lastCommand, [], .gmailLabels(.add(silent: true, gmailLabels: [])))),
+            ],
+            require: .noFlagReadsFromAnyMessage
+        )
+        expect(
+            commands: [
+                (#_sourceLocation, .uidStore(.lastCommand, [], .gmailLabels(.add(silent: true, gmailLabels: [])))),
+            ],
+            doNotRequire: .noFlagChangesToAnyMessage
+        )
+        expect(
+            commands: [
+                (#_sourceLocation, .uidStore(.lastCommand, [], .gmailLabels(.add(silent: false, gmailLabels: [])))),
+            ],
+            require: .noFlagReadsFromAnyMessage
+        )
+        expect(
+            commands: [
+                (#_sourceLocation, .uidStore(.lastCommand, [], .gmailLabels(.add(silent: false, gmailLabels: [])))),
+            ],
+            require: .noFlagChangesToAnyMessage
+        )
+
+        // uidStore(.set) with gmail labels
+        MessageIdentifierSetNonEmpty<UID>.arbitrarySets.forEach { uids in
+            expect(
+                commands: [
+                    (#_sourceLocation, .uidStore(.set(uids), [], .gmailLabels(.add(silent: true, gmailLabels: [])))),
+                ],
+                require: .noFlagReads(uids)
+            )
+            expect(
+                commands: [
+                    (#_sourceLocation, .uidStore(.set(uids), [], .gmailLabels(.add(silent: true, gmailLabels: [])))),
+                ],
+                doNotRequire: .noFlagChanges(uids)
+            )
+            expect(
+                commands: [
+                    (#_sourceLocation, .uidStore(.set(uids), [], .gmailLabels(.add(silent: false, gmailLabels: [])))),
+                ],
+                require: .noFlagReads(uids)
+            )
+            expect(
+                commands: [
+                    (#_sourceLocation, .uidStore(.set(uids), [], .gmailLabels(.add(silent: false, gmailLabels: [])))),
+                ],
+                require: .noFlagChanges(uids)
+            )
+        }
+    }
+
+    @Test("store with gmail labels pipelining behavior")
+    func commandGmailLabelsBehavior() {
+        // store gmailLabels silent=true changes flags but doesn't read them
+        expect(
+            commands: [
+                (#_sourceLocation, .store(.set([1]), [], .gmailLabels(.add(silent: true, gmailLabels: [])))),
+            ],
+            haveBehavior: .changesFlagsOnAnyMessage
+        )
+        expect(
+            commands: [
+                (#_sourceLocation, .store(.set([1]), [], .gmailLabels(.add(silent: true, gmailLabels: [])))),
+            ],
+            doNotHaveBehavior: .readsFlagsFromAnyMessage
+        )
+        // store gmailLabels silent=false changes and reads flags
+        expect(
+            commands: [
+                (#_sourceLocation, .store(.set([1]), [], .gmailLabels(.add(silent: false, gmailLabels: [])))),
+            ],
+            haveBehavior: .readsFlagsFromAnyMessage
+        )
+
+        // uidStore(.lastCommand) flags silent=true
+        expect(
+            commands: [
+                (#_sourceLocation, .uidStore(.lastCommand, [], .flags(.add(silent: true, list: [.answered])))),
+            ],
+            haveBehavior: .changesFlagsOnAnyMessage
+        )
+        expect(
+            commands: [
+                (#_sourceLocation, .uidStore(.lastCommand, [], .flags(.add(silent: true, list: [.answered])))),
+            ],
+            doNotHaveBehavior: .readsFlagsFromAnyMessage
+        )
+        // uidStore(.lastCommand) flags silent=false
+        expect(
+            commands: [
+                (#_sourceLocation, .uidStore(.lastCommand, [], .flags(.add(silent: false, list: [.answered])))),
+            ],
+            haveBehavior: .changesFlagsOnAnyMessage
+        )
+        expect(
+            commands: [
+                (#_sourceLocation, .uidStore(.lastCommand, [], .flags(.add(silent: false, list: [.answered])))),
+            ],
+            haveBehavior: .readsFlagsFromAnyMessage
+        )
+        // uidStore(.lastCommand) gmailLabels both silent variants
+        expect(
+            commands: [
+                (#_sourceLocation, .uidStore(.lastCommand, [], .gmailLabels(.add(silent: true, gmailLabels: [])))),
+            ],
+            haveBehavior: .changesFlagsOnAnyMessage
+        )
+        expect(
+            commands: [
+                (#_sourceLocation, .uidStore(.lastCommand, [], .gmailLabels(.add(silent: true, gmailLabels: [])))),
+            ],
+            doNotHaveBehavior: .readsFlagsFromAnyMessage
+        )
+        expect(
+            commands: [
+                (#_sourceLocation, .uidStore(.lastCommand, [], .gmailLabels(.add(silent: false, gmailLabels: [])))),
+            ],
+            haveBehavior: .readsFlagsFromAnyMessage
+        )
+
+        // uidStore(.set) gmailLabels
+        MessageIdentifierSetNonEmpty<UID>.arbitrarySets.forEach { uids in
+            expect(
+                commands: [
+                    (#_sourceLocation, .uidStore(.set(uids), [], .gmailLabels(.add(silent: true, gmailLabels: [])))),
+                ],
+                doNotHaveBehavior: .readsFlags(uids)
+            )
+            expect(
+                commands: [
+                    (#_sourceLocation, .uidStore(.set(uids), [], .gmailLabels(.add(silent: false, gmailLabels: [])))),
+                ],
+                haveBehavior: .readsFlags(uids)
+            )
+        }
+    }
+
+    // MARK: uidFetch(.lastCommand) behavior
+
+    @Test("uidFetch last command pipelining behavior")
+    func commandUIDFetchLastCommandBehavior() {
+        // Without flags — does not read flags
+        expect(
+            commands: [
+                (#_sourceLocation, .uidFetch(.lastCommand, [.envelope, .uid], [])),
+            ],
+            doNotHaveBehavior: .readsFlagsFromAnyMessage
+        )
+        // With flags — reads flags from any message
+        expect(
+            commands: [
+                (#_sourceLocation, .uidFetch(.lastCommand, [.uid, .flags], [])),
+            ],
+            haveBehavior: .readsFlagsFromAnyMessage
+        )
+    }
+
+    // MARK: Command.custom pipelining
+
+    @Test("custom command pipelining requirements and behavior")
+    func commandCustomPipelining() {
+        let custom = Command.custom(name: "X-TEST", payloads: [])
+        // Custom commands require many things
+        #expect(custom.pipeliningRequirements.contains(.noMailboxCommandsRunning))
+        #expect(custom.pipeliningRequirements.contains(.noUntaggedExpungeResponse))
+        #expect(custom.pipeliningRequirements.contains(.noUIDBasedCommandRunning))
+        // Custom command behavior is a barrier
+        #expect(custom.pipeliningBehavior.contains(.barrier))
     }
 }

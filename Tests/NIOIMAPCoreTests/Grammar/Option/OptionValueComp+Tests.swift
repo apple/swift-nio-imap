@@ -33,6 +33,7 @@ struct OptionValueCompTests {
     @Test(arguments: [
         ParseFixture.optionValueComp(#""test""#, expected: .success(.string("test"))),
         ParseFixture.optionValueComp("atom", ")", expected: .success(.string("atom"))),
+        ParseFixture.optionValueComp(#"("val")"#, " ", expected: .success(.array([.string("val")]))),
         ParseFixture.optionValueComp("", "", expected: .incompleteMessage),
     ])
     func parse(_ fixture: ParseFixture<OptionValueComp>) {

@@ -31,6 +31,11 @@ struct ListReturnOptionsTests {
         ParseFixture.returnOption("SUBSCRIBED", ")", expected: .success(.subscribed)),
         ParseFixture.returnOption("CHILDREN", ")", expected: .success(.children)),
         ParseFixture.returnOption("STATUS (MESSAGES)", " ", expected: .success(.statusOption([.messageCount]))),
+        ParseFixture.returnOption(
+            "MYEXT",
+            ")",
+            expected: .success(.optionExtension(.init(key: .standard("MYEXT"), value: nil)))
+        ),
         ParseFixture.returnOption("", "", expected: .incompleteMessage),
         ParseFixture.returnOption("123invalid", expected: .failure),
     ])

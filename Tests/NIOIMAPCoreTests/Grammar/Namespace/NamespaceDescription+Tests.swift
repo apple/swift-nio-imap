@@ -47,6 +47,22 @@ struct NamespaceDescriptionTests {
             " ",
             expected: .success(.init(string: "str", char: "a", responseExtensions: [:]))
         ),
+        ParseFixture.namespaceDescription(
+            "(\"str\" \"\r\")",
+            " ",
+            expected: .failureIgnoringBufferModifications
+        ),
+        ParseFixture.namespaceDescription(
+            "(\"str\" NIL \"ext-key\" (\"val1\" \"val2\"))",
+            " ",
+            expected: .success(
+                .init(
+                    string: "str",
+                    char: nil,
+                    responseExtensions: ["ext-key": ["val1", "val2"]]
+                )
+            )
+        ),
     ])
     func parse(_ fixture: ParseFixture<NamespaceDescription>) {
         fixture.checkParsing()

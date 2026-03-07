@@ -30,6 +30,7 @@ struct ObjectIDTests {
         ParseFixture.objectID("abc123", expected: .success(ObjectID("abc123")!)),
         ParseFixture.objectID("M1-abc_XY", expected: .success(ObjectID("M1-abc_XY")!)),
         ParseFixture.objectID("", "", expected: .failure),
+        ParseFixture.objectID(String(repeating: "a", count: 256), " ", expected: .failureIgnoringBufferModifications),
     ])
     func parse(_ fixture: ParseFixture<ObjectID>) {
         fixture.checkParsing()

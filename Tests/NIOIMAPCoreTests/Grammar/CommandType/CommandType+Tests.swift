@@ -336,6 +336,12 @@ struct CommandTypeTests {
             "RENAME box5 box6 (test)",
             expected: .success(.rename(from: .init("box5"), to: .init("box6"), parameters: ["test": nil]))
         ),
+        ParseFixture.command(
+            "RENAME box5 box6 (test1 test2)",
+            expected: .success(
+                .rename(from: .init("box5"), to: .init("box6"), parameters: ["test1": nil, "test2": nil])
+            )
+        ),
         ParseFixture.command("SELECT INBOX", expected: .success(.select(.inbox, []))),
         ParseFixture.command("STATUS INBOX (SIZE)", expected: .success(.status(.inbox, [.size]))),
         ParseFixture.command("SUBSCRIBE INBOX", expected: .success(.subscribe(.inbox))),

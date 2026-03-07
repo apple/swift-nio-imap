@@ -230,6 +230,7 @@ struct FetchAttributeTests {
             ParseFixture.partial("<2.4294967294>", expected: .failure),
             ParseFixture.partial("<4294967000.4294967000>", expected: .failure),
             ParseFixture.partial("<2200000000.2200000000>", expected: .failure),
+            ParseFixture.partial("<0.4294967296>", expected: .failure),
             ParseFixture.partial("<", "", expected: .incompleteMessage),
             ParseFixture.partial("<111111111", "", expected: .incompleteMessage),
             ParseFixture.partial("<1.", "", expected: .incompleteMessage),

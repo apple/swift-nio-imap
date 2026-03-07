@@ -52,6 +52,11 @@ struct UserAuthenticationMechanismTests {
             " ",
             expected: .success(.init(encodedUser: .init(data: "test"), authenticationMechanism: .any))
         ),
+        ParseFixture.userAuthenticationMechanism(
+            "@localhost",
+            " ",
+            expected: .failureIgnoringBufferModifications
+        ),
     ])
     func parse(_ fixture: ParseFixture<UserAuthenticationMechanism>) {
         fixture.checkParsing()
