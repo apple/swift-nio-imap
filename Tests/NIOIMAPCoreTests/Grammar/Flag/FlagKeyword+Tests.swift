@@ -83,9 +83,12 @@ struct FlagKeywordTests {
         fixture.checkEncoding()
     }
 
-    @Test("parse", arguments: [
-        ParseFixture.flagKeyword("keyword", expected: .success(Flag.Keyword("keyword")!))
-    ])
+    @Test(
+        "parse",
+        arguments: [
+            ParseFixture.flagKeyword("keyword", expected: .success(Flag.Keyword("keyword")!))
+        ]
+    )
     func parse(_ fixture: ParseFixture<Flag.Keyword>) {
         fixture.checkParsing()
     }

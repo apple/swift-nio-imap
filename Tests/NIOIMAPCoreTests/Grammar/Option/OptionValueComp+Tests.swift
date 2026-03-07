@@ -18,24 +18,30 @@ import Testing
 
 @Suite("OptionValueComp")
 struct OptionValueCompTests {
-    @Test("encode", arguments: [
-        EncodeFixture.optionValueComp(.string("test"), #""test""#),
-        EncodeFixture.optionValueComp([.string("test1"), .string("test2")], #"("test1" "test2")"#),
-        EncodeFixture.optionValueComp(
-            .array([.string("a"), .array([.string("E"), .string("F")]), .string("b")]),
-            #"("a" ("E" "F") "b")"#
-        ),
-    ])
+    @Test(
+        "encode",
+        arguments: [
+            EncodeFixture.optionValueComp(.string("test"), #""test""#),
+            EncodeFixture.optionValueComp([.string("test1"), .string("test2")], #"("test1" "test2")"#),
+            EncodeFixture.optionValueComp(
+                .array([.string("a"), .array([.string("E"), .string("F")]), .string("b")]),
+                #"("a" ("E" "F") "b")"#
+            ),
+        ]
+    )
     func encode(_ fixture: EncodeFixture<OptionValueComp>) {
         fixture.checkEncoding()
     }
 
-    @Test("parse", arguments: [
-        ParseFixture.optionValueComp(#""test""#, expected: .success(.string("test"))),
-        ParseFixture.optionValueComp("atom", ")", expected: .success(.string("atom"))),
-        ParseFixture.optionValueComp(#"("val")"#, " ", expected: .success(.array([.string("val")]))),
-        ParseFixture.optionValueComp("", "", expected: .incompleteMessage),
-    ])
+    @Test(
+        "parse",
+        arguments: [
+            ParseFixture.optionValueComp(#""test""#, expected: .success(.string("test"))),
+            ParseFixture.optionValueComp("atom", ")", expected: .success(.string("atom"))),
+            ParseFixture.optionValueComp(#"("val")"#, " ", expected: .success(.array([.string("val")]))),
+            ParseFixture.optionValueComp("", "", expected: .incompleteMessage),
+        ]
+    )
     func parse(_ fixture: ParseFixture<OptionValueComp>) {
         fixture.checkParsing()
     }

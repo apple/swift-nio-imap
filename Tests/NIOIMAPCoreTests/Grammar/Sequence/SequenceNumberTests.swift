@@ -41,15 +41,18 @@ extension SequenceNumberTests {
         #expect(SequenceNumber(1) < 999)
     }
 
-    @Test("encode", arguments: [
-        EncodeFixture.sequenceNumber(1, "1"),
-        EncodeFixture.sequenceNumber(123, "123"),
-        EncodeFixture.sequenceNumber(1234, "1234"),
-        EncodeFixture.sequenceNumber(9999, "9999"),
-        EncodeFixture.sequenceNumber(65535, "65535"),
-        EncodeFixture.sequenceNumber(1_000_000, "1000000"),
-        EncodeFixture.sequenceNumber(.max, "4294967295"),
-    ])
+    @Test(
+        "encode",
+        arguments: [
+            EncodeFixture.sequenceNumber(1, "1"),
+            EncodeFixture.sequenceNumber(123, "123"),
+            EncodeFixture.sequenceNumber(1234, "1234"),
+            EncodeFixture.sequenceNumber(9999, "9999"),
+            EncodeFixture.sequenceNumber(65535, "65535"),
+            EncodeFixture.sequenceNumber(1_000_000, "1000000"),
+            EncodeFixture.sequenceNumber(.max, "4294967295"),
+        ]
+    )
     func encode(_ fixture: EncodeFixture<SequenceNumber>) {
         fixture.checkEncoding()
     }

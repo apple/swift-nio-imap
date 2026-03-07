@@ -18,10 +18,13 @@ import Testing
 
 @Suite("ListSelectBaseOption")
 struct ListSelectBaseOptionTests {
-    @Test("encode", arguments: [
-        EncodeFixture.listSelectBaseOption(.subscribed, "SUBSCRIBED"),
-        EncodeFixture.listSelectBaseOption(.option(.init(key: .standard("test"), value: nil)), "test"),
-    ])
+    @Test(
+        "encode",
+        arguments: [
+            EncodeFixture.listSelectBaseOption(.subscribed, "SUBSCRIBED"),
+            EncodeFixture.listSelectBaseOption(.option(.init(key: .standard("test"), value: nil)), "test"),
+        ]
+    )
     func encode(_ fixture: EncodeFixture<ListSelectBaseOption>) {
         fixture.checkEncoding()
     }
@@ -36,30 +39,36 @@ struct ListSelectBaseOptionTests {
         fixture.checkEncoding()
     }
 
-    @Test("parse", arguments: [
-        ParseFixture.listSelectBaseOption("SUBSCRIBED", ")", expected: .success(.subscribed)),
-        ParseFixture.listSelectBaseOption(
-            "REMOTE",
-            ")",
-            expected: .success(.option(.init(key: .standard("REMOTE"), value: nil)))
-        ),
-        ParseFixture.listSelectBaseOption("", "", expected: .incompleteMessage),
-    ])
+    @Test(
+        "parse",
+        arguments: [
+            ParseFixture.listSelectBaseOption("SUBSCRIBED", ")", expected: .success(.subscribed)),
+            ParseFixture.listSelectBaseOption(
+                "REMOTE",
+                ")",
+                expected: .success(.option(.init(key: .standard("REMOTE"), value: nil)))
+            ),
+            ParseFixture.listSelectBaseOption("", "", expected: .incompleteMessage),
+        ]
+    )
     func parse(_ fixture: ParseFixture<ListSelectBaseOption>) {
         fixture.checkParsing()
     }
 
-    @Test("parse CHILDINFO extended item", arguments: [
-        ParseFixture.childinfoExtendedItem(
-            #"CHILDINFO ("SUBSCRIBED")"#,
-            expected: .success([.subscribed])
-        ),
-        ParseFixture.childinfoExtendedItem(
-            #"CHILDINFO ("SUBSCRIBED" "REMOTE")"#,
-            expected: .success([.subscribed, .option(.init(key: .standard("REMOTE"), value: nil))])
-        ),
-        ParseFixture.childinfoExtendedItem("", "", expected: .incompleteMessage),
-    ])
+    @Test(
+        "parse CHILDINFO extended item",
+        arguments: [
+            ParseFixture.childinfoExtendedItem(
+                #"CHILDINFO ("SUBSCRIBED")"#,
+                expected: .success([.subscribed])
+            ),
+            ParseFixture.childinfoExtendedItem(
+                #"CHILDINFO ("SUBSCRIBED" "REMOTE")"#,
+                expected: .success([.subscribed, .option(.init(key: .standard("REMOTE"), value: nil))])
+            ),
+            ParseFixture.childinfoExtendedItem("", "", expected: .incompleteMessage),
+        ]
+    )
     func parseChildinfoExtendedItem(_ fixture: ParseFixture<[ListSelectBaseOption]>) {
         fixture.checkParsing()
     }

@@ -181,35 +181,41 @@ struct CapabilityTests {
         fixture.checkParsing()
     }
 
-    @Test("parse CAPABILITY suffix", arguments: [
-        ParseFixture.capabilitySuffix(" IMAP4rev1", expected: .success([.imap4rev1])),
-        ParseFixture.capabilitySuffix(
-            " CONDSTORE ENABLE FILTERS",
-            expected: .success([.condStore, .enable, .filters])
-        ),
-        ParseFixture.capabilitySuffix(
-            " AUTH=PLAIN IMAP4rev1",
-            expected: .success([.authenticate(.plain), .imap4rev1])
-        ),
-        ParseFixture.capabilitySuffix("", "", expected: .incompleteMessage),
-    ])
+    @Test(
+        "parse CAPABILITY suffix",
+        arguments: [
+            ParseFixture.capabilitySuffix(" IMAP4rev1", expected: .success([.imap4rev1])),
+            ParseFixture.capabilitySuffix(
+                " CONDSTORE ENABLE FILTERS",
+                expected: .success([.condStore, .enable, .filters])
+            ),
+            ParseFixture.capabilitySuffix(
+                " AUTH=PLAIN IMAP4rev1",
+                expected: .success([.authenticate(.plain), .imap4rev1])
+            ),
+            ParseFixture.capabilitySuffix("", "", expected: .incompleteMessage),
+        ]
+    )
     func parseCapabilitySuffix(_ fixture: ParseFixture<[Capability]>) {
         fixture.checkParsing()
     }
 
-    @Test("parse capability data", arguments: [
-        ParseFixture.capabilityData("CAPABILITY IMAP4rev1", expected: .success([.imap4rev1])),
-        ParseFixture.capabilityData("CAPABILITY IMAP4 IMAP4rev1", expected: .success([.imap4, .imap4rev1])),
-        ParseFixture.capabilityData("CAPABILITY FILTERS IMAP4", expected: .success([.filters, .imap4])),
-        ParseFixture.capabilityData(
-            "CAPABILITY FILTERS IMAP4rev1 ENABLE",
-            expected: .success([.filters, .imap4rev1, .enable])
-        ),
-        ParseFixture.capabilityData(
-            "CAPABILITY FILTERS IMAP4rev1 ENABLE IMAP4",
-            expected: .success([.filters, .imap4rev1, .enable, .imap4])
-        ),
-    ])
+    @Test(
+        "parse capability data",
+        arguments: [
+            ParseFixture.capabilityData("CAPABILITY IMAP4rev1", expected: .success([.imap4rev1])),
+            ParseFixture.capabilityData("CAPABILITY IMAP4 IMAP4rev1", expected: .success([.imap4, .imap4rev1])),
+            ParseFixture.capabilityData("CAPABILITY FILTERS IMAP4", expected: .success([.filters, .imap4])),
+            ParseFixture.capabilityData(
+                "CAPABILITY FILTERS IMAP4rev1 ENABLE",
+                expected: .success([.filters, .imap4rev1, .enable])
+            ),
+            ParseFixture.capabilityData(
+                "CAPABILITY FILTERS IMAP4rev1 ENABLE IMAP4",
+                expected: .success([.filters, .imap4rev1, .enable, .imap4])
+            ),
+        ]
+    )
     func parseCapabilityData(_ fixture: ParseFixture<[Capability]>) {
         fixture.checkParsing()
     }

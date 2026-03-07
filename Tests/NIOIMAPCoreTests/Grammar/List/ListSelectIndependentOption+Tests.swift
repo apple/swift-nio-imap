@@ -18,20 +18,26 @@ import Testing
 
 @Suite("ListSelectIndependentOption")
 struct ListSelectIndependentOptionTests {
-    @Test("encode", arguments: [
-        EncodeFixture.listSelectIndependentOption(.remote, "REMOTE"),
-        EncodeFixture.listSelectIndependentOption(.option(.init(key: .standard("test"), value: nil)), "test"),
-        EncodeFixture.listSelectIndependentOption(.specialUse, "SPECIAL-USE"),
-    ])
+    @Test(
+        "encode",
+        arguments: [
+            EncodeFixture.listSelectIndependentOption(.remote, "REMOTE"),
+            EncodeFixture.listSelectIndependentOption(.option(.init(key: .standard("test"), value: nil)), "test"),
+            EncodeFixture.listSelectIndependentOption(.specialUse, "SPECIAL-USE"),
+        ]
+    )
     func encode(_ fixture: EncodeFixture<ListSelectIndependentOption>) {
         fixture.checkEncoding()
     }
 
-    @Test("parse", arguments: [
-        ParseFixture.listSelectIndependentOption("REMOTE", " ", expected: .success(.remote)),
-        ParseFixture.listSelectIndependentOption("SPECIAL-USE", " ", expected: .failure),
-        ParseFixture.listSelectIndependentOption("", "", expected: .incompleteMessage),
-    ])
+    @Test(
+        "parse",
+        arguments: [
+            ParseFixture.listSelectIndependentOption("REMOTE", " ", expected: .success(.remote)),
+            ParseFixture.listSelectIndependentOption("SPECIAL-USE", " ", expected: .failure),
+            ParseFixture.listSelectIndependentOption("", "", expected: .incompleteMessage),
+        ]
+    )
     func parse(_ fixture: ParseFixture<ListSelectIndependentOption>) {
         fixture.checkParsing()
     }

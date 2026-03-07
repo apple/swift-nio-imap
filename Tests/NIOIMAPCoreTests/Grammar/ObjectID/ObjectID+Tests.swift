@@ -18,20 +18,30 @@ import Testing
 
 @Suite("ObjectID")
 struct ObjectIDTests {
-    @Test("encode", arguments: [
-        EncodeFixture.objectID(ObjectID("abc123")!, "abc123"),
-        EncodeFixture.objectID(ObjectID("M1-abc_XY")!, "M1-abc_XY"),
-    ])
+    @Test(
+        "encode",
+        arguments: [
+            EncodeFixture.objectID(ObjectID("abc123")!, "abc123"),
+            EncodeFixture.objectID(ObjectID("M1-abc_XY")!, "M1-abc_XY"),
+        ]
+    )
     func encode(_ fixture: EncodeFixture<ObjectID>) {
         fixture.checkEncoding()
     }
 
-    @Test("parse", arguments: [
-        ParseFixture.objectID("abc123", expected: .success(ObjectID("abc123")!)),
-        ParseFixture.objectID("M1-abc_XY", expected: .success(ObjectID("M1-abc_XY")!)),
-        ParseFixture.objectID("", "", expected: .failure),
-        ParseFixture.objectID(String(repeating: "a", count: 256), " ", expected: .failureIgnoringBufferModifications),
-    ])
+    @Test(
+        "parse",
+        arguments: [
+            ParseFixture.objectID("abc123", expected: .success(ObjectID("abc123")!)),
+            ParseFixture.objectID("M1-abc_XY", expected: .success(ObjectID("M1-abc_XY")!)),
+            ParseFixture.objectID("", "", expected: .failure),
+            ParseFixture.objectID(
+                String(repeating: "a", count: 256),
+                " ",
+                expected: .failureIgnoringBufferModifications
+            ),
+        ]
+    )
     func parse(_ fixture: ParseFixture<ObjectID>) {
         fixture.checkParsing()
     }

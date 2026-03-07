@@ -18,22 +18,28 @@ import Testing
 
 @Suite("UIDValidity")
 struct UIDValidityTests {
-    @Test("encode", arguments: [
-        EncodeFixture.uidValidity(1, "1"),
-        EncodeFixture.uidValidity(123, "123"),
-        EncodeFixture.uidValidity(4_294_967_295, "4294967295"),
-    ])
+    @Test(
+        "encode",
+        arguments: [
+            EncodeFixture.uidValidity(1, "1"),
+            EncodeFixture.uidValidity(123, "123"),
+            EncodeFixture.uidValidity(4_294_967_295, "4294967295"),
+        ]
+    )
     func encode(_ fixture: EncodeFixture<UIDValidity>) {
         fixture.checkEncoding()
     }
 
-    @Test("parse", arguments: [
-        ParseFixture.uidValidity("1", " ", expected: .success(1)),
-        ParseFixture.uidValidity("12", " ", expected: .success(12)),
-        ParseFixture.uidValidity("123", " ", expected: .success(123)),
-        ParseFixture.uidValidity("0", " ", expected: .failure),
-        ParseFixture.uidValidity("1", "", expected: .incompleteMessage),
-    ])
+    @Test(
+        "parse",
+        arguments: [
+            ParseFixture.uidValidity("1", " ", expected: .success(1)),
+            ParseFixture.uidValidity("12", " ", expected: .success(12)),
+            ParseFixture.uidValidity("123", " ", expected: .success(123)),
+            ParseFixture.uidValidity("0", " ", expected: .failure),
+            ParseFixture.uidValidity("1", "", expected: .incompleteMessage),
+        ]
+    )
     func parse(_ fixture: ParseFixture<UIDValidity>) {
         fixture.checkParsing()
     }

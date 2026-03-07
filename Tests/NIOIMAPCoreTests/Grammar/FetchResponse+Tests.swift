@@ -51,24 +51,27 @@ struct FetchResponseTests {
         fixture.checkParsing()
     }
 
-    @Test("parse streaming response", arguments: [
-        // BODY without section brackets triggers the nil-section path (offset present)
-        ParseFixture.fetchStreamingResponse("BODY<0>", " ", expected: .success(.body(section: .init(), offset: 0))),
-        // BODY with section and offset
-        ParseFixture.fetchStreamingResponse(
-            "BODY[TEXT]<5>",
-            " ",
-            expected: .success(.body(section: .init(kind: .text), offset: 5))
-        ),
-        // BODY with section, no offset
-        ParseFixture.fetchStreamingResponse(
-            "BODY[HEADER]",
-            " ",
-            expected: .success(.body(section: .init(kind: .header), offset: nil))
-        ),
-        ParseFixture.fetchStreamingResponse("RFC822.TEXT", " ", expected: .success(.rfc822Text)),
-        ParseFixture.fetchStreamingResponse("RFC822.HEADER", " ", expected: .success(.rfc822Header)),
-    ])
+    @Test(
+        "parse streaming response",
+        arguments: [
+            // BODY without section brackets triggers the nil-section path (offset present)
+            ParseFixture.fetchStreamingResponse("BODY<0>", " ", expected: .success(.body(section: .init(), offset: 0))),
+            // BODY with section and offset
+            ParseFixture.fetchStreamingResponse(
+                "BODY[TEXT]<5>",
+                " ",
+                expected: .success(.body(section: .init(kind: .text), offset: 5))
+            ),
+            // BODY with section, no offset
+            ParseFixture.fetchStreamingResponse(
+                "BODY[HEADER]",
+                " ",
+                expected: .success(.body(section: .init(kind: .header), offset: nil))
+            ),
+            ParseFixture.fetchStreamingResponse("RFC822.TEXT", " ", expected: .success(.rfc822Text)),
+            ParseFixture.fetchStreamingResponse("RFC822.HEADER", " ", expected: .success(.rfc822Header)),
+        ]
+    )
     func parseStreamingResponse(_ fixture: ParseFixture<StreamingKind>) {
         fixture.checkParsing()
     }

@@ -68,24 +68,27 @@ struct NamespaceDescriptionTests {
         fixture.checkParsing()
     }
 
-    @Test("parse NAMESPACE", arguments: [
-        ParseFixture.namespace(
-            "NIL",
-            expected: .success([])
-        ),
-        ParseFixture.namespace(
-            "((\"#mh/\" \"/\"))",
-            expected: .success([.init(string: "#mh/", char: "/", responseExtensions: [:])])
-        ),
-        ParseFixture.namespace(
-            "((\"\" \"/\")(\"#mh/\" \"/\"))",
-            expected: .success([
-                .init(string: "", char: "/", responseExtensions: [:]),
-                .init(string: "#mh/", char: "/", responseExtensions: [:]),
-            ])
-        ),
-        ParseFixture.namespace("", "", expected: .incompleteMessage),
-    ])
+    @Test(
+        "parse NAMESPACE",
+        arguments: [
+            ParseFixture.namespace(
+                "NIL",
+                expected: .success([])
+            ),
+            ParseFixture.namespace(
+                "((\"#mh/\" \"/\"))",
+                expected: .success([.init(string: "#mh/", char: "/", responseExtensions: [:])])
+            ),
+            ParseFixture.namespace(
+                "((\"\" \"/\")(\"#mh/\" \"/\"))",
+                expected: .success([
+                    .init(string: "", char: "/", responseExtensions: [:]),
+                    .init(string: "#mh/", char: "/", responseExtensions: [:]),
+                ])
+            ),
+            ParseFixture.namespace("", "", expected: .incompleteMessage),
+        ]
+    )
     func parseNamespace(_ fixture: ParseFixture<[NamespaceDescription]>) {
         fixture.checkParsing()
     }

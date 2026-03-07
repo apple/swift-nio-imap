@@ -18,10 +18,13 @@ import Testing
 
 @Suite("MailboxID")
 struct MailboxIDTests {
-    @Test("encode", arguments: [
-        EncodeFixture.mailboxID("Abc123", "Abc123"),
-        EncodeFixture.mailboxID("a-b_c", "a-b_c"),
-    ])
+    @Test(
+        "encode",
+        arguments: [
+            EncodeFixture.mailboxID("Abc123", "Abc123"),
+            EncodeFixture.mailboxID("a-b_c", "a-b_c"),
+        ]
+    )
     func encode(_ fixture: EncodeFixture<MailboxID>) {
         fixture.checkEncoding()
     }

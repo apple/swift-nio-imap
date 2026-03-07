@@ -65,10 +65,13 @@ struct EmailIDTests {
         #expect(id.debugDescription == fixture.1)
     }
 
-    @Test("encode", arguments: [
-        EncodeFixture.emailID("abc123", "abc123"),
-        EncodeFixture.emailID("XYZ-789_000", "XYZ-789_000"),
-    ])
+    @Test(
+        "encode",
+        arguments: [
+            EncodeFixture.emailID("abc123", "abc123"),
+            EncodeFixture.emailID("XYZ-789_000", "XYZ-789_000"),
+        ]
+    )
     func encode(_ fixture: EncodeFixture<EmailID>) {
         fixture.checkEncoding()
     }

@@ -32,28 +32,36 @@ struct EmailAddressTestsSuite {
         #expect(address.host == host)
     }
 
-    @Test("encode email address", arguments: [
-        EmailAddressFixture(
-            name: "all nil",
-            address: .init(personName: nil, sourceRoot: nil, mailbox: nil, host: nil),
-            expectedString: "(NIL NIL NIL NIL)"
-        ),
-        EmailAddressFixture(
-            name: "none nil",
-            address: .init(personName: "somename", sourceRoot: "someadl", mailbox: "somemailbox", host: "someaddress"),
-            expectedString: "(\"somename\" \"someadl\" \"somemailbox\" \"someaddress\")"
-        ),
-        EmailAddressFixture(
-            name: "mixed nil",
-            address: .init(personName: nil, sourceRoot: "some", mailbox: "thing", host: nil),
-            expectedString: "(NIL \"some\" \"thing\" NIL)"
-        ),
-        EmailAddressFixture(
-            name: "unicode",
-            address: .init(personName: nil, sourceRoot: nil, mailbox: "阿Q", host: "例子.中国"),
-            expectedString: "(NIL NIL {4}\r\n阿Q {13}\r\n例子.中国)"
-        ),
-    ])
+    @Test(
+        "encode email address",
+        arguments: [
+            EmailAddressFixture(
+                name: "all nil",
+                address: .init(personName: nil, sourceRoot: nil, mailbox: nil, host: nil),
+                expectedString: "(NIL NIL NIL NIL)"
+            ),
+            EmailAddressFixture(
+                name: "none nil",
+                address: .init(
+                    personName: "somename",
+                    sourceRoot: "someadl",
+                    mailbox: "somemailbox",
+                    host: "someaddress"
+                ),
+                expectedString: "(\"somename\" \"someadl\" \"somemailbox\" \"someaddress\")"
+            ),
+            EmailAddressFixture(
+                name: "mixed nil",
+                address: .init(personName: nil, sourceRoot: "some", mailbox: "thing", host: nil),
+                expectedString: "(NIL \"some\" \"thing\" NIL)"
+            ),
+            EmailAddressFixture(
+                name: "unicode",
+                address: .init(personName: nil, sourceRoot: nil, mailbox: "阿Q", host: "例子.中国"),
+                expectedString: "(NIL NIL {4}\r\n阿Q {13}\r\n例子.中国)"
+            ),
+        ]
+    )
     func encodeEmailAddress(_ fixture: EmailAddressFixture) {
         fixture.checkEncoding()
     }
@@ -82,123 +90,126 @@ struct EmailAddressTestsSuite {
         fixture.checkParsing()
     }
 
-    @Test("parse envelope email address groups", arguments: [
-        EnvelopeGroupingFixture(
-            addresses: [],
-            expected: []
-        ),
-        EnvelopeGroupingFixture(
-            addresses: [.init(personName: "a", sourceRoot: "a", mailbox: "a", host: "a")],
-            expected: [.singleAddress(.init(personName: "a", sourceRoot: "a", mailbox: "a", host: "a"))]
-        ),
-        EnvelopeGroupingFixture(
-            addresses: [
-                .init(personName: "a", sourceRoot: "a", mailbox: "a", host: "a"),
-                .init(personName: "b", sourceRoot: "b", mailbox: "b", host: "b"),
-            ],
-            expected: [
-                .singleAddress(.init(personName: "a", sourceRoot: "a", mailbox: "a", host: "a")),
-                .singleAddress(.init(personName: "b", sourceRoot: "b", mailbox: "b", host: "b")),
-            ]
-        ),
-        EnvelopeGroupingFixture(
-            addresses: [
-                .init(personName: nil, sourceRoot: nil, mailbox: "group", host: nil),
-                .init(personName: "a", sourceRoot: "a", mailbox: "a", host: "a"),
-                .init(personName: nil, sourceRoot: nil, mailbox: nil, host: nil),
-            ],
-            expected: [
-                .group(
-                    .init(
-                        groupName: "group",
-                        sourceRoot: nil,
-                        children: [.singleAddress(.init(personName: "a", sourceRoot: "a", mailbox: "a", host: "a"))]
+    @Test(
+        "parse envelope email address groups",
+        arguments: [
+            EnvelopeGroupingFixture(
+                addresses: [],
+                expected: []
+            ),
+            EnvelopeGroupingFixture(
+                addresses: [.init(personName: "a", sourceRoot: "a", mailbox: "a", host: "a")],
+                expected: [.singleAddress(.init(personName: "a", sourceRoot: "a", mailbox: "a", host: "a"))]
+            ),
+            EnvelopeGroupingFixture(
+                addresses: [
+                    .init(personName: "a", sourceRoot: "a", mailbox: "a", host: "a"),
+                    .init(personName: "b", sourceRoot: "b", mailbox: "b", host: "b"),
+                ],
+                expected: [
+                    .singleAddress(.init(personName: "a", sourceRoot: "a", mailbox: "a", host: "a")),
+                    .singleAddress(.init(personName: "b", sourceRoot: "b", mailbox: "b", host: "b")),
+                ]
+            ),
+            EnvelopeGroupingFixture(
+                addresses: [
+                    .init(personName: nil, sourceRoot: nil, mailbox: "group", host: nil),
+                    .init(personName: "a", sourceRoot: "a", mailbox: "a", host: "a"),
+                    .init(personName: nil, sourceRoot: nil, mailbox: nil, host: nil),
+                ],
+                expected: [
+                    .group(
+                        .init(
+                            groupName: "group",
+                            sourceRoot: nil,
+                            children: [.singleAddress(.init(personName: "a", sourceRoot: "a", mailbox: "a", host: "a"))]
+                        )
                     )
-                )
-            ]
-        ),
-        EnvelopeGroupingFixture(
-            addresses: [
-                .init(personName: nil, sourceRoot: nil, mailbox: nil, host: nil)
-            ],
-            expected: [
-                .singleAddress(.init(personName: nil, sourceRoot: nil, mailbox: nil, host: nil))
-            ]
-        ),
-        EnvelopeGroupingFixture(
-            addresses: [
-                .init(personName: nil, sourceRoot: nil, mailbox: "group", host: nil),
-                .init(personName: "a", sourceRoot: "a", mailbox: "a", host: "a"),
-                .init(personName: "b", sourceRoot: "b", mailbox: "b", host: "b"),
-                .init(personName: "c", sourceRoot: "c", mailbox: "c", host: "c"),
-                .init(personName: nil, sourceRoot: nil, mailbox: nil, host: nil),
-            ],
-            expected: [
-                .group(
-                    .init(
-                        groupName: "group",
-                        sourceRoot: nil,
-                        children: [
-                            .singleAddress(.init(personName: "a", sourceRoot: "a", mailbox: "a", host: "a")),
-                            .singleAddress(.init(personName: "b", sourceRoot: "b", mailbox: "b", host: "b")),
-                            .singleAddress(.init(personName: "c", sourceRoot: "c", mailbox: "c", host: "c")),
-                        ]
+                ]
+            ),
+            EnvelopeGroupingFixture(
+                addresses: [
+                    .init(personName: nil, sourceRoot: nil, mailbox: nil, host: nil)
+                ],
+                expected: [
+                    .singleAddress(.init(personName: nil, sourceRoot: nil, mailbox: nil, host: nil))
+                ]
+            ),
+            EnvelopeGroupingFixture(
+                addresses: [
+                    .init(personName: nil, sourceRoot: nil, mailbox: "group", host: nil),
+                    .init(personName: "a", sourceRoot: "a", mailbox: "a", host: "a"),
+                    .init(personName: "b", sourceRoot: "b", mailbox: "b", host: "b"),
+                    .init(personName: "c", sourceRoot: "c", mailbox: "c", host: "c"),
+                    .init(personName: nil, sourceRoot: nil, mailbox: nil, host: nil),
+                ],
+                expected: [
+                    .group(
+                        .init(
+                            groupName: "group",
+                            sourceRoot: nil,
+                            children: [
+                                .singleAddress(.init(personName: "a", sourceRoot: "a", mailbox: "a", host: "a")),
+                                .singleAddress(.init(personName: "b", sourceRoot: "b", mailbox: "b", host: "b")),
+                                .singleAddress(.init(personName: "c", sourceRoot: "c", mailbox: "c", host: "c")),
+                            ]
+                        )
                     )
-                )
-            ]
-        ),
-        EnvelopeGroupingFixture(
-            addresses: [
-                .init(personName: nil, sourceRoot: nil, mailbox: "group1", host: nil),
-                .init(personName: "a", sourceRoot: "a", mailbox: "a", host: "a"),
-                .init(personName: nil, sourceRoot: nil, mailbox: "group2", host: nil),
-                .init(personName: "b", sourceRoot: "b", mailbox: "b", host: "b"),
-                .init(personName: nil, sourceRoot: nil, mailbox: "group3", host: nil),
-                .init(personName: "c", sourceRoot: "c", mailbox: "c", host: "c"),
-                .init(personName: nil, sourceRoot: nil, mailbox: nil, host: nil),
-                .init(personName: nil, sourceRoot: nil, mailbox: nil, host: nil),
-                .init(personName: nil, sourceRoot: nil, mailbox: nil, host: nil),
-            ],
-            expected: [
-                .group(
-                    .init(
-                        groupName: "group1",
-                        sourceRoot: nil,
-                        children: [
-                            .singleAddress(.init(personName: "a", sourceRoot: "a", mailbox: "a", host: "a")),
-                            .group(
-                                .init(
-                                    groupName: "group2",
-                                    sourceRoot: nil,
-                                    children: [
-                                        .singleAddress(
-                                            .init(personName: "b", sourceRoot: "b", mailbox: "b", host: "b")
-                                        ),
-                                        .group(
-                                            .init(
-                                                groupName: "group3",
-                                                sourceRoot: nil,
-                                                children: [
-                                                    .singleAddress(
-                                                        .init(
-                                                            personName: "c",
-                                                            sourceRoot: "c",
-                                                            mailbox: "c",
-                                                            host: "c"
+                ]
+            ),
+            EnvelopeGroupingFixture(
+                addresses: [
+                    .init(personName: nil, sourceRoot: nil, mailbox: "group1", host: nil),
+                    .init(personName: "a", sourceRoot: "a", mailbox: "a", host: "a"),
+                    .init(personName: nil, sourceRoot: nil, mailbox: "group2", host: nil),
+                    .init(personName: "b", sourceRoot: "b", mailbox: "b", host: "b"),
+                    .init(personName: nil, sourceRoot: nil, mailbox: "group3", host: nil),
+                    .init(personName: "c", sourceRoot: "c", mailbox: "c", host: "c"),
+                    .init(personName: nil, sourceRoot: nil, mailbox: nil, host: nil),
+                    .init(personName: nil, sourceRoot: nil, mailbox: nil, host: nil),
+                    .init(personName: nil, sourceRoot: nil, mailbox: nil, host: nil),
+                ],
+                expected: [
+                    .group(
+                        .init(
+                            groupName: "group1",
+                            sourceRoot: nil,
+                            children: [
+                                .singleAddress(.init(personName: "a", sourceRoot: "a", mailbox: "a", host: "a")),
+                                .group(
+                                    .init(
+                                        groupName: "group2",
+                                        sourceRoot: nil,
+                                        children: [
+                                            .singleAddress(
+                                                .init(personName: "b", sourceRoot: "b", mailbox: "b", host: "b")
+                                            ),
+                                            .group(
+                                                .init(
+                                                    groupName: "group3",
+                                                    sourceRoot: nil,
+                                                    children: [
+                                                        .singleAddress(
+                                                            .init(
+                                                                personName: "c",
+                                                                sourceRoot: "c",
+                                                                mailbox: "c",
+                                                                host: "c"
+                                                            )
                                                         )
-                                                    )
-                                                ]
-                                            )
-                                        ),
-                                    ]
-                                )
-                            ),
-                        ]
+                                                    ]
+                                                )
+                                            ),
+                                        ]
+                                    )
+                                ),
+                            ]
+                        )
                     )
-                )
-            ]
-        ),
-    ])
+                ]
+            ),
+        ]
+    )
     func parseEnvelopeEmailAddressGroups(_ fixture: EnvelopeGroupingFixture) {
         let actual = GrammarParser().parseEnvelopeEmailAddressGroups(fixture.addresses)
         #expect(actual == fixture.expected)

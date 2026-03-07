@@ -18,41 +18,47 @@ import Testing
 
 @Suite("MailboxGroup")
 struct MailboxGroupTests {
-    @Test("encode email address group", arguments: [
-        EncodeFixture.emailAddressGroup(
-            EmailAddressGroup(
-                groupName: ByteBuffer(string: "Team"),
-                sourceRoot: ByteBuffer(string: "root"),
-                children: [
-                    .singleAddress(
-                        EmailAddress(
-                            personName: "Alice",
-                            sourceRoot: nil,
-                            mailbox: "alice",
-                            host: "example.com"
+    @Test(
+        "encode email address group",
+        arguments: [
+            EncodeFixture.emailAddressGroup(
+                EmailAddressGroup(
+                    groupName: ByteBuffer(string: "Team"),
+                    sourceRoot: ByteBuffer(string: "root"),
+                    children: [
+                        .singleAddress(
+                            EmailAddress(
+                                personName: "Alice",
+                                sourceRoot: nil,
+                                mailbox: "alice",
+                                host: "example.com"
+                            )
                         )
-                    )
-                ]
-            ),
-            #"(NIL "root" "Team" NIL)("Alice" NIL "alice" "example.com")(NIL "root" NIL NIL)"#
-        )
-    ])
+                    ]
+                ),
+                #"(NIL "root" "Team" NIL)("Alice" NIL "alice" "example.com")(NIL "root" NIL NIL)"#
+            )
+        ]
+    )
     func encodeEmailAddressGroup(_ fixture: EncodeFixture<EmailAddressGroup>) {
         fixture.checkEncoding()
     }
 
-    @Test("encode email address or group", arguments: [
-        EncodeFixture.emailAddressOrGroup(
-            .group(
-                EmailAddressGroup(
-                    groupName: ByteBuffer(string: "Mgmt"),
-                    sourceRoot: nil,
-                    children: []
-                )
-            ),
-            #"(NIL NIL "Mgmt" NIL)(NIL NIL NIL NIL)"#
-        )
-    ])
+    @Test(
+        "encode email address or group",
+        arguments: [
+            EncodeFixture.emailAddressOrGroup(
+                .group(
+                    EmailAddressGroup(
+                        groupName: ByteBuffer(string: "Mgmt"),
+                        sourceRoot: nil,
+                        children: []
+                    )
+                ),
+                #"(NIL NIL "Mgmt" NIL)(NIL NIL NIL NIL)"#
+            )
+        ]
+    )
     func encodeEmailAddressOrGroup(_ fixture: EncodeFixture<EmailAddressListElement>) {
         fixture.checkEncoding()
     }

@@ -52,12 +52,15 @@ struct UIDTests {
         fixture.check()
     }
 
-    @Test("encode", arguments: [
-        EncodeFixture.uid(.min, "1"),
-        EncodeFixture.uid(.max, "*"),
-        EncodeFixture.uid(UID(1234), "1234"),
-        EncodeFixture.uid(UID(392_972_163), "392972163"),
-    ])
+    @Test(
+        "encode",
+        arguments: [
+            EncodeFixture.uid(.min, "1"),
+            EncodeFixture.uid(.max, "*"),
+            EncodeFixture.uid(UID(1234), "1234"),
+            EncodeFixture.uid(UID(392_972_163), "392972163"),
+        ]
+    )
     func encode(_ fixture: EncodeFixture<UID>) {
         fixture.checkEncoding()
     }

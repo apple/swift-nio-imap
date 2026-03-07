@@ -18,11 +18,14 @@ import Testing
 
 @Suite("ListReturnOptions")
 struct ListReturnOptionsTests {
-    @Test("encode", arguments: [
-        EncodeFixture.listReturnOptions([], "RETURN ()"),
-        EncodeFixture.listReturnOptions([.subscribed], "RETURN (SUBSCRIBED)"),
-        EncodeFixture.listReturnOptions([.subscribed, .children], "RETURN (SUBSCRIBED CHILDREN)"),
-    ])
+    @Test(
+        "encode",
+        arguments: [
+            EncodeFixture.listReturnOptions([], "RETURN ()"),
+            EncodeFixture.listReturnOptions([.subscribed], "RETURN (SUBSCRIBED)"),
+            EncodeFixture.listReturnOptions([.subscribed, .children], "RETURN (SUBSCRIBED CHILDREN)"),
+        ]
+    )
     func encode(_ fixture: EncodeFixture<[ReturnOption]>) {
         fixture.checkEncoding()
     }

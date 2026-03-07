@@ -18,37 +18,49 @@ import Testing
 
 @Suite("ParameterValue")
 struct ParameterValueTests {
-    @Test("encode", arguments: [
-        EncodeFixture.parameterValue(.sequence(.set(.init(range: .init(SequenceNumber(1))))), "1"),
-        EncodeFixture.parameterValue(.sequence(.lastCommand), "$"),
-        EncodeFixture.parameterValue(.comp(["foo", "bar"]), #"(("foo" "bar"))"#),
-        EncodeFixture.parameterValue(.comp([]), "()"),
-    ])
+    @Test(
+        "encode",
+        arguments: [
+            EncodeFixture.parameterValue(.sequence(.set(.init(range: .init(SequenceNumber(1))))), "1"),
+            EncodeFixture.parameterValue(.sequence(.lastCommand), "$"),
+            EncodeFixture.parameterValue(.comp(["foo", "bar"]), #"(("foo" "bar"))"#),
+            EncodeFixture.parameterValue(.comp([]), "()"),
+        ]
+    )
     func encode(_ fixture: EncodeFixture<ParameterValue>) {
         fixture.checkEncoding()
     }
 
-    @Test("parse", arguments: [
-        ParseFixture.parameterValue("1", expected: .success(.sequence(.set(.init(range: .init(SequenceNumber(1))))))),
-        ParseFixture.parameterValue("$", expected: .success(.sequence(.lastCommand))),
-        ParseFixture.parameterValue(#"(("foo" "bar"))"#, ")", expected: .success(.comp(["foo", "bar"]))),
-        ParseFixture.parameterValue("()", ")", expected: .success(.comp([]))),
-        ParseFixture.parameterValue("", "", expected: .incompleteMessage),
-    ])
+    @Test(
+        "parse",
+        arguments: [
+            ParseFixture.parameterValue(
+                "1",
+                expected: .success(.sequence(.set(.init(range: .init(SequenceNumber(1))))))
+            ),
+            ParseFixture.parameterValue("$", expected: .success(.sequence(.lastCommand))),
+            ParseFixture.parameterValue(#"(("foo" "bar"))"#, ")", expected: .success(.comp(["foo", "bar"]))),
+            ParseFixture.parameterValue("()", ")", expected: .success(.comp([]))),
+            ParseFixture.parameterValue("", "", expected: .incompleteMessage),
+        ]
+    )
     func parse(_ fixture: ParseFixture<ParameterValue>) {
         fixture.checkParsing()
     }
 
-    @Test("parse parameter", arguments: [
-        ParseFixture.parameter("USE", ")", expected: .success(.init(key: "USE", value: nil))),
-        ParseFixture.parameter(
-            "USE 1",
-            ")",
-            expected: .success(.init(key: "USE", value: .sequence(.set(.init(range: .init(SequenceNumber(1)))))))
-        ),
-        ParseFixture.parameter("USE $", ")", expected: .success(.init(key: "USE", value: .sequence(.lastCommand)))),
-        ParseFixture.parameter("", "", expected: .incompleteMessage),
-    ])
+    @Test(
+        "parse parameter",
+        arguments: [
+            ParseFixture.parameter("USE", ")", expected: .success(.init(key: "USE", value: nil))),
+            ParseFixture.parameter(
+                "USE 1",
+                ")",
+                expected: .success(.init(key: "USE", value: .sequence(.set(.init(range: .init(SequenceNumber(1)))))))
+            ),
+            ParseFixture.parameter("USE $", ")", expected: .success(.init(key: "USE", value: .sequence(.lastCommand)))),
+            ParseFixture.parameter("", "", expected: .incompleteMessage),
+        ]
+    )
     func parseParameter(_ fixture: ParseFixture<KeyValue<String, ParameterValue?>>) {
         fixture.checkParsing()
     }

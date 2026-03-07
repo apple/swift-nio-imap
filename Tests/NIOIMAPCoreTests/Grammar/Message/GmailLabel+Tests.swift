@@ -18,11 +18,14 @@ import Testing
 
 @Suite("GmailLabel")
 struct GmailLabelTests {
-    @Test("encode", arguments: [
-        EncodeFixture.gmailLabel(GmailLabel(ByteBuffer(string: "Inbox")), #""Inbox""#),
-        EncodeFixture.gmailLabel(GmailLabel(ByteBuffer(string: "\\Sent")), #"\Sent"#),
-        EncodeFixture.gmailLabel(GmailLabel(ByteBuffer(string: "My Label")), #""My Label""#),
-    ])
+    @Test(
+        "encode",
+        arguments: [
+            EncodeFixture.gmailLabel(GmailLabel(ByteBuffer(string: "Inbox")), #""Inbox""#),
+            EncodeFixture.gmailLabel(GmailLabel(ByteBuffer(string: "\\Sent")), #"\Sent"#),
+            EncodeFixture.gmailLabel(GmailLabel(ByteBuffer(string: "My Label")), #""My Label""#),
+        ]
+    )
     func encode(_ fixture: EncodeFixture<GmailLabel>) {
         fixture.checkEncoding()
     }
@@ -54,11 +57,14 @@ struct GmailLabelTests {
         #expect(fixture.0.makeDisplayString() == fixture.1)
     }
 
-    @Test("parse", arguments: [
-        ParseFixture.gmailLabel(#""Inbox""#, expected: .success(GmailLabel(ByteBuffer(string: "Inbox")))),
-        ParseFixture.gmailLabel(#"\Sent"#, expected: .success(GmailLabel(ByteBuffer(string: "\\Sent")))),
-        ParseFixture.gmailLabel("", "", expected: .incompleteMessage),
-    ])
+    @Test(
+        "parse",
+        arguments: [
+            ParseFixture.gmailLabel(#""Inbox""#, expected: .success(GmailLabel(ByteBuffer(string: "Inbox")))),
+            ParseFixture.gmailLabel(#"\Sent"#, expected: .success(GmailLabel(ByteBuffer(string: "\\Sent")))),
+            ParseFixture.gmailLabel("", "", expected: .incompleteMessage),
+        ]
+    )
     func parse(_ fixture: ParseFixture<GmailLabel>) {
         fixture.checkParsing()
     }

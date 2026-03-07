@@ -18,21 +18,27 @@ import Testing
 
 @Suite("StoreOperation")
 struct StoreOperationTests {
-    @Test("encode", arguments: [
-        EncodeFixture.storeOperation(.add, "+"),
-        EncodeFixture.storeOperation(.remove, "-"),
-        EncodeFixture.storeOperation(.replace, ""),
-    ])
+    @Test(
+        "encode",
+        arguments: [
+            EncodeFixture.storeOperation(.add, "+"),
+            EncodeFixture.storeOperation(.remove, "-"),
+            EncodeFixture.storeOperation(.replace, ""),
+        ]
+    )
     func encode(_ fixture: EncodeFixture<StoreOperation>) {
         fixture.checkEncoding()
     }
 
-    @Test("parse", arguments: [
-        ParseFixture.storeOperation("+", expected: .success(.add)),
-        ParseFixture.storeOperation("-", expected: .success(.remove)),
-        // .replace matches the empty prefix — succeeds on any input without consuming bytes
-        ParseFixture.storeOperation("", " ", expected: .success(.replace)),
-    ])
+    @Test(
+        "parse",
+        arguments: [
+            ParseFixture.storeOperation("+", expected: .success(.add)),
+            ParseFixture.storeOperation("-", expected: .success(.remove)),
+            // .replace matches the empty prefix — succeeds on any input without consuming bytes
+            ParseFixture.storeOperation("", " ", expected: .success(.replace)),
+        ]
+    )
     func parse(_ fixture: ParseFixture<StoreOperation>) {
         fixture.checkParsing()
     }

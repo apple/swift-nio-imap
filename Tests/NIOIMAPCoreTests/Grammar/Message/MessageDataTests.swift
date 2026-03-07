@@ -34,9 +34,12 @@ struct MessageDataTests {
         fixture.checkEncoding()
     }
 
-    @Test("encode end", arguments: [
-        EncodeFixture.messageDataEnd(.expunge(1), ")")
-    ])
+    @Test(
+        "encode end",
+        arguments: [
+            EncodeFixture.messageDataEnd(.expunge(1), ")")
+        ]
+    )
     func encodeEnd(_ fixture: EncodeFixture<MessageData>) {
         fixture.checkEncoding()
     }

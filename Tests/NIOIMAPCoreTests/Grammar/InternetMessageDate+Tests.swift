@@ -18,9 +18,12 @@ import Testing
 
 @Suite("InternetMessageDate")
 struct InternetMessageDateTests {
-    @Test("encode", arguments: [
-        EncodeFixture.internetMessageDate(.init("test"), "test")
-    ])
+    @Test(
+        "encode",
+        arguments: [
+            EncodeFixture.internetMessageDate(.init("test"), "test")
+        ]
+    )
     func encode(_ fixture: EncodeFixture<InternetMessageDate>) {
         fixture.checkEncoding()
     }

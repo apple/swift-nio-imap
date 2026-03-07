@@ -18,14 +18,17 @@ import Testing
 
 @Suite("AttributeFlag")
 struct AttributeFlagTests {
-    @Test("encode", arguments: [
-        EncodeFixture.attributeFlag(.answered, "\\\\answered"),
-        EncodeFixture.attributeFlag(.deleted, "\\\\deleted"),
-        EncodeFixture.attributeFlag(.draft, "\\\\draft"),
-        EncodeFixture.attributeFlag(.flagged, "\\\\flagged"),
-        EncodeFixture.attributeFlag(.seen, "\\\\seen"),
-        EncodeFixture.attributeFlag(.init("test"), "test"),
-    ])
+    @Test(
+        "encode",
+        arguments: [
+            EncodeFixture.attributeFlag(.answered, "\\\\answered"),
+            EncodeFixture.attributeFlag(.deleted, "\\\\deleted"),
+            EncodeFixture.attributeFlag(.draft, "\\\\draft"),
+            EncodeFixture.attributeFlag(.flagged, "\\\\flagged"),
+            EncodeFixture.attributeFlag(.seen, "\\\\seen"),
+            EncodeFixture.attributeFlag(.init("test"), "test"),
+        ]
+    )
     func encode(_ fixture: EncodeFixture<AttributeFlag>) {
         fixture.checkEncoding()
     }
@@ -48,10 +51,13 @@ struct AttributeFlagTests {
         #expect(String(fixture.0) == fixture.1)
     }
 
-    @Test("parse", arguments: [
-        ParseFixture.attributeFlag(#"\\Answered"#, expected: .success(.answered)),
-        ParseFixture.attributeFlag("some", expected: .success(.init("some"))),
-    ])
+    @Test(
+        "parse",
+        arguments: [
+            ParseFixture.attributeFlag(#"\\Answered"#, expected: .success(.answered)),
+            ParseFixture.attributeFlag("some", expected: .success(.init("some"))),
+        ]
+    )
     func parse(_ fixture: ParseFixture<AttributeFlag>) {
         fixture.checkParsing()
     }

@@ -18,31 +18,37 @@ import Testing
 
 @Suite("TaggedCommand")
 struct TaggedCommandTests {
-    @Test("parse", arguments: [
-        ParseFixture.taggedCommand("a CAPABILITY", expected: .success(.init(tag: "a", command: .capability))),
-        ParseFixture.taggedCommand("1 CAPABILITY", expected: .success(.init(tag: "1", command: .capability))),
-        ParseFixture.taggedCommand("a1 CAPABILITY", expected: .success(.init(tag: "a1", command: .capability))),
-        ParseFixture.taggedCommand("(", "CAPABILITY", expected: .failure),
-        ParseFixture.taggedCommand("a CAPABILITY", "", expected: .incompleteMessage),
-    ])
+    @Test(
+        "parse",
+        arguments: [
+            ParseFixture.taggedCommand("a CAPABILITY", expected: .success(.init(tag: "a", command: .capability))),
+            ParseFixture.taggedCommand("1 CAPABILITY", expected: .success(.init(tag: "1", command: .capability))),
+            ParseFixture.taggedCommand("a1 CAPABILITY", expected: .success(.init(tag: "a1", command: .capability))),
+            ParseFixture.taggedCommand("(", "CAPABILITY", expected: .failure),
+            ParseFixture.taggedCommand("a CAPABILITY", "", expected: .incompleteMessage),
+        ]
+    )
     func parse(_ fixture: ParseFixture<TaggedCommand>) {
         fixture.checkParsing()
     }
 
-    @Test("debug description", arguments: [
-        DebugStringFixture<TaggedCommand>(
-            sut: .init(tag: "A1", command: .capability),
-            expected: "A1 CAPABILITY\r\n"
-        ),
-        DebugStringFixture<TaggedCommand>(
-            sut: .init(tag: "A1", command: .select(.inbox)),
-            expected: "A1 SELECT \"INBOX\"\r\n"
-        ),
-        DebugStringFixture<TaggedCommand>(
-            sut: .init(tag: "A1", command: .login(username: "alice", password: "secret")),
-            expected: "A1 LOGIN \"alice\" \"secret\"\r\n"
-        ),
-    ])
+    @Test(
+        "debug description",
+        arguments: [
+            DebugStringFixture<TaggedCommand>(
+                sut: .init(tag: "A1", command: .capability),
+                expected: "A1 CAPABILITY\r\n"
+            ),
+            DebugStringFixture<TaggedCommand>(
+                sut: .init(tag: "A1", command: .select(.inbox)),
+                expected: "A1 SELECT \"INBOX\"\r\n"
+            ),
+            DebugStringFixture<TaggedCommand>(
+                sut: .init(tag: "A1", command: .login(username: "alice", password: "secret")),
+                expected: "A1 LOGIN \"alice\" \"secret\"\r\n"
+            ),
+        ]
+    )
     func debugDescription(_ fixture: DebugStringFixture<TaggedCommand>) {
         fixture.check()
     }

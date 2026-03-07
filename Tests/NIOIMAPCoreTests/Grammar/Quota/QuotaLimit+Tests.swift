@@ -18,30 +18,36 @@ import Testing
 
 @Suite("QuotaLimit")
 struct QuotaLimitTests {
-    @Test("encode", arguments: [
-        EncodeFixture.quotaLimit(QuotaLimit(resourceName: "STORAGE", limit: 104), "STORAGE 104"),
-        EncodeFixture.quotaLimit(QuotaLimit(resourceName: "MESSAGE", limit: 42), "MESSAGE 42"),
-    ])
+    @Test(
+        "encode",
+        arguments: [
+            EncodeFixture.quotaLimit(QuotaLimit(resourceName: "STORAGE", limit: 104), "STORAGE 104"),
+            EncodeFixture.quotaLimit(QuotaLimit(resourceName: "MESSAGE", limit: 42), "MESSAGE 42"),
+        ]
+    )
     func encode(_ fixture: EncodeFixture<QuotaLimit>) {
         fixture.checkEncoding()
     }
 
-    @Test("parse LIST", arguments: [
-        ParseFixture.quotaLimits("()", expected: .success([])),
-        ParseFixture.quotaLimits(
-            "(STORAGE 104)",
-            expected: .success([QuotaLimit(resourceName: "STORAGE", limit: 104)])
-        ),
-        ParseFixture.quotaLimits(
-            "(STORAGE 104 MESSAGE 42)",
-            expected: .success([
-                QuotaLimit(resourceName: "STORAGE", limit: 104),
-                QuotaLimit(resourceName: "MESSAGE", limit: 42),
-            ])
-        ),
-        ParseFixture.quotaLimits("", "", expected: .incompleteMessage),
-        ParseFixture.quotaLimits("STORAGE 104", expected: .failure),
-    ])
+    @Test(
+        "parse LIST",
+        arguments: [
+            ParseFixture.quotaLimits("()", expected: .success([])),
+            ParseFixture.quotaLimits(
+                "(STORAGE 104)",
+                expected: .success([QuotaLimit(resourceName: "STORAGE", limit: 104)])
+            ),
+            ParseFixture.quotaLimits(
+                "(STORAGE 104 MESSAGE 42)",
+                expected: .success([
+                    QuotaLimit(resourceName: "STORAGE", limit: 104),
+                    QuotaLimit(resourceName: "MESSAGE", limit: 42),
+                ])
+            ),
+            ParseFixture.quotaLimits("", "", expected: .incompleteMessage),
+            ParseFixture.quotaLimits("STORAGE 104", expected: .failure),
+        ]
+    )
     func parseList(_ fixture: ParseFixture<[QuotaLimit]>) {
         fixture.checkParsing()
     }

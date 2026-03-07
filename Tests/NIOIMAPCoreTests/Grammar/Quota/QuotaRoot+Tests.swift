@@ -18,20 +18,26 @@ import Testing
 
 @Suite("QuotaRoot")
 struct QuotaRootTests {
-    @Test("encode", arguments: [
-        EncodeFixture.quotaRoot(QuotaRoot(""), #""""#),
-        EncodeFixture.quotaRoot(QuotaRoot("MassivePool"), #""MassivePool""#),
-    ])
+    @Test(
+        "encode",
+        arguments: [
+            EncodeFixture.quotaRoot(QuotaRoot(""), #""""#),
+            EncodeFixture.quotaRoot(QuotaRoot("MassivePool"), #""MassivePool""#),
+        ]
+    )
     func encode(_ fixture: EncodeFixture<QuotaRoot>) {
         fixture.checkEncoding()
     }
 
-    @Test("parse", arguments: [
-        ParseFixture.quotaRoot(#""MassivePool""#, expected: .success(QuotaRoot("MassivePool"))),
-        ParseFixture.quotaRoot("inbox", expected: .success(QuotaRoot("inbox"))),
-        ParseFixture.quotaRoot(#""""#, expected: .success(QuotaRoot(""))),
-        ParseFixture.quotaRoot("", "", expected: .incompleteMessage),
-    ])
+    @Test(
+        "parse",
+        arguments: [
+            ParseFixture.quotaRoot(#""MassivePool""#, expected: .success(QuotaRoot("MassivePool"))),
+            ParseFixture.quotaRoot("inbox", expected: .success(QuotaRoot("inbox"))),
+            ParseFixture.quotaRoot(#""""#, expected: .success(QuotaRoot(""))),
+            ParseFixture.quotaRoot("", "", expected: .incompleteMessage),
+        ]
+    )
     func parse(_ fixture: ParseFixture<QuotaRoot>) {
         fixture.checkParsing()
     }

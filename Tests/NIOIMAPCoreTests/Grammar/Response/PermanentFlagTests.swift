@@ -18,21 +18,27 @@ import Testing
 
 @Suite("PermanentFlag")
 struct PermanentFlagTests {
-    @Test("encode", arguments: [
-        EncodeFixture.permanentFlag(.wildcard, #"\*"#),
-        EncodeFixture.permanentFlag(.flag(.answered), #"\Answered"#),
-    ])
+    @Test(
+        "encode",
+        arguments: [
+            EncodeFixture.permanentFlag(.wildcard, #"\*"#),
+            EncodeFixture.permanentFlag(.flag(.answered), #"\Answered"#),
+        ]
+    )
     func encode(_ fixture: EncodeFixture<PermanentFlag>) {
         fixture.checkEncoding()
     }
 
-    @Test("parse", arguments: [
-        ParseFixture.permanentFlag(#"\*"#, expected: .success(.wildcard)),
-        ParseFixture.permanentFlag(#"\Answered"#, expected: .success(.flag(.answered))),
-        ParseFixture.permanentFlag(#"\Seen"#, expected: .success(.flag(.seen))),
-        ParseFixture.permanentFlag("$Forwarded", expected: .success(.flag("$Forwarded"))),
-        ParseFixture.permanentFlag("", "", expected: .incompleteMessage),
-    ])
+    @Test(
+        "parse",
+        arguments: [
+            ParseFixture.permanentFlag(#"\*"#, expected: .success(.wildcard)),
+            ParseFixture.permanentFlag(#"\Answered"#, expected: .success(.flag(.answered))),
+            ParseFixture.permanentFlag(#"\Seen"#, expected: .success(.flag(.seen))),
+            ParseFixture.permanentFlag("$Forwarded", expected: .success(.flag("$Forwarded"))),
+            ParseFixture.permanentFlag("", "", expected: .incompleteMessage),
+        ]
+    )
     func parse(_ fixture: ParseFixture<PermanentFlag>) {
         fixture.checkParsing()
     }
