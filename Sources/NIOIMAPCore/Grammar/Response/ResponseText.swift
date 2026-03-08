@@ -14,17 +14,46 @@
 
 import struct NIO.ByteBuffer
 
-/// Data sent from the server to signal a success or failure.
+/// Text and optional status code returned by the server in a response.
+///
+/// Response text is always included with tagged responses and some untagged responses to provide
+/// human-readable information about the result. The optional code field can contain structured
+/// machine-readable status codes that provide additional semantic information. See [RFC 3501 Section 7.1](https://datatracker.ietf.org/doc/html/rfc3501#section-7.1)
+/// for details on response text format.
+///
+/// ### Examples
+///
+/// ```
+/// S: A001 OK CAPABILITY completed
+/// S: A002 NO [CANNOT] Mailbox does not exist
+/// S: A003 OK [UIDNEXT 4392] APPEND completed
+/// ```
+///
+/// The first line wraps the response text "CAPABILITY completed" with no code.
+/// The second line wraps the response text "Mailbox does not exist" with code ``ResponseTextCode/cannot``.
+/// The third line wraps the response text "APPEND completed" with code ``ResponseTextCode/uidNext(_:)``.
+///
+/// - SeeAlso: ``ResponseTextCode``, [RFC 3501 Section 7.1](https://datatracker.ietf.org/doc/html/rfc3501#section-7.1)
 public struct ResponseText: Hashable, Sendable {
-    /// Used as a quick way to signal, e.g. *[ALERT]*. Not required.
+    /// The optional structured status code providing additional semantic information.
+    ///
+    /// Status codes are brief tokens that communicate specific server conditions (e.g., `[ALERT]`,
+    /// `[CANNOT]`, `[PERMANENT]`). They provide machine-readable information to clients that extends
+    /// the human-readable text. Not all responses include a code; `nil` indicates no code is present.
+    ///
+    /// - SeeAlso: ``ResponseTextCode``
     public var code: ResponseTextCode?
 
-    /// A human-readable description.
+    /// A human-readable description from the server.
+    ///
+    /// The text provides context-specific information about the response, such as error messages or
+    /// successful completion notifications. It is always present but may be a single space for some
+    /// protocol-compliant responses.
     public var text: String
 
     /// Creates a new `ResponseText`.
-    /// - parameter code: Used as a quick way to signal, e.g. *[ALERT]*. Not required. Defaults to `nil`.
-    /// - parameter text: A human-readable description.
+    /// - parameter code: The optional structured status code. Defaults to `nil`.
+    /// - parameter text: The human-readable description from the server.
     public init(code: ResponseTextCode? = nil, text: String) {
         self.code = code
         self.text = text
