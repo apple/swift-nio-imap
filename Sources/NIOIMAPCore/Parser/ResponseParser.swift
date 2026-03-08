@@ -80,6 +80,8 @@ public struct ResponseParser: Parser, Sendable {
     let messageAttributeLimit: Int
     let bodySizeLimit: UInt64
     private var mode: Mode
+    /// Newline kind of the last successfully parsed response.
+    private var lastResponseNewlineEnding: ParseBuffer.Newline?
 
     /// Creates a new `ResponseParser`.
     /// - parameter bufferLimit: The maximum amount of data that may be buffered by the parser. If this limit is exceeded then an error will be thrown. Defaults to 1000 bytes.
@@ -94,6 +96,7 @@ public struct ResponseParser: Parser, Sendable {
             parsedStringCache: options.parsedStringCache
         )
         self.bodySizeLimit = options.bodySizeLimit
+        self.lastResponseNewlineEnding = nil
     }
 
     /// Parses a `ResponseStream` and returns the result.
@@ -117,7 +120,20 @@ public struct ResponseParser: Parser, Sendable {
         do {
             switch self.mode {
             case .response(let state):
-                return try self.parseResponse(state: state, buffer: &parseBuffer, tracker: tracker)
+                // Handle orphaned CR/LF from split CRLF where previous buffer ended with CR-only:
+                if self.lastResponseNewlineEnding == .cr,
+                   parseBuffer.skipLF() == .didSkip {
+                    // Did consume complete CR-LF pair:
+                    self.lastResponseNewlineEnding = .crlf
+                }
+
+                let result = try self.parseResponseAndNewline(
+                    state: state,
+                    buffer: &parseBuffer,
+                    tracker: tracker
+                )
+                self.lastResponseNewlineEnding = result.newline
+                return result.response
             case .attributeBytes(let remaining, attributeCount: let attributeCount):
                 return .response(
                     try self.parseBytes(
@@ -152,6 +168,27 @@ public struct ResponseParser: Parser, Sendable {
 // MARK: - Parse responses
 
 extension ResponseParser {
+    struct ResponseAndNewline {
+        var response: ResponseOrContinuationRequest
+        var newline: ParseBuffer.Newline?
+    }
+
+    private mutating func parseResponseAndNewline(
+        state: ResponseState,
+        buffer: inout ParseBuffer,
+        tracker: StackTracker
+    ) throws -> ResponseAndNewline {
+        let response = try parseResponse(
+            state: state,
+            buffer: &buffer,
+            tracker: tracker
+        )
+        return ResponseAndNewline(
+            response: response,
+            newline: buffer.lastParsedNewline
+        )
+    }
+
     private mutating func parseResponse(
         state: ResponseState,
         buffer: inout ParseBuffer,
