@@ -136,6 +136,32 @@ public enum Command: Hashable, Sendable {
     /// Similar to `.fetch`, but uses unique identifier instead of sequence numbers to identify messages.
     case uidFetch(LastCommandSet<UID>, [FetchAttribute], [FetchModifier])
 
+    /// `SORT` – Returns message sequence numbers of messages matching a search key, sorted by the given criteria.
+    ///
+    /// Unlike ``search(key:charset:returnOptions:)``, the `SORT` command requires a charset parameter
+    /// and returns results in the order specified by the sort criteria rather than message sequence order.
+    ///
+    /// The server responds with an untagged `SORT` response containing the sorted message sequence numbers.
+    /// If `returnOptions` are specified, the response format follows the ESORT extension (RFC 5267).
+    ///
+    /// - Parameters:
+    ///   - criteria: One or more ``SortCriterion`` values defining the sort order. Later criteria
+    ///     are used as tie-breakers when earlier criteria produce equal values.
+    ///   - charset: The character set for string comparisons (e.g., `"UTF-8"`, `"US-ASCII"`). Required.
+    ///   - key: The ``SearchKey`` filtering which messages to include in the result.
+    ///   - returnOptions: Optional ``SearchReturnOption`` values controlling the response format.
+    ///
+    /// - SeeAlso: [RFC 5256](https://datatracker.ietf.org/doc/html/rfc5256), [RFC 5267](https://datatracker.ietf.org/doc/html/rfc5267)
+    case sort(criteria: [SortCriterion], charset: String, key: SearchKey, returnOptions: [SearchReturnOption] = [])
+
+    /// `UID SORT` – Returns UIDs of messages matching a search key, sorted by the given criteria.
+    ///
+    /// Similar to ``sort(criteria:charset:key:returnOptions:)``, but returns unique identifiers
+    /// instead of message sequence numbers.
+    ///
+    /// - SeeAlso: [RFC 5256](https://datatracker.ietf.org/doc/html/rfc5256)
+    case uidSort(criteria: [SortCriterion], charset: String, key: SearchKey, returnOptions: [SearchReturnOption] = [])
+
     /// Similar to `.search`, but uses unique identifier instead of sequence numbers to identify messages.
     case uidSearch(key: SearchKey, charset: String? = nil, returnOptions: [SearchReturnOption] = [])
 
@@ -287,6 +313,10 @@ extension CommandEncodeBuffer {
             return self.writeCommandKind_search(key: key, charset: charset, returnOptions: returnOptions)
         case .uidSearch(let key, let charset, let returnOptions):
             return self.writeCommandKind_uidSearch(key: key, charset: charset, returnOptions: returnOptions)
+        case .sort(let criteria, let charset, let key, let returnOptions):
+            return self.writeCommandKind_sort(criteria: criteria, charset: charset, key: key, returnOptions: returnOptions)
+        case .uidSort(let criteria, let charset, let key, let returnOptions):
+            return self.writeCommandKind_uidSort(criteria: criteria, charset: charset, key: key, returnOptions: returnOptions)
         case .move(let set, let mailbox):
             return self.writeCommandKind_move(set: set, mailbox: mailbox)
         case .uidMove(let set, let mailbox):
@@ -634,6 +664,33 @@ extension CommandEncodeBuffer {
     ) -> Int {
         self.buffer.writeString("UID ")
             + self.writeCommandKind_search(key: key, charset: charset, returnOptions: returnOptions)
+    }
+
+    private mutating func writeCommandKind_sort(
+        criteria: [SortCriterion],
+        charset: String,
+        key: SearchKey,
+        returnOptions: [SearchReturnOption] = []
+    ) -> Int {
+        self.buffer.writeString("SORT")
+            + self.buffer.writeIfExists(returnOptions) { (options) -> Int in
+                self.buffer.writeSearchReturnOptions(options)
+            } + self.buffer.writeSpace()
+            + self.buffer.writeSortCriteria(criteria)
+            + self.buffer.writeSpace()
+            + self.buffer.writeString(charset)
+            + self.buffer.writeSpace()
+            + self.buffer.writeSearchKey(key)
+    }
+
+    private mutating func writeCommandKind_uidSort(
+        criteria: [SortCriterion],
+        charset: String,
+        key: SearchKey,
+        returnOptions: [SearchReturnOption] = []
+    ) -> Int {
+        self.buffer.writeString("UID ")
+            + self.writeCommandKind_sort(criteria: criteria, charset: charset, key: key, returnOptions: returnOptions)
     }
 
     private mutating func writeCommandKind_move(set: LastCommandSet<SequenceNumber>, mailbox: MailboxName) -> Int {

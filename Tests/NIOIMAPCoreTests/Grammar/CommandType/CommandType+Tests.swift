@@ -126,6 +126,22 @@ struct CommandTypeTests {
             #"UID SEARCH RETURN (COUNT MAX) ANSWERED"#
         ),
         CommandEncodeFixture.command(
+            .sort(criteria: [.date], charset: "UTF-8", key: .all),
+            "SORT (DATE) UTF-8 ALL"
+        ),
+        CommandEncodeFixture.command(
+            .sort(criteria: [.date, .reverse(.subject)], charset: "UTF-8", key: .unseen),
+            "SORT (DATE REVERSE SUBJECT) UTF-8 UNSEEN"
+        ),
+        CommandEncodeFixture.command(
+            .sort(criteria: [.arrival], charset: "US-ASCII", key: .answered, returnOptions: [.count, .max]),
+            "SORT RETURN (COUNT MAX) (ARRIVAL) US-ASCII ANSWERED"
+        ),
+        CommandEncodeFixture.command(
+            .uidSort(criteria: [.date, .from], charset: "UTF-8", key: .all),
+            "UID SORT (DATE FROM) UTF-8 ALL"
+        ),
+        CommandEncodeFixture.command(
             .uidStore(.set(.init(range: 4_306...6_866)), [], .flags(.add(silent: true, list: [.answered]))),
             #"UID STORE 4306:6866 +FLAGS.SILENT (\Answered)"#
         ),
@@ -332,6 +348,34 @@ struct CommandTypeTests {
         ParseFixture.command("DELete inbox", "\n", expected: .success(.delete(.inbox))),
         ParseFixture.command("MOVE $ INBOX", expected: .success(.move(.lastCommand, .inbox))),
         ParseFixture.command("SEARCH ALL", expected: .success(.search(key: .all, charset: nil, returnOptions: []))),
+        ParseFixture.command(
+            "SORT (DATE) UTF-8 ALL",
+            expected: .success(.sort(criteria: [.date], charset: "UTF-8", key: .all, returnOptions: []))
+        ),
+        ParseFixture.command(
+            "SORT (DATE REVERSE SUBJECT) UTF-8 UNSEEN",
+            expected: .success(
+                .sort(criteria: [.date, .reverse(.subject)], charset: "UTF-8", key: .unseen, returnOptions: [])
+            )
+        ),
+        ParseFixture.command(
+            "SORT RETURN (COUNT MAX) (ARRIVAL) US-ASCII ANSWERED",
+            expected: .success(
+                .sort(criteria: [.arrival], charset: "US-ASCII", key: .answered, returnOptions: [.count, .max])
+            )
+        ),
+        ParseFixture.command(
+            "UID SORT (DATE FROM) UTF-8 ALL",
+            expected: .success(.uidSort(criteria: [.date, .from], charset: "UTF-8", key: .all, returnOptions: []))
+        ),
+        ParseFixture.command(
+            "UID SORT (SIZE) UTF-8 FLAGGED UNSEEN",
+            expected: .success(
+                .uidSort(
+                    criteria: [.size], charset: "UTF-8", key: .and([.flagged, .unseen]), returnOptions: []
+                )
+            )
+        ),
         ParseFixture.command("ESEARCH ALL", expected: .success(.extendedSearch(.init(key: .all)))),
         ParseFixture.command(
             "STORE $ +FLAGS \\Answered",
@@ -662,6 +706,43 @@ struct CommandTypeTests {
         ]
     )
     func parseSearchSuffix(_ fixture: ParseFixture<Command>) {
+        fixture.checkParsing()
+    }
+
+    @Test(
+        "parse SORT suffix",
+        arguments: [
+            ParseFixture.sortSuffix(
+                " (DATE) UTF-8 ALL",
+                expected: .success(.sort(criteria: [.date], charset: "UTF-8", key: .all, returnOptions: []))
+            ),
+            ParseFixture.sortSuffix(
+                " (DATE REVERSE SUBJECT) UTF-8 UNSEEN",
+                expected: .success(
+                    .sort(criteria: [.date, .reverse(.subject)], charset: "UTF-8", key: .unseen, returnOptions: [])
+                )
+            ),
+            ParseFixture.sortSuffix(
+                " RETURN (COUNT MAX) (ARRIVAL) US-ASCII ANSWERED",
+                expected: .success(
+                    .sort(criteria: [.arrival], charset: "US-ASCII", key: .answered, returnOptions: [.count, .max])
+                )
+            ),
+            ParseFixture.sortSuffix(
+                " (SIZE) UTF-8 FLAGGED UNSEEN",
+                expected: .success(
+                    .sort(criteria: [.size], charset: "UTF-8", key: .and([.flagged, .unseen]), returnOptions: [])
+                )
+            ),
+            ParseFixture.sortSuffix(
+                " (DISPLAYFROM DISPLAYTO) UTF-8 ALL",
+                expected: .success(
+                    .sort(criteria: [.displayFrom, .displayTo], charset: "UTF-8", key: .all, returnOptions: [])
+                )
+            ),
+        ]
+    )
+    func parseSortSuffix(_ fixture: ParseFixture<Command>) {
         fixture.checkParsing()
     }
 
@@ -1284,6 +1365,19 @@ extension ParseFixture<Command> {
             terminator: terminator,
             expected: expected,
             parser: GrammarParser().parseCommandSuffix_search
+        )
+    }
+
+    fileprivate static func sortSuffix(
+        _ input: String,
+        _ terminator: String = "\r",
+        expected: Expected
+    ) -> Self {
+        ParseFixture(
+            input: input,
+            terminator: terminator,
+            expected: expected,
+            parser: GrammarParser().parseCommandSuffix_sort
         )
     }
 

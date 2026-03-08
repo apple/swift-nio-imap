@@ -132,6 +132,10 @@ extension Command {
             return key.pipeliningRequirements
         case .uidSearch(key: let key, charset: _, returnOptions: _):
             return key.pipeliningRequirements
+        case .sort(criteria: _, charset: _, key: let key, returnOptions: _):
+            return key.pipeliningRequirements
+        case .uidSort(criteria: _, charset: _, key: let key, returnOptions: _):
+            return key.pipeliningRequirements
         case .extendedSearch(let options):
             return options.key.pipeliningRequirements
 
@@ -297,6 +301,14 @@ extension Command {
                 [.dependsOnMailboxSelection]
             )
         case .uidSearch(key: let key, charset: _, returnOptions: _):
+            return key.pipeliningBehavior.union(
+                [.dependsOnMailboxSelection, .mayTriggerUntaggedExpunge, .isUIDBased]
+            )
+        case .sort(criteria: _, charset: _, key: let key, returnOptions: _):
+            return key.pipeliningBehavior.union(
+                [.dependsOnMailboxSelection]
+            )
+        case .uidSort(criteria: _, charset: _, key: let key, returnOptions: _):
             return key.pipeliningBehavior.union(
                 [.dependsOnMailboxSelection, .mayTriggerUntaggedExpunge, .isUIDBased]
             )
