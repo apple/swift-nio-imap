@@ -858,6 +858,125 @@ struct IMAPClientHandlerTests {
             try promise.wait()
         }
     }
+
+    @Test("handles responses split between CR and LF")
+    func handleResponsesSplitBetweenCRAndLF() {
+        var helper = Helper()
+        defer {
+            helper.check()
+        }
+
+        // Send a command expecting responses
+        helper.writeOutbound(.tagged(.init(tag: "a", command: .noop)))
+        helper.expectOutboundString("a NOOP\r\n")
+
+        // Write a response where CR and LF are split across two buffers.
+        // This simulates what happens when a large response is split at
+        // an 8K buffer boundary right after a carriage return.
+        // The first buffer ends with \r (carriage return only)
+        helper.writeInbound("* 1 EXISTS\r")
+
+        // The second buffer starts with \n (line feed only), followed by the next response
+        helper.writeInbound("\n* 0 RECENT\r\n")
+
+        // Expect the responses to be parsed successfully
+        helper.expectInbound(.untagged(.mailboxData(.exists(1))))
+        helper.expectInbound(.untagged(.mailboxData(.recent(0))))
+
+        // Complete the command
+        helper.writeInbound("a OK NOOP complete\r\n")
+        helper.expectInbound(
+            .tagged(
+                .init(
+                    tag: "a",
+                    state: .ok(.init(code: nil, text: "NOOP complete"))
+                )
+            )
+        )
+    }
+
+    @Test("minimal: split between CR and LF in parser input")
+    func minimalSplitCRLF() {
+        var helper = Helper()
+        defer {
+            helper.check()
+        }
+
+        helper.writeOutbound(.tagged(.init(tag: "t", command: .noop)))
+        helper.expectOutboundString("t NOOP\r\n")
+
+        // Minimal reproducer: send first part ending with CR, then send LF on its own line
+        helper.writeInbound("* 1 EXISTS\r")
+        helper.writeInbound("\n")
+
+        helper.expectInbound(.untagged(.mailboxData(.exists(1))))
+
+        helper.writeInbound("t OK\r\n")
+        helper.expectInbound(
+            .tagged(
+                .init(
+                    tag: "t",
+                    state: .ok(.init(code: nil, text: ""))
+                )
+            )
+        )
+    }
+
+    @Test("responses with LF-only line endings (non-split)")
+    func responsesWithLFOnlyLineEndings() {
+        var helper = Helper()
+        defer {
+            helper.check()
+        }
+
+        helper.writeOutbound(.tagged(.init(tag: "a", command: .noop)))
+        helper.expectOutboundString("a NOOP\r\n")
+
+        // Send response with LF-only endings (lenient servers may do this)
+        // Note: This is the complete LF in one buffer, not split
+        helper.writeInbound("* 1 EXISTS\n* 0 RECENT\n")
+
+        helper.expectInbound(.untagged(.mailboxData(.exists(1))))
+        helper.expectInbound(.untagged(.mailboxData(.recent(0))))
+
+        helper.writeInbound("a OK\n")
+        helper.expectInbound(
+            .tagged(
+                .init(
+                    tag: "a",
+                    state: .ok(.init(code: nil, text: ""))
+                )
+            )
+        )
+    }
+
+    @Test("responses with CR-only line endings (non-split)")
+    func responsesWithCROnlyLineEndings() {
+        var helper = Helper()
+        defer {
+            helper.check()
+        }
+
+        helper.writeOutbound(.tagged(.init(tag: "b", command: .noop)))
+        helper.expectOutboundString("b NOOP\r\n")
+
+        // Send response with CR-only endings (lenient servers may do this)
+        // Note: This is the complete CR in one buffer, not split
+        helper.writeInbound("* 2 EXISTS\r* 1 RECENT\r")
+
+        helper.expectInbound(.untagged(.mailboxData(.exists(2))))
+        helper.expectInbound(.untagged(.mailboxData(.recent(1))))
+
+        helper.writeInbound("b OK\r")
+        helper.expectInbound(
+            .tagged(
+                .init(
+                    tag: "b",
+                    state: .ok(.init(code: nil, text: ""))
+                )
+            )
+        )
+    }
 }
 
 // MARK: - Helper
