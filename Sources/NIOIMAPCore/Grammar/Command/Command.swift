@@ -15,12 +15,53 @@
 import struct NIO.ByteBuffer
 import struct OrderedCollections.OrderedDictionary
 
-/// Commands are sent by clients, and processed by servers.
+/// Commands are sent by clients to perform operations on the server.
 ///
-/// A notably exclusion here is the ability to append a message.
-/// This is handled separately using the `AppendCommand` type,
-/// as a state is maintained to enable streaming of large amounts
-/// of data.
+/// In the [IMAP4rev1 protocol](https://datatracker.ietf.org/doc/html/rfc3501), a client initiates operations
+/// by sending commands to the server.
+///
+/// Each command is identified with a unique "tag" (typically a short string like "A1") that allows the client
+/// to correlate server responses with the commands that generated them. See ``TaggedCommand``.
+///
+/// The server responds with untagged data (prefixed with `*`) and a tagged response (using the same tag)
+/// indicating success (`OK`), failure (`NO`), or protocol error (`BAD`). See ``Response`` for response types.
+///
+/// ## Command Structure
+///
+/// Every IMAP command follows this basic structure:
+/// ```
+/// tag command-name arguments
+/// ```
+/// For example:
+/// ```
+/// A0001 LOGIN user@example.com password
+/// A0002 SELECT INBOX
+/// A0003 FETCH 1:* (FLAGS BODY)
+/// ```
+///
+/// ## Protocol State Requirements
+///
+/// Commands are restricted based on the connection's current state:
+/// - **Any State**: Commands like ``capability``, ``noop``, and ``logout`` are valid at any time.
+/// - **Not Authenticated**: Commands like ``authenticate(mechanism:initialResponse:)`` and ``login(username:password:)``
+///   authenticate the client before entering authenticated state.
+/// - **Authenticated**: Commands like ``select(_:_:)`` and ``create(_:_:)`` operate on mailboxes
+///   after authentication but before selecting a specific mailbox.
+/// - **Selected**: Commands like ``fetch(_:_:_:)`` and ``search(key:charset:returnOptions:)`` work with messages
+///   in the currently selected mailbox.
+///
+/// ## Extension Support
+///
+/// Many commands support IMAP extensions defined in RFCs beyond [RFC 3501](https://datatracker.ietf.org/doc/html/rfc3501).
+/// For example, the ``list(_:reference:_:_:)`` command supports extensions from
+/// [RFC 5258](https://datatracker.ietf.org/doc/html/rfc5258) (LIST Extensions),
+/// [RFC 5819](https://datatracker.ietf.org/doc/html/rfc5819) (RETURN option), and
+/// [RFC 6154](https://datatracker.ietf.org/doc/html/rfc6154) (SPECIAL-USE mailboxes).
+///
+/// ## Streaming Commands
+///
+/// Some commands like APPEND involve uploading large messages and are handled separately by the
+/// ``AppendCommand`` type to support streaming of data.
 public enum Command: Hashable, Sendable {
     /// Requests a server's capabilities.
     case capability
@@ -40,7 +81,75 @@ public enum Command: Hashable, Sendable {
     /// Similar to `.select` and returns the same data, however the current mailbox is identified as readonly
     case examine(MailboxName, [SelectParameter] = [])
 
-    /// Returns a subset of names from the complete set of all names available to the client.
+    /// `LIST` command.
+    ///
+    /// The LIST command allows a client to discover what mailboxes are available on the server,
+    /// with support for pattern matching and filtering.
+    ///
+    /// ## Base Functionality ([RFC 3501 Section 6.3.8](https://datatracker.ietf.org/doc/html/rfc3501#section-6.3.8))
+    ///
+    /// The base LIST command takes two arguments:
+    /// - **reference**: A mailbox name or hierarchy level that provides context for interpreting the pattern.
+    ///   An empty string means the pattern is interpreted as if by the SELECT command.
+    /// - **pattern**: A mailbox name with possible wildcards (`*` matches any substring, `%` matches up to
+    ///   the next hierarchy delimiter). For example, `"*"` lists all mailboxes, `"Foo/*"` lists all mailboxes
+    ///   under "Foo", and `"%"` lists mailboxes at the top level only.
+    ///
+    /// ### Example
+    ///
+    /// ```
+    /// C: A001 LIST "" "*"
+    /// S: * LIST (\NoInferiors) "/" "INBOX"
+    /// S: * LIST (\HasChildren) "/" "Drafts"
+    /// S: * LIST (\HasChildren) "/" "Archive"
+    /// S: A001 OK LIST Completed
+    /// ```
+    ///
+    /// The command `C: A001 LIST "" "*"` corresponds to this case with reference as empty string and
+    /// pattern as `"*"`. The server responds with zero or more `S: * LIST...` lines (each wrapped as
+    /// ``MailboxData/list(_:)``), followed by the tagged response `S: A001 OK LIST Completed`.
+    ///
+    /// ## Selection Options ([RFC 5258](https://datatracker.ietf.org/doc/html/rfc5258))
+    ///
+    /// The optional `options` parameter uses ``ListSelectOptions`` to control which mailboxes are listed:
+    /// - ``ListSelectBaseOption/subscribed``: Only list mailboxes that the user has subscribed to
+    ///   ([RFC 3501](https://datatracker.ietf.org/doc/html/rfc3501)).
+    /// - Additional options from ``ListSelectOption`` can be combined with the base option:
+    ///   - ``ListSelectOption/recursiveMatch``: Include parent mailboxes that don't match but have matching children
+    ///     ([RFC 5258](https://datatracker.ietf.org/doc/html/rfc5258)).
+    ///
+    /// ## Independent Options ([RFC 5258](https://datatracker.ietf.org/doc/html/rfc5258), [RFC 6154](https://datatracker.ietf.org/doc/html/rfc6154))
+    ///
+    /// When syntax conflicts prevent combining options, use ``listIndependent(_:reference:_:_:)`` instead:
+    /// - ``ListSelectIndependentOption/remote``: Include remote mailboxes in the results
+    ///   ([RFC 5258](https://datatracker.ietf.org/doc/html/rfc5258)).
+    /// - ``ListSelectIndependentOption/specialUse``: Only return mailboxes with special-use attributes
+    ///   like `\Drafts`, `\Sent`, or `\Trash` ([RFC 6154](https://datatracker.ietf.org/doc/html/rfc6154)).
+    ///
+    /// ## Return Options ([RFC 5258](https://datatracker.ietf.org/doc/html/rfc5258), [RFC 5819](https://datatracker.ietf.org/doc/html/rfc5819), [RFC 6154](https://datatracker.ietf.org/doc/html/rfc6154))
+    ///
+    /// The optional `returnOptions` array specifies what additional data should be returned for each mailbox:
+    /// - ``ReturnOption/subscribed``: Include subscription state for each mailbox
+    ///   ([RFC 5258](https://datatracker.ietf.org/doc/html/rfc5258)).
+    /// - ``ReturnOption/children``: Include child mailbox information (`\HasChildren` / `\HasNoChildren`)
+    ///   ([RFC 5258](https://datatracker.ietf.org/doc/html/rfc5258)).
+    /// - ``ReturnOption/specialUse``: Include special-use attributes
+    ///   ([RFC 6154](https://datatracker.ietf.org/doc/html/rfc6154)).
+    /// - ``ReturnOption/statusOption(_:)``: Request STATUS data (mailbox statistics like MESSAGES, UNSEEN, UIDVALIDITY)
+    ///   be returned alongside LIST responses ([RFC 5819](https://datatracker.ietf.org/doc/html/rfc5819)).
+    ///
+    /// ### Example with Return Options
+    ///
+    /// ```
+    /// C: A002 LIST "" "INBOX" RETURN (SUBSCRIBED STATUS (MESSAGES UNSEEN))
+    /// S: * LIST (\Subscribed) "/" "INBOX"
+    /// S: * STATUS "INBOX" (MESSAGES 42 UNSEEN 3)
+    /// S: A002 OK LIST Completed
+    /// ```
+    ///
+    /// The command shows a LIST with RETURN options. The server responds with a LIST response
+    /// (``MailboxData/list(_:)``) and a STATUS response (``MailboxData/status(_:_:)``), both wrapped
+    /// as untagged ``Response`` types.
     case list(ListSelectOptions?, reference: MailboxName, MailboxPatterns, [ReturnOption] = [])
 
     /// Similar to `.list`, but uses options that do not syntactically interact with other options
