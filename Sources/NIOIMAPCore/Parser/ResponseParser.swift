@@ -122,7 +122,8 @@ public struct ResponseParser: Parser, Sendable {
             case .response(let state):
                 // Handle orphaned CR/LF from split CRLF where previous buffer ended with CR-only:
                 if self.lastResponseNewlineEnding == .cr,
-                   parseBuffer.skipLF() == .didSkip {
+                    parseBuffer.skipLF() == .didSkip
+                {
                     // Did consume complete CR-LF pair:
                     self.lastResponseNewlineEnding = .crlf
                 }
