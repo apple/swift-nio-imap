@@ -858,6 +858,347 @@ struct IMAPClientHandlerTests {
             try promise.wait()
         }
     }
+
+    @Test("handles responses split between CR and LF")
+    func handleResponsesSplitBetweenCRAndLF() {
+        var helper = Helper()
+        defer {
+            helper.check()
+        }
+
+        // Send a command expecting responses
+        helper.writeOutbound(.tagged(.init(tag: "a", command: .noop)))
+        helper.expectOutboundString("a NOOP\r\n")
+
+        // Write a response where CR and LF are split across two buffers.
+        // This simulates what happens when a large response is split at
+        // an 8K buffer boundary right after a carriage return.
+        // The first buffer ends with \r (carriage return only)
+        helper.writeInbound("* 1 EXISTS\r")
+
+        // The second buffer starts with \n (line feed only), followed by the next response
+        helper.writeInbound("\n* 0 RECENT\r\n")
+
+        // Expect the responses to be parsed successfully
+        helper.expectInbound(.untagged(.mailboxData(.exists(1))))
+        helper.expectInbound(.untagged(.mailboxData(.recent(0))))
+
+        // Complete the command
+        helper.writeInbound("a OK NOOP complete\r\n")
+        helper.expectInbound(
+            .tagged(
+                .init(
+                    tag: "a",
+                    state: .ok(.init(code: nil, text: "NOOP complete"))
+                )
+            )
+        )
+    }
+
+    @Test("minimal: split between CR and LF in parser input")
+    func minimalSplitCRLF() {
+        var helper = Helper()
+        defer {
+            helper.check()
+        }
+
+        helper.writeOutbound(.tagged(.init(tag: "t", command: .noop)))
+        helper.expectOutboundString("t NOOP\r\n")
+
+        // Minimal reproducer: send first part ending with CR, then send LF on its own line
+        helper.writeInbound("* 1 EXISTS\r")
+        helper.writeInbound("\n")
+
+        helper.expectInbound(.untagged(.mailboxData(.exists(1))))
+
+        helper.writeInbound("t OK\r\n")
+        helper.expectInbound(
+            .tagged(
+                .init(
+                    tag: "t",
+                    state: .ok(.init(code: nil, text: ""))
+                )
+            )
+        )
+    }
+
+    @Test("responses with LF-only line endings (non-split)")
+    func responsesWithLFOnlyLineEndings() {
+        var helper = Helper()
+        defer {
+            helper.check()
+        }
+
+        helper.writeOutbound(.tagged(.init(tag: "a", command: .noop)))
+        helper.expectOutboundString("a NOOP\r\n")
+
+        // Send response with LF-only endings (lenient servers may do this)
+        // Note: This is the complete LF in one buffer, not split
+        helper.writeInbound("* 1 EXISTS\n* 0 RECENT\n")
+
+        helper.expectInbound(.untagged(.mailboxData(.exists(1))))
+        helper.expectInbound(.untagged(.mailboxData(.recent(0))))
+
+        helper.writeInbound("a OK\n")
+        helper.expectInbound(
+            .tagged(
+                .init(
+                    tag: "a",
+                    state: .ok(.init(code: nil, text: ""))
+                )
+            )
+        )
+    }
+
+    @Test("responses with CR-only line endings (non-split)")
+    func responsesWithCROnlyLineEndings() {
+        var helper = Helper()
+        defer {
+            helper.check()
+        }
+
+        helper.writeOutbound(.tagged(.init(tag: "b", command: .noop)))
+        helper.expectOutboundString("b NOOP\r\n")
+
+        // Send response with CR-only endings (lenient servers may do this)
+        // Note: This is the complete CR in one buffer, not split
+        helper.writeInbound("* 2 EXISTS\r* 1 RECENT\r")
+
+        helper.expectInbound(.untagged(.mailboxData(.exists(2))))
+        helper.expectInbound(.untagged(.mailboxData(.recent(1))))
+
+        helper.writeInbound("b OK\r")
+        helper.expectInbound(
+            .tagged(
+                .init(
+                    tag: "b",
+                    state: .ok(.init(code: nil, text: ""))
+                )
+            )
+        )
+    }
+
+    @Test("rejects buffer starting with empty line (CR CR)")
+    func rejectsEmptyLineCRCR() {
+        var helper = Helper()
+        defer {
+            helper.check()
+        }
+
+        helper.writeOutbound(.tagged(.init(tag: "c", command: .noop)))
+        helper.expectOutboundString("c NOOP\r\n")
+
+        // Empty line: CR CR - This is malformed and should fail
+        // (This could represent an empty line in the response stream)
+        #expect(throws: (any Error).self) {
+            try helper.channel.writeInbound(ByteBuffer(string: "\r\r* 1 EXISTS\r\n"))
+        }
+    }
+
+    @Test("rejects buffer starting with empty line (LF LF)")
+    func rejectsEmptyLineLFLF() {
+        var helper = Helper()
+        defer {
+            helper.check()
+        }
+
+        helper.writeOutbound(.tagged(.init(tag: "d", command: .noop)))
+        helper.expectOutboundString("d NOOP\r\n")
+
+        // Empty line: LF LF - This is malformed and should fail
+        #expect(throws: (any Error).self) {
+            try helper.channel.writeInbound(ByteBuffer(string: "\n\n* 1 EXISTS\r\n"))
+        }
+    }
+
+    @Test("rejects buffer starting with empty line (CR LF CR)")
+    func rejectsEmptyLineCRLFCR() {
+        var helper = Helper()
+        defer {
+            helper.check()
+        }
+
+        helper.writeOutbound(.tagged(.init(tag: "e", command: .noop)))
+        helper.expectOutboundString("e NOOP\r\n")
+
+        // Empty line: CR LF CR - Valid CRLF followed by orphaned CR
+        // This represents an empty line which is not valid in IMAP response stream
+        #expect(throws: (any Error).self) {
+            try helper.channel.writeInbound(ByteBuffer(string: "\r\n\r* 1 EXISTS\r\n"))
+        }
+    }
+
+    @Test("rejects buffer starting with empty line (CR LF LF)")
+    func rejectsEmptyLineCRLFLF() {
+        var helper = Helper()
+        defer {
+            helper.check()
+        }
+
+        helper.writeOutbound(.tagged(.init(tag: "f", command: .noop)))
+        helper.expectOutboundString("f NOOP\r\n")
+
+        // Empty line: CR LF LF - Valid CRLF followed by orphaned LF
+        #expect(throws: (any Error).self) {
+            try helper.channel.writeInbound(ByteBuffer(string: "\r\n\n* 1 EXISTS\r\n"))
+        }
+    }
+
+    @Test("rejects buffer starting with empty line (LF CR)")
+    func rejectsEmptyLineLFCR() {
+        var helper = Helper()
+        defer {
+            helper.check()
+        }
+
+        helper.writeOutbound(.tagged(.init(tag: "g", command: .noop)))
+        helper.expectOutboundString("g NOOP\r\n")
+
+        // Empty line: LF CR - This is an unusual sequence and should fail
+        #expect(throws: (any Error).self) {
+            try helper.channel.writeInbound(ByteBuffer(string: "\n\r* 1 EXISTS\r\n"))
+        }
+    }
+
+    @Test("accepts valid CR-only response and continues parsing next response")
+    func crOnlyResponseFollowedByAnotherResponse() {
+        var helper = Helper()
+        defer {
+            helper.check()
+        }
+
+        helper.writeOutbound(.tagged(.init(tag: "h", command: .noop)))
+        helper.expectOutboundString("h NOOP\r\n")
+
+        // First response ends with CR only, then immediately another response
+        // (both in same buffer to avoid the split case)
+        helper.writeInbound("* 1 EXISTS\r* 0 RECENT\r")
+
+        helper.expectInbound(.untagged(.mailboxData(.exists(1))))
+        helper.expectInbound(.untagged(.mailboxData(.recent(0))))
+
+        helper.writeInbound("h OK\r\n")
+        helper.expectInbound(
+            .tagged(
+                .init(
+                    tag: "h",
+                    state: .ok(.init(code: nil, text: ""))
+                )
+            )
+        )
+    }
+
+    @Test("accepts valid CR-only response when it ends the buffer")
+    func crOnlyResponseEndsBuffer() {
+        var helper = Helper()
+        defer {
+            helper.check()
+        }
+
+        helper.writeOutbound(.tagged(.init(tag: "i", command: .noop)))
+        helper.expectOutboundString("i NOOP\r\n")
+
+        // First response ends with CR only at the end of buffer
+        // This is a complete response that should be accepted
+        helper.writeInbound("* 2 EXISTS\r")
+
+        helper.expectInbound(.untagged(.mailboxData(.exists(2))))
+
+        // Send a normal CRLF response next
+        helper.writeInbound("* 1 RECENT\r\n")
+        helper.expectInbound(.untagged(.mailboxData(.recent(1))))
+
+        helper.writeInbound("i OK\r\n")
+        helper.expectInbound(
+            .tagged(
+                .init(
+                    tag: "i",
+                    state: .ok(.init(code: nil, text: ""))
+                )
+            )
+        )
+    }
+
+    @Test("fails when split CR-LF is followed by malformed data")
+    func failsWhenSplitCRLFFollowedByMalformedData() {
+        var helper = Helper()
+        defer {
+            helper.check()
+        }
+
+        helper.writeOutbound(.tagged(.init(tag: "j", command: .noop)))
+        helper.expectOutboundString("j NOOP\r\n")
+
+        // First response ends with CR only
+        helper.writeInbound("* 1 EXISTS\r")
+        helper.expectInbound(.untagged(.mailboxData(.exists(1))))
+
+        // Next buffer starts with LF (orphaned, will be skipped)
+        // But then has malformed data that should cause a parse error
+        #expect(throws: (any Error).self) {
+            try helper.channel.writeInbound(ByteBuffer(string: "\n!!INVALID\r\n"))
+        }
+    }
+
+    @Test("rejects CR-only response followed by orphaned LF then another LF (not re-skipped)")
+    func rejectsCRThenLFThenLFNotReSkipped() {
+        var helper = Helper()
+        defer {
+            helper.check()
+        }
+
+        helper.writeOutbound(.tagged(.init(tag: "k", command: .noop)))
+        helper.expectOutboundString("k NOOP\r\n")
+
+        // Response ends with CR only
+        helper.writeInbound("* 1 EXISTS\r")
+        helper.expectInbound(.untagged(.mailboxData(.exists(1))))
+
+        // Next buffer: just orphaned LF (will be skipped, state becomes .crlf)
+        helper.writeInbound("\n")
+        // Buffer was empty after skip, so IncompleteMessage - nothing to read
+
+        // Next buffer: another LF followed by otherwise valid response
+        // At this point lastResponseNewlineEnding should be .crlf (not .cr)
+        // So we should NOT skip this second LF, and the parser should fail
+        // because \n is not a valid start of a response (even though * 1 EXISTS would be)
+        #expect(throws: (any Error).self) {
+            try helper.channel.writeInbound(ByteBuffer(string: "\n* 1 EXISTS\r\n"))
+        }
+    }
+
+    @Test("accepts CR-only response, orphaned LF, then valid response")
+    func acceptsCRThenLFThenValidResponse() {
+        var helper = Helper()
+        defer {
+            helper.check()
+        }
+
+        helper.writeOutbound(.tagged(.init(tag: "l", command: .noop)))
+        helper.expectOutboundString("l NOOP\r\n")
+
+        // Response ends with CR only
+        helper.writeInbound("* 1 EXISTS\r")
+        helper.expectInbound(.untagged(.mailboxData(.exists(1))))
+
+        // Next buffer: orphaned LF (will be skipped)
+        helper.writeInbound("\n")
+        // Buffer was empty after skip, so IncompleteMessage
+
+        // Next buffer: valid response
+        helper.writeInbound("* 2 RECENT\r\n")
+        helper.expectInbound(.untagged(.mailboxData(.recent(2))))
+
+        helper.writeInbound("l OK\r\n")
+        helper.expectInbound(
+            .tagged(
+                .init(
+                    tag: "l",
+                    state: .ok(.init(code: nil, text: ""))
+                )
+            )
+        )
+    }
 }
 
 // MARK: - Helper
