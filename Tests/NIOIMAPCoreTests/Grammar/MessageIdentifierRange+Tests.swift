@@ -53,6 +53,36 @@ struct MessageIdentifierRangeTests {
         let output = MessageIdentifierRange<UID>(input)
         #expect(output == 5...6)
     }
+
+    @Test("init from partial range through")
+    func initFromPartialRangeThrough() {
+        let range = MessageIdentifierRange<UID>(...UID(10))
+        #expect(range.lowerBound == UID.min)
+        #expect(range.upperBound == UID(10))
+    }
+
+    @Test("init from partial range from")
+    func initFromPartialRangeFrom() {
+        let range = MessageIdentifierRange<UID>(UID(5)...)
+        #expect(range.lowerBound == UID(5))
+        #expect(range.upperBound == UID.max)
+    }
+
+    @Test("convert UID range to UnknownMessageIdentifier")
+    func convertUIDRangeToUnknownMessageIdentifier() {
+        let uidRange = MessageIdentifierRange<UID>(UID(3)...UID(7))
+        let unknown = MessageIdentifierRange<UnknownMessageIdentifier>(uidRange)
+        #expect(unknown.lowerBound.rawValue == 3)
+        #expect(unknown.upperBound.rawValue == 7)
+    }
+
+    @Test("convert SequenceNumber range to UnknownMessageIdentifier")
+    func convertSequenceNumberRangeToUnknownMessageIdentifier() {
+        let seqRange = MessageIdentifierRange<SequenceNumber>(SequenceNumber(2)...SequenceNumber(5))
+        let unknown = MessageIdentifierRange<UnknownMessageIdentifier>(seqRange)
+        #expect(unknown.lowerBound.rawValue == 2)
+        #expect(unknown.upperBound.rawValue == 5)
+    }
 }
 
 // MARK: -

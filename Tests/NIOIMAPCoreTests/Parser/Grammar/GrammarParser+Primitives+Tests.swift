@@ -197,6 +197,17 @@ private struct GrammarParserPrimitivesTests {
                 "",
                 expected: .success([UInt8(ascii: "%"), UInt8(ascii: "F"), UInt8(ascii: "F")])
             ),
+            // Lowercase hex digits get uppercased
+            ParseFixture.uchar(
+                "%1a",
+                "",
+                expected: .success([UInt8(ascii: "%"), UInt8(ascii: "1"), UInt8(ascii: "A")])
+            ),
+            ParseFixture.uchar(
+                "%ff",
+                "",
+                expected: .success([UInt8(ascii: "%"), UInt8(ascii: "F"), UInt8(ascii: "F")])
+            ),
             ParseFixture.uchar("%GG", " ", expected: .failure),
             ParseFixture.uchar("%", "", expected: .incompleteMessage),
         ]
@@ -296,6 +307,47 @@ private struct GrammarParserPrimitivesTests {
     )
     func parseVendorToken(_ fixture: ParseFixture<String>) {
         fixture.checkParsing()
+    }
+
+    @Test("parseLiteralSize with and without tilde prefix")
+    func parseLiteralSizeVariants() throws {
+        let parser = GrammarParser()
+
+        // Standard {N}\r\n — single-arg overload (covers lines 1467-1468)
+        var b1 = ParseBuffer("{5}\r\n")
+        let size1 = try parser.parseLiteralSize(buffer: &b1, tracker: .makeNewDefault)
+        #expect(size1 == 5)
+
+        // Binary ~{N}\r\n — covers the ~ optional branch in the two-arg overload (line 1474)
+        var b2 = ParseBuffer("~{5}\r\n")
+        let size2 = try parser.parseLiteralSize(buffer: &b2, tracker: .makeNewDefault)
+        #expect(size2 == 5)
+    }
+
+    @Test("parseLiteral with NUL byte throws")
+    func parseLiteralNULByte() {
+        let parser = GrammarParser()
+        // Literal containing a NUL byte (0x00) — covers line 1495
+        var b = ParseBuffer("{3}\r\na\0b")
+        #expect(throws: (any Error).self) {
+            try parser.parseLiteral(buffer: &b, tracker: .makeNewDefault)
+        }
+    }
+
+    @Test("parseLiteral8 non-synchronizing literal and NUL byte")
+    func parseLiteral8Variants() throws {
+        let parser = GrammarParser()
+
+        // Non-synchronizing ~{N+}\r\n — covers the + optional branch (line 1508)
+        var b1 = ParseBuffer("~{3+}\r\nabc")
+        let result = try parser.parseLiteral8(buffer: &b1, tracker: .makeNewDefault)
+        #expect(String(buffer: result) == "abc")
+
+        // Literal8 containing a NUL byte — covers line 1513
+        var b2 = ParseBuffer("~{3}\r\na\0b")
+        #expect(throws: (any Error).self) {
+            try parser.parseLiteral8(buffer: &b2, tracker: .makeNewDefault)
+        }
     }
 }
 

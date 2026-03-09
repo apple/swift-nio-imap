@@ -18,10 +18,13 @@ import Testing
 
 @Suite("ListSelectBaseOption")
 struct ListSelectBaseOptionTests {
-    @Test(arguments: [
-        EncodeFixture.listSelectBaseOption(.subscribed, "SUBSCRIBED"),
-        EncodeFixture.listSelectBaseOption(.option(.init(key: .standard("test"), value: nil)), "test"),
-    ])
+    @Test(
+        "encode",
+        arguments: [
+            EncodeFixture.listSelectBaseOption(.subscribed, "SUBSCRIBED"),
+            EncodeFixture.listSelectBaseOption(.option(.init(key: .standard("test"), value: nil)), "test"),
+        ]
+    )
     func encode(_ fixture: EncodeFixture<ListSelectBaseOption>) {
         fixture.checkEncoding()
     }
@@ -34,6 +37,40 @@ struct ListSelectBaseOptionTests {
     )
     func encodeQuoted(_ fixture: EncodeFixture<ListSelectBaseOption>) {
         fixture.checkEncoding()
+    }
+
+    @Test(
+        "parse",
+        arguments: [
+            ParseFixture.listSelectBaseOption("SUBSCRIBED", ")", expected: .success(.subscribed)),
+            ParseFixture.listSelectBaseOption(
+                "REMOTE",
+                ")",
+                expected: .success(.option(.init(key: .standard("REMOTE"), value: nil)))
+            ),
+            ParseFixture.listSelectBaseOption("", "", expected: .incompleteMessage),
+        ]
+    )
+    func parse(_ fixture: ParseFixture<ListSelectBaseOption>) {
+        fixture.checkParsing()
+    }
+
+    @Test(
+        "parse CHILDINFO extended item",
+        arguments: [
+            ParseFixture.childinfoExtendedItem(
+                #"CHILDINFO ("SUBSCRIBED")"#,
+                expected: .success([.subscribed])
+            ),
+            ParseFixture.childinfoExtendedItem(
+                #"CHILDINFO ("SUBSCRIBED" "REMOTE")"#,
+                expected: .success([.subscribed, .option(.init(key: .standard("REMOTE"), value: nil))])
+            ),
+            ParseFixture.childinfoExtendedItem("", "", expected: .incompleteMessage),
+        ]
+    )
+    func parseChildinfoExtendedItem(_ fixture: ParseFixture<[ListSelectBaseOption]>) {
+        fixture.checkParsing()
     }
 }
 
@@ -61,6 +98,36 @@ extension EncodeFixture<ListSelectBaseOption> {
             bufferKind: .defaultServer,
             expectedString: expectedString,
             encoder: { $0.writeListSelectBaseOptionQuoted($1) }
+        )
+    }
+}
+
+extension ParseFixture<ListSelectBaseOption> {
+    fileprivate static func listSelectBaseOption(
+        _ input: String,
+        _ terminator: String = " ",
+        expected: Expected
+    ) -> Self {
+        ParseFixture(
+            input: input,
+            terminator: terminator,
+            expected: expected,
+            parser: GrammarParser().parseListSelectBaseOption
+        )
+    }
+}
+
+extension ParseFixture<[ListSelectBaseOption]> {
+    fileprivate static func childinfoExtendedItem(
+        _ input: String,
+        _ terminator: String = "\r",
+        expected: Expected
+    ) -> Self {
+        ParseFixture(
+            input: input,
+            terminator: terminator,
+            expected: expected,
+            parser: GrammarParser().parseChildinfoExtendedItem
         )
     }
 }

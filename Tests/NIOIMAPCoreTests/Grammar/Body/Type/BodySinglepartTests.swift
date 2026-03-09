@@ -215,6 +215,51 @@ extension BodySinglepartTests {
                 )
             )
         ),
+        // Extension with non-nil md5
+        ParseFixture.bodySinglepart(
+            #""TEXT" "plain" NIL NIL NIL "7BIT" 100 10 "md5hash""#,
+            "\r\n",
+            expected: .success(
+                .init(
+                    kind: .text(.init(mediaSubtype: "plain", lineCount: 10)),
+                    fields: .init(
+                        parameters: [:],
+                        id: nil,
+                        contentDescription: nil,
+                        encoding: .sevenBit,
+                        octetCount: 100
+                    ),
+                    extension: .init(digest: "md5hash", dispositionAndLanguage: nil)
+                )
+            )
+        ),
+        // Full extension chain: md5 + disposition + language + location + body-extension
+        ParseFixture.bodySinglepart(
+            #""TEXT" "plain" NIL NIL NIL "7BIT" 100 10 "md5hash" NIL NIL "http://example.com" 42"#,
+            "\r\n",
+            expected: .success(
+                .init(
+                    kind: .text(.init(mediaSubtype: "plain", lineCount: 10)),
+                    fields: .init(
+                        parameters: [:],
+                        id: nil,
+                        contentDescription: nil,
+                        encoding: .sevenBit,
+                        octetCount: 100
+                    ),
+                    extension: .init(
+                        digest: "md5hash",
+                        dispositionAndLanguage: .init(
+                            disposition: nil,
+                            language: .init(
+                                languages: [],
+                                location: .init(location: "http://example.com", extensions: [.number(42)])
+                            )
+                        )
+                    )
+                )
+            )
+        ),
     ])
     func parse(_ fixture: ParseFixture<BodyStructure.Singlepart>) {
         fixture.checkParsing()

@@ -78,6 +78,22 @@ struct MailboxInfoTests {
             ),
             #"(\Subscribed \HasNoChildren) "." "Archive/2024""#
         ),
+        EncodeFixture.mailboxInfo(
+            MailboxInfo(
+                attributes: [.unmarked],
+                path: try! .init(name: MailboxName("Old"), pathSeparator: "\\"),
+                extensions: [:]
+            ),
+            #"(\Unmarked) "\" "Old""#
+        ),
+        EncodeFixture.mailboxInfo(
+            MailboxInfo(
+                attributes: [.nonExistent],
+                path: try! .init(name: MailboxName("Ghost"), pathSeparator: "\""),
+                extensions: [:]
+            ),
+            #"(\Nonexistent) "\\" "Ghost""#
+        ),
     ])
     func encode(_ fixture: EncodeFixture<MailboxInfo>) {
         fixture.checkEncoding()
@@ -133,6 +149,39 @@ struct MailboxInfoTests {
         ),
         ParseFixture.mailboxInfo(#"() ""#, "", expected: .incompleteMessageIgnoringBufferModifications),
         ParseFixture.mailboxInfo(#"() "\" inbox"#, "", expected: .failureIgnoringBufferModifications),
+        // Extended list — empty extensions: covers parseMailboxListExtended entry + empty content path
+        ParseFixture.mailboxInfo(
+            "() NIL inbox ()",
+            "\r",
+            expected: .success(.init(attributes: [], path: try! .init(name: .inbox), extensions: [:]))
+        ),
+        // Extended list — one item: covers parseMailboxListExtendedItem and value parsing
+        ParseFixture.mailboxInfo(
+            "() NIL inbox (CHILDINFO (SUBSCRIBED))",
+            "\r",
+            expected: .success(
+                .init(
+                    attributes: [],
+                    path: try! .init(name: .inbox),
+                    extensions: [ByteBuffer(string: "CHILDINFO"): .comp(["SUBSCRIBED"])]
+                )
+            )
+        ),
+        // Extended list — two items: covers parseZeroOrMore additional item path (line 244)
+        ParseFixture.mailboxInfo(
+            "() NIL inbox (KEY1 (VAL1) KEY2 (VAL2))",
+            "\r",
+            expected: .success(
+                .init(
+                    attributes: [],
+                    path: try! .init(name: .inbox),
+                    extensions: [
+                        ByteBuffer(string: "KEY1"): .comp(["VAL1"]),
+                        ByteBuffer(string: "KEY2"): .comp(["VAL2"]),
+                    ]
+                )
+            )
+        ),
     ])
     func parse(_ fixture: ParseFixture<MailboxInfo>) {
         fixture.checkParsing()

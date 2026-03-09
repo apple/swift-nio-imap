@@ -177,6 +177,30 @@ struct SynchronizingLiteralParserTests {
         )
     }
 
+    @Test(
+        "invalid literal syntax throws",
+        arguments: [
+            // "}" immediately before newline — after stripping "}" the buffer is empty,
+            // so reverseParseIf("+") hits the .none branch and throws.
+            "}\r\n",
+            // "{}" — no digits between braces; reverseParseNumber encounters a
+            // non-digit on the first attempt with magnitude == 1 and throws.
+            "{}\r\n",
+            // "+}" — after stripping "}" and "+" the buffer is empty when
+            // reverseParseNumber is called, so the .none branch throws.
+            "+}\r\n",
+            // Literal size that overflows Int (19 nines on 64-bit = > Int.max).
+            "{9999999999999999999}\r\n",
+        ] as [String]
+    )
+    func invalidLiteralSyntaxThrows(input: String) {
+        var parser = SynchronizingLiteralParser()
+        let buffer = ByteBuffer(string: input)
+        #expect(throws: (any Error).self) {
+            try parser.parseContinuationsNecessary(buffer)
+        }
+    }
+
     @Test("append followed by half command")
     func appendFollowedByHalfCommand() {
         var helper = Helper()

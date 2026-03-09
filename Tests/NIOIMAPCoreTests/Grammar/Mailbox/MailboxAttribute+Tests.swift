@@ -137,6 +137,21 @@ struct MailboxAttributeTests {
     func parseMailboxStatus(_ fixture: ParseFixture<MailboxStatus>) {
         fixture.checkParsing()
     }
+    @Test(
+        "parse status option",
+        arguments: [
+            ParseFixture.statusOption("STATUS (MESSAGES)", expected: .success([.messageCount])),
+            ParseFixture.statusOption(
+                "STATUS (MESSAGES RECENT UNSEEN)",
+                expected: .success([.messageCount, .recentCount, .unseenCount])
+            ),
+            ParseFixture.statusOption("STATUS (UIDNEXT)", expected: .success([.uidNext])),
+            ParseFixture.statusOption("", "", expected: .incompleteMessage),
+        ]
+    )
+    func parseStatusOption(_ fixture: ParseFixture<[MailboxAttribute]>) {
+        fixture.checkParsing()
+    }
 }
 
 // MARK: -
@@ -189,6 +204,21 @@ extension ParseFixture<MailboxStatus> {
             terminator: terminator,
             expected: expected,
             parser: GrammarParser().parseMailboxStatus
+        )
+    }
+}
+
+extension ParseFixture<[MailboxAttribute]> {
+    fileprivate static func statusOption(
+        _ input: String,
+        _ terminator: String = "\r",
+        expected: Expected
+    ) -> Self {
+        ParseFixture(
+            input: input,
+            terminator: terminator,
+            expected: expected,
+            parser: GrammarParser().parseStatusOption
         )
     }
 }

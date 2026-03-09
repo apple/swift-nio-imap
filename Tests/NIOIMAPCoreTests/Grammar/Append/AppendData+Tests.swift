@@ -44,6 +44,23 @@ struct AppendDataTests {
         fixture.checkEncoding()
     }
 
+    #if swift(>=6.2)
+    @Test("encode in server mode calls preconditionFailure")
+    func encodeInServerModeCallsPreconditionFailure() async {
+        await #expect(
+            processExitsWith: ExitTest.Condition.failure,
+            performing: {
+                var buffer = EncodeBuffer.serverEncodeBuffer(
+                    buffer: ByteBufferAllocator().buffer(capacity: 128),
+                    options: ResponseEncodingOptions(),
+                    loggingMode: false
+                )
+                buffer.writeAppendData(.init(byteCount: 123))
+            }
+        )
+    }
+    #endif
+
     @Test(arguments: [
         ParseFixture.appendData("{123}\r\n", "hello", expected: .success(.init(byteCount: 123))),
         ParseFixture.appendData(

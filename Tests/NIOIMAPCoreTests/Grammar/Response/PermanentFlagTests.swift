@@ -18,12 +18,40 @@ import Testing
 
 @Suite("PermanentFlag")
 struct PermanentFlagTests {
-    @Test(arguments: [
-        EncodeFixture.permanentFlag(.wildcard, #"\*"#),
-        EncodeFixture.permanentFlag(.flag(.answered), #"\Answered"#),
-    ])
+    @Test(
+        "encode",
+        arguments: [
+            EncodeFixture.permanentFlag(.wildcard, #"\*"#),
+            EncodeFixture.permanentFlag(.flag(.answered), #"\Answered"#),
+        ]
+    )
     func encode(_ fixture: EncodeFixture<PermanentFlag>) {
         fixture.checkEncoding()
+    }
+
+    @Test(
+        "parse",
+        arguments: [
+            ParseFixture.permanentFlag(#"\*"#, expected: .success(.wildcard)),
+            ParseFixture.permanentFlag(#"\Answered"#, expected: .success(.flag(.answered))),
+            ParseFixture.permanentFlag(#"\Seen"#, expected: .success(.flag(.seen))),
+            ParseFixture.permanentFlag("$Forwarded", expected: .success(.flag("$Forwarded"))),
+            ParseFixture.permanentFlag("", "", expected: .incompleteMessage),
+        ]
+    )
+    func parse(_ fixture: ParseFixture<PermanentFlag>) {
+        fixture.checkParsing()
+    }
+
+    @Test(
+        "debug description",
+        arguments: [
+            (PermanentFlag.wildcard, #"\*"#),
+            (PermanentFlag.flag(.answered), #"\Answered"#),
+        ] as [(PermanentFlag, String)]
+    )
+    func debugDescription(_ fixture: (PermanentFlag, String)) {
+        #expect(fixture.0.debugDescription == fixture.1)
     }
 }
 
@@ -39,6 +67,21 @@ extension EncodeFixture<PermanentFlag> {
             bufferKind: .defaultServer,
             expectedString: expectedString,
             encoder: { $0.writeFlagPerm($1) }
+        )
+    }
+}
+
+extension ParseFixture<PermanentFlag> {
+    fileprivate static func permanentFlag(
+        _ input: String,
+        _ terminator: String = " ",
+        expected: Expected
+    ) -> Self {
+        ParseFixture(
+            input: input,
+            terminator: terminator,
+            expected: expected,
+            parser: GrammarParser().parseFlagPerm
         )
     }
 }

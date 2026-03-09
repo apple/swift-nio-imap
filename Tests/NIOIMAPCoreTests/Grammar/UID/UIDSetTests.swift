@@ -87,7 +87,7 @@ struct UIDSetTests {
         #expect(MessageIdentifierSet<UID>.all.contains(.max))
     }
 
-    @Test func isContiguous() {
+    @Test("isContiguous") func isContiguous() {
         #expect(MessageIdentifierSet<UID>.empty.isContiguous)
         #expect(MessageIdentifierSet<UID>(20 as UID).isContiguous)
         #expect(MessageIdentifierSet<UID>(20...22).isContiguous)
@@ -123,7 +123,7 @@ struct UIDSetTests {
         )
     }
 
-    @Test func symmetricDifference() {
+    @Test("symmetricDifference") func symmetricDifference() {
         #expect(
             "\(MessageIdentifierSet<UID>(20 as UID).symmetricDifference(MessageIdentifierSet(30 as UID)))"
                 == "20,30"
@@ -188,19 +188,19 @@ struct UIDSetTests {
         #expect(sut.count == 4)
     }
 
-    @Test func formUnion() {
+    @Test("formUnion") func formUnion() {
         var sut = MessageIdentifierSet(20 as UID)
         sut.formUnion(MessageIdentifierSet(30 as UID))
         #expect("\(sut)" == "20,30")
     }
 
-    @Test func formIntersection() {
+    @Test("formIntersection") func formIntersection() {
         var sut = MessageIdentifierSet<UID>(20...35)
         sut.formIntersection(MessageIdentifierSet(30...40))
         #expect("\(sut)" == "30:35")
     }
 
-    @Test func formSymmetricDifference() {
+    @Test("formSymmetricDifference") func formSymmetricDifference() {
         var sut = MessageIdentifierSet<UID>(20...35)
         sut.formSymmetricDifference(MessageIdentifierSet(30...40))
         #expect("\(sut)" == "20:29,36:40")
@@ -213,7 +213,7 @@ struct UIDSetTests {
         #expect("\(a)" == "20,25:35")
     }
 
-    @Test func isSubset() {
+    @Test("isSubset") func isSubset() {
         #expect(
             MessageIdentifierSet<UID>(20...35)
                 .isSubset(of: MessageIdentifierSet<UID>(20...35))
@@ -236,7 +236,7 @@ struct UIDSetTests {
         )
     }
 
-    @Test func isStrictSubset() {
+    @Test("isStrictSubset") func isStrictSubset() {
         #expect(
             !MessageIdentifierSet<UID>(20...35)
                 .isStrictSubset(of: MessageIdentifierSet<UID>(20...35))
@@ -259,7 +259,7 @@ struct UIDSetTests {
         )
     }
 
-    @Test func isDisjoint() {
+    @Test("isDisjoint") func isDisjoint() {
         #expect(
             !MessageIdentifierSet<UID>(20...35)
                 .isDisjoint(with: MessageIdentifierSet<UID>(20...35))
@@ -282,7 +282,7 @@ struct UIDSetTests {
         )
     }
 
-    @Test func isSuperset() {
+    @Test("isSuperset") func isSuperset() {
         #expect(
             MessageIdentifierSet<UID>(20...35)
                 .isSuperset(of: MessageIdentifierSet<UID>(20...35))
@@ -305,7 +305,7 @@ struct UIDSetTests {
         )
     }
 
-    @Test func isStrictSuperset() {
+    @Test("isStrictSuperset") func isStrictSuperset() {
         #expect(
             !MessageIdentifierSet<UID>(20...35)
                 .isStrictSuperset(of: MessageIdentifierSet<UID>(20...35))
@@ -334,20 +334,20 @@ struct UIDSetTests {
         #expect("\(sut)" == "20,25:35")
     }
 
-    @Test func emptyCollection() {
+    @Test("empty collection") func emptyCollection() {
         #expect(MessageIdentifierSet<UID>().map { "\($0)" } == [])
         #expect(MessageIdentifierSet<UID>().count == 0)
         #expect(MessageIdentifierSet<UID>().isEmpty)
     }
 
-    @Test func singleElementCollection() {
+    @Test("single element collection") func singleElementCollection() {
         let sut = MessageIdentifierSet(55 as UID)
         #expect(sut.map { "\($0)" } == ["55"])
         #expect(sut.count == 1)
         #expect(!sut.isEmpty)
     }
 
-    @Test func singleRangeCollection() {
+    @Test("single range collection") func singleRangeCollection() {
         let sut = MessageIdentifierSet<UID>(55...57)
         #expect(sut.map { "\($0)" } == ["55", "56", "57"])
         #expect(sut.count == 3)
@@ -575,7 +575,7 @@ struct UIDSetTests {
         #expect(sut.index(sut.startIndex, offsetBy: 31, limitedBy: sut.endIndex) == nil)
     }
 
-    @Test func rangeView() {
+    @Test("RangeView") func rangeView() {
         #expect(Array(MessageIdentifierSet<UID>().ranges) == [])
         #expect(
             Array(MessageIdentifierSet<UID>([1_234]).ranges)

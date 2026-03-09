@@ -155,6 +155,75 @@ struct Base64Tests {
     func parseBase64(_ fixture: ParseFixture<String>) {
         fixture.checkParsing()
     }
+
+    // MARK: - encodeString
+
+    @Test(
+        "encodeString produces correct output",
+        arguments: [
+            ([UInt8](), ""),
+            ([0x61, 0x62, 0x63], "YWJj"),  // "abc" → 3-byte aligned, no remainder
+            ([0x61, 0x62], "YWI="),  // "ab" → 2-byte remainder
+            ([0x61], "YQ=="),  // "a" → 1-byte remainder
+        ] as [([UInt8], String)]
+    )
+    func encodeStringProducesCorrectOutput(_ fixture: ([UInt8], String)) {
+        let result = Base64.encodeString(bytes: fixture.0)
+        #expect(result == fixture.1)
+    }
+
+    @Test("encodeString with omitPaddingCharacter omits padding")
+    func encodeStringOmitsPadding() {
+        #expect(Base64.encodeString(bytes: [0x61], options: [.omitPaddingCharacter]) == "YQ")
+        #expect(Base64.encodeString(bytes: [0x61, 0x62], options: [.omitPaddingCharacter]) == "YWI")
+    }
+
+    // MARK: - decode(string:)
+
+    @Test(
+        "decode(string:) decodes valid base64",
+        arguments: [
+            ("YWJj", [0x61, 0x62, 0x63]),  // "abc"
+            ("YQ==", [0x61]),  // "a"
+            ("YWI=", [0x61, 0x62]),  // "ab"
+        ] as [(String, [UInt8])]
+    )
+    func decodeStringDecodesValidBase64(_ fixture: (String, [UInt8])) throws {
+        let result = try Base64.decode(string: fixture.0)
+        #expect(result == fixture.1)
+    }
+
+    @Test("decode(string:) with empty string returns empty")
+    func decodeStringEmptyReturnsEmpty() throws {
+        let result = try Base64.decode(string: "")
+        #expect(result == [])
+    }
+
+    @Test("decode with omitPaddingCharacter and length mod 4 == 1 throws")
+    func decodeOmitPaddingInvalidLength() {
+        // Length 1 mod 4 = 1 is invalid even with omitPaddingCharacter
+        #expect(throws: (any Error).self) {
+            try Base64.decode(string: "Y", options: [.omitPaddingCharacter])
+        }
+    }
+
+    @Test("decode with invalid character in full 4-byte chunk throws")
+    func decodeInvalidCharacterInFullChunk() {
+        // 8-char aligned input: fullchunks = 8/4 - 1 = 1, so the loop processes
+        // the first 4 chars "YW!h" and hits the invalid '!' at the full-chunk check (line 525).
+        #expect(throws: (any Error).self) {
+            try Base64.decode(string: "YW!hYWFh")
+        }
+    }
+
+    @Test("decode(string:) with omitPaddingCharacter round-trips non-aligned input")
+    func decodeStringOmitPaddingRoundTrip() throws {
+        // "a" encodes to "YQ" (length 2, 2 mod 4 = 2 → non-4-aligned)
+        let encoded = Base64.encodeString(bytes: [0x61], options: [.omitPaddingCharacter])
+        #expect(encoded == "YQ")
+        let decoded = try Base64.decode(string: encoded, options: [.omitPaddingCharacter])
+        #expect(decoded == [0x61])
+    }
 }
 
 // MARK: -

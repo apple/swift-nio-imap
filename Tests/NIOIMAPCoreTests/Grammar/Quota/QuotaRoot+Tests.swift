@@ -18,12 +18,58 @@ import Testing
 
 @Suite("QuotaRoot")
 struct QuotaRootTests {
-    @Test(arguments: [
-        EncodeFixture.quotaRoot(QuotaRoot(""), #""""#),
-        EncodeFixture.quotaRoot(QuotaRoot("MassivePool"), #""MassivePool""#),
-    ])
+    @Test(
+        "encode",
+        arguments: [
+            EncodeFixture.quotaRoot(QuotaRoot(""), #""""#),
+            EncodeFixture.quotaRoot(QuotaRoot("MassivePool"), #""MassivePool""#),
+        ]
+    )
     func encode(_ fixture: EncodeFixture<QuotaRoot>) {
         fixture.checkEncoding()
+    }
+
+    @Test(
+        "parse",
+        arguments: [
+            ParseFixture.quotaRoot(#""MassivePool""#, expected: .success(QuotaRoot("MassivePool"))),
+            ParseFixture.quotaRoot("inbox", expected: .success(QuotaRoot("inbox"))),
+            ParseFixture.quotaRoot(#""""#, expected: .success(QuotaRoot(""))),
+            ParseFixture.quotaRoot("", "", expected: .incompleteMessage),
+        ]
+    )
+    func parse(_ fixture: ParseFixture<QuotaRoot>) {
+        fixture.checkParsing()
+    }
+
+    @Test(
+        "string conversion",
+        arguments: [
+            (QuotaRoot("MassivePool"), "MassivePool" as String?),
+            (QuotaRoot(""), "" as String?),
+            (QuotaRoot(ByteBuffer(bytes: [0xFF, 0xFE])), nil as String?),
+        ] as [(QuotaRoot, String?)]
+    )
+    func stringConversion(_ fixture: (QuotaRoot, String?)) {
+        #expect(String(fixture.0) == fixture.1)
+    }
+
+    @Test(
+        "debug description",
+        arguments: [
+            (QuotaRoot("MassivePool"), "MassivePool")
+        ] as [(QuotaRoot, String)]
+    )
+    func debugDescription(_ fixture: (QuotaRoot, String)) {
+        #expect(fixture.0.debugDescription == fixture.1)
+    }
+
+    @Test("debug description falls back for invalid UTF-8") func debugDescriptionInvalidUTF8() {
+        // Invalid UTF-8 falls back to String(buffer:), which produces a non-nil description.
+        let root = QuotaRoot(ByteBuffer(bytes: [0xFF, 0xFE]))
+        // String(self) returns nil, so debugDescription uses the fallback path.
+        #expect(String(root) == nil)
+        #expect(root.debugDescription.isEmpty == false)
     }
 }
 
@@ -36,6 +82,21 @@ extension EncodeFixture<QuotaRoot> {
             bufferKind: .defaultServer,
             expectedString: expectedString,
             encoder: { $0.writeQuotaRoot($1) }
+        )
+    }
+}
+
+extension ParseFixture<QuotaRoot> {
+    fileprivate static func quotaRoot(
+        _ input: String,
+        _ terminator: String = " ",
+        expected: Expected
+    ) -> Self {
+        ParseFixture(
+            input: input,
+            terminator: terminator,
+            expected: expected,
+            parser: GrammarParser().parseQuotaRoot
         )
     }
 }

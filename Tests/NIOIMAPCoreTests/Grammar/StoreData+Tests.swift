@@ -19,6 +19,39 @@ import Testing
 @Suite("StoreData")
 struct StoreDataTests {
     @Test(
+        "encode store data",
+        arguments: [
+            EncodeFixture.storeData(.flags(.add(silent: false, list: [.answered])), "+FLAGS (\\Answered)"),
+            EncodeFixture.storeData(.flags(.remove(silent: true, list: [.draft])), "-FLAGS.SILENT (\\Draft)"),
+            EncodeFixture.storeData(
+                .gmailLabels(.add(silent: false, gmailLabels: [.init("\\Inbox")])),
+                "+X-GM-LABELS (\\Inbox)"
+            ),
+        ]
+    )
+    func encode(_ fixture: EncodeFixture<StoreData>) {
+        fixture.checkEncoding()
+    }
+
+    @Test(
+        "encode store gmail labels",
+        arguments: [
+            EncodeFixture.storeGmailLabels(.add(silent: false, gmailLabels: [.init("foo")]), #"+X-GM-LABELS ("foo")"#),
+            EncodeFixture.storeGmailLabels(
+                .remove(silent: true, gmailLabels: [.init("foo"), .init("bar")]),
+                #"-X-GM-LABELS.SILENT ("foo" "bar")"#
+            ),
+            EncodeFixture.storeGmailLabels(
+                .replace(silent: false, gmailLabels: [.init("foo")]),
+                #"X-GM-LABELS ("foo")"#
+            ),
+        ]
+    )
+    func encodeGmailLabels(_ fixture: EncodeFixture<StoreGmailLabels>) {
+        fixture.checkEncoding()
+    }
+
+    @Test(
         "parse store modifier",
         arguments: [
             ParseFixture.storeModifier(
@@ -135,6 +168,28 @@ extension ParseFixture<StoreGmailLabels> {
             terminator: terminator,
             expected: expected,
             parser: GrammarParser().parseStoreGmailLabels
+        )
+    }
+}
+
+extension EncodeFixture<StoreData> {
+    fileprivate static func storeData(_ input: StoreData, _ expectedString: String) -> Self {
+        EncodeFixture(
+            input: input,
+            bufferKind: .defaultServer,
+            expectedString: expectedString,
+            encoder: { $0.writeStoreData($1) }
+        )
+    }
+}
+
+extension EncodeFixture<StoreGmailLabels> {
+    fileprivate static func storeGmailLabels(_ input: StoreGmailLabels, _ expectedString: String) -> Self {
+        EncodeFixture(
+            input: input,
+            bufferKind: .defaultServer,
+            expectedString: expectedString,
+            encoder: { $0.writeStoreGmailLabels($1) }
         )
     }
 }
