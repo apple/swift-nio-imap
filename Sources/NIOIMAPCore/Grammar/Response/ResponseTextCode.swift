@@ -15,265 +15,424 @@
 import struct NIO.ByteBuffer
 
 // TODO: Convert to struct
-/// Additional, structured status information for `UntaggedStatus` and `TaggedResponse`.
+/// Structured status codes sent with server responses.
 ///
-/// `ResponseTextCode` contains the parsed part, whereas the human-readable description
-/// is captured by `ResponseText`’s `text`.
+/// Response text codes provide machine-readable status information accompanying tagged responses
+/// and some untagged responses. They indicate the reason for command success or failure, provide
+/// mailbox status updates, or convey extension-specific information. Servers send these codes
+/// within square brackets in the response text (e.g., `[TRYCREATE]`, `[UIDVALIDITY 1234]`).
+/// See [RFC 3501 Section 7.1](https://datatracker.ietf.org/doc/html/rfc3501#section-7.1) for the
+/// base protocol codes, and the IMAP extensions for domain-specific codes.
 ///
-/// See also https://www.iana.org/assignments/imap-response-codes/imap-response-codes.xhtml
+/// These codes are distinct from the human-readable text in ``ResponseText``, which is designed
+/// for user display. The codes here are for programmatic use.
+/// See the [IANA IMAP Response Codes registry](https://www.iana.org/assignments/imap-response-codes/imap-response-codes.xhtml)
+/// for the complete list of standardized codes.
+///
+/// ### Examples
+///
+/// ```
+/// S: * OK [UIDVALIDITY 1234] server response
+/// S: A001 OK [UIDNEXT 42] APPEND completed
+/// S: A002 NO [TRYCREATE] Mailbox does not exist
+/// ```
+///
+/// The code `[UIDVALIDITY 1234]` is wrapped as ``ResponseTextCode/uidValidity(_:)``,
+/// `[UIDNEXT 42]` as ``ResponseTextCode/uidNext(_:)``, and `[TRYCREATE]` as ``ResponseTextCode/tryCreate``.
+/// The text after the code (if any) is stored separately in ``ResponseText/text``.
 ///
 /// - Note: This `enum` is `indirect` to work around the compiler generating large types. (86318397)
 public indirect enum ResponseTextCode: Hashable, Sendable {
-    /// The human-readable text contains a special alert that MUST be
-    /// presented to the user in a fashion that calls the user's
-    /// attention to the message.
+    /// The human-readable text contains a special alert that MUST be presented to the user.
+    ///
+    /// This code indicates that the accompanying text is a special alert that requires user
+    /// attention. The client should display this message in a way that is noticeable to the end user.
+    /// See [RFC 3501](https://datatracker.ietf.org/doc/html/rfc3501) and
+    /// [RFC 9051](https://datatracker.ietf.org/doc/html/rfc9051) for details.
     case alert
 
-    /// The operation attempts to create something that already exists,
-    /// such as when the CREATE or RENAME directories attempt to create
-    /// a mailbox and there is already one of that name.
+    /// The operation attempts to create something that already exists.
+    ///
+    /// This code indicates that the operation failed because it would create a duplicate. For example,
+    /// CREATE or RENAME commands fail if the target mailbox name already exists.
+    /// See [RFC 3501](https://datatracker.ietf.org/doc/html/rfc3501) and
+    /// [RFC 9051](https://datatracker.ietf.org/doc/html/rfc9051) for details.
     case alreadyExists
 
-    /// A SEARCH failed because the given charset is not supported by
-    /// this implementation.  If the optional list of charsets is
-    /// given, this lists the charsets that are supported by this
-    /// implementation.
+    /// A SEARCH command failed because the specified character set is unsupported.
+    ///
+    /// This code indicates that a SEARCH command referenced a character set that the server does not
+    /// support. The optional list of character sets indicates which sets are supported by the server,
+    /// allowing the client to retry with a supported charset.
+    /// See [RFC 3501](https://datatracker.ietf.org/doc/html/rfc3501) and
+    /// [RFC 9051](https://datatracker.ietf.org/doc/html/rfc9051) for details.
     case badCharset([String])
 
-    /// Followed by a list of capabilities.  This can appear in the
-    /// initial OK or PREAUTH response to transmit an initial
-    /// capabilities list.  This makes it unnecessary for a client to
-    /// send a separate CAPABILITY command if it recognizes this
-    /// response.
+    /// Followed by a list of supported capabilities.
+    ///
+    /// This code may appear in the initial OK or PREAUTH response to transmit the server's capability list.
+    /// This allows the client to learn the server's capabilities without sending a separate CAPABILITY command.
+    /// See [RFC 3501](https://datatracker.ietf.org/doc/html/rfc3501) and
+    /// [RFC 9051](https://datatracker.ietf.org/doc/html/rfc9051) for details.
     case capability([Capability])
 
-    /// The human-readable text represents an error in parsing the
-    /// [RFC-2822] header or [MIME-IMB] headers of a message in the
-    /// mailbox.
+    /// The human-readable text represents an error in parsing message headers.
+    ///
+    /// This code indicates that the server encountered an error while parsing the [RFC-2822] headers
+    /// or [MIME] headers of a message in the mailbox. This typically indicates message corruption.
+    /// See [RFC 3501](https://datatracker.ietf.org/doc/html/rfc3501) and
+    /// [RFC 9051](https://datatracker.ietf.org/doc/html/rfc9051) for details.
     case parse
 
-    /// Followed by a parenthesized list of flags, indicates which of
-    /// the known flags the client can change permanently.  Any flags
-    /// that are in the FLAGS untagged response, but not the
-    /// PERMANENTFLAGS list, can not be set permanently.  If the client
-    /// attempts to STORE a flag that is not in the PERMANENTFLAGS
-    /// list, the server will either ignore the change or store the
-    /// state change for the remainder of the current session only.
-    /// The PERMANENTFLAGS list can also include the special flag \*,
-    /// which indicates that it is possible to create new keywords by
-    /// attempting to store those flags in the mailbox.
+    /// Followed by a list of flags that the client can change permanently.
+    ///
+    /// This code lists the flags that the client is allowed to store permanently in the selected mailbox.
+    /// Flags not in this list may only be stored for the current session. The special flag `\*` indicates
+    /// that new keywords can be created by attempting to store them.
+    /// See [RFC 3501](https://datatracker.ietf.org/doc/html/rfc3501) and
+    /// [RFC 9051](https://datatracker.ietf.org/doc/html/rfc9051) for details.
     case permanentFlags([PermanentFlag])
 
-    /// The mailbox is selected read-only, or its access while selected
-    /// has changed from read-write to read-only.
+    /// The selected mailbox is read-only.
+    ///
+    /// This code indicates that the mailbox is selected in read-only mode, or that its access has
+    /// changed from read-write to read-only. The client cannot store messages, delete messages, or
+    /// modify flags in a read-only mailbox.
+    /// See [RFC 3501](https://datatracker.ietf.org/doc/html/rfc3501) and
+    /// [RFC 9051](https://datatracker.ietf.org/doc/html/rfc9051) for details.
     case readOnly
 
-    /// The mailbox is selected read-write, or its access while
-    /// selected has changed from read-only to read-write.
+    /// The selected mailbox is read-write.
+    ///
+    /// This code indicates that the mailbox is selected in read-write mode, or that its access has
+    /// changed from read-only to read-write. The client can store messages, delete messages, and
+    /// modify flags in a read-write mailbox.
+    /// See [RFC 3501](https://datatracker.ietf.org/doc/html/rfc3501) and
+    /// [RFC 9051](https://datatracker.ietf.org/doc/html/rfc9051) for details.
     case readWrite
 
-    /// An APPEND or COPY attempt is failing because the target mailbox
-    /// does not exist (as opposed to some other reason).  This is a
-    /// hint to the client that the operation can succeed if the
-    /// mailbox is first created by the CREATE command.
+    /// An APPEND or COPY operation failed because the target mailbox does not exist.
+    ///
+    /// This code suggests that the operation can succeed if the mailbox is first created using the
+    /// CREATE command. This is a hint to the client about how to recover from the failure.
+    /// See [RFC 3501](https://datatracker.ietf.org/doc/html/rfc3501) and
+    /// [RFC 9051](https://datatracker.ietf.org/doc/html/rfc9051) for details.
     case tryCreate
 
     /// Indicates the next unique identifier value.
+    ///
+    /// This code contains the UID that will be assigned to the next message appended to the selected mailbox.
+    /// See [RFC 3501](https://datatracker.ietf.org/doc/html/rfc3501) and
+    /// [RFC 9051](https://datatracker.ietf.org/doc/html/rfc9051) for details.
     case uidNext(UID)
 
     /// Indicates the unique identifier validity value.
+    ///
+    /// This code contains the UIDVALIDITY value for the selected mailbox. The client must remember this
+    /// value; if it changes, all cached UIDs are invalidated.
+    /// See [RFC 3501](https://datatracker.ietf.org/doc/html/rfc3501) and
+    /// [RFC 9051](https://datatracker.ietf.org/doc/html/rfc9051) for details.
     case uidValidity(UIDValidity)
 
-    /// Indicates the number of the first message without the \Seen flag set.
+    /// Indicates the sequence number of the first message without the ``Flag/seen`` flag set.
+    ///
+    /// This code identifies the message number (in sequence order) of the first message in the mailbox
+    /// that does not have the `\Seen` flag set, indicating an unread message.
+    /// See [RFC 3501](https://datatracker.ietf.org/doc/html/rfc3501) and
+    /// [RFC 9051](https://datatracker.ietf.org/doc/html/rfc9051) for details.
     case unseen(SequenceNumber)
 
-    /// A command was unable to complete because it attempted to perform
-    /// an option in a namespace the user does not have access.
+    /// A command was unable to complete due to a namespace access restriction.
+    ///
+    /// This code indicates that the command attempted to perform an operation in a namespace that the
+    /// user does not have permission to access. This is part of the NAMESPACE extension.
+    /// See [RFC 2342](https://datatracker.ietf.org/doc/html/rfc2342) (NAMESPACE Extension) for details.
     case namespace(NamespaceResponse)
 
-    /// Followed by the UIDVALIDITY of the destination mailbox and the UID
-    /// assigned to the appended message in the destination mailbox,
-    /// indicates that the message has been appended to the destination
-    /// mailbox with that UID.
+    /// Indicates the UIDVALIDITY and UID assigned to an appended message.
+    ///
+    /// This code is returned in response to an APPEND command. It contains the UIDVALIDITY of the
+    /// destination mailbox and the UID assigned to the newly appended message in that mailbox.
+    /// This is part of the UIDPLUS extension.
+    /// See [RFC 4315](https://datatracker.ietf.org/doc/html/rfc4315) and
+    /// [RFC 9051](https://datatracker.ietf.org/doc/html/rfc9051) for details.
     case uidAppend(ResponseCodeAppend)
 
-    /// Followed by the UIDVALIDITY of the destination mailbox, a UID set
-    /// containing the UIDs of the message(s) in the source mailbox that
-    /// were copied to the destination mailbox and containing the UIDs
-    /// assigned to the copied message(s) in the destination mailbox,
-    /// indicates that the message(s) have been copied to the destination
-    /// mailbox with the stated UID(s).
+    /// Indicates the UIDs of messages copied to a destination mailbox.
+    ///
+    /// This code is returned in response to a COPY command. It contains the UIDVALIDITY of the
+    /// destination mailbox and the UIDs assigned to the copied message(s) in that mailbox.
+    /// This is part of the UIDPLUS extension.
+    /// See [RFC 4315](https://datatracker.ietf.org/doc/html/rfc4315) and
+    /// [RFC 9051](https://datatracker.ietf.org/doc/html/rfc9051) for details.
     case uidCopy(ResponseCodeCopy)
 
-    /// The selected mailbox is supported by a mail store that does not
-    /// support persistent UIDs; that is, UIDVALIDITY will be different
-    /// each time the mailbox is selected.  Consequently, APPEND or COPY
-    /// to this mailbox will not return an APPENDUID or COPYUID response
-    /// code.
+    /// The selected mailbox does not support persistent UIDs.
+    ///
+    /// This code indicates that the mail store does not support persistent UIDs; the UIDVALIDITY
+    /// value will be different each time the mailbox is selected. Therefore, APPEND and COPY commands
+    /// will not return APPENDUID or COPYUID codes.
+    /// This is part of the UIDPLUS extension.
+    /// See [RFC 4315](https://datatracker.ietf.org/doc/html/rfc4315) and
+    /// [RFC 9051](https://datatracker.ietf.org/doc/html/rfc9051) for details.
     case uidNotSticky
 
-    /// If the server cannot create a mailbox with the designated special use
-    /// defined, for whatever reason, it MUST NOT create the mailbox, and
-    /// MUST respond to the CREATE command with a tagged NO response.  If the
-    /// reason for the failure is related to the special-use attribute (the
-    /// specified special use is not supported or cannot be assigned to the
-    /// specified mailbox)
+    /// The special-use attribute cannot be assigned to this mailbox.
+    ///
+    /// This code indicates that the CREATE command failed because the server cannot create a mailbox
+    /// with the specified special-use attribute. This is part of the Special-Use Mailbox extension.
+    /// See [RFC 6154](https://datatracker.ietf.org/doc/html/rfc6154) (Special-Use Mailbox Attributes) for details.
     case useAttribute
 
-    /// A generic catch-all case to support response codes sent by future extensions.
+    /// A server-specific or unknown response code.
+    ///
+    /// This catch-all case supports response codes that may be sent by future IMAP extensions or
+    /// vendor-specific implementations. The first string is the code name, and the optional second
+    /// string is any accompanying data.
     case other(String, String?)
 
-    /// The server refused to save a SEARCH (SAVE) result,
-    /// for example, if an internal limit on the number of saved results is
-    /// reached.
+    /// The server refused to save a SEARCH (SAVE) result.
+    ///
+    /// This code indicates that a SEARCH (SAVE) command failed because the server has reached an
+    /// internal limit on the number of saved search results.
+    /// This is part of the extended SEARCH extension.
+    /// See [RFC 5182](https://datatracker.ietf.org/doc/html/rfc5182) (Last SEARCH Result Reference Extension) for details.
     case notSaved
 
-    /// The CLOSED response code serves as a boundary between responses for the
-    /// previously opened mailbox (which was closed) and the newly selected
-    /// mailbox: all responses before the CLOSED response code relate to the
-    /// mailbox that was closed, and all subsequent responses relate to the
-    /// newly opened mailbox.
+    /// Boundary marker between responses for different mailboxes.
+    ///
+    /// This code appears when the server closes one mailbox and selects another. All responses
+    /// before the CLOSED code relate to the previously selected mailbox, and all responses after
+    /// relate to the newly selected mailbox.
+    /// See [RFC 5162](https://datatracker.ietf.org/doc/html/rfc5162) and
+    /// [RFC 9051](https://datatracker.ietf.org/doc/html/rfc9051) for details.
     case closed
 
-    /// A server that doesn't support the persistent storage of mod-sequences
-    /// for the mailbox MUST send the OK untagged response including NOMODSEQ
-    /// response code with every successful SELECT or EXAMINE command.
+    /// The selected mailbox does not support persistent modification sequences.
+    ///
+    /// This code appears in the OK response to SELECT or EXAMINE commands when the server does not
+    /// support persistent storage of modification sequences (mod-sequences) for the mailbox. Each
+    /// successful SELECT or EXAMINE must include this code if the mailbox lacks mod-sequence support.
+    /// See [RFC 4551](https://datatracker.ietf.org/doc/html/rfc4551) (CONDSTORE Extension) for details.
     case noModificationSequence
 
-    /// Used with an OK response to the STORE command.  (It can also be used in a NO
-    /// response.)
+    /// Indicates which messages were modified by a STORE command.
+    ///
+    /// This code is returned in response to a STORE command and lists the messages that were actually
+    /// modified. This allows the client to detect when the server rejected modifications for specific messages.
+    /// See [RFC 4551](https://datatracker.ietf.org/doc/html/rfc4551) (CONDSTORE Extension) for details.
     case modified(LastCommandSet<UnknownMessageIdentifier>)
 
-    /// A server supporting the persistent storage of mod-sequences for the mailbox
-    /// MUST send the OK untagged response including HIGHESTMODSEQ response
-    /// code with every successful SELECT or EXAMINE command:
+    /// Indicates the highest modification sequence value in the mailbox.
+    ///
+    /// This code appears in OK responses to SELECT or EXAMINE commands when the server supports
+    /// persistent modification sequences. The value indicates the highest mod-sequence value assigned
+    /// to any message in the mailbox.
+    /// See [RFC 4551](https://datatracker.ietf.org/doc/html/rfc4551) (CONDSTORE Extension) for details.
     case highestModificationSequence(ModificationSequenceValue)
 
-    /// If there are any entries with values
-    /// larger than the MAXSIZE limit, the server MUST include the METADATA
-    /// LONGENTRIES response code in the tagged OK response for the
-    /// GETMETADATA command.  The METADATA LONGENTRIES response code returns
-    /// the size of the biggest entry value requested by the client that
-    /// exceeded the MAXSIZE limit.
+    /// A metadata entry value exceeded the MAXSIZE limit.
+    ///
+    /// This code is returned in the GETMETADATA command response when one or more entry values
+    /// exceed the MAXSIZE limit. The value indicates the size of the largest entry that was requested
+    /// but exceeded the limit.
+    /// This is part of the METADATA extension.
+    /// See [RFC 5464](https://datatracker.ietf.org/doc/html/rfc5464) (METADATA Extension) for details.
     case metadataLongEntries(Int)
 
-    /// the server is unable to set an annotation because the size of its value is too large. The maximum size
-    /// is contained in the response code.
+    /// The server cannot set an annotation due to size limitations.
+    ///
+    /// This code indicates that a SETMETADATA command failed because an entry value is too large.
+    /// The value indicates the maximum size allowed by the server.
+    /// This is part of the METADATA extension.
+    /// See [RFC 5464](https://datatracker.ietf.org/doc/html/rfc5464) (METADATA Extension) for details.
     case metadataMaxsize(Int)
 
-    /// The server is unable to set a new annotation because the maximum
-    /// number of allowed annotations has already been reached
+    /// The maximum number of allowed annotations has been reached.
+    ///
+    /// This code indicates that a SETMETADATA command failed because the server has reached the
+    /// maximum number of annotations allowed for the mailbox or server.
+    /// This is part of the METADATA extension.
+    /// See [RFC 5464](https://datatracker.ietf.org/doc/html/rfc5464) (METADATA Extension) for details.
     case metadataTooMany
 
-    /// The server is unable to set a new annotation because it does not
-    /// support private annotations on one of the specified mailboxes
+    /// The server does not support private annotations on one or more specified mailboxes.
+    ///
+    /// This code indicates that a SETMETADATA command failed because the server does not allow
+    /// private annotations on one of the specified mailboxes.
+    /// This is part of the METADATA extension.
+    /// See [RFC 5464](https://datatracker.ietf.org/doc/html/rfc5464) (METADATA Extension) for details.
     case metadataNoPrivate
 
-    /// Returned in an untagged OK response in
-    /// response to a RESETKEY, SELECT, or EXAMINE command.  In the case of
-    /// the RESETKEY command, this status response code can be sent in the
-    /// tagged OK response instead of requiring a separate untagged OK
-    /// response.
+    /// Indicates the supported authentication mechanisms for URLAUTH.
+    ///
+    /// This code appears in OK responses to RESETKEY, SELECT, or EXAMINE commands. For RESETKEY,
+    /// it may appear in the tagged OK response instead of a separate untagged response.
+    /// See [RFC 4467](https://datatracker.ietf.org/doc/html/rfc4467) for details.
     case urlMechanisms([MechanismBase64])
 
-    /// An IMAP4 server MAY respond with an untagged BYE and a REFERRAL
-    /// response code that contains an IMAP URL to a home server if it is not
-    /// willing to accept connections and wishes to direct the client to
-    /// another IMAP4 server.
+    /// The server directs the client to another IMAP server.
+    ///
+    /// This code is returned in a BYE response when the server is not accepting connections and wishes
+    /// to direct the client to another server for the same account or mailbox. The IMAP URL points to
+    /// the referral server.
+    /// See [RFC 2221](https://datatracker.ietf.org/doc/html/rfc2221) for details.
     case referral(IMAPURL)
 
-    /// Temporary failure because a subsystem is down.
+    /// Temporary server failure or subsystem unavailability.
+    ///
+    /// This code indicates that the server is temporarily unable to complete the command due to a
+    /// subsystem being down or unavailable. The client may retry the command later.
+    /// See [RFC 5530](https://datatracker.ietf.org/doc/html/rfc5530) and
+    /// [RFC 9051](https://datatracker.ietf.org/doc/html/rfc9051) for details.
     case unavailable
 
-    /// Authentication failed for some reason on which the server
-    /// is unwilling to elaborate.
+    /// Authentication failed for unspecified reasons.
+    ///
+    /// This code indicates that an authentication command failed, but the server is unwilling to
+    /// provide details about the reason for the failure.
+    /// See [RFC 5530](https://datatracker.ietf.org/doc/html/rfc5530) and
+    /// [RFC 9051](https://datatracker.ietf.org/doc/html/rfc9051) for details.
     case authenticationFailed
 
-    // Authentication succeeded in using the authentication identity,
-    // but the server cannot or will not allow the authentication
-    // identity to act as the requested authorization identity.  This
-    // is only applicable when the authentication and authorization
-    // identities are different.
+    /// Authorization identity cannot be assumed.
+    ///
+    /// This code indicates that authentication succeeded with the authentication identity, but the
+    /// server cannot or will not allow that identity to act as the requested authorization identity.
+    /// This only applies when the authentication and authorization identities are different.
+    /// See [RFC 5530](https://datatracker.ietf.org/doc/html/rfc5530) and
+    /// [RFC 9051](https://datatracker.ietf.org/doc/html/rfc9051) for details.
     case authorizationFailed
 
-    /// Either authentication succeeded or the server no longer had the
-    /// necessary data; either way, access is no longer permitted using
-    /// that passphrase.  The client or user should get a new
-    /// passphrase.
+    /// The authentication or authorization passphrase has expired.
+    ///
+    /// This code indicates that either authentication succeeded but the server no longer has the
+    /// necessary data, or the passphrase is no longer valid. The client or user should obtain a
+    /// new passphrase.
+    /// See [RFC 5530](https://datatracker.ietf.org/doc/html/rfc5530) and
+    /// [RFC 9051](https://datatracker.ietf.org/doc/html/rfc9051) for details.
     case expired
 
-    /// The operation is not permitted due to a lack of privacy.  If
-    /// Transport Layer Security (TLS) is not in use, the client could
-    /// try STARTTLS (see Section 6.2.1 of [RFC3501]) and then repeat
-    /// the operation.
+    /// Privacy support is required to perform this operation.
+    ///
+    /// This code indicates that the operation cannot be completed without privacy protection. If
+    /// TLS is not in use, the client could try STARTTLS and then retry the operation.
+    /// See [RFC 5530](https://datatracker.ietf.org/doc/html/rfc5530) and
+    /// [RFC 9051](https://datatracker.ietf.org/doc/html/rfc9051) for details.
     case privacyRequired
 
-    /// The user should contact the system administrator or support
-    /// desk.
+    /// User should contact the system administrator.
+    ///
+    /// This code indicates that the user should contact the system administrator or support desk
+    /// to resolve the issue.
+    /// See [RFC 5530](https://datatracker.ietf.org/doc/html/rfc5530) and
+    /// [RFC 9051](https://datatracker.ietf.org/doc/html/rfc9051) for details.
     case contactAdmin
 
-    /// The access control system (e.g., Access Control List (ACL), see
-    /// [RFC4314]) does not permit this user to carry out an operation,
-    /// such as selecting or creating a mailbox.
+    /// Insufficient access permissions for this operation.
+    ///
+    /// This code indicates that the access control system (e.g., ACL) does not permit the user to
+    /// perform the requested operation, such as selecting or creating a mailbox.
+    /// See [RFC 5530](https://datatracker.ietf.org/doc/html/rfc5530) and
+    /// [RFC 9051](https://datatracker.ietf.org/doc/html/rfc9051) for details.
     case noPermission
 
-    /// An operation has not been carried out because it involves
-    /// sawing off a branch someone else is sitting on.  Someone else
-    /// may be holding an exclusive lock needed for this operation, or
-    /// the operation may involve deleting a resource someone else is
-    /// using, typically a mailbox.
+    /// Operation conflicts with resource usage by another client.
+    ///
+    /// This code indicates that the operation was not carried out because it involves removing a
+    /// resource that another client is currently using. For example, another client may be holding
+    /// an exclusive lock or using a mailbox that would be deleted.
+    /// See [RFC 5530](https://datatracker.ietf.org/doc/html/rfc5530) and
+    /// [RFC 9051](https://datatracker.ietf.org/doc/html/rfc9051) for details.
     case inUse
 
-    /// Someone else has issued an EXPUNGE for the same mailbox.  The///
-    /// client may want to issue NOOP soon.  [RFC2180] discusses this
-    /// subject in depth.
+    /// Another client has issued an EXPUNGE command for this mailbox.
+    ///
+    /// This code indicates that another client has expunged messages from the selected mailbox.
+    /// The client may want to issue a NOOP command soon to refresh its view.
+    /// See [RFC 5530](https://datatracker.ietf.org/doc/html/rfc5530) and
+    /// [RFC 9051](https://datatracker.ietf.org/doc/html/rfc9051) for details.
     case expungeIssued
 
-    /// The server discovered that some relevant data (e.g., the
-    /// mailbox) are corrupt.  This response code does not include any
-    /// information about what's corrupt, but the server can write that
-    /// to its logfiles.
+    /// The server detected data corruption.
+    ///
+    /// This code indicates that the server has discovered that relevant data (such as mailbox data)
+    /// is corrupt. This does not specify what is corrupt, but the server will have written details
+    /// to its log files.
+    /// See [RFC 5530](https://datatracker.ietf.org/doc/html/rfc5530) and
+    /// [RFC 9051](https://datatracker.ietf.org/doc/html/rfc9051) for details.
     case corruption
 
-    /// The server encountered a bug in itself or violated one of its
-    /// own invariants.
+    /// The server encountered an internal bug or invariant violation.
+    ///
+    /// This code indicates that the server encountered a bug in itself or violated one of its own
+    /// invariants during command processing.
+    /// See [RFC 5530](https://datatracker.ietf.org/doc/html/rfc5530) and
+    /// [RFC 9051](https://datatracker.ietf.org/doc/html/rfc9051) for details.
     case serverBug
 
-    /// The server has detected a client bug.  This can accompany all
-    /// of OK, NO, and BAD, depending on what the client bug is.
+    /// The server detected a client protocol violation.
+    ///
+    /// This code indicates that the server has detected a client bug. This may accompany OK, NO, or BAD
+    /// responses depending on the nature of the client bug.
+    /// See [RFC 5530](https://datatracker.ietf.org/doc/html/rfc5530) and
+    /// [RFC 9051](https://datatracker.ietf.org/doc/html/rfc9051) for details.
     case clientBug
 
-    /// The operation violates some invariant of the server and can
-    /// never succeed.
+    /// The operation violates a server invariant and cannot succeed.
+    ///
+    /// This code indicates that the requested operation violates some invariant of the server and
+    /// can never succeed, regardless of how the client retries.
+    /// See [RFC 5530](https://datatracker.ietf.org/doc/html/rfc5530) and
+    /// [RFC 9051](https://datatracker.ietf.org/doc/html/rfc9051) for details.
     case cannot
 
-    /// The operation ran up against an implementation limit of some
-    /// kind, such as the number of flags on a single message or the
-    /// number of flags used in a mailbox.
+    /// The operation exceeds a server implementation limit.
+    ///
+    /// This code indicates that the operation ran up against an implementation limit of some kind,
+    /// such as the maximum number of flags per message or the maximum number of distinct flags
+    /// used in a mailbox.
+    /// See [RFC 5530](https://datatracker.ietf.org/doc/html/rfc5530) and
+    /// [RFC 9051](https://datatracker.ietf.org/doc/html/rfc9051) for details.
     case limit
 
-    /// The user would be over quota after the operation.  (The user
-    /// may or may not be over quota already.)
-    /// Note that if the server sends OVERQUOTA but doesn't support the
-    /// IMAP QUOTA extension defined by [RFC2087], then there is a
-    /// quota, but the client cannot find out what the quota is.
+    /// The user's quota would be exceeded by this operation.
+    ///
+    /// This code indicates that the user would exceed their quota if the operation completed. The
+    /// user may or may not already be over quota. Note that if the server sends OVERQUOTA but does
+    /// not support the QUOTA extension, the client cannot determine the actual quota limits.
+    /// See [RFC 5530](https://datatracker.ietf.org/doc/html/rfc5530) and
+    /// [RFC 9051](https://datatracker.ietf.org/doc/html/rfc9051) for details.
     case overQuota
 
     /// The operation attempts to delete something that does not exist.
-    /// Similar to ALREADYEXISTS.
+    ///
+    /// This code indicates that the operation failed because it tried to delete something that does not
+    /// exist. This is similar to ``alreadyExists`` but indicates a DELETE operation instead of a CREATE.
+    /// See [RFC 5530](https://datatracker.ietf.org/doc/html/rfc5530) and
+    /// [RFC 9051](https://datatracker.ietf.org/doc/html/rfc9051) for details.
     case nonExistent
 
-    /// Compression is active.
+    /// Compression is currently active on the connection.
+    ///
+    /// This code indicates that the COMPRESS command has been issued and compression is now active
+    /// on the connection. This is part of the COMPRESS=DEFLATE extension.
+    /// See [RFC 4978](https://datatracker.ietf.org/doc/html/rfc4978) (COMPRESS Extension) for details.
     case compressionActive
 
-    /// RFC 8474 OBJECTID
+    /// A unique identifier for the selected mailbox.
     ///
-    /// A unique identifier for a mailbox.
+    /// This code contains the MAILBOXID value for the selected mailbox. The client should remember
+    /// this value to track mailboxes across sessions.
+    /// This is part of the OBJECTID extension.
+    /// See [RFC 8474](https://datatracker.ietf.org/doc/html/rfc8474) (OBJECTID Extension) for details.
     case mailboxID(MailboxID)
 
-    /// RFC 9586 UIDONLY
+    /// The client must not use message sequence numbers.
     ///
-    /// The client MUST NOT use message sequence numbers.
+    /// This code indicates that the server does not support the use of message sequence numbers and
+    /// requires the client to use UIDs instead. This is part of the UIDONLY extension.
+    /// See [RFC 9586](https://datatracker.ietf.org/doc/html/rfc9586) (SUBMIT Extension) for details.
     case uidRequired
 }
 
