@@ -60,7 +60,7 @@ import struct OrderedCollections.OrderedDictionary
 ///
 /// ## Streaming Commands
 ///
-/// Some commands like APPEND involve uploading large messages and are handled separately by the
+/// Some commands like `APPEND` involve uploading large messages and are handled separately by the
 /// ``AppendCommand`` type to support streaming of data.
 public enum Command: Hashable, Sendable {
     /// Requests a server's capabilities.
@@ -83,14 +83,14 @@ public enum Command: Hashable, Sendable {
 
     /// `LIST` command.
     ///
-    /// The LIST command allows a client to discover what mailboxes are available on the server,
+    /// The `LIST` command allows a client to discover what mailboxes are available on the server,
     /// with support for pattern matching and filtering.
     ///
     /// ## Base Functionality ([RFC 3501 Section 6.3.8](https://datatracker.ietf.org/doc/html/rfc3501#section-6.3.8))
     ///
-    /// The base LIST command takes two arguments:
+    /// The base `LIST` command takes two arguments:
     /// - **reference**: A mailbox name or hierarchy level that provides context for interpreting the pattern.
-    ///   An empty string means the pattern is interpreted as if by the SELECT command.
+    ///   An empty string means the pattern is interpreted as if by the `SELECT` command.
     /// - **pattern**: A mailbox name with possible wildcards (`*` matches any substring, `%` matches up to
     ///   the next hierarchy delimiter). For example, `"*"` lists all mailboxes, `"Foo/*"` lists all mailboxes
     ///   under "Foo", and `"%"` lists mailboxes at the top level only.
@@ -135,8 +135,8 @@ public enum Command: Hashable, Sendable {
     ///   ([RFC 5258](https://datatracker.ietf.org/doc/html/rfc5258)).
     /// - ``ReturnOption/specialUse``: Include special-use attributes
     ///   ([RFC 6154](https://datatracker.ietf.org/doc/html/rfc6154)).
-    /// - ``ReturnOption/statusOption(_:)``: Request STATUS data (mailbox statistics like MESSAGES, UNSEEN, UIDVALIDITY)
-    ///   be returned alongside LIST responses ([RFC 5819](https://datatracker.ietf.org/doc/html/rfc5819)).
+    /// - ``ReturnOption/statusOption(_:)``: Request `STATUS` data (mailbox statistics like `MESSAGES`, `UNSEEN`, `UIDVALIDITY`)
+    ///   be returned alongside `LIST` responses ([RFC 5819](https://datatracker.ietf.org/doc/html/rfc5819)).
     ///
     /// ### Example with Return Options
     ///
@@ -186,10 +186,10 @@ public enum Command: Hashable, Sendable {
     /// Requests a check-point of the server's in-memory representation of the mailbox. Allows the server to do some housekeeping.
     case check
 
-    /// Permanently deletes all messages in the selected mailbox that have the *\Deleted* flag set, and unselects the mailbox.
+    /// Permanently deletes all messages in the selected mailbox that have the `\Deleted` flag set, and unselects the mailbox.
     case close
 
-    /// Permanently deletes all messages in the selected mailbox that have the *\Deleted* flag set.
+    /// Permanently deletes all messages in the selected mailbox that have the `\Deleted` flag set.
     case expunge
 
     /// Enables each listed capability, providing the server has advertised support for those capabilities.
@@ -257,7 +257,7 @@ public enum Command: Hashable, Sendable {
     /// Takes the name of a quota root and returns the quota root's resource usage and limits.
     case getQuota(QuotaRoot)
 
-    /// Takes the name of a mailbox and returns the list of quota roots for the mailbox in an untagged QUOTAROOT response.
+    /// Takes the name of a mailbox and returns the list of quota roots for the mailbox in an untagged `QUOTAROOT` response.
     case getQuotaRoot(MailboxName)
 
     /// Sets the resource limits for a given quote root.

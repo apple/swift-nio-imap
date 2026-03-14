@@ -12,12 +12,12 @@
 //
 //===----------------------------------------------------------------------===//
 
-/// The APPENDUID response code returned after a successful APPEND command.
+/// The `APPENDUID` response code returned after a successful `APPEND` command.
 ///
-/// When an APPEND command completes successfully, the server may return this response code
+/// When an `APPEND` command completes successfully, the server may return this response code
 /// containing the UID validity of the destination mailbox and the UIDs assigned to the appended
 /// messages. This allows clients to immediately know the UID values without issuing a separate
-/// SEARCH command. See [RFC 4315](https://datatracker.ietf.org/doc/html/rfc4315) (UIDPLUS Extension)
+/// `SEARCH` command. See [RFC 4315](https://datatracker.ietf.org/doc/html/rfc4315) (UIDPLUS Extension)
 /// for details.
 ///
 /// ### Example

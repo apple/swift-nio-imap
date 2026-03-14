@@ -50,7 +50,7 @@ public enum ResponseOrContinuationRequest: Hashable, Sendable {
 ///
 /// The line `* CAPABILITY IMAP4rev1 STARTTLS LOGIN` is wrapped as ``Response/untagged(_:)``
 /// containing a ``ResponsePayload/capabilityData(_:)``. The line `A001 OK CAPABILITY completed`
-/// is wrapped as ``Response/tagged(_:)`` with an OK status.
+/// is wrapped as ``Response/tagged(_:)`` with an `OK` status.
 ///
 /// - SeeAlso: ``TaggedResponse``, ``ResponsePayload``, [RFC 3501](https://datatracker.ietf.org/doc/html/rfc3501)
 public enum Response: Hashable, Sendable {
@@ -94,7 +94,7 @@ public enum Response: Hashable, Sendable {
     ///
     /// Tagged responses (prefixed with a command tag) signal that the server has finished
     /// processing a command. Exactly one tagged response is sent for each command, with a tag
-    /// matching the original command tag. The response contains a status code (OK, NO, or BAD)
+    /// matching the original command tag. The response contains a status code (`OK`, `NO`, or `BAD`)
     /// and optional human-readable text.
     ///
     /// ### Examples
@@ -105,14 +105,14 @@ public enum Response: Hashable, Sendable {
     /// ```
     ///
     /// Each of these lines is wrapped as ``Response/tagged(_:)`` with a ``TaggedResponse``
-    /// containing the tag (`A001`, `A002`) and the outcome state (OK or NO).
+    /// containing the tag (`A001`, `A002`) and the outcome state (`OK` or `NO`).
     ///
     /// - SeeAlso: ``TaggedResponse``, [RFC 3501 Section 7.1](https://datatracker.ietf.org/doc/html/rfc3501#section-7.1)
     case tagged(TaggedResponse)
 
     /// A fatal response indicating an unrecoverable error.
     ///
-    /// Fatal responses (typically BYE) indicate that the server has encountered an unrecoverable
+    /// Fatal responses (typically `BYE`) indicate that the server has encountered an unrecoverable
     /// error and is terminating the connection. After a fatal response, the client should close
     /// the connection and may reconnect if desired.
     ///

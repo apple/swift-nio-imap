@@ -116,7 +116,7 @@ public enum MailboxData: Hashable, Sendable {
     /// ```
     ///
     /// The line `S: * STATUS "INBOX"...` is wrapped as ``MailboxData/status(_:_:)`` containing the
-    /// mailbox name and a ``MailboxStatus`` with the requested status attributes.
+    /// mailbox name and a ``MailboxStatus`` with the requested status attributes (`MESSAGES`, `UNSEEN`, `UIDVALIDITY`).
     ///
     /// - SeeAlso: [RFC 3501 Section 7.2.4](https://datatracker.ietf.org/doc/html/rfc3501#section-7.2.4)
     case status(MailboxName, MailboxStatus)

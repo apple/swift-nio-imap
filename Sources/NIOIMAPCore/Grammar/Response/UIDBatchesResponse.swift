@@ -44,7 +44,7 @@ public struct UIDBatchesResponse: Hashable, Sendable {
     /// The correlator linking this response to its search command.
     ///
     /// The correlator is either the tag of the original command (for tagged responses) or an
-    /// explicit UID returned in response to a SEARCH command with the RETURN option. It allows
+    /// explicit UID returned in response to a `SEARCH` command with the `RETURN` option. It allows
     /// clients to match multiple UIDBATCHES responses to the correct command, especially useful
     /// when commands are pipelined.
     ///
@@ -55,7 +55,7 @@ public struct UIDBatchesResponse: Hashable, Sendable {
     ///
     /// Each batch contains message UIDs in descending order (highest first), represented as an
     /// array of UID ranges for efficient encoding and representation. Multiple batches may be
-    /// sent for a single SEARCH command, allowing incremental result processing.
+    /// sent for a single `SEARCH` command, allowing incremental result processing.
     ///
     /// - SeeAlso: ``UIDRange``
     public var batches: [UIDRange]

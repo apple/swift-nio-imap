@@ -18,7 +18,7 @@ extension TaggedResponse {
     /// The outcome status of a tagged response.
     ///
     /// Tagged responses use one of three status codes to indicate the outcome of command execution:
-    /// OK (success), NO (rejection with reason), or BAD (protocol error). Each case includes
+    /// `OK` (success), `NO` (rejection with reason), or `BAD` (protocol error). Each case includes
     /// a ``ResponseText`` containing optional structured status codes and human-readable text.
     /// See [RFC 3501 Section 7.1](https://datatracker.ietf.org/doc/html/rfc3501#section-7.1) for details.
     ///
@@ -51,7 +51,7 @@ extension TaggedResponse {
         /// ```
         ///
         /// This line is wrapped as ``State/ok(_:)`` with a ``ResponseText`` containing code
-        /// ``ResponseTextCode/uidValidity(_:)`` and text "SELECT completed".
+        /// ``ResponseTextCode/uidValidity(_:)`` and text "`SELECT` completed".
         ///
         /// - SeeAlso: [RFC 3501 Section 7.1.2.1](https://datatracker.ietf.org/doc/html/rfc3501#section-7.1.2.1)
         case ok(ResponseText)
@@ -71,7 +71,7 @@ extension TaggedResponse {
         /// ```
         ///
         /// This line is wrapped as ``State/no(_:)`` with a ``ResponseText`` containing code
-        /// ``ResponseTextCode/tryCreate`` and text "APPEND failed - mailbox does not exist".
+        /// ``ResponseTextCode/tryCreate`` and text "`APPEND` failed - mailbox does not exist".
         ///
         /// - SeeAlso: [RFC 3501 Section 7.1.2.2](https://datatracker.ietf.org/doc/html/rfc3501#section-7.1.2.2)
         case no(ResponseText)

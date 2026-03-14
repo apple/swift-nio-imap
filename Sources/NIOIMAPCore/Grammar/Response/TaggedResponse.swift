@@ -17,7 +17,7 @@ import struct NIO.ByteBuffer
 /// A tagged response sent by a server to signal that a command has finished processing.
 ///
 /// Every client command receives exactly one tagged response from the server. The response contains
-/// the original command tag (to correlate with the sent command), a status code (OK, NO, or BAD),
+/// the original command tag (to correlate with the sent command), a status code (`OK`, `NO`, or `BAD`),
 /// and optional human-readable text with additional information. Tagged responses mark the completion
 /// of command processing and may include structured status codes (e.g., `[CANNOT]`, `[TRYCREATE]`)
 /// that provide machine-readable details.
@@ -59,7 +59,7 @@ public struct TaggedResponse: Hashable, Sendable {
 
     /// The outcome status of the command execution.
     ///
-    /// Contains the response state (OK for success, NO for rejection, or BAD for protocol error)
+    /// Contains the response state (`OK` for success, `NO` for rejection, or `BAD` for protocol error)
     /// along with a ``ResponseText`` that may include a status code and human-readable message.
     /// See ``State`` for details on each outcome type.
     public var state: State

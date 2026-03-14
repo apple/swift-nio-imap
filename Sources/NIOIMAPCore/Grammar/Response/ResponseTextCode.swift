@@ -59,9 +59,9 @@ public indirect enum ResponseTextCode: Hashable, Sendable {
     /// [RFC 9051](https://datatracker.ietf.org/doc/html/rfc9051) for details.
     case alreadyExists
 
-    /// A SEARCH command failed because the specified character set is unsupported.
+    /// A `SEARCH` command failed because the specified character set is unsupported.
     ///
-    /// This code indicates that a SEARCH command referenced a character set that the server does not
+    /// This code indicates that a `SEARCH` command referenced a character set that the server does not
     /// support. The optional list of character sets indicates which sets are supported by the server,
     /// allowing the client to retry with a supported charset.
     /// See [RFC 3501](https://datatracker.ietf.org/doc/html/rfc3501) and
@@ -70,8 +70,8 @@ public indirect enum ResponseTextCode: Hashable, Sendable {
 
     /// Followed by a list of supported capabilities.
     ///
-    /// This code may appear in the initial OK or PREAUTH response to transmit the server's capability list.
-    /// This allows the client to learn the server's capabilities without sending a separate CAPABILITY command.
+    /// This code may appear in the initial `OK` or `PREAUTH` response to transmit the server's capability list.
+    /// This allows the client to learn the server's capabilities without sending a separate `CAPABILITY` command.
     /// See [RFC 3501](https://datatracker.ietf.org/doc/html/rfc3501) and
     /// [RFC 9051](https://datatracker.ietf.org/doc/html/rfc9051) for details.
     case capability([Capability])
@@ -111,10 +111,10 @@ public indirect enum ResponseTextCode: Hashable, Sendable {
     /// [RFC 9051](https://datatracker.ietf.org/doc/html/rfc9051) for details.
     case readWrite
 
-    /// An APPEND or COPY operation failed because the target mailbox does not exist.
+    /// An `APPEND` or `COPY` operation failed because the target mailbox does not exist.
     ///
     /// This code suggests that the operation can succeed if the mailbox is first created using the
-    /// CREATE command. This is a hint to the client about how to recover from the failure.
+    /// `CREATE` command. This is a hint to the client about how to recover from the failure.
     /// See [RFC 3501](https://datatracker.ietf.org/doc/html/rfc3501) and
     /// [RFC 9051](https://datatracker.ietf.org/doc/html/rfc9051) for details.
     case tryCreate
@@ -149,10 +149,10 @@ public indirect enum ResponseTextCode: Hashable, Sendable {
     /// See [RFC 2342](https://datatracker.ietf.org/doc/html/rfc2342) (NAMESPACE Extension) for details.
     case namespace(NamespaceResponse)
 
-    /// Indicates the UIDVALIDITY and UID assigned to an appended message.
+    /// Indicates the `UIDVALIDITY` and `UID` assigned to an appended message.
     ///
-    /// This code is returned in response to an APPEND command. It contains the UIDVALIDITY of the
-    /// destination mailbox and the UID assigned to the newly appended message in that mailbox.
+    /// This code is returned in response to an `APPEND` command. It contains the `UIDVALIDITY` of the
+    /// destination mailbox and the `UID` assigned to the newly appended message in that mailbox.
     /// This is part of the UIDPLUS extension.
     /// See [RFC 4315](https://datatracker.ietf.org/doc/html/rfc4315) and
     /// [RFC 9051](https://datatracker.ietf.org/doc/html/rfc9051) for details.
@@ -160,8 +160,8 @@ public indirect enum ResponseTextCode: Hashable, Sendable {
 
     /// Indicates the UIDs of messages copied to a destination mailbox.
     ///
-    /// This code is returned in response to a COPY command. It contains the UIDVALIDITY of the
-    /// destination mailbox and the UIDs assigned to the copied message(s) in that mailbox.
+    /// This code is returned in response to a `COPY` command. It contains the `UIDVALIDITY` of the
+    /// destination mailbox and the `UID`s assigned to the copied message(s) in that mailbox.
     /// This is part of the UIDPLUS extension.
     /// See [RFC 4315](https://datatracker.ietf.org/doc/html/rfc4315) and
     /// [RFC 9051](https://datatracker.ietf.org/doc/html/rfc9051) for details.
@@ -169,9 +169,9 @@ public indirect enum ResponseTextCode: Hashable, Sendable {
 
     /// The selected mailbox does not support persistent UIDs.
     ///
-    /// This code indicates that the mail store does not support persistent UIDs; the UIDVALIDITY
-    /// value will be different each time the mailbox is selected. Therefore, APPEND and COPY commands
-    /// will not return APPENDUID or COPYUID codes.
+    /// This code indicates that the mail store does not support persistent UIDs; the `UIDVALIDITY`
+    /// value will be different each time the mailbox is selected. Therefore, `APPEND` and `COPY` commands
+    /// will not return `APPENDUID` or `COPYUID` codes.
     /// This is part of the UIDPLUS extension.
     /// See [RFC 4315](https://datatracker.ietf.org/doc/html/rfc4315) and
     /// [RFC 9051](https://datatracker.ietf.org/doc/html/rfc9051) for details.
@@ -179,7 +179,7 @@ public indirect enum ResponseTextCode: Hashable, Sendable {
 
     /// The special-use attribute cannot be assigned to this mailbox.
     ///
-    /// This code indicates that the CREATE command failed because the server cannot create a mailbox
+    /// This code indicates that the `CREATE` command failed because the server cannot create a mailbox
     /// with the specified special-use attribute. This is part of the Special-Use Mailbox extension.
     /// See [RFC 6154](https://datatracker.ietf.org/doc/html/rfc6154) (Special-Use Mailbox Attributes) for details.
     case useAttribute
@@ -191,9 +191,9 @@ public indirect enum ResponseTextCode: Hashable, Sendable {
     /// string is any accompanying data.
     case other(String, String?)
 
-    /// The server refused to save a SEARCH (SAVE) result.
+    /// The server refused to save a `SEARCH` (`SAVE`) result.
     ///
-    /// This code indicates that a SEARCH (SAVE) command failed because the server has reached an
+    /// This code indicates that a `SEARCH` (`SAVE`) command failed because the server has reached an
     /// internal limit on the number of saved search results.
     /// This is part of the extended SEARCH extension.
     /// See [RFC 5182](https://datatracker.ietf.org/doc/html/rfc5182) (Last SEARCH Result Reference Extension) for details.
@@ -202,7 +202,7 @@ public indirect enum ResponseTextCode: Hashable, Sendable {
     /// Boundary marker between responses for different mailboxes.
     ///
     /// This code appears when the server closes one mailbox and selects another. All responses
-    /// before the CLOSED code relate to the previously selected mailbox, and all responses after
+    /// before the `CLOSED` code relate to the previously selected mailbox, and all responses after
     /// relate to the newly selected mailbox.
     /// See [RFC 5162](https://datatracker.ietf.org/doc/html/rfc5162) and
     /// [RFC 9051](https://datatracker.ietf.org/doc/html/rfc9051) for details.
@@ -210,22 +210,22 @@ public indirect enum ResponseTextCode: Hashable, Sendable {
 
     /// The selected mailbox does not support persistent modification sequences.
     ///
-    /// This code appears in the OK response to SELECT or EXAMINE commands when the server does not
+    /// This code appears in the `OK` response to `SELECT` or `EXAMINE` commands when the server does not
     /// support persistent storage of modification sequences (mod-sequences) for the mailbox. Each
-    /// successful SELECT or EXAMINE must include this code if the mailbox lacks mod-sequence support.
+    /// successful `SELECT` or `EXAMINE` must include this code if the mailbox lacks mod-sequence support.
     /// See [RFC 4551](https://datatracker.ietf.org/doc/html/rfc4551) (CONDSTORE Extension) for details.
     case noModificationSequence
 
-    /// Indicates which messages were modified by a STORE command.
+    /// Indicates which messages were modified by a `STORE` command.
     ///
-    /// This code is returned in response to a STORE command and lists the messages that were actually
+    /// This code is returned in response to a `STORE` command and lists the messages that were actually
     /// modified. This allows the client to detect when the server rejected modifications for specific messages.
     /// See [RFC 4551](https://datatracker.ietf.org/doc/html/rfc4551) (CONDSTORE Extension) for details.
     case modified(LastCommandSet<UnknownMessageIdentifier>)
 
     /// Indicates the highest modification sequence value in the mailbox.
     ///
-    /// This code appears in OK responses to SELECT or EXAMINE commands when the server supports
+    /// This code appears in `OK` responses to `SELECT` or `EXAMINE` commands when the server supports
     /// persistent modification sequences. The value indicates the highest mod-sequence value assigned
     /// to any message in the mailbox.
     /// See [RFC 4551](https://datatracker.ietf.org/doc/html/rfc4551) (CONDSTORE Extension) for details.
@@ -233,8 +233,8 @@ public indirect enum ResponseTextCode: Hashable, Sendable {
 
     /// A metadata entry value exceeded the MAXSIZE limit.
     ///
-    /// This code is returned in the GETMETADATA command response when one or more entry values
-    /// exceed the MAXSIZE limit. The value indicates the size of the largest entry that was requested
+    /// This code is returned in the `GETMETADATA` command response when one or more entry values
+    /// exceed the `MAXSIZE` limit. The value indicates the size of the largest entry that was requested
     /// but exceeded the limit.
     /// This is part of the METADATA extension.
     /// See [RFC 5464](https://datatracker.ietf.org/doc/html/rfc5464) (METADATA Extension) for details.
@@ -242,7 +242,7 @@ public indirect enum ResponseTextCode: Hashable, Sendable {
 
     /// The server cannot set an annotation due to size limitations.
     ///
-    /// This code indicates that a SETMETADATA command failed because an entry value is too large.
+    /// This code indicates that a `SETMETADATA` command failed because an entry value is too large.
     /// The value indicates the maximum size allowed by the server.
     /// This is part of the METADATA extension.
     /// See [RFC 5464](https://datatracker.ietf.org/doc/html/rfc5464) (METADATA Extension) for details.
@@ -250,7 +250,7 @@ public indirect enum ResponseTextCode: Hashable, Sendable {
 
     /// The maximum number of allowed annotations has been reached.
     ///
-    /// This code indicates that a SETMETADATA command failed because the server has reached the
+    /// This code indicates that a `SETMETADATA` command failed because the server has reached the
     /// maximum number of annotations allowed for the mailbox or server.
     /// This is part of the METADATA extension.
     /// See [RFC 5464](https://datatracker.ietf.org/doc/html/rfc5464) (METADATA Extension) for details.
@@ -266,14 +266,14 @@ public indirect enum ResponseTextCode: Hashable, Sendable {
 
     /// Indicates the supported authentication mechanisms for URLAUTH.
     ///
-    /// This code appears in OK responses to RESETKEY, SELECT, or EXAMINE commands. For RESETKEY,
-    /// it may appear in the tagged OK response instead of a separate untagged response.
+    /// This code appears in `OK` responses to `RESETKEY`, `SELECT`, or `EXAMINE` commands. For `RESETKEY`,
+    /// it may appear in the tagged `OK` response instead of a separate untagged response.
     /// See [RFC 4467](https://datatracker.ietf.org/doc/html/rfc4467) for details.
     case urlMechanisms([MechanismBase64])
 
     /// The server directs the client to another IMAP server.
     ///
-    /// This code is returned in a BYE response when the server is not accepting connections and wishes
+    /// This code is returned in a `BYE` response when the server is not accepting connections and wishes
     /// to direct the client to another server for the same account or mailbox. The IMAP URL points to
     /// the referral server.
     /// See [RFC 2221](https://datatracker.ietf.org/doc/html/rfc2221) for details.

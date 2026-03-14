@@ -53,8 +53,8 @@ import struct OrderedCollections.OrderedDictionary
 public enum ResponsePayload: Hashable, Sendable {
     /// Indicates if a command executed successfully or encountered an error.
     ///
-    /// This case wraps an ``UntaggedStatus`` which can be OK (success), NO (warning/rejection),
-    /// BAD (protocol error), PREAUTH (pre-authenticated), or BYE (server closing connection).
+    /// This case wraps an ``UntaggedStatus`` which can be `OK` (success), `NO` (warning/rejection),
+    /// `BAD` (protocol error), `PREAUTH` (pre-authenticated), or `BYE` (server closing connection).
     /// See [RFC 3501 Section 7.1](https://datatracker.ietf.org/doc/html/rfc3501#section-7.1) for
     /// details on status responses.
     case conditionalState(UntaggedStatus)
@@ -73,14 +73,14 @@ public enum ResponsePayload: Hashable, Sendable {
 
     /// An array of capabilities supported by the server.
     ///
-    /// This case is returned in response to CAPABILITY commands or as part of the initial
+    /// This case is returned in response to `CAPABILITY` commands or as part of the initial
     /// server greeting. It indicates which IMAP extensions and features the server supports.
     /// See [RFC 3501 Section 7.1](https://datatracker.ietf.org/doc/html/rfc3501#section-7.1) and ``Capability``.
     case capabilityData([Capability])
 
     /// An array of capabilities that have been enabled on the server by the client.
     ///
-    /// This case is returned in response to an ENABLE command and lists the capabilities
+    /// This case is returned in response to an `ENABLE` command and lists the capabilities
     /// that were successfully enabled. See [RFC 5161](https://datatracker.ietf.org/doc/html/rfc5161)
     /// (ENABLE Extension) for details.
     case enableData([Capability])
@@ -108,7 +108,7 @@ public enum ResponsePayload: Hashable, Sendable {
 
     /// Metadata for a mailbox.
     ///
-    /// This case provides metadata entries for a mailbox, as requested by a GETMETADATA command.
+    /// This case provides metadata entries for a mailbox, as requested by a `GETMETADATA` command.
     /// See [RFC 5464](https://datatracker.ietf.org/doc/html/rfc5464) (METADATA Extension) for details.
     case metadata(MetadataResponse)
 

@@ -12,13 +12,13 @@
 //
 //===----------------------------------------------------------------------===//
 
-/// The COPYUID response code returned after a successful COPY or MOVE command.
+/// The `COPYUID` response code returned after a successful `COPY` or `MOVE` command.
 ///
-/// When a COPY or MOVE command completes successfully, the server may return this response code
+/// When a `COPY` or `MOVE` command completes successfully, the server may return this response code
 /// containing the UID validity of the destination mailbox and two parallel sets of UIDs. The first
 /// set contains the UIDs of the source messages (in the source mailbox), and the second set contains
 /// the UIDs assigned to the copied messages in the destination mailbox. This allows clients to
-/// correlate copied messages without issuing separate SEARCH commands. See [RFC 4315](https://datatracker.ietf.org/doc/html/rfc4315)
+/// correlate copied messages without issuing separate `SEARCH` commands. See [RFC 4315](https://datatracker.ietf.org/doc/html/rfc4315)
 /// (UIDPLUS Extension) for details.
 ///
 /// ### Example

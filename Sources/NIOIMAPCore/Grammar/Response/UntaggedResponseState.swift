@@ -77,10 +77,10 @@ public enum UntaggedStatus: Hashable, Sendable {
 
     /// Indicates a protocol-level error.
     ///
-    /// The BAD response indicates an error message from the server. When tagged, it reports a
+    /// The `BAD` response indicates an error message from the server. When tagged, it reports a
     /// protocol-level error in the client's command; the tag indicates the command that caused the
     /// error. The untagged form indicates a protocol-level error for which the associated command
-    /// cannot be determined; it can also indicate an internal server failure. After a BAD response,
+    /// cannot be determined; it can also indicate an internal server failure. After a `BAD` response,
     /// the connection may be in an undefined state.
     ///
     /// ### Example
@@ -96,10 +96,10 @@ public enum UntaggedStatus: Hashable, Sendable {
 
     /// Indicates that the connection has already been authenticated by external means.
     ///
-    /// The PREAUTH response is always untagged and is one of three possible greetings at connection
-    /// startup (along with OK and BYE). It indicates that the connection has already been
+    /// The `PREAUTH` response is always untagged and is one of three possible greetings at connection
+    /// startup (along with `OK` and `BYE`). It indicates that the connection has already been
     /// authenticated through external means (e.g., TLS client certificate verification), so no
-    /// LOGIN command is needed. After PREAUTH, the client is in the authenticated state and can
+    /// `LOGIN` command is needed. After `PREAUTH`, the client is in the authenticated state and can
     /// access mailboxes.
     ///
     /// ### Example
@@ -116,9 +116,9 @@ public enum UntaggedStatus: Hashable, Sendable {
 
     /// Indicates that the server is about to close the connection.
     ///
-    /// The BYE response is always untagged and indicates that the server is about to close the
+    /// The `BYE` response is always untagged and indicates that the server is about to close the
     /// connection. This may be sent by the server as a closing greeting, or to inform the client
-    /// of an unexpected shutdown. After receiving BYE, the client should close the connection.
+    /// of an unexpected shutdown. After receiving `BYE`, the client should close the connection.
     /// The server may provide a human-readable explanation in the response text.
     ///
     /// ### Example
