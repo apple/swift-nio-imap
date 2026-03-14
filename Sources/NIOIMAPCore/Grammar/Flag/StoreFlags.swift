@@ -14,92 +14,162 @@
 
 import struct NIO.ByteBuffer
 
-/// What operation to perform on the flags.
+/// The operation to perform on message flags in a `STORE` command.
+///
+/// The `STORE` command modifies message flags in one of three ways: add new flags, remove existing flags,
+/// or replace all flags. The operation is specified as part of the `STORE` command syntax defined in
+/// [RFC 3501 Section 6.4.6](https://datatracker.ietf.org/doc/html/rfc3501#section-6.4.6).
+///
+/// - SeeAlso: [RFC 3501 Section 6.4.6](https://datatracker.ietf.org/doc/html/rfc3501#section-6.4.6)
 public enum StoreOperation: String, Hashable, Sendable {
-    /// Add to the flags for the message.
+    /// Add the specified flags to the message's existing flags.
+    ///
+    /// Other flags on the message are preserved. This corresponds to the `+FLAGS` operation in IMAP.
     case add = "+"
 
-    /// Remove from the flags for the message.
+    /// Remove the specified flags from the message's flags.
+    ///
+    /// Other flags on the message are preserved. This corresponds to the `-FLAGS` operation in IMAP.
     case remove = "-"
 
-    /// Replace the flags for the message (other than \Recent).
+    /// Replace all flags on the message with the specified flags.
+    ///
+    /// All existing flags are removed except `\Recent` (which is read-only). This corresponds to the `FLAGS`
+    /// operation in IMAP. This corresponds to the `FLAGS` operation in IMAP.
     case replace = ""
 }
 
+/// Data for a `STORE` command to modify message attributes.
+///
+/// The `STORE` command can modify both standard message flags and Gmail-specific labels. This enum represents
+/// the different types of data that can be stored on messages.
+///
+/// - SeeAlso: ``StoreFlags``
+/// - SeeAlso: ``StoreGmailLabels``
 public enum StoreData: Hashable, Sendable {
+    /// Modify standard IMAP message flags (add, remove, or replace).
     case flags(StoreFlags)
+
+    /// Modify Gmail-specific labels (Gmail extension, requires X-GM-EXT-1 capability).
     case gmailLabels(StoreGmailLabels)
 }
 
+/// Gmail-specific labels for a `STORE` command.
+///
+/// Gmail labels are extended attributes for Gmail messages, separate from standard IMAP flags.
+/// They are supported only on Gmail IMAP servers that advertise the `X-GM-EXT-1` capability.
+/// Labels can be added, removed, or replaced using the `X-GM-LABELS` attribute in `STORE` commands.
+///
+/// - SeeAlso: ``StoreOperation``
+/// - SeeAlso: ``GmailLabel``
+/// - SeeAlso: https://developers.google.com/gmail/imap/imap-extensions
 public struct StoreGmailLabels: Hashable, Sendable {
-    /// Convenience function to create a new *add* operation.
-    /// - parameter silent: `false` if the server should return the new flags list for the message(s), otherwise `true`.
-    /// - parameter list: The `Flag`s to add.
-    /// - returns: A new `StoreFlags`
+    /// The operation to perform on Gmail labels (add, remove, or replace).
+    public var operation: StoreOperation
+
+    /// Whether the server should suppress sending the updated labels list back to the client.
+    ///
+    /// When `true`, the server uses `.SILENT` mode and does not send a `FETCH` response with the new labels.
+    /// When `false`, the server responds with the updated labels.
+    public var silent: Bool
+
+    /// The Gmail labels to operate on.
+    public var gmailLabels: [GmailLabel]
+
+    /// Creates a new add operation for Gmail labels.
+    ///
+    /// - parameter silent: `true` to suppress the server's response, `false` to receive the updated labels list.
+    /// - parameter gmailLabels: The labels to add (defaults to empty array).
+    /// - returns: A new ``StoreGmailLabels`` configured for adding labels.
     public static func add(silent: Bool, gmailLabels: [GmailLabel] = []) -> Self {
         Self(operation: .add, silent: silent, gmailLabels: gmailLabels)
     }
 
-    /// Convenience function to create a new *remove* operation.
-    /// - parameter silent: `false` if the server should return the new flags list for the message(s), otherwise `true`.
-    /// - parameter list: The `Flag`s to remove.
-    /// - returns: A new `StoreFlags`
+    /// Creates a new remove operation for Gmail labels.
+    ///
+    /// - parameter silent: `true` to suppress the server's response, `false` to receive the updated labels list.
+    /// - parameter gmailLabels: The labels to remove (defaults to empty array).
+    /// - returns: A new ``StoreGmailLabels`` configured for removing labels.
     public static func remove(silent: Bool, gmailLabels: [GmailLabel] = []) -> Self {
         Self(operation: .remove, silent: silent, gmailLabels: gmailLabels)
     }
 
-    /// Convenience function to create a new *add* operation.
-    /// - parameter silent: `false` if the server should return the new flags list for the message(s), otherwise `true`.
-    /// - parameter list: The `Flag`s to replace.
-    /// - returns: A new `StoreFlags`
+    /// Creates a new replace operation for Gmail labels.
+    ///
+    /// - parameter silent: `true` to suppress the server's response, `false` to receive the updated labels list.
+    /// - parameter gmailLabels: The labels to set as the complete set (defaults to empty array).
+    /// - returns: A new ``StoreGmailLabels`` configured for replacing all labels.
     public static func replace(silent: Bool, gmailLabels: [GmailLabel] = []) -> Self {
         Self(operation: .replace, silent: silent, gmailLabels: gmailLabels)
     }
-
-    /// The type of flag operation e.g. add, remove, or replace.
-    public var operation: StoreOperation
-
-    /// `false` if the server should return the new `Flag`s list for each message, otherwise `true`.
-    public var silent: Bool
-
-    /// The `GmailLabel`s to operate on.
-    public var gmailLabels: [GmailLabel]
 }
 
-/// Defines if certain flags should be added, removed, or replaced.
+/// Standard IMAP message flags for a `STORE` command.
+///
+/// This type specifies a set of flags to add to, remove from, or replace on messages via the `STORE` command.
+/// The operation (add/remove/replace) and whether to suppress the server response are configured separately.
+///
+/// Flags are described in [RFC 3501 Section 2.3](https://datatracker.ietf.org/doc/html/rfc3501#section-2.3)
+/// and the `STORE` command in [RFC 3501 Section 6.4.6](https://datatracker.ietf.org/doc/html/rfc3501#section-6.4.6).
+///
+/// ### Example
+///
+/// ```
+/// C: A001 STORE 1:5 +FLAGS (\Seen)
+/// S: * 1 FETCH (FLAGS (\Answered \Seen))
+/// S: * 2 FETCH (FLAGS (\Seen))
+/// S: * 3 FETCH (FLAGS (\Seen))
+/// S: * 4 FETCH (FLAGS (\Seen))
+/// S: * 5 FETCH (FLAGS (\Seen))
+/// S: A001 OK STORE completed
+/// ```
+///
+/// The `+FLAGS` operation corresponds to a ``StoreFlags`` with ``operation`` = ``StoreOperation/add`` and
+/// ``flags`` = `[\Seen]`.
+///
+/// - SeeAlso: [RFC 3501 Section 2.3](https://datatracker.ietf.org/doc/html/rfc3501#section-2.3)
+/// - SeeAlso: [RFC 3501 Section 6.4.6](https://datatracker.ietf.org/doc/html/rfc3501#section-6.4.6)
+/// - SeeAlso: ``StoreOperation``
+/// - SeeAlso: ``Flag``
 public struct StoreFlags: Hashable, Sendable {
-    /// Convenience function to create a new *add* operation.
-    /// - parameter silent: `false` if the server should return the new flags list for the message(s), otherwise `true`.
-    /// - parameter list: The `Flag`s to add.
-    /// - returns: A new `StoreFlags`
+    /// The operation to perform on flags (add, remove, or replace).
+    public var operation: StoreOperation
+
+    /// Whether the server should suppress sending the updated flags list back to the client.
+    ///
+    /// When `true`, the server uses `.SILENT` mode and does not send a `FETCH` response with the new flags.
+    /// When `false` (default), the server responds with the updated flags for each affected message.
+    public var silent: Bool
+
+    /// The flags to operate on.
+    public var flags: [Flag]
+
+    /// Creates a new add operation for message flags.
+    ///
+    /// - parameter silent: `true` to suppress the server's response, `false` to receive the updated flags list.
+    /// - parameter list: The flags to add to each message.
+    /// - returns: A new ``StoreFlags`` configured for adding flags.
     public static func add(silent: Bool, list: [Flag]) -> Self {
         Self(operation: .add, silent: silent, flags: list)
     }
 
-    /// Convenience function to create a new *remove* operation.
-    /// - parameter silent: `false` if the server should return the new flags list for the message(s), otherwise `true`.
-    /// - parameter list: The `Flag`s to remove.
-    /// - returns: A new `StoreFlags`
+    /// Creates a new remove operation for message flags.
+    ///
+    /// - parameter silent: `true` to suppress the server's response, `false` to receive the updated flags list.
+    /// - parameter list: The flags to remove from each message.
+    /// - returns: A new ``StoreFlags`` configured for removing flags.
     public static func remove(silent: Bool, list: [Flag]) -> Self {
         Self(operation: .remove, silent: silent, flags: list)
     }
 
-    /// Convenience function to create a new *add* operation.
-    /// - parameter silent: `false` if the server should return the new flags list for the message(s), otherwise `true`.
-    /// - parameter list: The `Flag`s to replace.
-    /// - returns: A new `StoreFlags`
+    /// Creates a new replace operation for message flags.
+    ///
+    /// - parameter silent: `true` to suppress the server's response, `false` to receive the updated flags list.
+    /// - parameter list: The complete set of flags to assign to each message (replaces existing flags except `\Recent`).
+    /// - returns: A new ``StoreFlags`` configured for replacing all flags.
     public static func replace(silent: Bool, list: [Flag]) -> Self {
         Self(operation: .replace, silent: silent, flags: list)
     }
-
-    /// The type of flag operation e.g. add, remove, or replace.
-    public var operation: StoreOperation
-
-    /// `false` if the server should return the new `Flag`s list for each message, otherwise `true`.
-    public var silent: Bool
-
-    /// The `Flag`s to operate on.
-    public var flags: [Flag]
 }
 
 // MARK: - Encoding
