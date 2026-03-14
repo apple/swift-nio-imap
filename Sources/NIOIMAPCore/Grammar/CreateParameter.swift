@@ -14,12 +14,47 @@
 
 import struct NIO.ByteBuffer
 
-/// Parameters to use when creating a mailbox.
+/// Parameters that modify the behavior of the `CREATE` command.
+///
+/// The `CreateParameter` enum allows clients to attach special attributes or other
+/// metadata when creating a new mailbox. Currently, the primary use is the `USE` option
+/// (RFC 6154) to assign special-use attributes (like `\All`, `\Drafts`, `\Trash`) to
+/// newly created mailboxes. The `labelled` case provides extensibility for future
+/// CREATE parameters.
+///
+/// ### Example
+///
+/// ```
+/// C: A001 CREATE DraftsFolder USE (\Drafts)
+/// S: A001 OK CREATE completed
+/// ```
+///
+/// The `USE (\Drafts)` portion is represented as `CreateParameter.attributes([.drafts])`.
+///
+/// - SeeAlso: [RFC 3501 Section 6.3.3](https://datatracker.ietf.org/doc/html/rfc3501#section-6.3.3) (CREATE Command)
+/// - SeeAlso: [RFC 6154 Section 2](https://datatracker.ietf.org/doc/html/rfc6154#section-2) (USE Attribute)
+/// - SeeAlso: ``Command/create(_:parameters:)``
 public enum CreateParameter: Hashable, Sendable {
-    /// Implemented as a catch-all to provide support for cases defined in future extensions.
+    /// A generic CREATE parameter (catch-all for extensions).
+    ///
+    /// Used for parameters not specifically handled by other cases, enabling future
+    /// extensions to add new CREATE parameters without requiring code changes.
+    ///
+    /// - parameter KeyValue: A key-value pair representing the parameter
     case labelled(KeyValue<String, ParameterValue?>)
 
-    /// Adds special-use attributes to the newly-created Mailbox.
+    /// Special-use attributes for the newly-created mailbox (RFC 6154).
+    ///
+    /// Assigns one or more special-use attributes to the mailbox, such as `\All`,
+    /// `\Archive`, `\Drafts`, `\Flagged`, `\Important`, `\Junk`, `\Sent`, or `\Trash`.
+    /// These attributes inform mail clients how to treat the mailbox in their UI.
+    ///
+    /// **Requires server capability:** ``Capability/specialUse``
+    ///
+    /// - parameter [UseAttribute]: One or more special-use attributes
+    ///
+    /// - SeeAlso: [RFC 6154](https://datatracker.ietf.org/doc/html/rfc6154) (Special-Use Mailbox Attributes)
+    /// - SeeAlso: ``UseAttribute``
     case attributes([UseAttribute])
 }
 
