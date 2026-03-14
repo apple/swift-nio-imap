@@ -14,69 +14,228 @@
 
 import struct NIO.ByteBuffer
 
-/// Attributes of a message that can be retrieved as part of a `.fetch` command.
+/// A message attribute that can be retrieved using the `FETCH` command (RFC 3501 and extensions).
+///
+/// The `FETCH` command allows clients to retrieve specific attributes of messages from the server.
+/// This enum represents all available fetch attributes, including standard RFC 3501 attributes and
+/// attributes from various IMAP extensions.
+///
+/// ### Standard Attributes (RFC 3501)
+///
+/// Basic message properties like envelope, flags, internal date, and RFC 822 message format.
+///
+/// ### Extension Attributes
+///
+/// - `BODYSTRUCTURE`: Detailed message structure information (RFC 3501)
+/// - `BINARY`: Raw binary content of message sections (RFC 3516 BINARY extension)
+/// - `MODSEQ`: Modification sequence tracking (RFC 7162 CONDSTORE extension)
+/// - `PREVIEW`: Server-generated message preview (RFC 8970)
+/// - `EMAILID` / `THREADID`: Message and thread identifiers (RFC 8474)
+/// - `X-GM-*`: Gmail-specific attributes (non-standard)
+///
+/// ### Attributes with Options
+///
+/// Some attributes support optional parameters:
+/// - ``bodySection(peek:_:)`` supports a `peek` flag (prevents \\Seen flag modification) and partial byte ranges
+/// - ``binary(peek:section:partial:)`` supports peek mode and partial byte ranges
+/// - ``bodyStructure(extensions:)`` controls whether extension fields are included
+/// - ``preview(lazy:)`` supports lazy evaluation of preview text
+///
+/// ### Example
+///
+/// ```
+/// C: A001 FETCH 1 (ENVELOPE FLAGS INTERNALDATE)
+/// S: * 1 FETCH (ENVELOPE (...) FLAGS (\\Seen) INTERNALDATE "17-Jul-1996 09:01:33 -0700")
+/// S: A001 OK FETCH completed
+/// ```
+///
+/// The `ENVELOPE`, `FLAGS`, and `INTERNALDATE` in the FETCH command correspond to ``envelope``,
+/// ``flags``, and ``internalDate`` cases respectively.
+///
+/// - SeeAlso: [RFC 3501 Section 6.4.5](https://datatracker.ietf.org/doc/html/rfc3501#section-6.4.5)
 public enum FetchAttribute: Hashable, Sendable {
-    /// The message's envelope including the sender(s), bcc list, cc list, etc.
+    /// The message envelope structure containing sender, recipient, subject, and date information.
+    ///
+    /// Returns an ``Envelope`` structure with the sender, recipient lists, subject, and other message metadata.
+    /// This is a parsed representation of the message headers.
+    ///
+    /// - SeeAlso: [RFC 3501 Section 7.4.2](https://datatracker.ietf.org/doc/html/rfc3501#section-7.4.2)
     case envelope
 
-    /// The message's flags.
+    /// The message flags currently set on this message.
+    ///
+    /// Returns a list of flags (both standard flags like `\Seen` and custom keywords).
+    /// See ``Flag`` for flag types.
+    ///
+    /// - SeeAlso: [RFC 3501 Section 7.4.2](https://datatracker.ietf.org/doc/html/rfc3501#section-7.4.2)
     case flags
 
-    /// The message's internal date - the date the message was received.
+    /// The internal date of the message (when the message was received by the server).
+    ///
+    /// Returns an ``InternalDate`` representing the server's timestamp for when the message
+    /// entered the mailbox.
+    ///
+    /// - SeeAlso: [RFC 3501 Section 7.4.2](https://datatracker.ietf.org/doc/html/rfc3501#section-7.4.2)
     case internalDate
 
-    /// Functionally equivalent to `.body`, but the format of the data is different and conforms to the RFC 822 syntax.
+    /// The entire message in RFC 822 format (includes headers and body).
+    ///
+    /// Returns the complete message as a single binary string in RFC 822 format. Note that this returns
+    /// the message in RFC 822 syntax rather than the IMAP-specific BODY format.
+    ///
+    /// - SeeAlso: [RFC 3501 Section 7.4.2](https://datatracker.ietf.org/doc/html/rfc3501#section-7.4.2)
     case rfc822
 
-    /// Functionally equivalent to `.body(peek: true, section: .header)`, but the format of the data is different and conforms to the RFC 822 syntax.
+    /// The RFC 822 headers of the message (without the body).
+    ///
+    /// Functionally equivalent to ``bodySection(peek:_:)`` with `peek: true` and `.header`,
+    /// but returns the headers in RFC 822 format rather than IMAP BODY format.
+    ///
+    /// - SeeAlso: [RFC 3501 Section 7.4.2](https://datatracker.ietf.org/doc/html/rfc3501#section-7.4.2)
     case rfc822Header
 
-    /// The RFC 822 size of the message in bytes.
+    /// The size of the message in bytes, as counted using the RFC 822 definition.
+    ///
+    /// Returns the byte count of the message in RFC 822 format. This may differ slightly
+    /// from the actual message size due to line-ending conventions.
+    ///
+    /// - SeeAlso: [RFC 3501 Section 7.4.2](https://datatracker.ietf.org/doc/html/rfc3501#section-7.4.2)
     case rfc822Size
 
-    /// Functionally equivalent to `.body(peek: false, section: .text)`, but the format of the data is different and conforms to the RFC 822 syntax.
+    /// The RFC 822 message body (text portion, excluding headers).
+    ///
+    /// Functionally equivalent to ``bodySection(peek:_:)`` with `peek: false` and `.text`,
+    /// but returns the body in RFC 822 format rather than IMAP BODY format.
+    ///
+    /// - SeeAlso: [RFC 3501 Section 7.4.2](https://datatracker.ietf.org/doc/html/rfc3501#section-7.4.2)
     case rfc822Text
 
-    /// `BODY` and `BODYSTRUCTURE` -- the latter will result in the extension parts
-    /// of the body structure to be returned as part of the response, whereas the former
-    /// will not.
+    /// The message structure (BODY or BODYSTRUCTURE).
+    ///
+    /// Returns a hierarchical structure of the message's MIME parts. When `extensions: true`,
+    /// returns the full BODYSTRUCTURE including extension information; otherwise returns
+    /// the basic BODY structure.
+    ///
+    /// - parameter extensions: If `true`, includes extension fields (BODYSTRUCTURE); if `false`, omits them (BODY)
+    /// - SeeAlso: [RFC 3501 Section 7.4.2](https://datatracker.ietf.org/doc/html/rfc3501#section-7.4.2)
     case bodyStructure(extensions: Bool)
 
-    /// `BODY[<section>]<<partial>>` and `BODY.PEEK[<section>]<<partial>>`
+    /// A specific section of the message body (headers, text, MIME parts, or entire message).
+    ///
+    /// Allows fetching of specific parts of the message, including individual MIME parts and
+    /// their headers. Supports partial byte ranges for efficient fetching of large parts.
+    ///
+    /// - parameter peek: If `true`, does not set the `\Seen` flag on the message; if `false`, sets `\Seen`
+    /// - parameter section: The section specifier (e.g., `1`, `1.1`, `HEADER`, `TEXT`)
+    /// - parameter partial: Optional byte range `startOctet..<endOctet` to fetch only a portion
+    /// - SeeAlso: [RFC 3501 Section 7.4.2](https://datatracker.ietf.org/doc/html/rfc3501#section-7.4.2)
     case bodySection(peek: Bool, _ section: SectionSpecifier, ClosedRange<UInt32>?)
 
-    /// The unique identifier of the message.
+    /// The unique identifier (UID) of the message.
+    ///
+    /// Returns the message's UID, which is stable across sessions and not affected by message
+    /// deletions or mailbox state changes (unless the UIDVALIDITY changes).
+    ///
+    /// - SeeAlso: [RFC 3501 Section 7.4.2](https://datatracker.ietf.org/doc/html/rfc3501#section-7.4.2)
     case uid
 
-    /// The modification sequence of the message.
+    /// The modification sequence value of the message (CONDSTORE extension).
+    ///
+    /// Returns a marker indicating that the MODSEQ fetch attribute is present, but the actual
+    /// mod-sequence value is returned separately. This is less common than ``modificationSequenceValue(_:)``.
+    ///
+    /// **Requires server capability:** ``Capability/condstore``
+    ///
+    /// - SeeAlso: [RFC 7162 Section 3.1.4](https://datatracker.ietf.org/doc/html/rfc7162#section-3.1.4)
     case modificationSequence
 
-    /// The modification sequence value.
+    /// The modification sequence value of the message with a specific value (CONDSTORE extension).
+    ///
+    /// When used with a conditional FETCH modifier like `CHANGEDSINCE`, the server returns the
+    /// actual mod-sequence value of the message.
+    ///
+    /// **Requires server capability:** ``Capability/condstore``
+    ///
+    /// - parameter value: The specific modification sequence value to fetch
+    /// - SeeAlso: [RFC 7162 Section 3.1.4](https://datatracker.ietf.org/doc/html/rfc7162#section-3.1.4)
     case modificationSequenceValue(ModificationSequenceValue)
 
-    /// The binary data of the specified message section.
+    /// Raw binary data of a specific message section (BINARY extension).
+    ///
+    /// Like ``bodySection(peek:_:)`` but returns raw binary data instead of IMAP-formatted body data.
+    /// Supports partial byte ranges for efficient fetching.
+    ///
+    /// **Requires server capability:** ``Capability/binary``
+    ///
+    /// - parameter peek: If `true`, does not set the `\Seen` flag; if `false`, sets `\Seen`
+    /// - parameter section: The specific MIME part to fetch (e.g., `1`, `1.1`)
+    /// - parameter partial: Optional byte range to fetch only a portion
+    /// - SeeAlso: [RFC 3516](https://datatracker.ietf.org/doc/html/rfc3516)
     case binary(peek: Bool, section: SectionSpecifier.Part, partial: ClosedRange<UInt32>?)
 
-    /// The size of the specified message section.
+    /// The size of a specific message section in bytes (BINARY extension).
+    ///
+    /// Returns only the byte count of the specified section, without the actual data.
+    ///
+    /// **Requires server capability:** ``Capability/binary``
+    ///
+    /// - parameter section: The specific MIME part whose size to fetch
+    /// - SeeAlso: [RFC 3516](https://datatracker.ietf.org/doc/html/rfc3516)
     case binarySize(section: SectionSpecifier.Part)
 
-    /// The message's GMail ID.
+    /// The message's Gmail-assigned message ID (Gmail extension, non-standard).
+    ///
+    /// This is a Gmail-specific extension that returns the unique message identifier within
+    /// Gmail's system. Not part of the IMAP standard.
+    ///
+    /// - SeeAlso:  https://developers.google.com/gmail/imap/imap-extensions
     case gmailMessageID
 
-    /// The messages GMail Thread Id - the group of messages that this message belongs to.
+    /// The message's Gmail thread ID (Gmail extension, non-standard).
+    ///
+    /// This is a Gmail-specific extension that returns the identifier for the thread/conversation
+    /// this message belongs to. Not part of the IMAP standard.
+    ///
+    /// - SeeAlso:  https://developers.google.com/gmail/imap/imap-extensions
     case gmailThreadID
 
-    /// The message's GMail labels.
+    /// The message's Gmail labels (Gmail extension, non-standard).
+    ///
+    /// This is a Gmail-specific extension that returns the list of labels (like folders) applied
+    /// to this message. Not part of the IMAP standard.
+    ///
+    /// - SeeAlso:  https://developers.google.com/gmail/imap/imap-extensions
     case gmailLabels
 
-    /// The RFC 8970 Server-generated abbreviated text representation of message
-    /// data that is useful as a contextual preview of the entire message.
+    /// A server-generated preview of the message content (RFC 8970).
+    ///
+    /// Returns a brief excerpt of the message content, useful for displaying message previews
+    /// without fetching the full message body.
+    ///
+    /// **Requires server capability:** ``Capability/preview``
+    ///
+    /// - parameter lazy: If `true`, server may delay generating the preview; if `false`, must be available immediately
+    /// - SeeAlso: [RFC 8970](https://datatracker.ietf.org/doc/html/rfc8970)
     case preview(lazy: Bool)
 
-    /// RFC 8474 message identifiers
+    /// The message's email ID (RFC 8474 OBJECTID extension).
+    ///
+    /// Returns a stable, unique identifier for the message that persists across mailbox
+    /// reorganizations. Different from UID, which can change if the mailbox is reconstructed.
+    ///
+    /// **Requires server capability:** ``Capability/objectID``
+    ///
+    /// - SeeAlso: [RFC 8474](https://datatracker.ietf.org/doc/html/rfc8474)
     case emailID
 
-    /// RFC 8474 thread identifiers
+    /// The message's thread ID (RFC 8474 OBJECTID extension).
+    ///
+    /// Returns a stable identifier for the conversation/thread this message belongs to.
+    /// Messages with the same thread ID are part of the same conversation.
+    ///
+    /// **Requires server capability:** ``Capability/objectID``
+    ///
+    /// - SeeAlso: [RFC 8474](https://datatracker.ietf.org/doc/html/rfc8474)
     case threadID
 }
 
