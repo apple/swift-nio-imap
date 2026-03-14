@@ -8,7 +8,7 @@ This project implements:
  * Extensive support for common IMAP extensions
  * Integration with SwiftNIO
 
-For a list of IMAP extensions, see [EXTENSIONS.md](EXTENSIONS.md). 
+For a list of IMAP extensions, see SupportedExtensions.md in the documentation. 
 
 ⚠️ **Note:** This library is still in development phases and not ready to be used in production system yet. ⚠️ 
 
