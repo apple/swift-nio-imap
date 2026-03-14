@@ -15,19 +15,48 @@
 import struct NIO.ByteBuffer
 
 extension BodyStructure {
-    /// Pairs a location with `BodyExtensions`s. An abstraction from RFC 3501
-    /// to make the API slightly easier to work with and enforce validity.
+    /// Content location URI and future extension fields for a message part.
+    ///
+    /// This type pairs a content location URI (defined in [RFC 2557](https://datatracker.ietf.org/doc/html/rfc2557))
+    /// with a list of future extension fields. The location provides a URI where the message part content can be
+    /// retrieved, and extensions allow servers to add new fields without breaking existing clients.
+    ///
+    /// Both the location and extensions are optional fields in the body structure defined in
+    /// [RFC 3501 Section 7.4.2](https://datatracker.ietf.org/doc/html/rfc3501#section-7.4.2).
+    ///
+    /// This is an API abstraction to simplify working with the location/extension pairing from the raw IMAP message.
+    ///
+    /// ### Example
+    ///
+    /// ```
+    /// C: A001 FETCH 1 (BODYSTRUCTURE)
+    /// S: * 1 FETCH (BODYSTRUCTURE ("text" "html" NIL NIL NIL "7bit" 1024 30 NIL NIL NIL "https://example.com/part" 42))
+    /// S: A001 OK FETCH completed
+    /// ```
+    ///
+    /// The location `"https://example.com/part"` and extension value `42` correspond to a ``LocationAndExtensions``
+    /// with ``location`` = `"https://example.com/part"` and ``extensions`` = `[.number(42)]`.
+    ///
+    /// - SeeAlso: [RFC 3501 Section 7.4.2](https://datatracker.ietf.org/doc/html/rfc3501#section-7.4.2)
+    /// - SeeAlso: [RFC 2557](https://datatracker.ietf.org/doc/html/rfc2557)
+    /// - SeeAlso: ``BodyExtension``
     public struct LocationAndExtensions: Hashable, Sendable {
-        /// A string giving the body content URI. Defined in LOCATION.
+        /// Optional URI indicating where the message part content can be retrieved.
+        ///
+        /// Defined in [RFC 2557](https://datatracker.ietf.org/doc/html/rfc2557). When `nil`, no location is specified.
         public var location: String?
 
-        /// An array of extension fields that are not formally defined, but may be in future capabilities.
-        /// This is a method of future proofing clients.
+        /// Future extension fields not yet formally defined.
+        ///
+        /// Extensions allow servers to include additional fields in the body structure without breaking
+        /// existing clients. These fields follow the ``BodyExtension`` format (strings or integers).
+        /// New extension fields can be added in future IMAP specifications.
         public var extensions: [BodyExtension]
 
-        /// Creates a new `LocationAndExtensions` pair.
-        /// - parameter location: A string giving the body content URI. Defined in LOCATION.
-        /// - parameter extensions: An array of extension fields that are not formally defined, but may be in future capabilities.
+        /// Creates a location and extensions pairing.
+        ///
+        /// - parameter location: Optional URI where content can be retrieved.
+        /// - parameter extensions: Array of extension fields (typically empty for current usage).
         public init(location: String?, extensions: [BodyExtension]) {
             self.location = location
             self.extensions = extensions
