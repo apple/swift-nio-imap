@@ -15,30 +15,67 @@
 import struct NIO.ByteBuffer
 
 extension MessageAttribute {
-    /// A common parser failure is inside `BodyStructure`.
+    /// A helper type for parsing `BODY` responses which may contain invalid or malformed body structures.
     ///
-    /// This helper type is able to express failure to parse the RFC 3501 `body` (`NIOIMAPCore.BodyStructure`),
-    /// without failing the overall parsing.
+    /// Servers must parse MIME messages to build up `BODY` data, and since many real-world messages
+    /// are malformed or intentionally corrupted, servers sometimes generate invalid `BODY` structures.
+    /// Rather than fail the entire message parsing, this wrapper allows distinguishing between valid
+    /// and invalid `BODYSTRUCTURE` data.
     ///
-    /// A server has to parse a MIME message to build up the RFC 3501 `body` data, and since there are a lot of
-    /// badly formatted messages in the wild, servers can sometimes end up generating “bad” `body` data.
-    /// The most common source is from junk messages, that are more-or-less intentionally ill-formated.
+    /// - SeeAlso: [RFC 3501 Section 7.4.2](https://datatracker.ietf.org/doc/html/rfc3501#section-7.4.2)
     public enum BodyStructure: Hashable, Sendable {
-        /// A normal, valid RFC 3501 `body` (aka. body structure).
+        /// A valid `BODY` structure conforming to RFC 3501 format.
         case valid(NIOIMAPCore.BodyStructure)
-        /// We failed to parse the body structure.
+        /// Parsing failed to produce a valid `BODY` structure.
         case invalid
     }
 }
 
-/// A parsed representation of the MIME-IMB body structure information of the message.
-/// Recomended reading: RFC 3501 § 2.6.3 and 7.4.2.
+/// The hierarchical structure of a message body, representing the MIME composition (RFC 3501).
+///
+/// A `BODY` structure describes the composition of an email message, including how it is divided
+/// into parts and what media types each part contains. This is critical for clients to understand
+/// the message composition before downloading individual parts.
+///
+/// `BodyStructure` is a recursive type: a single-part message body may contain a nested message
+/// (which itself has a `BODY` structure), and a multipart message contains multiple sub-bodies.
+/// The type conforms to `RandomAccessCollection`, allowing clients to navigate the tree of parts
+/// using ``SectionSpecifier.Part`` indices.
+///
+/// ### Examples
+///
+/// **Single-part message:**
+/// ```
+/// C: A001 FETCH 1 (BODYSTRUCTURE)
+/// S: * 1 FETCH (BODYSTRUCTURE ("text" "plain" ("charset" "us-ascii") NIL NIL "7bit" 3445 65))
+/// S: A001 OK FETCH completed
+/// ```
+///
+/// This represents a ``singlepart(_:)`` case containing a ``Singlepart`` with media type `text/plain`.
+///
+/// **Multipart message:**
+/// ```
+/// C: A002 FETCH 2 (BODYSTRUCTURE)
+/// S: * 2 FETCH (BODYSTRUCTURE (("text" "plain" ("charset" "us-ascii") NIL NIL "7bit" 1025 32) ("text" "html" ("charset" "us-ascii") NIL NIL "7bit" 2056 48) "alternative"))
+/// S: A002 OK FETCH completed
+/// ```
+///
+/// This represents a ``multipart(_:)`` case containing two parts (text/plain and text/html) with media subtype `alternative`.
+///
+/// - SeeAlso: [RFC 3501 Section 7.4.2](https://datatracker.ietf.org/doc/html/rfc3501#section-7.4.2)
+/// - SeeAlso: [RFC 3501 Section 2.6.3](https://datatracker.ietf.org/doc/html/rfc3501#section-2.6.3)
+/// - SeeAlso: ``FetchAttribute/bodyStructure(extensions:)``
 public enum BodyStructure: Hashable, Sendable {
-    /// A message that at the top level contains only one part. Note that a "message" body contains a nested
-    /// body, which may itself be multipart.
+    /// A single-part message body (text, basic media, or encapsulated message).
+    ///
+    /// Single-part messages contain only one MIME part at the top level. However, if the part type
+    /// is `message/rfc822`, it contains a nested ``Singlepart/Message`` which has its own `BODY` structure.
     case singlepart(Singlepart)
 
-    /// A message that at the top level contains one or more parts.
+    /// A multipart message body containing one or more sub-parts.
+    ///
+    /// Multipart messages have multiple MIME parts (e.g., `multipart/mixed` for mixed content,
+    /// `multipart/alternative` for alternative representations).
     case multipart(Multipart)
 }
 
