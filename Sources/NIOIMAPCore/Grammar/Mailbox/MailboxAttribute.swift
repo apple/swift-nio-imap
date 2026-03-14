@@ -14,97 +14,185 @@
 
 import struct NIO.ByteBuffer
 
-/// Mailbox attributes that may be requested and returned as part of a *LIST* command.
+/// Status attributes that can be requested and returned by a `STATUS` command.
+///
+/// The `STATUS` command returns information about a mailbox without selecting it.
+/// ``MailboxAttribute`` enumerates the standard attributes that can be queried via the
+/// `STATUS` command as defined in [RFC 3501 Section 6.3.10](https://datatracker.ietf.org/doc/html/rfc3501#section-6.3.10).
+/// Each attribute corresponds to a specific piece of mailbox metadata.
+///
+/// ### Example
+///
+/// ```
+/// C: A001 STATUS "INBOX" (MESSAGES UNSEEN)
+/// S: * STATUS "INBOX" (MESSAGES 42 UNSEEN 3)
+/// S: A001 OK STATUS completed
+/// ```
+///
+/// The line `* STATUS "INBOX" (MESSAGES 42 UNSEEN 3)` returns a ``Response/untagged(_:)`` containing
+/// ``ResponsePayload/mailboxData(_:)`` with these status attributes and their values wrapped in ``MailboxStatus``.
+///
+/// - SeeAlso: ``MailboxStatus``
 public enum MailboxAttribute: String, CaseIterable, Sendable {
-    /// `MESSAGES`
-    /// The number of messages in the mailbox.
+    /// The `MESSAGES` attribute: the number of messages in the mailbox.
+    ///
+    /// This attribute returns the total count of messages in the mailbox.
+    /// See [RFC 3501 Section 7.3.2](https://datatracker.ietf.org/doc/html/rfc3501#section-7.3.2).
     case messageCount = "MESSAGES"
 
-    /// `RECENT`
-    /// The number of messages with the \Recent flag set.
+    /// The `RECENT` attribute: the number of messages with the `\Recent` flag.
+    ///
+    /// This attribute returns the count of messages that have been added to the mailbox since
+    /// the last time it was selected. See [RFC 3501 Section 7.3.2](https://datatracker.ietf.org/doc/html/rfc3501#section-7.3.2).
     case recentCount = "RECENT"
 
-    /// `UIDNEXT`
-    /// The next unique identifier value of the mailbox.
+    /// The `UIDNEXT` attribute: the next unique identifier value.
+    ///
+    /// This attribute predicts the UID value that will be assigned to the next message appended
+    /// to the mailbox. See [RFC 3501 Section 7.3.2](https://datatracker.ietf.org/doc/html/rfc3501#section-7.3.2).
     case uidNext = "UIDNEXT"
 
-    /// `UIDVALIDITY`
-    /// The unique identifier validity value of the mailbox.
+    /// The `UIDVALIDITY` attribute: the mailbox's unique identifier validity value.
+    ///
+    /// This attribute is a permanent unique identifier for the mailbox. If returned as zero,
+    /// it indicates the mailbox does not support unique identifiers. See [RFC 3501 Section 7.3.2](https://datatracker.ietf.org/doc/html/rfc3501#section-7.3.2).
     case uidValidity = "UIDVALIDITY"
 
-    /// `UNSEEN`
-    /// The number of messages which do not have the `\Seen` flag set.
+    /// The `UNSEEN` attribute: the number of messages without the `\Seen` flag.
+    ///
+    /// This attribute returns the count of messages in the mailbox that do not have the `\Seen` flag set.
+    /// See [RFC 3501 Section 7.3.2](https://datatracker.ietf.org/doc/html/rfc3501#section-7.3.2).
     case unseenCount = "UNSEEN"
 
-    /// `SIZE`
-    /// RFC 8438
-    /// The total size of the mailbox in octets.
+    /// The `SIZE` attribute: the total size of the mailbox in octets.
+    ///
+    /// This attribute returns the total size of all messages in the mailbox in bytes (octets).
+    /// **Requires server capability:** ``Capability/statusSize``
+    /// See [RFC 8438](https://datatracker.ietf.org/doc/html/rfc8438).
     case size = "SIZE"
 
-    /// `HIGHESTMODSEQ`
-    /// RFC 7162
-    /// The highest mod-sequence value of all messages in the mailbox.
+    /// The `HIGHESTMODSEQ` attribute: the highest modification sequence value.
+    ///
+    /// This attribute returns the highest mod-sequence value assigned to any message in the mailbox.
+    /// The `CONDSTORE` extension uses modification sequences to track message changes.
+    /// **Requires server capability:** ``Capability/condstore``
+    /// See [RFC 7162 Section 3.1](https://datatracker.ietf.org/doc/html/rfc7162#section-3.1).
     case highestModificationSequence = "HIGHESTMODSEQ"
 
-    /// `APPENDLIMIT`
+    /// The `APPENDLIMIT` attribute: the maximum message upload size in octets.
     ///
-    /// RFC 7889. Maximum upload size.
+    /// This attribute specifies the maximum size (in bytes) of a single message that can be appended to the mailbox.
+    /// **Requires server capability:** ``Capability/appendLimit``
+    /// See [RFC 7889 Section 4](https://datatracker.ietf.org/doc/html/rfc7889#section-4).
     case appendLimit = "APPENDLIMIT"
 
-    /// `MAILBOXID`
+    /// The `MAILBOXID` attribute: the server's object identifier for the mailbox.
     ///
-    /// RFC 8474. Object ID of the mailbox.
+    /// This attribute returns a permanent, server-assigned identifier that uniquely identifies the mailbox.
+    /// Unlike `UIDVALIDITY`, this identifier is globally unique and never reused.
+    /// **Requires server capability:** ``Capability/objectID``
+    /// See [RFC 8474 Section 3](https://datatracker.ietf.org/doc/html/rfc8474#section-3).
     case mailboxID = "MAILBOXID"
 }
 
-/// The (aggregated) information about a mailbox that the server reports as part of the response to e.g. a `SELECT` command.
+/// Information about a mailbox returned by a `STATUS` command.
+///
+/// ``MailboxStatus`` represents the response to a `STATUS` command as specified in
+/// [RFC 3501 Section 6.3.10](https://datatracker.ietf.org/doc/html/rfc3501#section-6.3.10).
+/// The `STATUS` command allows clients to request mailbox information without selecting the mailbox.
+///
+/// All properties are optional, as the server returns only the requested attributes.
+/// Access the properties that correspond to the attributes requested in the `STATUS` command.
+///
+/// ### Example
+///
+/// ```
+/// C: A001 STATUS "Archive" (MESSAGES UIDVALIDITY UNSEEN)
+/// S: * STATUS "Archive" (MESSAGES 1500 UIDVALIDITY 384160001 UNSEEN 34)
+/// S: A001 OK STATUS completed
+/// ```
+///
+/// The response contains a ``MailboxStatus`` with messageCount=1500, uidValidity=384160001, unseenCount=34.
+/// Other properties would be `nil` since they were not requested.
+///
+/// - SeeAlso: ``MailboxAttribute``
 public struct MailboxStatus: Hashable, Sendable {
-    /// `MESSAGES`
-    /// The number of messages in the mailbox.
+    /// The `MESSAGES` attribute: total number of messages in the mailbox.
+    ///
+    /// This property is `nil` if the `MESSAGES` attribute was not requested or returned.
+    /// See [RFC 3501 Section 7.3.2](https://datatracker.ietf.org/doc/html/rfc3501#section-7.3.2).
     public var messageCount: Int?
-    /// `RECENT`
-    /// The number of messages with the \Recent flag set.
+
+    /// The `RECENT` attribute: number of messages with the `\Recent` flag.
+    ///
+    /// This property is `nil` if the `RECENT` attribute was not requested or returned.
+    /// See [RFC 3501 Section 7.3.2](https://datatracker.ietf.org/doc/html/rfc3501#section-7.3.2).
     public var recentCount: Int?
-    /// `UIDNEXT`
-    /// The next unique identifier value of the mailbox.
+
+    /// The `UIDNEXT` attribute: the next unique identifier value to be assigned.
+    ///
+    /// This property is `nil` if the `UIDNEXT` attribute was not requested or returned.
+    /// See [RFC 3501 Section 7.3.2](https://datatracker.ietf.org/doc/html/rfc3501#section-7.3.2).
     public var nextUID: UID?
-    /// `UIDVALIDITY`
-    /// The unique identifier validity value of the mailbox.
+
+    /// The `UIDVALIDITY` attribute: the mailbox's unique identifier validity value.
+    ///
+    /// This property is `nil` if the `UIDVALIDITY` attribute was not requested or returned.
+    /// See [RFC 3501 Section 7.3.2](https://datatracker.ietf.org/doc/html/rfc3501#section-7.3.2).
     public var uidValidity: UIDValidity?
-    /// `UNSEEN`
-    /// The number of messages which do not have the `\Seen` flag set.
+
+    /// The `UNSEEN` attribute: number of messages without the `\Seen` flag.
+    ///
+    /// This property is `nil` if the `UNSEEN` attribute was not requested or returned.
+    /// See [RFC 3501 Section 7.3.2](https://datatracker.ietf.org/doc/html/rfc3501#section-7.3.2).
     public var unseenCount: Int?
 
-    /// `SIZE`
-    /// RFC 8438
-    /// The total size of the mailbox in octets.
+    /// The `SIZE` attribute: total size of the mailbox in bytes (octets).
+    ///
+    /// This property is `nil` if the `SIZE` attribute was not requested or returned.
+    /// **Requires server capability:** ``Capability/statusSize``
+    /// See [RFC 8438](https://datatracker.ietf.org/doc/html/rfc8438).
     public var size: Int?
 
-    /// `HIGHESTMODSEQ`
-    /// RFC 7162
-    /// The highest mod-sequence value of all messages in the mailbox.
+    /// The `HIGHESTMODSEQ` attribute: the highest modification sequence value assigned to any message.
+    ///
+    /// This property is `nil` if the `HIGHESTMODSEQ` attribute was not requested or returned.
+    /// The `CONDSTORE` extension uses modification sequences to track which messages have changed.
+    /// **Requires server capability:** ``Capability/condstore``
+    /// See [RFC 7162 Section 3.1](https://datatracker.ietf.org/doc/html/rfc7162#section-3.1).
     public var highestModificationSequence: ModificationSequenceValue?
 
-    /// `APPENDLIMIT`
+    /// The `APPENDLIMIT` attribute: maximum size per message in bytes (octets).
     ///
-    /// RFC 7889 per-mailbox `APPENDLIMIT`, i.e. maximum message upload size.
+    /// This property is `nil` if the `APPENDLIMIT` attribute was not requested or returned.
+    /// The `APPENDLIMIT` extension specifies per-mailbox upload limits.
+    /// **Requires server capability:** ``Capability/appendLimit``
+    /// See [RFC 7889 Section 4](https://datatracker.ietf.org/doc/html/rfc7889#section-4).
     public var appendLimit: Int?
 
-    /// `MAILBOXID`
+    /// The `MAILBOXID` attribute: the server's permanent object identifier for the mailbox.
     ///
-    /// RFC 8474 object ID of the mailbox.
+    /// This property is `nil` if the `MAILBOXID` attribute was not requested or returned.
+    /// The `OBJECTID` extension assigns stable, unique identifiers to mailboxes that persist
+    /// even if the mailbox is renamed or moved.
+    /// **Requires server capability:** ``Capability/objectID``
+    /// See [RFC 8474 Section 3](https://datatracker.ietf.org/doc/html/rfc8474#section-3).
     public var mailboxID: MailboxID?
 
-    /// Creates a new `MailboxStatus`. All parameters default to `nil`.
-    /// - parameter messageCount: RFC 3501: `MESSAGES` - The number of messages in the mailbox.
-    /// - parameter recentCount: RFC 3501: `RECENT` - The number of messages with the \Recent flag set.
-    /// - parameter nextUID: RFC 3501: `UIDNEXT` - The next unique identifier value of the mailbox.
-    /// - parameter uidValidity: RFC 3501: `UIDVALIDITY` - The unique identifier validity value of the mailbox.
-    /// - parameter unseenCount: RFC 3501: `UNSEEN` - The number of messages which do not have the `\Seen` flag set.
-    /// - parameter size: RFC 8438: `SIZE` - The number of messages which do not have the `\Seen` flag set.
-    /// - parameter highestModificationSequence: RFC 7162: `SIZE` - The total size of the mailbox in octets.
-    /// - parameter appendLimit: RFC 7889 per-mailbox `APPENDLIMIT`, i.e. maximum message upload size.
-    /// - parameter mailboxID: RFC 8474 object ID of the mailbox.
+    /// Creates a new mailbox status record with optional attribute values.
+    ///
+    /// All parameters default to `nil`. Initialize only the attributes that were requested
+    /// in the corresponding `STATUS` command.
+    ///
+    /// - Parameter messageCount: The `MESSAGES` count if requested
+    /// - Parameter recentCount: The `RECENT` count if requested
+    /// - Parameter nextUID: The `UIDNEXT` value if requested
+    /// - Parameter uidValidity: The `UIDVALIDITY` value if requested
+    /// - Parameter unseenCount: The `UNSEEN` count if requested
+    /// - Parameter size: The `SIZE` value if requested
+    /// - Parameter highestModificationSequence: The `HIGHESTMODSEQ` value if requested
+    /// - Parameter appendLimit: The `APPENDLIMIT` value if requested
+    /// - Parameter mailboxID: The `MAILBOXID` value if requested
     public init(
         messageCount: Int? = nil,
         recentCount: Int? = nil,
