@@ -51,9 +51,11 @@ public enum MessageAttribute: Hashable, Sendable {
     case fetchModificationResponse(FetchModificationResponse)
 
     /// `X-GM-MSGID`: provides a unique ID for each email stable across multiple folders.
+    /// C.f. ``EmailID`` (RFC 8474)
     case gmailMessageID(UInt64)
 
     /// `X-GM-THRID`: provides an ID that associates mail with a given gmail thread.
+    /// C.f. ``ThreadID`` (RFC 8474)
     case gmailThreadID(UInt64)
 
     /// `X-GM-LABELS`: provides the labels for a given message

@@ -15,9 +15,49 @@
 import struct NIO.ByteBuffer
 @preconcurrency import SE0270_RangeSet
 
-/// A set contains an array of `MessageIdentifierRange<MessageIdentifier>>` to represent a (potentially large) collection of messages.
+/// A set of message identifiers represented as an array of ranges.
 ///
-/// `MessageIdentifier`s are _not_ sorted.
+/// A `MessageIdentifierSet` represents a potentially non-contiguous collection of message
+/// identifiers (either UIDs or sequence numbers) using an optimized internal representation
+/// based on `RangeSet`. Unlike a simple `Set<UID>`, this type stores contiguous ranges
+/// efficiently, allowing it to represent large sets like "all messages" (`1:*`) with minimal
+/// memory overhead instead of storing millions of individual elements.
+///
+/// In IMAP wire format, sets are encoded as comma-separated ranges: `1,3,5:7,9:*` (which
+/// represents messages 1, 3, 5-7, and 9 through the maximum). The set automatically merges
+/// adjacent ranges.
+///
+/// See [RFC 3501 Section 6](https://datatracker.ietf.org/doc/html/rfc3501#section-6) for
+/// message set syntax and usage in commands like `FETCH`, `STORE`, `COPY`, and `EXPUNGE`.
+///
+/// ## Examples
+///
+/// ```swift
+/// // Create from ranges
+/// let set = MessageIdentifierSet([5...10, 15...20])  // [5-10, 15-20]
+///
+/// // Create from a single range
+/// let range = MessageIdentifierSet(5...10)
+///
+/// // Static convenience values
+/// let all = MessageIdentifierSet.all          // All messages (1 to max)
+/// let empty = MessageIdentifierSet.empty      // No messages
+///
+/// // Query properties
+/// if set.isContiguous { ... }                 // True if no gaps
+/// let min = set.min()                         // Returns 5
+/// let max = set.max()                         // Returns 20
+/// ```
+///
+/// This type conforms to `BidirectionalCollection` and `SetAlgebra`, allowing iteration,
+/// queries, and set operations like `union`, `intersection`, and `isSubset`.
+///
+/// ## Related Types
+///
+/// - ``MessageIdentifierRange`` represents a single contiguous range.
+/// - ``MessageIdentifierSetNonEmpty`` wraps a non-empty set for use in commands requiring at least one message.
+/// - ``SequenceSet`` is a type alias for `MessageIdentifierSet<SequenceNumber>`.
+/// - ``UIDSet`` is a type alias for `MessageIdentifierSet<UID>`.
 public struct MessageIdentifierSet<IdentifierType: MessageIdentifier>: Hashable, Sendable {
     /// A set that contains a single range, that in turn contains all messages.
     public static var all: Self {
@@ -246,7 +286,7 @@ extension MessageIdentifierSet: CustomDebugStringConvertible {
 
 extension MessageIdentifierSet: ExpressibleByArrayLiteral {
     /// Creates a new MessageIdentifierSet from a literal array of ranges.
-    /// - parameter arrayLiteral: The elements to use, assumed to be non-empty.
+    /// - parameter elements: The message identifier ranges to include in the set.
     public init(arrayLiteral elements: MessageIdentifierRange<IdentifierType>...) {
         self.init(elements)
     }
