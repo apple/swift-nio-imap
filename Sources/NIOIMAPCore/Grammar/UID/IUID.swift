@@ -20,23 +20,27 @@ public struct InvalidUID: Error {}
 
 /// A wrapped ``UID`` for use in IMAP URL constructs and CATENATE operations.
 ///
-/// The `IUID` type wraps a ``UID`` and provides encoding compatible with IMAP URL and
-/// CATENATE extension syntax. It is used in operations that reference message content by
-/// URL-style paths, particularly in RFC 4469 CATENATE and RFC 5092 IMAP URL contexts.
+/// The `IUID` type wraps a ``UID`` and provides encoding compatible with IMAP URL syntax,
+/// URLAUTH-authorized URLs, and CATENATE extension syntax. It is used in operations that
+/// reference message content by URL-style paths, particularly in RFC 2192/5092 IMAP URL,
+/// RFC 4467 URLAUTH, and RFC 4469 CATENATE contexts.
 ///
 /// In IMAP URL/CATENATE format, a UID is encoded as:
 /// - `;UID=<uid-value>` (in relative paths or CATENATE operations)
 /// - `/;UID=<uid-value>` (in absolute message paths)
 ///
-/// This type is primarily used internally for IMAP URL constructs and CATENATE append
-/// operations that reference existing messages on the server.
+/// This type is primarily used internally for IMAP URL constructs, URLAUTH-authorized URL
+/// verification, and CATENATE append operations that reference existing messages on the server.
 ///
-/// See [RFC 4469](https://datatracker.ietf.org/doc/html/rfc4469) (CATENATE Extension)
+/// See [RFC 4467](https://datatracker.ietf.org/doc/html/rfc4467) (URLAUTH Extension)
+/// and [RFC 4469](https://datatracker.ietf.org/doc/html/rfc4469) (CATENATE Extension)
 /// for details on how IUIDs are used to reference message content.
 ///
 /// ## Related Types
 ///
-/// - ``UID`` is the wrapped type containing the actual message identifier.
+/// - ``UID`` is the wrapped type containing the actual message identifier
+/// - ``MessagePath`` uses ``IUID`` for URL-style message identification
+/// - ``NetworkMessagePath`` uses ``MessagePath`` for network-accessible URLs
 public struct IUID: Hashable, Sendable {
     /// The wrapped ``UID`` value.
     ///
