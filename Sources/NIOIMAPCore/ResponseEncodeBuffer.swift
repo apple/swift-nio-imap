@@ -14,11 +14,39 @@
 
 import struct NIO.ByteBuffer
 
-/// Used to write responses in preparation for sending down a network.
+/// A wrapper around ``EncodeBuffer`` for encoding IMAP server responses.
+///
+/// `ResponseEncodeBuffer` is the primary interface for encoding server responses into
+/// wire format ready for transmission to an IMAP client. It wraps an ``EncodeBuffer``
+/// configured in server mode and provides response-specific encoding operations.
+///
+/// Unlike ``CommandEncodeBuffer`` which handles chunking for synchronizing literals,
+/// `ResponseEncodeBuffer` returns all encoded data in a single operation, which is
+/// appropriate for server-to-client responses that don't require continuation handshakes.
+///
+/// ## Usage Example
+///
+/// ```swift
+/// var buffer = ResponseEncodeBuffer(
+///     buffer: ByteBuffer(),
+///     options: ResponseEncodingOptions(),
+///     loggingMode: false
+/// )
+/// // Encode response data into buffer
+/// let encoded = buffer.readBytes()  // Get all encoded data
+/// ```
+///
+/// - SeeAlso: ``EncodeBuffer``, ``CommandEncodeBuffer``, ``ResponseEncodingOptions``
 public struct ResponseEncodeBuffer: Sendable {
     var buffer: EncodeBuffer
 
-    /// Data that is waiting to be sent.
+    /// Retrieves all encoded data from the buffer for transmission.
+    ///
+    /// After calling this method, the buffer is cleared and ready for encoding the
+    /// next response. This is typically called after encoding a complete response
+    /// to retrieve the wire-format bytes for sending to the client.
+    ///
+    /// - Returns: A `ByteBuffer` containing all encoded response data.
     public mutating func readBytes() -> ByteBuffer {
         let buffer = self.buffer.nextChunk().bytes
         precondition(self.buffer.buffer.readableBytes == 0)
@@ -26,18 +54,33 @@ public struct ResponseEncodeBuffer: Sendable {
         return buffer
     }
 
-    /// Creates a new `ResponseEncodeBuffer` from an initial `ByteBuffer` and configuration.
-    /// - parameter buffer: The inital `ByteBuffer` to use. Note that this is copied, not taken as `inout`.
-    /// - parameter options: The `ResponseEncodingOptions` to use when writing responses.
+    /// Creates a new response encoding buffer with explicit options.
+    ///
+    /// - Parameters:
+    ///   - buffer: The initial `ByteBuffer` to build upon. This buffer is copied,
+    ///     not taken as inout.
+    ///   - options: The ``ResponseEncodingOptions`` controlling how strings and other
+    ///     protocol elements are encoded.
+    ///   - loggingMode: When `true`, binary data is replaced with placeholders like
+    ///     `[N bytes]` for safe logging. Defaults to `false`.
     public init(buffer: ByteBuffer, options: ResponseEncodingOptions, loggingMode: Bool) {
         self.buffer = .serverEncodeBuffer(buffer: buffer, options: options, loggingMode: loggingMode)
     }
 }
 
 extension ResponseEncodeBuffer {
-    /// Creates a new `ResponseEncodeBuffer` from an initial `ByteBuffer` and configuration.
-    /// - parameter buffer: The inital `ByteBuffer` to use. Note that this is copied, not taken as `inout`.
-    /// - parameter capabilities: Server capabilites to use when writing responses. These will be converted into a `ResponseEncodingOptions`.
+    /// Creates a new response encoding buffer from server capabilities.
+    ///
+    /// This initializer converts a list of ``Capability`` values into ``ResponseEncodingOptions``,
+    /// which enables capability-dependent encoding options if the server advertises them.
+    ///
+    /// - Parameters:
+    ///   - buffer: The initial `ByteBuffer` to build upon. This buffer is copied,
+    ///     not taken as inout.
+    ///   - capabilities: Server capabilities for context. These may be used to configure
+    ///     encoding options if needed.
+    ///   - loggingMode: When `true`, binary data is replaced with placeholders like
+    ///     `[N bytes]` for safe logging. Defaults to `false`.
     public init(buffer: ByteBuffer, capabilities: [Capability], loggingMode: Bool) {
         self.buffer = .serverEncodeBuffer(buffer: buffer, capabilities: capabilities, loggingMode: loggingMode)
     }
