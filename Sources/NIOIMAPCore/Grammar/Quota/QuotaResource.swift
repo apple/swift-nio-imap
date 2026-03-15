@@ -14,21 +14,61 @@
 
 import struct NIO.ByteBuffer
 
-/// A resource with it's current usage and maximum size.
+/// A resource usage report showing current usage and maximum limit (RFC 2087).
+///
+/// **Requires server capability:** ``Capability/quota``
+///
+/// Quota resource data combines resource usage information with limit information,
+/// allowing clients to understand both how much of a resource is currently in use and what the maximum
+/// allowed usage is. This information is typically returned in server responses to quota commands.
+/// See [RFC 2087 Section 5.1](https://datatracker.ietf.org/doc/html/rfc2087#section-5.1).
+///
+/// ### Example
+///
+/// ```
+/// C: A001 GETQUOTA "user.john"
+/// S: * QUOTA "user.john" (STORAGE 512000 102400 MESSAGE 450 500)
+/// S: A001 OK GETQUOTA completed
+/// ```
+///
+/// The response `(STORAGE 512000 102400 MESSAGE 450 500)` represents two ``QuotaResource`` instances:
+/// - `STORAGE`: using 512000 KB out of 102400 KB limit (actually over limit - server implementation may vary)
+/// - `MESSAGE`: 450 messages out of 500 message limit
+///
+/// These appear in ``QuotaResponse`` as part of the ``ResponsePayload/quotaData(_:_:)`` response.
+///
+/// ## Related Types
+///
+/// - See ``QuotaLimit`` for just the maximum limit without usage
+/// - See ``QuotaRoot`` for quota root names
+/// - See ``QuotaResponse`` for complete quota responses
+///
+/// - SeeAlso: [RFC 2087 Section 5.1](https://datatracker.ietf.org/doc/html/rfc2087#section-5.1)
 public struct QuotaResource: Hashable, Sendable {
-    /// The resource that the quota is applied to.
+    /// The resource name being tracked.
+    ///
+    /// An atom identifying the resource type, such as `STORAGE` or `MESSAGE`. Custom resources
+    /// may be defined by implementations.
     public var resourceName: String
 
-    /// How big the current resource is.
+    /// The current usage of the resource.
+    ///
+    /// For `STORAGE` resources, this is typically in units of 1024 octets (kilobytes).
+    /// For `MESSAGE` resources, this is the current number of messages in the quota root.
+    /// See [RFC 2087 Section 3](https://datatracker.ietf.org/doc/html/rfc2087#section-3).
     public var usage: Int
 
-    /// The maximum size/count of the resource.
+    /// The maximum allowed usage of the resource.
+    ///
+    /// When `usage` exceeds this limit, the quota root has exceeded its limit. Server behavior
+    /// when limits are exceeded is implementation-defined.
     public var limit: Int
 
-    /// Creates a new `QuotaResource`.
-    /// - parameter resourceName: The resource that the quota is applied to.
-    /// - parameter usage: How much os the resource is currently in use.
-    /// - parameter limit: The maximum size/count of the resource.
+    /// Creates a new `QuotaResource` with current usage and maximum limit.
+    ///
+    /// - parameter resourceName: The resource name (e.g., `"STORAGE"`, `"MESSAGE"`).
+    /// - parameter usage: The current usage of the resource.
+    /// - parameter limit: The maximum allowed value for the resource.
     public init(resourceName: String, usage: Int, limit: Int) {
         self.resourceName = resourceName
         self.usage = usage

@@ -14,17 +14,54 @@
 
 import struct NIO.ByteBuffer
 
-/// A resource with it's corresponding limits.
+/// A resource quota limit specifying the maximum allowed size or count for a resource (RFC 2087).
+///
+/// **Requires server capability:** ``Capability/quota``
+///
+/// Quota limits define the maximum allowed value for a named resource within a quota root. Common resources
+/// include `STORAGE` (maximum mailbox size in kilobytes) and `MESSAGE` (maximum number of messages).
+/// Each resource has an atom name and an implementation-defined numeric limit.
+/// See [RFC 2087 Section 4.1](https://datatracker.ietf.org/doc/html/rfc2087#section-4.1) for details.
+///
+/// ### Example
+///
+/// ```
+/// C: A001 GETQUOTA "user.john"
+/// S: * QUOTA "user.john" (STORAGE 512000 102400 MESSAGE 1000 500)
+/// S: A001 OK GETQUOTA completed
+/// ```
+///
+/// In this response, `STORAGE 512000 102400` represents two ``QuotaLimit`` instances:
+/// - Resource `STORAGE` with limit `102400` (kilobytes)
+/// - Resource `MESSAGE` with limit `500` (messages)
+///
+/// These appear in ``QuotaResponse`` as part of the ``ResponsePayload/quotaData(_:_:)`` response.
+///
+/// ## Related Types
+///
+/// - See ``QuotaResource`` for current usage along with limits
+/// - See ``QuotaRoot`` for quota root names
+/// - See ``QuotaResponse`` for complete quota responses
+///
+/// - SeeAlso: [RFC 2087 Section 5.1](https://datatracker.ietf.org/doc/html/rfc2087#section-5.1)
 public struct QuotaLimit: Hashable, Sendable {
-    /// The resource that the quota is applied to.
+    /// The resource name that the quota limit applies to.
+    ///
+    /// An atom identifying the resource type, such as `STORAGE` or `MESSAGE`. Custom resources
+    /// may be defined by implementations.
     public var resourceName: String
 
-    /// The maximum size/count of the resource.
+    /// The maximum allowed size or count for the resource.
+    ///
+    /// For `STORAGE` resources, this is typically in units of 1024 octets (kilobytes).
+    /// For `MESSAGE` resources, this is the maximum number of messages allowed in the quota root.
+    /// See [RFC 2087 Section 3](https://datatracker.ietf.org/doc/html/rfc2087#section-3) for standard resources.
     public var limit: Int
 
-    /// Creates a new `QuotaLimit`.
-    /// - parameter resourceName: The resource that the quota is applied to.
-    /// - parameter limit: The maximum size/count of the resource.
+    /// Creates a new `QuotaLimit` with a resource name and maximum limit.
+    ///
+    /// - parameter resourceName: The resource name (e.g., `"STORAGE"`, `"MESSAGE"`).
+    /// - parameter limit: The maximum allowed value for the resource.
     public init(resourceName: String, limit: Int) {
         self.resourceName = resourceName
         self.limit = limit

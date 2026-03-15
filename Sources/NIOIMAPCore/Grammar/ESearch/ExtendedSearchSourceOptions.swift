@@ -14,17 +14,53 @@
 
 import struct NIO.ByteBuffer
 
-/// RFC 7377 - Source options
+/// Source options specifying which mailboxes to search in a multi-mailbox search operation (RFC 7377).
+///
+/// **Requires server capability:** ``Capability/multimailboxSearch``
+///
+/// Source options define the mailbox context for an extended search operation, allowing searches to span
+/// multiple mailboxes using mailbox filters (e.g., personal namespace mailboxes, specific named mailboxes).
+/// The `IN` clause specifies one or more mailbox filters, and optional scope options can further refine
+/// the search context. See [RFC 7377 Section 2.1.1](https://datatracker.ietf.org/doc/html/rfc7377#section-2.1.1).
+///
+/// ### Example
+///
+/// ```
+/// C: A001 SEARCH IN (personal subtree "Archive") RETURN (MIN MAX) UNSEEN
+/// S: * ESEARCH UID MIN 5 MAX 128
+/// S: A001 OK SEARCH completed
+/// ```
+///
+/// The line `IN (personal subtree "Archive")` represents the source options with mailbox filters:
+/// - ``MailboxFilter/personal`` - all personal mailboxes
+/// - ``MailboxFilter/subtree(_:)`` - the "Archive" mailbox and its subfolders
+///
+/// ## Related Types
+///
+/// - See ``MailboxFilter`` for individual mailbox filter types
+/// - See ``ExtendedSearchOptions`` for complete search options
+/// - See ``ExtendedSearchScopeOptions`` for optional scope configuration
+///
+/// - SeeAlso: [RFC 7377](https://datatracker.ietf.org/doc/html/rfc7377)
 public struct ExtendedSearchSourceOptions: Hashable, Sendable {
-    /// Array of at least one mailbox filter.
+    /// Array of mailbox filters specifying which mailboxes to search.
+    ///
+    /// At least one mailbox filter must be present. Multiple filters can be combined to search
+    /// across different mailbox categories (e.g., personal mailboxes, specific named mailboxes,
+    /// subscribed mailboxes).
     public let sourceMailbox: [MailboxFilter]
 
-    /// Scope Options
+    /// Optional scope options for refining the search context.
+    ///
+    /// Provides extensibility for future scope-related parameters that may further qualify
+    /// the mailbox selection. When `nil`, no additional scope constraints are applied.
     public let scopeOptions: ExtendedSearchScopeOptions?
 
-    /// Creates a new `ExtendedSearchSourceOptions` from given scope options and mailbox filters.
-    /// - parameter sourceMailbox: One or more mailboxes filters
-    /// - parameter scopeOptions: Optional ExtendedSearch Scope options.
+    /// Creates a new `ExtendedSearchSourceOptions` for multi-mailbox search.
+    ///
+    /// - parameter sourceMailbox: One or more mailbox filters specifying which mailboxes to search.
+    /// - parameter scopeOptions: Optional scope options for further refinement (default: `nil`).
+    /// - returns: A new `ExtendedSearchSourceOptions` if `sourceMailbox` is non-empty, otherwise `nil`.
     public init?(sourceMailbox: [MailboxFilter], scopeOptions: ExtendedSearchScopeOptions? = nil) {
         guard sourceMailbox.count >= 1 else {
             return nil

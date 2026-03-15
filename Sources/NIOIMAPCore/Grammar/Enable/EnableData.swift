@@ -14,6 +14,29 @@
 
 import struct NIO.ByteBuffer
 
+/// The `ENABLED` response data sent by a server in response to an `ENABLE` command (RFC 5161).
+///
+/// **Requires server capability:** ``Capability/enable``
+///
+/// The `ENABLED` response reports which extension capabilities have been successfully enabled
+/// by the server. This allows clients to know which extensions are now active on the connection.
+/// The server responds to the `ENABLE` command with zero or more capabilities that were enabled.
+/// From [RFC 5161 Section 3.1](https://datatracker.ietf.org/doc/html/rfc5161#section-3.1).
+///
+/// ### Example
+///
+/// ```
+/// C: A001 ENABLE CONDSTORE QRESYNC
+/// S: * ENABLED CONDSTORE QRESYNC
+/// S: A001 OK ENABLE completed
+/// ```
+///
+/// The line `S: * ENABLED CONDSTORE QRESYNC` is wrapped as ``Response/untagged(_:)`` containing
+/// ``ResponsePayload/enableData(_:)`` with an array of enabled ``Capability`` values.
+///
+/// - SeeAlso: [RFC 5161](https://datatracker.ietf.org/doc/html/rfc5161)
+typealias EnableData = [Capability]
+
 // MARK: - Encoding
 
 extension EncodeBuffer {

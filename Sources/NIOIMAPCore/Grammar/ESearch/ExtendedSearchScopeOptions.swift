@@ -15,15 +15,32 @@
 import struct NIO.ByteBuffer
 import struct OrderedCollections.OrderedDictionary
 
-/// A wrapper around a non-empty array of key/value pairs. This is used to provide
-/// a catch-all for future extensions, as no options are currently explicitly defined.
+/// Optional scope options for extended multi-mailbox search operations (RFC 7377).
+///
+/// **Requires server capability:** ``Capability/multimailboxSearch``
+///
+/// Scope options provide a catch-all mechanism for future extensions to the MULTIMAILBOX SEARCH protocol,
+/// allowing servers to support additional scope-related parameters beyond those explicitly defined.
+/// These options are specified as key-value pairs and are optional in search commands.
+/// See [RFC 7377 Section 2.1.1](https://datatracker.ietf.org/doc/html/rfc7377#section-2.1.1) for details.
+///
+/// ## Related Types
+///
+/// - See ``ExtendedSearchSourceOptions`` for mailbox selection
+/// - See ``ExtendedSearchOptions`` for complete search options
+///
+/// - SeeAlso: [RFC 7377](https://datatracker.ietf.org/doc/html/rfc7377)
 public struct ExtendedSearchScopeOptions: Hashable, Sendable {
-    /// An array of Scope Option key/value pairs. Note that the array must not be empty.
+    /// An ordered dictionary of scope option key-value pairs.
+    ///
+    /// The array must contain at least one key-value pair and is never empty. This provides
+    /// a flexible mechanism for supporting scope parameters not yet defined in the base specification.
     public let content: OrderedDictionary<String, ParameterValue?>
 
-    /// Creates a new `ExtendedSearchScopeOptions` from a non-empty array of options.
-    ///  - parameter options: One or more options.
-    /// - returns: A `nil` if `options` is empty, otherwise a new `ExtendedSearchScopeOptions`.
+    /// Creates a new `ExtendedSearchScopeOptions` from one or more scope options.
+    ///
+    /// - parameter options: One or more key-value scope option pairs. Must not be empty.
+    /// - returns: A new `ExtendedSearchScopeOptions` if `options` is non-empty, otherwise `nil`.
     init?(_ options: OrderedDictionary<String, ParameterValue?>) {
         guard options.count >= 1 else {
             return nil

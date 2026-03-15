@@ -14,14 +14,42 @@
 
 import struct NIO.ByteBuffer
 
-/// RFC 5465 - One or more mailboxes
+/// A non-empty collection of mailbox names (RFC 5465 NOTIFY).
+///
+/// **Requires server capability:** ``Capability/notify``
+///
+/// This type represents a non-empty list of mailbox names used with mailbox filters in the NOTIFY
+/// extension. Certain filters like ``MailboxFilter/subtree(_:)`` and ``MailboxFilter/mailboxes(_:)``
+/// require one or more specific mailbox names. See [RFC 5465 Section 3.2](https://datatracker.ietf.org/doc/html/rfc5465#section-3.2).
+///
+/// ### Example
+///
+/// ```
+/// C: A001 NOTIFY SET (SUBTREE ("Archive" "Sent Mail"))
+/// S: * OK NOTIFY registered for SUBTREE Archive and Sent Mail
+/// S: A001 OK NOTIFY completed
+/// ```
+///
+/// The mailbox names `"Archive"` and `"Sent Mail"` form a ``Mailboxes`` collection that specifies
+/// which mailboxes and their subfolders should be monitored for notifications.
+///
+/// ## Related Types
+///
+/// - See ``MailboxFilter`` for different ways to select mailboxes
+/// - See ``MailboxName`` for individual mailbox name representation
+///
+/// - SeeAlso: [RFC 5465 Section 3.2](https://datatracker.ietf.org/doc/html/rfc5465#section-3.2)
 public struct Mailboxes: Hashable, Sendable {
-    /// Array of at least one mailbox.
+    /// Array of one or more mailbox names.
+    ///
+    /// This collection must contain at least one mailbox. The mailboxes are represented as
+    /// ``MailboxName`` values, which can include standard or UTF-7-modified mailbox names.
     public let content: [MailboxName]
 
-    /// Creates a new `Mailboxes` - there must be at least one mail box in the set.
-    /// - parameter mailboxes: One or more mailboxes.
-    /// - returns: `nil` if `mailboxes` is empty, otherwise a new `Mailboxes`
+    /// Creates a new `Mailboxes` collection from one or more mailbox names.
+    ///
+    /// - parameter mailboxes: One or more mailbox names to include in the collection.
+    /// - returns: A new `Mailboxes` if at least one mailbox is provided, otherwise `nil`.
     public init?(_ mailboxes: [MailboxName]) {
         guard mailboxes.count >= 1 else {
             return nil

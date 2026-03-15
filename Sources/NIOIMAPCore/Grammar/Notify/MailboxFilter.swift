@@ -14,34 +14,76 @@
 
 import struct NIO.ByteBuffer
 
-/// Filters to be used when selecting mailboxes to be notified about.
+/// Filters to select mailboxes for notification in the NOTIFY extension (RFC 5465).
+///
+/// **Requires server capability:** ``Capability/notify``
+///
+/// Mailbox filters are used with the `NOTIFY` command to specify which mailboxes the client wishes
+/// to receive change notifications about. Filters can target individual mailboxes, groups of mailboxes,
+/// or special mailbox categories. See [RFC 5465 Section 3.2](https://datatracker.ietf.org/doc/html/rfc5465#section-3.2).
+///
+/// ### Example
+///
+/// ```
+/// C: A001 NOTIFY SET (INBOXES "INBOX" PERSONAL STATUS (UNSEEN))
+/// S: * OK NOTIFY registered
+/// S: A001 OK NOTIFY completed
+/// ```
+///
+/// The filter `INBOXES` in the example selects all selectable mailboxes in the user's personal
+/// namespace(s) where messages may be delivered. Different filters like ``personal``, ``subscribed``,
+/// or ``subtree(_:)`` allow flexible mailbox selection for notifications.
+///
+/// - SeeAlso: [RFC 5465](https://datatracker.ietf.org/doc/html/rfc5465)
 public enum MailboxFilter: Hashable, Sendable {
-    /// All selectable mailboxes in the user's personal
-    /// namespace(s) to which messages may be delivered by a Message Delivery Agent (MDA)
+    /// All selectable mailboxes that may receive messages in the user's personal namespace(s).
+    ///
+    /// Corresponds to the `INBOXES` keyword. This filter matches all selectable mailboxes where
+    /// the Message Delivery Agent (MDA) might deliver messages. From [RFC 5465 Section 3.2](https://datatracker.ietf.org/doc/html/rfc5465#section-3.2).
     case inboxes
 
-    /// All selectable mailboxes in the user's personal namespace(s)
+    /// All selectable mailboxes in the user's personal namespace(s).
+    ///
+    /// Corresponds to the `PERSONAL` keyword. This includes all personal mailboxes, not just those
+    /// that may receive messages from delivery. From [RFC 5465 Section 3.2](https://datatracker.ietf.org/doc/html/rfc5465#section-3.2).
     case personal
 
     /// All mailboxes subscribed to by the user.
+    ///
+    /// Corresponds to the `SUBSCRIBED` keyword. This matches any mailbox that the user has
+    /// explicitly subscribed to. From [RFC 5465 Section 3.2](https://datatracker.ietf.org/doc/html/rfc5465#section-3.2).
     case subscribed
 
-    /// All selectable mailboxes that are subordinate to
-    /// the specified mailbox plus the specified mailbox itself.
+    /// A mailbox and all of its selectable child mailboxes.
+    ///
+    /// Corresponds to the `SUBTREE` keyword. This recursively includes the specified mailbox
+    /// and all selectable subfolders beneath it. From [RFC 5465 Section 3.2](https://datatracker.ietf.org/doc/html/rfc5465#section-3.2).
     case subtree(Mailboxes)
 
-    /// A list of mailbox names.
+    /// A list of specific mailbox names.
+    ///
+    /// Corresponds to a list of mailbox names. This filter matches exactly the specified mailboxes.
+    /// From [RFC 5465 Section 3.2](https://datatracker.ietf.org/doc/html/rfc5465#section-3.2).
     case mailboxes(Mailboxes)
 
-    /// Selected mailbox.
+    /// The currently selected mailbox.
+    ///
+    /// Corresponds to the `SELECTED` keyword. This filter matches the mailbox currently selected
+    /// in the connection. From [RFC 5465 Section 3.2](https://datatracker.ietf.org/doc/html/rfc5465#section-3.2).
     case selected
 
-    /// Selected mailbox when using MSNs and '*'
-    /// Note:  Forbidden in an RFC 7377 context.
+    /// The currently selected mailbox when using message sequence numbers (MSNs) and `*` wildcard.
+    ///
+    /// Corresponds to the `SELECTED-DELAYED` keyword. This variant is forbidden in the RFC 7377
+    /// MULTIMAILBOX SEARCH context and is used only with traditional sequence-based operations.
+    /// Note: Forbidden in an [RFC 7377](https://datatracker.ietf.org/doc/html/rfc7377) context.
+    /// From [RFC 5465 Section 3.2](https://datatracker.ietf.org/doc/html/rfc5465#section-3.2).
     case selectedDelayed
 
-    /// Specified mailbox and all selectable child mailboxes, one
-    /// hierarchy level down.
+    /// A mailbox and all selectable child mailboxes one level down in the hierarchy.
+    ///
+    /// Corresponds to the `SUBTREE-ONE` keyword. This includes the specified mailbox and only
+    /// its immediate selectable children, not deeper descendants. From [RFC 5465 Section 3.2](https://datatracker.ietf.org/doc/html/rfc5465#section-3.2).
     case subtreeOne(Mailboxes)
 }
 
