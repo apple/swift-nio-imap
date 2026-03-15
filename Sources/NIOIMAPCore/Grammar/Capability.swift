@@ -14,17 +14,35 @@
 
 import struct NIO.ByteBuffer
 
-/// A `Capability` is advertised as a piece of functionality that a server supports. If the
-/// server does not explicitly advertise a capability then the client should not assume the functionality
-/// is present.
+/// A capability advertised by a server to indicate supported functionality.
+///
+/// A server advertises its capabilities in response to a CAPABILITY command or automatically in greeting and
+/// response codes. Each capability name indicates a feature or extension that the server supports. Clients must not assume
+/// a capability is present unless explicitly advertised by the server.
+///
+/// Capabilities may be simple (like `STARTTLS`) or configurable (like `AUTH=GSSAPI`). Configurable capabilities
+/// contain an equals sign separating the capability name from its configuration value. Use the name and value
+/// properties to parse these components.
+///
+/// ### Example
+///
+/// ```
+/// S: * CAPABILITY IMAP4rev1 STARTTLS AUTH=GSSAPI XPIG-LATIN
+/// ```
+///
+/// This server response advertises capabilities: `IMAP4rev1` (simple), `STARTTLS` (simple), `AUTH=GSSAPI`
+/// (configurable with name `AUTH` and value `GSSAPI`), and `XPIG-LATIN` (custom vendor extension).
+///
+/// - SeeAlso: [RFC 3501 Section 7.2.1](https://datatracker.ietf.org/doc/html/rfc3501#section-7.2.1)
+/// - SeeAlso: <doc:SupportedExtensions>
 public struct Capability: Hashable, Sendable {
     /// The raw string value of the capability.
     var rawValue: String
     private var splitIndex: String.Index?
 
-    /// The name of the capability. For simple capabilities such as *STARTTLS*, the value
-    /// will simply be *STARTTLS*. For configurable capabilities such as *AUTH=GSSAPI*, the value
-    /// will be *AUTH*.
+    /// The name of the capability. For simple capabilities such as `STARTTLS`, the value
+    /// will simply be `STARTTLS`. For configurable capabilities such as `AUTH=GSSAPI`, the value
+    /// will be `AUTH`.
     public var name: String {
         guard let index = self.splitIndex else {
             return self.rawValue
@@ -32,9 +50,9 @@ public struct Capability: Hashable, Sendable {
         return String(self.rawValue[..<index])
     }
 
-    /// If the capability is _simple_, e.g. *STARTTTLS*, then the value will be `nil`.
-    /// Otherwise, if the capability is configurable such as *AUTH=GSSAPI*` then the value will
-    /// be *GSSAPI*.
+    /// If the capability is _simple_, e.g. `STARTTLS`, then the value will be `nil`.
+    /// Otherwise, if the capability is configurable such as `AUTH=GSSAPI`, then the value will
+    /// be `GSSAPI`.
     public var value: String? {
         guard var index = self.splitIndex else {
             return nil
@@ -59,19 +77,28 @@ public struct Capability: Hashable, Sendable {
 // MARK: - Convenience Types
 
 extension Capability {
-    /// Wraps supported contexts including *SEARCH* and *SORT*.
+    /// Wraps the context type component of extended search and sort capabilities.
+    ///
+    /// Context kinds indicate which protocol extension is being used for search operations. These are used in combination
+    /// with context(_:) to form capabilities like `CONTEXT=SEARCH` or `CONTEXT=SORT`.
+    ///
+    /// - SeeAlso: [RFC 4731 ESEARCH Extension](https://datatracker.ietf.org/doc/html/rfc4731)
+    /// - SeeAlso: [RFC 5256 SORT Extension](https://datatracker.ietf.org/doc/html/rfc5256)
     public struct ContextKind: Hashable, Sendable {
-        /// Support extended search commands and accepts new return options.
+        /// Extended search context (RFC 4731).
         public static let search = Self(unchecked: "SEARCH")
 
-        /// Support the extended SORT command syntax and accepts new return options.
+        /// Extended sort context (RFC 5256).
         public static let sort = Self(unchecked: "SORT")
 
-        /// The raw string value of the capability.
+        /// The raw string value of the context kind.
         var rawValue: String
 
-        /// Creates a new `ContextKind`  from a `String`.
-        /// - parameter value: The raw `String`. Will be uppercased.
+        /// Creates a new context kind from a string.
+        ///
+        /// The provided value is uppercased for consistency with IMAP protocol conventions.
+        ///
+        /// - parameter value: The context kind as a string (e.g., SEARCH, SORT).
         public init(_ value: String) {
             self.rawValue = value.uppercased()
         }
@@ -81,18 +108,24 @@ extension Capability {
         }
     }
 
-    /// Wraps *SORT=* extensions.
+    /// Wraps sort algorithm variants supported by a `SORT` extension.
+    ///
+    /// Sort kinds indicate specific sort capabilities. A server supporting `SORT=DISPLAY` supports
+    /// the `DISPLAYFROM` and `DISPLAYTO` sort criteria in addition to base `SORT` criteria.
+    ///
+    /// - SeeAlso: [RFC 5256 SORT Extension](https://datatracker.ietf.org/doc/html/rfc5256)
     public struct SortKind: Hashable, Sendable {
-        /// A server that supports the full SORT extension as well as both the
-        /// DISPLAYFROM and DISPLAYTO sort criteria indicates this by returning
-        /// "SORT=DISPLAY" in its CAPABILITY response.
+        /// Display sort kind supporting DISPLAYFROM and DISPLAYTO criteria (RFC 5256).
         public static let display = Self(unchecked: "DISPLAY")
 
-        /// The raw string value of the capability.
+        /// The raw string value of the sort kind.
         var rawValue: String
 
-        /// Creates a new `SortKind`  from a `String`.
-        /// - parameter value: The raw `String`. Will be uppercased.
+        /// Creates a new sort kind from a string.
+        ///
+        /// The provided value is uppercased for consistency with IMAP protocol conventions.
+        ///
+        /// - parameter value: The sort kind as a string (e.g., DISPLAY).
         public init(_ value: String) {
             self.rawValue = value.uppercased()
         }
@@ -102,24 +135,27 @@ extension Capability {
         }
     }
 
-    /// Wraps *THREAD=* extensions.
+    /// Wraps thread algorithm variants supported by a `THREAD` extension.
+    ///
+    /// Thread kinds specify the algorithm used to group related messages together. Different algorithms
+    /// use different criteria to establish parent-child relationships.
+    ///
+    /// - SeeAlso: [RFC 5256 THREAD Extension](https://datatracker.ietf.org/doc/html/rfc5256)
     public struct ThreadKind: Hashable, Sendable {
-        /// The searched messages are sorted by base subject and then
-        /// by the sent date.  The messages are then split into separate
-        /// threads, with each thread containing messages with the same
-        /// base subject text.  Finally, the threads are sorted by the sent
-        /// date of the first message in the thread.
+        /// ORDEREDSUBJECT threading groups messages by base subject and date (RFC 5256).
         public static let orderedSubject = Self(unchecked: "ORDEREDSUBJECT")
 
-        /// Threads the searched messages by grouping them together in parent/child
-        /// relationships based on which messages are replies to others.
+        /// REFERENCES threading groups messages by in-reply-to relationships (RFC 5256).
         public static let references = Self(unchecked: "REFERENCES")
 
-        /// The raw string value of the capability.
+        /// The raw string value of the thread kind.
         var rawValue: String
 
-        /// Creates a new `ThreadKind`  from a `String`.
-        /// - parameter value: The raw `String`. Will be uppercased.
+        /// Creates a new thread kind from a string.
+        ///
+        /// The provided value is uppercased for consistency with IMAP protocol conventions.
+        ///
+        /// - parameter value: The thread kind as a string (e.g., ORDEREDSUBJECT, REFERENCES).
         public init(_ value: String) {
             self.rawValue = value.uppercased()
         }
@@ -129,18 +165,24 @@ extension Capability {
         }
     }
 
-    /// Wraps *STATUS=* extensions.
+    /// Wraps additional `STATUS` response item types supported by a `STATUS` extension.
+    ///
+    /// Status kinds specify which additional mailbox status attributes a server can provide beyond
+    /// the base RFC 3501 `MESSAGES`, `RECENT`, `UIDNEXT`, `UIDVALIDITY`, and `UNSEEN` attributes.
+    ///
+    /// - SeeAlso: [RFC 8438 Status Response Extension](https://datatracker.ietf.org/doc/html/rfc8438)
     public struct StatusKind: Hashable, Sendable {
-        /// Allows retrieving the total storage size of a mailbox with
-        /// a single STATUS command rather than retrieving and
-        /// summing the sizes of all individual messages in that mailbox.
+        /// SIZE status kind allows retrieving total mailbox storage size (RFC 8438).
         public static let size = Self(unchecked: "SIZE")
 
-        /// The raw string value of the capability.
+        /// The raw string value of the status kind.
         var rawValue: String
 
-        /// Creates a new `StatusKind`  from a `String`.
-        /// - parameter value: The raw `String`. Will be uppercased.
+        /// Creates a new status kind from a string.
+        ///
+        /// The provided value is uppercased for consistency with IMAP protocol conventions.
+        ///
+        /// - parameter value: The status kind as a string (e.g., SIZE).
         public init(_ value: String) {
             self.rawValue = value.uppercased()
         }
@@ -150,17 +192,25 @@ extension Capability {
         }
     }
 
-    /// Wraps *UTF8=* extensions
+    /// Wraps UTF-8 encoding support variants.
+    ///
+    /// UTF-8 kinds specify the level of UTF-8 support offered by the server. When a client enables
+    /// a UTF-8 capability, it informs the server that it will send and can receive UTF-8-encoded
+    /// strings instead of modified UTF-7 encoding.
+    ///
+    /// - SeeAlso: [RFC 6855 IMAP Support for UTF-8](https://datatracker.ietf.org/doc/html/rfc6855)
     public struct UTF8Kind: Hashable, Sendable {
-        /// Enabling this extension will tell the server that the client accepts
-        /// UTF8-encoded strings.
+        /// ACCEPT UTF-8 kind allows server to send UTF-8-encoded strings (RFC 6855).
         public static let accept = Self(unchecked: "ACCEPT")
 
-        /// The raw string value of the capability.
+        /// The raw string value of the UTF-8 kind.
         var rawValue: String
 
-        /// Creates a new `UTF8Kind`  from a `String`.
-        /// - parameter value: The raw `String`. Will be uppercased.
+        /// Creates a new UTF-8 kind from a string.
+        ///
+        /// The provided value is uppercased for consistency with IMAP protocol conventions.
+        ///
+        /// - parameter value: The UTF-8 kind as a string (e.g., ACCEPT).
         public init(_ value: String) {
             self.rawValue = value.uppercased()
         }
@@ -170,18 +220,24 @@ extension Capability {
         }
     }
 
-    /// Wraps *RIGHTS=* extensions. For more information on what each
-    /// letter means see RFC 4314 section 4.
+    /// Wraps access control right sets supported by the `ACL` extension.
+    ///
+    /// Rights kinds specify permission sets for mailbox access control lists. Each rights code is
+    /// a combination of letter codes representing different allowed operations.
+    ///
+    /// - SeeAlso: [RFC 4314 Section 4 ACL Extension](https://datatracker.ietf.org/doc/html/rfc4314#section-4)
     public struct RightsKind: Hashable, Sendable {
-        /// Allowed operations in auth state: *DELETE*, *APPEND*, *CREATE*, *RENAME*,
-        /// Allowed operations in selected state: *COPY*, *STORE flags*, *EXPUNGE* (required)
+        /// TEKX rights kind represents a common permission set (RFC 4314).
         public static let tekx = Self(unchecked: "TEKX")
 
-        /// The raw string value of the capability.
+        /// The raw string value of the rights kind.
         var rawValue: String
 
-        /// Creates a new `RightsKind`  from a `String`.
-        /// - parameter value: The raw `String`. Will be uppercased.
+        /// Creates a new rights kind from a string.
+        ///
+        /// The provided value is uppercased for consistency with IMAP protocol conventions.
+        ///
+        /// - parameter value: The rights kind as a string (e.g., TEKX).
         public init(_ value: String) {
             self.rawValue = value.uppercased()
         }
@@ -191,16 +247,24 @@ extension Capability {
         }
     }
 
-    /// The type of compression used in IMAP  responses.
+    /// Wraps compression algorithm support types.
+    ///
+    /// Compression kinds indicate the compression algorithms supported by a server's `COMPRESS` extension.
+    /// Clients can enable compression to reduce bandwidth usage on the connection.
+    ///
+    /// - SeeAlso: [RFC 4978 IMAP Compression](https://datatracker.ietf.org/doc/html/rfc4978)
     public struct CompressionKind: Hashable, Sendable {
-        /// The `DEFLATE` algorithm is used. RFC 4978
+        /// DEFLATE compression algorithm (RFC 1951).
         public static let deflate = Self(unchecked: "DEFLATE")
 
-        /// The raw string value of the capability.
+        /// The raw string value of the compression kind.
         var rawValue: String
 
-        /// Creates a new `CompressionKind` from a `String`.
-        /// - parameter value: The raw `String`. Will be uppercased.
+        /// Creates a new compression kind from a string.
+        ///
+        /// The provided value is uppercased for consistency with IMAP protocol conventions.
+        ///
+        /// - parameter value: The compression kind as a string (e.g., DEFLATE).
         public init(_ value: String) {
             self.rawValue = value.uppercased()
         }
@@ -210,208 +274,290 @@ extension Capability {
         }
     }
 
-    /// Permits access control lists to be retrieved and manipulated - RFC 2086.
+    /// The `ACL` capability indicates the server supports access control lists for mailbox permissions.
+    ///
+    /// - SeeAlso: [RFC 2086](https://datatracker.ietf.org/doc/html/rfc2086)
     public static let acl = Self(unchecked: "ACL")
 
-    /// Enables clients and server to maintain metadata for messages or individual message parts - RFC 5257.
+    /// The `ANNOTATE-EXPERIMENT-1` capability indicates experimental support for message annotations and metadata.
+    ///
+    /// - SeeAlso: [RFC 5257](https://datatracker.ietf.org/doc/html/rfc5257)
     public static let annotateExperiment1 = Self(unchecked: "ANNOTATE-EXPERIMENT-1")
 
-    /// The server supports sending binary message data - RFC 3516
+    /// The `BINARY` capability indicates the server supports sending binary message data without encoding.
+    ///
+    /// - SeeAlso: [RFC 3516](https://datatracker.ietf.org/doc/html/rfc3516)
     public static let binary = Self(unchecked: "BINARY")
 
-    /// Allows clients to create messages containing a combination of new and existing data/messages - RFC 5550.
+    /// The `CATENATE` capability indicates the server supports creating messages by combining new and existing message data.
+    ///
+    /// - SeeAlso: [RFC 4469](https://datatracker.ietf.org/doc/html/rfc4469)
     public static let catenate = Self(unchecked: "CATENATE")
 
-    /// Provides a mechanism for a client to efficiently determine if a particular mailbox has children - RFC 3348.
+    /// The `CHILDREN` capability indicates the server can determine whether a mailbox has children without listing them.
+    ///
+    /// - SeeAlso: [RFC 3348](https://datatracker.ietf.org/doc/html/rfc3348)
     public static let children = Self(unchecked: "CHILDREN")
 
-    /// Provides a protected update mechanism to fully resynchronise a mailbox as part of a `.select` or `.examine` command - RFC 7162.
+    /// The `CONDSTORE` capability indicates the server maintains modification sequence values for tracking changes.
+    ///
+    /// - SeeAlso: [RFC 7162](https://datatracker.ietf.org/doc/html/rfc7162)
+    /// - SeeAlso: ``qresync``
     public static let condStore = Self(unchecked: "CONDSTORE")
 
-    /// Allows clients to designate mailboxes as being for a dedicated purpose, e.g. the "sent" mailbox - RFC 6154.
+    /// The `CREATE-SPECIAL-USE` capability indicates the server supports creating mailboxes with special-use attributes.
+    ///
+    /// - SeeAlso: [RFC 6154](https://datatracker.ietf.org/doc/html/rfc6154)
+    /// - SeeAlso: ``specialUse``
     public static let createSpecialUse = Self(unchecked: "CREATE-SPECIAL-USE")
 
-    /// Allows clients to tell servers which capabilities they support and should be used  - RFC 5161.
+    /// The `ENABLE` capability indicates the server supports the `ENABLE` command for capability negotiation.
+    ///
+    /// - SeeAlso: [RFC 5161](https://datatracker.ietf.org/doc/html/rfc5161)
     public static let enable = Self(unchecked: "ENABLE")
 
-    /// Extends normal search to control what type of data is returned - RFC 4731.
+    /// The `ESEARCH` capability indicates the server supports the ESEARCH command with advanced search result options.
+    ///
+    /// - SeeAlso: [RFC 4731](https://datatracker.ietf.org/doc/html/rfc4731)
     public static let extendedSearch = Self(unchecked: "ESEARCH")
 
-    /// Allows search responses to be sorted according to e.g. *MIN*, *MAX*, etc - RFC 5465.
+    /// The `ESORT` capability indicates the server supports extended sort result forms.
+    ///
+    /// - SeeAlso: [RFC 5465](https://datatracker.ietf.org/doc/html/rfc5465)
     public static let esort = Self(unchecked: "ESORT")
 
-    /// Allows searches to be persistently stored on the server - RFC 5466.
+    /// The `FILTERS` capability indicates the server supports persistent server-side searches.
+    ///
+    /// - SeeAlso: [RFC 5466](https://datatracker.ietf.org/doc/html/rfc5466)
     public static let filters = Self(unchecked: "FILTERS")
 
-    /// Allows the server and client to exchange implementation identifier information - RFC 2971.
+    /// The `ID` capability indicates the server supports the ID command for exchanging implementation information.
+    ///
+    /// - SeeAlso: [RFC 2971](https://datatracker.ietf.org/doc/html/rfc2971)
     public static let id = Self(unchecked: "ID")
 
-    /// The server can be put into an IDLE state without terminating the connection - RFC 2177
+    /// The `IDLE` capability indicates the server supports the `IDLE` command for real-time message notifications.
+    ///
+    /// - SeeAlso: [RFC 2177](https://datatracker.ietf.org/doc/html/rfc2177)
     public static let idle = Self(unchecked: "IDLE")
 
-    /// The specific rev1 revision of IMAP 4 - RFC 3501.
+    /// The `IMAP4rev1` capability indicates the server implements IMAP protocol version 4 revision 1.
+    ///
+    /// - SeeAlso: [RFC 3501](https://datatracker.ietf.org/doc/html/rfc3501)
     public static let imap4rev1 = Self(unchecked: "IMAP4rev1")
 
-    /// Default IMAP CAPABILITY - every server should advertise this.
+    /// The `IMAP4` capability is a legacy identifier that servers may advertise. Use `IMAP4rev1` instead.
+    ///
+    /// - SeeAlso: [RFC 3501](https://datatracker.ietf.org/doc/html/rfc3501)
     public static let imap4 = Self(unchecked: "IMAP4")
 
-    /// RFC 9698 - Access to JMAP
+    /// The `JMAPACCESS` capability indicates the server provides access to JMAP resources via IMAP.
+    ///
+    /// - SeeAlso: [RFC 9698](https://datatracker.ietf.org/doc/html/rfc9698)
     public static let jmapAccess = Self(unchecked: "JMAPACCESS")
 
-    /// Allows the client and server to decide which language the server should use when sending human-readable text - RFC 5255.
+    /// The `LANGUAGE` capability indicates the server supports the LANGUAGE command for selecting response language.
+    ///
+    /// - SeeAlso: [RFC 5255](https://datatracker.ietf.org/doc/html/rfc5255)
     public static let language = Self(unchecked: "LANGUAGE")
 
-    /// Allows a `.list` command to also respond status information for each mailbox - RFC 5819.
+    /// The `LIST-STATUS` capability indicates the server supports returning mailbox status in LIST responses.
+    ///
+    /// - SeeAlso: [RFC 5819](https://datatracker.ietf.org/doc/html/rfc5819)
     public static let listStatus = Self(unchecked: "LIST-STATUS")
 
-    /// Provides an interface for additional `.list` command options to prevent an exponential API increase - RFC 5258.
+    /// The `LIST-EXTENDED` capability indicates the server supports the extended LIST command with additional options.
+    ///
+    /// - SeeAlso: [RFC 5258](https://datatracker.ietf.org/doc/html/rfc5258)
     public static let listExtended = Self(unchecked: "LIST-EXTENDED")
 
-    /// Clients must not send a `.login` command if this capability is advertised - RFC 3501.
+    /// The `LOGINDISABLED` capability indicates the server does not support the LOGIN command (use AUTHENTICATE instead).
+    ///
+    /// - SeeAlso: [RFC 3501](https://datatracker.ietf.org/doc/html/rfc3501)
     public static let loginDisabled = Self(unchecked: "LOGINDISABLED")
 
-    /// Allow clients to transparently connect to an alternate IMAP4 server, if their home IMAP4 server has changed - RFC 2221.
+    /// The `LOGIN-REFERRALS` capability indicates the server may redirect clients to an alternate IMAP server.
+    ///
+    /// - SeeAlso: [RFC 2221](https://datatracker.ietf.org/doc/html/rfc2221)
     public static let loginReferrals = Self(unchecked: "LOGIN-REFERRALS")
 
-    /// RFC 7889 “Mailbox-Specific APPENDLIMIT” — maximum upload size.
+    /// The `APPENDLIMIT` capability advertises the maximum size of messages that can be appended to the mailbox.
+    ///
+    /// - SeeAlso: [RFC 7889](https://datatracker.ietf.org/doc/html/rfc7889)
+    /// - SeeAlso: ``appendLimit(_:)``
     public static let mailboxSpecificAppendLimit = Self(unchecked: "APPENDLIMIT")
 
-    /// Permits clients and servers to maintain "annotations" or "metadata" on IMAP servers - RFC 5464.
+    /// The `METADATA` capability indicates the server supports storing and retrieving user and server annotations.
+    ///
+    /// - SeeAlso: [RFC 5464](https://datatracker.ietf.org/doc/html/rfc5464)
+    /// - SeeAlso: ``metadataServer``
     public static let metadata = Self(unchecked: "METADATA")
 
-    /// Permits clients and servers to maintain "annotations" or "metadata" on IMAP servers.
-    /// A server that supports only server annotations indicates the presence of this extension
-    /// by returning "METADATA-SERVER" - RFC 5464.
+    /// The `METADATA-SERVER` capability indicates the server supports server-level (not per-mailbox) annotations.
+    ///
+    /// - SeeAlso: [RFC 5464](https://datatracker.ietf.org/doc/html/rfc5464)
+    /// - SeeAlso: ``metadata``
     public static let metadataServer = Self(unchecked: "METADATA-SERVER")
 
-    /// The server supports moving messages from one mailbox to another - RFC 6851.
+    /// The `MOVE` capability indicates the server supports the `MOVE` command for atomic message relocation.
+    ///
+    /// - SeeAlso: [RFC 6851](https://datatracker.ietf.org/doc/html/rfc6851)
     public static let move = Self(unchecked: "MOVE")
 
-    /// Allows a client to search multiple mailboxes with one command - RFC 7377.
+    /// The `MULTISEARCH` capability indicates the server supports searching across multiple mailboxes in one command.
+    ///
+    /// - SeeAlso: [RFC 7377](https://datatracker.ietf.org/doc/html/rfc7377)
     public static let multiSearch = Self(unchecked: "MULTISEARCH")
 
-    /// Enables managing mailbox namespaces to provide support for shared mailboxes - RFC 4466.
+    /// The `NAMESPACE` capability indicates the server supports the `NAMESPACE` command for accessing multiple mailbox namespaces.
+    ///
+    /// - SeeAlso: [RFC 2342](https://datatracker.ietf.org/doc/html/rfc2342)
     public static let namespace = Self(unchecked: "NAMESPACE")
 
-    /// The server supports object identifiers - RFC 8474.
+    /// The `OBJECTID` capability indicates the server supports object identifiers for messages and mailboxes.
+    ///
+    /// - SeeAlso: [RFC 8474](https://datatracker.ietf.org/doc/html/rfc8474)
     public static let objectID = Self(unchecked: "OBJECTID")
 
-    /// Each mailbox that supports persistent storage of mod-sequences, i.e., for which the server would
-    /// send a HIGHESTMODSEQ untagged OK response code on a successful
-    /// SELECT/EXAMINE, MUST increment the per-mailbox mod-sequence when one
-    /// or more messages are expunged due to EXPUNGE, UID EXPUNGE, CLOSE, or
-    /// MOVE [RFC6851]; the server MUST associate the incremented mod-
-    /// sequence with the UIDs of the expunged messages - RFC 4466.
+    /// The `QRESYNC` capability indicates the server supports quick resynchronization for mailbox reconciliation.
+    ///
+    /// - SeeAlso: [RFC 7162](https://datatracker.ietf.org/doc/html/rfc7162)
+    /// - SeeAlso: ``condStore``
     public static let qresync = Self(unchecked: "QRESYNC")
 
-    /// The server supports administrative limits on resource usage - RFC 2087.
+    /// The `QUOTA` capability indicates the server supports resource quota management for mailboxes.
+    ///
+    /// - SeeAlso: [RFC 2087](https://datatracker.ietf.org/doc/html/rfc2087)
     public static let quota = Self(unchecked: "QUOTA")
 
-    /// Allows an initial client response argument to the IMAP AUTHENTICATE command - RFC 4959.
+    /// The `SASL-IR` capability indicates the server supports initial response data with the `AUTHENTICATE` command.
+    ///
+    /// - SeeAlso: [RFC 4959](https://datatracker.ietf.org/doc/html/rfc4959)
     public static let saslIR = Self(unchecked: "SASL-IR")
 
-    /// Allows a client to tell a server to use the result of a SEARCH (or Unique Identifier (UID)
-    /// SEARCH) command as an input to any subsequent command - RFC 5182.
+    /// The `SEARCHRES` capability indicates the server supports the `$` reference to the last search result.
+    ///
+    /// - SeeAlso: [RFC 5182](https://datatracker.ietf.org/doc/html/rfc5182)
     public static let searchRes = Self(unchecked: "SEARCHRES")
 
-    /// Adds new optional mailbox attributes that a server may include in IMAP LIST
-    /// command responses to identify special-use mailboxes to the client,
-    /// easing configuration - RFC 6154.
+    /// The `SPECIAL-USE` capability indicates the server supports special-use mailbox attributes like Drafts and Sent.
+    ///
+    /// - SeeAlso: [RFC 6154](https://datatracker.ietf.org/doc/html/rfc6154)
+    /// - SeeAlso: ``createSpecialUse``
     public static let specialUse = Self(unchecked: "SPECIAL-USE")
 
-    /// Part of the core IMAP4rev1 specification, enables upgrading plaintext connections to TLS - RFC 3501.
+    /// The `STARTTLS` capability indicates the server supports the `STARTTLS` command to upgrade to an encrypted connection.
+    ///
+    /// - SeeAlso: [RFC 3501](https://datatracker.ietf.org/doc/html/rfc3501)
     public static let startTLS = Self(unchecked: "STARTTLS")
 
-    /// Provides a set of features intended to reduce the amount of time and
-    /// resources used by some client operations - RFC 4315.
+    /// The `UIDPLUS` capability indicates the server supports UIDPLUS extensions for UID responses and UID EXPUNGE.
+    ///
+    /// - SeeAlso: [RFC 4315](https://datatracker.ietf.org/doc/html/rfc4315)
     public static let uidPlus = Self(unchecked: "UIDPLUS")
 
-    /// Provides a command to retrieve UIDs that partition a mailbox's messages
-    /// into evenly sized batches
+    /// The `UIDBATCHES` capability indicates the server supports partitioning messages into evenly-sized UID batches.
+    ///
+    /// - SeeAlso: [RFC 9618](https://datatracker.ietf.org/doc/html/draft-ietf-mailmaint-imap-uidbatches-22)
     public static let uidBatches = Self(unchecked: "UIDBATCHES")
 
-    /// Allows closing the current mailbox without expunging it - RFC 3691.
+    /// The `UNSELECT` capability indicates the server supports the `UNSELECT` command to close without expunging.
+    ///
+    /// - SeeAlso: [RFC 3691](https://datatracker.ietf.org/doc/html/rfc3691)
     public static let unselect = Self(unchecked: "UNSELECT")
 
-    /// If an IMAP server supports PARTIAL in IMAP URL used in CATENATE and
-    /// URLAUTH extensions, then it MUST advertise the URL-PARTIAL capability
-    /// in both the CAPABILITY response and the equivalent response-code - RFC 5550.
+    /// The `URL-PARTIAL` capability indicates the server supports partial IMAP URLs in `CATENATE` and `URLAUTH` extensions.
+    ///
+    /// - SeeAlso: [RFC 5092](https://datatracker.ietf.org/doc/html/rfc5092)
     public static let partialURL = Self(unchecked: "URL-PARTIAL")
 
-    /// Paged SEARCH and FETCH, RFC 9394.
+    /// The `PARTIAL` capability indicates the server supports paged SEARCH and FETCH results.
     ///
-    /// Allows clients to limit the number of results returned.
+    /// - SeeAlso: [RFC 9394](https://datatracker.ietf.org/doc/html/rfc9394)
     public static let partial = Self(unchecked: "PARTIAL")
 
-    /// Provides a means by which an IMAP client can use URLs carrying authorization
-    /// to access limited message data on the IMAP server - RFC 4467.
+    /// The `URLAUTH` capability indicates the server supports IMAP URLs with authorization data.
+    ///
+    /// - SeeAlso: [RFC 4467](https://datatracker.ietf.org/doc/html/rfc4467)
     public static let authenticatedURL = Self(unchecked: "URLAUTH")
 
-    /// Provides additional mechanisms to `.search` such as *OLDER*, *YOUNGER* to reduce
-    /// network traffic and the computation required by clients.
+    /// The `WITHIN` capability indicates the server supports the `OLDER` and `YOUNGER` search criteria.
+    ///
+    /// - SeeAlso: [RFC 5032](https://datatracker.ietf.org/doc/html/rfc5032)
     public static let within = Self(unchecked: "WITHIN")
 
-    /// Enables GMail-specific features.
-    /// https://developers.google.com/gmail/imap/imap-extensions
+    /// The `X-GM-EXT-1` capability indicates the server supports Gmail-specific IMAP extensions.
+    ///
+    /// - SeeAlso: [Gmail IMAP Extensions](https://developers.google.com/gmail/imap/imap-extensions)
     public static let gmailExtensions = Self(unchecked: "X-GM-EXT-1")
 
-    /// Yahoo Mail Highest Modification-Sequence
+    /// The `XYMHIGHESTMODSEQ` capability indicates the server tracks the highest modification sequence for Yahoo Mail.
+    ///
+    /// - SeeAlso: [Yahoo Mail IMAP](https://help.yahoo.com/kb/SLN6556.html)
     public static let yahooMailHighestModificationSequence = Self(unchecked: "XYMHIGHESTMODSEQ")
 
-    /// The server supports non-synchronising literals - RFC 7888.
+    /// The `LITERAL+` capability indicates the server supports non-synchronizing literals for efficient transmission.
+    ///
+    /// - SeeAlso: [RFC 7888](https://datatracker.ietf.org/doc/html/rfc7888)
+    /// - SeeAlso: ``literalMinus``
     public static let literalPlus = Self(unchecked: "LITERAL+")
 
-    /// RFC 7888 LITERAL-
+    /// The `LITERAL-` capability indicates the server supports literal minus for selective synchronizing.
+    ///
+    /// - SeeAlso: [RFC 7888](https://datatracker.ietf.org/doc/html/rfc7888)
+    /// - SeeAlso: ``literalPlus``
     public static let literalMinus = Self(unchecked: "LITERAL-")
 
-    /// RFC 8970 - IMAP4 Extension: Message Preview Generation
+    /// The `PREVIEW` capability indicates the server can generate server-side message preview text.
     ///
-    /// Allows a client to request a server-generated abbreviated text representation of message data.
+    /// - SeeAlso: [RFC 8970](https://datatracker.ietf.org/doc/html/rfc8970)
     public static let preview = Self(unchecked: "PREVIEW")
 
-    /// RFC 9586 UIDONLY
+    /// The `UIDONLY` capability indicates the server does not return message sequence numbers when enabled.
     ///
-    /// Message numbers are not returned in responses and cannot be used in requests once this extension is enabled.
+    /// - SeeAlso: [RFC 9586](https://datatracker.ietf.org/doc/html/rfc9586)
+    /// - SeeAlso: ``saveLimit(_:)``
     public static let uidOnly = Self(unchecked: "UIDONLY")
 
-    /// RFC 7889 `APPENDLIMIT` — maximum upload size.
+    /// Creates an `APPENDLIMIT=<count>` capability advertising the maximum message size for the mailbox.
     ///
-    /// See also: ``mailboxSpecificAppendLimit``
+    /// - SeeAlso: [RFC 7889](https://datatracker.ietf.org/doc/html/rfc7889)
     public static func appendLimit(_ count: Int) -> Self {
         Self("APPENDLIMIT=\(count)")
     }
 
-    /// RFC 9738 `MESSAGELIMIT`
+    /// Creates a `MESSAGELIMIT=<count>` capability advertising the maximum message count for operations.
     ///
-    /// Allows servers to announce a limit on the number of messages that can be processed in a single command.
+    /// - SeeAlso: [RFC 9738](https://datatracker.ietf.org/doc/html/rfc9738)
     public static func messageLimit(_ count: Int) -> Self {
         Self("MESSAGELIMIT=\(count)")
     }
 
-    /// SAVELIMIT
+    /// Creates a `SAVELIMIT=<count>` capability advertising the maximum message count for SAVE operations.
     ///
-    /// Allows servers to announce a limit on the number of messages that can be processed in a single command.
+    /// - SeeAlso: [RFC 9586](https://datatracker.ietf.org/doc/html/rfc9586)
+    /// - SeeAlso: ``uidOnly``
     public static func saveLimit(_ count: Int) -> Self {
         Self("SAVELIMIT=\(count)")
     }
 
-    /// Creates a new *AUTH* capability.
-    /// - parameter type: The `AuthenticationMechanism`.
-    /// - returns: A new `Capability`.
+    /// Creates an `AUTH=<mechanism>` capability for the specified SASL mechanism.
+    ///
+    /// - SeeAlso: [RFC 4959](https://datatracker.ietf.org/doc/html/rfc4959)
     public static func authenticate(_ type: AuthenticationMechanism) -> Self {
         Self("AUTH=\(type.rawValue)")
     }
 
-    /// Creates a new *CONTEXT* capability.
-    /// - parameter type: The `ContextKind`.
-    /// - returns: A new `Capability`.
+    /// Creates a `CONTEXT=<kind>` capability for the specified search or sort context.
+    ///
+    /// - SeeAlso: [RFC 4731](https://datatracker.ietf.org/doc/html/rfc4731)
     public static func context(_ type: ContextKind) -> Self {
         Self("CONTEXT=\(type.rawValue)")
     }
 
-    /// Creates a new *SORT* capability.
-    /// - parameter type: The `SortKind`.
-    /// - returns: A new `Capability`.
+    /// Creates a `SORT` or `SORT=<kind>` capability for the specified sort algorithm.
+    ///
+    /// - SeeAlso: [RFC 5256](https://datatracker.ietf.org/doc/html/rfc5256)
     public static func sort(_ type: SortKind?) -> Self {
         guard let type = type else {
             return Self("SORT")
@@ -419,37 +565,37 @@ extension Capability {
         return Self("SORT=\(type.rawValue)")
     }
 
-    /// Creates a new *UTF8* capability.
-    /// - parameter type: The `UTF8Kind`.
-    /// - returns: A new `Capability`.
+    /// Creates a `UTF8=<kind>` capability for the specified UTF-8 support level.
+    ///
+    /// - SeeAlso: [RFC 6855](https://datatracker.ietf.org/doc/html/rfc6855)
     public static func utf8(_ type: UTF8Kind) -> Self {
         Self("UTF8=\(type.rawValue)")
     }
 
-    /// Creates a new *THREAD* capability.
-    /// - parameter type: The `ThreadKind`.
-    /// - returns: A new `Capability`.
+    /// Creates a `THREAD=<kind>` capability for the specified threading algorithm.
+    ///
+    /// - SeeAlso: [RFC 5256](https://datatracker.ietf.org/doc/html/rfc5256)
     public static func thread(_ type: ThreadKind) -> Self {
         Self("THREAD=\(type.rawValue)")
     }
 
-    /// Creates a new *STATUS* capability.
-    /// - parameter type: The `STATUSKind`.
-    /// - returns: A new `Capability`.
+    /// Creates a `STATUS=<kind>` capability for the specified status attribute type.
+    ///
+    /// - SeeAlso: [RFC 8438](https://datatracker.ietf.org/doc/html/rfc8438)
     public static func status(_ type: StatusKind) -> Self {
         Self("STATUS=\(type.rawValue)")
     }
 
-    /// Creates a new *RIGHTS* capability.
-    /// - parameter type: The `RightsKind`.
-    /// - returns: A new `Capability`.
+    /// Creates a `RIGHTS=<kind>` capability for the specified access control right set.
+    ///
+    /// - SeeAlso: [RFC 4314](https://datatracker.ietf.org/doc/html/rfc4314)
     public static func rights(_ type: RightsKind) -> Self {
         Self("RIGHTS=\(type.rawValue)")
     }
 
-    /// Creates a new *COMPRESSION* capability.
-    /// - parameter type: The `CompressionKind`.
-    /// - returns: A new `Capability`.
+    /// Creates a `COMPRESS=<kind>` capability for the specified compression algorithm.
+    ///
+    /// - SeeAlso: [RFC 4978](https://datatracker.ietf.org/doc/html/rfc4978)
     public static func compression(_ type: CompressionKind) -> Self {
         Self("COMPRESS=\(type.rawValue)")
     }

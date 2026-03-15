@@ -23,7 +23,7 @@
 /// Valid mailbox IDs are 1-255 alphanumeric characters plus hyphens and underscores.
 ///
 /// ``MailboxID`` is returned as part of ``MailboxStatus`` when the `MAILBOXID` attribute is requested
-/// in a `STATUS` command, or as part of the ``Notify`` extension when monitoring mailbox changes.
+/// in a `STATUS` command, or as part of the `NOTIFY` extension when monitoring mailbox changes.
 ///
 /// **Requires server capability:** ``Capability/objectID``
 ///

@@ -14,11 +14,25 @@
 
 import struct NIO.ByteBuffer
 
-/// Represents the a *mod-sequence-value` as defined in RFC 7162.
+/// A modification sequence value from RFC 7162 `CONDSTORE` extension.
+///
+/// A mod-sequence value is a 63-bit unsigned integer that tracks when a message or its flags last changed.
+/// Servers that support the `CONDSTORE` extension assign and maintain mod-sequence values for each mailbox.
+/// These values enable clients to efficiently resynchronize mailbox state by requesting only messages
+/// modified since a known `MODSEQ` value.
+///
+/// Modification sequence values are monotonically increasing within a mailbox. They increase when:
+/// - A message is added to the mailbox
+/// - A message's flags are modified
+/// - A message is expunged
+///
+/// The 63-bit constraint is enforced by the initializer; values must not exceed `Int64.max`.
+///
+/// - SeeAlso: [RFC 7162 CONDSTORE Extension](https://datatracker.ietf.org/doc/html/rfc7162)
 public struct ModificationSequenceValue: Hashable, Sendable {
     var value: UInt64
 
-    /// A  zero *mod-sequence-value*
+    /// A zero `mod-sequence-value`
     public static var zero: Self {
         0
     }

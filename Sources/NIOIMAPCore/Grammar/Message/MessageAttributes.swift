@@ -14,63 +14,228 @@
 
 import struct NIO.ByteBuffer
 
-/// These are the individual parts of a `FETCH` response.
+/// Individual message attributes returned in a `FETCH` response.
 ///
-/// - SeeAlso: RFC 3501 section 7.4.2
+/// When a client sends a `FETCH` command, the server responds with one or more message attributes for each matching message.
+/// Each ``MessageAttribute`` represents a single piece of message data, such as flags, message structure, or message identifiers.
+/// Multiple attributes are returned together in a single `FETCH` response line.
+///
+/// ### Example
+///
+/// ```
+/// C: A001 FETCH 1 (FLAGS ENVELOPE UID)
+/// S: * 1 FETCH (FLAGS (\Seen) ENVELOPE (...) UID 123)
+/// ```
+///
+/// The response line contains three attributes: ``flags(_:)`` wrapping `\Seen`, ``envelope(_:)`` containing the message envelope,
+/// and ``uid(_:)`` with UID `123`.
+///
+/// ## Request vs Response
+///
+/// Use ``FetchAttribute`` to request specific message attributes in a `FETCH` command. The server responds with ``MessageAttribute``
+/// values containing the requested data. Not all ``FetchAttribute`` cases have corresponding ``MessageAttribute`` cases — for example,
+/// ``FetchAttribute/bodyStructure(extensions:)`` (a request) produces ``body(_:hasExtensionData:)`` (response).
+///
+/// ## Related Types
+///
+/// - ``FetchAttribute`` — Request side (what the client asks for)
+/// - ``FetchModifier`` — Modifiers for `FETCH` commands (RFC 7162)
+/// - ``SectionSpecifier`` — Specifies message body sections for partial fetches
+/// - ``StreamingKind`` — Streaming body section references
+///
+/// - SeeAlso: [RFC 3501 Section 7.4.2](https://datatracker.ietf.org/doc/html/rfc3501#section-7.4.2)
 public enum MessageAttribute: Hashable, Sendable {
-    /// `FLAGS` -- A list of flags that are set for this message.
+    /// The message flags.
+    ///
+    /// The `FLAGS` attribute contains a list of zero or more flags set for this message.
+    /// Each flag is a ``Flag`` which may be a standard system flag (like `\Seen`, `\Flagged`) or a custom keyword.
+    ///
+    /// ### Example
+    ///
+    /// ```
+    /// S: * 1 FETCH (FLAGS (\Seen \Flagged))
+    /// ```
+    ///
+    /// This response contains the ``flags(_:)`` case with two system flags.
+    ///
+    /// - SeeAlso: [RFC 3501 Section 7.4.2](https://datatracker.ietf.org/doc/html/rfc3501#section-7.4.2)
     case flags([Flag])
-    /// `ENVELOPE` -- A list that describes the envelope structure of a message.
+
+    /// The message envelope (RFC 2822 headers in structured format).
+    ///
+    /// The `ENVELOPE` attribute contains structured information about the message headers, including sender, recipients,
+    /// subject, dates, and identifiers. See ``Envelope`` for field descriptions.
+    ///
+    /// ### Example
+    ///
+    /// ```
+    /// S: * 1 FETCH (ENVELOPE (“date” “from” “subject” “to” “cc” “bcc” “in-reply-to” “message-id”))
+    /// ```
+    ///
+    /// - SeeAlso: [RFC 3501 Section 7.4.2](https://datatracker.ietf.org/doc/html/rfc3501#section-7.4.2)
     case envelope(Envelope)
-    /// The internal date of the message.
+
+    /// The internal date of the message (when the server received it).
+    ///
+    /// The `INTERNALDATE` attribute contains the date and time the server received the message. This differs from
+    /// the message’s `Date` header, which the client provided when sending the message.
+    ///
+    /// ### Example
+    ///
+    /// ```
+    /// S: * 1 FETCH (INTERNALDATE “27-Mar-2023 12:34:56 +0000”)
+    /// ```
+    ///
+    /// - SeeAlso: [RFC 3501 Section 7.4.2](https://datatracker.ietf.org/doc/html/rfc3501#section-7.4.2)
     case internalDate(ServerMessageDate)
-    /// The unique identifier of the message.
+
+    /// The unique message identifier.
+    ///
+    /// The `UID` attribute contains the unique identifier assigned by the server to this message. UIDs are persistent
+    /// across connections and remain constant unless the server resets the mailbox (changing ``UIDValidity``).
+    ///
+    /// ### Example
+    ///
+    /// ```
+    /// S: * 1 FETCH (UID 12345)
+    /// ```
+    ///
+    /// - SeeAlso: [RFC 3501 Section 2.3.1.1](https://datatracker.ietf.org/doc/html/rfc3501#section-2.3.1.1)
     case uid(UID)
-    /// `RFC822.SIZE` -- A number expressing the RFC 2822 size of the message.
+
+    /// The size of the message in octets (bytes).
+    ///
+    /// The `RFC822.SIZE` attribute contains the number of octets in the message as defined by RFC 2822,
+    /// including all headers and body content.
+    ///
+    /// ### Example
+    ///
+    /// ```
+    /// S: * 1 FETCH (RFC822.SIZE 1234)
+    /// ```
+    ///
+    /// - SeeAlso: [RFC 3501 Section 7.4.2](https://datatracker.ietf.org/doc/html/rfc3501#section-7.4.2)
     case rfc822Size(Int)
 
-    /// `BODYSTRUCTURE` or `BODY` -- A list that describes the MIME body structure of a message.
+    /// The message body structure (MIME parts).
     ///
-    /// A `BODYSTRUCTURE` response will have `hasExtensionData` set to `true`.
+    /// The `BODY` or `BODYSTRUCTURE` attribute contains a description of the message’s MIME body structure,
+    /// including multipart boundaries and content type information for each part.
+    ///
+    /// When `hasExtensionData` is `true`, the attribute was returned as `BODYSTRUCTURE` (RFC 3501 extension data included).
+    /// When `false`, it was returned as `BODY` (basic structure only).
+    ///
+    /// ### Example
+    ///
+    /// ```
+    /// S: * 1 FETCH (BODY ((“TEXT” “PLAIN” NIL NIL NIL “7BIT” 1234 50)))
+    /// S: * 2 FETCH (BODYSTRUCTURE ((“TEXT” “PLAIN” NIL NIL NIL “7BIT” 1234 50 NIL NIL NIL NIL)))
+    /// ```
+    ///
+    /// The first uses `BODY` (basic), the second uses `BODYSTRUCTURE` (with extension fields).
+    ///
+    /// - SeeAlso: [RFC 3501 Section 7.4.2](https://datatracker.ietf.org/doc/html/rfc3501#section-7.4.2)
     case body(BodyStructure, hasExtensionData: Bool)
 
-    /// `BINARY.SIZE<section-binary>` -- The size of the section after
-    /// removing any content-transfer-encoding related encoding.
-    /// - SeeAlso: RFC 3516 “IMAP4 Binary Content Extension”
+    /// The size of a specific body section after transfer encoding removal.
+    ///
+    /// The `BINARY.SIZE[section]` attribute contains the byte count of the specified message section after removing
+    /// any `Content-Transfer-Encoding` applied to the section. This is useful for determining the decoded size of a part
+    /// without downloading its full content.
+    ///
+    /// ### Example
+    ///
+    /// ```
+    /// S: * 1 FETCH (BINARY.SIZE[2] 5000)
+    /// ```
+    ///
+    /// This indicates body part 2 has 5000 octets when decoded.
+    ///
+    /// - SeeAlso: [RFC 3516 IMAP4 Binary Content Extension](https://datatracker.ietf.org/doc/html/rfc3516)
     case binarySize(section: SectionSpecifier.Part, size: Int)
 
-    /// A `NIL` response to a `StreamingKind`.
+    /// A nil response to a requested body section.
     ///
-    /// This corresponds to e.g. `BODY[4.TEXT] NIL`, i.e. when there’s no data
-    /// for a particular body section. Note that this is different than a
-    /// `.streamingBegin` with a `byteCount` of `0`. The former indicates
-    /// that the section does not exist, the latter than it has zero length.
+    /// The `NIL` attribute indicates that the server could not return the requested body section because the section
+    /// does not exist in the message. This differs from a zero-length section, which would be returned as a literal
+    /// with byte count 0.
+    ///
+    /// ### Example
+    ///
+    /// ```
+    /// S: * 1 FETCH (BODY[4.TEXT] NIL)
+    /// ```
+    ///
+    /// This indicates that body part 4 has no TEXT section (it doesn’t exist).
+    ///
+    /// - SeeAlso: [RFC 3501 Section 7.4.2](https://datatracker.ietf.org/doc/html/rfc3501#section-7.4.2)
     case nilBody(StreamingKind)
 
-    /// The modification time of the message.
+    /// The modification sequence number for the message.
+    ///
+    /// The `MODSEQ` attribute contains a modification sequence number indicating when the message or its flags last changed.
+    /// This is used with the `CONDSTORE` extension for efficient synchronization. The attribute also includes the `UNCHANGEDSINCE`
+    /// or `CHANGEDSINCE` modifier information.
+    ///
+    /// - SeeAlso: [RFC 7162 IMAP4 Extensions: CONDSTORE and QRESYNC](https://datatracker.ietf.org/doc/html/rfc7162)
     case fetchModificationResponse(FetchModificationResponse)
 
-    /// `X-GM-MSGID`: provides a unique ID for each email stable across multiple folders.
-    /// C.f. ``EmailID`` (RFC 8474)
+    /// Gmail-specific message unique identifier (vendor extension).
+    ///
+    /// The `X-GM-MSGID` attribute contains a Gmail-specific unique message ID that remains stable across mailboxes.
+    /// This is a 64-bit unsigned integer. This is a Gmail-only extension, not part of the standard IMAP protocol.
+    ///
+    /// For standard IMAP object identifiers, see ``emailID(_:)`` which uses RFC 8474.
+    ///
+    /// - SeeAlso: [Gmail IMAP Extensions](https://developers.google.com/gmail/imap/imap-extensions)
     case gmailMessageID(UInt64)
 
-    /// `X-GM-THRID`: provides an ID that associates mail with a given gmail thread.
-    /// C.f. ``ThreadID`` (RFC 8474)
+    /// Gmail-specific thread identifier (vendor extension).
+    ///
+    /// The `X-GM-THRID` attribute contains a Gmail-specific thread ID that associates messages belonging to the same thread.
+    /// This is a 64-bit unsigned integer. This is a Gmail-only extension, not part of the standard IMAP protocol.
+    ///
+    /// For standard IMAP object identifiers, see ``threadID(_:)`` which uses RFC 8474.
+    ///
+    /// - SeeAlso: [Gmail IMAP Extensions](https://developers.google.com/gmail/imap/imap-extensions)
     case gmailThreadID(UInt64)
 
-    /// `X-GM-LABELS`: provides the labels for a given message
+    /// Gmail-specific message labels (vendor extension).
+    ///
+    /// The `X-GM-LABELS` attribute contains a list of labels (tags) applied to the message in Gmail. Each label is a ``GmailLabel``.
+    /// This is a Gmail-only extension, not part of the standard IMAP protocol.
+    ///
+    /// - SeeAlso: [Gmail IMAP Extensions](https://developers.google.com/gmail/imap/imap-extensions)
     case gmailLabels([GmailLabel])
 
-    /// `PREVIEW`: a server-generated abbreviated text representation of message data that
-    /// is useful as a contextual preview of the entire message.
+    /// Server-generated preview text of the message.
     ///
-    /// - SeeAlso: RFC 8970 (IMAP4 Extension: Message Preview Generation)
+    /// The `PREVIEW` attribute contains an abbreviated text representation of the message body that the server generates
+    /// automatically. This is useful for displaying message previews without downloading full message bodies.
+    /// The value may be `nil` if the server could not generate a preview.
+    ///
+    /// - SeeAlso: [RFC 8970 IMAP4 Extension: Message Preview Generation](https://datatracker.ietf.org/doc/html/rfc8970)
     case preview(PreviewText?)
 
-    /// An RFC 8474 object identifier for the message.
+    /// An object identifier for the message content.
+    ///
+    /// The `EMAILID` attribute contains an object identifier that uniquely identifies the message’s content.
+    /// This is stable across servers and can be used to detect when a message with the same content exists
+    /// in different mailboxes or on different servers.
+    ///
+    /// For Gmail-specific message identifiers, see ``gmailMessageID(_:)`` which uses the `X-GM-MSGID` extension.
+    ///
+    /// - SeeAlso: [RFC 8474 IMAP4 Extension: OBJECTID](https://datatracker.ietf.org/doc/html/rfc8474)
     case emailID(EmailID)
 
-    /// An RFC 8474 object identifier for the thread.
+    /// An object identifier for the message thread.
+    ///
+    /// The `THREADID` attribute contains an object identifier for the thread the message belongs to.
+    /// This is `nil` if the message is not part of a thread or if the server does not support threading.
+    ///
+    /// For Gmail-specific thread identifiers, see ``gmailThreadID(_:)`` which uses the `X-GM-THRID` extension.
+    ///
+    /// - SeeAlso: [RFC 8474 IMAP4 Extension: OBJECTID](https://datatracker.ietf.org/doc/html/rfc8474)
     case threadID(ThreadID?)
 }
 

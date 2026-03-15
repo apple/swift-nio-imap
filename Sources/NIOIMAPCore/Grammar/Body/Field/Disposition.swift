@@ -85,7 +85,7 @@ extension BodyStructure {
 
         /// Creates a new disposition.
         ///
-        /// - parameter kind: The disposition kind (``inline`` or ``attachment``).
+        /// - parameter kind: The disposition kind (`inline` or `attachment`).
         /// - parameter parameters: An ordered dictionary of disposition parameters (e.g., filename, size).
         public init(kind: DispositionKind, parameters: OrderedDictionary<String, String>) {
             self.kind = kind

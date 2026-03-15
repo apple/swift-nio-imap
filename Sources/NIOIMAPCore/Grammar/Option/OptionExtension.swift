@@ -14,7 +14,14 @@
 
 import struct NIO.ByteBuffer
 
-/// Specifies the type of `OptionExtension`
+/// The type of option extension, either standard or vendor-specific.
+///
+/// Option extensions are part of the RFC 4466 extension mechanism that allows servers to advertise
+/// additional capabilities without breaking existing clients. Extensions can be either standard
+/// atoms (like `QRESYNC`) or vendor-specific tags with a vendor prefix and vendor name
+/// (like `X-VENDOR-FEATURE`).
+///
+/// - SeeAlso: [RFC 4466 IMAP4 Extensions: Collected Extensions](https://datatracker.ietf.org/doc/html/rfc4466)
 public enum OptionExtensionKind: Hashable, Sendable {
     /// A simple string-based value.
     case standard(String)

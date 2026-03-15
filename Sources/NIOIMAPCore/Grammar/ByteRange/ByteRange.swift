@@ -14,7 +14,17 @@
 
 import struct NIO.ByteBuffer
 
-/// Represents a range of bytes in a larger whole. See RFC 5092
+/// A byte range specifying an offset and optional length within a message or section.
+///
+/// Byte ranges are used with `PARTIAL` fetch modifiers (RFC 9394) to retrieve only a portion of
+/// message data without downloading the entire body. They may be applied to IMAP URLs (RFC 5092)
+/// for authenticated partial access.
+///
+/// The offset specifies the starting byte position, and the length (if present) specifies how many
+/// bytes to include. If length is nil, the range extends to the end of the data.
+///
+/// - SeeAlso: [RFC 5092 IMAP URL Scheme](https://datatracker.ietf.org/doc/html/rfc5092)
+/// - SeeAlso: [RFC 9394 IMAP PARTIAL Extension](https://datatracker.ietf.org/doc/html/rfc9394)
 public struct ByteRange: Hashable, Sendable {
     /// The offset in bytes from the beginning of the message/data in question.
     public var offset: Int
@@ -22,7 +32,7 @@ public struct ByteRange: Hashable, Sendable {
     /// The number of bytes the range covers.
     public var length: Int?
 
-    /// Creates a new `PartialRange`
+    /// Creates a new `ByteRange`
     /// - parameter offset: The offset in bytes from the beginning of the message/data in question.
     /// - parameter length: The number of bytes the range covers.
     public init(offset: Int, length: Int?) {
