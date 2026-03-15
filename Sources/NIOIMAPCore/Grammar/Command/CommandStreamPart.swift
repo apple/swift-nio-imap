@@ -229,7 +229,7 @@ public enum CommandStreamPart: Hashable, Sendable {
     /// The `DONE` line is represented as the ``idleDone`` case.
     ///
     /// - SeeAlso: [RFC 2177 Section 3](https://datatracker.ietf.org/doc/html/rfc2177#section-3)
-    /// - SeeAlso: ``Command/idle``
+    /// - SeeAlso: ``Command/idleStart``
     case idleDone
 
     /// Sends a simple tagged command ready for transmission.
@@ -242,7 +242,7 @@ public enum CommandStreamPart: Hashable, Sendable {
 
     /// Sends a sub-command that is part of a multi-step append operation.
     ///
-    /// The ``tag`` property extracts the tag from ``AppendCommand/start(_:appendingTo:)``,
+    /// The ``tag`` property extracts the tag from ``AppendCommand/start(tag:appendingTo:)``,
     /// if present.
     ///
     /// - parameter AppendCommand: The sub-command to send

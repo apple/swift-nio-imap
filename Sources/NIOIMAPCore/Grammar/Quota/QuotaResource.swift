@@ -35,13 +35,12 @@ import struct NIO.ByteBuffer
 /// - `STORAGE`: using 512000 KB out of 102400 KB limit (actually over limit - server implementation may vary)
 /// - `MESSAGE`: 450 messages out of 500 message limit
 ///
-/// These appear in ``QuotaResponse`` as part of the ``ResponsePayload/quotaData(_:_:)`` response.
+/// These appear as part of the ``ResponsePayload/quota(_:_:)`` response.
 ///
 /// ## Related Types
 ///
 /// - See ``QuotaLimit`` for just the maximum limit without usage
 /// - See ``QuotaRoot`` for quota root names
-/// - See ``QuotaResponse`` for complete quota responses
 ///
 /// - SeeAlso: [RFC 2087 Section 5.1](https://datatracker.ietf.org/doc/html/rfc2087#section-5.1)
 public struct QuotaResource: Hashable, Sendable {

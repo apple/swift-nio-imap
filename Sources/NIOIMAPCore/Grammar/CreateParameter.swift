@@ -33,7 +33,7 @@ import struct NIO.ByteBuffer
 ///
 /// - SeeAlso: [RFC 3501 Section 6.3.3](https://datatracker.ietf.org/doc/html/rfc3501#section-6.3.3) (CREATE Command)
 /// - SeeAlso: [RFC 6154 Section 2](https://datatracker.ietf.org/doc/html/rfc6154#section-2) (USE Attribute)
-/// - SeeAlso: ``Command/create(_:parameters:)``
+/// - SeeAlso: ``Command/create(_:_:)``
 public enum CreateParameter: Hashable, Sendable {
     /// A generic CREATE parameter (catch-all for extensions).
     ///

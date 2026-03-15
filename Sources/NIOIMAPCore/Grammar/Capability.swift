@@ -323,7 +323,7 @@ extension Capability {
 
     /// The `ESORT` capability indicates the server supports extended sort result forms.
     ///
-    /// - SeeAlso: [RFC 5465](https://datatracker.ietf.org/doc/html/rfc5465)
+    /// - SeeAlso: [RFC 7377](https://datatracker.ietf.org/doc/html/rfc7377)
     public static let esort = Self(unchecked: "ESORT")
 
     /// The `FILTERS` capability indicates the server supports persistent server-side searches.

@@ -46,7 +46,7 @@ import struct NIO.ByteBuffer
 ///
 /// See ``URLMessageSection`` for the complete message section specification,
 /// ``MessagePath`` for the full message location including sections, and
-/// ``SectionSpec`` for RFC 3501 section syntax details.
+/// ``SectionSpecifier`` for RFC 3501 section syntax details.
 ///
 /// - SeeAlso: [RFC 2192](https://datatracker.ietf.org/doc/html/rfc2192) - IMAP URL Scheme
 /// - SeeAlso: [RFC 3501 Section 6.4.5](https://datatracker.ietf.org/doc/html/rfc3501#section-6.4.5) - FETCH Command

@@ -24,7 +24,7 @@ import struct NIO.ByteBuffer
 public enum MailboxData: Hashable, Sendable {
     /// Response to a ``Command/select(_:_:)`` or ``Command/examine(_:_:)`` command.
     ///
-    /// Sent as part of ``ResponsePayload/mailboxData(.flags(...))``.
+    /// Sent as part of ``ResponsePayload/mailboxData(_:)`` containing ``MailboxData/flags(_:)``.
     ///
     /// ### Example
     ///
@@ -39,7 +39,7 @@ public enum MailboxData: Hashable, Sendable {
 
     /// Response to a ``Command/list(_:reference:_:_:)`` or ``Command/listIndependent(_:reference:_:_:)`` command.
     ///
-    /// Sent as part of ``ResponsePayload/mailboxData(.list(...))``.
+    /// Sent as part of ``ResponsePayload/mailboxData(_:)`` containing ``MailboxData/list(_:)``.
     ///
     /// ### Examples
     ///
@@ -57,7 +57,7 @@ public enum MailboxData: Hashable, Sendable {
 
     /// Response to a ``Command/lsub(reference:pattern:)`` command.
     ///
-    /// Sent as part of ``ResponsePayload/mailboxData(.lsub(...))``.
+    /// Sent as part of ``ResponsePayload/mailboxData(_:)`` containing ``MailboxData/lsub(_:)``.
     ///
     /// ### Examples
     ///
@@ -75,7 +75,7 @@ public enum MailboxData: Hashable, Sendable {
 
     /// Response to a ``Command/search(key:charset:returnOptions:)`` or ``Command/uidSearch(key:charset:returnOptions:)`` command.
     ///
-    /// Sent as part of ``ResponsePayload/mailboxData(.search(...))``.
+    /// Sent as part of ``ResponsePayload/mailboxData(_:)`` containing ``MailboxData/search(_:_:)``.
     ///
     /// ### Example
     ///
@@ -96,7 +96,7 @@ public enum MailboxData: Hashable, Sendable {
 
     /// Response to a search command using the ESEARCH extension.
     ///
-    /// Sent as part of ``ResponsePayload/mailboxData(.extendedSearch(...))``.
+    /// Sent as part of ``ResponsePayload/mailboxData(_:)`` containing ``MailboxData/extendedSearch(_:)``.
     ///
     /// See ``ExtendedSearchResponse`` for the structure of the returned data.
     ///
@@ -105,7 +105,7 @@ public enum MailboxData: Hashable, Sendable {
 
     /// Response to a ``Command/status(_:_:)`` command.
     ///
-    /// Sent as part of ``ResponsePayload/mailboxData(.status(...))``.
+    /// Sent as part of ``ResponsePayload/mailboxData(_:)`` containing ``MailboxData/status(_:_:)``.
     ///
     /// ### Example
     ///
@@ -123,7 +123,7 @@ public enum MailboxData: Hashable, Sendable {
 
     /// The number of messages in the currently selected mailbox.
     ///
-    /// Sent as part of ``ResponsePayload/mailboxData(.exists(...))``.
+    /// Sent as part of ``ResponsePayload/mailboxData(_:)`` containing ``MailboxData/exists(_:)``.
     ///
     /// ### Example
     ///
@@ -138,7 +138,7 @@ public enum MailboxData: Hashable, Sendable {
 
     /// The number of messages with the `\Recent` flag set.
     ///
-    /// Sent as part of ``ResponsePayload/mailboxData(.recent(...))``.
+    /// Sent as part of ``ResponsePayload/mailboxData(_:)`` containing ``MailboxData/recent(_:)``.
     ///
     /// ### Example
     ///
@@ -153,7 +153,7 @@ public enum MailboxData: Hashable, Sendable {
 
     /// Response to a NAMESPACE command.
     ///
-    /// Sent as part of ``ResponsePayload/mailboxData(.namespace(...))``.
+    /// Sent as part of ``ResponsePayload/mailboxData(_:)`` containing ``MailboxData/namespace(_:)``.
     ///
     /// See ``NamespaceResponse`` for the structure of the returned data.
     ///
@@ -162,7 +162,7 @@ public enum MailboxData: Hashable, Sendable {
 
     /// Response to a search command with SORT or THREAD extensions.
     ///
-    /// Sent as part of ``ResponsePayload/mailboxData(.searchSort(...))``.
+    /// Sent as part of ``ResponsePayload/mailboxData(_:)`` containing ``MailboxData/searchSort(_:)``.
     ///
     /// See ``SearchSort`` for the structure of the returned data.
     ///
@@ -171,7 +171,7 @@ public enum MailboxData: Hashable, Sendable {
 
     /// Response to a UID BATCHES command.
     ///
-    /// Sent as part of ``ResponsePayload/mailboxData(.uidBatches(...))``.
+    /// Sent as part of ``ResponsePayload/mailboxData(_:)`` containing ``MailboxData/uidBatches(_:)``.
     ///
     /// See ``UIDBatchesResponse`` for the structure of the returned data.
     ///

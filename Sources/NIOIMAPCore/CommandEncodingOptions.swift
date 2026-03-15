@@ -177,7 +177,7 @@ extension CommandEncodingOptions {
     ///
     /// - Parameter capabilities: Server capabilities that have been enabled.
     ///
-    /// - SeeAlso: ``Capability/utf8``, [RFC 6531 Section 3.1](https://datatracker.ietf.org/doc/html/rfc6531#section-3.1)
+    /// - SeeAlso: ``Capability/utf8(_:)``, [RFC 6531 Section 3.1](https://datatracker.ietf.org/doc/html/rfc6531#section-3.1)
     public mutating func updateEnabledOptions(capabilities: [Capability]) {
         if capabilities.contains(.utf8(.accept)) {
             self.useSearchCharset = false

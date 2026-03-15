@@ -17,7 +17,7 @@ import struct OrderedCollections.OrderedDictionary
 
 /// Optional scope options for extended multi-mailbox search operations (RFC 7377).
 ///
-/// **Requires server capability:** ``Capability/multimailboxSearch``
+/// **Requires server capability:** ``Capability/multiSearch``
 ///
 /// Scope options provide a catch-all mechanism for future extensions to the MULTIMAILBOX SEARCH protocol,
 /// allowing servers to support additional scope-related parameters beyond those explicitly defined.

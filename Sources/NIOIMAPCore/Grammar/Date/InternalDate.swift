@@ -39,7 +39,7 @@ public struct ServerMessageDate: Hashable, Sendable {
     /// The individual date and time components for this internal date.
     ///
     /// This computed property extracts the encoded date, time, and timezone components
-    /// from the compact ``rawValue`` representation. The components can be used to
+    /// from the compact internal representation. The components can be used to
     /// display or work with individual date and time fields.
     ///
     /// - Returns: A ``Components`` structure containing the decoded date, time, and timezone offset.
@@ -83,7 +83,7 @@ public struct ServerMessageDate: Hashable, Sendable {
     /// Creates a new `ServerMessageDate` from individual date and time components.
     ///
     /// This initializer constructs a ``ServerMessageDate`` by encoding the provided
-    /// components into the compact ``rawValue`` representation.
+    /// components into the compact rawValue representation.
     ///
     /// - Parameter components: A ``Components`` structure containing the date, time, and timezone information.
     public init(_ components: Components) {

@@ -32,7 +32,7 @@ import struct OrderedCollections.OrderedDictionary
 /// ```
 ///
 /// The line `* METADATA "INBOX" (...)` is wrapped as ``Response/untagged(_:)`` containing
-/// ``ResponsePayload/metadataData(_:)`` with a ``MetadataResponse/values(values:mailbox:)`` case.
+/// ``ResponsePayload/metadata(_:)`` with a ``MetadataResponse/values(values:mailbox:)`` case.
 /// Each entry name maps to a ``MetadataValue`` (which may be `nil` if not found).
 ///
 /// ## Related Types

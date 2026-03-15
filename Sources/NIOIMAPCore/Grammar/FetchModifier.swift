@@ -39,7 +39,7 @@ public enum FetchModifier: Hashable, Sendable {
     /// are returned. This allows clients to efficiently synchronize mailbox state changes without transferring
     /// unchanged messages.
     ///
-    /// **Requires server capability:** ``Capability/condstore``
+    /// **Requires server capability:** ``Capability/condStore``
     ///
     /// - SeeAlso: [RFC 7162 Section 3.1.4](https://datatracker.ietf.org/doc/html/rfc7162#section-3.1.4)
     case changedSince(ChangedSinceModifier)

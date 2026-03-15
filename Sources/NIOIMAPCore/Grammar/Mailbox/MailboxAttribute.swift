@@ -67,7 +67,7 @@ public enum MailboxAttribute: String, CaseIterable, Sendable {
     /// The `SIZE` attribute: the total size of the mailbox in octets.
     ///
     /// This attribute returns the total size of all messages in the mailbox in bytes (octets).
-    /// **Requires server capability:** ``Capability/statusSize``
+    /// **Requires server capability:** ``Capability/status(_:)`` with ``Capability/StatusKind/size``
     /// See [RFC 8438](https://datatracker.ietf.org/doc/html/rfc8438).
     case size = "SIZE"
 
@@ -75,14 +75,14 @@ public enum MailboxAttribute: String, CaseIterable, Sendable {
     ///
     /// This attribute returns the highest mod-sequence value assigned to any message in the mailbox.
     /// The `CONDSTORE` extension uses modification sequences to track message changes.
-    /// **Requires server capability:** ``Capability/condstore``
+    /// **Requires server capability:** ``Capability/condStore``
     /// See [RFC 7162 Section 3.1](https://datatracker.ietf.org/doc/html/rfc7162#section-3.1).
     case highestModificationSequence = "HIGHESTMODSEQ"
 
     /// The `APPENDLIMIT` attribute: the maximum message upload size in octets.
     ///
     /// This attribute specifies the maximum size (in bytes) of a single message that can be appended to the mailbox.
-    /// **Requires server capability:** ``Capability/appendLimit``
+    /// **Requires server capability:** ``Capability/mailboxSpecificAppendLimit`` or ``Capability/appendLimit(_:)``
     /// See [RFC 7889 Section 4](https://datatracker.ietf.org/doc/html/rfc7889#section-4).
     case appendLimit = "APPENDLIMIT"
 
@@ -150,7 +150,7 @@ public struct MailboxStatus: Hashable, Sendable {
     /// The `SIZE` attribute: total size of the mailbox in bytes (octets).
     ///
     /// This property is `nil` if the `SIZE` attribute was not requested or returned.
-    /// **Requires server capability:** ``Capability/statusSize``
+    /// **Requires server capability:** ``Capability/status(_:)`` with ``Capability/StatusKind/size``
     /// See [RFC 8438](https://datatracker.ietf.org/doc/html/rfc8438).
     public var size: Int?
 
@@ -158,7 +158,7 @@ public struct MailboxStatus: Hashable, Sendable {
     ///
     /// This property is `nil` if the `HIGHESTMODSEQ` attribute was not requested or returned.
     /// The `CONDSTORE` extension uses modification sequences to track which messages have changed.
-    /// **Requires server capability:** ``Capability/condstore``
+    /// **Requires server capability:** ``Capability/condStore``
     /// See [RFC 7162 Section 3.1](https://datatracker.ietf.org/doc/html/rfc7162#section-3.1).
     public var highestModificationSequence: ModificationSequenceValue?
 
@@ -166,7 +166,7 @@ public struct MailboxStatus: Hashable, Sendable {
     ///
     /// This property is `nil` if the `APPENDLIMIT` attribute was not requested or returned.
     /// The `APPENDLIMIT` extension specifies per-mailbox upload limits.
-    /// **Requires server capability:** ``Capability/appendLimit``
+    /// **Requires server capability:** ``Capability/mailboxSpecificAppendLimit`` or ``Capability/appendLimit(_:)``
     /// See [RFC 7889 Section 4](https://datatracker.ietf.org/doc/html/rfc7889#section-4).
     public var appendLimit: Int?
 

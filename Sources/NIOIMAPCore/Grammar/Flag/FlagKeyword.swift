@@ -33,7 +33,7 @@ extension Flag {
     /// S: A001 OK STORE completed
     /// ```
     ///
-    /// The `$Forwarded` keyword corresponds to a ``Flag`` wrapping a ``Flag.Keyword``.
+    /// The `$Forwarded` keyword corresponds to a ``Flag`` wrapping a ``Flag/Keyword``.
     ///
     /// - SeeAlso: [RFC 3501 Section 2.3.2](https://datatracker.ietf.org/doc/html/rfc3501#section-2.3.2)
     /// - SeeAlso: ``Flag``
@@ -97,7 +97,7 @@ extension Flag {
 }
 
 extension String {
-    /// Creates a `String` from a ``Flag.Keyword``.
+    /// Creates a `String` from a ``Flag/Keyword``.
     ///
     /// - parameter other: The keyword to convert.
     public init(_ other: Flag.Keyword) {
@@ -179,7 +179,7 @@ extension Flag: ExpressibleByStringLiteral {
     /// This allows writing flags directly as string literals (e.g., `let flag: Flag = "$Custom"`),
     /// which is useful for static keyword definitions and testing.
     ///
-    /// - parameter stringLiteral: The string literal to construct a keyword flag from.
+    /// - parameter value: The string literal to construct a keyword flag from.
     public init(stringLiteral value: String) {
         self.init(value)
     }

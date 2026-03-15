@@ -77,7 +77,7 @@ extension MessageIdentifier {
     }
 
     /// Creates a new `MessageIdentifier` from an integer literal, skipping all validation.
-    /// - parameter integerLiteral: The integer literal value.
+    /// - parameter value: The integer literal value.
     public init(integerLiteral value: UInt32) {
         assert(value >= 1)
         self.init(rawValue: value)

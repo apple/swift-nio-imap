@@ -20,7 +20,7 @@ import struct OrderedCollections.OrderedDictionary
 /// metadata (such as flags) is modified. This type allows clients to request only messages that have been
 /// modified since a specific mod-sequence value, enabling efficient synchronization of mailbox state changes.
 ///
-/// **Requires server capability:** ``Capability/condstore``
+/// **Requires server capability:** ``Capability/condStore``
 ///
 /// When used in a `SEARCH` or `UID SEARCH` command with the `MODSEQ` criterion, this type encapsulates
 /// the search parameters including any extension-specific entry attributes and the minimum mod-sequence value

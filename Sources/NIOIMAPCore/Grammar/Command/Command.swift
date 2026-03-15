@@ -839,7 +839,7 @@ extension Command {
     /// Pass in a `UIDSet`, and if that set is valid (i.e. non-empty) then a command is returned.
     /// - parameter messages: The set of message UIDs to use.
     /// - parameter modifiers: Store modifiers.
-    /// - parameter flags: The flags to store.
+    /// - parameter data: The store data to apply.
     /// - returns: `nil` if `messages` is empty, otherwise a `Command`.
     public static func uidStore(messages: UIDSet, modifiers: [StoreModifier], data: StoreData) -> Command? {
         guard let set = MessageIdentifierSetNonEmpty(set: messages) else {
@@ -851,6 +851,7 @@ extension Command {
     /// Convenience for creating a *UID EXPUNGE* command.
     /// Pass in a `UIDSet`, and if that set is valid (i.e. non-empty) then a command is returned.
     /// - parameter messages: The set of message UIDs to use.
+    /// - parameter mailbox: The mailbox on which to perform the expunge.
     /// - returns: `nil` if `messages` is empty, otherwise a `Command`.
     public static func uidExpunge(messages: UIDSet, mailbox: MailboxName) -> Command? {
         guard let set = MessageIdentifierSetNonEmpty(set: messages) else {

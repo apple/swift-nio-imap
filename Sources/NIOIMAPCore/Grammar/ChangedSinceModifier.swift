@@ -18,7 +18,7 @@
 /// a known modification sequence value. This allows clients to efficiently synchronize mailbox state by
 /// requesting only messages that have changed since the last synchronization point.
 ///
-/// **Requires server capability:** ``Capability/condstore``
+/// **Requires server capability:** ``Capability/condStore``
 ///
 /// ### Example
 ///
@@ -59,7 +59,7 @@ public struct ChangedSinceModifier: Hashable, Sendable {
 /// This implements optimistic concurrency control, allowing multiple clients to safely modify messages without
 /// overwriting each other's changes.
 ///
-/// **Requires server capability:** ``Capability/condstore``
+/// **Requires server capability:** ``Capability/condStore``
 ///
 /// ### Example
 ///

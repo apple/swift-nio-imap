@@ -98,7 +98,7 @@ public struct QResyncParameter: Hashable, Sendable {
 /// returns information during mailbox selection, enabling efficient synchronization
 /// through the `CONDSTORE` and `QRESYNC` extensions (RFC 7162).
 ///
-/// **Requires server capability:** ``Capability/qresync`` or ``Capability/condstore``
+/// **Requires server capability:** ``Capability/qresync`` or ``Capability/condStore``
 /// (depending on which case is used).
 ///
 /// - SeeAlso: [RFC 7162](https://datatracker.ietf.org/doc/html/rfc7162) (CONDSTORE and QRESYNC)
@@ -132,7 +132,7 @@ public enum SelectParameter: Hashable, Sendable {
     /// ``StoreModifier/unchangedSince(_:)`` and fetch filtering using
     /// ``FetchModifier/changedSince(_:)``.
     ///
-    /// **Requires server capability:** ``Capability/condstore``
+    /// **Requires server capability:** ``Capability/condStore``
     ///
     /// - SeeAlso: [RFC 7162 Section 3.1.1](https://datatracker.ietf.org/doc/html/rfc7162#section-3.1.1)
     /// - SeeAlso: ``UnchangedSinceModifier``, ``ChangedSinceModifier``

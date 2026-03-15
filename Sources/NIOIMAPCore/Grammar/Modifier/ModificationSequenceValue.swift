@@ -66,7 +66,7 @@ extension ModificationSequenceValue: ExpressibleByIntegerLiteral {
     public typealias IntegerLiteralType = UInt64
 
     /// Creates a `ModificationSequenceValue` from an integer literal.
-    /// - parameter integerLiteral: The literal value.
+    /// - parameter value: The literal value.
     public init(integerLiteral value: UInt64) {
         self.value = value
     }

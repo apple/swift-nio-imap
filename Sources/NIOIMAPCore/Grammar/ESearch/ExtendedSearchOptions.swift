@@ -16,7 +16,7 @@ import struct NIO.ByteBuffer
 
 /// Options for performing a multi-mailbox extended search (RFC 7377 MULTIMAILBOX SEARCH).
 ///
-/// **Requires server capability:** ``Capability/multimailboxSearch``
+/// **Requires server capability:** ``Capability/multiSearch``
 ///
 /// The extended search options combine search criteria, charset specification, return options, and source options
 /// to enable searching across multiple mailboxes in a single command. This extension allows searches that span
@@ -34,7 +34,7 @@ import struct NIO.ByteBuffer
 /// The `SEARCH IN (personal) RETURN (MIN MAX) UNSEEN` command uses ``ExtendedSearchOptions`` with
 /// `sourceOptions` set to a personal mailbox filter, `returnOptions` for `MIN`/`MAX`, and `key` for the
 /// `UNSEEN` search criteria. The response is ``Response/untagged(_:)`` containing
-/// ``ResponsePayload/extendedSearch(_:)``.
+/// ``ResponsePayload/mailboxData(_:)`` with ``MailboxData/extendedSearch(_:)``.
 ///
 /// ## Related Types
 ///

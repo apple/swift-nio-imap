@@ -21,7 +21,7 @@ import struct NIO.ByteBuffer
 /// allows clients to safely pipeline search commands without confusion, as each response includes the correlator
 /// information from the original request.
 ///
-/// **Requires server capability:** ``Capability/multimailboxSearch``
+/// **Requires server capability:** ``Capability/multiSearch``
 ///
 /// The server echoes back the correlator information in the ESEARCH response, allowing clients to:
 /// - Match responses to requests when pipelining

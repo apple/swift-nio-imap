@@ -121,13 +121,13 @@ extension SectionSpecifier {
         let array: [Int]
 
         /// Creates a new `Part` from an array of integers..
-        /// - parameter rawValue: The array of integers.
+        /// - parameter array: The array of integers.
         public init(_ array: [Int]) {
             self.array = array
         }
 
         /// Creates a new `Part` from an array of integers..
-        /// - parameter rawValue: The array of integers.
+        /// - parameter elements: The array of integers.
         public init(arrayLiteral elements: Int...) {
             self.array = elements
         }

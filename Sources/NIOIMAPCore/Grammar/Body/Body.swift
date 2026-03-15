@@ -40,7 +40,7 @@ extension MessageAttribute {
 /// `BodyStructure` is a recursive type: a single-part message body may contain a nested message
 /// (which itself has a `BODY` structure), and a multipart message contains multiple sub-bodies.
 /// The type conforms to `RandomAccessCollection`, allowing clients to navigate the tree of parts
-/// using ``SectionSpecifier.Part`` indices.
+/// using ``SectionSpecifier/Part`` indices.
 ///
 /// ### Examples
 ///

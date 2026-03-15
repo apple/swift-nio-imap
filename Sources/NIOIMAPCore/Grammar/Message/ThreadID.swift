@@ -45,10 +45,10 @@
 /// ## Related Proprietary Identifiers
 ///
 /// Gmail servers provide a similar but proprietary identifier via the `X-GM-THRID` field (see
-/// ``MessageAttribute.gmailThreadID(_:)``). While both serve similar purposes, `THREADID` is
+/// ``FetchAttribute/gmailThreadID``). While both serve similar purposes, `THREADID` is
 /// the standardized RFC 8474 alternative for cross-server compatibility.
 ///
-/// - SeeAlso: [RFC 8474 Section 5.2](https://datatracker.ietf.org/doc/html/rfc8474#section-5.2), ``EmailID``, ``ObjectID``
+/// - SeeAlso: [RFC 8474 Section 5.2](https://datatracker.ietf.org/doc/html/rfc8474#section-5.2), ``EmailID``
 public struct ThreadID: Hashable, Sendable {
     fileprivate var objectID: ObjectID
 

@@ -32,7 +32,7 @@
 /// Broken down:
 /// - `;EXPIRE=<datetime>` (optional): Expiration date via ``expire``
 /// - `;URLAUTH=` (literal): Fixed prefix
-/// - `<access>` (required): Access identifier via ``access`` (``anonymous``, ``authuser``, ``user+userid``, or ``submit+userid``)
+/// - `<access>` (required): Access identifier via ``access`` (`anonymous`, `authuser`, `user+userid`, or `submit+userid`)
 /// - `:` (literal): Separator
 /// - `<mechanism>:<token>` (required): Provided by ``AuthenticatedURLVerifier``
 ///

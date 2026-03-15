@@ -63,7 +63,7 @@ public struct NetworkPath: Hashable, Sendable {
 
     /// Creates a new network-accessible path.
     /// - parameter server: The IMAP server location.
-    /// - parameter command: Optional command to execute. Defaults to `nil`.
+    /// - parameter query: Optional command to execute. Defaults to `nil`.
     public init(server: IMAPServer, query: URLCommand?) {
         self.server = server
         self.command = query

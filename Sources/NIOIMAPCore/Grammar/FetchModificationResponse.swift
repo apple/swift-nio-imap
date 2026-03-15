@@ -18,7 +18,7 @@
 /// `FETCH` modifiers like ``FetchModifier/changedSince(_:)``, the server returns the current modification sequence
 /// (mod-sequence) value of each message. This value indicates when the message's metadata was last changed.
 ///
-/// **Requires server capability:** ``Capability/condstore``
+/// **Requires server capability:** ``Capability/condStore``
 ///
 /// The mod-sequence value is used for client-server synchronization. Clients can track which messages have changed
 /// since a known point in time by comparing mod-sequence values, allowing efficient resynchronization of mailbox state

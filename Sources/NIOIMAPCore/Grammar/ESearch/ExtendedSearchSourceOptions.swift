@@ -16,7 +16,7 @@ import struct NIO.ByteBuffer
 
 /// Source options specifying which mailboxes to search in a multi-mailbox search operation (RFC 7377).
 ///
-/// **Requires server capability:** ``Capability/multimailboxSearch``
+/// **Requires server capability:** ``Capability/multiSearch``
 ///
 /// Source options define the mailbox context for an extended search operation, allowing searches to span
 /// multiple mailboxes using mailbox filters (e.g., personal namespace mailboxes, specific named mailboxes).

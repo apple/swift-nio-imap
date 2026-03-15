@@ -14,31 +14,32 @@
 
 import struct NIO.ByteBuffer
 
-/// A non-empty collection of mailbox names (RFC 5465 NOTIFY).
+/// A non-empty collection of mailbox names for use with RFC 7377 MULTIMAILBOX SEARCH.
 ///
-/// **Requires server capability:** ``Capability/notify``
+/// **Requires server capability:** ``Capability/multiSearch``
 ///
-/// This type represents a non-empty list of mailbox names used with mailbox filters in the NOTIFY
-/// extension. Certain filters like ``MailboxFilter/subtree(_:)`` and ``MailboxFilter/mailboxes(_:)``
-/// require one or more specific mailbox names. See [RFC 5465 Section 3.2](https://datatracker.ietf.org/doc/html/rfc5465#section-3.2).
+/// This type represents a non-empty list of mailbox names used with mailbox filters in RFC 7377 MULTIMAILBOX SEARCH.
+/// The filter types are defined in RFC 5465 NOTIFY but are re-used by RFC 7377. Certain filters like
+/// ``MailboxFilter/subtree(_:)`` and ``MailboxFilter/mailboxes(_:)`` require one or more specific mailbox names.
+/// See [RFC 7377 Section 3](https://datatracker.ietf.org/doc/html/rfc7377#section-3).
 ///
 /// ### Example
 ///
 /// ```
-/// C: A001 NOTIFY SET (SUBTREE ("Archive" "Sent Mail"))
-/// S: * OK NOTIFY registered for SUBTREE Archive and Sent Mail
-/// S: A001 OK NOTIFY completed
+/// C: A001 SEARCH IN (SUBTREE "Archive" SUBTREE "Sent Mail") RETURN (MIN MAX) UNSEEN
+/// S: * ESEARCH UID MIN 1 MAX 42
+/// S: A001 OK SEARCH completed
 /// ```
 ///
 /// The mailbox names `"Archive"` and `"Sent Mail"` form a ``Mailboxes`` collection that specifies
-/// which mailboxes and their subfolders should be monitored for notifications.
+/// which mailboxes (via ``MailboxFilter``) are included in a multi-mailbox search operation.
 ///
 /// ## Related Types
 ///
 /// - See ``MailboxFilter`` for different ways to select mailboxes
 /// - See ``MailboxName`` for individual mailbox name representation
 ///
-/// - SeeAlso: [RFC 5465 Section 3.2](https://datatracker.ietf.org/doc/html/rfc5465#section-3.2)
+/// - SeeAlso: [RFC 7377 Section 3](https://datatracker.ietf.org/doc/html/rfc7377#section-3)
 public struct Mailboxes: Hashable, Sendable {
     /// Array of one or more mailbox names.
     ///

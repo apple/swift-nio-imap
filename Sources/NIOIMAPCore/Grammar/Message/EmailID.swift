@@ -40,10 +40,10 @@
 /// ## Related Proprietary Identifiers
 ///
 /// Gmail servers provide a similar but proprietary identifier via the `X-GM-MSGID` field (see
-/// ``MessageAttribute.gmailMessageID(_:)``). While both serve similar purposes, `EMAILID` is
+/// ``FetchAttribute/gmailMessageID``). While both serve similar purposes, `EMAILID` is
 /// the standardized RFC 8474 alternative for cross-server compatibility.
 ///
-/// - SeeAlso: [RFC 8474 Section 5.1](https://datatracker.ietf.org/doc/html/rfc8474#section-5.1), ``ThreadID``, ``ObjectID``
+/// - SeeAlso: [RFC 8474 Section 5.1](https://datatracker.ietf.org/doc/html/rfc8474#section-5.1), ``ThreadID``
 public struct EmailID: Hashable, Sendable {
     fileprivate var objectID: ObjectID
 

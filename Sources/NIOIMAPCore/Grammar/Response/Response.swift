@@ -330,7 +330,7 @@ public enum StreamingKind: Hashable, Sendable {
     /// - parameter section: The part of the message to fetch (e.g., 1, 2.1)
     /// - parameter offset: Optional byte offset for partial fetch (requires RFC 9394 PARTIAL extension)
     ///
-    /// - SeeAlso: ``SectionSpecifier.Part``, [RFC 3516](https://datatracker.ietf.org/doc/html/rfc3516)
+    /// - SeeAlso: ``SectionSpecifier/Part``, [RFC 3516](https://datatracker.ietf.org/doc/html/rfc3516)
     case binary(section: SectionSpecifier.Part, offset: Int?)
 
     /// A body section being streamed.

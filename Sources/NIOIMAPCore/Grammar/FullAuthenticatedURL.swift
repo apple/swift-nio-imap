@@ -71,7 +71,7 @@ import struct NIO.ByteBuffer
 /// - ``NetworkMessagePath`` provides server and message content specification
 /// - ``AuthenticatedURL`` provides complete URLAUTH authorization
 /// - ``RumpAuthenticatedURL`` provides URL with rump information
-/// - ``Response/untagged(_:)`` and ``ResponsePayload/genurlauth(_:)`` wrap GENURLAUTH responses
+/// - ``Response/untagged(_:)`` and ``MessageData/generateAuthorizedURL(_:)`` wrap GENURLAUTH responses
 /// - ``URLCommand/fetch(path:authenticatedURL:)`` uses authenticated URLs in URLFETCH
 ///
 /// - SeeAlso: [RFC 4467 Section 5](https://datatracker.ietf.org/doc/html/rfc4467#section-5) - Generation of URLAUTH-Authorized URLs

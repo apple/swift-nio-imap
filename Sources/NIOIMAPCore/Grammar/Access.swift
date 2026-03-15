@@ -35,7 +35,7 @@ import struct NIO.ByteBuffer
 /// ```
 ///
 /// The `anonymous` access identifier allows any session to fetch the URL. The line
-/// `S: * GENURLAUTH ...` is the ``Response/untagged(_:)`` containing a ``ResponsePayload/genurlauth(_:)``
+/// `S: * GENURLAUTH ...` is the ``Response/untagged(_:)`` containing a ``MessageData/generateAuthorizedURL(_:)``
 /// response with the generated URLAUTH URL.
 ///
 /// In contrast, `user+` restricts to a specific user:

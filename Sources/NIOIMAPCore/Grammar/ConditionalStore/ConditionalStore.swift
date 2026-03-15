@@ -16,7 +16,7 @@ import struct NIO.ByteBuffer
 
 /// Helper type for the `CONDSTORE` parameter in RFC 7162 Conditional Store extension.
 ///
-/// **Requires server capability:** ``Capability/condstore``
+/// **Requires server capability:** ``Capability/condStore``
 ///
 /// The `CONDSTORE` parameter is used with the `SELECT` and `EXAMINE` commands to enable conditional
 /// store operations and modification sequence tracking on the selected mailbox. This allows clients to

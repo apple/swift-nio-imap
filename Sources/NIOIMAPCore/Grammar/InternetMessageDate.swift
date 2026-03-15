@@ -65,7 +65,7 @@ extension InternetMessageDate: ExpressibleByStringLiteral {
     /// let date: InternetMessageDate = “Fri, 15 Mar 2026 10:30:45 +0100”
     /// ```
     ///
-    /// - Parameter stringLiteral: A `String` containing the RFC 2822 date value.
+    /// - Parameter value: A `String` containing the RFC 2822 date value.
     public init(stringLiteral value: String) {
         self.value = value
     }

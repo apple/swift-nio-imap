@@ -16,7 +16,7 @@
 ///
 /// This type represents a full date-time specification as defined in RFC 3339, combining
 /// a ``FullDate`` and ``FullTime`` into a single value. RFC 3339 is used in IMAP extensions
-/// such as NOTIFY (RFC 5465) and METADATA (RFC 5464) for precise timestamp representation.
+/// such as MULTIMAILBOX SEARCH (RFC 7377) and METADATA (RFC 5464) for precise timestamp representation.
 ///
 /// The format when encoded is `YYYY-MM-DDTHH:MM:SS[.FRACTION]` where the `T` separates the
 /// date and time components.

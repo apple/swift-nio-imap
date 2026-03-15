@@ -31,15 +31,15 @@ import struct NIO.ByteBufferView
 /// S: A001 OK GETQUOTA completed
 /// ```
 ///
-/// The quota root name `"user.john"` (in double quotes) is represented as a ``QuotaRoot`` and appears in
-/// ``QuotaResponse`` along with an array of ``QuotaResource`` values. This response is wrapped as
-/// ``Response/untagged(_:)`` containing ``ResponsePayload/quotaData(_:_:)``.
+/// The quota root name `"user.john"` (in double quotes) is represented as a ``QuotaRoot`` and appears
+/// along with an array of ``QuotaResource`` values. This response is wrapped as
+/// ``Response/untagged(_:)`` containing ``ResponsePayload/quota(_:_:)``.
 ///
 /// ## Related Types
 ///
 /// - See ``QuotaResource`` for resource usage and limits
 /// - See ``QuotaRootResponse`` for mailbox-to-quota-root associations
-/// - See ``ResponsePayload/quotaData(_:_:)`` for quota response data
+/// - See ``ResponsePayload/quota(_:_:)`` for quota response data
 ///
 /// - SeeAlso: [RFC 2087 Section 3](https://datatracker.ietf.org/doc/html/rfc2087#section-3)
 public struct QuotaRoot: Hashable, Sendable {

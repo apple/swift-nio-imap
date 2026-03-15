@@ -33,7 +33,7 @@ import NIO
 ///
 /// The entry names `"/shared/comment"` and `"/private/notes"` represent ``MetadataEntryName`` values
 /// in the ``MetadataResponse/values(values:mailbox:)`` response. They appear in ``Response/untagged(_:)``
-/// containing ``ResponsePayload/metadataData(_:)``.
+/// containing ``ResponsePayload/metadata(_:)``.
 ///
 /// ## Related Types
 ///

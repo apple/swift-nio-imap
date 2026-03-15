@@ -28,9 +28,9 @@
 /// ### URLAUTH Component Structure
 ///
 /// A complete URLAUTH component consists of:
-/// - `;URLAUTH=<access>` - From ``AuthenticatedURLRump.access``
-/// - `:<mechanism>` - From ``AuthenticatedURLVerifier.urlAuthenticationMechanism``
-/// - `:<token>` - From ``AuthenticatedURLVerifier.encodedAuthenticationURL``
+/// - `;URLAUTH=<access>` - From ``AuthenticatedURLRump/access``
+/// - `:<mechanism>` - From ``AuthenticatedURLVerifier/urlAuthenticationMechanism``
+/// - `:<token>` - From ``AuthenticatedURLVerifier/encodedAuthenticationURL``
 ///
 /// ### Examples
 ///
@@ -70,7 +70,7 @@
 /// - ``RumpAuthenticatedURL`` pairs a network message path with this authorization
 /// - ``FullAuthenticatedURL`` combines network message path and authorization for complete URLs
 /// - ``URLCommand`` uses authentication in fetch operations
-/// - ``Response/untagged(_:)`` and ``ResponsePayload/genurlauth(_:)`` contain URLAUTH responses
+/// - ``Response/untagged(_:)`` contains the response, with ``MessageData/generateAuthorizedURL(_:)`` for GENURLAUTH results
 ///
 /// - SeeAlso: [RFC 4467 Section 3](https://datatracker.ietf.org/doc/html/rfc4467#section-3) - IMAP URL Extensions
 /// - SeeAlso: [RFC 4467 Section 5](https://datatracker.ietf.org/doc/html/rfc4467#section-5) - Generation of URLAUTH-Authorized URLs

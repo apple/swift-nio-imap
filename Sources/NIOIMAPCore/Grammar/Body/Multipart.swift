@@ -40,7 +40,7 @@ extension BodyStructure {
         /// The MIME parts contained in this multipart body.
         ///
         /// Each part is indexed starting from 1 (not 0), following IMAP conventions.
-        /// Parts may be accessed using ``SectionSpecifier.Part`` indices.
+        /// Parts may be accessed using ``SectionSpecifier/Part`` indices.
         public var parts: [BodyStructure]
 
         /// The multipart subtype (e.g., `mixed` for `multipart/mixed`, `alternative` for `multipart/alternative`).

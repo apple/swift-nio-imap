@@ -44,7 +44,7 @@ public enum StoreModifier: Hashable, Sendable {
     /// This prevents "lost updates" where one client's changes could overwrite another client's changes in a
     /// multimailbox environment.
     ///
-    /// **Requires server capability:** ``Capability/condstore``
+    /// **Requires server capability:** ``Capability/condStore``
     ///
     /// - SeeAlso: [RFC 7162 Section 3.1.3](https://datatracker.ietf.org/doc/html/rfc7162#section-3.1.3)
     case unchangedSince(UnchangedSinceModifier)

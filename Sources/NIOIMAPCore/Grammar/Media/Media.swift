@@ -160,7 +160,7 @@ extension Media.TopLevelType: ExpressibleByStringLiteral {
 }
 
 extension String {
-    /// Creates a `String` from a ``Media.TopLevelType``.
+    /// Creates a `String` from a ``Media/TopLevelType``.
     ///
     /// - parameter other: The top-level type to convert.
     public init(_ other: Media.TopLevelType) {
@@ -236,7 +236,7 @@ extension Media.Subtype: ExpressibleByStringLiteral {
 }
 
 extension String {
-    /// Creates a `String` from a ``Media.Subtype``.
+    /// Creates a `String` from a ``Media/Subtype``.
     ///
     /// - parameter other: The subtype to convert.
     public init(_ other: Media.Subtype) {
@@ -253,7 +253,7 @@ extension BodyStructure {
     /// of the single part. For multipart bodies, returns the media type with top-level type `multipart` and the
     /// appropriate subtype.
     ///
-    /// - Returns: The computed ``Media.MediaType`` for this body structure.
+    /// - Returns: The computed ``Media/MediaType`` for this body structure.
     public var mediaType: Media.MediaType {
         switch self {
         case .singlepart(let singlepart):

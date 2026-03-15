@@ -14,27 +14,27 @@
 
 import struct NIO.ByteBuffer
 
-/// Filters to select mailboxes for notification in the NOTIFY extension (RFC 5465).
+/// Filters to select mailboxes for the MULTIMAILBOX SEARCH extension (RFC 7377).
 ///
-/// **Requires server capability:** ``Capability/notify``
+/// **Requires server capability:** ``Capability/multiSearch``
 ///
-/// Mailbox filters are used with the `NOTIFY` command to specify which mailboxes the client wishes
-/// to receive change notifications about. Filters can target individual mailboxes, groups of mailboxes,
-/// or special mailbox categories. See [RFC 5465 Section 3.2](https://datatracker.ietf.org/doc/html/rfc5465#section-3.2).
+/// Mailbox filters are used with RFC 7377 MULTIMAILBOX SEARCH to specify which mailboxes the client wishes
+/// to search across in a single command. The filter types are defined in RFC 5465 NOTIFY but are re-used by RFC 7377.
+/// Filters can target individual mailboxes, groups of mailboxes, or special mailbox categories.
+/// See [RFC 7377 Section 3](https://datatracker.ietf.org/doc/html/rfc7377#section-3).
 ///
 /// ### Example
 ///
 /// ```
-/// C: A001 NOTIFY SET (INBOXES "INBOX" PERSONAL STATUS (UNSEEN))
-/// S: * OK NOTIFY registered
-/// S: A001 OK NOTIFY completed
+/// C: A001 SEARCH IN (INBOXES PERSONAL) RETURN (MIN MAX) UNSEEN
+/// S: * ESEARCH UID MIN 1 MAX 42
+/// S: A001 OK SEARCH completed
 /// ```
 ///
-/// The filter `INBOXES` in the example selects all selectable mailboxes in the user's personal
-/// namespace(s) where messages may be delivered. Different filters like ``personal``, ``subscribed``,
-/// or ``subtree(_:)`` allow flexible mailbox selection for notifications.
+/// The filters `INBOXES` and `PERSONAL` in the example select specific mailboxes across which to search.
+/// Different filters like ``personal``, ``subscribed``, or ``subtree(_:)`` allow flexible mailbox selection.
 ///
-/// - SeeAlso: [RFC 5465](https://datatracker.ietf.org/doc/html/rfc5465)
+/// - SeeAlso: [RFC 7377](https://datatracker.ietf.org/doc/html/rfc7377)
 public enum MailboxFilter: Hashable, Sendable {
     /// All selectable mailboxes that may receive messages in the user's personal namespace(s).
     ///

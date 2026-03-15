@@ -36,7 +36,7 @@ import struct NIO.ByteBuffer
 /// ### Attributes with Options
 ///
 /// Some attributes support optional parameters:
-/// - ``bodySection(peek:_:)`` supports a `peek` flag (prevents \\Seen flag modification) and partial byte ranges
+/// - ``bodySection(peek:_:_:)`` supports a `peek` flag (prevents \\Seen flag modification) and partial byte ranges
 /// - ``binary(peek:section:partial:)`` supports peek mode and partial byte ranges
 /// - ``bodyStructure(extensions:)`` controls whether extension fields are included
 /// - ``preview(lazy:)`` supports lazy evaluation of preview text
@@ -72,7 +72,7 @@ public enum FetchAttribute: Hashable, Sendable {
 
     /// The internal date of the message (when the message was received by the server).
     ///
-    /// Returns an ``InternalDate`` representing the server's timestamp for when the message
+    /// Returns a ``ServerMessageDate`` representing the server's timestamp for when the message
     /// entered the mailbox.
     ///
     /// - SeeAlso: [RFC 3501 Section 7.4.2](https://datatracker.ietf.org/doc/html/rfc3501#section-7.4.2)
@@ -88,7 +88,7 @@ public enum FetchAttribute: Hashable, Sendable {
 
     /// The RFC 822 headers of the message (without the body).
     ///
-    /// Functionally equivalent to ``bodySection(peek:_:)`` with `peek: true` and `.header`,
+    /// Functionally equivalent to ``bodySection(peek:_:_:)`` with `peek: true` and `.header`,
     /// but returns the headers in RFC 822 format rather than IMAP BODY format.
     ///
     /// - SeeAlso: [RFC 3501 Section 7.4.2](https://datatracker.ietf.org/doc/html/rfc3501#section-7.4.2)
@@ -104,7 +104,7 @@ public enum FetchAttribute: Hashable, Sendable {
 
     /// The RFC 822 message body (text portion, excluding headers).
     ///
-    /// Functionally equivalent to ``bodySection(peek:_:)`` with `peek: false` and `.text`,
+    /// Functionally equivalent to ``bodySection(peek:_:_:)`` with `peek: false` and `.text`,
     /// but returns the body in RFC 822 format rather than IMAP BODY format.
     ///
     /// - SeeAlso: [RFC 3501 Section 7.4.2](https://datatracker.ietf.org/doc/html/rfc3501#section-7.4.2)
@@ -144,7 +144,7 @@ public enum FetchAttribute: Hashable, Sendable {
     /// Returns a marker indicating that the MODSEQ fetch attribute is present, but the actual
     /// mod-sequence value is returned separately. This is less common than ``modificationSequenceValue(_:)``.
     ///
-    /// **Requires server capability:** ``Capability/condstore``
+    /// **Requires server capability:** ``Capability/condStore``
     ///
     /// - SeeAlso: [RFC 7162 Section 3.1.4](https://datatracker.ietf.org/doc/html/rfc7162#section-3.1.4)
     case modificationSequence
@@ -154,7 +154,7 @@ public enum FetchAttribute: Hashable, Sendable {
     /// When used with a conditional FETCH modifier like `CHANGEDSINCE`, the server returns the
     /// actual mod-sequence value of the message.
     ///
-    /// **Requires server capability:** ``Capability/condstore``
+    /// **Requires server capability:** ``Capability/condStore``
     ///
     /// - parameter value: The specific modification sequence value to fetch
     /// - SeeAlso: [RFC 7162 Section 3.1.4](https://datatracker.ietf.org/doc/html/rfc7162#section-3.1.4)
@@ -162,7 +162,7 @@ public enum FetchAttribute: Hashable, Sendable {
 
     /// Raw binary data of a specific message section (BINARY extension).
     ///
-    /// Like ``bodySection(peek:_:)`` but returns raw binary data instead of IMAP-formatted body data.
+    /// Like ``bodySection(peek:_:_:)`` but returns raw binary data instead of IMAP-formatted body data.
     /// Supports partial byte ranges for efficient fetching.
     ///
     /// **Requires server capability:** ``Capability/binary``

@@ -30,8 +30,8 @@ import struct NIO.ByteBuffer
 /// When received, these would be represented as ``BodyExtension`` values in the extension arrays.
 ///
 /// - SeeAlso: [RFC 3501 Section 2.6.3](https://datatracker.ietf.org/doc/html/rfc3501#section-2.6.3)
-/// - SeeAlso: ``Singlepart/Extension``
-/// - SeeAlso: ``Multipart/Extension``
+/// - SeeAlso: ``BodyStructure/Singlepart/Extension``
+/// - SeeAlso: ``BodyStructure/Multipart/Extension``
 public enum BodyExtension: Hashable, Sendable {
     /// A generic string extension field, or `nil` if not present.
     ///

@@ -76,7 +76,7 @@ public struct IMAPURL: Hashable, Sendable {
 
     /// Creates a new IMAP URL.
     /// - parameter server: The server to connect to.
-    /// - parameter command: Optional command to execute. Defaults to `nil`.
+    /// - parameter query: Optional command to execute. Defaults to `nil`.
     public init(server: IMAPServer, query: URLCommand?) {
         self.server = server
         self.command = query
