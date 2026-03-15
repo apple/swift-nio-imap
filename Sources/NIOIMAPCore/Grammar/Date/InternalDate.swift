@@ -12,18 +12,37 @@
 //
 //===----------------------------------------------------------------------===//
 
-/// The internal date and time of the message on the server.
+/// The internal date and time of a message as stored on the server.
 ///
-/// This is not the date and time in the [RFC-2822] header, but rather a date and time
-/// which reflects when the message was received.
+/// This type represents the server's record of when a message was received or stored,
+/// not the date from the message's headers (which is represented by ``InternetMessageDate``).
+/// The internal date consists of a calendar date, time of day, and timezone offset.
 ///
-/// See RFC 3501 section 2.3.3. “Internal Date Message Attribute”
+/// The value is stored as a compact `UInt64` that encodes all components, allowing
+/// efficient storage and comparison. Use the ``components`` property or the ``Components``
+/// initializer to work with individual date/time components.
 ///
-/// IMAPv4 `date-time`
+/// ### Example
+///
+/// ```
+/// * 1 FETCH (INTERNALDATE “15-Mar-2026 10:30:45 +0100”)
+/// ```
+///
+/// This response indicates the message was received on March 15, 2026 at 10:30:45 AM
+/// in the UTC+01:00 timezone. This is wrapped as ``ServerMessageDate`` with components
+/// accessible via the ``components`` property.
+///
+/// - SeeAlso: [RFC 3501 Section 2.3.3](https://datatracker.ietf.org/doc/html/rfc3501#section-2.3.3)
 public struct ServerMessageDate: Hashable, Sendable {
     let rawValue: UInt64
 
-    /// The components of the date, such as the day, month, year, etc.
+    /// The individual date and time components for this internal date.
+    ///
+    /// This computed property extracts the encoded date, time, and timezone components
+    /// from the compact ``rawValue`` representation. The components can be used to
+    /// display or work with individual date and time fields.
+    ///
+    /// - Returns: A ``Components`` structure containing the decoded date, time, and timezone offset.
     public var components: Components {
         var remainder = self.rawValue
 
@@ -61,8 +80,12 @@ public struct ServerMessageDate: Hashable, Sendable {
         self.rawValue = rawValue
     }
 
-    /// Creates a new `ServerMessageDate` from a given collection of `Components`
-    /// - parameter components: The components containing a year, month, day, hour, minute, second, and timezone.
+    /// Creates a new `ServerMessageDate` from individual date and time components.
+    ///
+    /// This initializer constructs a ``ServerMessageDate`` by encoding the provided
+    /// components into the compact ``rawValue`` representation.
+    ///
+    /// - Parameter components: A ``Components`` structure containing the date, time, and timezone information.
     public init(_ components: Components) {
         var rawValue = 0 as UInt64
 
@@ -99,38 +122,71 @@ extension ServerMessageDate: CustomDebugStringConvertible {
 }
 
 extension ServerMessageDate {
-    /// Contains the individual components extracted from an `ServerMessageDate`, and can be used to
-    /// construct an `ServerMessageDate`.
+    /// Individual date and time components that can be encoded into or extracted from a ``ServerMessageDate``.
+    ///
+    /// The `Components` structure represents a complete internal date/time value with all components
+    /// broken out into separate fields. You can use this type to construct a ``ServerMessageDate``
+    /// or to inspect the individual components of an existing one.
+    ///
+    /// ### Example
+    ///
+    /// ```
+    /// let components = ServerMessageDate.Components(
+    ///     year: 2026, month: 3, day: 15,
+    ///     hour: 10, minute: 30, second: 45,
+    ///     timeZoneMinutes: 60
+    /// )
+    /// let date = ServerMessageDate(components)
+    /// ```
+    ///
+    /// This creates an ``ServerMessageDate`` representing March 15, 2026 at 10:30:45 UTC+01:00.
     public struct Components: Sendable {
-        /// The year.
+        /// The year, typically represented as a 4-digit integer.
+        ///
+        /// This is a full year value (e.g., 2026), constrained to fit within an unsigned 16-bit integer.
         public let year: Int
 
-        /// The month, typically represented as a 2-digit integer in the range `1...12`
+        /// The month, typically represented as a 2-digit integer in the range `1...12`.
+        ///
+        /// Month 1 is January, month 12 is December.
         public let month: Int
 
-        /// The day, typically represented as a 2-digit integer in the range `1...31`
+        /// The day of the month, typically represented as a 2-digit integer in the range `1...31`.
         public let day: Int
 
-        /// The hour, typically represented as a 2-digit integer in the range `0...23`
+        /// The hour of the day, typically represented as a 2-digit integer in the range `0...23`.
+        ///
+        /// Hour 0 is midnight, hour 23 is 11 PM.
         public let hour: Int
 
-        /// The minute, typically represented as a 2-digit integer in the range `0...59`
+        /// The minute of the hour, typically represented as a 2-digit integer in the range `0...59`.
         public let minute: Int
 
-        /// The second, typically represented as a 2-digit integer in the range `0...60` (to account for leap seconds)
+        /// The second of the minute, typically represented as a 2-digit integer in the range `0...60`.
+        ///
+        /// The range includes 60 to account for leap seconds.
         public let second: Int
 
-        /// Time zone offset in minutes.
+        /// Time zone offset in minutes from UTC.
+        ///
+        /// Positive values indicate east of UTC (ahead of UTC), negative values indicate west of UTC (behind UTC).
+        /// For example, +0100 (UTC+01:00) is represented as `60`, and -0500 (UTC-05:00) is represented as `-300`.
         public let zoneMinutes: Int
 
-        /// Creates a new `Components` collection from the given parameters. Note that currently no soundness checks are performed.
-        /// - parameter year: The year, typically to be represented as a 4-digit integer.
-        /// - parameter month: The month, typically represented as a 2-digit integer in the range `1...12`
-        /// - parameter day: The day, typically represented as a 2-digit integer in the range `1...31`
-        /// - parameter hour: The hour, typically represented as a 2-digit integer in the range `0...23`
-        /// - parameter minute: The minute, typically represented as a 2-digit integer in the range `0...59`
-        /// - parameter second: The second, typically represented as a 2-digit integer in the range `0...60` (to account for leap seconds)
-        /// - parameter zoneMinutes: The timezone as an offset in minutes from UTC.
+        /// Creates a new `Components` structure from the given parameters.
+        ///
+        /// All parameters are validated against their documented ranges. If any parameter
+        /// falls outside its valid range, this initializer returns `nil`.
+        ///
+        /// - Parameters:
+        ///   - year: The year, validated to be in the range `1...UInt16.max`.
+        ///   - month: The month, validated to be in the range `1...12`.
+        ///   - day: The day, validated to be in the range `1...31`.
+        ///   - hour: The hour, validated to be in the range `0...23`.
+        ///   - minute: The minute, validated to be in the range `0...59`.
+        ///   - second: The second, validated to be in the range `0...60` (accounting for leap seconds).
+        ///   - timeZoneMinutes: The timezone offset in minutes, validated to be in the range `(-24*60)...(24*60)`.
+        /// - Returns: A new `Components` if all validation is passed, otherwise `nil`.
         public init?(year: Int, month: Int, day: Int, hour: Int, minute: Int, second: Int, timeZoneMinutes: Int) {
             guard
                 (1...31).contains(day),
