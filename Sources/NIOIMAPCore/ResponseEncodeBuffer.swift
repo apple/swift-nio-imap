@@ -14,12 +14,9 @@
 
 import struct NIO.ByteBuffer
 
-/// A wrapper around ``EncodeBuffer`` for encoding IMAP server responses.
+/// Encodes IMAP server responses into wire format ready for transmission to an IMAP client.
 ///
-/// `ResponseEncodeBuffer` is the primary interface for encoding server responses into
-/// wire format ready for transmission to an IMAP client. It wraps an ``EncodeBuffer``
-/// configured in server mode and provides response-specific encoding operations.
-///
+/// `ResponseEncodeBuffer` is the primary interface for encoding responses from the server side.
 /// Unlike ``CommandEncodeBuffer`` which handles chunking for synchronizing literals,
 /// `ResponseEncodeBuffer` returns all encoded data in a single operation, which is
 /// appropriate for server-to-client responses that don't require continuation handshakes.
@@ -36,7 +33,7 @@ import struct NIO.ByteBuffer
 /// let encoded = buffer.readBytes()  // Get all encoded data
 /// ```
 ///
-/// - SeeAlso: ``EncodeBuffer``, ``CommandEncodeBuffer``, ``ResponseEncodingOptions``
+/// - SeeAlso: ``CommandEncodeBuffer``, ``ResponseEncodingOptions``
 public struct ResponseEncodeBuffer: Sendable {
     var buffer: EncodeBuffer
 

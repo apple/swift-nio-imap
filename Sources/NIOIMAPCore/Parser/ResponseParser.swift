@@ -14,28 +14,144 @@
 
 import struct NIO.ByteBuffer
 
+/// Parsing a server response exceeded the maximum allowed message attributes.
+///
+/// Each ``MessageAttribute`` in a FETCH response is counted. If a server sends a FETCH
+/// response with more attributes than allowed, this error is thrown. This is a DoS
+/// protection limit.
+///
+/// - SeeAlso: ``MessageAttribute``, ``ExceededMaximumBodySizeError``
 public struct ExceededMaximumMessageAttributesError: Error {
+    /// The actual number of message attributes in the response.
     public var actualCount: Int
+
+    /// The configured maximum number of attributes allowed.
     public var maximumCount: Int
 
+    /// Creates a new error with the actual and maximum attribute counts.
+    ///
+    /// - Parameters:
+    ///   - actualCount: The number of attributes encountered
+    ///   - maximumCount: The configured limit
     public init(actualCount: Int, maximumCount: Int) {
         self.actualCount = actualCount
         self.maximumCount = maximumCount
     }
 }
 
+/// Parsing a server response exceeded the maximum allowed body size.
+///
+/// Server responses can include large message bodies (e.g., in FETCH responses).
+/// If a body exceeds the configured maximum size, this error is thrown. This is a
+/// DoS and memory protection limit.
+///
+/// - SeeAlso: ``ExceededMaximumMessageAttributesError``, ``ResponseParser/Options``
 public struct ExceededMaximumBodySizeError: Error {
+    /// The actual number of bytes in the body.
     public var actualCount: UInt64
+
+    /// The configured maximum body size.
     public var maximumCount: UInt64
 
+    /// Creates a new error with the actual and maximum body sizes.
+    ///
+    /// - Parameters:
+    ///   - actualCount: The number of body bytes encountered
+    ///   - maximumCount: The configured limit
     public init(actualCount: UInt64, maximumCount: UInt64) {
         self.actualCount = actualCount
         self.maximumCount = maximumCount
     }
 }
 
-/// A parser to be used by Clients in order to parse responses sent from a server.
+/// A parser for IMAP server responses.
+///
+/// `ResponseParser` incrementally parses the stream of bytes sent by an IMAP server,
+/// converting them into ``ResponseOrContinuationRequest`` values (which contain either
+/// a ``Response`` or a ``ContinuationRequest``). It handles all response types defined
+/// by RFC 3501 and supported extensions, including:
+/// - Tagged responses (command completions)
+/// - Untagged responses (unsolicited data, mailbox state changes)
+/// - FETCH responses with streaming support
+/// - Continuation requests for multi-part operations
+///
+/// The parser maintains internal state for handling responses that arrive incomplete
+/// or fragmented across multiple network packets.
+///
+/// ## Usage
+///
+/// ```swift
+/// var parser = ResponseParser()
+/// var buffer = ByteBuffer(bytes: serverData)
+/// while let response = try parser.parseResponseStream(buffer: &buffer) {
+///     // Process response
+/// }
+/// ```
+///
+/// - SeeAlso: ``ResponseOrContinuationRequest``, ``Response``, ``ContinuationRequest``, ``Options``,
+///   [RFC 3501 Section 7](https://datatracker.ietf.org/doc/html/rfc3501#section-7) (server responses)
 public struct ResponseParser: Parser, Sendable {
+    /// Configuration options for response parsing.
+    ///
+    /// `Options` allows tuning the parser's behavior and limits, particularly for
+    /// DoS protection and memory management when dealing with potentially untrusted
+    /// server responses.
+    public struct Options: Sendable {
+        /// The maximum amount of data the parser can buffer at any time.
+        ///
+        /// If the parser's internal buffer exceeds this limit, parsing fails. This
+        /// prevents malformed responses from consuming excessive memory.
+        /// Defaults to 8192 bytes.
+        public var bufferLimit: Int
+
+        /// The maximum number of message attributes allowed in a single FETCH response.
+        ///
+        /// Each attribute (BODY, FLAGS, ENVELOPE, etc.) in a FETCH response is counted.
+        /// Defaults to `Int.max` (effectively unlimited).
+        public var messageAttributeLimit: Int
+
+        /// The maximum size of message body data in a single response.
+        ///
+        /// If a FETCH response includes body data larger than this limit, parsing fails.
+        /// Defaults to `UInt64.max` (effectively unlimited).
+        public var bodySizeLimit: UInt64
+
+        /// The maximum size of a single literal in the response.
+        ///
+        /// Literals (data between `{size}` markers) larger than this limit will cause
+        /// an error. Defaults to ``IMAPDefaults/literalSizeLimit`` (4096 bytes).
+        public var literalSizeLimit: Int
+
+        /// Optional string interning/caching function for parsed strings.
+        ///
+        /// When provided, every parsed string is passed through this function, which
+        /// can return a cached version. This reduces memory usage for responses with
+        /// many repeated strings (e.g., flag names). Defaults to `nil` (no caching).
+        public var parsedStringCache: (@Sendable (String) -> String)?
+
+        /// Creates new response parser options.
+        ///
+        /// - Parameters:
+        ///   - bufferLimit: Maximum buffered bytes. Defaults to 8192.
+        ///   - messageAttributeLimit: Maximum FETCH attributes. Defaults to Int.max.
+        ///   - bodySizeLimit: Maximum body size. Defaults to UInt64.max.
+        ///   - literalSizeLimit: Maximum literal size. Defaults to 4096 bytes.
+        ///   - parsedStringCache: Optional string caching function. Defaults to nil.
+        public init(
+            bufferLimit: Int = 8_192,
+            messageAttributeLimit: Int = .max,
+            bodySizeLimit: UInt64 = .max,
+            literalSizeLimit: Int = IMAPDefaults.literalSizeLimit,
+            parsedStringCache: (@Sendable (String) -> String)? = nil
+        ) {
+            self.bufferLimit = bufferLimit
+            self.messageAttributeLimit = messageAttributeLimit
+            self.bodySizeLimit = bodySizeLimit
+            self.literalSizeLimit = literalSizeLimit
+            self.parsedStringCache = parsedStringCache
+        }
+    }
+
     enum AttributeState: Hashable, Sendable {
         case head
         case attribute
@@ -53,36 +169,19 @@ public struct ResponseParser: Parser, Sendable {
         case attributeBytes(Int, attributeCount: Int)
     }
 
-    public struct Options: Sendable {
-        public var bufferLimit: Int
-        public var messageAttributeLimit: Int
-        public var bodySizeLimit: UInt64
-        public var literalSizeLimit: Int
-        public var parsedStringCache: (@Sendable (String) -> String)?
-
-        public init(
-            bufferLimit: Int = 8_192,
-            messageAttributeLimit: Int = .max,
-            bodySizeLimit: UInt64 = .max,
-            literalSizeLimit: Int = IMAPDefaults.literalSizeLimit,
-            parsedStringCache: (@Sendable (String) -> String)? = nil
-        ) {
-            self.bufferLimit = bufferLimit
-            self.messageAttributeLimit = messageAttributeLimit
-            self.bodySizeLimit = bodySizeLimit
-            self.literalSizeLimit = literalSizeLimit
-            self.parsedStringCache = parsedStringCache
-        }
-    }
-
     let parser: GrammarParser
     let bufferLimit: Int
     let messageAttributeLimit: Int
     let bodySizeLimit: UInt64
     private var mode: Mode
 
-    /// Creates a new `ResponseParser`.
-    /// - parameter bufferLimit: The maximum amount of data that may be buffered by the parser. If this limit is exceeded then an error will be thrown. Defaults to 1000 bytes.
+
+    /// Creates a new `ResponseParser` with configuration options.
+    ///
+    /// - Parameter options: Configuration for buffer limits, size restrictions, and
+    ///   optional string caching. Defaults to standard limits suitable for most servers.
+    ///
+    /// - SeeAlso: ``Options``
     public init(
         options: Options = Options()
     ) {
@@ -96,10 +195,32 @@ public struct ResponseParser: Parser, Sendable {
         self.bodySizeLimit = options.bodySizeLimit
     }
 
-    /// Parses a `ResponseStream` and returns the result.
-    /// - parameter buffer: The `ByteBuffer` to parse data from.
-    /// - returns: `nil` if there wasn't enough data, otherwise a `ResponseOrContinuationRequest` if parsing was successful.
-    /// - throws: A `ParserError` with a desription as to why parsing failed.
+    /// Parses a server response from incoming bytes.
+    ///
+    /// Incrementally consumes bytes from the buffer and returns parsed responses.
+    /// The parser maintains state across calls, so it can handle responses that arrive
+    /// fragmented across multiple network packets.
+    ///
+    /// Returns `nil` when more data is needed. Throws an error if:
+    /// - The buffer exceeds ``Options/bufferLimit``
+    /// - A literal exceeds ``Options/literalSizeLimit``
+    /// - A FETCH response has too many attributes (exceeds ``Options/messageAttributeLimit``)
+    /// - A body exceeds ``Options/bodySizeLimit``
+    /// - The response violates IMAP syntax
+    /// - UTF-8 validation fails
+    ///
+    /// - Parameter buffer: A `ByteBuffer` with incoming server data. The parser consumes
+    ///   bytes from the front as it parses them.
+    ///
+    /// - Returns: A ``ResponseOrContinuationRequest`` if a complete response element is parsed,
+    ///   or `nil` if more data is needed.
+    ///
+    /// - Throws: ``ParserError`` for syntax errors, ``ExceededMaximumMessageAttributesError``
+    ///   for attribute limit violations, ``ExceededMaximumBodySizeError`` for body size violations,
+    ///   ``TooMuchRecursion`` for overly nested structures.
+    ///
+    /// - SeeAlso: ``ResponseOrContinuationRequest``, ``Options``,
+    ///   [RFC 3501 Section 7](https://datatracker.ietf.org/doc/html/rfc3501#section-7)
     public mutating func parseResponseStream(
         buffer inputBytes: inout ByteBuffer
     ) throws -> ResponseOrContinuationRequest? {

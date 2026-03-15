@@ -30,10 +30,28 @@ import ucrt
 let badOS = { fatalError("unsupported OS") }()
 #endif
 
+/// Parsing a literal exceeded the maximum configured size limit.
+///
+/// IMAP protocol literals (data between `{size}` markers) can be arbitrarily large.
+/// To prevent memory exhaustion from malformed or malicious input, a maximum literal
+/// size is enforced. If a literal exceeds this limit, this error is thrown.
+///
+/// This is a DoS protection mechanism.
+///
+/// - SeeAlso: [RFC 3501 Section 4.3.3](https://datatracker.ietf.org/doc/html/rfc3501#section-4.3.3),
+///   ``ExceededMaximumBodySizeError``
 public struct ExceededLiteralSizeLimitError: Error {
+    /// The actual size of the literal.
     public var actualCount: Int
+
+    /// The configured maximum literal size.
     public var maximumCount: Int
 
+    /// Creates a new error with the actual and maximum sizes.
+    ///
+    /// - Parameters:
+    ///   - actualCount: The size of the literal that exceeded the limit
+    ///   - maximumCount: The configured maximum size
     public init(actualCount: Int, maximumCount: Int) {
         self.actualCount = actualCount
         self.maximumCount = maximumCount
@@ -56,7 +74,14 @@ struct GrammarParser: @unchecked Sendable {
     let literalSizeLimit: Int
     let messageBodySizeLimit: Int
 
-    /// - parameter parseCache
+    /// Creates a new grammar parser with configurable limits.
+    ///
+    /// - Parameters:
+    ///   - literalSizeLimit: Maximum size of a single literal. Defaults to ``IMAPDefaults/literalSizeLimit``.
+    ///   - messageBodySizeLimit: Maximum size of a message body. Defaults to ``IMAPDefaults/bodySizeLimit``.
+    ///   - parsedStringCache: Optional string caching function for memory optimization. When provided,
+    ///     every parsed string is passed through this function, which can return a cached version
+    ///     to reduce memory usage for responses with repeated strings. Defaults to `nil`.
     init(
         literalSizeLimit: Int = IMAPDefaults.literalSizeLimit,
         messageBodySizeLimit: Int = IMAPDefaults.bodySizeLimit,

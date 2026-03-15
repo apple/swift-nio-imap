@@ -14,11 +14,11 @@
 
 import struct NIO.ByteBuffer
 
-/// A wrapper around ``EncodeBuffer`` for encoding IMAP commands.
+/// Encodes IMAP client commands into wire format ready for transmission to an IMAP server.
 ///
-/// `CommandEncodeBuffer` is the primary interface for encoding client commands into
-/// wire format ready for transmission to an IMAP server. It wraps an ``EncodeBuffer``
-/// configured in client mode and provides command-specific encoding operations.
+/// `CommandEncodeBuffer` is the primary interface for encoding commands from the client side.
+/// It handles chunking of synchronizing literals (for RFC 3501 Section 4.3 compliance) and
+/// respects server capabilities when deciding which literal formats to use.
 ///
 /// ## Usage Example
 ///
@@ -32,7 +32,7 @@ import struct NIO.ByteBuffer
 /// // Retrieve chunks via buffer.buffer.nextChunk()
 /// ```
 ///
-/// - SeeAlso: ``EncodeBuffer``, ``ResponseEncodeBuffer``, ``CommandEncodingOptions``
+/// - SeeAlso: ``ResponseEncodeBuffer``, ``CommandEncodingOptions``
 public struct CommandEncodeBuffer: Hashable, Sendable {
     /// The underlying buffer containing data to be written.
     ///

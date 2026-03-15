@@ -14,24 +14,77 @@
 
 import struct NIO.ByteBuffer
 
-/// A `CommandStreamPart` (i.e. a command or part of a command) and any synchronising literals that are ready to be sent down the network to a server.
+/// A command stream part with synchronizing literal information.
+///
+/// When parsing client commands, the parser must handle synchronizing literals (RFC 3501 Section 4.3).
+/// With synchronizing literals, the client sends the literal size, waits for a `+` continuation,
+/// then sends the literal data. This struct wraps a ``CommandStreamPart`` with metadata about
+/// how many synchronizing literals it contains.
+///
+/// When ``numberOfSynchronisingLiterals`` is greater than 0, the parser expects the server
+/// to send that many `+` continuation requests before this command is complete.
+///
+/// - SeeAlso: ``CommandStreamPart``, [RFC 3501 Section 4.3.3](https://datatracker.ietf.org/doc/html/rfc3501#section-4.3.3)
 public struct SynchronizedCommand: Hashable, Sendable {
-    /// The number of synchronising literals contained in the corresponding `command`.
+    /// The number of synchronising literals contained in the corresponding command.
+    ///
+    /// When this is greater than 0, the server must send that many continuation
+    /// requests (`+` responses) to allow the client to send each literal's data.
+    /// Each synchronizing literal (format `{size}`) requires a `+` response before
+    /// the literal data is sent.
     public var numberOfSynchronisingLiterals: Int
 
     /// A command to be sent to a server.
+    ///
+    /// This is the actual ``CommandStreamPart`` (or part of a command in streaming mode).
+    /// May be `nil` if only continuation data is being sent.
     public var commandPart: CommandStreamPart?
 
     /// Creates a new `SynchronizedCommand`.
-    /// - parameter commandPart: A `CommandStreamPart`, if any. Defaults to `nil`.
-    /// - parameter numberOfSynchronisingLiterals: How many synchronising literals are in the `commandPart`. Defaults to 0.
+    ///
+    /// - Parameters:
+    ///   - commandPart: A ``CommandStreamPart``, if any. Defaults to `nil`.
+    ///   - numberOfSynchronisingLiterals: How many synchronising literals are in the command.
+    ///     Defaults to 0.
     public init(_ commandPart: CommandStreamPart? = nil, numberOfSynchronisingLiterals: Int = 0) {
         self.commandPart = commandPart
         self.numberOfSynchronisingLiterals = numberOfSynchronisingLiterals
     }
 }
 
-/// A parser dedicated to parsing commands sent from a client.
+/// A parser for IMAP commands sent from a client to a server.
+///
+/// `CommandParser` incrementally parses the stream of bytes sent by an IMAP client,
+/// converting them into ``CommandStreamPart`` structures that represent complete commands
+/// or parts of commands (in the case of streaming operations like `APPEND` or `CATENATE`).
+///
+/// The parser handles:
+/// - Regular commands (``Command``)
+/// - Streaming commands (`APPEND` with literal data)
+/// - Multi-part commands (`CATENATE`)
+/// - IDLE command lifecycle
+/// - Synchronizing literals (RFC 3501 Section 4.3) where the server sends `+` before literal data
+///
+/// The parser maintains internal state to track incomplete parsing operations and can process
+/// incomplete input, returning `nil` until enough bytes are available for a complete element.
+///
+/// ## Usage
+///
+/// ```swift
+/// var parser = CommandParser()
+/// var buffer = ByteBuffer(bytes: clientData)
+/// while let syncedCommand = try parser.parseCommandStream(buffer: &buffer) {
+///     if syncedCommand.numberOfSynchronisingLiterals > 0 {
+///         // Wait for continuation requests and responses
+///     }
+///     if let part = syncedCommand.commandPart {
+///         // Process the command
+///     }
+/// }
+/// ```
+///
+/// - SeeAlso: ``SynchronizedCommand``, ``CommandStreamPart``,
+///   [RFC 3501 Section 5](https://datatracker.ietf.org/doc/html/rfc3501#section-5) (commands)
 public struct CommandParser: Parser, Sendable {
     enum Mode: Hashable, Sendable {
         case lines
@@ -56,18 +109,49 @@ public struct CommandParser: Parser, Sendable {
     private(set) var mode: Mode = .lines
     private var synchronisingLiteralParser = SynchronizingLiteralParser()
 
-    /// Creates a new `CommandParser` with a built in buffer limit. Used to prevent DOS attacks, an error will be thrown if this limit is exceeded.
-    /// - parameter bufferLimit. The maximum size of the buffer in bytes at any one time. Defaults to 8192 bytes.
+    /// Creates a new `CommandParser` with configurable buffer limits.
+    ///
+    /// The buffer limits serve as DoS protection, preventing malicious or malformed input
+    /// from consuming excessive memory or processing time.
+    ///
+    /// - Parameters:
+    ///   - bufferLimit: The maximum number of bytes that can be buffered at any time.
+    ///     If the parser accumulates more than this, an error is thrown. Defaults to
+    ///     ``IMAPDefaults/lineLengthLimit`` (8192 bytes).
+    ///   - literalSizeLimit: The maximum size of a single literal (data between `{size}` markers).
+    ///     Defaults to ``IMAPDefaults/literalSizeLimit`` (4096 bytes).
+    ///
+    /// - Throws: Errors during parsing if limits are exceeded or parsing fails.
+    ///
+    /// - SeeAlso: ``parseCommandStream(buffer:)``
     public init(bufferLimit: Int = IMAPDefaults.lineLengthLimit, literalSizeLimit: Int = IMAPDefaults.literalSizeLimit)
     {
         self.bufferLimit = bufferLimit
         self.parser = GrammarParser(literalSizeLimit: literalSizeLimit)
     }
 
-    /// Parses a given `ByteBuffer` into a `CommandStreamPart` that may then be transmitted.
-    /// Parsing depends on the current mode of the parser.
-    /// - parameter buffer: A `ByteBuffer` that will be consumed for parsing.
-    /// - returns: A `CommandStreamPart` that can be sent.
+    /// Parses a given `ByteBuffer` into command stream parts.
+    ///
+    /// Incrementally consumes bytes from the buffer and returns parsed command parts.
+    /// The parser maintains state across calls, so it can handle commands and data
+    /// that arrive in multiple network packets.
+    ///
+    /// Returns `nil` when more data is needed. Throws an error if:
+    /// - The buffer exceeds ``bufferLimit``
+    /// - A literal exceeds ``literalSizeLimit``
+    /// - The input violates IMAP command syntax
+    /// - UTF-8 validation fails
+    ///
+    /// - Parameter buffer: A `ByteBuffer` with incoming data. The parser consumes
+    ///   bytes from the front as it parses them.
+    ///
+    /// - Returns: A ``SynchronizedCommand`` if a complete element is parsed, or `nil`
+    ///   if more data is needed.
+    ///
+    /// - Throws: ``ParserError`` for syntax errors, ``BadCommand`` for tagged command
+    ///   parse failures, ``TooMuchRecursion`` for overly nested structures.
+    ///
+    /// - SeeAlso: ``SynchronizedCommand``, [RFC 3501 Section 5](https://datatracker.ietf.org/doc/html/rfc3501#section-5)
     public mutating func parseCommandStream(buffer: inout ByteBuffer) throws -> SynchronizedCommand? {
         guard buffer.readableBytes > 0 else {
             return nil
