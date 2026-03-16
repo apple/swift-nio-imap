@@ -94,13 +94,20 @@ public enum MailboxData: Hashable, Sendable {
     /// - SeeAlso: [RFC 3501 Section 7.2.5](https://datatracker.ietf.org/doc/html/rfc3501#section-7.2.5)
     case search([UnknownMessageIdentifier], ModificationSequenceValue? = nil)
 
-    /// Response to a search command using the ESEARCH extension.
+    /// Response to a search command in `ESEARCH` response format (RFC 4731).
+    ///
+    /// The `ESEARCH` response format is defined in RFC 4731 with optional `MIN`, `MAX`, `COUNT`, and `ALL` fields.
+    /// **Important:** The presence of this response format does **not** require the `ESEARCH` capability.
+    /// The `ESEARCH` response format is returned by:
+    /// - Basic `SEARCH` commands with extended return options when the server supports RFC 4731
+    /// - RFC 7377 MULTIMAILBOX SEARCH commands (which may not require the `ESEARCH` capability)
     ///
     /// Sent as part of ``ResponsePayload/mailboxData(_:)`` containing ``MailboxData/extendedSearch(_:)``.
     ///
     /// See ``ExtendedSearchResponse`` for the structure of the returned data.
     ///
-    /// - SeeAlso: [RFC 4731](https://datatracker.ietf.org/doc/html/rfc4731) - ESEARCH Extension
+    /// - SeeAlso: [RFC 4731](https://datatracker.ietf.org/doc/html/rfc4731) - `ESEARCH` Response Format
+    /// - SeeAlso: [RFC 7377](https://datatracker.ietf.org/doc/html/rfc7377) - MULTIMAILBOX SEARCH (returns `ESEARCH` responses)
     case extendedSearch(ExtendedSearchResponse)
 
     /// Response to a ``Command/status(_:_:)`` command.

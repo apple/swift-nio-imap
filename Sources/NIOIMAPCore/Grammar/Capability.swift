@@ -316,9 +316,15 @@ extension Capability {
     /// - SeeAlso: [RFC 5161](https://datatracker.ietf.org/doc/html/rfc5161)
     public static let enable = Self(unchecked: "ENABLE")
 
-    /// The `ESEARCH` capability indicates the server supports the ESEARCH command with advanced search result options.
+    /// The `ESEARCH` capability indicates the server supports the ESEARCH command (RFC 4731).
     ///
-    /// - SeeAlso: [RFC 4731](https://datatracker.ietf.org/doc/html/rfc4731)
+    /// This capability indicates server support for the `SEARCH` command with extended result options
+    /// (like `RETURN (MIN MAX COUNT ALL)`), as defined in RFC 4731. Note: This capability is **not**
+    /// about the ESEARCH response format itself. The `ESEARCH` response format can be returned by
+    /// RFC 7377 MULTIMAILBOX SEARCH commands even without this capability.
+    ///
+    /// - SeeAlso: [RFC 4731](https://datatracker.ietf.org/doc/html/rfc4731) - ESEARCH Command Extension
+    /// - SeeAlso: [RFC 7377](https://datatracker.ietf.org/doc/html/rfc7377) - MULTIMAILBOX SEARCH (may return `ESEARCH` responses without requiring this capability)
     public static let extendedSearch = Self(unchecked: "ESEARCH")
 
     /// The `ESORT` capability indicates the server supports extended sort result forms.

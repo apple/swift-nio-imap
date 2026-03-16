@@ -275,6 +275,11 @@ public enum Command: Hashable, Sendable {
     case setMetadata(mailbox: MailboxName, entries: OrderedDictionary<MetadataEntryName, MetadataValue>)
 
     /// Performs a “multimailbox” search as defined in RFC 7377.
+    ///
+    /// This command enables searching across multiple mailboxes in a single request. The search results are
+    /// returned using the `ESEARCH` response format defined in RFC 4731, which includes optional `MIN`, `MAX`,
+    /// `COUNT`, and `ALL` return options. This command is equivalent to the extended `SEARCH` command but can
+    /// target multiple mailboxes via the ``MailboxFilter`` and ``Mailboxes`` filters.
     case extendedSearch(ExtendedSearchOptions)
 
     /// When sent with no arguments: removes all mailbox access keys
