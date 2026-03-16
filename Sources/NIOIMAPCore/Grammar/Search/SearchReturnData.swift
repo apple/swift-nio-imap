@@ -49,7 +49,7 @@ import struct NIO.ByteBuffer
 public enum SearchReturnData: Hashable, Sendable {
     /// The lowest message number/UID matching the search criteria.
     ///
-    /// Returned when ``.min`` is included in the `RETURN` clause. Only present if the search
+    /// Returned when `MIN` is included in the `RETURN` clause. Only present if the search
     /// found at least one matching message. The value is either a message number (for `SEARCH`)
     /// or a UID (for `UID SEARCH`).
     ///
@@ -58,7 +58,7 @@ public enum SearchReturnData: Hashable, Sendable {
 
     /// The highest message number/UID matching the search criteria.
     ///
-    /// Returned when ``.max`` is included in the `RETURN` clause. Only present if the search
+    /// Returned when `MAX` is included in the `RETURN` clause. Only present if the search
     /// found at least one matching message. The value is either a message number (for `SEARCH`)
     /// or a UID (for `UID SEARCH`).
     ///
@@ -67,7 +67,7 @@ public enum SearchReturnData: Hashable, Sendable {
 
     /// All message numbers/UIDs matching the search criteria in sequence-set format.
     ///
-    /// Returned when ``.all`` is included in the `RETURN` clause. Results are represented as
+    /// Returned when `ALL` is included in the `RETURN` clause. Results are represented as
     /// a ``LastCommandSet`` (compact sequence-set notation like `2,10:11`). Only present if the search
     /// found at least one matching message.
     ///
@@ -76,7 +76,7 @@ public enum SearchReturnData: Hashable, Sendable {
 
     /// The count of messages matching the search criteria.
     ///
-    /// Returned when ``.count`` is included in the `RETURN` clause. Unlike other result options,
+    /// Returned when `COUNT` is included in the `RETURN` clause. Unlike other result options,
     /// this is REQUIRED and always included in the ESEARCH response, even when the count is zero.
     ///
     /// - SeeAlso: [RFC 4731 Section 3.1](https://datatracker.ietf.org/doc/html/rfc4731#section-3.1)

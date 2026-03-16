@@ -38,7 +38,7 @@ import struct NIO.ByteBufferView
 /// ## Related Types
 ///
 /// - See ``QuotaResource`` for resource usage and limits
-/// - See ``QuotaRootResponse`` for mailbox-to-quota-root associations
+/// - See ``ResponsePayload/quotaRoot(_:_:)`` for mailbox-to-quota-root associations
 /// - See ``ResponsePayload/quota(_:_:)`` for quota response data
 ///
 /// - SeeAlso: [RFC 2087 Section 3](https://datatracker.ietf.org/doc/html/rfc2087#section-3)
@@ -46,7 +46,7 @@ public struct QuotaRoot: Hashable, Sendable {
     /// The raw bytes representing the quota root name.
     ///
     /// Contains the UTF-8 encoded bytes of the quota root name. Can be converted to a `String`
-    /// via the initializer ``init(_:)-init:self`` operator.
+    /// using the ``Swift/String/init(_:)-(QuotaRoot)`` initializer on String.
     public var storage: ByteBuffer
 
     /// Creates a new `QuotaRoot` from a string.

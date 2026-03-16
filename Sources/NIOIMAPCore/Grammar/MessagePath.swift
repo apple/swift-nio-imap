@@ -28,7 +28,7 @@
 /// 1. **Mailbox Reference** (``MailboxUIDValidity``): Identifies the mailbox with optional UID validity
 /// 2. **Message UID** (``IUID``): The message unique identifier
 /// 3. **Section** (``URLMessageSection``, optional): Specific part of the message structure
-/// 4. **Byte Range** (``MessagePath.ByteRange``, optional): Specific bytes within the section
+/// 4. **Byte Range** (``MessagePath/ByteRange``, optional): Specific bytes within the section
 ///
 /// ### Examples
 ///

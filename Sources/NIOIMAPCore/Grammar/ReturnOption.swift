@@ -40,14 +40,14 @@ import struct NIO.ByteBuffer
 ///
 /// ## Related Types
 ///
-/// Return options are used with the ``Command/list(_:reference:_:)`` command.
+/// Return options are used with the ``Command/list(_:reference:_:_:)`` command.
 /// See ``MailboxAttribute`` for the attributes returned in status responses.
 ///
 /// - SeeAlso: [RFC 5819](https://datatracker.ietf.org/doc/html/rfc5819), [RFC 3501 Section 6.3.8](https://datatracker.ietf.org/doc/html/rfc3501#section-6.3.8)
 public enum ReturnOption: Hashable, Sendable {
     /// The `SUBSCRIBED` return option causes `LIST` to return subscription state for all matching mailboxes.
     ///
-    /// This is used with the ``Command/list(_:reference:_:)`` command to include subscription information
+    /// This is used with the ``Command/list(_:reference:_:_:)`` command to include subscription information
     /// in the `LIST` responses. From [RFC 5819 Section 2](https://datatracker.ietf.org/doc/html/rfc5819#section-2).
     case subscribed
 

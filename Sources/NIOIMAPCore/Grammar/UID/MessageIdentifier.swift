@@ -92,8 +92,8 @@ extension MessageIdentifier {
 /// committing to a specific type.
 ///
 /// Convert between `UnknownMessageIdentifier` and concrete types using:
-/// - ``UID.init(_:)`` or ``SequenceNumber.init(_:)`` to convert from an unknown identifier.
-/// - ``UID.init(_:)`` or ``SequenceNumber.init(_:)`` to convert from a concrete type.
+/// - ``/NIOIMAPCore/UID/init(_:)-(UnknownMessageIdentifier)`` or ``/NIOIMAPCore/SequenceNumber/init(_:)-(UnknownMessageIdentifier)`` to convert from an unknown identifier.
+/// - ``/NIOIMAPCore/UnknownMessageIdentifier/init(_:)-(UID)`` or ``/NIOIMAPCore/UnknownMessageIdentifier/init(_:)-(SequenceNumber)`` to convert from a concrete type.
 public struct UnknownMessageIdentifier: MessageIdentifier, Sendable {
     public var rawValue: UInt32
 
@@ -111,7 +111,7 @@ extension BinaryInteger {
 // MARK: - Strideable
 
 extension MessageIdentifier {
-    /// Evaluates if one `MessageIdentifier` (`lhs`) is strictly less than another (`rhs`).
+    /// Evaluates if one ``MessageIdentifier`` (`lhs`) is strictly less than another (`rhs`).
     /// - parameter lhs: The first `MessageIdentifier` to evaluate.
     /// - parameter rhs: The second `MessageIdentifier` to evaluate.
     /// - returns: `true` if `lhs` strictly less than`rhs`, otherwise `false`.
@@ -119,7 +119,7 @@ extension MessageIdentifier {
         lhs.rawValue < rhs.rawValue
     }
 
-    /// Evaluates if one `MessageIdentifier` (`lhs`) is less than or equal to another (`rhs`).
+    /// Evaluates if one ``MessageIdentifier`` (`lhs`) is less than or equal to another (`rhs`).
     /// - parameter lhs: The first `MessageIdentifier` to evaluate.
     /// - parameter rhs: The second `MessageIdentifier` to evaluate.
     /// - returns: `true` if `lhs` is less than or equal to `rhs`, otherwise `false`.
@@ -127,16 +127,16 @@ extension MessageIdentifier {
         lhs.rawValue <= rhs.rawValue
     }
 
-    /// Gets the distance to the given `MessageIdentifier`.
+    /// Gets the distance to the given ``MessageIdentifier``.
     /// - parameter other: The `MessageIdentifier` to get the distance to.
     /// - returns: The distance.
     public func distance(to other: Self) -> Int64 {
         Int64(other.rawValue) - Int64(self.rawValue)
     }
 
-    /// Advances the current `MessageIdentifier` by `n`.
-    /// IMPORTANT: `n` *must* be `<= UInt32.max`. `Int64` is used as the stridable type as it allows
-    /// values equal to `UInt32.max` on all platforms (including 32 bit platforms where `Int.max < UInt32.max`.
+    /// Advances the current ``MessageIdentifier`` by `n`.
+    /// IMPORTANT: `n` *must* be `<= UInt32.max`. `Int64` is used as the strideable type as it allows
+    /// values equal to `UInt32.max` on all platforms (including 32 bit platforms where `Int.max < UInt32.max`).
     /// - parameter n: How many to advance by.
     /// - returns: A new `MessageIdentifier`.
     public func advanced(by n: Int64) -> Self {

@@ -280,7 +280,7 @@ public struct MailboxName: Sendable {
     /// or in hash-based collections. Hash calculation is performed once at initialization time
     /// using the mailbox name bytes.
     ///
-    /// - Returns: The hash value as an `Int`
+    /// - Returns: The hash value as an `Swift/Int`
     @inlinable
     public var hashValue: Int {
         self._hashValue.value
@@ -327,8 +327,8 @@ public struct MailboxName: Sendable {
 }
 
 extension MailboxName {
-    /// A helper to store a hash value (for `Hashable` conformance) inside
-    /// a `UInt32` (i.e. 4 bytes) even on platforms where `Int` is 64 bit.
+    /// A helper to store a hash value (for ``Swift/Hashable`` conformance) inside
+    /// a ``Swift/UInt32`` (i.e. 4 bytes) even on platforms where ``Swift/Int`` is 64 bit.
     @usableFromInline
     struct HashValue: Sendable {
         @usableFromInline

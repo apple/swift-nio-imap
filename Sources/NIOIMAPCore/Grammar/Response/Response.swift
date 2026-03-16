@@ -69,10 +69,11 @@ public enum Response: Hashable, Sendable {
     /// S: * 0 RECENT
     /// ```
     ///
-    /// These lines are each wrapped as ``Response/untagged(_:)`` containing different cases of
-    /// ``ResponsePayload`` (``ResponsePayload/mailboxData(.flags(...))``,
-    /// ``ResponsePayload/mailboxData(.exists(...))``, and ``ResponsePayload/mailboxData(.recent(...))``
-    /// respectively).
+    /// These lines are each wrapped as ``Response/untagged(_:)`` containing
+    /// ``ResponsePayload/mailboxData(_:)`` with various ``MailboxData`` cases:
+    /// ``MailboxData/flags(_:)``,
+    /// ``MailboxData/exists(_:)``, and ``MailboxData/recent(_:)``
+    /// respectively.
     ///
     /// - SeeAlso: ``ResponsePayload``
     case untagged(ResponsePayload)
@@ -265,7 +266,7 @@ public enum FetchResponse: Hashable, Sendable {
     ///
     /// This event indicates that a large message part (body, RFC 822 header, etc.) is about to be
     /// streamed to the client. The ``StreamingKind`` specifies which part is being streamed,
-    /// and ``byteCount`` indicates the total bytes that will follow.
+    /// and the `byteCount` parameter indicates the total bytes that will follow.
     ///
     /// After this event, expect one or more ``streamingBytes(_:)`` events containing the data,
     /// followed by a ``streamingEnd`` event.
@@ -279,7 +280,7 @@ public enum FetchResponse: Hashable, Sendable {
     /// A chunk of bytes from the currently streaming section.
     ///
     /// Multiple ``streamingBytes(_:)`` events may be sent for a single streaming section. The total
-    /// bytes from all events for one section should equal the ``byteCount`` specified in the
+    /// bytes from all events for one section should equal the `byteCount` specified in the
     /// preceding ``streamingBegin(kind:byteCount:)`` event.
     ///
     /// - SeeAlso: ``streamingBegin(kind:byteCount:)``
@@ -312,8 +313,8 @@ public enum StreamingKind: Hashable, Sendable {
     /// A binary body part being streamed.
     ///
     /// The BINARY extension (see [RFC 3516](https://datatracker.ietf.org/doc/html/rfc3516)) allows
-    /// fetching message parts as raw binary data without MIME encoding. The ``section`` identifies
-    /// which part of the message is being streamed, and ``offset`` specifies a byte offset for
+    /// fetching message parts as raw binary data without MIME encoding. The `section` identifies
+    /// which part of the message is being streamed, and `offset` specifies a byte offset for
     /// partial fetches (when the PARTIAL extension is used).
     ///
     /// ### Example
@@ -335,9 +336,9 @@ public enum StreamingKind: Hashable, Sendable {
 
     /// A body section being streamed.
     ///
-    /// The BODY fetch item returns message structure and content according to [RFC 3501](https://datatracker.ietf.org/doc/html/rfc3501).
-    /// The ``section`` specifies which part of the message is being returned (e.g., TEXT for the message body,
-    /// HEADER for headers, or 1.2.3 for nested MIME parts). The ``offset`` specifies a byte offset for
+    /// The `BODY` fetch item returns message structure and content according to [RFC 3501](https://datatracker.ietf.org/doc/html/rfc3501).
+    /// The `section` specifies which part of the message is being returned (e.g., TEXT for the message body,
+    /// HEADER for headers, or 1.2.3 for nested MIME parts). The `offset` specifies a byte offset for
     /// partial fetches.
     ///
     /// ### Example

@@ -99,7 +99,7 @@ extension PipeliningRequirement {
 ///
 /// A `FETCH` command has behaviors including ``dependsOnMailboxSelection`` and
 /// possibly ``readsFlagsFromAnyMessage``. A later `STORE` command with flag changes
-/// (non-silent) has requirement ``PipeliningRequirement/noFlagReads`` on those messages,
+/// (non-silent) has requirement ``PipeliningRequirement/noFlagReads(_:)`` on those messages,
 /// which will conflict with the existing `FETCH` behavior.
 ///
 /// - SeeAlso: ``PipeliningRequirement``, ``CommandStreamPart/pipeliningBehavior``,

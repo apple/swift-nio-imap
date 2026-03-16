@@ -209,7 +209,7 @@ public struct ResponseParser: Parser, Sendable {
     /// - The response violates IMAP syntax
     /// - UTF-8 validation fails
     ///
-    /// - Parameter buffer: A `ByteBuffer` with incoming server data. The parser consumes
+    /// - Parameter inputBytes: A `ByteBuffer` with incoming server data. The parser consumes
     ///   bytes from the front as it parses them.
     ///
     /// - Returns: A ``ResponseOrContinuationRequest`` if a complete response element is parsed,

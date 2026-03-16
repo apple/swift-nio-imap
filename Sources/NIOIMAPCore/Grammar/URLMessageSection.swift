@@ -61,7 +61,7 @@ import struct NIO.ByteBuffer
 /// - ``EncodedSection`` wraps the percent-encoded section string
 /// - ``MessagePath`` includes an optional ``URLMessageSection``
 /// - ``URLFetchType`` may include section specifications
-/// - ``SectionSpec`` defines RFC 3501 section syntax details
+/// - ``SectionSpecifier`` defines RFC 3501 section syntax details
 ///
 /// - SeeAlso: [RFC 2192 Section 5.2](https://datatracker.ietf.org/doc/html/rfc2192#section-5.2) - IMAP URL ABNF
 /// - SeeAlso: [RFC 3501 Section 6.4.5](https://datatracker.ietf.org/doc/html/rfc3501#section-6.4.5) - FETCH Command

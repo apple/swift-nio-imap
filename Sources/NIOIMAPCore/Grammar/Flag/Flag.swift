@@ -46,7 +46,7 @@ import struct NIO.ByteBuffer
 /// S: A001 OK STORE completed
 /// ```
 public struct Flag: Hashable, Sendable {
-    /// The raw case-sensitive `String` value.
+    /// The raw case-sensitive ``Swift/String`` value.
     internal let stringValue: String
 
     /// Creates a new `Flag` from the given `String`. Note that casing is preserved, however

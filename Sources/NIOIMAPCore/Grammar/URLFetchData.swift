@@ -35,7 +35,7 @@ import struct NIO.ByteBuffer
 /// ```
 ///
 /// The server response line `* URLFETCH (url data)` is wrapped as ``Response/untagged(_:)``
-/// containing ``ResponsePayload/urlfetch(_:)`` with a list of ``URLFetchData`` items.
+/// containing ``MessageData/urlFetch(_:)`` with a list of ``URLFetchData`` items.
 ///
 /// Each item pairs the requested URL with the fetched message data (or NIL if the URL
 /// was invalid or the server could not retrieve the data).
@@ -53,7 +53,7 @@ import struct NIO.ByteBuffer
 /// - ``AuthenticatedURL`` provides URLAUTH verification for the URL
 /// - ``URLCommand`` specifies what to fetch
 /// - ``Response/untagged(_:)`` wraps the response
-/// - ``ResponsePayload/urlfetch(_:)`` contains the URLFETCH data
+/// - ``MessageData/urlFetch(_:)`` contains the URLFETCH data
 ///
 /// - SeeAlso: [RFC 4467 Section 7](https://datatracker.ietf.org/doc/html/rfc4467#section-7) - URLFETCH Command
 public struct URLFetchData: Hashable, Sendable {

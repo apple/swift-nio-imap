@@ -36,7 +36,7 @@
 ///
 /// - SeeAlso: [RFC 7162 Section 3.2.5](https://datatracker.ietf.org/doc/html/rfc7162#section-3.2.5) (Quick Resynchronization)
 /// - SeeAlso: [RFC 7162 Section 3.1.1](https://datatracker.ietf.org/doc/html/rfc7162#section-3.1.1) (CONDSTORE Extension)
-/// - SeeAlso: ``Command/select(_:parameters:)``
+/// - SeeAlso: ``Command/select(_:_:)``
 public struct QResyncParameter: Hashable, Sendable {
     /// The last known UID validity.
     ///
@@ -102,7 +102,7 @@ public struct QResyncParameter: Hashable, Sendable {
 /// (depending on which case is used).
 ///
 /// - SeeAlso: [RFC 7162](https://datatracker.ietf.org/doc/html/rfc7162) (CONDSTORE and QRESYNC)
-/// - SeeAlso: ``Command/select(_:parameters:)``
+/// - SeeAlso: ``Command/select(_:_:)``
 public enum SelectParameter: Hashable, Sendable {
     /// A generic SELECT parameter (catch-all for extensions).
     ///

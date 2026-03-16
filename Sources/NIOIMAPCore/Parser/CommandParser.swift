@@ -105,7 +105,19 @@ public struct CommandParser: Parser, Sendable {
     }
 
     let parser: GrammarParser
-    let bufferLimit: Int
+
+    /// The maximum number of bytes that can be buffered at any time.
+    ///
+    /// When the parser accumulates more than this limit, an error is thrown.
+    /// This serves as DoS protection against malicious or malformed input.
+    /// Defaults to ``IMAPDefaults/lineLengthLimit`` (8192 bytes).
+    public let bufferLimit: Int
+
+    /// The maximum size of a single literal (data between `{size}` markers).
+    ///
+    /// This serves as DoS protection against excessively large literal data.
+    /// Defaults to ``IMAPDefaults/literalSizeLimit`` (4096 bytes).
+    public var literalSizeLimit: Int { parser.literalSizeLimit }
     private(set) var mode: Mode = .lines
     private var synchronisingLiteralParser = SynchronizingLiteralParser()
 

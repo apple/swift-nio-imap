@@ -31,7 +31,7 @@ import struct NIO.ByteBuffer
 /// ```
 ///
 /// The line `S: * ESEARCH (TAG "A001") UID COUNT 42 ALL 1,3,5,7,9,...` is wrapped as a
-/// ``ResponsePayload/extendedSearch(_:)`` containing this ``ExtendedSearchResponse``. The response
+/// ``ResponsePayload/mailboxData(_:)`` containing ``MailboxData/extendedSearch(_:)`` with this ``ExtendedSearchResponse``. The response
 /// indicates the search matched 42 messages (COUNT 42) and provides the UIDs of all matches
 /// (ALL 1,3,5,7,9,...) because UID was specified and RETURN (COUNT ALL) was requested.
 ///

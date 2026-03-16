@@ -29,13 +29,13 @@
 /// ```
 ///
 /// The date header value `Fri, 15 Mar 2026 10:30:45 +0100` can be represented as an
-/// ``InternetMessageDate``. Use `String(InternetMessageDate(...))` to retrieve the string value.
+/// ``InternetMessageDate``. Use ``Swift/String/init(_:)-(InternetMessageDate)`` to retrieve the string value.
 ///
 /// - SeeAlso: [RFC 2822 Section 3.3](https://datatracker.ietf.org/doc/html/rfc2822#section-3.3)
 public struct InternetMessageDate: Hashable, Sendable {
     var value: String
 
-    /// Creates a new `InternetMessageDate` from a given `String`.
+    /// Creates a new ``InternetMessageDate`` from a given ``Swift/String``.
     ///
     /// The string is stored as-is without parsing or validation. The caller is responsible
     /// for ensuring the string represents a valid RFC 2822 date format.
@@ -47,11 +47,11 @@ public struct InternetMessageDate: Hashable, Sendable {
 }
 
 extension String {
-    /// Creates a new `String` from an `InternetMessageDate`.
+    /// Creates a new ``Swift/String`` from an ``InternetMessageDate``.
     ///
     /// This extracts the underlying string value from the ``InternetMessageDate``.
     ///
-    /// - Parameter date: The `InternetMessageDate` to convert.
+    /// - Parameter date: The ``InternetMessageDate`` to convert.
     public init(_ date: InternetMessageDate) {
         self = date.value
     }
@@ -65,7 +65,7 @@ extension InternetMessageDate: ExpressibleByStringLiteral {
     /// let date: InternetMessageDate = “Fri, 15 Mar 2026 10:30:45 +0100”
     /// ```
     ///
-    /// - Parameter value: A `String` containing the RFC 2822 date value.
+    /// - Parameter value: A ``Swift/String`` containing the RFC 2822 date value.
     public init(stringLiteral value: String) {
         self.value = value
     }

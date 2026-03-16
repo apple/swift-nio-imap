@@ -32,7 +32,7 @@
 /// entries immediately below the specified entry.
 ///
 /// - SeeAlso: [RFC 5464 Section 4.4.2](https://datatracker.ietf.org/doc/html/rfc5464#section-4.4.2) (DEPTH Option)
-/// - SeeAlso: ``Command/getMetadata(_:options:)``
+/// - SeeAlso: ``Command/getMetadata(options:mailbox:entries:)``
 public struct ScopeOption: Hashable, Sendable {
     /// No child entries are included in results.
     ///

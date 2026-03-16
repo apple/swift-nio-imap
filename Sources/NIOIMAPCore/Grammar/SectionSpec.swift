@@ -44,7 +44,7 @@ public struct SectionSpecifier: Hashable, Sendable {
     /// Creates a new *complete* `SectionSpecifier`.
     ///
     /// Note that only certain `kind` values are valid, based on what kind of part `part` refers to.
-    /// See the documentation for ``SectionSpecifier.Kind`` for more details.
+    /// See the documentation for ``SectionSpecifier/Kind`` for more details.
     ///
     /// - parameter part: The part of the body. Can only be empty if `kind` is not `.MIMEHeader`.
     /// - parameter kind: The type of section, e.g. *HEADER*. Defaults to `.complete`.
