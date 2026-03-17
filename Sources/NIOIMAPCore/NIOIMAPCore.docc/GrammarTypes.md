@@ -16,9 +16,11 @@ Types representing mailbox names, paths, and properties.
 - ``MailboxPath``
 - ``MailboxInfo``
 - ``MailboxInfo/Attribute``
+- ``MailboxAttribute``
 - ``MailboxStatus``
 - ``MailboxID``
 - ``MailboxPatterns``
+- ``MailboxUIDValidity``
 
 ### Messages & UIDs
 
@@ -26,8 +28,14 @@ Types for identifying and tracking messages.
 
 - ``UID``
 - ``UIDValidity``
+- ``UIDRange``
+- ``UIDSet``
+- ``UIDSetNonEmpty``
 - ``SequenceNumber``
+- ``SequenceRange``
+- ``SequenceSet``
 - ``MessageIdentifier``
+- ``UnknownMessageIdentifier``
 - ``MessageIdentifierRange``
 - ``MessageIdentifierSet``
 - ``MessageIdentifierSetNonEmpty``
@@ -35,6 +43,7 @@ Types for identifying and tracking messages.
 - ``EmailID``
 - ``ThreadID``
 - ``LastCommandSet``
+- ``LastCommandMessageID``
 - ``IUID``
 
 ### Flags
@@ -45,6 +54,7 @@ Message flags and flag management.
 - ``Flag/Keyword``
 - ``PermanentFlag``
 - ``UseAttribute``
+- ``AttributeFlag``
 
 ### Body Structure
 
@@ -57,6 +67,7 @@ MIME body structure representation.
 - ``BodyStructure/Encoding``
 - ``BodyStructure/Disposition``
 - ``BodyExtension``
+- ``Media``
 
 ### Envelope & Addresses
 
@@ -65,8 +76,9 @@ Message envelope and email address information.
 - ``Envelope``
 - ``EmailAddress``
 - ``EmailAddressGroup``
+- ``EmailAddressListElement``
 
-### Dates
+### Dates & Times
 
 Date and time types used in IMAP messages.
 
@@ -74,6 +86,8 @@ Date and time types used in IMAP messages.
 - ``IMAPCalendarDay``
 - ``InternetMessageDate``
 - ``FullDateTime``
+- ``FullDate``
+- ``FullTime``
 
 ### Quota
 
@@ -90,27 +104,45 @@ Namespace description and negotiation.
 - ``NamespaceDescription``
 - ``NamespaceResponse``
 
-### Metadata
+### Metadata & Entries
 
 Metadata entry names, options, and values.
 
 - ``MetadataEntryName``
 - ``MetadataOption``
 - ``MetadataValue``
+- ``EntryFlagName``
+- ``EntryKindRequest``
+- ``EntryKindResponse``
 
-### URLs
+### URLs & IMAP Paths
 
 IMAP URL representation and components.
 
 - ``IMAPURL``
+- ``RelativeIMAPURL``
 - ``AuthenticatedURL``
 - ``FullAuthenticatedURL``
+- ``AuthenticatedURLRump``
+- ``AuthenticatedURLVerifier``
+- ``RumpAuthenticatedURL``
+- ``RumpURLAndMechanism``
 - ``IMAPServer``
-- ``MessagePath``
+- ``AbsoluteMessagePath``
+- ``NetworkMessagePath``
 - ``NetworkPath``
+- ``MessagePath``
 - ``EncodedMailbox``
 - ``EncodedSection``
+- ``EncodedAuthenticatedURL``
+- ``EncodedAuthenticationType``
+- ``EncodedUser``
+- ``EncodedSearch``
+- ``EncodedSearchQuery``
 - ``URLCommand``
+- ``URLMessageSection``
+- ``URLFetchData``
+- ``URLFetchType``
 
 ### Modification Sequences
 
@@ -120,6 +152,7 @@ Types for tracking and managing message modifications.
 - ``ChangedSinceModifier``
 - ``UnchangedSinceModifier``
 - ``SequenceMatchData``
+- ``SearchModificationSequence``
 
 ### Sections & Ranges
 
@@ -129,12 +162,49 @@ Message section and byte range specifications.
 - ``ByteRange``
 - ``PartialRange``
 
-### Other
+### Search & Notification
 
-Additional protocol types.
+Advanced search and notification filtering types.
 
+- ``MailboxFilter``
+- ``Mailboxes``
+- ``ScopeOption``
+
+### Authentication & SASL
+
+Authentication mechanisms and SASL-related types.
+
+- ``AuthenticationMechanism``
+- ``IMAPURLAuthenticationMechanism``
+- ``URLAuthenticationMechanism``
+- ``UserAuthenticationMechanism``
+- ``MechanismBase64``
+- ``InitialResponse``
+
+### Specialized Extensions
+
+Additional specialized types for protocol extensions.
+
+- ``CreateParameter``
+- ``SelectParameter``
+- ``QResyncParameter``
+- ``SynchronizedCommand``
+- ``Expire``
 - ``KeyValue``
 - ``GmailLabel``
 - ``PreviewText``
 - ``SortData``
 - ``SearchCorrelator``
+- ``OptionExtensionKind``
+- ``OptionValueComp``
+- ``ParameterValue``
+- ``Access``
+
+### Errors & Exceptions
+
+Error types for protocol violations and constraints.
+
+- ``InvalidUID``
+- ``InvalidMailboxNameError``
+- ``InvalidPathSeparatorError``
+- ``MailboxTooBigError``

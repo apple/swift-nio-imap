@@ -76,3 +76,11 @@ Parameters for selecting, examining, or creating mailboxes.
 - ``SelectParameter``
 - ``QResyncParameter``
 - ``CreateParameter``
+
+### Other Command Support Types
+
+Additional specialized types used in command processing.
+
+- ``CustomCommandPayload``
+- ``LastCommandMessageID``
+- ``SynchronizedCommand``
