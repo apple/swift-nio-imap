@@ -477,7 +477,7 @@ extension Capability {
     /// - SeeAlso: [RFC 5092](https://datatracker.ietf.org/doc/html/rfc5092)
     public static let partialURL = Self(unchecked: "URL-PARTIAL")
 
-    /// The `PARTIAL` capability indicates the server supports paged SEARCH and FETCH results.
+    /// The `PARTIAL` capability indicates the server supports paged `SEARCH` and `FETCH` results.
     ///
     /// - SeeAlso: [RFC 9394](https://datatracker.ietf.org/doc/html/rfc9394)
     public static let partial = Self(unchecked: "PARTIAL")

@@ -12,7 +12,7 @@
 //
 //===----------------------------------------------------------------------===//
 
-/// A reference modification sequence value used to filter FETCH results (RFC 7162 `CONDSTORE` extension).
+/// A reference modification sequence value used to filter `FETCH` results (RFC 7162 `CONDSTORE` extension).
 ///
 /// The `CHANGEDSINCE` modifier tells the server to return only messages that have been modified since
 /// a known modification sequence value. This allows clients to efficiently synchronize mailbox state by

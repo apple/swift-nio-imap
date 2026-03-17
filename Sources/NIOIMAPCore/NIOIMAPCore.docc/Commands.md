@@ -1,31 +1,47 @@
 # Commands
 
-Supporting types used when constructing and sending IMAP commands.
+The IMAP protocol is built on a command-response model where clients send tagged commands to perform operations, and servers respond with updates and status.
 
 ## Overview
 
-When composing IMAP commands, you use these types to specify what action to perform and with what parameters. They provide a type-safe API for building commands that the server can understand.
+When composing IMAP commands, you use these types to specify what action to perform and with what parameters. Commands can be simple (executed in a single round trip) or streaming (involving multiple message parts or continued data uploads).
+
+The ``Command`` enum includes 40+ cases covering:
+- **Authentication**: Login, AUTHENTICATE, STARTTLS
+- **Mailbox operations**: SELECT, CREATE, DELETE, RENAME, LIST, STATUS
+- **Message operations**: FETCH, STORE, COPY, MOVE, SEARCH
+- **Extensions**: IDLE, NAMESPACE, QUOTA, METADATA, and many others
+
+All commands are wrapped with a tag in ``TaggedCommand`` for request/response correlation, or streamed with lifecycle parts in ``CommandStreamPart``.
 
 ## Topics
 
-### Appending
+### Core Command Types
 
-Types for uploading messages to a mailbox.
+The fundamental types for sending commands to the server.
+
+- ``Command``
+- ``TaggedCommand``
+- ``CommandStreamPart``
+
+### Appending Messages
+
+Types for uploading messages to a mailbox with support for flags, dates, and streaming.
 
 - ``AppendMessage``
 - ``AppendOptions``
 - ``AppendData``
 
-### Fetching
+### Fetching Message Data
 
-Attributes and modifiers for retrieving message data.
+Attributes and modifiers for retrieving specific message data items.
 
 - ``FetchAttribute``
 - ``FetchModifier``
 
-### Searching
+### Searching Messages
 
-Keys and options for finding messages based on criteria.
+Search criteria and options for finding messages by various criteria.
 
 - ``SearchKey``
 - ``SearchReturnOption``
@@ -33,9 +49,9 @@ Keys and options for finding messages based on criteria.
 - ``ExtendedSearchScopeOptions``
 - ``ExtendedSearchSourceOptions``
 
-### Storing Flags
+### Storing Message Attributes
 
-Types for modifying message flags and attributes.
+Types for modifying message flags and other attributes.
 
 - ``StoreData``
 - ``StoreOperation``
@@ -43,9 +59,9 @@ Types for modifying message flags and attributes.
 - ``StoreGmailLabels``
 - ``StoreModifier``
 
-### Listing
+### Listing Mailboxes
 
-Options and parameters for listing mailboxes.
+Options and parameters for discovering and filtering available mailboxes.
 
 - ``ListSelectBaseOption``
 - ``ListSelectOption``
@@ -53,9 +69,9 @@ Options and parameters for listing mailboxes.
 - ``ListSelectOptions``
 - ``ReturnOption``
 
-### Mailbox Selection
+### Mailbox Selection and Creation
 
-Parameters used when selecting or creating mailboxes.
+Parameters for selecting, examining, or creating mailboxes.
 
 - ``SelectParameter``
 - ``QResyncParameter``
