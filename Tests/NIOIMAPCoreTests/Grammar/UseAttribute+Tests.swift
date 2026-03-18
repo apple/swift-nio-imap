@@ -46,10 +46,22 @@ struct UseAttributeTests {
         #expect(UseAttribute(MailboxInfo.Attribute(#"\All"#)).stringValue == #"\All"#)
     }
 
+    @Test(
+        "string conversion",
+        arguments: [
+            (UseAttribute.trash, "\\Trash"),
+            (UseAttribute("\\Custom"), "\\Custom"),
+        ] as [(UseAttribute, String)]
+    )
+    func stringConversion(_ fixture: (UseAttribute, String)) {
+        #expect(String(fixture.0) == fixture.1)
+    }
+
     @Test(arguments: [
         ParseFixture.useAttribute("\\All", "", expected: .success(.all)),
         ParseFixture.useAttribute("\\Archive", "", expected: .success(.archive)),
         ParseFixture.useAttribute("\\Flagged", "", expected: .success(.flagged)),
+        ParseFixture.useAttribute("\\Junk", "", expected: .success(.junk)),
         ParseFixture.useAttribute("\\Trash", "", expected: .success(.trash)),
         ParseFixture.useAttribute("\\Sent", "", expected: .success(.sent)),
         ParseFixture.useAttribute("\\Drafts", "", expected: .success(.drafts)),

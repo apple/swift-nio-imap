@@ -45,6 +45,7 @@ struct MessageIdentifierSetTests {
         ),
         ParseFixture.messageIdentifierSet("1:*", "\r\n", expected: .success(.all)),
         ParseFixture.messageIdentifierSet("a", " ", expected: .failure),
+        ParseFixture.messageIdentifierSet("0", "\r\n", expected: .failure),
         ParseFixture.messageIdentifierSet("1234", "", expected: .incompleteMessage),
         ParseFixture.messageIdentifierSet("", "", expected: .incompleteMessage),
     ])
@@ -97,6 +98,79 @@ struct MessageIdentifierSetTests {
         #expect(UIDSet.all.suffix(0) == UIDSet())
         #expect(UIDSet.all.suffix(1) == UIDSet([4_294_967_295]))
         #expect(UIDSet.all.suffix(2) == UIDSet([4_294_967_294...4_294_967_295]))
+    }
+
+    @Test("RangeView array literal initializer")
+    func rangeViewArrayLiteral() {
+        let rv: MessageIdentifierSet<UID>.RangeView = [MessageIdentifierRange<UID>(1...5)]
+        let set = UIDSet([1...5])
+        #expect(rv == set.ranges)
+    }
+
+    @Test("RangeView equality")
+    func rangeViewEquality() {
+        let set1 = UIDSet([1...5, 10...15])
+        let set2 = UIDSet([1...5, 10...15])
+        let set3 = UIDSet([1...5])
+        #expect(set1.ranges == set2.ranges)
+        #expect(set1.ranges != set3.ranges)
+    }
+
+    @Test("init from ClosedRange")
+    func initFromClosedRange() {
+        let set = MessageIdentifierSet<UID>(1...10 as ClosedRange<UID>)
+        #expect(set == UIDSet([1...10]))
+    }
+
+    @Test("init from PartialRangeThrough")
+    func initFromPartialRangeThrough() {
+        let set = MessageIdentifierSet<UID>(...10 as PartialRangeThrough<UID>)
+        #expect(set == UIDSet([1...10]))
+    }
+
+    @Test("init from PartialRangeFrom")
+    func initFromPartialRangeFrom() {
+        let set = MessageIdentifierSet<UID>(1... as PartialRangeFrom<UID>)
+        #expect(set.contains(1))
+        #expect(set.contains(UID(rawValue: 4_294_967_295)))
+    }
+
+    @Test(
+        "init from Range",
+        arguments: [
+            (1..<1 as Range<UID>, UIDSet()),
+            (1..<5 as Range<UID>, UIDSet([1...4])),
+        ] as [(Range<UID>, UIDSet)]
+    )
+    func initFromRange(_ fixture: (Range<UID>, UIDSet)) {
+        #expect(MessageIdentifierSet<UID>(fixture.0) == fixture.1)
+    }
+
+    @Test("Index comparison operators")
+    func indexComparison() {
+        let set = UIDSet([1...3, 10...12])
+        let indices = Array(set.indices)
+        // indices[0] < indices[1] < indices[2] < indices[3] etc.
+        #expect(indices[0] < indices[1])
+        #expect(indices[1] > indices[0])
+        #expect(!(indices[0] > indices[1]))
+        // Compare across range boundaries
+        #expect(indices[2] < indices[3])
+        #expect(indices[3] > indices[2])
+    }
+
+    @Test("convert UnknownMessageIdentifier from UID set")
+    func convertUnknownFromUID() {
+        let uidSet: MessageIdentifierSet<UID> = [1...5, 10...15]
+        let unknown = MessageIdentifierSet<UnknownMessageIdentifier>(uidSet)
+        #expect(unknown == [1...5, 10...15])
+    }
+
+    @Test("convert UnknownMessageIdentifier from SequenceNumber set")
+    func convertUnknownFromSequenceNumber() {
+        let seqSet: MessageIdentifierSet<SequenceNumber> = [1...5, 10...15]
+        let unknown = MessageIdentifierSet<UnknownMessageIdentifier>(seqSet)
+        #expect(unknown == [1...5, 10...15])
     }
 }
 

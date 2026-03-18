@@ -27,6 +27,12 @@ struct FlagKeywordTests {
         #expect(Flag.Keyword("a") != Flag.Keyword("b"))
     }
 
+    @Test("debug description")
+    func debugDescription() {
+        #expect(Flag.Keyword.forwarded.debugDescription == "$Forwarded")
+        #expect(Flag.Keyword.junk.debugDescription == "$Junk")
+    }
+
     @Test(arguments: [
         EncodeFixture.flagKeyword(
             .forwarded,
@@ -77,9 +83,12 @@ struct FlagKeywordTests {
         fixture.checkEncoding()
     }
 
-    @Test(arguments: [
-        ParseFixture.flagKeyword("keyword", expected: .success(Flag.Keyword("keyword")!))
-    ])
+    @Test(
+        "parse",
+        arguments: [
+            ParseFixture.flagKeyword("keyword", expected: .success(Flag.Keyword("keyword")!))
+        ]
+    )
     func parse(_ fixture: ParseFixture<Flag.Keyword>) {
         fixture.checkParsing()
     }

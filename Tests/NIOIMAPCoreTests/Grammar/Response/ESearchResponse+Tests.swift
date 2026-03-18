@@ -40,6 +40,15 @@ struct ExtendedSearchResponseTests {
             ExtendedSearchResponse(kind: .uid, returnData: [.partial(.last(34...10_000), [99...107, 200])]).matchedUIDs
                 == [99...107, 200]
         )
+        // Exercise the guard-else branch in the .partial fallback: non-partial elements
+        // precede the .partial element, so the guard fails for those elements first.
+        #expect(
+            ExtendedSearchResponse(
+                kind: .uid,
+                returnData: [.count(5), .partial(.last(34...10_000), [99...107, 200])]
+            ).matchedUIDs
+                == [99...107, 200]
+        )
         #expect(
             ExtendedSearchResponse(
                 kind: .uid,

@@ -35,6 +35,28 @@ struct OptionExtensionTests {
     func encode(_ fixture: EncodeFixture<KeyValue<OptionExtensionKind, OptionValueComp?>>) {
         fixture.checkEncoding()
     }
+
+    @Test(arguments: [
+        ParseFixture.optionExtension(
+            "MYEXT",
+            ")",
+            expected: .success(.init(key: .standard("MYEXT"), value: nil))
+        ),
+        ParseFixture.optionExtension(
+            "MYEXT (\"val\")",
+            ")",
+            expected: .success(.init(key: .standard("MYEXT"), value: .string("val")))
+        ),
+        ParseFixture.optionExtension(
+            "ACME-SORT",
+            ")",
+            expected: .success(.init(key: .standard("ACME-SORT"), value: nil))
+        ),
+        ParseFixture.optionExtension("", "", expected: .incompleteMessage),
+    ])
+    func parse(_ fixture: ParseFixture<KeyValue<OptionExtensionKind, OptionValueComp?>>) {
+        fixture.checkParsing()
+    }
 }
 
 // MARK: -
@@ -49,6 +71,21 @@ extension EncodeFixture<KeyValue<OptionExtensionKind, OptionValueComp?>> {
             bufferKind: .defaultServer,
             expectedString: expectedString,
             encoder: { $0.writeOptionExtension($1) }
+        )
+    }
+}
+
+extension ParseFixture<KeyValue<OptionExtensionKind, OptionValueComp?>> {
+    fileprivate static func optionExtension(
+        _ input: String,
+        _ terminator: String = ")",
+        expected: Expected
+    ) -> Self {
+        ParseFixture(
+            input: input,
+            terminator: terminator,
+            expected: expected,
+            parser: GrammarParser().parseOptionExtension
         )
     }
 }

@@ -39,6 +39,10 @@ public struct MailboxInfo: Hashable, Sendable {
     ///
     /// Attributes indicate whether the mailbox is selectable, has children, is remote, etc.
     /// See ``Attribute`` for the standard attribute types.
+    ///
+    /// Note: Servers may omit attributes that can be inferred from other returned attributes.
+    /// Use ``hasEffectiveAttribute(_:)`` to check for an attribute while accounting for
+    /// inference rules per RFC 9051 §6.3.9.4.
     public var attributes: [Attribute]
 
     /// The hierarchical path to this mailbox, including its name and optional separator.
@@ -165,6 +169,23 @@ extension MailboxInfo {
         public func hash(into hasher: inout Hasher) {
             self.backing.lowercased().hash(into: &hasher)
         }
+
+        /// Returns whether this attribute implies another attribute per RFC 9051 §6.3.9.4.
+        ///
+        /// The following inference rules are defined:
+        ///
+        /// | Returned Attribute | Implied Attribute |
+        /// |--------------------|-------------------|
+        /// | `\NoInferiors`     | `\HasNoChildren`  |
+        /// | `\NonExistent`     | `\NoSelect`       |
+        public func implies(_ other: Self) -> Bool {
+            switch (self, other) {
+            case (.noInferiors, .hasNoChildren), (.nonExistent, .noSelect):
+                true
+            default:
+                false
+            }
+        }
     }
 }
 
@@ -175,6 +196,36 @@ extension String {
     /// for consistency with IMAP's case-insensitive attribute names.
     public init(_ other: MailboxInfo.Attribute) {
         self = other.backing
+    }
+}
+
+extension Sequence where Element == MailboxInfo.Attribute {
+    /// Returns whether this sequence contains a given attribute either directly or by implication,
+    /// per RFC 9051 §6.3.9.4.
+    ///
+    /// The following inference rules are defined:
+    ///
+    /// | Returned Attribute | Implied Attribute |
+    /// |--------------------|-------------------|
+    /// | `\NoInferiors`     | `\HasNoChildren`  |
+    /// | `\NonExistent`     | `\NoSelect`       |
+    public func containsEffective(_ attribute: MailboxInfo.Attribute) -> Bool {
+        contains { $0 == attribute || $0.implies(attribute) }
+    }
+}
+
+extension MailboxInfo {
+    /// Returns whether this mailbox's attributes include a given attribute either directly
+    /// or by implication, per RFC 9051 §6.3.9.4.
+    ///
+    /// The following inference rules are defined:
+    ///
+    /// | Returned Attribute | Implied Attribute |
+    /// |--------------------|-------------------|
+    /// | `\NoInferiors`     | `\HasNoChildren`  |
+    /// | `\NonExistent`     | `\NoSelect`       |
+    public func hasEffectiveAttribute(_ attribute: Attribute) -> Bool {
+        attributes.containsEffective(attribute)
     }
 }
 

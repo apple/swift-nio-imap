@@ -18,11 +18,19 @@ import Testing
 
 @Suite("InternetMessageDate")
 struct InternetMessageDateTests {
-    @Test(arguments: [
-        EncodeFixture.internetMessageDate(.init("test"), "test")
-    ])
+    @Test(
+        "encode",
+        arguments: [
+            EncodeFixture.internetMessageDate(.init("test"), "test")
+        ]
+    )
     func encode(_ fixture: EncodeFixture<InternetMessageDate>) {
         fixture.checkEncoding()
+    }
+
+    @Test("string conversion")
+    func stringConversion() {
+        #expect(String(InternetMessageDate("Mon, 01 Jan 2024 00:00:00 +0000")) == "Mon, 01 Jan 2024 00:00:00 +0000")
     }
 }
 

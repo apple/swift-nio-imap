@@ -284,6 +284,64 @@ private struct CommandStreamTests {
     func descriptionWithoutPII(_ fixture: PIIFixture) {
         #expect(CommandStreamPart.descriptionWithoutPII([fixture.input]) == fixture.expected)
     }
+
+    @Test(
+        "AppendCommand tag",
+        arguments: [
+            (AppendCommand.start(tag: "A1", appendingTo: .inbox), "A1"),
+            (AppendCommand.beginMessage(message: .init(options: .none, data: .init(byteCount: 5))), nil),
+            (AppendCommand.messageBytes("data"), nil),
+            (AppendCommand.endMessage, nil),
+            (AppendCommand.beginCatenate(options: .none), nil),
+            (AppendCommand.catenateURL("/mailbox"), nil),
+            (AppendCommand.catenateData(.begin(size: 3)), nil),
+            (AppendCommand.catenateData(.bytes("abc")), nil),
+            (AppendCommand.catenateData(.end), nil),
+            (AppendCommand.endCatenate, nil),
+            (AppendCommand.finish, nil),
+        ] as [(AppendCommand, String?)]
+    )
+    func appendCommandTag(_ fixture: (AppendCommand, String?)) {
+        #expect(fixture.0.tag == fixture.1)
+    }
+
+    @Test(
+        "CommandStreamPart tag",
+        arguments: [
+            (CommandStreamPart.idleDone, nil),
+            (CommandStreamPart.tagged(.init(tag: "B2", command: .noop)), "B2"),
+            (CommandStreamPart.append(.start(tag: "C3", appendingTo: .inbox)), "C3"),
+            (CommandStreamPart.append(.finish), nil),
+            (CommandStreamPart.continuationResponse("data"), nil),
+        ] as [(CommandStreamPart, String?)]
+    )
+    func commandStreamPartTag(_ fixture: (CommandStreamPart, String?)) {
+        #expect(fixture.0.tag == fixture.1)
+    }
+
+    @Test("CommandStreamPart debugDescription")
+    func commandStreamPartDebugDescription() {
+        let part = CommandStreamPart.tagged(.init(tag: "1", command: .noop))
+        let desc = part.debugDescription
+        #expect(desc == "1 NOOP\r\n")
+    }
+
+    @Test("writeAppendCommand in loggingMode for messageBytes")
+    func writeAppendCommandLoggingModeMessageBytes() {
+        var buffer = CommandEncodeBuffer(buffer: "", capabilities: [], loggingMode: true)
+        let count = buffer.writeCommandStream(.append(.messageBytes("hello")))
+        #expect(count == 0)
+        #expect(String(buffer: buffer.buffer.nextChunk().bytes) == "")
+    }
+
+    @Test("writeAppendCommand in loggingMode for endMessage")
+    func writeAppendCommandLoggingModeEndMessage() {
+        var buffer = CommandEncodeBuffer(buffer: "", capabilities: [], loggingMode: true)
+        let count = buffer.writeCommandStream(.append(.endMessage))
+        #expect(count > 0)
+        let chunk = buffer.buffer.nextChunk()
+        #expect(String(buffer: chunk.bytes) == "∅")
+    }
 }
 
 // MARK: -

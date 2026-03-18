@@ -136,6 +136,62 @@ private struct MailboxPathTests {
         }
     }
 
+    @Test("init with non-ASCII path separator throws InvalidPathSeparatorError")
+    func initWithNonASCIIPathSeparatorThrows() {
+        #expect(throws: InvalidPathSeparatorError.self) {
+            try MailboxPath(name: .init("box"), pathSeparator: "\u{00A3}")
+        }
+    }
+
+    @Test("validateUTF8String with valid UTF-8")
+    func validateUTF8StringValid() {
+        let path = try! MailboxPath(name: .inbox)
+        let validBytes = ByteBuffer(string: "hello")
+        #expect(path.validateUTF8String(validBytes) == "hello")
+    }
+
+    @Test("validateUTF8String with invalid UTF-8 returns nil")
+    func validateUTF8StringInvalid() {
+        let path = try! MailboxPath(name: .inbox)
+        var invalidBytes = ByteBuffer()
+        invalidBytes.writeBytes([0x80, 0xFF])
+        #expect(path.validateUTF8String(invalidBytes) == nil)
+    }
+
+    @Test("displayStringComponents with no path separator returns full name")
+    func displayStringComponentsNilPathSeparator() {
+        let path = try! MailboxPath(name: .init("INBOX"))
+        let components = path.displayStringComponents()
+        #expect(components == ["INBOX"])
+    }
+
+    @Test("decodeBufferToString falls back on invalid modified UTF-7")
+    func decodeBufferToStringFallback() {
+        // "&AQID-" in modified UTF-7 decodes base64 "AQID" → 3 bytes (odd count) → throws
+        // The catch falls back to UTF-8 interpretation of the original bytes
+        let path = try! MailboxPath(
+            name: MailboxName(ByteBuffer(string: "box/&AQID-/sub")),
+            pathSeparator: "/"
+        )
+        let components = path.displayStringComponents()
+        #expect(components == ["box", "&AQID-", "sub"])
+    }
+
+    @Test("makeRootMailbox throws when name contains separator")
+    func makeRootMailboxThrowsWhenNameContainsSeparator() {
+        #expect(throws: InvalidMailboxNameError.self) {
+            try MailboxPath.makeRootMailbox(displayName: "box/subbox", pathSeparator: "/")
+        }
+    }
+
+    @Test("makeSubMailbox throws when display name contains separator")
+    func makeSubMailboxThrowsWhenNameContainsSeparator() {
+        let path = try! MailboxPath(name: .init("INBOX"), pathSeparator: "/")
+        #expect(throws: InvalidMailboxNameError.self) {
+            try path.makeSubMailbox(displayName: "sub/folder")
+        }
+    }
+
     @Test(
         "custom debug string convertible",
         arguments: [

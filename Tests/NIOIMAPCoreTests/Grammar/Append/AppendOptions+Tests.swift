@@ -45,6 +45,18 @@ struct AppendOptionsTests {
             ),
             " (\\Answered) \"25-Jun-1994 01:02:03 +0000\""
         ),
+        EncodeFixture.appendOptions(
+            .init(flagList: [], internalDate: nil, extensions: ["name1": .sequence(.range(1...2))]),
+            " name1 1:2"
+        ),
+        EncodeFixture.appendOptions(
+            .init(
+                flagList: [],
+                internalDate: nil,
+                extensions: ["name1": .sequence(.range(1...2)), "name2": .sequence(.range(2...3))]
+            ),
+            " name1 1:2 name2 2:3"
+        ),
     ])
     func encode(_ fixture: EncodeFixture<AppendOptions>) {
         fixture.checkEncoding()

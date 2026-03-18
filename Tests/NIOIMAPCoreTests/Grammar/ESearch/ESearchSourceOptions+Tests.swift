@@ -18,6 +18,19 @@ import Testing
 
 @Suite("ExtendedSearchSourceOptions")
 struct ExtendedSearchSourceOptionsTests {
+    @Test(
+        "failable init",
+        arguments: [
+            ([] as [MailboxFilter], false),
+            ([.inboxes] as [MailboxFilter], true),
+        ] as [([MailboxFilter], Bool)]
+    )
+    func failableInit(_ fixture: ([MailboxFilter], Bool)) {
+        let (sourceMailbox, shouldSucceed) = fixture
+        let result = ExtendedSearchSourceOptions(sourceMailbox: sourceMailbox)
+        #expect((result != nil) == shouldSucceed)
+    }
+
     @Test(arguments: [
         EncodeFixture.extendedSearchSourceOptions(
             ExtendedSearchSourceOptions(sourceMailbox: [.inboxes])!,
@@ -42,33 +55,36 @@ struct ExtendedSearchSourceOptionsTests {
         fixture.checkEncoding()
     }
 
-    @Test(arguments: [
-        ParseFixture.extendedSearchSourceOptions(
-            "IN (inboxes)",
-            expected: .success(ExtendedSearchSourceOptions(sourceMailbox: [.inboxes])!)
-        ),
-        ParseFixture.extendedSearchSourceOptions(
-            "IN (inboxes personal)",
-            expected: .success(ExtendedSearchSourceOptions(sourceMailbox: [.inboxes, .personal])!)
-        ),
-        ParseFixture.extendedSearchSourceOptions(
-            "IN (inboxes (name))",
-            expected: .success(
-                ExtendedSearchSourceOptions(
-                    sourceMailbox: [.inboxes],
-                    scopeOptions: ExtendedSearchScopeOptions(["name": nil])!
-                )!
-            )
-        ),
-        ParseFixture.extendedSearchSourceOptions("IN (inboxes ())", expected: .failure),
-        ParseFixture.extendedSearchSourceOptions("IN ((name))", expected: .failure),
-        ParseFixture.extendedSearchSourceOptions("IN (inboxes (name)", expected: .failure),
-        ParseFixture.extendedSearchSourceOptions("IN (inboxes (name", expected: .failure),
-        ParseFixture.extendedSearchSourceOptions("IN (inboxes (", expected: .failure),
-        ParseFixture.extendedSearchSourceOptions("IN (inboxes )", expected: .failure),
-        ParseFixture.extendedSearchSourceOptions("IN (", expected: .failure),
-        ParseFixture.extendedSearchSourceOptions("IN", expected: .failure),
-    ])
+    @Test(
+        "parse extended search source options",
+        arguments: [
+            ParseFixture.extendedSearchSourceOptions(
+                "IN (inboxes)",
+                expected: .success(ExtendedSearchSourceOptions(sourceMailbox: [.inboxes])!)
+            ),
+            ParseFixture.extendedSearchSourceOptions(
+                "IN (inboxes personal)",
+                expected: .success(ExtendedSearchSourceOptions(sourceMailbox: [.inboxes, .personal])!)
+            ),
+            ParseFixture.extendedSearchSourceOptions(
+                "IN (inboxes (name))",
+                expected: .success(
+                    ExtendedSearchSourceOptions(
+                        sourceMailbox: [.inboxes],
+                        scopeOptions: ExtendedSearchScopeOptions(["name": nil])!
+                    )!
+                )
+            ),
+            ParseFixture.extendedSearchSourceOptions("IN (inboxes ())", expected: .failure),
+            ParseFixture.extendedSearchSourceOptions("IN ((name))", expected: .failure),
+            ParseFixture.extendedSearchSourceOptions("IN (inboxes (name)", expected: .failure),
+            ParseFixture.extendedSearchSourceOptions("IN (inboxes (name", expected: .failure),
+            ParseFixture.extendedSearchSourceOptions("IN (inboxes (", expected: .failure),
+            ParseFixture.extendedSearchSourceOptions("IN (inboxes )", expected: .failure),
+            ParseFixture.extendedSearchSourceOptions("IN (", expected: .failure),
+            ParseFixture.extendedSearchSourceOptions("IN", expected: .failure),
+        ]
+    )
     func parseExtendedSearchSourceOptions(_ fixture: ParseFixture<ExtendedSearchSourceOptions>) {
         fixture.checkParsing()
     }

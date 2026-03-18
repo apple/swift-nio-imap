@@ -87,6 +87,10 @@ struct SelectParameterTests {
             expected: .success(.basic(.init(key: "test", value: .sequence(.set([1])))))
         ),
         ParseFixture.selectParameter(
+            "CONDSTORE",
+            expected: .success(.condStore)
+        ),
+        ParseFixture.selectParameter(
             "QRESYNC (1 1)",
             expected: .success(
                 .qresync(.init(uidValidity: 1, modificationSequenceValue: 1, knownUIDs: nil, sequenceMatchData: nil))

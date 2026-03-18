@@ -71,6 +71,11 @@ struct SearchReturnDataTests {
                 "PARTIAL (-55:-700 NIL)",
                 expected: .success(.partial(.last(55...700), []))
             ),
+            // $ (last-command-set) is invalid as a PARTIAL result set — triggers guard failure
+            ParseFixture.searchReturnDataPartial(
+                "PARTIAL (1:3 $)",
+                expected: .failureIgnoringBufferModifications
+            ),
         ]
     )
     func parsePartial(_ fixture: ParseFixture<SearchReturnData>) {

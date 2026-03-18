@@ -52,10 +52,26 @@ struct UserAuthenticationMechanismTests {
             " ",
             expected: .success(.init(encodedUser: .init(data: "test"), authenticationMechanism: .any))
         ),
+        ParseFixture.userAuthenticationMechanism(
+            "@localhost",
+            " ",
+            expected: .failureIgnoringBufferModifications
+        ),
     ])
     func parse(_ fixture: ParseFixture<UserAuthenticationMechanism>) {
         fixture.checkParsing()
     }
+
+    #if swift(>=6.2)
+    @Test("both nil arguments triggers precondition failure") func bothNilPreconditionFailure() async {
+        await #expect(
+            processExitsWith: ExitTest.Condition.failure,
+            performing: {
+                _ = UserAuthenticationMechanism(encodedUser: nil, authenticationMechanism: nil)
+            }
+        )
+    }
+    #endif
 }
 
 // MARK: -

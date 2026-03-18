@@ -34,6 +34,8 @@ struct FetchAttributeTests {
         EncodeFixture.fetchAttribute(.binarySize(section: [1]), "BINARY.SIZE[1]"),
         EncodeFixture.fetchAttribute(.binary(peek: true, section: [1, 2, 3], partial: nil), "BINARY.PEEK[1.2.3]"),
         EncodeFixture.fetchAttribute(.binary(peek: false, section: [3, 4, 5], partial: nil), "BINARY[3.4.5]"),
+        EncodeFixture.fetchAttribute(.binary(peek: false, section: [1], partial: 3...6), "BINARY[1]<3.4>"),
+        EncodeFixture.fetchAttribute(.binary(peek: true, section: [2], partial: 4...8), "BINARY.PEEK[2]<4.5>"),
         EncodeFixture.fetchAttribute(.modificationSequenceValue(.zero), "0"),
         EncodeFixture.fetchAttribute(.modificationSequenceValue(3), "3"),
         EncodeFixture.fetchAttribute(.modificationSequence, "MODSEQ"),
@@ -200,6 +202,9 @@ struct FetchAttributeTests {
         ParseFixture.fetchAttribute("PREVIEW (LAZY)", " ", expected: .success(.preview(lazy: true))),
         ParseFixture.fetchAttribute("EMAILID", " ", expected: .success(.emailID)),
         ParseFixture.fetchAttribute("THREADID", " ", expected: .success(.threadID)),
+        // Numeric inputs fall back to parseFetchAttribute_modificationSequence
+        ParseFixture.fetchAttribute("0", " ", expected: .success(.modificationSequenceValue(.zero))),
+        ParseFixture.fetchAttribute("42", " ", expected: .success(.modificationSequenceValue(42))),
     ])
     func parse(_ fixture: ParseFixture<FetchAttribute>) {
         fixture.checkParsing()
@@ -225,6 +230,7 @@ struct FetchAttributeTests {
             ParseFixture.partial("<2.4294967294>", expected: .failure),
             ParseFixture.partial("<4294967000.4294967000>", expected: .failure),
             ParseFixture.partial("<2200000000.2200000000>", expected: .failure),
+            ParseFixture.partial("<0.4294967296>", expected: .failure),
             ParseFixture.partial("<", "", expected: .incompleteMessage),
             ParseFixture.partial("<111111111", "", expected: .incompleteMessage),
             ParseFixture.partial("<1.", "", expected: .incompleteMessage),

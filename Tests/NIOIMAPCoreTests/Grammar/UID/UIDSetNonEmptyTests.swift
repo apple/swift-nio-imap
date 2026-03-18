@@ -28,6 +28,29 @@ extension UIDSetNonEmptyTests {
         )
     }
 
+    @Test("init with empty set returns nil")
+    func initWithEmptySetReturnsNil() {
+        #expect(MessageIdentifierSetNonEmpty<UID>(set: MessageIdentifierSet<UID>()) == nil)
+    }
+
+    @Test("init unknown converts to typed set")
+    func initUnknownConvertsToTypedSet() {
+        let unknown = MessageIdentifierSetNonEmpty<UnknownMessageIdentifier>(set: MessageIdentifierSet([1...5]))!
+        let uids = MessageIdentifierSetNonEmpty<UID>(unknown: unknown)
+        #expect(uids.set == MessageIdentifierSet<UID>([1...5]))
+    }
+
+    #if swift(>=6.2)
+    @Test("empty array literal triggers precondition failure") func emptyArrayLiteralPreconditionFailure() async {
+        await #expect(
+            processExitsWith: ExitTest.Condition.failure,
+            performing: {
+                let _: MessageIdentifierSetNonEmpty<UID> = []
+            }
+        )
+    }
+    #endif
+
     @Test("init with range")
     func initWithRange() {
         #expect(

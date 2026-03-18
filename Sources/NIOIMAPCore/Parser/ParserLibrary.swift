@@ -25,13 +25,43 @@ typealias SubParser<T> = (inout ParseBuffer, StackTracker) throws -> T
 
 internal struct ParseBuffer: Hashable {
     fileprivate var bytes: ByteBuffer
+    /// Last newline parsed by `parseNewline()`
+    fileprivate(set) internal var lastParsedNewline: Newline?
 
     internal init(_ bytes: ByteBuffer) {
         self.bytes = bytes
+        self.lastParsedNewline = nil
     }
 
     internal var readableBytes: Int {
         self.bytes.readableBytes
+    }
+}
+
+extension ParseBuffer {
+    /// Line ending kind
+    enum Newline: Sendable, Hashable {
+        case crlf
+        case cr
+        case lf
+    }
+
+    enum SkipLFResult: Hashable, Sendable {
+        case didSkip
+        case none
+    }
+
+    /// Skip an `LF` if it's the first byte in the buffer.
+    mutating func skipLF() -> SkipLFResult {
+        guard
+            let first = bytes.getInteger(
+                at: bytes.readerIndex,
+                as: UInt8.self
+            ),
+            first == UInt8(ascii: "\n")
+        else { return .none }
+        bytes.moveReaderIndex(forwardBy: 1)
+        return .didSkip
     }
 }
 
@@ -438,38 +468,54 @@ extension ParserLibrary {
         }
     }
 
-    static func parseNewline(buffer: inout ParseBuffer, tracker: StackTracker) throws {
-        switch buffer.bytes.getInteger(at: buffer.bytes.readerIndex, as: UInt16.self) {
-        case .some(UInt16(0x0D0A)):  // CRLF
-            // fast path: we find CRLF
-            buffer.bytes.moveReaderIndex(forwardBy: 2)
-            return
-        case .some(let x) where (UInt8(x >> 8) == UInt8(ascii: "\n") || UInt8(x >> 8) == UInt8(ascii: "\r")):
-            // other fast path: we find LF + some other byte
-            buffer.bytes.moveReaderIndex(forwardBy: 1)
-            return
-        case .some(let x) where UInt8(x >> 8) == UInt8(ascii: " "):
-            // found a space that we’ll skip. Some servers insert an extra space at the end.
-            try PL.composite(buffer: &buffer, tracker: tracker) { buffer, tracker in
+    @discardableResult
+    static func parseNewline(
+        buffer: inout ParseBuffer,
+        tracker: StackTracker
+    ) throws -> ParseBuffer.Newline {
+        func _parseNewline() throws -> ParseBuffer.Newline {
+            switch buffer.bytes.getInteger(at: buffer.bytes.readerIndex, as: UInt16.self) {
+            case .some(UInt16(0x0D0A)):  // CRLF
+                // fast path: we find CRLF
+                buffer.bytes.moveReaderIndex(forwardBy: 2)
+                return .crlf
+            case .some(let x) where UInt8(x >> 8) == UInt8(ascii: "\n"):
+                // other fast path: we find LF + some other byte
                 buffer.bytes.moveReaderIndex(forwardBy: 1)
-                try PL.parseNewline(buffer: &buffer, tracker: tracker)
-            }
-        case .none:
-            guard let first = buffer.bytes.getInteger(at: buffer.bytes.readerIndex, as: UInt8.self) else {
-                throw IncompleteMessage()
-            }
-            switch first {
-            case UInt8(ascii: "\n"), UInt8(ascii: "\r"):
+                return .lf
+            case .some(let x) where UInt8(x >> 8) == UInt8(ascii: "\r"):
+                // CR followed by some other byte
                 buffer.bytes.moveReaderIndex(forwardBy: 1)
-                return
+                return .cr
+            case .some(let x) where UInt8(x >> 8) == UInt8(ascii: " "):
+                // found a space that we’ll skip. Some servers insert an extra space at the end.
+                return try PL.composite(buffer: &buffer, tracker: tracker) { buffer, tracker in
+                    buffer.bytes.moveReaderIndex(forwardBy: 1)
+                    return try PL.parseNewline(buffer: &buffer, tracker: tracker)
+                }
+            case .none:
+                guard let first = buffer.bytes.getInteger(at: buffer.bytes.readerIndex, as: UInt8.self) else {
+                    throw IncompleteMessage()
+                }
+                switch first {
+                case UInt8(ascii: "\n"):
+                    buffer.bytes.moveReaderIndex(forwardBy: 1)
+                    return .lf
+                case UInt8(ascii: "\r"):
+                    buffer.bytes.moveReaderIndex(forwardBy: 1)
+                    return .cr
+                default:
+                    // found only one byte which is neither CR nor LF.
+                    throw ParserError()
+                }
             default:
-                // found only one byte which is neither CR nor LF.
+                // found two bytes but they’re neither CRLF, nor start with a NL.
                 throw ParserError()
             }
-        default:
-            // found two bytes but they're neither CRLF, nor start with a NL.
-            throw ParserError()
         }
+        let result = try _parseNewline()
+        buffer.lastParsedNewline = result
+        return result
     }
 
     static func parseByte(buffer: inout ParseBuffer, tracker: StackTracker) throws -> UInt8 {

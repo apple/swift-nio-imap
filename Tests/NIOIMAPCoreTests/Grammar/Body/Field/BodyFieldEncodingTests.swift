@@ -18,28 +18,60 @@ import Testing
 
 @Suite("BodyStructure.Encoding")
 struct BodyFieldEncodingTests {
-    @Test(arguments: [
-        EncodeFixture.bodyEncoding(.sevenBit, #""7BIT""#),
-        EncodeFixture.bodyEncoding(.eightBit, #""8BIT""#),
-        EncodeFixture.bodyEncoding(.binary, #""BINARY""#),
-        EncodeFixture.bodyEncoding(.base64, #""BASE64""#),
-        EncodeFixture.bodyEncoding(.quotedPrintable, #""QUOTED-PRINTABLE""#),
-        EncodeFixture.bodyEncoding(.init("some"), "\"SOME\""),
-    ])
+    @Test(
+        "encoding",
+        arguments: [
+            EncodeFixture.bodyEncoding(.sevenBit, #""7BIT""#),
+            EncodeFixture.bodyEncoding(.eightBit, #""8BIT""#),
+            EncodeFixture.bodyEncoding(.binary, #""BINARY""#),
+            EncodeFixture.bodyEncoding(.base64, #""BASE64""#),
+            EncodeFixture.bodyEncoding(.quotedPrintable, #""QUOTED-PRINTABLE""#),
+            EncodeFixture.bodyEncoding(.init("some"), "\"SOME\""),
+        ]
+    )
     func encoding(_ fixture: EncodeFixture<BodyStructure.Encoding>) {
         fixture.checkEncoding()
     }
 
-    @Test(arguments: [
-        ParseFixture.bodyEncoding(#""BASE64""#, expected: .success(.base64)),
-        ParseFixture.bodyEncoding(#""BINARY""#, expected: .success(.binary)),
-        ParseFixture.bodyEncoding(#""7BIT""#, expected: .success(.sevenBit)),
-        ParseFixture.bodyEncoding(#""8BIT""#, expected: .success(.eightBit)),
-        ParseFixture.bodyEncoding(#""QUOTED-PRINTABLE""#, expected: .success(.quotedPrintable)),
-        ParseFixture.bodyEncoding(#""other""#, expected: .success(.init("other"))),
-    ])
+    @Test(
+        "parse",
+        arguments: [
+            ParseFixture.bodyEncoding(#""BASE64""#, expected: .success(.base64)),
+            ParseFixture.bodyEncoding(#""BINARY""#, expected: .success(.binary)),
+            ParseFixture.bodyEncoding(#""7BIT""#, expected: .success(.sevenBit)),
+            ParseFixture.bodyEncoding(#""8BIT""#, expected: .success(.eightBit)),
+            ParseFixture.bodyEncoding(#""QUOTED-PRINTABLE""#, expected: .success(.quotedPrintable)),
+            ParseFixture.bodyEncoding(#""other""#, expected: .success(.init("other"))),
+        ]
+    )
     func parse(_ fixture: ParseFixture<BodyStructure.Encoding?>) {
         fixture.checkParsing()
+    }
+
+    @Test("nil encoding encodes as NIL")
+    func nilEncodingEncodesAsNIL() {
+        let expected = "NIL"
+        var buffer = EncodeBuffer.serverEncodeBuffer(
+            buffer: ByteBufferAllocator().buffer(capacity: 32),
+            options: ResponseEncodingOptions(),
+            loggingMode: false
+        )
+        _ = buffer.writeBodyEncoding(nil)
+        var remaining = buffer
+        let chunk = remaining.nextChunk()
+        #expect(String(buffer: chunk.bytes) == expected)
+    }
+
+    @Test("debug description")
+    func debugDescription() {
+        #expect(BodyStructure.Encoding.sevenBit.debugDescription == "7BIT")
+        #expect(BodyStructure.Encoding.base64.debugDescription == "BASE64")
+    }
+
+    @Test("string conversion")
+    func stringConversion() {
+        #expect(String(BodyStructure.Encoding.sevenBit) == "7BIT")
+        #expect(String(BodyStructure.Encoding.quotedPrintable) == "QUOTED-PRINTABLE")
     }
 }
 
