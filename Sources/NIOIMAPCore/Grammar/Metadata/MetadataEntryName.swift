@@ -76,4 +76,3 @@ extension MetadataEntryName: ExpressibleByStringLiteral {
         self.backing = ByteBuffer(string: value)
     }
 }
-

@@ -49,7 +49,6 @@ public struct SynchronizingLiteralParser: Sendable {
     /// Creates a new synchronizing literal parser.
     public init() {}
 
-
     private static func reverseParseTrailingNewlines(_ buffer: inout ByteBuffer) throws {
         switch (buffer.readableBytesView.reversed().dropFirst().first, buffer.readableBytesView.last) {
         case (UInt8(ascii: "\r"), UInt8(ascii: "\n")):

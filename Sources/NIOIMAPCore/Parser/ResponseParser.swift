@@ -177,7 +177,6 @@ public struct ResponseParser: Parser, Sendable {
     /// Newline kind of the last successfully parsed response.
     private var lastResponseNewlineEnding: ParseBuffer.Newline?
 
-
     /// Creates a new `ResponseParser` with configuration options.
     ///
     /// - Parameter options: Configuration for buffer limits, size restrictions, and
