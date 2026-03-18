@@ -15,12 +15,44 @@
 import struct NIO.ByteBuffer
 import struct OrderedCollections.OrderedDictionary
 
-/// Sent by the server as a response to a `.getMetdata` command.
+/// Response data sent by a server in reply to a `GETMETADATA` command (RFC 5464).
+///
+/// **Requires server capability:** ``Capability/metadata`` or ``Capability/metadataServer``
+///
+/// The `METADATA` response contains either requested metadata entry values or a list of available entries.
+/// The response type depends on whether the client requested specific entry names or a list of entries.
+/// See [RFC 5464 Section 4.4](https://datatracker.ietf.org/doc/html/rfc5464#section-4.4).
+///
+/// ### Example
+///
+/// ```
+/// C: A001 GETMETADATA "INBOX" ("/shared/comment")
+/// S: * METADATA "INBOX" ("/shared/comment" "Team discussion folder")
+/// S: A001 OK GETMETADATA completed
+/// ```
+///
+/// The line `* METADATA "INBOX" (...)` is wrapped as ``Response/untagged(_:)`` containing
+/// ``ResponsePayload/metadata(_:)`` with a ``MetadataResponse/values(values:mailbox:)`` case.
+/// Each entry name maps to a ``MetadataValue`` (which may be `nil` if not found).
+///
+/// ## Related Types
+///
+/// - See ``MetadataEntryName`` for entry name representation
+/// - See ``MetadataValue`` for entry values
+/// - See ``MetadataOption`` for query options
+///
+/// - SeeAlso: [RFC 5464 Section 4.4](https://datatracker.ietf.org/doc/html/rfc5464#section-4.4)
 public enum MetadataResponse: Hashable, Sendable {
-    /// Provides an array of values for the specified mailbox.
+    /// Metadata entries with their values for a specific mailbox.
+    ///
+    /// Contains an ordered dictionary mapping entry names to their values. Values may be `nil`
+    /// if the entry does not exist. From [RFC 5464 Section 4.4.1](https://datatracker.ietf.org/doc/html/rfc5464#section-4.4.1).
     case values(values: OrderedDictionary<MetadataEntryName, MetadataValue>, mailbox: MailboxName)
 
-    /// Provided as a catch-all to support future extensions, associates data with a mailbox.
+    /// A list of available metadata entry names for a mailbox.
+    ///
+    /// Provides a catch-all for future extensions that return a list of available entries
+    /// without their values. From [RFC 5464 Section 4.4.2](https://datatracker.ietf.org/doc/html/rfc5464#section-4.4.2).
     case list(list: [MetadataEntryName], mailbox: MailboxName)
 }
 

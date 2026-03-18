@@ -14,7 +14,25 @@
 
 import struct NIO.ByteBuffer
 
-/// Sent as a response to a `.sort` command.
+/// Response data from a `SORT` command, including optional modification sequence.
+///
+/// The `SORT` extension (RFC 5256) allows clients to request server-side sorting of messages by various
+/// criteria. The server responds with message sequence numbers in sorted order. When combined with
+/// the `CONDSTORE` extension (RFC 7162), the response also includes the highest modification sequence
+/// for all returned messages to aid efficient resynchronization.
+///
+/// ### Example
+///
+/// ```
+/// C: A001 SORT (ARRIVAL) ALL
+/// S: * SORT 3 2 1
+/// S: A001 OK SORT completed
+/// ```
+///
+/// This response indicates messages 3, 2, and 1 are the result in sorted order (most recent arrival first).
+///
+/// - SeeAlso: [RFC 5256 SORT Extension](https://datatracker.ietf.org/doc/html/rfc5256)
+/// - SeeAlso: [RFC 7162 CONDSTORE MODSEQ](https://datatracker.ietf.org/doc/html/rfc7162)
 public struct SortData: Hashable, Sendable {
     /// Message sequence numbers that match the search.
     public var identifiers: [Int]

@@ -15,7 +15,21 @@
 import struct NIO.ByteBuffer
 import struct NIO.ByteBufferView
 
-/// A parser dedicated to handling syncrhonising literals.
+/// A parser dedicated to handling synchronizing literals.
+///
+/// Synchronizing literals are defined in RFC 3501 Section 4.3. When a client sends
+/// a command containing a literal, it first sends `{size}` and then waits for a `+`
+/// continuation response from the server before sending the actual literal bytes.
+///
+/// This parser scans command data to identify literal sizes and locations, determining
+/// which bytes must wait for continuation responses and which can be sent immediately.
+/// It distinguishes between:
+/// - Synchronizing literals (`{100}`) - require continuation
+/// - Non-synchronizing literals (`{100+}`, `{100-}`) - no continuation needed
+/// - Binary literals (`~{100}`) - binary data format
+///
+/// - SeeAlso: [RFC 3501 Section 4.3.3](https://datatracker.ietf.org/doc/html/rfc3501#section-4.3.3),
+///   ``CommandParser``
 public struct SynchronizingLiteralParser: Sendable {
     private var offset = 0
     private var synchronisingLiterals = 0
@@ -32,7 +46,7 @@ public struct SynchronizingLiteralParser: Sendable {
         case nonSynchronisingLiteral(Int)
     }
 
-    /// Creates a new `SynchronisingLiteralParser`.
+    /// Creates a new synchronizing literal parser.
     public init() {}
 
     private static func reverseParseTrailingNewlines(_ buffer: inout ByteBuffer) throws {
@@ -110,7 +124,10 @@ public struct SynchronizingLiteralParser: Sendable {
 
     /// Contains information on the result of a call to `parseContinuationsNecessary`.
     public struct FramingResult: Sendable {
-        /// The maximum number of bytes that can be consumed by a `ResponseParser` until more data is required.
+        /// The maximum number of bytes that can be consumed by the command parser until continuation responses are needed.
+        ///
+        /// Once this many bytes have been processed, any remaining synchronizing literals in the command
+        /// require continuation requests before they can be sent.
         public var maximumValidBytes: Int
 
         /// How many synchronising literals are in the frame.

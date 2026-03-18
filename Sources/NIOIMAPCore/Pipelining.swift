@@ -12,42 +12,58 @@
 //
 //===----------------------------------------------------------------------===//
 
-/// Describes the requirements of a command about to be started.
+/// Requirements that must be satisfied before starting a command.
 ///
-/// IMAP supports command pipelining. But there are restrictions as to what commands can
-/// be run at the same time.
+/// IMAP supports command pipelining, where multiple commands can be in flight simultaneously.
+/// However, RFC 3501 Section 5.5 (“Multiple Commands in Progress”) restricts what command
+/// combinations are valid. This enum defines constraints that a command has on what other
+/// commands can currently be running.
 ///
-/// This is described in RFC 3501 section 5.5. “Multiple Commands in Progress”.
+/// The pipelining system uses two complementary types:
+/// - `PipeliningRequirement`: Constraints a command _imposes_ on other running commands
+/// - ``PipeliningBehavior``: The characteristics of a running command
 ///
-/// 1. Commands the change the mailbox selection (`SELECT` / `UNSELECT`) can’t be run
-/// while commands run that depend on the mailbox selection.
+/// To check if a command can start, verify that the current ``PipeliningBehavior``
+/// (from commands already running) satisfies the new command’s `PipeliningRequirement`.
 ///
-/// 2. Changing flags and retrieving flags (of the same messages) at the same time.
+/// ## Examples
 ///
-/// 3. Sequence number based commands can not be started while any command other than
-/// `FETCH`, `STORE`, and `SEARCH` is running — since an untagged `EXPUNGE` may happen.
+/// A `SELECT` command has the requirement ``PipeliningRequirement/noMailboxCommandsRunning``,
+/// meaning no other commands that depend on or change the mailbox selection can be running
+/// when `SELECT` is sent. Conversely, commands have the behavior
+/// ``PipeliningBehavior/changesMailboxSelection`` to indicate they satisfy this requirement.
 ///
-/// 4. If the client sends a UID command, it must wait for a completion result
-/// response before sending a command with message sequence numbers.
-///
-/// - Note: This implementation with `PipeliningBehavior` and
-///     `PipeliningRequirement` is intentionally _conservative_.  At the extreme case,
-///     one may want to only ever run a single command at a time. That way there’d be no
-///     inter-dependencies. But by being a bit more smart, certain commands can be allowed
-///     to run in parallel. It’s ok for this logic not to be perfect as long as it errs on the
-///     side of caution.
+/// - SeeAlso: ``PipeliningBehavior``, ``CommandStreamPart/pipeliningRequirements``,
+///   [RFC 3501 Section 5.5](https://datatracker.ietf.org/doc/html/rfc3501#section-5.5)
 public enum PipeliningRequirement: Hashable, Sendable {
-    /// No command that depend on the _Selected State_ must be running.
+    /// No command that depends on or changes the mailbox selection can be running.
+    ///
+    /// This requirement is imposed by commands like `SELECT`, `EXAMINE`, `UNSELECT`,
+    /// and `CLOSE` that establish or clear the mailbox selection context.
     case noMailboxCommandsRunning
-    /// No command besides `FETCH`, `STORE`, and `SEARCH` is running.
-    /// This is a requirement for all sequence number based commands.
+
+    /// No command other than `FETCH`, `STORE`, and `SEARCH` can be running.
+    ///
+    /// Sequence number-based commands impose this requirement to avoid untagged `EXPUNGE`
+    /// responses that would invalidate their sequence numbers mid-command.
     case noUntaggedExpungeResponse
-    /// No command is running that uses UIDs to specify messages.
-    /// This is a requirement for all sequence number based commands.
+
+    /// No command using UIDs to specify messages can be running.
+    ///
+    /// This is a requirement for sequence number-based commands, since a UID-based
+    /// command might invalidate the mailbox state.
     case noUIDBasedCommandRunning
-    /// No flags are being changed on the specific messages.
+
+    /// No flags are being changed on these specific messages.
+    ///
+    /// When a command reads flags from certain messages, other commands cannot
+    /// simultaneously change flags on those same messages.
     case noFlagChanges(MessageIdentifierSetNonEmpty<UID>)
-    /// No command is running that retrieves flags of the specific messages.
+
+    /// No command is reading flags from these specific messages.
+    ///
+    /// When a command modifies flags on certain messages (and is not silent), other
+    /// commands cannot simultaneously read flags from those same messages.
     case noFlagReads(MessageIdentifierSetNonEmpty<UID>)
 
     // TODO: Add Message metadata read + write
@@ -55,56 +71,118 @@ public enum PipeliningRequirement: Hashable, Sendable {
 }
 
 extension PipeliningRequirement {
-    /// No flags are being changed.
+    /// No flags are being changed on any message.
+    ///
+    /// Convenience static member equivalent to ``noFlagChanges(_:)`` with
+    /// ``MessageIdentifierSetNonEmpty/all``.
     public static let noFlagChangesToAnyMessage = PipeliningRequirement.noFlagChanges(.all)
-    /// No command is running that retrieves flags.
+
+    /// No flags are being read from any message.
+    ///
+    /// Convenience static member equivalent to ``noFlagReads(_:)`` with
+    /// ``MessageIdentifierSetNonEmpty/all``.
     public static let noFlagReadsFromAnyMessage = PipeliningRequirement.noFlagReads(.all)
 }
 
-/// Describes the behavior of a running command.
+/// Describes characteristics of a running command relevant to pipelining.
 ///
-/// See `PipeliningRequirement`.
+/// While ``PipeliningRequirement`` defines what constraints a command _imposes_,
+/// `PipeliningBehavior` describes the characteristics of an already-running command.
+/// The pipelining system checks that a new command's requirements are satisfied by
+/// the behaviors of currently running commands.
+///
+/// Each running command contributes zero or more behaviors to the "current state".
+/// To verify a new command can start, check that `Set<PipeliningBehavior>`
+/// representing all running commands satisfies the new command's requirements.
+///
+/// ## Example
+///
+/// A `FETCH` command has behaviors including ``dependsOnMailboxSelection`` and
+/// possibly ``readsFlagsFromAnyMessage``. A later `STORE` command with flag changes
+/// (non-silent) has requirement ``PipeliningRequirement/noFlagReads(_:)`` on those messages,
+/// which will conflict with the existing `FETCH` behavior.
+///
+/// - SeeAlso: ``PipeliningRequirement``, ``CommandStreamPart/pipeliningBehavior``,
+///   [RFC 3501 Section 5.5](https://datatracker.ietf.org/doc/html/rfc3501#section-5.5)
 public enum PipeliningBehavior: Hashable, Sendable {
-    /// This command changes the _mailbox selection_.
+    /// This command establishes a new mailbox selection.
+    ///
+    /// Commands like `SELECT`, `EXAMINE`, and `UNSELECT` change which mailbox is active.
+    /// These commands satisfy the requirement ``PipeliningRequirement/noMailboxCommandsRunning``
+    /// imposed by other mailbox-selection commands.
     case changesMailboxSelection
-    /// This command depends on the _mailbox selection_.
+
+    /// This command operates within and depends on the current mailbox selection.
+    ///
+    /// Commands like `FETCH`, `STORE`, `SEARCH`, `EXPUNGE`, etc. require a mailbox
+    /// to be selected and will fail if no selection is active.
     case dependsOnMailboxSelection
-    /// The server may send an untagged `EXPUNGE` while this command is running.
+
+    /// This command may trigger untagged `EXPUNGE` responses.
     ///
-    /// This is true for _all_ commands except `FETCH`, `STORE`, and `SEARCH`.
+    /// Most commands can cause the server to send untagged `EXPUNGE` responses,
+    /// invalidating the sequence numbers of remaining messages. Only `FETCH`, `STORE`,
+    /// and `SEARCH` guarantee no untagged `EXPUNGE`. This behavior satisfies the
+    /// requirement ``PipeliningRequirement/noUntaggedExpungeResponse``.
     case mayTriggerUntaggedExpunge
-    /// This command uses UIDs to specify messages
-    /// — or its a `UID` command (e.g. `UID SEARCH`).
+
+    /// This command uses UIDs to identify messages or is itself a `UID` command.
+    ///
+    /// Commands like `UID FETCH`, `UID STORE`, etc. operate on UIDs. This behavior
+    /// satisfies the requirement ``PipeliningRequirement/noUIDBasedCommandRunning``.
     case isUIDBased
-    /// This command is changing flags on speicifc messages.
+
+    /// This command changes flags on these specific messages.
+    ///
+    /// For non-silent `STORE` operations and similar flag-modifying commands, this
+    /// behavior indicates which messages have their flags changed. Satisfies
+    /// ``PipeliningRequirement/noFlagReads(_:)`` requirements on those messages.
     case changesFlags(MessageIdentifierSetNonEmpty<UID>)
-    /// This command is querying flags for specific messages.
+
+    /// This command queries flags from these specific messages.
+    ///
+    /// For `FETCH` commands with flag attributes and similar flag-reading commands,
+    /// this behavior indicates which messages have their flags read. Satisfies
+    /// ``PipeliningRequirement/noFlagChanges(_:)`` requirements on those messages.
     case readsFlags(MessageIdentifierSetNonEmpty<UID>)
-    /// No commands may be sent until this command completes.
+
+    /// No other commands can be sent until this command completes.
     ///
-    /// This command may be sent while other commands are running, but it acts as a barrier itself.
-    /// The connection will have to wait for it to complete.
+    /// Barrier commands like `IDLE`, `AUTHENTICATE`, and `STARTTLS` can only run alone
+    /// because they exchange multiple messages with the server before a completion response.
+    /// If other commands were pipelined, there would be ambiguity about which command
+    /// a continuation request or unsolicited response belongs to.
     ///
-    /// The reason for this is that the server may send zero, one, or multiple continuation
-    /// requests as part of responding to this command — until finally sending the command
-    /// completion response. If additional commands were sent while such a command was running,
-    /// there would be no way to know if a continuation request from the server was asking for
-    /// data from the _barrier_ command or from the subsequent commands.
-    ///
-    /// Notably, the `IDLE` and `AUTHENTICATE` commands are barrier commands.
+    /// - SeeAlso: [RFC 3501 Section 7.3.2](https://datatracker.ietf.org/doc/html/rfc3501#section-7.3.2) (AUTHENTICATE),
+    ///   [RFC 2177](https://datatracker.ietf.org/doc/html/rfc2177) (IDLE),
+    ///   [RFC 3501 Section 6.2.1](https://datatracker.ietf.org/doc/html/rfc3501#section-6.2.1) (STARTTLS)
     case barrier
 }
 
 extension PipeliningBehavior {
-    /// This command is changing flags on messages.
+    /// This command is changing flags on all messages.
+    ///
+    /// Convenience static member equivalent to ``changesFlags(_:)`` with
+    /// ``MessageIdentifierSetNonEmpty/all``.
     public static let changesFlagsOnAnyMessage = PipeliningBehavior.changesFlags(.all)
-    /// This command is querying flags
+
+    /// This command is querying flags from all messages.
+    ///
+    /// Convenience static member equivalent to ``readsFlags(_:)`` with
+    /// ``MessageIdentifierSetNonEmpty/all``.
     public static let readsFlagsFromAnyMessage = PipeliningBehavior.readsFlags(.all)
 }
 
 extension CommandStreamPart {
-    /// The requirements that this command (part) has wrt. what other commands are allowed
-    /// to be running while it runs.
+    /// The requirements that must be satisfied before this command can start.
+    ///
+    /// This property returns the ``PipeliningRequirement`` constraints imposed by this
+    /// command. Before sending this command, verify that all currently running commands
+    /// together satisfy these requirements.
+    ///
+    /// - Returns: A set of requirements this command imposes on other running commands.
+    ///
+    /// - SeeAlso: ``pipeliningBehavior``, [RFC 3501 Section 5.5](https://datatracker.ietf.org/doc/html/rfc3501#section-5.5)
     public var pipeliningRequirements: Set<PipeliningRequirement> {
         switch self {
         case .idleDone:
@@ -240,9 +318,19 @@ extension Command {
 }
 
 extension CommandStreamPart {
-    /// The behavior of this command (part) wrt. pipelining.
+    /// The pipelining characteristics of this command.
     ///
-    /// Certain `PipeliningBehavior` prevent certain (other) commands from running.
+    /// This property returns the ``PipeliningBehavior`` values that describe how this
+    /// command behaves with respect to pipelining. These behaviors affect what new
+    /// commands can be sent while this command is running.
+    ///
+    /// Multiple behaviors can be combined in the returned set. For example, a `FETCH`
+    /// command might return behaviors for depending on mailbox selection, being UID-based,
+    /// and reading flags, all of which constrain what other commands can run concurrently.
+    ///
+    /// - Returns: A set of behaviors describing this command's pipelining characteristics.
+    ///
+    /// - SeeAlso: ``pipeliningRequirements``, [RFC 3501 Section 5.5](https://datatracker.ietf.org/doc/html/rfc3501#section-5.5)
     public var pipeliningBehavior: Set<PipeliningBehavior> {
         switch self {
         case .idleDone:

@@ -15,32 +15,67 @@
 import struct NIO.ByteBuffer
 import struct NIO.ByteBufferView
 
-/// The `MailboxName` was too big - typically > 1000 bytes.
+/// The mailbox name exceeded the maximum allowed size.
+///
+/// See [RFC 3501](https://datatracker.ietf.org/doc/html/rfc3501) for mailbox name limitations.
+/// The maximum size is typically 1000 bytes.
 public struct MailboxTooBigError: Error, Equatable {
-    /// Specifies the maximum size of a `MailboxName`, typically 1000 bytes.
+    /// The maximum allowed size for a mailbox name, typically 1000 bytes.
     public var maximumSize: Int
 
-    /// The actual size of the attempted `MailboxName`.
+    /// The actual size of the mailbox name that exceeded the limit.
     public var actualSize: Int
 }
 
-/// The `MailboxName` was invalid, and probably contained illegal characters.
+/// A mailbox name contained invalid characters or violated naming constraints.
+///
+/// This error is raised when a mailbox name contains characters that are not permitted by the IMAP protocol,
+/// such as path separators in the display name.
 public struct InvalidMailboxNameError: Error, Equatable {
-    /// Information on why the `MailboxName` was considered invalid.
+    /// A description of why the mailbox name was considered invalid.
     public var description: String
 }
 
-/// The path separator was invalid - path separators have strict requirements. See RFC 3501 for more details.
+/// A path separator did not meet protocol requirements.
+///
+/// Path separators in mailbox names have strict requirements defined in
+/// [RFC 3501 Section 5.1](https://datatracker.ietf.org/doc/html/rfc3501#section-5.1).
+/// The separator must be a single ASCII character.
 public struct InvalidPathSeparatorError: Error, Equatable {
-    /// Information on why the path separator was considered invalid.
+    /// A description of why the path separator was considered invalid.
     public var description: String
 }
 
-/// Represents a complete mailbox path, delimited by the `pathSeparator`.
-/// For example, *foo/bar* is the `MailboxName`, and so "/" would be the `pathSeparator`.
-/// Path separators are optional, and so the simple `MailboxName` *foo* has `pathSeparator = nil`.
+/// A complete mailbox path with an optional delimiter character.
+///
+/// Mailbox paths use a hierarchical naming convention with an optional path separator character to organize
+/// mailboxes into a tree structure. For example, a path like "Sent/Work" would have the name "Sent/Work" with
+/// the separator "/" to indicate that "Work" is a child mailbox of "Sent". Path separators are optional, but
+/// a simple mailbox like "Inbox" may still have the path separator set to indicate what path separator
+/// will be used for nested mailboxes.
+///
+/// Mailbox names are encoded using [Modified UTF-7](https://datatracker.ietf.org/doc/html/rfc2152)
+/// as defined in [RFC 3501 Section 5.1.3](https://datatracker.ietf.org/doc/html/rfc3501#section-5.1.3).
+/// The path separator itself must be a single ASCII character.
+///
+/// ### Example
+///
+/// ```
+/// C: A001 LIST "" "INBOX/Sent/Work"
+/// S: * LIST (\NoInferiors) "/" "INBOX/Sent/Work"
+/// S: A001 OK LIST completed
+/// ```
+///
+/// The line `* LIST (\NoInferiors) "/" "INBOX/Sent/Work"` creates a ``MailboxPath`` with name bytes
+/// representing "INBOX/Sent/Work" and pathSeparator "/" to indicate the hierarchical structure.
+///
+/// - SeeAlso: ``MailboxName``
 public struct MailboxPath: Hashable, Sendable {
-    /// The full mailbox name, e.g. *foo/bar*
+    /// The full mailbox path in Modified UTF-7 encoding.
+    ///
+    /// This name may contain path separator characters and represents the complete hierarchical path
+    /// to the mailbox as known to the server. The encoding follows
+    /// [RFC 2152](https://datatracker.ietf.org/doc/html/rfc2152) as required by RFC 3501.
     public let name: MailboxName
 
     // Using this instead of `Character?` to reduce the size of this type.
@@ -48,17 +83,29 @@ public struct MailboxPath: Hashable, Sendable {
     @usableFromInline
     let _pathSeparator: UInt8
 
-    /// The path separator, e.g. */* in *foo/bar*
+    /// The optional path separator character used to delimit sub-mailboxes.
+    ///
+    /// If present, this ASCII character (commonly "/" or ".") separates parent and child mailbox names
+    /// in the path. Returns `nil` if the mailbox is a top-level mailbox with no hierarchy.
+    ///
+    /// The separator is determined by the server and is reported in `LIST` responses.
+    /// For the special "INBOX" mailbox, the separator may be reported separately from other mailboxes.
+    ///
+    /// - Returns: The path separator as a `Character`, or `nil` if the mailbox is not hierarchical.
     @inlinable
     public var pathSeparator: Character? {
         (self._pathSeparator == 0) ? nil : Unicode.Scalar(UInt32(self._pathSeparator)).map { Character($0) }
     }
 
-    /// Creates a new `MailboxPath` with the given data.
-    /// - Note: Do not use this initialiser to create a root/sub mailbox that requires validation. Instead use `makeRootMailbox(displayName:pathSeparator:)`
-    /// - parameter name: The `MailboxName` containing UTF-7 encoded bytes
-    /// - parameter pathSeparator: An optional `Character` used to delimit sub-mailboxes. Note that this needs to be an ASCII character.
-    /// - throws: `InvalidPathSeparatorError` if the `pathSeparator` is not a valid ascii value.
+    /// Creates a new `MailboxPath` with the given name and optional path separator.
+    ///
+    /// This initializer accepts raw bytes and does not perform encoding. Use ``makeRootMailbox(displayName:pathSeparator:)``
+    /// to create a new mailbox from a display string with automatic encoding, or ``makeSubMailbox(displayName:)``
+    /// to create a hierarchical mailbox path.
+    ///
+    /// - Parameter name: A ``MailboxName`` containing the mailbox path, typically in Modified UTF-7 encoding
+    /// - Parameter pathSeparator: An optional path separator as a single ASCII character
+    /// - Throws: ``InvalidPathSeparatorError`` if the path separator is not an ASCII character
     public init(name: MailboxName, pathSeparator: Character? = nil) throws {
         // if a path separator is given, it must be a valid ascii character
         if let pathSeparator, !pathSeparator.isASCII {
@@ -97,10 +144,19 @@ extension MailboxPath {
         }
     }
 
-    /// Splits `mailbox` into constituent path components using the `PathSeparator`. Conversion is lossy and
-    /// for display purposes only, do not use the return value as a mailbox name.
-    /// The conversion to display string using heuristics to determine if the byte stream is the modified version of UTF-7 encoding defined in RFC 2152 (which it should be according to RFC 3501) — or if it is UTF-8 data. Many email clients erroneously encode mailbox names as UTF-8.
-    /// - returns: `[String]` containing path components
+    /// Splits the mailbox path into human-readable display components using the path separator.
+    ///
+    /// This method converts the Modified UTF-7-encoded mailbox name to a display string by splitting on
+    /// the path separator. The conversion is lossy and intended for display purposes only. Do not use the
+    /// returned components as mailbox names for protocol operations.
+    ///
+    /// The method uses heuristics to decode the path as either Modified UTF-7 (per RFC 3501) or UTF-8.
+    /// Many email clients incorrectly encode mailbox names as UTF-8 instead of the required Modified UTF-7,
+    /// so this method attempts to handle both formats gracefully.
+    ///
+    /// - Parameter omittingEmptySubsequences: If `true` (default), empty components between consecutive
+    ///   separators are omitted from the result
+    /// - Returns: An array of display strings for each mailbox component in the path
     public func displayStringComponents(omittingEmptySubsequences: Bool = true) -> [String] {
         guard let pathSeparator = self.pathSeparator else {
             return [self.decodeBufferToString(ByteBuffer(bytes: self.name.bytes))]
@@ -114,13 +170,20 @@ extension MailboxPath {
             }
     }
 
-    /// Creates a new root mailbox. The given display string will be encoded according to RFC 2152
-    /// and then vlaidate that there are no path separators in the name.
-    /// - parameter displayName: The name of the new mailbox
-    /// - parameter pathSeparator: The optional separator to delimit sub-mailboxes
-    /// - throws: `MailboxTooBigError` if the `displayName` is > 1000 bytes.
-    /// - throws: `InvalidMailboxNameError` if the `displayName` contains a `pathSeparator`.
-    /// - returns: A new `MailboxPath` containing the given name and separator.
+    /// Creates a new root mailbox path from a display name.
+    ///
+    /// This factory method encodes the display name using Modified UTF-7 (RFC 2152) and validates
+    /// that the resulting mailbox name does not contain the path separator character (if provided).
+    /// Root mailboxes are top-level mailboxes with no parent hierarchy.
+    ///
+    /// Use this method when creating new mailboxes from user input, as it handles encoding automatically.
+    /// For existing mailboxes received from the server, use the initializer directly.
+    ///
+    /// - Parameter displayName: A human-readable name for the mailbox (will be UTF-7 encoded)
+    /// - Parameter pathSeparator: The optional separator character that delimits the mailbox hierarchy
+    /// - Throws: ``MailboxTooBigError`` if the encoded name exceeds 1000 bytes
+    /// - Throws: ``InvalidMailboxNameError`` if the display name contains the path separator character
+    /// - Returns: A new ``MailboxPath`` for the root mailbox
     public static func makeRootMailbox(displayName: String, pathSeparator: Character? = nil) throws -> MailboxPath {
         guard displayName.utf8.count <= self.maximumMailboxSize else {
             throw MailboxTooBigError(maximumSize: self.maximumMailboxSize, actualSize: displayName.utf8.count)
@@ -137,23 +200,22 @@ extension MailboxPath {
         return try MailboxPath(name: .init(encodedNewName), pathSeparator: pathSeparator)
     }
 
-    /// Creates a new mailbox path that nested inside the existing path.
+    /// Creates a nested child mailbox path within this mailbox.
     ///
-    /// This will encode the display string according to RFC 2152
-    /// and make sure that there are no path separators in the name,
-    /// and then append the path separator and the name to the
-    /// existing path’s name.
+    /// This method encodes the display name using Modified UTF-7 and appends it as a child to the current
+    /// mailbox path. The path separator is inserted between the parent and child names.
     ///
-    /// This should _only_ be used in order to create the path / name for a new mailbox
-    /// that the client wants to create. It should not be used to create paths that already exist
-    /// on the server. The reason is that mailboxes are identified by the exact byte sequence
-    /// of their name. Re-assembling a path and doing the required encoding might produce
-    /// different byte sequences if another client uses a bogus encoding. Sadly that is rather
-    /// common.
-    /// - parameter displayName: The name of the sub-mailbox to create, which will be UTF-7 encoded.
-    /// - throws: `MailboxTooBigError` if new mailbox path is > 1000 bytes.
-    /// - throws: `InvalidMailboxNameError` if the `displayName` contains a `pathSeparator`.
-    /// - returns: A new `MailboxPath` containing the given name and separator.
+    /// **Important:** This method should only be used when creating new mailboxes that do not yet exist
+    /// on the server. For existing mailboxes received from the server, the exact byte sequence of the
+    /// mailbox name must be preserved as-is. Re-encoding may produce different bytes if other clients
+    /// use non-standard encodings (such as UTF-8 instead of Modified UTF-7), which would create
+    /// a different mailbox.
+    ///
+    /// - Parameter displayName: The name of the child mailbox (will be UTF-7 encoded)
+    /// - Throws: ``MailboxTooBigError`` if the resulting path exceeds 1000 bytes
+    /// - Throws: ``InvalidMailboxNameError`` if the display name contains the path separator character
+    /// - Throws: ``InvalidPathSeparatorError`` if the parent mailbox has no path separator (no hierarchy)
+    /// - Returns: A new ``MailboxPath`` representing the child mailbox
     public func makeSubMailbox(displayName: String) throws -> MailboxPath {
         guard let separator = self.pathSeparator else {
             throw InvalidPathSeparatorError(description: "Need a path separator to make a sub mailbox")
@@ -179,27 +241,46 @@ extension MailboxPath {
     }
 }
 
-/// A mailbox’s name.
+/// A mailbox name represented as a sequence of bytes in Modified UTF-7 encoding.
 ///
-/// This uniquely identifies a specific mailbox, but does not specify the
-/// path separator. In most cases, using a `MailboxPath` should be preferred since
-/// `MailboxPath` is able to
-/// 1. create a (display) `String` from a path.
-/// 2. create a path from a `String` (for new mailboxes created by a user)
-/// 3. split a path into its components (to figure out how paths are nested into each other).
+/// A ``MailboxName`` uniquely identifies a specific mailbox on the server but does not include
+/// information about the mailbox hierarchy or path separator. In most cases, use ``MailboxPath``
+/// instead, which includes both the name and the optional path separator to enable hierarchical
+/// mailbox operations.
 ///
-/// Since it’s common to use `MailboxName` as a key in a dictionary and/or compare
-/// `MailboxName` for equality, `MailboxName` will pre-calculate its hash value, and
-/// store it. As a result `Hashable` (and `Equatable`) performance is very fast.
+/// ``MailboxName`` is optimized for use as a dictionary key or in comparisons by pre-calculating
+/// and caching its hash value. This makes equality checks and hashing very efficient.
+///
+/// Mailbox names follow [RFC 3501 Section 5.1](https://datatracker.ietf.org/doc/html/rfc3501#section-5.1)
+/// and must be encoded in Modified UTF-7 as defined by [RFC 2152](https://datatracker.ietf.org/doc/html/rfc2152).
+/// The special mailbox name "INBOX" is case-insensitive per RFC 3501 and is automatically normalized to uppercase.
+///
+/// For stable mailbox identification across renames, use ``MailboxID`` instead. The `OBJECTID` extension
+/// ([RFC 8474](https://datatracker.ietf.org/doc/html/rfc8474)) provides a permanent server-assigned identifier
+/// that persists even if the mailbox name changes, and is recommended when the server supports it.
+///
+/// - SeeAlso: ``MailboxPath``, ``MailboxID``
 public struct MailboxName: Sendable {
-    /// Represents an inbox.
+    /// The special "INBOX" mailbox name.
+    ///
+    /// INBOX is the default mailbox that all IMAP clients must be able to access.
+    /// Per [RFC 3501 Section 5.1](https://datatracker.ietf.org/doc/html/rfc3501#section-5.1),
+    /// the name "INBOX" is case-insensitive and is always normalized to uppercase.
     public static let inbox = Self(ByteBuffer(string: "INBOX"))
 
-    /// The raw bytes, readable as `[UInt8]`
-    public let bytes: [UInt8]
-    /// The hash value.
+    /// The raw bytes of the mailbox name, typically in Modified UTF-7 encoding.
     ///
-    /// We store a pre-calculated hash value to make `Hashable` conformance fast.
+    /// These bytes represent the mailbox name as transmitted in the IMAP protocol.
+    /// Use this when encoding/decoding mailbox information for wire transmission.
+    public let bytes: [UInt8]
+
+    /// The pre-calculated hash value for this mailbox name.
+    ///
+    /// The hash is cached for performance when using ``MailboxName`` as a dictionary key
+    /// or in hash-based collections. Hash calculation is performed once at initialization time
+    /// using the mailbox name bytes.
+    ///
+    /// - Returns: The hash value as an `Swift/Int`
     @inlinable
     public var hashValue: Int {
         self._hashValue.value
@@ -208,8 +289,13 @@ public struct MailboxName: Sendable {
     @usableFromInline
     let _hashValue: HashValue
 
-    /// `true` if the internal storage reads "INBOX"
-    /// otherwise `false`
+    /// A Boolean value indicating whether this is the special "INBOX" mailbox.
+    ///
+    /// Returns `true` if the mailbox name is "INBOX" (case-insensitive), `false` otherwise.
+    /// Per [RFC 3501](https://datatracker.ietf.org/doc/html/rfc3501), the special mailbox "INBOX"
+    /// is case-insensitive and unique per user.
+    ///
+    /// - Returns: `true` if this is the INBOX mailbox, `false` otherwise
     public var isInbox: Bool {
         self.hashValue == MailboxName.inboxHashValue && self.bytes.count == 5
             && self.bytes.map { $0 & 0xDF }.elementsEqual("INBOX".utf8)
@@ -217,9 +303,14 @@ public struct MailboxName: Sendable {
 
     private static let inboxHashValue: Int = MailboxName.inbox.hashValue
 
-    /// Creates a new `MailboxName` from the given bytes.
-    /// - note: The bytes provided should be UTF-7.
-    /// - parameter bytes: The bytes to construct a `MailboxName` from. Note that if any case-insensitive variation of *INBOX* is provided then it will be uppercased.
+    /// Creates a new mailbox name from a sequence of bytes.
+    ///
+    /// The bytes provided should represent a mailbox name in Modified UTF-7 encoding as per
+    /// [RFC 3501 Section 5.1.3](https://datatracker.ietf.org/doc/html/rfc3501#section-5.1.3).
+    /// The special mailbox name "INBOX" is case-insensitive and will be automatically normalized to uppercase
+    /// to ensure consistent equality comparisons and hash values.
+    ///
+    /// - Parameter bytes: The mailbox name bytes, typically in Modified UTF-7 encoding
     public init(_ bytes: [UInt8]) {
         let isInbox = bytes.lazy.map { $0 & 0xDF }.elementsEqual("INBOX".utf8)
         let b: [UInt8]
@@ -236,8 +327,8 @@ public struct MailboxName: Sendable {
 }
 
 extension MailboxName {
-    /// A helper to store a hash value (for `Hashable` conformance) inside
-    /// a `UInt32` (i.e. 4 bytes) even on platforms where `Int` is 64 bit.
+    /// A helper to store a hash value (for ``Swift/Hashable`` conformance) inside
+    /// a ``Swift/UInt32`` (i.e. 4 bytes) even on platforms where ``Swift/Int`` is 64 bit.
     @usableFromInline
     struct HashValue: Sendable {
         @usableFromInline

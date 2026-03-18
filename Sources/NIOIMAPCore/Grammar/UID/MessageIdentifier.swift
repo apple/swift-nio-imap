@@ -12,6 +12,29 @@
 //
 //===----------------------------------------------------------------------===//
 
+/// A protocol for message identifiers (either ``UID`` or ``SequenceNumber``).
+///
+/// The `MessageIdentifier` protocol defines the interface for message identifiers in IMAP.
+/// Two concrete types implement this protocol:
+///
+/// - ``UID``: A stable, session-independent message identifier.
+/// - ``SequenceNumber``: A dynamic, session-dependent relative position identifier.
+///
+/// Additionally, ``UnknownMessageIdentifier`` implements this protocol to represent a value
+/// that could be either type (useful during parsing when the context is ambiguous).
+///
+/// All message identifiers are 32-bit unsigned integers (1 to `UInt32.max`). The special
+/// value `UInt32.max` is often rendered as `*` in wire format to represent the maximum
+/// possible value.
+///
+/// See [RFC 3501](https://datatracker.ietf.org/doc/html/rfc3501) for details on message
+/// identifiers and their usage in IMAP commands and responses.
+///
+/// ## Related Types
+///
+/// - ``MessageIdentifierRange`` represents a range of message identifiers.
+/// - ``MessageIdentifierSet`` represents a collection of message identifier ranges.
+/// - ``MessageIdentifierSetNonEmpty`` wraps a ``MessageIdentifierSet`` guaranteeing at least one element.
 public protocol MessageIdentifier: Hashable, Codable, CustomDebugStringConvertible, ExpressibleByIntegerLiteral,
     Strideable
 where Stride == Int64 {
@@ -54,17 +77,23 @@ extension MessageIdentifier {
     }
 
     /// Creates a new `MessageIdentifier` from an integer literal, skipping all validation.
-    /// - parameter integerLiteral: The integer literal value.
+    /// - parameter value: The integer literal value.
     public init(integerLiteral value: UInt32) {
         assert(value >= 1)
         self.init(rawValue: value)
     }
 }
 
-/// Either a `UID` or a `SequenceNumber`. We weren't able to tell
-/// at the time of parsing. Use `UID.init(Messageidentifier)` and
-/// `SequenceNumber.init(MessageIdentifier)` to convert
-/// between the two.
+/// Either a ``UID`` or a ``SequenceNumber``, determined at runtime by command context.
+///
+/// When parsing protocol messages, some values could represent either a ``UID`` or a
+/// ``SequenceNumber`` depending on the command context (e.g., whether the command is prefixed
+/// with `UID`). The `UnknownMessageIdentifier` type preserves the numeric value without
+/// committing to a specific type.
+///
+/// Convert between `UnknownMessageIdentifier` and concrete types using:
+/// - ``/NIOIMAPCore/UID/init(_:)-(UnknownMessageIdentifier)`` or ``/NIOIMAPCore/SequenceNumber/init(_:)-(UnknownMessageIdentifier)`` to convert from an unknown identifier.
+/// - ``/NIOIMAPCore/UnknownMessageIdentifier/init(_:)-(UID)`` or ``/NIOIMAPCore/UnknownMessageIdentifier/init(_:)-(SequenceNumber)`` to convert from a concrete type.
 public struct UnknownMessageIdentifier: MessageIdentifier, Sendable {
     public var rawValue: UInt32
 
@@ -82,7 +111,7 @@ extension BinaryInteger {
 // MARK: - Strideable
 
 extension MessageIdentifier {
-    /// Evaluates if one `MessageIdentifier` (`lhs`) is strictly less than another (`rhs`).
+    /// Evaluates if one ``MessageIdentifier`` (`lhs`) is strictly less than another (`rhs`).
     /// - parameter lhs: The first `MessageIdentifier` to evaluate.
     /// - parameter rhs: The second `MessageIdentifier` to evaluate.
     /// - returns: `true` if `lhs` strictly less than`rhs`, otherwise `false`.
@@ -90,7 +119,7 @@ extension MessageIdentifier {
         lhs.rawValue < rhs.rawValue
     }
 
-    /// Evaluates if one `MessageIdentifier` (`lhs`) is less than or equal to another (`rhs`).
+    /// Evaluates if one ``MessageIdentifier`` (`lhs`) is less than or equal to another (`rhs`).
     /// - parameter lhs: The first `MessageIdentifier` to evaluate.
     /// - parameter rhs: The second `MessageIdentifier` to evaluate.
     /// - returns: `true` if `lhs` is less than or equal to `rhs`, otherwise `false`.
@@ -98,16 +127,16 @@ extension MessageIdentifier {
         lhs.rawValue <= rhs.rawValue
     }
 
-    /// Gets the distance to the given `MessageIdentifier`.
+    /// Gets the distance to the given ``MessageIdentifier``.
     /// - parameter other: The `MessageIdentifier` to get the distance to.
     /// - returns: The distance.
     public func distance(to other: Self) -> Int64 {
         Int64(other.rawValue) - Int64(self.rawValue)
     }
 
-    /// Advances the current `MessageIdentifier` by `n`.
-    /// IMPORTANT: `n` *must* be `<= UInt32.max`. `Int64` is used as the stridable type as it allows
-    /// values equal to `UInt32.max` on all platforms (including 32 bit platforms where `Int.max < UInt32.max`.
+    /// Advances the current ``MessageIdentifier`` by `n`.
+    /// IMPORTANT: `n` *must* be `<= UInt32.max`. `Int64` is used as the strideable type as it allows
+    /// values equal to `UInt32.max` on all platforms (including 32 bit platforms where `Int.max < UInt32.max`).
     /// - parameter n: How many to advance by.
     /// - returns: A new `MessageIdentifier`.
     public func advanced(by n: Int64) -> Self {

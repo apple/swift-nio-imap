@@ -14,26 +14,69 @@
 
 import struct NIO.ByteBuffer
 
-/// Specifies what items of data should be returned for each matching mailbox when
-/// executing a `.list` command.
+/// Return options that specify what additional data a `LIST` command should include for each matched mailbox (RFC 5819).
+///
+/// **Requires server capability:** ``Capability/listExtended``
+///
+/// These options control what information is returned by a `LIST` command for each matching mailbox,
+/// beyond the standard mailbox name and attributes. Return options are defined in
+/// [RFC 5819](https://datatracker.ietf.org/doc/html/rfc5819) and [RFC 3501](https://datatracker.ietf.org/doc/html/rfc3501).
+///
+/// ### Example
+///
+/// ```
+/// C: A001 LIST "" "%" RETURN (CHILDREN STATUS (MESSAGES UNSEEN))
+/// S: * LIST (\HasChildren) "/" "Archive"
+/// S: * STATUS "Archive" (MESSAGES 42 UNSEEN 5)
+/// S: * LIST (\HasNoChildren) "/" "Drafts"
+/// S: * STATUS "Drafts" (MESSAGES 12 UNSEEN 3)
+/// S: A001 OK LIST completed
+/// ```
+///
+/// The `RETURN (CHILDREN STATUS (...))` options cause the server to return child information
+/// and mailbox status data. The `LIST` responses are ``Response/untagged(_:)`` cases, and the
+/// `STATUS` responses are ``Response/untagged(_:)`` with ``ResponsePayload/mailboxData(_:)`` containing
+/// ``MailboxData/status(_:_:)`` variants.
+///
+/// ## Related Types
+///
+/// Return options are used with the ``Command/list(_:reference:_:_:)`` command.
+/// See ``MailboxAttribute`` for the attributes returned in status responses.
+///
+/// - SeeAlso: [RFC 5819](https://datatracker.ietf.org/doc/html/rfc5819), [RFC 3501 Section 6.3.8](https://datatracker.ietf.org/doc/html/rfc3501#section-6.3.8)
 public enum ReturnOption: Hashable, Sendable {
-    /// Causes the LIST command to return subscription state
-    /// for all matching mailbox names.
+    /// The `SUBSCRIBED` return option causes `LIST` to return subscription state for all matching mailboxes.
+    ///
+    /// This is used with the ``Command/list(_:reference:_:_:)`` command to include subscription information
+    /// in the `LIST` responses. From [RFC 5819 Section 2](https://datatracker.ietf.org/doc/html/rfc5819#section-2).
     case subscribed
 
-    /// Requests mailbox child information
+    /// The `CHILDREN` return option requests mailbox child information.
+    ///
+    /// This instructs the server to return information about which mailboxes have children
+    /// (subfolders). The standard mailbox attributes `\HasChildren` and `\HasNoChildren`
+    /// provide this information. From [RFC 3501 Section 7.2.2](https://datatracker.ietf.org/doc/html/rfc3501#section-7.2.2).
     case children
 
-    /// The server MUST return an untagged LIST response followed by an untagged STATUS
-    /// response containing the information requested in the STATUS return option.
+    /// The `STATUS` return option requests mailbox status information.
+    ///
+    /// When this option is specified, the server MUST return untagged `STATUS` responses
+    /// in addition to `LIST` responses for each matching mailbox. The specified attributes
+    /// determine what status data is returned (e.g., `MESSAGES`, `UNSEEN`, `UIDVALIDITY`).
+    /// From [RFC 5819 Section 2.1](https://datatracker.ietf.org/doc/html/rfc5819#section-2.1).
     case statusOption([MailboxAttribute])
 
-    /// Designed as a catch-all to support return options defined in future extensions
-    case optionExtension(KeyValue<OptionExtensionKind, OptionValueComp?>)
-
-    /// The LIST command MUST return only those mailboxes that have a
-    /// special-use attribute set.
+    /// The `SPECIAL-USE` return option requests only mailboxes with special-use attributes.
+    ///
+    /// This filters `LIST` results to return only mailboxes marked with special-use attributes
+    /// like `\All`, `\Archive`, `\Drafts`, `\Flagged`, `\Junk`, `\Sent`, or `\Trash`.
+    /// From [RFC 6154 Section 3](https://datatracker.ietf.org/doc/html/rfc6154#section-3).
     case specialUse
+
+    /// Catch-all for `LIST` return options defined in future extensions.
+    ///
+    /// Supports extension return options not yet defined in the standard.
+    case optionExtension(KeyValue<OptionExtensionKind, OptionValueComp?>)
 }
 
 // MARK: - Encoding

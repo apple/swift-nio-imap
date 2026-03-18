@@ -13,13 +13,19 @@
 //===----------------------------------------------------------------------===//
 
 extension MessagePath {
-    /// Used to append a `ByteRange` as part of a URL.
+    /// A byte range suffix for partial IMAP URL fetches.
+    ///
+    /// This type wraps a ``/NIOIMAPCore/ByteRange`` for use in IMAP URLs with the `/;PARTIAL=` encoding
+    /// (RFC 5092). It enables clients to request only a portion of a message via URL without
+    /// downloading the entire body.
+    ///
+    /// - SeeAlso: [RFC 5092 IMAP URL Scheme](https://datatracker.ietf.org/doc/html/rfc5092)
     public struct ByteRange: Hashable, Sendable {
-        /// The `PartialRange` to append.
+        /// The ``/NIOIMAPCore/ByteRange`` to append.
         public var range: NIOIMAPCore.ByteRange
 
         /// Creates a new `MessagePath.ByteRange`.
-        /// - parameter range: The `PartialRange` to append.
+        /// - parameter range: The ``/NIOIMAPCore/ByteRange`` to append.
         public init(range: NIOIMAPCore.ByteRange) {
             self.range = range
         }

@@ -12,38 +12,82 @@
 //
 //===----------------------------------------------------------------------===//
 
-/// A date and time defined in RFC 3339.
+/// A complete date and time value in RFC 3339 format with an optional fraction-of-second.
+///
+/// This type represents a full date-time specification as defined in RFC 3339, combining
+/// a ``FullDate`` and ``FullTime`` into a single value. RFC 3339 is used in IMAP extensions
+/// such as MULTIMAILBOX SEARCH (RFC 7377) and METADATA (RFC 5464) for precise timestamp representation.
+///
+/// The format when encoded is `YYYY-MM-DDTHH:MM:SS[.FRACTION]` where the `T` separates the
+/// date and time components.
+///
+/// ### Example
+///
+/// ```
+/// "2026-03-15T10:30:45"
+/// "2026-03-15T10:30:45.123"
+/// ```
+///
+/// These examples correspond to ``FullDateTime`` values combining a ``FullDate``
+/// (2026-03-15) with ``FullTime`` values (10:30:45 with optional fraction).
+///
+/// - SeeAlso: [RFC 3339](https://datatracker.ietf.org/doc/html/rfc3339)
 public struct FullDateTime: Hashable, Sendable {
-    /// The date.
+    /// The date component of this date-time value.
+    ///
+    /// The date contains the year, month, and day values.
     public var date: FullDate
 
-    /// The time.
+    /// The time component of this date-time value.
+    ///
+    /// The time contains the hour, minute, second, and optional fraction values.
     public var time: FullTime
 
     /// Creates a new `FullDateTime`.
-    /// - parameter date: The date.
-    /// - parameter time: The time.
+    ///
+    /// - Parameters:
+    ///   - date: The date component.
+    ///   - time: The time component.
     public init(date: FullDate, time: FullTime) {
         self.date = date
         self.time = time
     }
 }
 
-/// A date.
+/// A calendar date in RFC 3339 format (`YYYY-MM-DD`).
+///
+/// This type represents a date value as defined in RFC 3339, containing year, month, and day
+/// components. It is used in combination with ``FullTime`` to form a complete ``FullDateTime``.
+///
+/// The initializer uses `precondition` to verify month and day are within valid ranges but does
+/// not validate whether the day is appropriate for the given month (e.g., February 30 is accepted).
 public struct FullDate: Hashable, Sendable {
-    /// The year. Any non-negative integer.
+    /// The year as any non-negative integer.
+    ///
+    /// RFC 3339 allows any non-negative integer for the year, though practical applications
+    /// typically use 4-digit year values.
     public let year: Int
 
     /// The month in the range `1...12`.
+    ///
+    /// Month 1 is January, month 12 is December.
     public let month: Int
 
     /// The day in the range `1...31`.
+    ///
+    /// The range accepts all valid day numbers. No validation is performed to verify
+    /// the day is valid for the specific month (e.g., February 30 is accepted).
     public let day: Int
 
     /// Creates a new `FullDate`.
-    /// - parameter year: The year. Any non-negative integer.
-    /// - parameter month: The month in the range `1...12`.
-    /// - parameter day: The day in the range `1...31`.
+    ///
+    /// This initializer validates that month is in the range `1...12` and day is in the
+    /// range `1...31` using `precondition`. The year can be any non-negative integer.
+    ///
+    /// - Parameters:
+    ///   - year: The year. Any non-negative integer.
+    ///   - month: The month in the range `1...12`.
+    ///   - day: The day in the range `1...31`.
     public init(year: Int, month: Int, day: Int) {
         precondition(month > 0 && month < 13, "\(month) is not a valid month")
         precondition(day > 0 && day < 32, "\(day) is not a valid day")
@@ -53,27 +97,47 @@ public struct FullDate: Hashable, Sendable {
     }
 }
 
-/// A time.
+/// A time of day in RFC 3339 format (`HH:MM:SS[.FRACTION]`).
+///
+/// This type represents a time value as defined in RFC 3339, containing hour, minute, second,
+/// and an optional fractional-second component. It is used in combination with ``FullDate``
+/// to form a complete ``FullDateTime``.
+///
+/// The fractional-second field is partially dynamic: the integer value you provide is written
+/// directly to the output. For example, providing `123` writes `.123` and providing `1234`
+/// writes `.1234`.
 public struct FullTime: Hashable, Sendable {
-    /// The hour. 0-based in the range `0...23`.
+    /// The hour of the day, 0-based in the range `0...23`.
+    ///
+    /// Hour 0 is midnight, hour 23 is 11 PM.
     public var hour: Int
 
-    /// The minute. 0-based in the range `0...59`.
+    /// The minute of the hour, 0-based in the range `0...59`.
     public var minute: Int
 
-    /// The second. 0-based in the range `0...59`.
+    /// The second of the minute, 0-based in the range `0...59`.
     public var second: Int
 
-    /// This is a partially-dynamic field, and does not directly represent
-    /// milliseconds, microseconds, etc. The number you provide is the number
-    /// that will be written. E.g. `123` will write `HH:mm:ss.123`, and `1234`
-    /// will write `HH:mm:ss.1234`.
+    /// The fractional-second component, or `nil` if not included.
+    ///
+    /// This is a partially-dynamic field and does not directly represent milliseconds,
+    /// microseconds, or any specific fractional unit. The number you provide is the number
+    /// that will be written directly to the output. For example:
+    /// - `123` encodes as `HH:MM:SS.123`
+    /// - `1234` encodes as `HH:MM:SS.1234`
+    /// - `nil` encodes as `HH:MM:SS` (no fraction)
     public var fraction: Int?
 
-    /// Creates a new `FullTime`. Currently no validation takes place.
-    /// - parameter hour: The hour. 0-based in the range `0...23`.
-    /// - parameter minute: The minute. 0-based in the range `0...59`.
-    /// - parameter second: The second. 0-based in the range `0...59`.
+    /// Creates a new `FullTime`.
+    ///
+    /// Currently no validation of the component values is performed. The caller is responsible
+    /// for ensuring the values are in appropriate ranges.
+    ///
+    /// - Parameters:
+    ///   - hour: The hour. 0-based in the range `0...23`.
+    ///   - minute: The minute. 0-based in the range `0...59`.
+    ///   - second: The second. 0-based in the range `0...59`.
+    ///   - fraction: The fractional-second component (optional). Written directly as provided.
     public init(hour: Int, minute: Int, second: Int, fraction: Int? = nil) {
         self.hour = hour
         self.minute = minute

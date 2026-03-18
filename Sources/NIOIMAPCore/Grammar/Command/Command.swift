@@ -15,91 +15,393 @@
 import struct NIO.ByteBuffer
 import struct OrderedCollections.OrderedDictionary
 
-/// Commands are sent by clients, and processed by servers.
+/// Commands are sent by clients to perform operations on the server.
 ///
-/// A notably exclusion here is the ability to append a message.
-/// This is handled separately using the `AppendCommand` type,
-/// as a state is maintained to enable streaming of large amounts
-/// of data.
+/// In the [IMAP4rev1 protocol](https://datatracker.ietf.org/doc/html/rfc3501), a client initiates operations
+/// by sending commands to the server.
+///
+/// Each command is identified with a unique "tag" (typically a short string like "A1") that allows the client
+/// to correlate server responses with the commands that generated them. See ``TaggedCommand``.
+///
+/// The server responds with untagged data (prefixed with `*`) and a tagged response (using the same tag)
+/// indicating success (`OK`), failure (`NO`), or protocol error (`BAD`). See ``Response`` for response types.
+///
+/// ## Command Structure
+///
+/// Every IMAP command follows this basic structure:
+/// ```
+/// tag command-name arguments
+/// ```
+/// For example:
+/// ```
+/// A0001 LOGIN user@example.com password
+/// A0002 SELECT INBOX
+/// A0003 FETCH 1:* (FLAGS BODY)
+/// ```
+///
+/// ## Protocol State Requirements
+///
+/// Commands are restricted based on the connection's current state:
+/// - **Any State**: Commands like ``capability``, ``noop``, and ``logout`` are valid at any time.
+/// - **Not Authenticated**: Commands like ``authenticate(mechanism:initialResponse:)`` and ``login(username:password:)``
+///   authenticate the client before entering authenticated state.
+/// - **Authenticated**: Commands like ``select(_:_:)`` and ``create(_:_:)`` operate on mailboxes
+///   after authentication but before selecting a specific mailbox.
+/// - **Selected**: Commands like ``fetch(_:_:_:)`` and ``search(key:charset:returnOptions:)`` work with messages
+///   in the currently selected mailbox.
+///
+/// ## Extension Support
+///
+/// Many commands support IMAP extensions defined in RFCs beyond [RFC 3501](https://datatracker.ietf.org/doc/html/rfc3501).
+/// For example, the ``list(_:reference:_:_:)`` command supports extensions from
+/// [RFC 5258](https://datatracker.ietf.org/doc/html/rfc5258) (LIST Extensions),
+/// [RFC 5819](https://datatracker.ietf.org/doc/html/rfc5819) (RETURN option), and
+/// [RFC 6154](https://datatracker.ietf.org/doc/html/rfc6154) (SPECIAL-USE mailboxes).
+///
+/// ## Streaming Commands
+///
+/// Some commands like `APPEND` involve uploading large messages and are handled separately by the
+/// ``AppendCommand`` type to support streaming of data.
 public enum Command: Hashable, Sendable {
-    /// Requests a server's capabilities.
+    /// `CAPABILITY` – Requests the server's capabilities.
+    ///
+    /// The server responds with an untagged `CAPABILITY` response (``ResponsePayload/capabilityData(_:)``)
+    /// listing the capabilities it supports (see ``Capability``).
+    ///
+    /// - SeeAlso: [RFC 3501 Section 6.1.1](https://datatracker.ietf.org/doc/html/rfc3501#section-6.1.1)
     case capability
 
-    /// Returns the session's state to "non-authenticated".
+    /// `LOGOUT` – Closes the connection after optional server notifications.
+    ///
+    /// Returns the session to the logged-out state. The server may send an untagged `BYE` response
+    /// before closing the connection.
+    ///
+    /// - SeeAlso: [RFC 3501 Section 6.1.3](https://datatracker.ietf.org/doc/html/rfc3501#section-6.1.3)
     case logout
 
-    /// Performs no operation, typically used to test that a server is responding to commands.
+    /// `NOOP` – Performs no operation.
+    ///
+    /// Used to test server responsiveness or to request that the server send any pending updates
+    /// (such as new messages or mailbox changes).
+    ///
+    /// - SeeAlso: [RFC 3501 Section 6.1.2](https://datatracker.ietf.org/doc/html/rfc3501#section-6.1.2)
     case noop
 
-    /// Creates a new mailbox.
+    /// `CREATE` – Creates a new mailbox.
+    ///
+    /// It is an error to attempt to create `INBOX` or a mailbox with a name that refers to an existing mailbox.
+    /// If the mailbox name is suffixed with a hierarchy separator, the server creates the mailbox hierarchy.
+    ///
+    /// - SeeAlso: [RFC 3501 Section 6.3.3](https://datatracker.ietf.org/doc/html/rfc3501#section-6.3.3)
     case create(MailboxName, [CreateParameter])
 
-    /// Deletes a mailbox.
+    /// `DELETE` – Permanently deletes a mailbox.
+    ///
+    /// It is an error to attempt to delete `INBOX` or a mailbox name that does not exist.
+    /// The server must not remove any inferior hierarchical names.
+    ///
+    /// - SeeAlso: [RFC 3501 Section 6.3.4](https://datatracker.ietf.org/doc/html/rfc3501#section-6.3.4)
     case delete(MailboxName)
 
-    /// Similar to `.select` and returns the same data, however the current mailbox is identified as readonly
+    /// `EXAMINE` – Opens a mailbox in read-only mode, returning the same responses as `SELECT`.
+    ///
+    /// Identical to ``select(_:_:)`` except the selected mailbox is identified as read-only.
+    /// No changes to permanent mailbox state (including per-user state) are permitted.
+    /// The tagged `OK` always includes the `[READ-ONLY]` response code.
+    ///
+    /// ### Example
+    ///
+    /// ```
+    /// C: A002 EXAMINE INBOX
+    /// S: * 172 EXISTS
+    /// S: * 1 RECENT
+    /// S: * FLAGS (\Answered \Flagged \Deleted \Seen \Draft)
+    /// S: A002 OK [READ-ONLY] EXAMINE completed
+    /// ```
+    ///
+    /// - SeeAlso: [RFC 3501 Section 6.3.2](https://datatracker.ietf.org/doc/html/rfc3501#section-6.3.2)
     case examine(MailboxName, [SelectParameter] = [])
 
-    /// Returns a subset of names from the complete set of all names available to the client.
+    /// `LIST` command.
+    ///
+    /// The `LIST` command allows a client to discover what mailboxes are available on the server,
+    /// with support for pattern matching and filtering.
+    ///
+    /// ## Base Functionality ([RFC 3501 Section 6.3.8](https://datatracker.ietf.org/doc/html/rfc3501#section-6.3.8))
+    ///
+    /// The base `LIST` command takes two arguments:
+    /// - **reference**: A mailbox name or hierarchy level that provides context for interpreting the pattern.
+    ///   An empty string means the pattern is interpreted as if by the `SELECT` command.
+    /// - **pattern**: A mailbox name with possible wildcards (`*` matches any substring, `%` matches up to
+    ///   the next hierarchy delimiter). For example, `"*"` lists all mailboxes, `"Foo/*"` lists all mailboxes
+    ///   under "Foo", and `"%"` lists mailboxes at the top level only.
+    ///
+    /// ### Example
+    ///
+    /// ```
+    /// C: A001 LIST "" "*"
+    /// S: * LIST (\NoInferiors) "/" "INBOX"
+    /// S: * LIST (\HasChildren) "/" "Drafts"
+    /// S: * LIST (\HasChildren) "/" "Archive"
+    /// S: A001 OK LIST Completed
+    /// ```
+    ///
+    /// The command `C: A001 LIST "" "*"` corresponds to this case with reference as empty string and
+    /// pattern as `"*"`. The server responds with zero or more `S: * LIST...` lines (each wrapped as
+    /// ``MailboxData/list(_:)``), followed by the tagged response `S: A001 OK LIST Completed`.
+    ///
+    /// ## Selection Options ([RFC 5258](https://datatracker.ietf.org/doc/html/rfc5258))
+    ///
+    /// The optional `options` parameter uses ``ListSelectOptions`` to control which mailboxes are listed:
+    /// - ``ListSelectBaseOption/subscribed``: Only list mailboxes that the user has subscribed to
+    ///   ([RFC 3501](https://datatracker.ietf.org/doc/html/rfc3501)).
+    /// - Additional options from ``ListSelectOption`` can be combined with the base option:
+    ///   - ``ListSelectOption/recursiveMatch``: Include parent mailboxes that don't match but have matching children
+    ///     ([RFC 5258](https://datatracker.ietf.org/doc/html/rfc5258)).
+    ///
+    /// ## Independent Options ([RFC 5258](https://datatracker.ietf.org/doc/html/rfc5258), [RFC 6154](https://datatracker.ietf.org/doc/html/rfc6154))
+    ///
+    /// When syntax conflicts prevent combining options, use ``listIndependent(_:reference:_:_:)`` instead:
+    /// - ``ListSelectIndependentOption/remote``: Include remote mailboxes in the results
+    ///   ([RFC 5258](https://datatracker.ietf.org/doc/html/rfc5258)).
+    /// - ``ListSelectIndependentOption/specialUse``: Only return mailboxes with special-use attributes
+    ///   like `\Drafts`, `\Sent`, or `\Trash` ([RFC 6154](https://datatracker.ietf.org/doc/html/rfc6154)).
+    ///
+    /// ## Return Options ([RFC 5258](https://datatracker.ietf.org/doc/html/rfc5258), [RFC 5819](https://datatracker.ietf.org/doc/html/rfc5819), [RFC 6154](https://datatracker.ietf.org/doc/html/rfc6154))
+    ///
+    /// The optional `returnOptions` array specifies what additional data should be returned for each mailbox:
+    /// - ``ReturnOption/subscribed``: Include subscription state for each mailbox
+    ///   ([RFC 5258](https://datatracker.ietf.org/doc/html/rfc5258)).
+    /// - ``ReturnOption/children``: Include child mailbox information (`\HasChildren` / `\HasNoChildren`)
+    ///   ([RFC 5258](https://datatracker.ietf.org/doc/html/rfc5258)).
+    /// - ``ReturnOption/specialUse``: Include special-use attributes
+    ///   ([RFC 6154](https://datatracker.ietf.org/doc/html/rfc6154)).
+    /// - ``ReturnOption/statusOption(_:)``: Request `STATUS` data (mailbox statistics like `MESSAGES`, `UNSEEN`, `UIDVALIDITY`)
+    ///   be returned alongside `LIST` responses ([RFC 5819](https://datatracker.ietf.org/doc/html/rfc5819)).
+    ///
+    /// ### Example with Return Options
+    ///
+    /// ```
+    /// C: A002 LIST "" "INBOX" RETURN (SUBSCRIBED STATUS (MESSAGES UNSEEN))
+    /// S: * LIST (\Subscribed) "/" "INBOX"
+    /// S: * STATUS "INBOX" (MESSAGES 42 UNSEEN 3)
+    /// S: A002 OK LIST Completed
+    /// ```
+    ///
+    /// The command shows a LIST with RETURN options. The server responds with a LIST response
+    /// (``MailboxData/list(_:)``) and a STATUS response (``MailboxData/status(_:_:)``), both wrapped
+    /// as untagged ``Response`` types.
     case list(ListSelectOptions?, reference: MailboxName, MailboxPatterns, [ReturnOption] = [])
 
-    /// Similar to `.list`, but uses options that do not syntactically interact with other options
+    /// Similar to `.list`, but uses options that do not syntactically interact with other options.
+    ///
+    /// Some `LIST` extension options cannot be combined with other options due to syntactic constraints.
+    /// Use this variant with ``ListSelectIndependentOption`` values (such as ``ListSelectIndependentOption/remote``
+    /// or ``ListSelectIndependentOption/specialUse``) when needed.
     case listIndependent([ListSelectIndependentOption], reference: MailboxName, MailboxPatterns, [ReturnOption] = [])
 
-    /// Returns a subset of names from the complete set of names that the user has marked as "active" or "subscribed"
+    /// `LSUB` – Lists subscribed mailboxes matching the pattern.
+    ///
+    /// Returns a subset of mailbox names from the complete set of names that the user has marked
+    /// as "active" or "subscribed". This is typically a smaller set than ``list(_:reference:_:_:)`` results.
+    /// The server responds with ``MailboxData/lsub(_:)`` responses for each matching mailbox.
+    ///
+    /// - SeeAlso: [RFC 3501 Section 6.3.9](https://datatracker.ietf.org/doc/html/rfc3501#section-6.3.9)
     case lsub(reference: MailboxName, pattern: ByteBuffer)
 
-    /// Renames the given mailbox.
+    /// `RENAME` – Changes the name of a mailbox and all its children.
+    ///
+    /// Renames the mailbox and all inferior hierarchical names. When renaming INBOX, all messages
+    /// are moved to the new mailbox, and the original INBOX is left empty.
+    ///
+    /// - SeeAlso: [RFC 3501 Section 6.3.5](https://datatracker.ietf.org/doc/html/rfc3501#section-6.3.5)
     case rename(from: MailboxName, to: MailboxName, parameters: OrderedDictionary<String, ParameterValue?>)
 
-    /// Selects the given mailbox in preparation of running more commands.
+    /// `SELECT` – Selects a mailbox so that messages can be accessed using message-sequence-number based commands.
+    ///
+    /// Only one mailbox can be selected at a time. If another mailbox is already selected, it is
+    /// implicitly closed before the new mailbox is selected. The server sends several untagged responses
+    /// before the tagged `OK` to describe the mailbox state.
+    ///
+    /// ### Example
+    ///
+    /// ```
+    /// C: A001 SELECT INBOX
+    /// S: * 172 EXISTS
+    /// S: * 1 RECENT
+    /// S: * OK [UNSEEN 12] Message 12 is first unseen
+    /// S: * OK [UIDVALIDITY 3857529045] UIDs valid
+    /// S: * FLAGS (\Answered \Flagged \Deleted \Seen \Draft)
+    /// S: A001 OK [READ-WRITE] SELECT completed
+    /// ```
+    ///
+    /// The untagged responses include `EXISTS` (``MailboxData/exists(_:)``), `RECENT` (``MailboxData/recent(_:)``),
+    /// `FLAGS` (``MailboxData/flags(_:)``), and several `OK` lines with response codes (``ResponseTextCode``).
+    /// The tagged `OK` includes a `[READ-WRITE]` or `[READ-ONLY]` response code.
+    ///
+    /// - SeeAlso: [RFC 3501 Section 6.3.1](https://datatracker.ietf.org/doc/html/rfc3501#section-6.3.1)
     case select(MailboxName, [SelectParameter] = [])
 
-    /// Retrieves the status of the given mailbox.
+    /// `STATUS` – Requests the status of the specified mailbox without changing the current selection.
+    ///
+    /// Allows a client to access attributes (see ``MailboxAttribute``) of a mailbox other than the
+    /// currently selected one. The server responds with an untagged `STATUS` response (``MailboxData/status(_:_:)``)
+    /// containing the requested attributes.
+    ///
+    /// - SeeAlso: [RFC 3501 Section 6.3.10](https://datatracker.ietf.org/doc/html/rfc3501#section-6.3.10)
     case status(MailboxName, [MailboxAttribute])
 
-    /// Subscribes to the given mailbox.
+    /// `SUBSCRIBE` – Adds the specified mailbox name to the server's set of "active" or "subscribed" mailboxes.
+    ///
+    /// - SeeAlso: [RFC 3501 Section 6.3.6](https://datatracker.ietf.org/doc/html/rfc3501#section-6.3.6)
     case subscribe(MailboxName)
 
-    /// Unsubscribes from the given mailbox.
+    /// `UNSUBSCRIBE` – Removes the specified mailbox name from the server's set of "active" or "subscribed" mailboxes.
+    ///
+    /// - SeeAlso: [RFC 3501 Section 6.3.7](https://datatracker.ietf.org/doc/html/rfc3501#section-6.3.7)
     case unsubscribe(MailboxName)
 
-    /// Begins the process of the client authenticating against the server. The client specifies a authentication `mechanism`, and the server may respond
-    /// with one or more challenges, which the client is also required to respond to using `CommandStreamPart.continuationResponse`.
+    /// `AUTHENTICATE` – Begins the process of the client authenticating against the server using the specified mechanism.
+    ///
+    /// The client specifies an authentication ``AuthenticationMechanism``, and the server may respond
+    /// with one or more challenges (``Response/authenticationChallenge(_:)``), which the client must
+    /// answer using ``CommandStreamPart/continuationResponse(_:)``.
+    ///
+    /// - SeeAlso: [RFC 3501 Section 6.2.2](https://datatracker.ietf.org/doc/html/rfc3501#section-6.2.2)
     case authenticate(mechanism: AuthenticationMechanism, initialResponse: InitialResponse?)
 
-    /// Authenticates the client using a username and password
+    /// `LOGIN` – Authenticates the client using a plaintext username and password.
+    ///
+    /// Not available when the server advertises the `LOGINDISABLED` capability.
+    ///
+    /// - SeeAlso: [RFC 3501 Section 6.2.3](https://datatracker.ietf.org/doc/html/rfc3501#section-6.2.3)
     case login(username: String, password: String)
 
-    /// Begins TLS negotiation immediately after this command is sent.
+    /// `STARTTLS` – Begins TLS negotiation.
+    ///
+    /// Initiates encryption for the connection. Only available when the server advertises
+    /// the `STARTTLS` capability.
+    ///
+    /// - SeeAlso: [RFC 3501 Section 6.2.1](https://datatracker.ietf.org/doc/html/rfc3501#section-6.2.1)
     case startTLS
 
-    /// Requests a check-point of the server's in-memory representation of the mailbox. Allows the server to do some housekeeping.
+    /// `CHECK` – Requests a checkpoint of the server's mailbox state.
+    ///
+    /// Allows the server to perform implementation-dependent housekeeping operations.
+    ///
+    /// - SeeAlso: [RFC 3501 Section 6.4.1](https://datatracker.ietf.org/doc/html/rfc3501#section-6.4.1)
     case check
 
-    /// Permanently deletes all messages in the selected mailbox that have the *\Deleted* flag set, and unselects the mailbox.
+    /// `CLOSE` – Permanently deletes all messages with the `\Deleted` flag and deselects the mailbox.
+    ///
+    /// Unlike ``expunge``, this command does NOT send untagged `EXPUNGE` responses for each deleted message.
+    /// Messages are removed silently, and the mailbox is closed.
+    ///
+    /// - SeeAlso: [RFC 3501 Section 6.4.2](https://datatracker.ietf.org/doc/html/rfc3501#section-6.4.2)
     case close
 
-    /// Permanently deletes all messages in the selected mailbox that have the *\Deleted* flag set.
+    /// `EXPUNGE` – Permanently deletes all messages with the `\Deleted` flag set.
+    ///
+    /// Before returning `OK`, the server sends one untagged `EXPUNGE` response per deleted message.
+    /// Each untagged response is a ``MessageData/expunge(_:)`` containing the sequence number of the deleted message.
+    ///
+    /// ### Example
+    ///
+    /// ```
+    /// C: A006 EXPUNGE
+    /// S: * 3 EXPUNGE
+    /// S: * 3 EXPUNGE
+    /// S: * 5 EXPUNGE
+    /// S: A006 OK EXPUNGE completed
+    /// ```
+    ///
+    /// - SeeAlso: [RFC 3501 Section 6.4.3](https://datatracker.ietf.org/doc/html/rfc3501#section-6.4.3)
     case expunge
 
+    /// `ENABLE` – Enables specified capabilities on the server.
+    ///
     /// Enables each listed capability, providing the server has advertised support for those capabilities.
+    /// The server responds with an untagged `ENABLED` response (``ResponsePayload/enableData(_:)``)
+    /// listing the capabilities that were successfully enabled.
+    ///
+    /// - SeeAlso: [RFC 5161](https://datatracker.ietf.org/doc/html/rfc5161)
     case enable([Capability])
 
-    /// Unselects the currently-select mailbox, and returns to an unselected state.
+    /// `UNSELECT` – Closes the currently selected mailbox without expunging messages.
+    ///
+    /// Deselects the mailbox and returns to the authenticated state. Unlike ``close``, this does not
+    /// remove messages with the `\Deleted` flag set.
+    ///
+    /// - SeeAlso: [RFC 3691](https://datatracker.ietf.org/doc/html/rfc3691)
     case unselect
 
-    /// Moves the server into an idle state. The server may send periodic reminder that it's idle. No more commands may be sent until
-    /// `CommandStreamPart.idleDone` has been sent.
+    /// `IDLE` – Enters the IDLE state.
+    ///
+    /// Moves the server into an idle state where it may send periodic updates on mailbox changes.
+    /// No more commands may be sent until ``CommandStreamPart/idleDone`` has been sent to exit IDLE mode.
+    ///
+    /// - SeeAlso: [RFC 2177](https://datatracker.ietf.org/doc/html/rfc2177)
     case idleStart
 
-    /// Copies each message in a given set to a new mailbox, preserving the original in the current mailbox.
+    /// `COPY` – Copies each message in the given sequence number set to the destination mailbox.
+    ///
+    /// The original messages remain in the current mailbox. The `\Seen` flag is not changed,
+    /// and the internal date is preserved. If the destination mailbox does not exist, the server
+    /// returns a `[TRYCREATE]` response code in the `NO` response.
+    ///
+    /// ### Example
+    ///
+    /// ```
+    /// C: A005 COPY 1:3 "Saved"
+    /// S: A005 OK COPY completed
+    /// ```
+    ///
+    /// - SeeAlso: [RFC 3501 Section 6.4.7](https://datatracker.ietf.org/doc/html/rfc3501#section-6.4.7)
     case copy(LastCommandSet<SequenceNumber>, MailboxName)
 
-    /// Fetches an array of specified attributes for each message in a given set.
+    /// `FETCH` – Retrieves message data for each message in the given sequence number set.
+    ///
+    /// The `attributes` array specifies which data items to fetch (see ``FetchAttribute``), and
+    /// the server sends one untagged `FETCH` response per message. Responses are delivered
+    /// as ``FetchResponse`` values (potentially as a streaming sequence for large data like body content).
+    ///
+    /// ### Example
+    ///
+    /// ```
+    /// C: A003 FETCH 1:3 (FLAGS BODY[])
+    /// S: * 1 FETCH (FLAGS (\Seen) BODY[] {1234}
+    /// S: ...message content...
+    /// S: )
+    /// S: * 2 FETCH (FLAGS () BODY[] {5678}
+    /// S: ...message content...
+    /// S: )
+    /// S: A003 OK FETCH completed
+    /// ```
+    ///
+    /// Each `* N FETCH ...` line is a ``FetchResponse`` value containing one or more ``MessageAttribute`` values.
+    ///
+    /// - SeeAlso: [RFC 3501 Section 6.4.5](https://datatracker.ietf.org/doc/html/rfc3501#section-6.4.5)
     case fetch(LastCommandSet<SequenceNumber>, [FetchAttribute], [FetchModifier])
 
-    /// Alters data associated with a message, typically returning the new data as an untagged fetch response.
+    /// `STORE` – Modifies flags or other data for messages in the given sequence number set.
+    ///
+    /// The `data` parameter specifies what to set, add, or remove (see ``StoreData``).
+    /// Unless the `.SILENT` variant is used, the server returns untagged `FETCH` responses
+    /// reflecting the updated flags for each affected message.
+    ///
+    /// ### Example
+    ///
+    /// ```
+    /// C: A004 STORE 1:3 +FLAGS (\Deleted)
+    /// S: * 1 FETCH (FLAGS (\Deleted \Seen))
+    /// S: * 2 FETCH (FLAGS (\Deleted))
+    /// S: * 3 FETCH (FLAGS (\Deleted \Flagged))
+    /// S: A004 OK STORE completed
+    /// ```
+    ///
+    /// Each `* N FETCH ...` line is a ``FetchResponse`` containing the updated ``Flag`` values.
+    ///
+    /// - SeeAlso: [RFC 3501 Section 6.4.6](https://datatracker.ietf.org/doc/html/rfc3501#section-6.4.6)
     case store(LastCommandSet<SequenceNumber>, [StoreModifier], StoreData)
 
     /// Searches the currently-selected mailbox for messages that match the search criteria.
@@ -113,59 +415,113 @@ public enum Command: Hashable, Sendable {
     /// * `SEARCH RETURN () ANSWERED` is `.search(key:. answered, returnOptions: [.all])`
     case search(key: SearchKey, charset: String? = nil, returnOptions: [SearchReturnOption] = [])
 
-    /// Moves each message in a given set into a new mailbox, removing the copy from the current mailbox.
+    /// `MOVE` – Moves each message in the given sequence number set to the destination mailbox.
+    ///
+    /// Copies the specified messages to the end of the destination mailbox and removes the copies from the current mailbox.
+    /// This operation is equivalent to performing ``copy(_:_:)`` followed by ``store(_:_:_:)`` with `\Deleted` flag.
+    ///
+    /// - SeeAlso: [RFC 6851](https://datatracker.ietf.org/doc/html/rfc6851)
     case move(LastCommandSet<SequenceNumber>, MailboxName)
 
-    /// Identifies the client to the server
+    /// `ID` – Identifies the client to the server.
+    ///
+    /// Sends identification parameters to the server (typically client name and version).
+    /// The server responds with an untagged `ID` response (``ResponsePayload/id(_:)``).
+    ///
+    /// - SeeAlso: [RFC 2971](https://datatracker.ietf.org/doc/html/rfc2971)
     case id(OrderedDictionary<String, String?>)
 
-    /// Retrieves the namespaces available to the user.
+    /// `NAMESPACE` – Retrieves the namespaces available to the user.
+    ///
+    /// The server responds with an untagged `NAMESPACE` response (``MailboxData/namespace(_:)``)
+    /// describing the personal, shared, and public namespace hierarchies.
+    ///
+    /// - SeeAlso: [RFC 2342](https://datatracker.ietf.org/doc/html/rfc2342)
     case namespace
 
-    /// UIDBATCHES to get partition UIDs into batches.
+    /// `UIDBATCHES` – Partitions a UID range into batches of a given size.
     ///
-    /// https://datatracker.ietf.org/doc/draft-ietf-mailmaint-imap-uidbatches/
+    /// **Requires server capability:** ``Capability/uidBatches``
+    ///
+    /// - SeeAlso: [UIDBATCHES Internet-Draft](https://datatracker.ietf.org/doc/draft-ietf-mailmaint-imap-uidbatches/)
     case uidBatches(batchSize: Int, batchRange: ClosedRange<Int>?)
 
-    /// Similar to `.copy`, but uses unique identifier instead of sequence numbers to identify messages.
+    /// `UID COPY` – Similar to ``copy(_:_:)``, but uses unique identifier instead of sequence numbers to identify messages.
+    ///
+    /// - SeeAlso: [RFC 3501 Section 6.4.8](https://datatracker.ietf.org/doc/html/rfc3501#section-6.4.8)
     case uidCopy(LastCommandSet<UID>, MailboxName)
 
-    /// Similar to `.move`, but uses unique identifier instead of sequence numbers to identify messages.
+    /// `UID MOVE` – Similar to ``move(_:_:)``, but uses unique identifier instead of sequence numbers to identify messages.
+    ///
+    /// - SeeAlso: [RFC 3501 Section 6.4.8](https://datatracker.ietf.org/doc/html/rfc3501#section-6.4.8)
     case uidMove(LastCommandSet<UID>, MailboxName)
 
-    /// Similar to `.fetch`, but uses unique identifier instead of sequence numbers to identify messages.
+    /// `UID FETCH` – Similar to ``fetch(_:_:_:)``, but uses unique identifier instead of sequence numbers to identify messages.
+    ///
+    /// - SeeAlso: [RFC 3501 Section 6.4.8](https://datatracker.ietf.org/doc/html/rfc3501#section-6.4.8)
     case uidFetch(LastCommandSet<UID>, [FetchAttribute], [FetchModifier])
 
-    /// Similar to `.search`, but uses unique identifier instead of sequence numbers to identify messages.
+    /// `UID SEARCH` – Similar to ``search(key:charset:returnOptions:)``, but uses unique identifier instead of sequence numbers to identify messages.
+    ///
+    /// - SeeAlso: [RFC 3501 Section 6.4.8](https://datatracker.ietf.org/doc/html/rfc3501#section-6.4.8)
     case uidSearch(key: SearchKey, charset: String? = nil, returnOptions: [SearchReturnOption] = [])
 
-    /// Similar to `.store`, but uses unique identifier instead of sequence numbers to identify messages.
+    /// `UID STORE` – Similar to ``store(_:_:_:)``, but uses unique identifier instead of sequence numbers to identify messages.
+    ///
+    /// - SeeAlso: [RFC 3501 Section 6.4.8](https://datatracker.ietf.org/doc/html/rfc3501#section-6.4.8)
     case uidStore(LastCommandSet<UID>, [StoreModifier], StoreData)
 
-    /// Similar to `.expunge`, but uses unique identifier instead of sequence numbers to identify messages.
+    /// `UID EXPUNGE` – Similar to ``expunge``, but uses unique identifier instead of sequence numbers to identify messages.
+    ///
+    /// - SeeAlso: [RFC 3501 Section 6.4.8](https://datatracker.ietf.org/doc/html/rfc3501#section-6.4.8)
     case uidExpunge(LastCommandSet<UID>)
 
-    /// Takes the name of a quota root and returns the quota root's resource usage and limits.
+    /// `GETQUOTA` – Retrieves quota information for a quota root.
+    ///
+    /// The server responds with an untagged `QUOTA` response (``ResponsePayload/quota(_:_:)``)
+    /// containing the quota root's resource usage and limits.
+    ///
+    /// - SeeAlso: [RFC 9208](https://datatracker.ietf.org/doc/html/rfc9208)
     case getQuota(QuotaRoot)
 
-    /// Takes the name of a mailbox and returns the list of quota roots for the mailbox in an untagged QUOTAROOT response.
+    /// `GETQUOTAROOT` – Retrieves quota roots for a mailbox.
+    ///
+    /// The server responds with an untagged `QUOTAROOT` response (``ResponsePayload/quotaRoot(_:_:)``)
+    /// listing the quota roots that control quotas for the specified mailbox.
+    ///
+    /// - SeeAlso: [RFC 9208](https://datatracker.ietf.org/doc/html/rfc9208)
     case getQuotaRoot(MailboxName)
 
-    /// Sets the resource limits for a given quote root.
+    /// `SETQUOTA` – Sets resource limits for a quota root.
+    ///
+    /// Modifies the resource limits (such as storage and message count) for a specific quota root.
+    ///
+    /// - SeeAlso: [RFC 9208](https://datatracker.ietf.org/doc/html/rfc9208)
     case setQuota(QuotaRoot, [QuotaLimit])
 
-    /// When the mailbox name is the empty string, this command retrieves
-    /// server annotations.  When the mailbox name is not empty, this command
-    /// retrieves annotations on the specified mailbox.
+    /// `GETMETADATA` – Retrieves metadata entries.
+    ///
+    /// When the mailbox name is empty, retrieves server annotations. When non-empty,
+    /// retrieves metadata entries on the specified mailbox. The server responds with
+    /// `METADATA` responses containing the requested entry values.
+    ///
+    /// - SeeAlso: [RFC 5464](https://datatracker.ietf.org/doc/html/rfc5464)
     case getMetadata(options: [MetadataOption], mailbox: MailboxName, entries: [MetadataEntryName])
 
-    /// Sets the specified list of entries by adding or
-    /// replacing the specified values provided, on the specified existing
-    /// mailboxes or on the server (if the mailbox argument is the empty
-    /// string).
+    /// `SETMETADATA` – Sets metadata entries.
+    ///
+    /// Adds or replaces metadata entry values on the specified mailbox or server
+    /// (if the mailbox argument is the empty string).
+    ///
+    /// - SeeAlso: [RFC 5464](https://datatracker.ietf.org/doc/html/rfc5464)
     case setMetadata(mailbox: MailboxName, entries: OrderedDictionary<MetadataEntryName, MetadataValue>)
 
     /// Performs a “multimailbox” search as defined in RFC 7377.
+    ///
+    /// This command enables searching across multiple mailboxes in a single request. The search results are
+    /// returned using the `ESEARCH` response format defined in RFC 4731, which includes optional `MIN`, `MAX`,
+    /// `COUNT`, and `ALL` return options. This command is equivalent to the extended `SEARCH` command but can
+    /// target multiple mailboxes via the ``MailboxFilter`` and ``Mailboxes`` filters.
     case extendedSearch(ExtendedSearchOptions)
 
     /// When sent with no arguments: removes all mailbox access keys
@@ -183,14 +539,21 @@ public enum Command: Hashable, Sendable {
     /// authorization mechanism.
     case generateAuthorizedURL([RumpURLAndMechanism])
 
-    /// Requests that the server return the text data
-    /// associated with the specified IMAP URLs
+    /// `URLFETCH` – Retrieves message data from IMAP URLs.
+    ///
+    /// Requests that the server return the text data associated with the specified IMAP URLs.
+    ///
+    /// - SeeAlso: [RFC 4467](https://datatracker.ietf.org/doc/html/rfc4467)
     case urlFetch([ByteBuffer])
 
-    /// Instructs the server to use the named compression mechanism.
+    /// Instructs the server to use the specified compression mechanism.
+    ///
+    /// - SeeAlso: [RFC 4978](https://datatracker.ietf.org/doc/html/rfc4978)
     case compress(Capability.CompressionKind)
 
-    /// RFC 9698: Retrieve the JMAP session URL
+    /// Retrieves the JMAP session URL.
+    ///
+    /// - SeeAlso: [RFC 9698](https://datatracker.ietf.org/doc/html/rfc9698)
     case getJMAPAccess
 
     /// A custom command that’s not defined in any RFC.
@@ -730,7 +1093,7 @@ extension Command {
     /// Pass in a `UIDSet`, and if that set is valid (i.e. non-empty) then a command is returned.
     /// - parameter messages: The set of message UIDs to use.
     /// - parameter modifiers: Store modifiers.
-    /// - parameter flags: The flags to store.
+    /// - parameter data: The store data to apply.
     /// - returns: `nil` if `messages` is empty, otherwise a `Command`.
     public static func uidStore(messages: UIDSet, modifiers: [StoreModifier], data: StoreData) -> Command? {
         guard let set = MessageIdentifierSetNonEmpty(set: messages) else {
@@ -742,6 +1105,7 @@ extension Command {
     /// Convenience for creating a *UID EXPUNGE* command.
     /// Pass in a `UIDSet`, and if that set is valid (i.e. non-empty) then a command is returned.
     /// - parameter messages: The set of message UIDs to use.
+    /// - parameter mailbox: The mailbox on which to perform the expunge.
     /// - returns: `nil` if `messages` is empty, otherwise a `Command`.
     public static func uidExpunge(messages: UIDSet, mailbox: MailboxName) -> Command? {
         guard let set = MessageIdentifierSetNonEmpty(set: messages) else {

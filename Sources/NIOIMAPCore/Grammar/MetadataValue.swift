@@ -14,19 +14,48 @@
 
 import struct NIO.ByteBuffer
 
-/// The value for a metadata entry.
+/// A metadata entry value returned from a `GETMETADATA` command or set with `SETMETADATA` (RFC 5464).
+///
+/// **Requires server capability:** ``Capability/metadata`` or ``Capability/metadataServer``
+///
+/// Metadata values can be any octet string or `nil` (representing a non-existent or deleted entry).
+/// Values are stored and retrieved as binary data, though their interpretation is application-specific.
+/// A `nil` value represents either a non-existent entry or an entry that has been deleted.
+/// See [RFC 5464 Section 4.4.1](https://datatracker.ietf.org/doc/html/rfc5464#section-4.4.1).
+///
+/// ### Example
+///
+/// ```
+/// C: A001 GETMETADATA "INBOX" ("/shared/comment" "/private/notes")
+/// S: * METADATA "INBOX" ("/shared/comment" "Team folder" "/private/notes" NIL)
+/// S: A001 OK GETMETADATA completed
+/// ```
+///
+/// The values in the response are ``MetadataValue`` instances:
+/// - `MetadataValue(ByteBuffer("Team folder"))` for `/shared/comment`
+/// - `MetadataValue(nil)` for `/private/notes` (not set or deleted)
+///
+/// ## Related Types
+///
+/// - See ``MetadataEntryName`` for entry names
+/// - See ``MetadataResponse`` for complete metadata responses
+/// - See ``MetadataOption`` for metadata query options
+///
+/// - SeeAlso: [RFC 5464 Section 4.4.1](https://datatracker.ietf.org/doc/html/rfc5464#section-4.4.1)
 public struct MetadataValue: Hashable, Sendable {
-    /// The raw value bytes.
+    /// The raw value bytes, or `nil` if the entry is not set or has been deleted.
+    ///
+    /// Contains the raw octet sequence representing the metadata value. When `nil`, the entry
+    /// either does not exist or has been explicitly deleted via `SETMETADATA`.
     public let bytes: ByteBuffer?
 
-    /// Creates a new `MetadataValue`.
-    /// - parameter rawValue: The raw value bytes - optional.
+    /// Creates a new `MetadataValue` with optional raw bytes.
+    ///
+    /// - parameter bytes: The raw value bytes, or `nil` for non-existent/deleted entries.
     public init(_ bytes: ByteBuffer?) {
         self.bytes = bytes
     }
 }
-
-// MARK: - ExpressibleByNilLiteral
 
 extension MetadataValue: ExpressibleByNilLiteral {
     public init(nilLiteral: ()) {

@@ -14,12 +14,40 @@
 
 import struct NIO.ByteBuffer
 
-/// Options that can be used by themselves.
+/// The primary selection mode for a `LIST` command (RFC 5258 LIST-EXTENDED extension).
+///
+/// **Requires server capability:** ``Capability/listExtended``
+///
+/// Base options determine the fundamental filtering mode for the `LIST` command,
+/// and are defined in [RFC 5258 Section 3.1](https://datatracker.ietf.org/doc/html/rfc5258#section-3.1).
+///
+/// ### Example
+///
+/// ```
+/// C: A001 LIST SUBSCRIBED "" "*"
+/// S: * LIST (\Noselect) "/" "Archive"
+/// S: * LIST (\HasNoChildren) "/" "Drafts"
+/// S: A001 OK LIST completed
+/// ```
+///
+/// The command `LIST SUBSCRIBED "" "*"` uses the ``subscribed`` base option to return only subscribed mailboxes.
+///
+/// ## Related Types
+///
+/// Combine this with ``ListSelectOption`` values to add additional filtering constraints.
+/// See ``ListSelectOptions`` for how to construct a complete set of `LIST` selection options.
+///
+/// - SeeAlso: [RFC 5258](https://datatracker.ietf.org/doc/html/rfc5258)
 public enum ListSelectBaseOption: Hashable, Sendable {
-    /// *SUBSCRIBED* - Lists subscribed mailboxes.
+    /// The `SUBSCRIBED` base option returns only mailboxes the user has subscribed to.
+    ///
+    /// This is the primary filtering mode that controls which mailboxes are included in the response.
+    /// From [RFC 5258 Section 3.1](https://datatracker.ietf.org/doc/html/rfc5258#section-3.1).
     case subscribed
 
-    /// A catch-all to support future extensions
+    /// Catch-all for `LIST` base selection options defined in future extensions.
+    ///
+    /// Supports extension base options not yet defined in the standard.
     case option(KeyValue<OptionExtensionKind, OptionValueComp?>)
 }
 

@@ -14,13 +14,39 @@
 
 import struct NIO.ByteBuffer
 
-/// IMAP Flag
+/// A message flag.
 ///
-/// Flags are case preserving, but case insensitive.
-/// As such e.g. `.extension("\\FOOBAR") == .extension("\\FooBar")`, but
-/// it will round-trip preserving its case.
+/// Flags are attributes attached to messages that indicate message state or special properties.
+/// They are part of the base [IMAP protocol](https://datatracker.ietf.org/doc/html/rfc3501).
+///
+/// ## Standard Flags
+///
+/// [RFC 3501](https://datatracker.ietf.org/doc/html/rfc3501) defines five standard system flags:
+/// - ``answered`` - The message has been replied to.
+/// - ``flagged`` - The message has been marked for attention.
+/// - ``deleted`` - The message has been deleted.
+/// - ``seen`` - The message has been read by the user.
+/// - ``draft`` - The message is incomplete and has not been sent.
+///
+/// ## Case Handling
+///
+/// Flags are compared case-insensitively, meaning `Flag("\\SEEN")` and `Flag("\\Seen")` are considered equal.
+/// Flags also preserve their original casing when encoded and decoded.
+///
+/// ## Extension Flags
+///
+/// Beyond the five standard flags, custom flags can be created. These are defined in
+/// [RFC 3501 Section 2.3.2](https://datatracker.ietf.org/doc/html/rfc3501#section-2.3.2).
+/// Custom flags must begin with a backslash (`\`).
+///
+/// Example showing standard and custom flags:
+/// ```
+/// C: A001 STORE 1 +FLAGS (\Seen \Junk)
+/// S: * 1 FETCH (FLAGS (\Answered \Seen \Junk))
+/// S: A001 OK STORE completed
+/// ```
 public struct Flag: Hashable, Sendable {
-    /// The raw case-sensitive `String` value.
+    /// The raw case-sensitive ``Swift/String`` value.
     internal let stringValue: String
 
     /// Creates a new `Flag` from the given `String`. Note that casing is preserved, however
@@ -66,22 +92,32 @@ extension Flag: CustomDebugStringConvertible {
 }
 
 extension Flag {
-    /// `\\Answered` - The message has been replied to.
+    /// `\Answered` - The message has been replied to.
+    ///
+    /// This standard flag ([RFC 3501](https://datatracker.ietf.org/doc/html/rfc3501)) indicates that the
+    /// message is a response to another message.
     public static let answered = Self("\\Answered")
 
-    /// `\\Flagged` - The message has been marked by the user, typically as a reminder
-    /// that some action is required.
+    /// `\Flagged` - The message has been marked for attention.
+    ///
+    /// This standard flag ([RFC 3501](https://datatracker.ietf.org/doc/html/rfc3501)).
     public static let flagged = Self("\\Flagged")
 
-    /// `\\Deleted` - The message has been deleted and should no
-    /// longer be shown to the user, unless they specifically request to
-    /// view deleted messages.
+    /// `\Deleted` - The message has been deleted.
+    ///
+    /// This standard flag ([RFC 3501](https://datatracker.ietf.org/doc/html/rfc3501)) marks a message for
+    /// deletion. The message is not permanently removed until the ``Command/expunge`` command is executed
+    /// or the mailbox is closed.
     public static let deleted = Self("\\Deleted")
 
-    /// `\\Seen` - The message has been read by the user
+    /// `\Seen` - The message has been read by the user.
+    ///
+    /// This standard flag ([RFC 3501](https://datatracker.ietf.org/doc/html/rfc3501)).
     public static let seen = Self("\\Seen")
 
-    /// `\\Draft` - The message is not yet complete
+    /// `\Draft` - The message is not yet complete.
+    ///
+    /// This standard flag ([RFC 3501](https://datatracker.ietf.org/doc/html/rfc3501)).
     public static let draft = Self("\\Draft")
 
     /// Convenience function to create a new flag from a `Keyword`.
@@ -91,10 +127,20 @@ extension Flag {
         self.init(keyword.rawValue)
     }
 
-    /// Creates a new `Flag` that complies to RFC 3501 `flag-extension`
-    /// Note: If the provided extension is invalid then we will crash
-    /// - parameter string: The new flag text, *must* begin with a single '\'
-    /// - returns: A newly-create `Flag`
+    /// Creates a new custom flag complying to [RFC 3501](https://datatracker.ietf.org/doc/html/rfc3501) flag-extension syntax.
+    ///
+    /// Custom flags must begin with a backslash (`\`).
+    ///
+    /// ### Example
+    ///
+    /// ```
+    /// let junkFlag = Flag.extension("\\Junk")
+    /// let importantFlag = Flag.extension("\\Important")
+    /// ```
+    ///
+    /// - parameter string: The custom flag name. Must begin with a single `\`. Will crash if not.
+    /// - returns: A newly-created `Flag`
+    /// - Note: If the provided extension is invalid (does not begin with `\`), a runtime assertion will fail.
     public static func `extension`(_ string: String) -> Self {
         precondition(string.first == "\\", "Flag extensions must begin with \\")
         return Self(string)

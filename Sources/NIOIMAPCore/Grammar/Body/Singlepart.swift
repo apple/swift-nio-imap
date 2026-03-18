@@ -15,21 +15,40 @@
 import struct NIO.ByteBuffer
 
 extension BodyStructure {
-    /// Represents a single-part body as defined in RFC 3501.
+    /// A single-part MIME message body as defined in RFC 3501.
+    ///
+    /// A single-part body represents a message containing only one MIME part. This includes simple
+    /// media types (e.g., `text/plain`, `image/jpeg`), the `message/rfc822` encapsulated message type,
+    /// and text-specific types. Single-part bodies may have optional extension fields for forward compatibility.
+    ///
+    /// ### Example
+    ///
+    /// ```
+    /// ("text" "plain" ("charset" "us-ascii") NIL NIL "7bit" 3445 65)
+    /// ```
+    ///
+    /// This is parsed as a ``Singlepart`` with `kind: .text(...)`, `fields: Fields(...)`, and no extension.
+    ///
+    /// - SeeAlso: [RFC 3501 Section 2.6.3](https://datatracker.ietf.org/doc/html/rfc3501#section-2.6.3)
+    /// - SeeAlso: ``Kind``
+    /// - SeeAlso: ``BodyStructure``
     public struct Singlepart: Hashable, Sendable {
-        /// The type of single-part. Note that "message" types may contain a multi-part.
+        /// The type of this single-part body (basic media, message/rfc822, or text).
         public var kind: Kind
 
-        /// A collection of common message attributes, such as a message identifier.
+        /// Common fields present in all body structures (media parameters, content ID, description, encoding, size).
         public var fields: Fields
 
-        /// An optional extension to the core message. Not required to construct a valid message.
+        /// Optional extension fields for future IMAP extensions.
+        ///
+        /// Per RFC 3501, servers may include extension data after the standard fields for forward compatibility.
+        /// These fields are optional and not required to construct a valid single-part body.
         public var `extension`: Extension?
 
-        /// Creates a new `SinglePart`.
-        /// - parameter type: The type of single-part. Note that "message" types may contain a multi-part.
-        /// - parameter fields: A collection of common message attributes, such as a message identifier.
-        /// - parameter extension: An optional extension to the core message. Not required to construct a valid message.
+        /// Creates a new single-part body.
+        /// - parameter kind: The type of single-part body
+        /// - parameter fields: Common body fields
+        /// - parameter extension: Optional extension fields (defaults to `nil`)
         public init(kind: BodyStructure.Singlepart.Kind, fields: Fields, extension: Extension? = nil) {
             self.kind = kind
             self.fields = fields
@@ -41,37 +60,53 @@ extension BodyStructure {
 // MARK: - Types
 
 extension BodyStructure.Singlepart {
-    /// Represents the type of a single-part message.
+    /// The media type category of a single-part body (RFC 3501).
+    ///
+    /// Represents the three main kinds of single-part bodies: basic media types, encapsulated messages,
+    /// and text-specific types. Each kind may have additional properties specific to that type.
     public indirect enum Kind: Hashable, Sendable {
-        /// A simple message containing only one kind of data.
+        /// A simple, non-message media type (e.g., `image/jpeg`, `application/pdf`).
+        ///
+        /// The associated ``Media/MediaType`` specifies the exact MIME type and subtype.
         case basic(Media.MediaType)
 
-        /// A "full" email message containing an envelope, and a child body.
+        /// An encapsulated RFC 822 email message (e.g., `message/rfc822`).
+        ///
+        /// The associated ``Message`` contains the envelope and nested body of the embedded message.
         case message(Message)
 
-        /// A message type, for example plain text, or html.
+        /// A text-specific body type with optional line count information.
+        ///
+        /// The associated ``Text`` specifies the text subtype (e.g., `plain` or `html`).
         case text(Text)
     }
 
-    /// Represents a typical "full" email message, containing an envelope and a child message.
+    /// A `message/rfc822` encapsulated email message with headers and body (RFC 3501).
+    ///
+    /// When a message contains another message as a body part, this structure describes
+    /// the embedded message's envelope and body structure.
     public struct Message: Hashable, Sendable {
-        /// The RFC 2045 sub-type. This will usually be `rfc822`.
+        /// The MIME subtype, typically `rfc822` for standard email messages.
         public var message: Media.Subtype
 
-        /// The envelope of the message, potentially including the message sender, bcc list, etc.
+        /// The parsed headers of the embedded message, including sender, recipients, subject, and date.
         public var envelope: Envelope
 
-        /// The child body. Note that this may be a multi-part.
+        /// The hierarchical body structure of the embedded message.
+        ///
+        /// This may itself be multipart, creating arbitrarily deep nesting of messages.
         public var body: BodyStructure
 
-        /// The number of lines in the message.
+        /// The number of lines in the message (per RFC 2045/RFC 3501).
+        ///
+        /// This is the line count of the message in its canonical form.
         public var lineCount: Int
 
-        /// Creates a new `Message`.
-        /// - parameter message:
-        /// - parameter envelope: The envelope of the message
-        /// - parameter body: The encapsulated message. Note that this may be a multi-part.
-        /// - parameter lineCount: The number of lines in the message
+        /// Creates a new encapsulated message.
+        /// - parameter message: The MIME subtype (usually `rfc822`)
+        /// - parameter envelope: The envelope structure of the embedded message
+        /// - parameter body: The body structure of the embedded message
+        /// - parameter lineCount: The line count of the embedded message
         public init(message: Media.Subtype, envelope: Envelope, body: BodyStructure, lineCount: Int) {
             self.message = message
             self.envelope = envelope
@@ -80,35 +115,47 @@ extension BodyStructure.Singlepart {
         }
     }
 
-    /// Represents a text-based message body.
+    /// A text-specific body part with MIME type `text/*` (RFC 3501).
+    ///
+    /// Text bodies are specialized single-part bodies with a specific subtype (e.g., `plain`, `html`)
+    /// and an associated line count.
     public struct Text: Hashable, Sendable {
-        /// The media sub-type of a text part, e.g. `html` or `plain` for `text/html` and `text/plain` respectively.
+        /// The text subtype (e.g., `plain` for `text/plain`, `html` for `text/html`).
         public var mediaSubtype: Media.Subtype
 
-        /// The number of lines in the message.
+        /// The number of lines in the text body (per RFC 2045/RFC 3501).
+        ///
+        /// Line count includes all lines in the text, including blank lines and lines of any length.
         public var lineCount: Int
 
-        /// Creates a new `Text`.
-        /// - parameter mediaText: The type of text message, e.g. `text/html` or `text/plain`
-        /// - parameter lineCount: The number of lines in the message.
+        /// Creates a new text body.
+        /// - parameter mediaSubtype: The text subtype (e.g., `plain` or `html`)
+        /// - parameter lineCount: The number of lines in the text
         public init(mediaSubtype: Media.Subtype, lineCount: Int) {
             self.mediaSubtype = mediaSubtype
             self.lineCount = lineCount
         }
     }
 
-    /// Optional extension fields, initially pairing an MD5 body digest with a `DispositionAndLanguage`.
+    /// Optional extension fields for single-part bodies, including MD5 digest and language information.
+    ///
+    /// Per RFC 3501, servers may include extension data after the standard fields. Currently defined
+    /// extensions include optional body MD5 hash and disposition/language information. Future extensions
+    /// may add additional fields.
     public struct Extension: Hashable, Sendable {
-        /// A string giving the body MD5 value.
+        /// The body MD5 digest value, if present.
+        ///
+        /// An optional MD5 hash of the body content (per RFC 2045), used to verify message integrity.
         public let digest: String?
 
-        /// A `Disposition` and `LanguageLocation` pairing. `LanguageLocation` can be further expanded, the intention
-        /// of which is to provide a cleaner API.
+        /// Optional disposition and language metadata.
+        ///
+        /// When present, describes how the body should be displayed and what languages are used.
         public var dispositionAndLanguage: BodyStructure.DispositionAndLanguage?
 
-        /// Creates a new `Extension`
-        /// - parameter fieldMD5: A string giving the body MD5 value.
-        /// - parameter dispositionAndLanguage: An optional `Disposition` and `LanguageLocation` pairing.
+        /// Creates a new extension.
+        /// - parameter digest: The body MD5 digest value
+        /// - parameter dispositionAndLanguage: Optional disposition and language metadata
         public init(digest: String?, dispositionAndLanguage: BodyStructure.DispositionAndLanguage?) {
             self.digest = digest
             self.dispositionAndLanguage = dispositionAndLanguage
