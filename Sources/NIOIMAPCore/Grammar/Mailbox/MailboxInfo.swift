@@ -42,7 +42,7 @@ public struct MailboxInfo: Hashable, Sendable {
     ///
     /// Note: Servers may omit attributes that can be inferred from other returned attributes.
     /// Use ``hasEffectiveAttribute(_:)`` to check for an attribute while accounting for
-    /// inference rules per RFC 9051 §6.3.9.4.
+    /// inference rules per [RFC 9051 Section 6.3.9.4](https://datatracker.ietf.org/doc/html/rfc9051#section-6.3.9.4).
     public var attributes: [Attribute]
 
     /// The hierarchical path to this mailbox, including its name and optional separator.
@@ -170,7 +170,7 @@ extension MailboxInfo {
             self.backing.lowercased().hash(into: &hasher)
         }
 
-        /// Returns whether this attribute implies another attribute per RFC 9051 §6.3.9.4.
+        /// Returns whether this attribute implies another attribute per [RFC 9051 Section 6.3.9.4](https://datatracker.ietf.org/doc/html/rfc9051#section-6.3.9.4).
         ///
         /// The following inference rules are defined:
         ///
@@ -201,7 +201,7 @@ extension String {
 
 extension Sequence where Element == MailboxInfo.Attribute {
     /// Returns whether this sequence contains a given attribute either directly or by implication,
-    /// per RFC 9051 §6.3.9.4.
+    /// per [RFC 9051 Section 6.3.9.4](https://datatracker.ietf.org/doc/html/rfc9051#section-6.3.9.4).
     ///
     /// The following inference rules are defined:
     ///
@@ -216,7 +216,7 @@ extension Sequence where Element == MailboxInfo.Attribute {
 
 extension MailboxInfo {
     /// Returns whether this mailbox's attributes include a given attribute either directly
-    /// or by implication, per RFC 9051 §6.3.9.4.
+    /// or by implication, per [RFC 9051 Section 6.3.9.4](https://datatracker.ietf.org/doc/html/rfc9051#section-6.3.9.4).
     ///
     /// The following inference rules are defined:
     ///
