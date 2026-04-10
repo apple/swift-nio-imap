@@ -314,9 +314,19 @@ extension CommandEncodeBuffer {
         case .uidSearch(let key, let charset, let returnOptions):
             return self.writeCommandKind_uidSearch(key: key, charset: charset, returnOptions: returnOptions)
         case .sort(let criteria, let charset, let key, let returnOptions):
-            return self.writeCommandKind_sort(criteria: criteria, charset: charset, key: key, returnOptions: returnOptions)
+            return self.writeCommandKind_sort(
+                criteria: criteria,
+                charset: charset,
+                key: key,
+                returnOptions: returnOptions
+            )
         case .uidSort(let criteria, let charset, let key, let returnOptions):
-            return self.writeCommandKind_uidSort(criteria: criteria, charset: charset, key: key, returnOptions: returnOptions)
+            return self.writeCommandKind_uidSort(
+                criteria: criteria,
+                charset: charset,
+                key: key,
+                returnOptions: returnOptions
+            )
         case .move(let set, let mailbox):
             return self.writeCommandKind_move(set: set, mailbox: mailbox)
         case .uidMove(let set, let mailbox):

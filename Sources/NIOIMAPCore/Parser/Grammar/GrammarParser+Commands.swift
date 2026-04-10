@@ -513,12 +513,16 @@ extension GrammarParser {
     }
 
     func parseSortCriterionKey(buffer: inout ParseBuffer, tracker: StackTracker) throws -> SortCriterion.Key {
-        func parseSortCriterion_displayFrom(buffer: inout ParseBuffer, tracker: StackTracker) throws -> SortCriterion.Key {
+        func parseSortCriterion_displayFrom(
+            buffer: inout ParseBuffer,
+            tracker: StackTracker
+        ) throws -> SortCriterion.Key {
             try PL.parseFixedString("DISPLAYFROM", buffer: &buffer, tracker: tracker)
             return .displayFrom
         }
 
-        func parseSortCriterion_displayTo(buffer: inout ParseBuffer, tracker: StackTracker) throws -> SortCriterion.Key {
+        func parseSortCriterion_displayTo(buffer: inout ParseBuffer, tracker: StackTracker) throws -> SortCriterion.Key
+        {
             try PL.parseFixedString("DISPLAYTO", buffer: &buffer, tracker: tracker)
             return .displayTo
         }

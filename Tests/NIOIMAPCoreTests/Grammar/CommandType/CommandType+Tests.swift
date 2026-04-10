@@ -372,7 +372,10 @@ struct CommandTypeTests {
             "UID SORT (SIZE) UTF-8 FLAGGED UNSEEN",
             expected: .success(
                 .uidSort(
-                    criteria: [.size], charset: "UTF-8", key: .and([.flagged, .unseen]), returnOptions: []
+                    criteria: [.size],
+                    charset: "UTF-8",
+                    key: .and([.flagged, .unseen]),
+                    returnOptions: []
                 )
             )
         ),
