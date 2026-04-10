@@ -31,7 +31,7 @@
 /// S: A001 OK SORT completed
 /// ```
 ///
-/// Use ``reverse(_:)`` to reverse the sort order:
+/// Use ``descending(_:)`` to reverse the sort order:
 ///
 /// ```
 /// C: A002 SORT (REVERSE DATE SUBJECT) UTF-8 UNSEEN
@@ -46,76 +46,93 @@
 /// - ``SearchReturnOption``: Options controlling the format of sort results
 ///
 /// - SeeAlso: [RFC 5256](https://datatracker.ietf.org/doc/html/rfc5256), [RFC 5957](https://datatracker.ietf.org/doc/html/rfc5957)
-public indirect enum SortCriterion: Hashable, Sendable {
-    /// Sort by internal date and time of the message.
-    ///
-    /// The internal date is when the message was received by the server, not the
-    /// `Date` header value. This corresponds to the `INTERNALDATE` message attribute.
-    /// From [RFC 5256 Section 2.2](https://datatracker.ietf.org/doc/html/rfc5256#section-2.2).
-    case arrival
+public enum SortCriterion: Hashable, Sendable {
+    /// Sort keys supported by the IMAP `SORT` command.
+    public enum Key: Hashable, Sendable {
+        /// Sort by internal date and time of the message.
+        ///
+        /// The internal date is when the message was received by the server, not the
+        /// `Date` header value. This corresponds to the `INTERNALDATE` message attribute.
+        /// From [RFC 5256 Section 2.2](https://datatracker.ietf.org/doc/html/rfc5256#section-2.2).
+        case arrival
 
-    /// Sort by the first address in the `Cc` header.
-    ///
-    /// Uses the mailbox portion (addr-mailbox) of the first address. If the `Cc`
-    /// header is absent or contains no addresses, sorts as the empty string.
-    /// From [RFC 5256 Section 2.2](https://datatracker.ietf.org/doc/html/rfc5256#section-2.2).
-    case cc
+        /// Sort by the first address in the `Cc` header.
+        ///
+        /// Uses the mailbox portion (addr-mailbox) of the first address. If the `Cc`
+        /// header is absent or contains no addresses, sorts as the empty string.
+        /// From [RFC 5256 Section 2.2](https://datatracker.ietf.org/doc/html/rfc5256#section-2.2).
+        case cc
 
-    /// Sort by the sent date of the message.
-    ///
-    /// Uses the `Date` header value, not the internal date. If the `Date` header
-    /// is missing or cannot be parsed, the internal date is used instead.
-    /// From [RFC 5256 Section 2.2](https://datatracker.ietf.org/doc/html/rfc5256#section-2.2).
-    case date
+        /// Sort by the sent date of the message.
+        ///
+        /// Uses the `Date` header value, not the internal date. If the `Date` header
+        /// is missing or cannot be parsed, the internal date is used instead.
+        /// From [RFC 5256 Section 2.2](https://datatracker.ietf.org/doc/html/rfc5256#section-2.2).
+        case date
 
-    /// Sort by the first address in the `From` header.
-    ///
-    /// Uses the mailbox portion (addr-mailbox) of the first address. If the `From`
-    /// header is absent or contains no addresses, sorts as the empty string.
-    /// From [RFC 5256 Section 2.2](https://datatracker.ietf.org/doc/html/rfc5256#section-2.2).
-    case from
+        /// Sort by the first address in the `From` header.
+        ///
+        /// Uses the mailbox portion (addr-mailbox) of the first address. If the `From`
+        /// header is absent or contains no addresses, sorts as the empty string.
+        /// From [RFC 5256 Section 2.2](https://datatracker.ietf.org/doc/html/rfc5256#section-2.2).
+        case from
 
-    /// Sort by the size of the message in octets.
-    ///
-    /// This corresponds to the `RFC822.SIZE` message attribute.
-    /// From [RFC 5256 Section 2.2](https://datatracker.ietf.org/doc/html/rfc5256#section-2.2).
-    case size
+        /// Sort by the size of the message in octets.
+        ///
+        /// This corresponds to the `RFC822.SIZE` message attribute.
+        /// From [RFC 5256 Section 2.2](https://datatracker.ietf.org/doc/html/rfc5256#section-2.2).
+        case size
 
-    /// Sort by the base subject text.
-    ///
-    /// The subject is processed according to [RFC 5256 Section 2.1](https://datatracker.ietf.org/doc/html/rfc5256#section-2.1)
-    /// to strip reply prefixes (e.g., "Re:", "Fwd:") and normalize whitespace before comparison.
-    case subject
+        /// Sort by the base subject text.
+        ///
+        /// The subject is processed according to [RFC 5256 Section 2.1](https://datatracker.ietf.org/doc/html/rfc5256#section-2.1)
+        /// to strip reply prefixes (e.g., "Re:", "Fwd:") and normalize whitespace before comparison.
+        case subject
 
-    /// Sort by the first address in the `To` header.
-    ///
-    /// Uses the mailbox portion (addr-mailbox) of the first address. If the `To`
-    /// header is absent or contains no addresses, sorts as the empty string.
-    /// From [RFC 5256 Section 2.2](https://datatracker.ietf.org/doc/html/rfc5256#section-2.2).
-    case to
+        /// Sort by the first address in the `To` header.
+        ///
+        /// Uses the mailbox portion (addr-mailbox) of the first address. If the `To`
+        /// header is absent or contains no addresses, sorts as the empty string.
+        /// From [RFC 5256 Section 2.2](https://datatracker.ietf.org/doc/html/rfc5256#section-2.2).
+        case to
 
-    /// Sort by the display name from the `From` header.
-    ///
-    /// If the first address has a display name, uses that; otherwise falls back
-    /// to the mailbox portion like ``from``.
-    /// From [RFC 5957](https://datatracker.ietf.org/doc/html/rfc5957).
-    case displayFrom
+        /// Sort by the display name from the `From` header.
+        ///
+        /// If the first address has a display name, uses that; otherwise falls back
+        /// to the mailbox portion like ``SortCriterion.Key/from``.
+        /// From [RFC 5957](https://datatracker.ietf.org/doc/html/rfc5957).
+        case displayFrom
 
-    /// Sort by the display name from the `To` header.
-    ///
-    /// If the first address has a display name, uses that; otherwise falls back
-    /// to the mailbox portion like ``to``.
-    /// From [RFC 5957](https://datatracker.ietf.org/doc/html/rfc5957).
-    case displayTo
+        /// Sort by the display name from the `To` header.
+        ///
+        /// If the first address has a display name, uses that; otherwise falls back
+        /// to the mailbox portion like ``SortCriterion.Key/to``.
+        /// From [RFC 5957](https://datatracker.ietf.org/doc/html/rfc5957).
+        case displayTo
+    }
 
-    /// Reverse the sort order of the following criterion.
+    /// Ascending order for the given sort key.
+    case ascending(Key)
+
+    /// Descending order for the given sort key.
     ///
-    /// The `REVERSE` modifier inverts the sort order of its associated criterion.
-    /// For example, ``reverse(_:)`` with ``date`` sorts messages newest-first
+    /// The `REVERSE` modifier inverts the sort order of its associated key.
+    /// For example, ``descending(_:)`` with ``SortCriterion.Key/date`` sorts messages newest-first
     /// instead of oldest-first.
     ///
-    /// - Parameter criterion: The criterion whose sort order should be reversed.
-    case reverse(SortCriterion)
+    /// - Parameter key: The key whose sort order should be reversed.
+    case descending(Key)
+
+    public static let arrival = Self.ascending(.arrival)
+    public static let cc = Self.ascending(.cc)
+    public static let date = Self.ascending(.date)
+    public static let from = Self.ascending(.from)
+    public static let size = Self.ascending(.size)
+    public static let subject = Self.ascending(.subject)
+    public static let to = Self.ascending(.to)
+    public static let displayFrom = Self.ascending(.displayFrom)
+    public static let displayTo = Self.ascending(.displayTo)
+
 }
 
 // MARK: - Encoding
@@ -130,6 +147,15 @@ extension EncodeBuffer {
 
     @discardableResult mutating func writeSortCriterion(_ criterion: SortCriterion) -> Int {
         switch criterion {
+        case .ascending(let key):
+            return self.writeSortCriterionKey(key)
+        case .descending(let key):
+            return self.writeString("REVERSE ") + self.writeSortCriterionKey(key)
+        }
+    }
+
+    @discardableResult private mutating func writeSortCriterionKey(_ key: SortCriterion.Key) -> Int {
+        switch key {
         case .arrival:
             return self.writeString("ARRIVAL")
         case .cc:
@@ -148,8 +174,6 @@ extension EncodeBuffer {
             return self.writeString("DISPLAYFROM")
         case .displayTo:
             return self.writeString("DISPLAYTO")
-        case .reverse(let inner):
-            return self.writeString("REVERSE ") + self.writeSortCriterion(inner)
         }
     }
 }

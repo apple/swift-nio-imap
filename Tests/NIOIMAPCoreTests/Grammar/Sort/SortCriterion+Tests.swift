@@ -28,9 +28,8 @@ struct SortCriterionTests {
         EncodeFixture.sortCriterion(.to, "TO"),
         EncodeFixture.sortCriterion(.displayFrom, "DISPLAYFROM"),
         EncodeFixture.sortCriterion(.displayTo, "DISPLAYTO"),
-        EncodeFixture.sortCriterion(.reverse(.date), "REVERSE DATE"),
-        EncodeFixture.sortCriterion(.reverse(.subject), "REVERSE SUBJECT"),
-        EncodeFixture.sortCriterion(.reverse(.reverse(.arrival)), "REVERSE REVERSE ARRIVAL"),
+        EncodeFixture.sortCriterion(.descending(.date), "REVERSE DATE"),
+        EncodeFixture.sortCriterion(.descending(.subject), "REVERSE SUBJECT"),
     ])
     func encodeSingle(_ fixture: EncodeFixture<SortCriterion>) {
         fixture.checkEncoding()
@@ -39,7 +38,7 @@ struct SortCriterionTests {
     @Test(arguments: [
         EncodeFixture.sortCriteria([.date], "(DATE)"),
         EncodeFixture.sortCriteria([.date, .subject], "(DATE SUBJECT)"),
-        EncodeFixture.sortCriteria([.date, .reverse(.subject)], "(DATE REVERSE SUBJECT)"),
+        EncodeFixture.sortCriteria([.date, .descending(.subject)], "(DATE REVERSE SUBJECT)"),
         EncodeFixture.sortCriteria([.arrival, .cc, .from], "(ARRIVAL CC FROM)"),
     ])
     func encodeCriteria(_ fixture: EncodeFixture<[SortCriterion]>) {
@@ -56,11 +55,11 @@ struct SortCriterionTests {
         ParseFixture.sortCriterion("TO", expected: .success(.to)),
         ParseFixture.sortCriterion("DISPLAYFROM", expected: .success(.displayFrom)),
         ParseFixture.sortCriterion("DISPLAYTO", expected: .success(.displayTo)),
-        ParseFixture.sortCriterion("REVERSE DATE", expected: .success(.reverse(.date))),
-        ParseFixture.sortCriterion("REVERSE SUBJECT", expected: .success(.reverse(.subject))),
+        ParseFixture.sortCriterion("REVERSE DATE", expected: .success(.descending(.date))),
+        ParseFixture.sortCriterion("REVERSE SUBJECT", expected: .success(.descending(.subject))),
         ParseFixture.sortCriterion("arrival", expected: .success(.arrival)),
         ParseFixture.sortCriterion("date", expected: .success(.date)),
-        ParseFixture.sortCriterion("reverse date", expected: .success(.reverse(.date))),
+        ParseFixture.sortCriterion("reverse date", expected: .success(.descending(.date))),
     ])
     func parseSingle(_ fixture: ParseFixture<SortCriterion>) {
         fixture.checkParsing()
@@ -69,11 +68,16 @@ struct SortCriterionTests {
     @Test(arguments: [
         ParseFixture.sortCriteria("(DATE)", expected: .success([.date])),
         ParseFixture.sortCriteria("(DATE SUBJECT)", expected: .success([.date, .subject])),
-        ParseFixture.sortCriteria("(DATE REVERSE SUBJECT)", expected: .success([.date, .reverse(.subject)])),
+        ParseFixture.sortCriteria("(DATE REVERSE SUBJECT)", expected: .success([.date, .descending(.subject)])),
         ParseFixture.sortCriteria("(ARRIVAL CC FROM)", expected: .success([.arrival, .cc, .from])),
     ])
     func parseCriteria(_ fixture: ParseFixture<[SortCriterion]>) {
         fixture.checkParsing()
+    }
+
+    @Test
+    func parseRejectsDoubleReverse() {
+        ParseFixture.sortCriterion("REVERSE REVERSE SUBJECT", expected: .failure).checkParsing()
     }
 }
 

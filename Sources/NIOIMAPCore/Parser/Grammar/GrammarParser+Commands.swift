@@ -98,6 +98,13 @@ extension GrammarParser {
 // MARK: - Command parsers
 
 extension GrammarParser {
+    struct SortCommandSuffix {
+        var criteria: [SortCriterion]
+        var charset: String
+        var key: SearchKey
+        var returnOptions: [SearchReturnOption]
+    }
+
     func parseCommandSuffix_urlFetch(buffer: inout ParseBuffer, tracker: StackTracker) throws -> Command {
         let array = try PL.parseOneOrMore(
             buffer: &buffer,
@@ -423,6 +430,16 @@ extension GrammarParser {
 
     // sort            = "SORT" [search-return-opts] SP sort-criteria SP charset SP search-key
     func parseCommandSuffix_sort(buffer: inout ParseBuffer, tracker: StackTracker) throws -> Command {
+        let suffix = try self.parseCommandSuffix_sortShared(buffer: &buffer, tracker: tracker)
+        return .sort(
+            criteria: suffix.criteria,
+            charset: suffix.charset,
+            key: suffix.key,
+            returnOptions: suffix.returnOptions
+        )
+    }
+
+    func parseCommandSuffix_sortShared(buffer: inout ParseBuffer, tracker: StackTracker) throws -> SortCommandSuffix {
         try PL.composite(buffer: &buffer, tracker: tracker) { (buffer, tracker) in
             let returnOpts = try PL.parseOptional(
                 buffer: &buffer,
@@ -446,9 +463,14 @@ extension GrammarParser {
                 key = .and(keys)
             }
             guard let o = returnOpts else {
-                return .sort(criteria: criteria, charset: charset, key: key, returnOptions: [])
+                return SortCommandSuffix(criteria: criteria, charset: charset, key: key, returnOptions: [])
             }
-            return .sort(criteria: criteria, charset: charset, key: key, returnOptions: (o == []) ? [.all] : o)
+            return SortCommandSuffix(
+                criteria: criteria,
+                charset: charset,
+                key: key,
+                returnOptions: (o == []) ? [.all] : o
+            )
         }
     }
 
@@ -468,62 +490,76 @@ extension GrammarParser {
     }
 
     // sort-key        = "ARRIVAL" / "CC" / "DATE" / "FROM" /
-    //                   "REVERSE" SP sort-key / "SIZE" / "SUBJECT" / "TO" /
+    //                   "REVERSE" SP sort-key-no-reverse / "SIZE" / "SUBJECT" / "TO" /
     //                   "DISPLAYFROM" / "DISPLAYTO"
     func parseSortCriterion(buffer: inout ParseBuffer, tracker: StackTracker) throws -> SortCriterion {
         func parseSortCriterion_reverse(buffer: inout ParseBuffer, tracker: StackTracker) throws -> SortCriterion {
             try PL.parseFixedString("REVERSE ", buffer: &buffer, tracker: tracker)
-            return .reverse(try self.parseSortCriterion(buffer: &buffer, tracker: tracker))
+            return .descending(try self.parseSortCriterionKey(buffer: &buffer, tracker: tracker))
         }
 
-        func parseSortCriterion_displayFrom(buffer: inout ParseBuffer, tracker: StackTracker) throws -> SortCriterion {
+        func parseSortCriterion_ascending(buffer: inout ParseBuffer, tracker: StackTracker) throws -> SortCriterion {
+            .ascending(try self.parseSortCriterionKey(buffer: &buffer, tracker: tracker))
+        }
+
+        return try PL.parseOneOf(
+            [
+                parseSortCriterion_reverse,
+                parseSortCriterion_ascending,
+            ],
+            buffer: &buffer,
+            tracker: tracker
+        )
+    }
+
+    func parseSortCriterionKey(buffer: inout ParseBuffer, tracker: StackTracker) throws -> SortCriterion.Key {
+        func parseSortCriterion_displayFrom(buffer: inout ParseBuffer, tracker: StackTracker) throws -> SortCriterion.Key {
             try PL.parseFixedString("DISPLAYFROM", buffer: &buffer, tracker: tracker)
             return .displayFrom
         }
 
-        func parseSortCriterion_displayTo(buffer: inout ParseBuffer, tracker: StackTracker) throws -> SortCriterion {
+        func parseSortCriterion_displayTo(buffer: inout ParseBuffer, tracker: StackTracker) throws -> SortCriterion.Key {
             try PL.parseFixedString("DISPLAYTO", buffer: &buffer, tracker: tracker)
             return .displayTo
         }
 
-        func parseSortCriterion_arrival(buffer: inout ParseBuffer, tracker: StackTracker) throws -> SortCriterion {
+        func parseSortCriterion_arrival(buffer: inout ParseBuffer, tracker: StackTracker) throws -> SortCriterion.Key {
             try PL.parseFixedString("ARRIVAL", buffer: &buffer, tracker: tracker)
             return .arrival
         }
 
-        func parseSortCriterion_cc(buffer: inout ParseBuffer, tracker: StackTracker) throws -> SortCriterion {
+        func parseSortCriterion_cc(buffer: inout ParseBuffer, tracker: StackTracker) throws -> SortCriterion.Key {
             try PL.parseFixedString("CC", buffer: &buffer, tracker: tracker)
             return .cc
         }
 
-        func parseSortCriterion_date(buffer: inout ParseBuffer, tracker: StackTracker) throws -> SortCriterion {
+        func parseSortCriterion_date(buffer: inout ParseBuffer, tracker: StackTracker) throws -> SortCriterion.Key {
             try PL.parseFixedString("DATE", buffer: &buffer, tracker: tracker)
             return .date
         }
 
-        func parseSortCriterion_from(buffer: inout ParseBuffer, tracker: StackTracker) throws -> SortCriterion {
+        func parseSortCriterion_from(buffer: inout ParseBuffer, tracker: StackTracker) throws -> SortCriterion.Key {
             try PL.parseFixedString("FROM", buffer: &buffer, tracker: tracker)
             return .from
         }
 
-        func parseSortCriterion_size(buffer: inout ParseBuffer, tracker: StackTracker) throws -> SortCriterion {
+        func parseSortCriterion_size(buffer: inout ParseBuffer, tracker: StackTracker) throws -> SortCriterion.Key {
             try PL.parseFixedString("SIZE", buffer: &buffer, tracker: tracker)
             return .size
         }
 
-        func parseSortCriterion_subject(buffer: inout ParseBuffer, tracker: StackTracker) throws -> SortCriterion {
+        func parseSortCriterion_subject(buffer: inout ParseBuffer, tracker: StackTracker) throws -> SortCriterion.Key {
             try PL.parseFixedString("SUBJECT", buffer: &buffer, tracker: tracker)
             return .subject
         }
 
-        func parseSortCriterion_to(buffer: inout ParseBuffer, tracker: StackTracker) throws -> SortCriterion {
+        func parseSortCriterion_to(buffer: inout ParseBuffer, tracker: StackTracker) throws -> SortCriterion.Key {
             try PL.parseFixedString("TO", buffer: &buffer, tracker: tracker)
             return .to
         }
 
         return try PL.parseOneOf(
             [
-                parseSortCriterion_reverse,
                 parseSortCriterion_displayFrom,
                 parseSortCriterion_displayTo,
                 parseSortCriterion_arrival,
@@ -613,15 +649,13 @@ extension GrammarParser {
         func parseUid_sort(buffer: inout ParseBuffer, tracker: StackTracker) throws -> Command {
             try PL.composite(buffer: &buffer, tracker: tracker) { buffer, tracker in
                 try PL.parseFixedString("SORT", buffer: &buffer, tracker: tracker)
-                guard
-                    case .sort(let criteria, let charset, let key, let returnOptions) = try self.parseCommandSuffix_sort(
-                        buffer: &buffer,
-                        tracker: tracker
-                    )
-                else {
-                    fatalError("This should never happen")
-                }
-                return .uidSort(criteria: criteria, charset: charset, key: key, returnOptions: returnOptions)
+                let suffix = try self.parseCommandSuffix_sortShared(buffer: &buffer, tracker: tracker)
+                return .uidSort(
+                    criteria: suffix.criteria,
+                    charset: suffix.charset,
+                    key: suffix.key,
+                    returnOptions: suffix.returnOptions
+                )
             }
         }
 

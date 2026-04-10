@@ -130,7 +130,7 @@ struct CommandTypeTests {
             "SORT (DATE) UTF-8 ALL"
         ),
         CommandEncodeFixture.command(
-            .sort(criteria: [.date, .reverse(.subject)], charset: "UTF-8", key: .unseen),
+            .sort(criteria: [.date, .descending(.subject)], charset: "UTF-8", key: .unseen),
             "SORT (DATE REVERSE SUBJECT) UTF-8 UNSEEN"
         ),
         CommandEncodeFixture.command(
@@ -355,7 +355,7 @@ struct CommandTypeTests {
         ParseFixture.command(
             "SORT (DATE REVERSE SUBJECT) UTF-8 UNSEEN",
             expected: .success(
-                .sort(criteria: [.date, .reverse(.subject)], charset: "UTF-8", key: .unseen, returnOptions: [])
+                .sort(criteria: [.date, .descending(.subject)], charset: "UTF-8", key: .unseen, returnOptions: [])
             )
         ),
         ParseFixture.command(
@@ -455,6 +455,7 @@ struct CommandTypeTests {
         ParseFixture.command("RENAME box1 ", expected: .failure),
         ParseFixture.command("COPY 1,2,3,4 ", "", expected: .failureIgnoringBufferModifications),
         ParseFixture.command("COPY inbox ", "", expected: .failureIgnoringBufferModifications),
+        ParseFixture.command("SORT (REVERSE REVERSE SUBJECT) UTF-8 UNSEEN", expected: .failure),
         ParseFixture.command("CAPABILITY", "", expected: .incompleteMessage),
         ParseFixture.command("CHECK", "", expected: .incompleteMessage),
         ParseFixture.command("", "", expected: .incompleteMessage),
@@ -719,7 +720,7 @@ struct CommandTypeTests {
             ParseFixture.sortSuffix(
                 " (DATE REVERSE SUBJECT) UTF-8 UNSEEN",
                 expected: .success(
-                    .sort(criteria: [.date, .reverse(.subject)], charset: "UTF-8", key: .unseen, returnOptions: [])
+                    .sort(criteria: [.date, .descending(.subject)], charset: "UTF-8", key: .unseen, returnOptions: [])
                 )
             ),
             ParseFixture.sortSuffix(
@@ -740,6 +741,7 @@ struct CommandTypeTests {
                     .sort(criteria: [.displayFrom, .displayTo], charset: "UTF-8", key: .all, returnOptions: [])
                 )
             ),
+            ParseFixture.sortSuffix(" (REVERSE REVERSE SUBJECT) UTF-8 UNSEEN", expected: .failure),
         ]
     )
     func parseSortSuffix(_ fixture: ParseFixture<Command>) {
