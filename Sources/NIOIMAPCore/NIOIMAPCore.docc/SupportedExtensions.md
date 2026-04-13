@@ -39,6 +39,7 @@ For more information about IMAP capabilities, see the [IANA IMAP Capabilities Re
 | `QUOTA` | ``Capability/quota`` | [RFC 2087](https://www.iana.org/go/rfc2087) | IMAP4 Quota Extension |
 | `SASL-IR` | ``Capability/saslIR`` | [RFC 4959](https://www.iana.org/go/rfc4959) | IMAP Extension for Simple Authentication and Security Layer (SASL) Initial Client Response |
 | `SEARCHRES` | ``Capability/searchRes`` | [RFC 5182](https://www.iana.org/go/rfc5182) | IMAP Extension for Referencing the Last SEARCH Result |
+| `SORT` | ``Capability/sort(_:)`` | [RFC 5256](https://www.iana.org/go/rfc5256) | Internet Message Access Protocol - SORT and THREAD Extensions |
 | `SPECIAL-USE` | ``Capability/specialUse`` | [RFC 6154](https://www.iana.org/go/rfc6154) | IMAP LIST Extension for Special-Use Mailboxes |
 | `STARTTLS` | ``Capability/startTLS`` | [RFC 3501](https://www.iana.org/go/rfc3501) | IMAP4rev1 |
 | `STATUS=SIZE` | ``Capability/status(_:)`` | [RFC 8438](https://www.iana.org/go/rfc8438) | IMAP4 STATUS Command Extension for Message Size Information |
