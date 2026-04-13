@@ -28,6 +28,9 @@ public enum MailboxData: Hashable, Sendable {
     /// Response to a search command, containing `SequenceNumber`s from `search`, or `UID`s from `uid search`.
     case search([UnknownMessageIdentifier], ModificationSequenceValue? = nil)
 
+    /// Response to a sort command.
+    case sort([UnknownMessageIdentifier], ModificationSequenceValue? = nil)
+
     /// Response to an extended search command.
     case extendedSearch(ExtendedSearchResponse)
 
@@ -92,6 +95,8 @@ extension EncodeBuffer {
             return self.writeMailboxData_lsub(list)
         case .search(let list, let modificationSequence):
             return self.writeMailboxData_search(list, modificationSequence: modificationSequence)
+        case .sort(let list, let modificationSequence):
+            return self.writeMailboxData_sort(list, modificationSequence: modificationSequence)
         case .extendedSearch(let response):
             return self.writeExtendedSearchResponse(response)
         case .status(let mailbox, let status):
@@ -114,6 +119,19 @@ extension EncodeBuffer {
         modificationSequence: ModificationSequenceValue?
     ) -> Int {
         self.writeString("SEARCH")
+            + self.writeArray(list, prefix: " ", separator: " ", parenthesis: false) { (id, buffer) -> Int in
+                buffer.writeMessageIdentifier(id)
+            }
+            + self.writeIfExists(modificationSequence) { value -> Int in
+                self.writeString(" (MODSEQ ") + self.writeModificationSequenceValue(value) + self.writeString(")")
+            }
+    }
+
+    private mutating func writeMailboxData_sort(
+        _ list: [UnknownMessageIdentifier],
+        modificationSequence: ModificationSequenceValue?
+    ) -> Int {
+        self.writeString("SORT")
             + self.writeArray(list, prefix: " ", separator: " ", parenthesis: false) { (id, buffer) -> Int in
                 buffer.writeMessageIdentifier(id)
             }
