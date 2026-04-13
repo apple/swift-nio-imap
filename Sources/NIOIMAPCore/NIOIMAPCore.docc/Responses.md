@@ -42,6 +42,6 @@ Results returned from search operations, including extended search formats.
 Metadata responses and modification tracking.
 
 - ``MetadataResponse``
-- ``FetchModificationResponse``
+- ``ModificationSequenceValue``
 - ``ResponseCodeAppend``
 - ``ResponseCodeCopy``
