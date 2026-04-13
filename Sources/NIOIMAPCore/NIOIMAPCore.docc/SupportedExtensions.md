@@ -62,7 +62,7 @@ In addition to the extension capabilities listed above, NIOIMAP also implements:
 
 This section describes each supported IMAP extension and RFC, organized by document. For detailed technical specifications, refer to the relevant RFC.
 
-### RFC 3501 & RFC 9051: Base Protocol
+### RFC 3501 and RFC 9051: Base Protocol
 
 [RFC 3501](https://datatracker.ietf.org/doc/html/rfc3501) (IMAP4rev1, March 2003) defines the core IMAP protocol, including fundamental operations for accessing and manipulating email messages. [RFC 9051](https://datatracker.ietf.org/doc/html/rfc9051) (IMAP4rev2, August 2021) is a modernized revision of the base protocol that updates and clarifies many aspects of RFC 3501.
 

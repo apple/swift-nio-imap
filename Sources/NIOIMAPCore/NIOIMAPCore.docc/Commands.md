@@ -81,6 +81,6 @@ Parameters for selecting, examining, or creating mailboxes.
 
 Additional specialized types used in command processing.
 
-- ``CustomCommandPayload``
+- ``Command/CustomCommandPayload``
 - ``LastCommandMessageID``
 - ``SynchronizedCommand``

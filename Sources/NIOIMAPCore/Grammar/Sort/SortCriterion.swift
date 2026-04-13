@@ -99,14 +99,14 @@ public enum SortCriterion: Hashable, Sendable {
         /// Sort by the display name from the `From` header.
         ///
         /// If the first address has a display name, uses that; otherwise falls back
-        /// to the mailbox portion like ``SortCriterion.Key/from``.
+        /// to the mailbox portion like ``SortCriterion/Key/from``.
         /// From [RFC 5957](https://datatracker.ietf.org/doc/html/rfc5957).
         case displayFrom
 
         /// Sort by the display name from the `To` header.
         ///
         /// If the first address has a display name, uses that; otherwise falls back
-        /// to the mailbox portion like ``SortCriterion.Key/to``.
+        /// to the mailbox portion like ``SortCriterion/Key/to``.
         /// From [RFC 5957](https://datatracker.ietf.org/doc/html/rfc5957).
         case displayTo
     }
@@ -117,7 +117,7 @@ public enum SortCriterion: Hashable, Sendable {
     /// Descending order for the given sort key.
     ///
     /// The `REVERSE` modifier inverts the sort order of its associated key.
-    /// For example, ``descending(_:)`` with ``SortCriterion.Key/date`` sorts messages newest-first
+    /// For example, ``descending(_:)`` with ``SortCriterion/Key/date`` sorts messages newest-first
     /// instead of oldest-first.
     ///
     /// - Parameter key: The key whose sort order should be reversed.
