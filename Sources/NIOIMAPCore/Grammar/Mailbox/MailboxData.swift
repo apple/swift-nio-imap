@@ -43,45 +43,13 @@ public enum MailboxData: Hashable, Sendable {
     /// Response to a namespace command.
     case namespace(NamespaceResponse)
 
-    /// Response to a search-sort command, containing an array of identifiers and sequence information.
-    case searchSort(SearchSort)
-
     /// https://datatracker.ietf.org/doc/draft-ietf-mailmaint-imap-uidbatches/
     case uidBatches(UIDBatchesResponse)
-}
-
-extension MailboxData {
-    /// A container for an array of message identifiers, and a sequence.
-    public struct SearchSort: Hashable, Sendable {
-        /// An array of message identifiers that were matched in a search.
-        public var identifiers: [Int]
-
-        /// The highest `ModificationSequence` of all messages that were found.
-        public var modificationSequence: ModificationSequenceValue
-
-        /// Creates a new `SearchSort`.
-        /// - parameter identifiers: An array of message identifiers that were matched in a search.
-        /// - parameter modificationSequence: The highest `ModificationSequence` of all messages that were found.
-        public init(identifiers: [Int], modificationSequence: ModificationSequenceValue) {
-            self.identifiers = identifiers
-            self.modificationSequence = modificationSequence
-        }
-    }
 }
 
 // MARK: - Encoding
 
 extension EncodeBuffer {
-    @discardableResult mutating func writeMailboxDataSearchSort(_ data: MailboxData.SearchSort?) -> Int {
-        self.writeString("SEARCH")
-            + self.writeIfExists(data) { (data) -> Int in
-                self.writeArray(data.identifiers, prefix: " ", parenthesis: false) { (element, buffer) -> Int in
-                    buffer.writeString("\(element)")
-                } + self.writeSpace() + self.writeString("(MODSEQ ")
-                    + self.writeModificationSequenceValue(data.modificationSequence) + self.writeString(")")
-            }
-    }
-
     @discardableResult mutating func writeMailboxData(_ data: MailboxData) -> Int {
         switch data {
         case .flags(let flags):
@@ -102,8 +70,6 @@ extension EncodeBuffer {
             return self.writeString("\(num) RECENT")
         case .namespace(let namespaceResponse):
             return self.writeNamespaceResponse(namespaceResponse)
-        case .searchSort(let data):
-            return self.writeMailboxDataSearchSort(data)
         case .uidBatches(let response):
             return self.writeUIDBatchesResponse(response)
         }
