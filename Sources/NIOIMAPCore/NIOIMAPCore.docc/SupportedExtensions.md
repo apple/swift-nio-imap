@@ -40,6 +40,7 @@ For more information about IMAP capabilities, see the [IANA IMAP Capabilities Re
 | `SASL-IR` | ``Capability/saslIR`` | [RFC 4959](https://www.iana.org/go/rfc4959) | IMAP Extension for Simple Authentication and Security Layer (SASL) Initial Client Response |
 | `SEARCHRES` | ``Capability/searchRes`` | [RFC 5182](https://www.iana.org/go/rfc5182) | IMAP Extension for Referencing the Last SEARCH Result |
 | `SORT` | ``Capability/sort(_:)`` | [RFC 5256](https://www.iana.org/go/rfc5256) | Internet Message Access Protocol - SORT and THREAD Extensions |
+| `SORT=DISPLAY` | ``Capability/sort(_:)`` | [RFC 5957](https://datatracker.ietf.org/doc/html/rfc5957) | Display-Based Address Sorting for the IMAP4 SORT Extension |
 | `SPECIAL-USE` | ``Capability/specialUse`` | [RFC 6154](https://www.iana.org/go/rfc6154) | IMAP LIST Extension for Special-Use Mailboxes |
 | `STARTTLS` | ``Capability/startTLS`` | [RFC 3501](https://www.iana.org/go/rfc3501) | IMAP4rev1 |
 | `STATUS=SIZE` | ``Capability/status(_:)`` | [RFC 8438](https://www.iana.org/go/rfc8438) | IMAP4 STATUS Command Extension for Message Size Information |
@@ -138,6 +139,10 @@ The base protocol is implemented throughout NIOIMAPCore with types like ``Comman
 ### RFC 5182: SEARCHRES Extension
 
 [RFC 5182](https://datatracker.ietf.org/doc/html/rfc5182) (March 2008) allows search operations to reference the results of the previous search using the `$` operator, enabling efficient progressive search refinement. The ``LastCommandSet`` type supports this functionality.
+
+### RFC 5256 and RFC 5957: SORT and THREAD Extensions
+
+[RFC 5256](https://datatracker.ietf.org/doc/html/rfc5256) (June 2008) defines `SORT` and `UID SORT` commands for returning search results in a specified order. Use ``Command/sort(criteria:charset:key:returnOptions:)`` or ``Command/uidSort(criteria:charset:key:returnOptions:)`` with sort order defined by ``SortCriterion``. Display name sorting is also supported via [RFC 5957](https://datatracker.ietf.org/doc/html/rfc5957) (July 2010).
 
 ### RFC 5258: LIST-EXTENDED Extension
 
