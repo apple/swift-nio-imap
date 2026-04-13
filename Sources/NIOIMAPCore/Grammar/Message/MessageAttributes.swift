@@ -48,7 +48,7 @@ public enum MessageAttribute: Hashable, Sendable {
     case nilBody(StreamingKind)
 
     /// The modification time of the message.
-    case fetchModificationResponse(FetchModificationResponse)
+    case modificationSequence(ModificationSequenceValue)
 
     /// `X-GM-MSGID`: provides a unique ID for each email stable across multiple folders.
     case gmailMessageID(UInt64)
@@ -107,8 +107,8 @@ extension EncodeBuffer {
             return self.writeMessageAttributeFlags(flags)
         case .nilBody(let kind):
             return self.writeMessageAttributeNilBody(kind)
-        case .fetchModificationResponse(let resp):
-            return self.writeFetchModificationResponse(resp)
+        case .modificationSequence(let val):
+            return self.writeString("MODSEQ (") + self.writeModificationSequenceValue(val) + self.writeString(")")
         case .gmailMessageID(let id):
             return self.writeMessageAttribute_gmailMessageID(id)
         case .gmailThreadID(let id):
