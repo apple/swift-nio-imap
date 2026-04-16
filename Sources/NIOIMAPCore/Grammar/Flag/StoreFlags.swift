@@ -14,13 +14,13 @@
 
 import struct NIO.ByteBuffer
 
-/// The operation to perform on message flags in a `STORE` command.
+/// How a `STORE` command modifies message flags.
 ///
-/// The `STORE` command modifies message flags in one of three ways: add new flags, remove existing flags,
-/// or replace all flags. The operation is specified as part of the `STORE` command syntax defined in
-/// [RFC 3501 Section 6.4.6](https://datatracker.ietf.org/doc/html/rfc3501#section-6.4.6).
+/// Three modes are supported: adding flags to a message's existing set, removing flags from it,
+/// or replacing the entire set at once. These correspond to the `+FLAGS`, `-FLAGS`, and `FLAGS`
+/// message data item names defined in [RFC 3501 §6.4.6](https://datatracker.ietf.org/doc/html/rfc3501#section-6.4.6).
 ///
-/// - SeeAlso: [RFC 3501 Section 6.4.6](https://datatracker.ietf.org/doc/html/rfc3501#section-6.4.6)
+/// - SeeAlso: [RFC 3501 §6.4.6](https://datatracker.ietf.org/doc/html/rfc3501#section-6.4.6)
 public enum StoreOperation: String, Hashable, Sendable {
     /// Add the specified flags to the message's existing flags.
     ///
