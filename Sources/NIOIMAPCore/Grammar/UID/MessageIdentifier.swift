@@ -92,8 +92,8 @@ extension MessageIdentifier {
 /// committing to a specific type.
 ///
 /// Convert between `UnknownMessageIdentifier` and concrete types using:
-/// - ``/NIOIMAPCore/UID/init(_:)-(UnknownMessageIdentifier)`` or ``/NIOIMAPCore/SequenceNumber/init(_:)-(UnknownMessageIdentifier)`` to convert from an unknown identifier.
-/// - ``/NIOIMAPCore/UnknownMessageIdentifier/init(_:)-(UID)`` or ``/NIOIMAPCore/UnknownMessageIdentifier/init(_:)-(SequenceNumber)`` to convert from a concrete type.
+/// - ``UID/init(_:)-(UnknownMessageIdentifier)`` or ``SequenceNumber/init(_:)-(UnknownMessageIdentifier)`` to convert from an unknown identifier.
+/// - ``UnknownMessageIdentifier/init(_:)-(UID)`` or ``UnknownMessageIdentifier/init(_:)-(SequenceNumber)`` to convert from a concrete type.
 public struct UnknownMessageIdentifier: MessageIdentifier, Sendable {
     public var rawValue: UInt32
 

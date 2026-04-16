@@ -54,7 +54,7 @@
 /// - ``MessagePath`` provides complete message location with mailbox, UID, optional section, and range
 /// - ``MailboxUIDValidity`` identifies a mailbox with optional UID validity
 /// - ``URLMessageSection`` specifies message sections
-/// - ``/NIOIMAPCore/ByteRange`` specifies byte ranges
+/// - ``MessagePath/ByteRange`` specifies byte ranges
 /// - ``URLCommand`` uses fetch types in ``URLCommand/fetch(path:authenticatedURL:)``
 ///
 /// - SeeAlso: [RFC 2192 Section 5.2](https://datatracker.ietf.org/doc/html/rfc2192#section-5.2) - IMAP URL ABNF

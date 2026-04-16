@@ -32,7 +32,7 @@ public struct ByteRange: Hashable, Sendable {
     /// The number of bytes the range covers.
     public var length: Int?
 
-    /// Creates a new ``/NIOIMAPCore/ByteRange``
+    /// Creates a new ``ByteRange``
     /// - parameter offset: The offset in bytes from the beginning of the message/data in question.
     /// - parameter length: The number of bytes the range covers.
     public init(offset: Int, length: Int?) {

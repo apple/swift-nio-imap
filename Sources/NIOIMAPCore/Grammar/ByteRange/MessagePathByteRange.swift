@@ -21,11 +21,11 @@ extension MessagePath {
     ///
     /// - SeeAlso: [RFC 5092 IMAP URL Scheme](https://datatracker.ietf.org/doc/html/rfc5092)
     public struct ByteRange: Hashable, Sendable {
-        /// The ``/NIOIMAPCore/ByteRange`` to append.
+        /// The underlying ``/NIOIMAPCore/ByteRange``.
         public var range: NIOIMAPCore.ByteRange
 
         /// Creates a new `MessagePath.ByteRange`.
-        /// - parameter range: The ``/NIOIMAPCore/ByteRange`` to append.
+        /// - parameter range: The ``/NIOIMAPCore/ByteRange`` to be wrapped.
         public init(range: NIOIMAPCore.ByteRange) {
             self.range = range
         }
