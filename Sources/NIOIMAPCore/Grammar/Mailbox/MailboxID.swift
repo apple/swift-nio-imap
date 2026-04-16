@@ -86,7 +86,6 @@ extension MailboxID: ExpressibleByStringLiteral {
 
 // MARK: - CustomDebugStringConvertible
 
-/// A human-readable debug description of the mailbox ID.
 extension MailboxID: CustomDebugStringConvertible {
     /// A debug string representation showing the mailbox ID value in parentheses.
     ///
