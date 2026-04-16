@@ -52,10 +52,10 @@ public enum MailboxAttribute: String, CaseIterable, Sendable {
     /// to the mailbox. See [RFC 3501 Section 7.3.2](https://datatracker.ietf.org/doc/html/rfc3501#section-7.3.2).
     case uidNext = "UIDNEXT"
 
-    /// The `UIDVALIDITY` attribute: the mailbox's unique identifier validity value.
+    /// The `UIDVALIDITY` attribute: a value clients use to verify that cached UIDs are still valid.
     ///
-    /// This attribute is a permanent unique identifier for the mailbox. If returned as zero,
-    /// it indicates the mailbox does not support unique identifiers. See [RFC 3501 Section 7.3.2](https://datatracker.ietf.org/doc/html/rfc3501#section-7.3.2).
+    /// If this value has changed since the previous session, all UIDs cached for this mailbox
+    /// must be discarded. See [RFC 3501 §2.3.1.1](https://datatracker.ietf.org/doc/html/rfc3501#section-2.3.1.1).
     case uidValidity = "UIDVALIDITY"
 
     /// The `UNSEEN` attribute: the number of messages without the `\Seen` flag.
@@ -135,10 +135,12 @@ public struct MailboxStatus: Hashable, Sendable {
     /// See [RFC 3501 Section 7.3.2](https://datatracker.ietf.org/doc/html/rfc3501#section-7.3.2).
     public var nextUID: UID?
 
-    /// The `UIDVALIDITY` attribute: the mailbox's unique identifier validity value.
+    /// The `UIDVALIDITY` attribute: a value clients use to verify that cached UIDs are still valid.
     ///
-    /// This property is `nil` if the `UIDVALIDITY` attribute was not requested or returned.
-    /// See [RFC 3501 Section 7.3.2](https://datatracker.ietf.org/doc/html/rfc3501#section-7.3.2).
+    /// Compare this against the value stored from a previous session; if it has changed, all
+    /// cached UIDs for this mailbox must be discarded. `nil` if the attribute was not requested
+    /// or returned.
+    /// See [RFC 3501 §2.3.1.1](https://datatracker.ietf.org/doc/html/rfc3501#section-2.3.1.1).
     public var uidValidity: UIDValidity?
 
     /// The `UNSEEN` attribute: number of messages without the `\Seen` flag.
