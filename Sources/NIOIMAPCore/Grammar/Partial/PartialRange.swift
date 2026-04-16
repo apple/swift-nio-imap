@@ -12,9 +12,17 @@
 //
 //===----------------------------------------------------------------------===//
 
-/// A range for `draft-ietf-extra-imap-partial-04` aka. “Paged SEARCH & FETCH”
+/// A range specifier for the `PARTIAL` extension enabling paged results.
 ///
-/// Aka. `partial-range`.
+/// The `PARTIAL` extension (RFC 9394) allows clients to request `SEARCH` and `FETCH` results
+/// in fixed-size pages, either from the beginning (`.first`) or end (`.last`) of the result set.
+/// This enables efficient pagination of large result sets without retrieving the entire list.
+///
+/// The two forms are:
+/// - `.first`: Requests N results starting from the lowest UID (beginning)
+/// - `.last`: Requests N results starting from the highest UID (end), encoded with negative offsets
+///
+/// - SeeAlso: [RFC 9394 IMAP PARTIAL Extension for Paged Results](https://datatracker.ietf.org/doc/html/rfc9394)
 public enum PartialRange: Hashable, Sendable {
     /// A range relative to the oldest (lowest UID) message.
     ///

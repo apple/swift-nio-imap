@@ -15,18 +15,46 @@
 import struct NIO.ByteBuffer
 
 extension BodyStructure {
-    /// Pairs a body `Disposition` with a `LanguageLocation`. An abstraction from RFC 3501
-    /// to make the API slightly easier to work with and enforce validity.
+    /// Content disposition and language information for a message part.
+    ///
+    /// This type pairs optional content disposition (indicating how the part should be handled) with optional
+    /// language and location information. Both are optional fields in the body structure defined in
+    /// [RFC 3501 Section 7.4.2](https://datatracker.ietf.org/doc/html/rfc3501#section-7.4.2).
+    ///
+    /// This is an API abstraction to simplify working with the disposition and language/location pairing from the raw IMAP message.
+    ///
+    /// ### Example
+    ///
+    /// ```
+    /// C: A001 FETCH 1 (BODYSTRUCTURE)
+    /// S: * 1 FETCH (BODYSTRUCTURE ("text" "plain" NIL NIL NIL "7bit" 1024 30 ("attachment" (("filename" "document.txt"))) ("en" "fr")))
+    /// S: A001 OK FETCH completed
+    /// ```
+    ///
+    /// The disposition `("attachment" (("filename" "document.txt")))` corresponds to a ``Disposition`` with
+    /// kind ``DispositionKind/attachment`` and filename parameter. The language list `("en" "fr")` corresponds to
+    /// a ``LanguageLocation`` with those language tags.
+    ///
+    /// - SeeAlso: [RFC 3501 Section 7.4.2](https://datatracker.ietf.org/doc/html/rfc3501#section-7.4.2)
+    /// - SeeAlso: ``Disposition``
+    /// - SeeAlso: ``LanguageLocation``
     public struct DispositionAndLanguage: Hashable, Sendable {
-        /// Some body `Disposition`
+        /// Optional content disposition indicating how the part should be handled.
+        ///
+        /// When `nil`, no disposition is specified (defaults to ``DispositionKind/inline``).
+        /// See ``Disposition`` for details on disposition types and parameters.
         public var disposition: Disposition?
 
-        /// Some *Language/Location* pair
+        /// Optional language and location information for the part.
+        ///
+        /// When `nil`, no language or location is specified.
+        /// See ``LanguageLocation`` for details.
         public var language: LanguageLocation?
 
-        /// Creates a new `DispositionAndLanguage`.
-        /// - parameter disposition: The disposition to pair.
-        /// - parameter language: Some *Language/Location* pair, defaults to `nil`.
+        /// Creates a disposition and language pairing.
+        ///
+        /// - parameter disposition: Optional disposition indicating how the part should be handled.
+        /// - parameter language: Optional language and location information. Defaults to `nil`.
         public init(disposition: Disposition?, language: LanguageLocation? = nil) {
             self.disposition = disposition
             self.language = language

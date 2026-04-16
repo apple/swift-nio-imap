@@ -14,10 +14,17 @@
 
 import struct NIO.ByteBuffer
 
-/// A `UseAttribute` is  a special-use attribute as defined in RFC 6154.
-/// They're used to designate a special use to certain mailboxes.
-/// The raw `String` value is lower-cased on initialisation to ensure
-/// case-insensitive comparison.
+/// A special-use mailbox attribute from RFC 6154.
+///
+/// The `SPECIAL-USE` extension allows servers to advertise the special purpose of certain mailboxes.
+/// This helps clients automatically identify important mailboxes like Drafts, Sent, Trash, and Junk
+/// without relying on localized mailbox names or user configuration.
+///
+/// The attribute values are case-insensitive and are stored lowercase internally for comparison.
+/// Servers can advertise these attributes in `LIST` responses, and clients can create mailboxes
+/// with these attributes using the `CREATE-SPECIAL-USE` extension.
+///
+/// - SeeAlso: [RFC 6154 IMAP Special-Use Mailbox Attributes](https://datatracker.ietf.org/doc/html/rfc6154)
 public struct UseAttribute: Hashable, Sendable {
     /// A mailbox that presents all messages in the user's store.
     public static let all = Self("\\All")
@@ -67,7 +74,7 @@ extension UseAttribute {
 }
 
 extension String {
-    /// The raw value of the attribute, e.g. `\\trash`. Always lowercase.
+    /// The raw value of the attribute, e.g. `\Trash`. Always lowercase..
     public init(_ other: UseAttribute) {
         self = other.stringValue
     }

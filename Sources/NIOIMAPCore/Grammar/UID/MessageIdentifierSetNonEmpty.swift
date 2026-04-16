@@ -12,9 +12,37 @@
 //
 //===----------------------------------------------------------------------===//
 
-import struct NIO.ByteBuffer
-
-/// A wrapper around a `MessageIdentifierSet` that enforces at least one element.
+/// A non-empty wrapper around ``MessageIdentifierSet`` guaranteeing at least one message identifier.
+///
+/// Many IMAP commands require a non-empty message set (e.g., `FETCH 1:5`, `STORE`, `COPY`,
+/// `EXPUNGE`). `MessageIdentifierSetNonEmpty` wraps a ``MessageIdentifierSet`` with a type-level
+/// guarantee that it contains at least one element.
+///
+/// Use the initializer ``init(set:)`` to validate that a set is non-empty, or construct
+/// directly from a range using ``init(range:)``.
+///
+/// ## Examples
+///
+/// ```swift
+/// // Create from a range (guaranteed non-empty)
+/// let set = MessageIdentifierSetNonEmpty(range: 5...10)
+///
+/// // Try to create from an existing set
+/// if let nonEmpty = MessageIdentifierSetNonEmpty(set: someSet) {
+///     // someSet is non-empty
+/// }
+///
+/// // Access the underlying set
+/// let all = MessageIdentifierSetNonEmpty.all
+/// let min = all.min()  // Returns 1
+/// let max = all.max()  // Returns UInt32.max
+/// ```
+///
+/// ## Related Types
+///
+/// - ``MessageIdentifierSet`` is the wrapped type (may be empty).
+/// - ``MessageIdentifierRange`` represents a single contiguous range.
+/// - ``UIDSetNonEmpty`` is a type alias for `MessageIdentifierSetNonEmpty<UID>`.
 public struct MessageIdentifierSetNonEmpty<IdentifierType: MessageIdentifier>: Hashable, Sendable {
     /// A set that contains a single range, that in turn contains all messages.
     public static var all: Self {
@@ -53,8 +81,8 @@ extension MessageIdentifierSetNonEmpty: CustomDebugStringConvertible {
 // MARK: - Array Literal
 
 extension MessageIdentifierSetNonEmpty: ExpressibleByArrayLiteral {
-    /// Creates a new MessageIdentifierSet from a literal array of ranges.
-    /// - parameter arrayLiteral: The elements to use, assumed to be non-empty.
+    /// Creates a new MessageIdentifierSetNonEmpty from a literal array of ranges.
+    /// - parameter elements: The message identifier ranges to include in the non-empty set.
     public init(arrayLiteral elements: MessageIdentifierRange<IdentifierType>...) {
         precondition(elements.count > 0, "At least one element is required.")
         self.set = MessageIdentifierSet(elements)

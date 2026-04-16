@@ -14,17 +14,46 @@
 
 import struct NIO.ByteBuffer
 
-/// Used to buffer commands before writing to the network.
+/// Encodes IMAP client commands into wire format ready for transmission to an IMAP server.
+///
+/// `CommandEncodeBuffer` is the primary interface for encoding commands from the client side.
+/// It handles chunking of synchronizing literals (for RFC 3501 Section 4.3 compliance) and
+/// respects server capabilities when deciding which literal formats to use.
+///
+/// ## Usage Example
+///
+/// ```swift
+/// var buffer = CommandEncodeBuffer(
+///     buffer: ByteBuffer(),
+///     options: CommandEncodingOptions(capabilities: [.literalPlus]),
+///     loggingMode: false
+/// )
+/// // Encode command data into buffer
+/// // Retrieve chunks via buffer.buffer.nextChunk()
+/// ```
+///
+/// - SeeAlso: ``ResponseEncodeBuffer``, ``CommandEncodingOptions``
 public struct CommandEncodeBuffer: Hashable, Sendable {
     /// The underlying buffer containing data to be written.
+    ///
+    /// This provides access to the raw ``EncodeBuffer`` for advanced operations,
+    /// though most users should interact through the public API of `CommandEncodeBuffer`.
     @_spi(NIOIMAPInternal) public var buffer: EncodeBuffer
 
     /// Tracks whether we have encoded at least one catenate element.
     internal var encodedAtLeastOneCatenateElement: Bool
 
-    /// Creates a new `CommandEncodeBuffer` from a given initial `ByteBuffer` and configuration options.
-    /// - parameter buffer: The initial `ByteBuffer` to build upon.
-    /// - parameter options: The options to use when writing commands and data.
+    /// Creates a new command encoding buffer with explicit options.
+    ///
+    /// - Parameters:
+    ///   - buffer: The initial `ByteBuffer` to build upon. This buffer is copied,
+    ///     not taken as inout.
+    ///   - options: The ``CommandEncodingOptions`` controlling how literals, strings,
+    ///     and other protocol elements are encoded.
+    ///   - encodedAtLeastOneCatenateElement: Internal tracking for CATENATE operations.
+    ///     Typically `false` for new buffers.
+    ///   - loggingMode: When `true`, binary data is replaced with placeholders like
+    ///     `[N bytes]` for safe logging. Defaults to `false`.
     public init(
         buffer: ByteBuffer,
         options: CommandEncodingOptions,
@@ -37,7 +66,14 @@ public struct CommandEncodeBuffer: Hashable, Sendable {
 }
 
 extension CommandEncodeBuffer {
-    /// The options used when writing commands and data.
+    /// The encoding options currently in use.
+    ///
+    /// These options determine how protocol elements are encoded (e.g., whether to use
+    /// quoted strings, which literal formats are supported). You can modify these
+    /// options at runtime to change encoding behavior for subsequent write operations.
+    ///
+    /// - Note: Changing this property affects all subsequent encoding operations in
+    ///   this buffer.
     public var options: CommandEncodingOptions {
         get {
             guard case .client(let options) = buffer.mode else {
@@ -50,9 +86,21 @@ extension CommandEncodeBuffer {
         }
     }
 
-    /// Creates a new `CommandEncodeBuffer` from a given initial `ByteBuffer` and configuration options.
-    /// - parameter buffer: The initial `ByteBuffer` to build upon.
-    /// - parameter capabilities: Capabilities to use when writing commands and data. Will be converted to `CommandEncodingOptions`.
+    /// Creates a new command encoding buffer from server capabilities.
+    ///
+    /// This initializer converts a list of ``Capability`` values into ``CommandEncodingOptions``,
+    /// which automatically enables extended literal formats and binary support if the
+    /// server advertises the corresponding capabilities.
+    ///
+    /// - Parameters:
+    ///   - buffer: The initial `ByteBuffer` to build upon. This buffer is copied,
+    ///     not taken as inout.
+    ///   - capabilities: Server capabilities from a `CAPABILITY` response. These are
+    ///     used to configure encoding options automatically.
+    ///   - encodedAtLeastOneCatenateElement: Internal tracking for CATENATE operations.
+    ///     Typically `false` for new buffers.
+    ///   - loggingMode: When `true`, binary data is replaced with placeholders like
+    ///     `[N bytes]` for safe logging. Defaults to `false`.
     public init(
         buffer: ByteBuffer,
         capabilities: [Capability],

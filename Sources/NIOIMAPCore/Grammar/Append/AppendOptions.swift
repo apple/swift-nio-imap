@@ -15,25 +15,65 @@
 import struct NIO.ByteBuffer
 import struct OrderedCollections.OrderedDictionary
 
-/// Various options that may be added to a message when it is appended to a mailbox.
+/// Optional metadata to attach to a message in an `APPEND` command.
+///
+/// An `AppendOptions` struct allows clients to specify flags, internal date, and
+/// extension fields when appending a message to a mailbox (RFC 3501). These options
+/// are optional; messages can be appended without any flags or date. This is also used
+/// when catenating messages using the `CATENATE` extension (RFC 4469).
+///
+/// ### Example
+///
+/// ```
+/// C: A001 APPEND INBOX (\Seen \Flagged) "17-Jul-1996 09:01:33 -0700" {1234}
+/// S: + Ready for literal data
+/// C: <1234 bytes of message data>
+/// S: * 10 EXISTS
+/// S: A001 OK APPEND completed
+/// ```
+///
+/// The `(\Seen \Flagged) "17-Jul-1996 09:01:33 -0700"` portion is represented as
+/// an `AppendOptions` with `flagList: [.seen, .flagged]` and the internal date.
+///
+/// - SeeAlso: [RFC 3501 Section 6.3.11](https://datatracker.ietf.org/doc/html/rfc3501#section-6.3.11) (APPEND Command)
+/// - SeeAlso: [RFC 4469](https://datatracker.ietf.org/doc/html/rfc4469) (CATENATE Extension)
+/// - SeeAlso: ``Flag``, ``AppendMessage``, ``AppendCommand/beginCatenate(options:)``
 public struct AppendOptions: Hashable, Sendable {
-    /// Flags that will be added to the message
+    /// Flags to be added to the message.
+    ///
+    /// A list of standard flags (like `\Seen`, `\Flagged`, `\Draft`) or custom keyword
+    /// flags to be set on the message when it is appended. If empty, no flags are set
+    /// on the new message.
+    ///
+    /// - SeeAlso: ``Flag``
     public var flagList: [Flag]
 
-    /// The date associated with the message, typically the date of delivery
+    /// The internal date associated with the message.
+    ///
+    /// Typically represents the date of message delivery. If `nil`, the server assigns
+    /// the current date as the internal date. The internal date affects mailbox search
+    /// results for date-based queries.
+    ///
+    /// - SeeAlso: ``ServerMessageDate``
     public var internalDate: ServerMessageDate?
 
-    /// Any additional pieces of information to be associated with the message. Implemented as a "catch-all" to support future extensions.
+    /// Extension fields for future IMAP extensions.
+    ///
+    /// Implemented as a catch-all to support new extension parameters that may be added
+    /// to `APPEND` in the future without requiring code changes. Extensions that don't
+    /// match standard options are stored here as key-value pairs.
     public var extensions: OrderedDictionary<String, ParameterValue>
 
-    /// Creates a new `AppendOptions` with no flags, internal date, or extensions.
-    /// Provided as syntactic sugar to use instead of `.init()`.
+    /// Empty options with no flags, date, or extensions.
+    ///
+    /// Provided as convenience to create an `APPEND` without any metadata.
     public static let none = Self()
 
-    /// Creates a new `AppendOptions`
-    /// - parameter flagList: Flags that will be added to the message. Defaults to `[]`.
-    /// - parameter internalDate: An optional date to be associated with the message, typically representing the date of delivery. Defaults to `nil`.
-    /// - parameter extensions: Any additional pieces of information to be associated with the message. Implemented as a "catch-all" to support future extensions. Defaults to `[:]`.
+    /// Creates a new set of append options.
+    ///
+    /// - parameter flagList: Flags to add to the message. Defaults to no flags.
+    /// - parameter internalDate: Optional date to associate with the message. Defaults to `nil`.
+    /// - parameter extensions: Extension fields for future extensions. Defaults to empty.
     public init(
         flagList: [Flag] = [],
         internalDate: ServerMessageDate? = nil,

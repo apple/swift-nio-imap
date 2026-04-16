@@ -12,12 +12,66 @@
 //
 //===----------------------------------------------------------------------===//
 
-/// A command that should be executed once a server has been successfully connected to.
+/// A command to execute once a connection to an IMAP server has been established.
+///
+/// URL commands specify operations to perform when resolving an IMAP URL. They are used in
+/// IMAP URLs (RFC 2192/5092) to indicate which message data should be fetched or searched.
+/// Each command type specifies a different operation and the parameters needed for that operation.
+///
+/// URL commands appear after the mailbox portion of an IMAP URL path.
+///
+/// ### Command Types
+///
+/// - ``messageList(_:)``: Search for messages matching specific criteria (` `SEARCH` or `` `SELECT` `` semantics)
+/// - ``fetch(path:authenticatedURL:)``: Fetch message content from a specific message location
+///
+/// ### Examples
+///
+/// Message list command (search for unseen messages):
+/// ```
+/// imap://user@example.com/INBOX?UNSEEN
+/// ```
+///
+/// Fetch command (retrieve a specific message):
+/// ```
+/// imap://user@example.com/INBOX/;uid=20
+/// ```
+///
+/// Fetch command with authentication (URLAUTH):
+/// ```
+/// imap://user@example.com/INBOX/;uid=20;urlauth=anonymous:internal:TOKEN
+/// ```
+///
+/// In a URLFETCH command:
+/// ```
+/// C: a001 URLFETCH "imap://user@example.com/INBOX/;uid=20;urlauth=anonymous:internal:TOKEN"
+/// S: * URLFETCH ("imap://user@example.com/INBOX/;uid=20;urlauth=anonymous:internal:TOKEN" "message-data")
+/// S: a001 OK URLFETCH completed
+/// ```
+///
+/// ## Related Types
+///
+/// - ``MessagePath`` specifies message location details
+/// - ``AuthenticatedURL`` provides URLAUTH verification for authorized access
+/// - ``URLFetchType`` provides variations on message path specification
+/// - ``IMAPURL`` includes an optional URL command
+/// - ``RelativeIMAPURL`` may include URL commands in absolute or network paths
+///
+/// - SeeAlso: [RFC 2192](https://datatracker.ietf.org/doc/html/rfc2192) - IMAP URL Scheme
+/// - SeeAlso: [RFC 4467 Section 7](https://datatracker.ietf.org/doc/html/rfc4467#section-7) - URLFETCH Command
 public enum URLCommand: Hashable, Sendable {
-    /// Performs a `.select` or `.examine` command.
+    /// A search query to identify messages matching specific criteria.
+    ///
+    /// When used in an IMAP URL, indicates that messages should be selected based on
+    /// search criteria (e.g., `UNSEEN`, `ALL`, `TEXT "search text"`). This effectively
+    /// performs a `SEARCH` command within the specified mailbox.
     case messageList(EncodedSearchQuery)
 
-    /// Performs a `.fetch` command.
+    /// A fetch command to retrieve specific message content.
+    ///
+    /// Specifies a message location (``MessagePath``) and optionally URLAUTH verification
+    /// (``AuthenticatedURL``) to fetch message content. This is the primary command type
+    /// used in URLFETCH requests.
     case fetch(path: MessagePath, authenticatedURL: AuthenticatedURL?)
 }
 

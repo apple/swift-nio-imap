@@ -14,17 +14,43 @@
 
 import struct NIO.ByteBuffer
 
-/// Represents a IMAP command that is preceded by a tag that can be used for command/response identification.
+/// A command tagged with an identifier for request/response correlation.
+///
+/// In the IMAP protocol (RFC 3501), clients send tagged commands to the server, and the
+/// server includes the same tag in the response to correlate them. This struct combines
+/// a unique tag (usually an alphanumeric string like "A001") with a ``Command``, allowing
+/// the client to track which response corresponds to which request when multiple commands
+/// are in flight (pipelining).
+///
+/// ### Example
+///
+/// ```
+/// C: A001 LOGIN user@example.com password
+/// S: A001 OK LOGIN completed
+/// ```
+///
+/// The line `A001 LOGIN user@example.com password` is represented as a `TaggedCommand`
+/// with `tag: "A001"` and `command: .login(...)`.
+///
+/// - SeeAlso: [RFC 3501 Section 2.2.1](https://datatracker.ietf.org/doc/html/rfc3501#section-2.2.1) (Command Syntax)
+/// - SeeAlso: ``Command``, ``CommandStreamPart/tagged(_:)``
 public struct TaggedCommand: Hashable, Sendable {
-    /// The tag, typically a mixture of alphanumeric characters.
+    /// The tag string used to correlate this command with its response.
+    ///
+    /// Tags are typically alphanumeric identifiers assigned by the client. The server
+    /// will include this tag in its response to allow the client to match responses to
+    /// requests, especially when using pipelined commands.
     public var tag: String
 
-    /// The command to associate with a tag.
+    /// The command to send with this tag.
+    ///
+    /// See ``Command`` for the full list of available commands.
     public var command: Command
 
-    /// Creates a new `TaggedCommand`.
-    /// - parameter tag: The tag, typically a mixture of alphanumeric characters.
-    /// - parameter command: The command to associate with a tag.
+    /// Creates a new tagged command.
+    ///
+    /// - parameter tag: The tag string, typically a mixture of alphanumeric characters
+    /// - parameter command: The command to associate with the tag
     public init(tag: String, command: Command) {
         self.tag = tag
         self.command = command

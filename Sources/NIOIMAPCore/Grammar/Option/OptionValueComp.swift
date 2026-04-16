@@ -14,7 +14,13 @@
 
 import struct NIO.ByteBuffer
 
-/// A wrapper for an option value.
+/// An option value, which can be a single string or a nested array of values.
+///
+/// This recursive enum allows option values to be nested arbitrarily deep, enabling representation
+/// of complex structured data in the RFC 4466 extension mechanism. Values can be simple strings
+/// or arrays of other option values, supporting flexible data representation.
+///
+/// - SeeAlso: [RFC 4466 IMAP4 Extensions](https://datatracker.ietf.org/doc/html/rfc4466)
 public enum OptionValueComp: Hashable, Sendable {
     /// A single value
     case string(ByteBuffer)
@@ -29,7 +35,7 @@ extension OptionValueComp: ExpressibleByArrayLiteral {
     /// Option values can be nested, so this provides recursion.
     public typealias ArrayLiteralElement = Self
 
-    /// Creates a new `OptionalValueComp` from the given elements.
+    /// Creates a new `OptionValueComp` from the given elements.
     /// - parameter elements: The contents of the array.
     public init(arrayLiteral elements: OptionValueComp...) {
         let array = Array(elements)
