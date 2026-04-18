@@ -14,9 +14,44 @@
 
 import struct NIO.ByteBuffer
 
-/// Represents a range of `MessageIdentifier`s using lower and upper bounds.
+/// A closed range of message identifiers (either UIDs or sequence numbers).
+///
+/// A `MessageIdentifierRange` represents a contiguous sequence of message identifiers using
+/// lower and upper bounds. It wraps a native Swift `ClosedRange` and supports conversion
+/// from partial ranges (e.g., `1...` or `...42`).
+///
+/// In IMAP wire format, ranges are encoded as `lower:upper`, where both bounds can be the
+/// special value `*` (representing `UInt32.max`, the maximum message identifier).
+///
+/// See [RFC 3501 Section 6](https://datatracker.ietf.org/doc/html/rfc3501#section-6) for
+/// message set syntax and examples.
+///
+/// ## Examples
+///
+/// ```swift
+/// // Specific range
+/// let range = MessageIdentifierRange(5...10)  // Messages 5 through 10
+///
+/// // Partial ranges
+/// let upTo = MessageIdentifierRange(...42)    // Messages 1 through 42
+/// let from = MessageIdentifierRange(5...)    // Messages 5 through max
+///
+/// // Single message
+/// let single = MessageIdentifierRange(7)      // Just message 7
+/// ```
+///
+/// These ranges are used in set-based commands like `FETCH 1:5`, `STORE 1,3:7 +FLAGS \Deleted`,
+/// and `COPY 1:* Archive`.
+///
+/// ## Related Types
+///
+/// - ``MessageIdentifierSet`` contains an array of ranges to represent non-contiguous sets.
+/// - ``SequenceRange`` is a type alias for `MessageIdentifierRange<SequenceNumber>`.
+/// - ``UIDRange`` is a type alias for `MessageIdentifierRange<UID>`.
 public struct MessageIdentifierRange<IdentifierType: MessageIdentifier>: Hashable {
-    /// The range expressed as a native Swift range.
+    /// The range expressed as a native Swift `ClosedRange`.
+    ///
+    /// - Returns: A `ClosedRange` from the lower bound to the upper bound (inclusive).
     public var range: ClosedRange<IdentifierType>
 
     /// Creates a new `MessageIdentifierRange`.
@@ -32,7 +67,7 @@ public struct MessageIdentifierRange<IdentifierType: MessageIdentifier>: Hashabl
     }
 
     /// Creates a new `MessageIdentifierRange` from a partial range, using `.max` as the upper bound.
-    /// - parameter rawValue: A partial with a `MessageIdentifier` as the lower bound.
+    /// - parameter range: A partial range with a `MessageIdentifier` as the lower bound.
     public init(_ range: PartialRangeFrom<IdentifierType>) {
         self.init(range.lowerBound...IdentifierType.max)
     }

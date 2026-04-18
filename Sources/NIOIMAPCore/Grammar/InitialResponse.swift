@@ -14,8 +14,26 @@
 
 import struct NIO.ByteBuffer
 
-/// Allows a client to optionally send an initial response when authenticating to speed
-/// up the process.
+/// An initial SASL response sent with the AUTHENTICATE command.
+///
+/// The SASL-IR extension (RFC 4959) allows clients to send an initial response directly with the
+/// AUTHENTICATE command, rather than waiting for a server challenge. This reduces the number of
+/// round-trips required for authentication.
+///
+/// The initial response is optional. An empty response is encoded as `=` (a single equals sign).
+/// Non-empty responses are base64-encoded.
+///
+/// ### Example
+///
+/// ```
+/// C: A001 AUTHENTICATE PLAIN dXNlcm5hbWVAZXhhbXBsZS5jb206cGFzc3dvcmQ=
+/// S: A001 OK authenticated
+/// ```
+///
+/// The client sends the AUTHENTICATE command with PLAIN mechanism and a base64-encoded initial
+/// response containing username and password, avoiding the server challenge round-trip.
+///
+/// - SeeAlso: [RFC 4959 SASL Initial Response](https://datatracker.ietf.org/doc/html/rfc4959)
 public struct InitialResponse: Hashable, Sendable {
     /// Creates a new empty `InitialResponse` that will be encoded as `=`.
     public static let empty: Self = .init(ByteBuffer())

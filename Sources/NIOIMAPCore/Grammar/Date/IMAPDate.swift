@@ -14,23 +14,54 @@
 
 import struct NIO.ByteBuffer
 
-/// Represents a day with the format `yyyy-MM-dd`.
-/// (RFC 3501)
+/// A calendar day formatted as `dd-MMM-yyyy` as defined in RFC 3501.
+///
+/// This type represents a date in the IMAP date format, where the month is represented
+/// as a three-letter abbreviation (e.g., `Jan`, `Feb`, etc.). This format is used in various
+/// IMAP protocol messages including the `INTERNALDATE` message attribute and `APPEND` commands.
+///
+/// The `IMAPCalendarDay` provides basic validation of date components. Note that the
+/// validation checks component ranges but does not validate whether the combination
+/// represents a valid calendar date (e.g., February 30 is accepted).
+///
+/// ### Example
+///
+/// ```
+/// * 1 FETCH (INTERNALDATE "15-Mar-2026 10:30:45 +0000")
+/// ```
+///
+/// The date portion `15-Mar-2026` corresponds to an ``IMAPCalendarDay`` with
+/// `year: 2026`, `month: 3`, and `day: 15`.
+///
+/// - SeeAlso: [RFC 3501 Section 2.3.3](https://datatracker.ietf.org/doc/html/rfc3501#section-2.3.3)
 public struct IMAPCalendarDay: Hashable, Sendable {
-    /// 4-digit year in the range (1900, 2500)
+    /// The year, constrained to the range `1900...2500`.
+    ///
+    /// This is a 4-digit year value. The range constraint reflects common IMAP server
+    /// implementations which typically support dates in this range.
     public let year: Int
 
-    /// 2-digit month in the range (01, 12)
+    /// The month, constrained to the range `1...12`.
+    ///
+    /// Month 1 is January, month 12 is December.
     public let month: Int
 
-    /// 2-digit day in the range (01, 31)
+    /// The day of the month, constrained to the range `1...31`.
+    ///
+    /// The range accepts all valid day numbers across different months. No validation
+    /// is performed to verify the day is valid for the specific month (e.g., February 30 is accepted).
     public let day: Int
 
-    /// Creates a new `Date` and performs some basic validation on the input provided.
-    /// - parameter year: The year, validated to be between 1900 and 2500 inclusive.
-    /// - parameter month: The month, validated to be between 01 and 12 inclusive.
-    /// - parameter day: The day, validated to be between 01 and 31 inclusive, however the number of days in the given month is not validated.
-    /// - returns: A new `Date` if all validation is passed, otherwise `nil`.
+    /// Creates a new `IMAPCalendarDay` and performs basic validation on the input.
+    ///
+    /// All parameters are validated against their documented ranges. If any parameter
+    /// falls outside its valid range, this initializer returns `nil`.
+    ///
+    /// - Parameters:
+    ///   - year: The year, validated to be between 1900 and 2500 inclusive.
+    ///   - month: The month, validated to be between 1 and 12 inclusive.
+    ///   - day: The day, validated to be between 1 and 31 inclusive. The number of days in the given month is not validated.
+    /// - Returns: A new `IMAPCalendarDay` if all validation is passed, otherwise `nil`.
     public init?(year: Int, month: Int, day: Int) {
         guard
             day >= 1,
@@ -55,7 +86,10 @@ extension EncodeBuffer {
 }
 
 extension IMAPCalendarDay {
-    var monthString: String {
+    /// The three-letter month abbreviation for this calendar day.
+    ///
+    /// Returns the month name as used in the IMAP date format (e.g., `Jan`, `Feb`, `Mar`, etc.).
+    fileprivate var monthString: String {
         switch month {
         case 1: return "Jan"
         case 2: return "Feb"
@@ -73,6 +107,12 @@ extension IMAPCalendarDay {
         }
     }
 
+    /// Parses a three-letter month name and returns the corresponding month number.
+    ///
+    /// The parsing is case-insensitive. For example, both `Jan` and `jan` return `1`.
+    ///
+    /// - Parameter text: The three-letter month abbreviation.
+    /// - Returns: The month number (1-12) if the text matches a valid month name, otherwise `nil`.
     static func month(text: String) -> Int? {
         switch text.lowercased() {
         case "jan": return 1

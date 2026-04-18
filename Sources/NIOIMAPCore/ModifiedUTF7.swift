@@ -14,23 +14,59 @@
 
 import struct NIO.ByteBuffer
 
-/// IMAP uses a slightly modified version of UTF7, as documented in RFC 3501 section 5.1.3.
+/// Encodes and decodes modified UTF-7 as used in IMAP mailbox names.
+///
+/// IMAP defines a modified version of UTF-7 encoding in RFC 3501 Section 5.1.3 for
+/// representing non-ASCII characters in mailbox names. This encoding is necessary because
+/// mailbox names must be transmitted as UTF-7 in the IMAP protocol, even when the client
+/// and server both support UTF-8.
+///
+/// ## Modified UTF-7 Rules
+///
+/// The modified UTF-7 encoding replaces the standard UTF-7 "shift" characters:
+/// - Uses `&` (U+0026) instead of `+` to begin Base64 sequences
+/// - Uses `-` (U+002D) instead of `-` to end Base64 sequences (when no non-ASCII characters)
+/// - The sequence `&-` encodes a literal `&` character
+///
+/// All other ASCII printable characters (0x20-0x7E) are encoded literally.
+///
+/// ## Example
+///
+/// ```swift
+/// let mailbox = "Sent &Aw0-Items"  // "Sent & Items" with & encoded
+/// let decoded = ModifiedUTF7.decode(mailbox)
+/// // decoded ≈ "Sent & Items"
+/// ```
+///
+/// - SeeAlso: [RFC 3501 Section 5.1.3](https://datatracker.ietf.org/doc/html/rfc3501#section-5.1.3)
 public enum ModifiedUTF7 {
-    /// Thrown if an odd number of bytes is given to the UTF-7 decoder.
+    /// Thrown when a UTF-7 decoder receives an odd number of bytes.
+    ///
+    /// UTF-7 Base64 encoding produces an even number of bytes, so an odd count
+    /// indicates corrupted or invalid data.
     public struct OddByteCountError: Error {
         /// The number of bytes given to the decoder.
         public var byteCount: Int
     }
 
-    /// Thrown if bytes cannot successfully roundtrip through the encoder and decoder.
+    /// Thrown when bytes cannot successfully roundtrip through encoding and decoding.
+    ///
+    /// This typically indicates the encoded data is corrupted or uses invalid UTF-7 sequences.
     public struct EncodingRoundtripError: Error {
-        /// The buffer to roundtrip
+        /// The buffer that failed to roundtrip.
         public var buffer: ByteBuffer
     }
 
-    /// Encodes a `String` into UTF-7 bytes.
-    /// - parameter string: The string to encode.
-    /// - returns: A `ByteBuffer` containing UTF-7 bytes.
+    /// Encodes a `String` into modified UTF-7 bytes for use as an IMAP mailbox name.
+    ///
+    /// This function converts a Unicode string into modified UTF-7 format, where
+    /// non-ASCII characters are represented using Base64 encoding with `&` as the
+    /// escape character.
+    ///
+    /// - Parameter string: The Unicode string to encode.
+    /// - Returns: A `ByteBuffer` containing modified UTF-7 bytes.
+    ///
+    /// - SeeAlso: [RFC 3501 Section 5.1.3](https://datatracker.ietf.org/doc/html/rfc3501#section-5.1.3)
     static func encode(_ string: String) -> ByteBuffer {
         var buffer = ByteBuffer()
         buffer.reserveCapacity(string.utf8.count)

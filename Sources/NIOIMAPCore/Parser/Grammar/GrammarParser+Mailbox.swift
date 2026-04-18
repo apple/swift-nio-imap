@@ -94,7 +94,8 @@ extension GrammarParser {
                     )
                     try PL.parseSpaces(buffer: &buffer, tracker: tracker)
                     let seq = try self.parseSearchSortModificationSequence(buffer: &buffer, tracker: tracker)
-                    return .searchSort(.init(identifiers: array, modificationSequence: seq))
+                    let identifiers = array.compactMap { UnknownMessageIdentifier(exactly: $0) }
+                    return .search(identifiers, seq)
                 }
 
                 return try PL.parseOneOf(

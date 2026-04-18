@@ -14,30 +14,96 @@
 
 import struct NIO.ByteBuffer
 
-/// Contains information returned from a complete search command, not on a per-message basis.
+/// Response data returned from a search command using the ESEARCH extension (RFC 4731).
+///
+/// When a client specifies one or more result options in the `RETURN` clause of a `SEARCH` or `UID SEARCH` command,
+/// the server responds with an ESEARCH response containing ``SearchReturnData`` cases corresponding to the
+/// requested options. Each case represents a specific type of search result.
+///
+/// **Requires server capability:** ``Capability/extendedSearch``
+///
+/// The ESEARCH response can include multiple data elements (e.g., both `MIN` and `COUNT`), and clients should handle
+/// each independently. Some result options (like ``count(_:)``) are always present, while others (like ``min(_:)``
+/// and ``max(_:)``) are omitted if the search returns no matches.
+///
+/// ### Examples
+///
+/// ```
+/// S: * ESEARCH (TAG "A001") MIN 2 COUNT 3
+/// S: A001 OK SEARCH completed
+/// ```
+///
+/// The line `S: * ESEARCH (TAG "A001") MIN 2 COUNT 3` represents a server response containing two ``SearchReturnData``
+/// cases: ``min(_:)`` with value `2` and ``count(_:)`` with value `3`. These are wrapped in an ``ExtendedSearchResponse``.
+///
+/// ```
+/// S: * ESEARCH (TAG "A002") UID ALL 7,10:15,22
+/// S: A002 OK SEARCH completed
+/// ```
+///
+/// The `ALL 7,10:15,22` portion represents ``all(_:)`` containing a ``LastCommandSet`` with the matching UIDs.
+///
+/// - SeeAlso: [RFC 4731](https://datatracker.ietf.org/doc/html/rfc4731)
+/// - SeeAlso: ``SearchReturnOption``
+/// - SeeAlso: ``ExtendedSearchResponse``
 public enum SearchReturnData: Hashable, Sendable {
-    /// Return the lowest message number/UID that satisfies the SEARCH criteria.
+    /// The lowest message number/UID matching the search criteria.
+    ///
+    /// Returned when `MIN` is included in the `RETURN` clause. Only present if the search
+    /// found at least one matching message. The value is either a message number (for `SEARCH`)
+    /// or a UID (for `UID SEARCH`).
+    ///
+    /// - SeeAlso: [RFC 4731 Section 3.1](https://datatracker.ietf.org/doc/html/rfc4731#section-3.1)
     case min(UnknownMessageIdentifier)
 
-    /// Return the highest message number/UID that satisfies the SEARCH criteria.
+    /// The highest message number/UID matching the search criteria.
+    ///
+    /// Returned when `MAX` is included in the `RETURN` clause. Only present if the search
+    /// found at least one matching message. The value is either a message number (for `SEARCH`)
+    /// or a UID (for `UID SEARCH`).
+    ///
+    /// - SeeAlso: [RFC 4731 Section 3.1](https://datatracker.ietf.org/doc/html/rfc4731#section-3.1)
     case max(UnknownMessageIdentifier)
 
-    /// Return all message numbers/UIDs that satisfy the SEARCH criteria.
+    /// All message numbers/UIDs matching the search criteria in sequence-set format.
+    ///
+    /// Returned when `ALL` is included in the `RETURN` clause. Results are represented as
+    /// a ``LastCommandSet`` (compact sequence-set notation like `2,10:11`). Only present if the search
+    /// found at least one matching message.
+    ///
+    /// - SeeAlso: [RFC 4731 Section 3.1](https://datatracker.ietf.org/doc/html/rfc4731#section-3.1)
     case all(LastCommandSet<UnknownMessageIdentifier>)
 
-    /// Return number of the messages that satisfy the SEARCH criteria.
+    /// The count of messages matching the search criteria.
+    ///
+    /// Returned when `COUNT` is included in the `RETURN` clause. Unlike other result options,
+    /// this is REQUIRED and always included in the ESEARCH response, even when the count is zero.
+    ///
+    /// - SeeAlso: [RFC 4731 Section 3.1](https://datatracker.ietf.org/doc/html/rfc4731#section-3.1)
     case count(Int)
 
-    /// Contains the highest mod-sequence for all messages being returned.
+    /// The highest modification sequence value among all messages being returned.
+    ///
+    /// Returned when the search is performed with a `MODSEQ` criterion and the server supports
+    /// the CONDSTORE extension. This allows clients to track which message state changes were
+    /// included in the search results for future synchronization.
+    ///
+    /// - SeeAlso: [RFC 7162 Section 3.1.5](https://datatracker.ietf.org/doc/html/rfc7162#section-3.1.5)
     case modificationSequence(ModificationSequenceValue)
 
-    /// The message numbers/UIDs that satisfy the SEARCH criteria for a
-    /// partial (paged) search.
+    /// A subset of results for paginated search using the PARTIAL extension.
     ///
-    /// Part of https://datatracker.ietf.org/doc/draft-ietf-extra-imap-partial/
+    /// Returned when the `.partial(_:)`` option is included in the `RETURN` clause. Contains
+    /// the requested range and the message numbers/UIDs within that range. The set may be empty
+    /// if the requested range is beyond the total number of results.
+    ///
+    /// - SeeAlso: [RFC 9394](https://datatracker.ietf.org/doc/html/rfc9394)
     case partial(PartialRange, MessageIdentifierSet<UnknownMessageIdentifier>)
 
-    /// Implemented as a catch-all to support any return data options defined in future extensions.
+    /// A server extension result option not defined in this library.
+    ///
+    /// This case captures future ESEARCH result data defined by extensions, allowing
+    /// forward compatibility with new IMAP capabilities without requiring library updates.
     case dataExtension(KeyValue<String, ParameterValue>)
 }
 

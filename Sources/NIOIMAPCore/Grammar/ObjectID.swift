@@ -12,9 +12,17 @@
 //
 //===----------------------------------------------------------------------===//
 
-/// An RFC 8747 object identifier.
+/// A persistent server-assigned object identifier.
 ///
-/// This is an internal type used to share code between stronger public types.
+/// An `ObjectID` is the base type for RFC 8474 object identifiers, which provide persistent,
+/// immutable identifiers for mailboxes and messages. This is an internal type used to share
+/// code between the stronger public types ``EmailID`` (for message content), ``ThreadID``
+/// (for related messages), and ``MailboxID`` (for mailboxes).
+///
+/// Valid `ObjectID` values are 1-255 alphanumeric characters, hyphens, or underscores, ensuring
+/// they can be safely transmitted in IMAP protocol messages.
+///
+/// - SeeAlso: [RFC 8474](https://datatracker.ietf.org/doc/html/rfc8474)
 internal struct ObjectID: Hashable, Sendable {
     /// The `String` representation.
     fileprivate var rawValue: String
@@ -22,6 +30,9 @@ internal struct ObjectID: Hashable, Sendable {
     /// Creates a new `ObjectID` from a `String`.
     ///
     /// Valid Object IDs are 1-255 alphanumeric or `-` or `_` characters.
+    ///
+    /// - Parameter rawValue: A candidate object ID string value
+    /// - Returns: An `ObjectID` if the string is valid, or `nil` if it fails validation
     init?(_ rawValue: String) {
         guard (1...255).contains(rawValue.count) else {
             return nil

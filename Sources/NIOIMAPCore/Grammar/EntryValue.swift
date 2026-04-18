@@ -15,6 +15,8 @@
 import struct NIO.ByteBuffer
 import struct OrderedCollections.OrderedDictionary
 
+// MARK: - Encoding
+
 extension EncodeBuffer {
     @discardableResult mutating func writeEntry(_ entry: KeyValue<MetadataEntryName, MetadataValue>) -> Int {
         self.writeIMAPString(String(entry.key)) + self.writeSpace() + self.writeMetadataValue(entry.value)

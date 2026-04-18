@@ -13,13 +13,32 @@
 //===----------------------------------------------------------------------===//
 import struct NIO.ByteBuffer
 
-/// GMail treats labels as folders.
+/// A Gmail label identifier (vendor extension).
+///
+/// Gmail treats labels like mailbox folders. This type represents a single Gmail label returned
+/// in the X-GM-LABELS attribute of a FETCH response. Labels are stored as byte buffers and may be
+/// encoded in modified UTF-7 format (the same encoding used for mailbox names).
+///
+/// This is a Gmail-specific extension not part of the standard IMAP protocol. It is available when
+/// the server advertises the X-GM-EXT-1 capability.
+///
+/// ### Example
+///
+/// ```
+/// C: A001 FETCH 1 (X-GM-LABELS)
+/// S: * 1 FETCH (X-GM-LABELS ("Important" "Work"))
+/// ```
+///
+/// This response indicates message 1 has two labels: "Important" and "Work".
+///
+/// - SeeAlso: [Gmail IMAP Extensions](https://developers.google.com/gmail/imap/imap-extensions)
+/// - SeeAlso: ``MessageAttribute/gmailLabels(_:)``
 public struct GmailLabel: Hashable, Sendable {
     /// The label's raw value -  a sequence of bytes
     let buffer: ByteBuffer
 
     /// Creates a new `GmailLabel` from the given bytes.
-    /// - parameter rawValue: The raw bytes to construct the label
+    /// - parameter buffer: The raw bytes to construct the label
     public init(_ buffer: ByteBuffer) {
         self.buffer = buffer
     }

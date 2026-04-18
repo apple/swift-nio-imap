@@ -14,30 +14,83 @@
 
 import struct NIO.ByteBuffer
 
-/// Used to control what data is sent back as part of a search response.
+/// A result option for the `SEARCH` command's extended `RETURN` clause (RFC 4731 ESEARCH extension).
+///
+/// The ESEARCH extension allows clients to control what kind of information is returned from a search operation,
+/// enabling more efficient searching by allowing the server to return only the data the client needs.
+///
+/// **Requires server capability:** ``Capability/extendedSearch``
+///
+/// When one or more result options are specified in the `RETURN` clause of a `SEARCH` or `UID SEARCH` command,
+/// the server responds with an ESEARCH response (see ``ExtendedSearchResponse``) instead of a standard search response.
+///
+/// ### Examples
+///
+/// ```
+/// C: A001 SEARCH RETURN (MIN COUNT) FLAGGED
+/// S: * ESEARCH (TAG "A001") MIN 2 COUNT 3
+/// S: A001 OK SEARCH completed
+/// ```
+///
+/// The `RETURN (MIN COUNT)` clause is represented by `[.min, .count]`. The server's response data
+/// is wrapped as ``SearchReturnData/min(_:)`` and ``SearchReturnData/count(_:)`` cases.
+///
+/// - SeeAlso: [RFC 4731 Section 3.1](https://datatracker.ietf.org/doc/html/rfc4731#section-3.1)
 public enum SearchReturnOption: Hashable, Sendable {
-    /// Return the lowest message number/UID that satisfies the SEARCH criteria.
+    /// Return the lowest message number/UID that satisfies the search criteria.
+    ///
+    /// If the search returns no matches, the server MUST NOT include this option in the response.
+    ///
+    /// - SeeAlso: [RFC 4731 Section 3.1](https://datatracker.ietf.org/doc/html/rfc4731#section-3.1)
     case min
 
-    /// Return the highest message number/UID that satisfies the SEARCH criteria.
+    /// Return the highest message number/UID that satisfies the search criteria.
+    ///
+    /// If the search returns no matches, the server MUST NOT include this option in the response.
+    ///
+    /// - SeeAlso: [RFC 4731 Section 3.1](https://datatracker.ietf.org/doc/html/rfc4731#section-3.1)
     case max
 
-    /// Return all message numbers/UIDs that satisfy the SEARCH criteria.
+    /// Return all message numbers/UIDs that satisfies the search criteria in sequence-set syntax.
+    ///
+    /// Unlike standard `SEARCH` responses which use space-separated lists, results are returned
+    /// as a compact sequence-set representation (e.g., `2,10:11`) that can be used directly
+    /// in subsequent commands. If the search returns no matches, the server MUST NOT include
+    /// this option in the response.
+    ///
+    /// - SeeAlso: [RFC 4731 Section 3.1](https://datatracker.ietf.org/doc/html/rfc4731#section-3.1)
     case all
 
-    /// Return number of the messages that satisfy the SEARCH criteria.
+    /// Return the count of messages that satisfy the search criteria.
+    ///
+    /// Unlike other result options, this option MUST always be included in the ESEARCH response,
+    /// even when the count is zero.
+    ///
+    /// - SeeAlso: [RFC 4731 Section 3.1](https://datatracker.ietf.org/doc/html/rfc4731#section-3.1)
     case count
 
-    /// Tells the server to remember the result of the SEARCH or UID SEARCH command (as well as any command based on
-    /// SEARCH, e.g., SORT and THREAD [SORT]) and store it
+    /// Request that the server remember the search result for use with the `$` command.
+    ///
+    /// Tells the server to store the result of the `SEARCH`, `UID SEARCH`, `SORT`, or `THREAD` command
+    /// so that the result set can be referenced as `$` in subsequent commands. Only one search result
+    /// can be active at a time; a new search result replaces the previous one.
+    ///
+    /// - SeeAlso: [RFC 5182](https://datatracker.ietf.org/doc/html/rfc5182)
     case save
 
-    /// Request a subset of the results.
+    /// Request a subset of the results using pagination.
     ///
-    /// Part of https://datatracker.ietf.org/doc/draft-ietf-extra-imap-partial/
+    /// This option is part of the PARTIAL extension for paginated search results. When specified,
+    /// the server returns only the requested range of matching messages rather than all results,
+    /// reducing bandwidth and server processing time.
+    ///
+    /// - SeeAlso: [RFC 9394](https://datatracker.ietf.org/doc/html/rfc9394)
     case partial(PartialRange)
 
-    /// Implemented as a catch-all to support future extensions.
+    /// A server extension result option not defined in this library.
+    ///
+    /// This case captures future ESEARCH result options defined by extensions, allowing
+    /// forward compatibility with new IMAP capabilities without requiring library updates.
     case optionExtension(KeyValue<String, ParameterValue?>)
 }
 

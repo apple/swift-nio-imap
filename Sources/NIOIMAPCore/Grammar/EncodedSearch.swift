@@ -14,7 +14,12 @@
 
 import struct NIO.ByteBuffer
 
-/// A percent-encoded search.
+/// A percent-encoded search query for use in IMAP URLs.
+///
+/// Search queries in IMAP URLs (RFC 5092) must be percent-encoded to avoid conflicts with
+/// URL syntax. This type wraps such an encoded search string.
+///
+/// - SeeAlso: [RFC 5092 IMAP URL Scheme](https://datatracker.ietf.org/doc/html/rfc5092)
 public struct EncodedSearch: Hashable, Sendable {
     /// The percent-encoded data.
     public var query: String

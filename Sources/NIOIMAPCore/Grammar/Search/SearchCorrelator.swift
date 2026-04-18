@@ -14,22 +14,57 @@
 
 import struct NIO.ByteBuffer
 
-/// Multiple searches may be run concurrently, and so a `SearchCorrelator` can be used
-/// to identify the search to which a response belongs.
+/// Identifies a search operation in responses when multiple searches are pipelined (RFC 7377 MULTIMAILBOX SEARCH extension).
+///
+/// When performing multiple concurrent searches across different mailboxes, clients need a way to correlate
+/// each ESEARCH response with its corresponding request. This type provides identification information that
+/// allows clients to safely pipeline search commands without confusion, as each response includes the correlator
+/// information from the original request.
+///
+/// **Requires server capability:** ``Capability/multiSearch``
+///
+/// The server echoes back the correlator information in the ESEARCH response, allowing clients to:
+/// - Match responses to requests when pipelining
+/// - Search multiple mailboxes with a single command
+/// - Avoid disrupting the currently selected mailbox
+///
+/// ### Example
+///
+/// ```
+/// C: A001 SEARCH IN (MAILBOX "INBOX") TEXT "hello" RETURN (COUNT) TAG "A001" MAILBOX "INBOX" UIDVALIDITY 12345
+/// S: * ESEARCH (TAG "A001" MAILBOX "INBOX" UIDVALIDITY 12345) COUNT 5
+/// S: A001 OK SEARCH completed
+/// ```
+///
+/// The `TAG "A001" MAILBOX "INBOX" UIDVALIDITY 12345` clause in the response corresponds to a ``SearchCorrelator``
+/// with `tag: "A001"`, `mailbox: "INBOX"`, and `uidValidity: 12345`. These fields allow the client to identify
+/// which mailbox's search results are being returned.
+///
+/// - SeeAlso: [RFC 7377 Section 2.3](https://datatracker.ietf.org/doc/html/rfc7377#section-2.3)
+/// - SeeAlso: ``ExtendedSearchResponse``
 public struct SearchCorrelator: Hashable, Sendable {
-    /// The tag of the command that this search result is a response to.
+    /// The tag from the original `SEARCH` command, used to correlate responses with requests.
+    ///
+    /// Per RFC 4466, this is an arbitrary string chosen by the client to uniquely identify this search
+    /// among potentially multiple concurrent searches.
     public var tag: String
 
-    /// The mailbox being searched. Required iff using RFC 7377
+    /// The mailbox name associated with this search, when using RFC 7377 multimailbox search.
+    ///
+    /// When present, the server is searching this specific mailbox. When `nil`, the search may apply
+    /// to the currently selected mailbox or multiple mailboxes depending on the request structure.
     public var mailbox: MailboxName?
 
-    /// Required iff using RFC 7377
+    /// The UIDVALIDITY of the mailbox at the time of the search, when using RFC 7377.
+    ///
+    /// UIDVALIDITY changes if the mailbox is reconstructed or emptied. Clients can use this to detect
+    /// when a mailbox has been modified and results may be stale.
     public var uidValidity: UIDValidity?
 
     /// Creates a new `SearchCorrelator`.
-    /// - parameter tag: The original option from RFC4466 - a random string.
-    /// - parameter mailbox: The mailbox being searched. Required iff using RFC 7377.
-    /// - parameter uidValidity: Required iff using RFC 7377.
+    /// - parameter tag: The tag string from the `SEARCH` command (per RFC 4466)
+    /// - parameter mailbox: The mailbox name being searched (RFC 7377, optional)
+    /// - parameter uidValidity: The UIDVALIDITY of the mailbox (RFC 7377, optional)
     public init(tag: String, mailbox: MailboxName? = nil, uidValidity: UIDValidity? = nil) {
         self.tag = tag
         self.mailbox = mailbox

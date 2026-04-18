@@ -12,15 +12,58 @@
 //
 //===----------------------------------------------------------------------===//
 
-/// Used an option to `.getMetadata` to specify the depth.
+/// Metadata search depth for the `GETMETADATA` command.
+///
+/// The `ScopeOption` enum specifies how deep the server should search for metadata
+/// entries when retrieving annotation data using the `GETMETADATA` command (RFC 5464
+/// METADATA extension). This determines whether the response includes only the exact
+/// entry, only immediate children, or all descendants.
+///
+/// ### Example
+///
+/// ```
+/// C: A001 GETMETADATA INBOX "/private" DEPTH 1
+/// S: * METADATA INBOX ("/private/comments" "draft ready")
+/// S: * METADATA INBOX ("/private/author" "john.doe")
+/// S: A001 OK GETMETADATA completed
+/// ```
+///
+/// The `DEPTH 1` option is represented as `ScopeOption.one`, limiting results to
+/// entries immediately below the specified entry.
+///
+/// - SeeAlso: [RFC 5464 Section 4.4.2](https://datatracker.ietf.org/doc/html/rfc5464#section-4.4.2) (DEPTH Option)
+/// - SeeAlso: ``Command/getMetadata(options:mailbox:entries:)``
 public struct ScopeOption: Hashable, Sendable {
-    /// No entries below the specified entry are returned
+    /// No child entries are included in results.
+    ///
+    /// Returns only the exact entry specified in the `GETMETADATA` command. Does not
+    /// include any entries below the specified entry in the annotation hierarchy.
+    ///
+    /// Corresponds to the `DEPTH 0` option in the protocol.
+    ///
+    /// - SeeAlso: [RFC 5464 Section 4.4.2](https://datatracker.ietf.org/doc/html/rfc5464#section-4.4.2)
     public static let zero = Self(_backing: .zero)
 
-    /// Only entries immediately below the specified entry are returned
+    /// Only immediate child entries are included in results.
+    ///
+    /// Returns the exact entry and entries that are direct children of the specified
+    /// entry, but not deeper descendants. For example, with entry `/private`, this
+    /// returns `/private` and `/private/comments` but not `/private/comments/draft`.
+    ///
+    /// Corresponds to the `DEPTH 1` option in the protocol.
+    ///
+    /// - SeeAlso: [RFC 5464 Section 4.4.2](https://datatracker.ietf.org/doc/html/rfc5464#section-4.4.2)
     public static let one = Self(_backing: .one)
 
-    /// All entries below the specified entry are returned
+    /// All descendant entries are included in results.
+    ///
+    /// Returns the exact entry and all entries below it at any depth in the annotation
+    /// hierarchy. This produces the most comprehensive metadata results but may return
+    /// large response sets.
+    ///
+    /// Corresponds to the `DEPTH INFINITY` option in the protocol.
+    ///
+    /// - SeeAlso: [RFC 5464 Section 4.4.2](https://datatracker.ietf.org/doc/html/rfc5464#section-4.4.2)
     public static let infinity = Self(_backing: .infinity)
 
     enum _Backing: String {

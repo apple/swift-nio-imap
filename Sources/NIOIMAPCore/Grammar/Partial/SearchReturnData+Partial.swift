@@ -15,6 +15,14 @@
 import struct NIO.ByteBuffer
 
 extension SearchReturnData {
+    /// Partial search results with a specified range.
+    ///
+    /// This type contains the range that was requested via the `PARTIAL` modifier and the
+    /// message numbers matching the search within that range. The `PARTIAL` extension (RFC 9394)
+    /// enables efficient pagination of large search results.
+    ///
+    /// - SeeAlso: [RFC 9394 IMAP PARTIAL Extension](https://datatracker.ietf.org/doc/html/rfc9394)
+    /// - SeeAlso: ``PartialRange``
     public struct Partial: Hashable, Sendable {
         /// The requested range.
         public var range: PartialRange

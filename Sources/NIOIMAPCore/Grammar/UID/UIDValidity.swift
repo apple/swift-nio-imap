@@ -12,7 +12,25 @@
 //
 //===----------------------------------------------------------------------===//
 
-/// The unique identifier validity value of a mailbox. Combined with a message UID to form a 64-bit identifier.
+/// A unique identifier validity value that ensures persistent message identification across sessions.
+///
+/// A `UIDValidity` is a 32-bit unsigned integer that, when combined with a ``UID``, forms a
+/// 64-bit value guaranteeing that the pair identifies the same message forever, even across
+/// mailbox deletions and recreations.
+///
+/// The server sends a `UIDVALIDITY` response code when a client selects a mailbox. If UIDs
+/// from a previous session fail to persist, the server MUST return a new (higher) `UIDValidity`
+/// value, allowing clients to detect when UIDs have been invalidated.
+///
+/// A `UIDValidity` must be greater than zero.
+///
+/// See [RFC 3501 Section 2.3.1.1](https://datatracker.ietf.org/doc/html/rfc3501#section-2.3.1.1)
+/// for details on unique identifier validity.
+///
+/// ## Related Types
+///
+/// Combine with ``UID`` to create persistent message identifiers: a (UID, UIDValidity) pair
+/// uniquely identifies a message across all sessions and mailbox reincarnations.
 public struct UIDValidity: Hashable, Sendable {
     /// The underlying raw value.
     @usableFromInline
