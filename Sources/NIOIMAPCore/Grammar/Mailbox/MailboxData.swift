@@ -167,15 +167,6 @@ public enum MailboxData: Hashable, Sendable {
     /// - SeeAlso: [RFC 2342](https://datatracker.ietf.org/doc/html/rfc2342) - NAMESPACE Extension
     case namespace(NamespaceResponse)
 
-    /// Response to a search command with SORT or THREAD extensions.
-    ///
-    /// Sent as part of ``ResponsePayload/mailboxData(_:)`` containing ``MailboxData/searchSort(_:)``.
-    ///
-    /// See ``SearchSort`` for the structure of the returned data.
-    ///
-    /// - SeeAlso: [RFC 5256](https://datatracker.ietf.org/doc/html/rfc5256) - SORT and THREAD Extensions
-    case searchSort(SearchSort)
-
     /// Response to a UID BATCHES command.
     ///
     /// Sent as part of ``ResponsePayload/mailboxData(_:)`` containing ``MailboxData/uidBatches(_:)``.
@@ -186,47 +177,9 @@ public enum MailboxData: Hashable, Sendable {
     case uidBatches(UIDBatchesResponse)
 }
 
-extension MailboxData {
-    /// Search results from SORT or THREAD operations.
-    ///
-    /// Provides sorted or threaded message identifiers along with the highest modification sequence among
-    /// matching messages. Used with the [SORT](https://datatracker.ietf.org/doc/html/rfc5256) and
-    /// [THREAD](https://datatracker.ietf.org/doc/html/rfc5256) extensions.
-    ///
-    /// - SeeAlso: [RFC 5256](https://datatracker.ietf.org/doc/html/rfc5256) - SORT and THREAD Extensions
-    public struct SearchSort: Hashable, Sendable {
-        /// An array of message identifiers from the sort or thread operation.
-        public var identifiers: [Int]
-
-        /// The highest modification sequence value among all matched messages.
-        ///
-        /// Used with [RFC 7162](https://datatracker.ietf.org/doc/html/rfc7162) CONDSTORE support to
-        /// indicate if any matching messages have been modified since the last synchronization.
-        public var modificationSequence: ModificationSequenceValue
-
-        /// Creates a new `SearchSort`.
-        /// - parameter identifiers: An array of message identifiers that were matched in a search or sort operation.
-        /// - parameter modificationSequence: The highest modification sequence value among all matched messages.
-        public init(identifiers: [Int], modificationSequence: ModificationSequenceValue) {
-            self.identifiers = identifiers
-            self.modificationSequence = modificationSequence
-        }
-    }
-}
-
 // MARK: - Encoding
 
 extension EncodeBuffer {
-    @discardableResult mutating func writeMailboxDataSearchSort(_ data: MailboxData.SearchSort?) -> Int {
-        self.writeString("SEARCH")
-            + self.writeIfExists(data) { (data) -> Int in
-                self.writeArray(data.identifiers, prefix: " ", parenthesis: false) { (element, buffer) -> Int in
-                    buffer.writeString("\(element)")
-                } + self.writeSpace() + self.writeString("(MODSEQ ")
-                    + self.writeModificationSequenceValue(data.modificationSequence) + self.writeString(")")
-            }
-    }
-
     @discardableResult mutating func writeMailboxData(_ data: MailboxData) -> Int {
         switch data {
         case .flags(let flags):
@@ -247,8 +200,6 @@ extension EncodeBuffer {
             return self.writeString("\(num) RECENT")
         case .namespace(let namespaceResponse):
             return self.writeNamespaceResponse(namespaceResponse)
-        case .searchSort(let data):
-            return self.writeMailboxDataSearchSort(data)
         case .uidBatches(let response):
             return self.writeUIDBatchesResponse(response)
         }
