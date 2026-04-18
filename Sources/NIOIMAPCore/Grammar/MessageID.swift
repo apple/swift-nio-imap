@@ -12,18 +12,31 @@
 //
 //===----------------------------------------------------------------------===//
 
-/// Represents the identifier of a message stored on a server.
+/// The RFC 2822 Message-ID identifier for a message.
 ///
-/// This is the “full” Message-ID, including the angled brackets, e.g.
-/// `<B27397-0100000@cac.washington.edu>`.
+/// A Message-ID is an optional but recommended unique identifier for a message. It is typically
+/// formatted as angle-bracketed text, for example <B27397-0100000@cac.washington.edu>. The Message-ID
+/// appears in the In-Reply-To header and is used to correlate related messages in threads.
 ///
-/// See RFC 2822 section 3.6.4.
+/// This type wraps the raw string value including angle brackets as sent by the server.
+///
+/// ### Example
+///
+/// ```
+/// C: A001 FETCH 1 (ENVELOPE)
+/// S: * 1 FETCH (ENVELOPE (...  “<msg-001@example.com>” ...))
+/// ```
+///
+/// The Message-ID appears in the envelope structure returned by the FETCH response.
+///
+/// - SeeAlso: [RFC 2822 Section 3.6.4 Message Identifier](https://datatracker.ietf.org/doc/html/rfc2822#section-3.6.4)
+/// - SeeAlso: [RFC 3501 Section 7.4.2 Envelope Structure](https://datatracker.ietf.org/doc/html/rfc3501#section-7.4.2)
 public struct MessageID: Hashable, Sendable {
     /// The `String` message identifier.
     var rawValue: String
 
     /// Creates a new `MessageID` from the given string.
-    /// - rawValue: The `String` message identifier.
+    /// - parameter rawValue: The `String` message identifier.
     public init(_ rawValue: String) {
         self.rawValue = rawValue
     }

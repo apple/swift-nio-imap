@@ -12,15 +12,47 @@
 //
 //===----------------------------------------------------------------------===//
 
-/// Conditions that must be met in order for a server to perform a store operation
+/// A modifier that constrains when the `STORE` command modifies message metadata (RFC 3501 and extensions).
+///
+/// The `STORE` command supports optional modifiers that control whether the server actually performs the requested
+/// operation. These modifiers are typically used for conditional storage operations to prevent conflicts when
+/// multiple clients are modifying the same mailbox simultaneously.
+///
+/// Without modifiers, the server unconditionally applies the flag changes. With modifiers, the server only
+/// applies changes if specific conditions are met, providing a form of optimistic locking for distributed clients.
+///
+/// ### Example
+///
+/// ```
+/// C: A001 STORE 1 (UNCHANGEDSINCE 12345) +FLAGS (\Seen)
+/// S: * 1 FETCH (FLAGS (\Seen) MODSEQ (12346))
+/// S: A001 OK STORE completed
+/// ```
+///
+/// The `(UNCHANGEDSINCE 12345)` portion represents the ``unchangedSince(_:)`` modifier. The server only
+/// sets the `\Seen` flag if the message's current mod-sequence is 12345 or lower. If a different client has
+/// modified the message (increasing its mod-sequence), the `STORE` operation is rejected.
+///
+/// - SeeAlso: [RFC 7162 Section 3.1.3](https://datatracker.ietf.org/doc/html/rfc7162#section-3.1.3)
 public enum StoreModifier: Hashable, Sendable {
-    /// If the mod-sequence of every metadata item of the
-    /// message affected by the STORE/UID STORE is equal to or less than the
-    /// specified UNCHANGEDSINCE value, then the requested operation (as
-    /// described by the message data item) is performed.
+    /// Only perform the store operation if the message's modification sequence is unchanged (RFC 7162 `CONDSTORE` extension).
+    ///
+    /// This modifier implements optimistic concurrency control. The server compares the message's current mod-sequence
+    /// with the specified value. If the message's mod-sequence is equal to or less than the specified value, the STORE
+    /// operation succeeds. Otherwise, the operation is rejected, indicating that another client has modified the message.
+    ///
+    /// This prevents "lost updates" where one client's changes could overwrite another client's changes in a
+    /// multimailbox environment.
+    ///
+    /// **Requires server capability:** ``Capability/condStore``
+    ///
+    /// - SeeAlso: [RFC 7162 Section 3.1.3](https://datatracker.ietf.org/doc/html/rfc7162#section-3.1.3)
     case unchangedSince(UnchangedSinceModifier)
 
-    /// Designed as a catch-all to enable support for future extensions.
+    /// A server extension modifier not defined in this library.
+    ///
+    /// This case captures future `STORE` modifiers defined by extensions, allowing forward compatibility
+    /// with new IMAP capabilities without requiring library updates.
     case other(KeyValue<String, ParameterValue?>)
 }
 

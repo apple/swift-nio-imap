@@ -14,21 +14,67 @@
 
 import struct NIO.ByteBuffer
 
-/// Sent from a server in response to an extended search.
+/// A server response to an extended SEARCH command.
+///
+/// The ESEARCH extension (see [RFC 4731](https://datatracker.ietf.org/doc/html/rfc4731)) enhances
+/// the base SEARCH command with additional return options, allowing clients to request specific
+/// result formats (ALL, COUNT, MIN, MAX, PARTIAL) rather than receiving only the matched message
+/// identifiers. Extended search responses are more efficient and flexible than base protocol search
+/// results, particularly for large result sets.
+///
+/// ### Example
+///
+/// ```
+/// C: A001 UID SEARCH RETURN (COUNT ALL) SINCE 1-Jan-2024
+/// S: * ESEARCH (TAG "A001") UID COUNT 42 ALL 1,3,5,7,9,...
+/// S: A001 OK SEARCH completed
+/// ```
+///
+/// The line `S: * ESEARCH (TAG "A001") UID COUNT 42 ALL 1,3,5,7,9,...` is wrapped as a
+/// ``ResponsePayload/mailboxData(_:)`` containing ``MailboxData/extendedSearch(_:)`` with this ``ExtendedSearchResponse``. The response
+/// indicates the search matched 42 messages (COUNT 42) and provides the UIDs of all matches
+/// (ALL 1,3,5,7,9,...) because UID was specified and RETURN (COUNT ALL) was requested.
+///
+/// ## Related Types
+///
+/// Link to related types using DocC symbol links: ``SearchReturnOption``, ``SearchReturnData``,
+/// ``SearchCorrelator``.
+///
+/// - SeeAlso: [RFC 4731](https://datatracker.ietf.org/doc/html/rfc4731) - ESEARCH Extension
 public struct ExtendedSearchResponse: Hashable, Sendable {
     /// Identifies the search that resulted in this response.
+    ///
+    /// The server automatically includes the command tag from the original SEARCH command
+    /// to correlate the response with the request. This is particularly useful when multiple
+    /// searches are pipelined. The `correlator` property contains this tag, or `nil` if not
+    /// present in the response.
+    ///
+    /// - SeeAlso: ``SearchCorrelator``
     public var correlator: SearchCorrelator?
 
-    /// Is this a UID or a sequence number response?
+    /// Indicates whether the identifiers in this response are UIDs or sequence numbers.
+    ///
+    /// When the client issues `SEARCH` (not `UID SEARCH`), the server returns sequence numbers.
+    /// When the client issues `UID SEARCH`, the server returns UIDs. Use this property to
+    /// interpret the identifiers in ``returnData`` correctly.
+    ///
+    /// - SeeAlso: ``Kind``, ``UID``, ``SequenceNumber``
     public var kind: Kind
 
-    /// Data returned from the search.
+    /// Data returned from the extended search.
+    ///
+    /// Contains the search result data in the format(s) requested by the client via the
+    /// RETURN option. Typical contents include all matching identifiers (``SearchReturnData/all(_:)``),
+    /// result count (``SearchReturnData/count(_:)``), minimum/maximum identifiers, and partial results.
+    ///
+    /// - SeeAlso: ``SearchReturnData``
     public var returnData: [SearchReturnData]
 
-    /// Creates a new `ExtendedSearchResponse`.
-    /// - parameter correlator: Identifies the search that resulted in this response. Defaults to `nil`.
-    /// - parameter kind: Is this a response to `UID SEARCH` or `SEARCH`?
-    /// - parameter returnData: Data returned from the search.
+    /// Creates a new extended search response.
+    ///
+    /// - parameter correlator: An optional correlator to associate this response with a specific search command. Defaults to `nil`.
+    /// - parameter kind: Whether this response contains UIDs or sequence numbers.
+    /// - parameter returnData: The search result data in the requested format(s).
     public init(correlator: SearchCorrelator? = nil, kind: Kind, returnData: [SearchReturnData]) {
         self.correlator = correlator
         self.kind = kind
@@ -37,11 +83,26 @@ public struct ExtendedSearchResponse: Hashable, Sendable {
 }
 
 extension ExtendedSearchResponse {
-    /// The kind of search response.
+    /// Indicates whether the identifiers in the response are sequence numbers or UIDs.
     ///
-    /// Describes if the `UnknownMessageIdentifier` in the `returnData`’s `SearchReturnData` are `UID` or `SequenceNumber`.
+    /// Servers send different types of identifiers depending on whether the client issued
+    /// `SEARCH` or `UID SEARCH`. Clients must use this property to correctly interpret
+    /// the identifiers in the ``returnData``.
+    ///
+    /// - SeeAlso: [RFC 3501 Section 6.4.4](https://datatracker.ietf.org/doc/html/rfc3501#section-6.4.4), [RFC 4731 Section 2.1](https://datatracker.ietf.org/doc/html/rfc4731#section-2.1)
     public enum Kind: Hashable, Sendable {
+        /// The response contains sequence numbers (from `SEARCH` command).
+        ///
+        /// Sequence numbers are relative positions in the currently selected mailbox and are
+        /// only valid during the current session for this mailbox.
         case sequenceNumber
+
+        /// The response contains UIDs (from `UID SEARCH` command).
+        ///
+        /// UIDs are unique, stable identifiers assigned by the server and remain valid across
+        /// sessions as long as the UIDVALIDITY of the mailbox has not changed.
+        ///
+        /// - SeeAlso: ``UID``, ``UIDValidity``
         case uid
     }
 }
@@ -49,33 +110,35 @@ extension ExtendedSearchResponse {
 // MARK: - Convenience
 
 extension ExtendedSearchResponse {
-    /// If the response is a UID response, it returns the UIDs of this response, _assuming_ that
-    /// `SearchReturnOption.all` was specified.
+    /// If the response is a UID response, returns the UIDs of all matched messages.
     ///
-    /// If the response is a sequence number response, this will return `nil`.
+    /// Returns `nil` if this is not a UID response or if the response does not contain matched UIDs.
+    /// When no matching UIDs exist, this property returns an empty set rather than `nil`.
     ///
-    /// If the response does not contain `.all` but contains `.partial`, the UIDs from
-    /// the partial result will be returned. Note that the returned value is thus ambiguous in
-    /// the (unlikely) case where the search specified both `.all` and `.partial`.
+    /// This property extracts UIDs from ``SearchReturnData/all(_:)`` if present, or falls back to
+    /// ``SearchReturnData/partial(_:_:)`` if only partial results are available. Per RFC 9394, a
+    /// single SEARCH response should contain either ALL or PARTIAL, but not both; if both are
+    /// present, ALL takes precedence.
     ///
-    /// Note: The response will not contain an `.all` item if there are no matching UIDs. In this
-    /// case, though, this property will return an empty `UIDSet`.
+    /// - Returns: The matched UIDs for UID search responses, or `nil` if unavailable.
+    /// - SeeAlso: ``SearchReturnData/all(_:)``, ``SearchReturnData/partial(_:_:)``
     public var matchedUIDs: UIDSet? {
         guard kind == .uid else { return nil }
         return UIDSet(_matchedIdentifierSet)
     }
 
-    /// If the response is a _sequence number_ response, it returns the sequence numbers of
-    /// this response, _assuming_ that `SearchReturnOption.all` was specified.
+    /// If the response is a sequence number response, returns the sequence numbers of all matched messages.
     ///
-    /// If the response is a UID response, this will return `nil`.
+    /// Returns `nil` if this is not a sequence number response or if the response does not contain matched sequence numbers.
+    /// When no matching sequence numbers exist, this property returns an empty set rather than `nil`.
     ///
-    /// If the response does not contain `.all` but contains `.partial`, the UIDs from
-    /// the partial result will be returned. Note that the returned value is thus ambiguous in
-    /// the (unlikely) case where the search specified both `.all` and `.partial`.
+    /// This property extracts sequence numbers from ``SearchReturnData/all(_:)`` if present, or falls back to
+    /// ``SearchReturnData/partial(_:_:)`` if only partial results are available. Per RFC 9394, a
+    /// single SEARCH response should contain either ALL or PARTIAL, but not both; if both are
+    /// present, ALL takes precedence.
     ///
-    /// Note: The response will not contain an `.all` item if there are no matching UIDs. In this
-    /// case, though, this property will return an empty `UIDSet`.
+    /// - Returns: The matched sequence numbers for non-UID search responses, or `nil` if unavailable.
+    /// - SeeAlso: ``MessageIdentifierSet``, ``SequenceNumber``, ``SearchReturnData/all(_:)``, ``SearchReturnData/partial(_:_:)``
     public var matchedSequenceNumbers: MessageIdentifierSet<SequenceNumber>? {
         guard kind == .sequenceNumber else { return nil }
         return MessageIdentifierSet(_matchedIdentifierSet)
@@ -91,7 +154,12 @@ extension ExtendedSearchResponse {
         }.first ?? MessageIdentifierSet()
     }
 
-    /// Returns the count value in the response.
+    /// The total count of matched messages, if present in this response.
+    ///
+    /// Returns `nil` if the response does not contain a COUNT value.
+    ///
+    /// - Returns: The count of matched messages, or `nil` if not present.
+    /// - SeeAlso: ``SearchReturnData/count(_:)``
     public var count: Int? {
         returnData.lazy.compactMap { data -> Int? in
             guard case .count(let c) = data else { return nil }
@@ -99,7 +167,12 @@ extension ExtendedSearchResponse {
         }.first
     }
 
-    /// Returns the `MIN` value in the response, if the result contains it and is a UID response.
+    /// The minimum UID in the search result, if available.
+    ///
+    /// Returns `nil` if this is not a UID response or if the response does not include MIN data.
+    ///
+    /// - Returns: The minimum UID, or `nil` if unavailable.
+    /// - SeeAlso: ``SearchReturnData/min(_:)``
     public var minUID: UID? {
         guard
             kind == .uid,
@@ -111,7 +184,12 @@ extension ExtendedSearchResponse {
         return UID(value)
     }
 
-    /// Returns the `MIN` value in the response, if the result contains it and is a sequence number response.
+    /// The minimum sequence number in the search result, if available.
+    ///
+    /// Returns `nil` if this is not a sequence number response or if the response does not include MIN data.
+    ///
+    /// - Returns: The minimum sequence number, or `nil` if unavailable.
+    /// - SeeAlso: ``SearchReturnData/min(_:)``
     public var minSequenceNumber: SequenceNumber? {
         guard
             kind == .sequenceNumber,
@@ -123,7 +201,12 @@ extension ExtendedSearchResponse {
         return SequenceNumber(value)
     }
 
-    /// Returns the `MAX` value in the response, if the result contains it and is a UID response.
+    /// The maximum UID in the search result, if available.
+    ///
+    /// Returns `nil` if this is not a UID response or if the response does not include MAX data.
+    ///
+    /// - Returns: The maximum UID, or `nil` if unavailable.
+    /// - SeeAlso: ``SearchReturnData/max(_:)``
     public var maxUID: UID? {
         guard
             kind == .uid,
@@ -135,7 +218,12 @@ extension ExtendedSearchResponse {
         return UID(value)
     }
 
-    /// Returns the `MAX` value in the response, if the result contains it and is a sequence number response.
+    /// The maximum sequence number in the search result, if available.
+    ///
+    /// Returns `nil` if this is not a sequence number response or if the response does not include MAX data.
+    ///
+    /// - Returns: The maximum sequence number, or `nil` if unavailable.
+    /// - SeeAlso: ``SearchReturnData/max(_:)``
     public var maxSequenceNumber: SequenceNumber? {
         guard
             kind == .sequenceNumber,

@@ -14,13 +14,26 @@
 
 import struct NIO.ByteBuffer
 
-/// Specifies a section.
+/// Specifies which part or section of a message body to fetch.
 ///
-/// Is used in a `FETCH` command’s `BODY[<section>]<<partial>>` for the `<section>` part.
+/// Section specifiers identify specific portions of message bodies in FETCH commands. They work with
+/// the BODY[<section>] fetch attribute to retrieve message headers, text bodies, or specific MIME parts.
+/// Section specifiers may optionally include a partial range to fetch only a byte range of the section.
 ///
-/// Use `SectionSpecifier.complete` for an empty section specifier (i.e. the complete message).
+/// Use complete to fetch the entire message, or specify a part number and kind to fetch a specific section.
 ///
-/// These are defined in RFC 3501 section 6.4.5.
+/// ### Example
+///
+/// ```
+/// C: A001 FETCH 1 (BODY[])
+/// S: * 1 FETCH (BODY[] {123}...message data...)
+/// C: A002 FETCH 2 (BODY[2.MIME])
+/// S: * 2 FETCH (BODY[2.MIME] {45}...mime header...)
+/// ```
+///
+/// The first line fetches the complete message body. The second fetches just the MIME header of part 2.
+///
+/// - SeeAlso: [RFC 3501 Section 6.4.5](https://datatracker.ietf.org/doc/html/rfc3501#section-6.4.5)
 public struct SectionSpecifier: Hashable, Sendable {
     /// The part of the body.
     public let part: Part
@@ -31,7 +44,7 @@ public struct SectionSpecifier: Hashable, Sendable {
     /// Creates a new *complete* `SectionSpecifier`.
     ///
     /// Note that only certain `kind` values are valid, based on what kind of part `part` refers to.
-    /// See the documentation for ``SectionSpecifier.Kind`` for more details.
+    /// See the documentation for ``SectionSpecifier/Kind`` for more details.
     ///
     /// - parameter part: The part of the body. Can only be empty if `kind` is not `.MIMEHeader`.
     /// - parameter kind: The type of section, e.g. *HEADER*. Defaults to `.complete`.
@@ -108,13 +121,13 @@ extension SectionSpecifier {
         let array: [Int]
 
         /// Creates a new `Part` from an array of integers..
-        /// - parameter rawValue: The array of integers.
+        /// - parameter array: The array of integers.
         public init(_ array: [Int]) {
             self.array = array
         }
 
         /// Creates a new `Part` from an array of integers..
-        /// - parameter rawValue: The array of integers.
+        /// - parameter elements: The array of integers.
         public init(arrayLiteral elements: Int...) {
             self.array = elements
         }
@@ -133,8 +146,8 @@ extension SectionSpecifier {
     ///   * `.text` / `TEXT`
     ///
     ///  For other parts (i.e. non-`message/rfc822` and not the message itself) these are valid:
-    ///   * `.complete` (the part without its MIME IMB header)
-    ///   * `.MIMEHeader` / `MIME` (the MIME IMB header)
+    ///   * `.complete` (the part without its MIME header)
+    ///   * `.MIMEHeader` / `MIME` (the MIME header)
     public enum Kind: Hashable, Sendable {
         /// A section specifier that ends in a part number, e.g. `4.2.2.1`.
         ///
@@ -154,7 +167,7 @@ extension SectionSpecifier {
         /// MIME IMB header, corresponding to e.g. `4.2.MIME`.
         ///
         /// This is only valid for a part that is _not_ a `message/rfc822` part. And in those cases,
-        /// this refers to the MIME IMB header of that (single- or multi-) part.
+        /// this refers to the MIME header of that (single- or multi-) part.
         case MIMEHeader
         /// Text body without header, corresponding to e.g. `4.2.TEXT`.
         ///

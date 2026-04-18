@@ -14,50 +14,92 @@
 
 import struct NIO.ByteBuffer
 
-/// The envelope of a message contains various fields, all of which may be empty or `nil`.
-/// It's entirely possible for an envelope to be completely empty, though this will be rare.
+/// The parsed envelope structure of a message, extracted from the message headers (RFC 3501).
+///
+/// The envelope represents the structured header fields of an email message, including the sender,
+/// recipients, subject, date, and message identifiers. When a client fetches the `ENVELOPE` attribute,
+/// the server returns this parsed structure rather than raw header data.
+///
+/// The envelope may contain empty or `nil` values for any field, including completely empty envelopes,
+/// though this is rare in practice. All address lists use ``EmailAddressListElement`` to support both
+/// individual addresses and address groups.
+///
+/// ### Example
+///
+/// ```
+/// C: A001 FETCH 1 (ENVELOPE)
+/// S: * 1 FETCH (ENVELOPE ("Mon, 7 Feb 1994 21:52:25 -0800" "The Subject" (("John Doe" NIL "john" "example.com")) (("John Doe" NIL "john" "example.com")) (("John Doe" NIL "john" "example.com")) (("Jane Smith" NIL "jane" "example.com")) ((NIL NIL "info" "example.com")) (("Bob Johnson" NIL "bob" "example.com")) (("Bob Johnson" NIL "bob" "example.com")) NIL NIL "<12345@example.com>"))
+/// S: A001 OK FETCH completed
+/// ```
+///
+/// The `ENVELOPE(...)` response is parsed into an ``Envelope`` struct with fields corresponding to each position:
+/// date, subject, from, sender, reply-to, to, cc, bcc, in-reply-to, and message-id.
+///
+/// - SeeAlso: [RFC 3501 Section 7.4.2](https://datatracker.ietf.org/doc/html/rfc3501#section-7.4.2)
+/// - SeeAlso: ``FetchAttribute/envelope``
 public struct Envelope: Hashable, Sendable {
-    /// The local time and date that the message was written.
+    /// The date the message was originally written, as parsed from the `Date:` header.
     public var date: InternetMessageDate?
 
-    /// The subject of the message.
+    /// The subject line of the message, as from the `Subject:` header.
     public var subject: ByteBuffer?
 
-    /// The email address, and optionally the name of the author(s).
+    /// The sender(s) of the message, as from the `From:` header.
+    ///
+    /// This is the author or originator of the message content. Multiple addresses indicate
+    /// multiple authors are credited with writing the message.
     public var from: [EmailAddressListElement]
 
-    /// Address of the actual sender acting on behalf of the author.
+    /// The actual sender on behalf of the author, as from the `Sender:` header.
+    ///
+    /// This is used when one entity sends a message on behalf of another (e.g., an assistant
+    /// sending mail on behalf of their boss). If absent, the `from` field should be used.
     public var sender: [EmailAddressListElement]
 
-    /// Who a reply should be sent to.
+    /// The address(es) to which replies should be sent, as from the `Reply-To:` header.
+    ///
+    /// When present, replies to this message should be sent to this address rather than to
+    /// the message's sender or author.
     public var reply: [EmailAddressListElement]
 
-    /// Who the message was sent to
+    /// The primary recipient(s) of the message, as from the `To:` header.
     public var to: [EmailAddressListElement]
 
-    /// The carbon-copy list.
+    /// The carbon-copy recipient(s) of the message, as from the `Cc:` header.
+    ///
+    /// Recipients listed here are sent a copy of the message, and their addresses are visible
+    /// to all recipients.
     public var cc: [EmailAddressListElement]
 
-    /// The blind-carbon-copy list
+    /// The blind-carbon-copy recipient(s) of the message, as from the `Bcc:` header.
+    ///
+    /// Recipients listed here are sent a copy of the message, but their addresses are hidden
+    /// from other recipients. Note that the `Bcc:` header is typically not present in the
+    /// received message, so this field is often empty.
     public var bcc: [EmailAddressListElement]
 
-    /// The message ID that this message replied to.
+    /// The message ID of the message this message is replying to, as from the `In-Reply-To:` header.
+    ///
+    /// This field links this message to a previous message in a conversation thread.
     public var inReplyTo: MessageID?
 
-    /// A unique identifier for the message.
+    /// The unique message identifier, as from the `Message-ID:` header.
+    ///
+    /// This identifier is assigned by the originating SMTP server and is globally unique
+    /// for the originating system.
     public var messageID: MessageID?
 
     /// Creates a new envelope.
-    /// - parameter date: The local time and date that the message was written.
-    /// - parameter subject: The subject of the message.
-    /// - parameter from: The email address, and optionally the name of the author(s).
-    /// - parameter sender: Address of the actual sender acting on behalf of the author.
-    /// - parameter reply: Who a reply should be sent to.
-    /// - parameter to: Who the message was sent to
-    /// - parameter cc: The carbon-copy list.
-    /// - parameter bcc: The blind-carbon-copy list
-    /// - parameter inReplyTo: The message ID that this message replied to.
-    /// - parameter messageID: A unique identifier for the message.
+    /// - parameter date: The date the message was written
+    /// - parameter subject: The subject line of the message
+    /// - parameter from: The author(s) of the message
+    /// - parameter sender: The actual sender (if different from the author)
+    /// - parameter reply: The reply-to address(es)
+    /// - parameter to: The primary recipient(s)
+    /// - parameter cc: The carbon-copy recipient(s)
+    /// - parameter bcc: The blind-carbon-copy recipient(s)
+    /// - parameter inReplyTo: The message ID this message replies to
+    /// - parameter messageID: The unique message identifier
     public init(
         date: InternetMessageDate?,
         subject: ByteBuffer?,

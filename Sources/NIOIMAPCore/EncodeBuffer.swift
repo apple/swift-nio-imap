@@ -16,18 +16,58 @@ import struct NIO.ByteBuffer
 import struct NIO.ByteBufferView
 import struct NIO.CircularBuffer
 
-/// A buffer that handles encoding of Swift types into IMAP commands/responses that
-/// will be sent/recieved by clients and servers.
+/// A buffer for encoding IMAP protocol messages into wire format.
+///
+/// `EncodeBuffer` is the core infrastructure for converting Swift types into bytes
+/// that can be transmitted over the network. It wraps a `ByteBuffer` and tracks
+/// encoding state, supporting both client commands and server responses.
+///
+/// This type is part of the internal SPI and is primarily used by:
+/// - ``CommandEncodeBuffer`` for encoding client commands
+/// - ``ResponseEncodeBuffer`` for encoding server responses
+///
+/// The buffer can operate in two modes via the ``Mode`` enum:
+/// - **Client mode**: Uses ``CommandEncodingOptions`` to determine how to encode literals,
+///   strings, and other protocol elements
+/// - **Server mode**: Uses ``ResponseEncodingOptions`` to format server responses
+///
+/// ## Chunking and Continuation
+///
+/// The buffer supports splitting encoded data into "chunks" separated by continuation
+/// points. This enables proper handling of IMAP's synchronizing literals, where the
+/// server must send a `+` continuation request before the client can send more data.
+/// The ``nextChunk()`` method retrieves the next chunk and indicates whether a
+/// continuation response is expected.
+///
+/// - SeeAlso: ``CommandEncodeBuffer``, ``ResponseEncodeBuffer``
 @_spi(NIOIMAPInternal) public struct EncodeBuffer: Hashable, Sendable {
-    /// Used to define if the buffer should act as a client or server.
+    /// Determines whether the buffer encodes for a client or server.
+    ///
+    /// This affects how the buffer formats protocol elements like literals, strings,
+    /// and response codes. The mode also carries encoding options specific to each role.
     public enum Mode: Hashable, Sendable {
-        /// Act as a client using the given `CommandEncodingOptions`.
+        /// Encodes client commands using the specified options.
+        ///
+        /// When in client mode, the buffer formats command data according to the
+        /// options, which control whether to use quoted strings, synchronizing literals,
+        /// non-synchronizing literals, and binary literals.
+        ///
+        /// - Parameter options: Configuration for command encoding
         case client(options: CommandEncodingOptions)
 
-        /// Act as a server using the given `ResponseEncodingOptions`.
+        /// Encodes server responses using the specified options.
+        ///
+        /// - Parameter streamingAttributes: A flag tracking whether streaming attributes
+        ///   are currently being written (used internally for FETCH response formatting)
+        /// - Parameter options: Configuration for response encoding
         case server(streamingAttributes: Bool, options: ResponseEncodingOptions)
     }
 
+    /// Enables logging mode, which obscures binary data for display purposes.
+    ///
+    /// When `true`, methods like ``writeBytes(_:)`` and ``writeBuffer(_:)`` will
+    /// write placeholder text like `[N bytes]` instead of the actual binary content.
+    /// This is useful for logging and debugging without exposing sensitive data.
     public var loggingMode: Bool
 
     internal var mode: Mode
@@ -107,12 +147,28 @@ extension EncodeBuffer {
 }
 
 extension EncodeBuffer {
-    /// Represents a piece of data that is ready to be written to the network.
+    /// A portion of encoded data ready to be transmitted.
+    ///
+    /// IMAP requires careful sequencing when using synchronizing literals. After encoding
+    /// a command with a literal, the buffer chunks the data into segments: one that ends
+    /// before the literal, then waits for a continuation response, then sends the literal
+    /// data and any remaining command.
+    ///
+    /// Each `Chunk` represents a portion of data that is ready to send, along with
+    /// metadata about whether a continuation response is expected.
     public struct Chunk: Hashable, Sendable {
-        /// The data that is ready to be written.
+        /// The encoded bytes ready to write to the network.
+        ///
+        /// This buffer contains the next portion of IMAP protocol data to transmit.
         public var bytes: ByteBuffer
 
-        /// Is a continuation request expected before this data can be written?
+        /// Whether a continuation request (`+`) should be expected before sending the next chunk.
+        ///
+        /// When `true`, the sender must wait for the server to send a `+` continuation
+        /// response before calling ``nextChunk()`` again. This synchronization is required
+        /// by RFC 3501 for commands containing literals.
+        ///
+        /// - SeeAlso: ``ContinuationRequest``
         public var waitForContinuation: Bool
     }
 
@@ -120,8 +176,16 @@ extension EncodeBuffer {
         self.stopPoints.count > 0
     }
 
-    /// Gets the next chunk that is ready to be written to the network.
-    /// - returns: The next chunk that is ready to be written.
+    /// Retrieves the next chunk of encoded data ready to transmit.
+    ///
+    /// In client mode with synchronizing literals, this may return multiple chunks with
+    /// ``Chunk.waitForContinuation`` set to `true` between chunks, requiring the caller
+    /// to pause and wait for the server's `+` continuation request.
+    ///
+    /// In server mode, this always returns all remaining data in a single chunk with
+    /// ``Chunk.waitForContinuation`` set to `false`.
+    ///
+    /// - Returns: The next ``Chunk`` of data to transmit.
     public mutating func nextChunk() -> Chunk {
         self.nextChunk(allowEmptyChunk: true)
     }
@@ -148,7 +212,15 @@ extension EncodeBuffer {
         }
     }
 
-    /// Marks the end of the current `Chunk`.
+    /// Marks the end of a command, potentially creating a stop point for chunking.
+    ///
+    /// In client mode, this sets a stop point that ``nextChunk()`` uses to determine
+    /// chunk boundaries. This is necessary for proper handling of synchronizing literals,
+    /// where each chunk must be separated by a continuation request/response cycle.
+    ///
+    /// In server mode, this call has no effect (server responses don't use stop points).
+    ///
+    /// - Returns: Always returns `0` (for compatibility with writer method conventions).
     @discardableResult
     public mutating func markStopPoint() -> Int {
         if case .client = mode {
@@ -159,9 +231,10 @@ extension EncodeBuffer {
 }
 
 extension EncodeBuffer {
-    /// Writes a raw `String` to the buffer.
-    /// - parameter string: The string to write.
-    /// - returns: The number of bytes written - always `string.utf8.count`.
+    /// Writes a string to the buffer in UTF-8 encoding.
+    ///
+    /// - Parameter string: The string to write.
+    /// - Returns: The number of bytes written (equals `string.utf8.count`).
     @discardableResult
     @inlinable
     public mutating func writeString(_ string: String) -> Int {
@@ -169,8 +242,12 @@ extension EncodeBuffer {
     }
 
     /// Writes raw bytes to the buffer.
-    /// - parameter buffer: The bytes to write.
-    /// - returns: The number of bytes written - always equal to the size of `bytes`.
+    ///
+    /// When ``loggingMode`` is enabled, this writes a placeholder like `[N bytes]`
+    /// instead of the actual binary data, useful for debugging without exposing sensitive content.
+    ///
+    /// - Parameter bytes: The bytes to write.
+    /// - Returns: The number of bytes written (in logging mode, this is the length of the placeholder).
     @discardableResult
     @inlinable
     public mutating func writeBytes<Bytes: Sequence>(_ bytes: Bytes) -> Int where Bytes.Element == UInt8 {
@@ -181,8 +258,12 @@ extension EncodeBuffer {
     }
 
     /// Writes a `ByteBuffer` to the buffer.
-    /// - parameter buffer: The `ByteBuffer` to write.
-    /// - returns: The number of bytes written - always equal to `buffer.readableBytes`.
+    ///
+    /// When ``loggingMode`` is enabled, this writes a placeholder like `[N bytes]`
+    /// instead of the actual binary data.
+    ///
+    /// - Parameter buffer: The buffer to write.
+    /// - Returns: The number of bytes written (in logging mode, this is the length of the placeholder).
     @discardableResult
     @inlinable
     public mutating func writeBuffer(_ buffer: inout ByteBuffer) -> Int {
@@ -192,7 +273,9 @@ extension EncodeBuffer {
         return self.buffer.writeString("[\(buffer.readableBytes) bytes]")
     }
 
-    /// Erases all data from the buffer.
+    /// Erases all data from the buffer and resets the chunk tracking.
+    ///
+    /// - Note: This invalidates any previously obtained ``Chunk`` values.
     @inlinable
     public mutating func clear() {
         self.stopPoints.removeAll()

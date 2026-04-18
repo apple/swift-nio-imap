@@ -12,7 +12,13 @@
 //
 //===----------------------------------------------------------------------===//
 
-/// Pairs a key with a value
+/// A generic key-value pair container.
+///
+/// This generic type is used throughout the IMAP protocol implementation to pair related values,
+/// such as extension names with their parameters, vendor tags with their values, or tagged
+/// extension data with their content.
+///
+/// - SeeAlso: ``OptionExtensionKind/vendor(_:)``
 public struct KeyValue<Key: Hashable, Value: Hashable>: Hashable {
     /// The key
     public var key: Key

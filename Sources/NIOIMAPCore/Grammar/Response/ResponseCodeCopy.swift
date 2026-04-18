@@ -12,24 +12,60 @@
 //
 //===----------------------------------------------------------------------===//
 
-/// Matches the `UIDSet` of the messages in the source mailbox to the `UIDSet` of the
-/// copied messages in the destination mailbox.
-/// - Note: This type uses `[UIDRange]` over `UIDSet` as it's important to preserve the array ordering
-/// so that the source UIDs can be matched to destination UIDs.
+/// The `COPYUID` response code returned after a successful `COPY` or `MOVE` command.
+///
+/// When a `COPY` or `MOVE` command completes successfully, the server may return this response code
+/// containing the UID validity of the destination mailbox and two parallel sets of UIDs. The first
+/// set contains the UIDs of the source messages (in the source mailbox), and the second set contains
+/// the UIDs assigned to the copied messages in the destination mailbox. This allows clients to
+/// correlate copied messages without issuing separate `SEARCH` commands. See [RFC 4315](https://datatracker.ietf.org/doc/html/rfc4315)
+/// (UIDPLUS Extension) for details.
+///
+/// ### Example
+///
+/// ```
+/// C: A001 COPY 1:3 Archive
+/// S: A001 OK [COPYUID 42 1:3 101:103] COPY completed
+/// ```
+///
+/// The response code `[COPYUID 42 1:3 101:103]` indicates that messages with UIDs 1, 2, 3 from the
+/// source mailbox were copied to the destination mailbox (with UID validity 42) and assigned UIDs
+/// 101, 102, 103 respectively.
+///
+/// - Note: This type uses `[UIDRange]` instead of ``MessageIdentifierSetNonEmpty`` to preserve
+///   array ordering, allowing source UIDs to be matched with their corresponding destination UIDs.
+///
+/// - SeeAlso: [RFC 4315](https://datatracker.ietf.org/doc/html/rfc4315) - UIDPLUS Extension, [RFC 6851](https://datatracker.ietf.org/doc/html/rfc6851) - MOVE Extension
 public struct ResponseCodeCopy: Hashable, Sendable {
-    /// The `UIDValidity` of the destination mailbox
+    /// The UID validity value of the destination mailbox.
+    ///
+    /// This value allows clients to validate that the destination UIDs are still correct if
+    /// referenced later. If the UID validity of the destination mailbox changes, the cached
+    /// destination UIDs become invalid.
+    ///
+    /// - SeeAlso: ``UIDValidity``
     public var destinationUIDValidity: UIDValidity
 
-    /// The message UIDs in the source mailbox.
+    /// The message UIDs in the source mailbox (as an ordered array of ranges).
+    ///
+    /// Each range in this array corresponds to a message or group of consecutive messages in the
+    /// source mailbox. The order and count must match the ``destinationUIDs`` array.
+    ///
+    /// - SeeAlso: ``UIDRange``
     public var sourceUIDs: [UIDRange]
 
-    /// The copied message UIDs in the destination mailbox.
+    /// The copied message UIDs assigned in the destination mailbox (as an ordered array of ranges).
+    ///
+    /// Each range in this array corresponds to the destination UID(s) assigned to the source messages
+    /// at the matching index. The order and count must match the ``sourceUIDs`` array.
+    ///
+    /// - SeeAlso: ``UIDRange``
     public var destinationUIDs: [UIDRange]
 
     /// Creates a new `ResponseCodeCopy`.
-    /// - parameter destinationUIDValidity: The `UIDValidity` of the destination mailbox.
-    /// - parameter sourceUIDs: The message UIDs in the source mailbox.
-    /// - parameter destinationUIDs: The copied message UIDs in the destination mailbox.
+    /// - parameter destinationUIDValidity: The UID validity of the destination mailbox.
+    /// - parameter sourceUIDs: The UIDs of the source messages.
+    /// - parameter destinationUIDs: The UIDs assigned to the copied messages.
     public init(destinationUIDValidity: UIDValidity, sourceUIDs: [UIDRange], destinationUIDs: [UIDRange]) {
         self.destinationUIDValidity = destinationUIDValidity
         self.sourceUIDs = sourceUIDs

@@ -14,145 +14,334 @@
 
 import struct NIO.ByteBuffer
 
-/// IMAPv4 `search-key`
+/// Represents a search criterion for the `SEARCH` command.
+///
+/// Search keys are used to query mailboxes for messages matching specified criteria.
+/// The `SEARCH` command is defined in [RFC 3501 Section 6.4.4](https://datatracker.ietf.org/doc/html/rfc3501#section-6.4.4),
+/// with extensions provided by multiple RFCs including [RFC 5032](https://datatracker.ietf.org/doc/html/rfc5032),
+/// [RFC 5466](https://datatracker.ietf.org/doc/html/rfc5466), [RFC 7162](https://datatracker.ietf.org/doc/html/rfc7162),
+/// and [RFC 8474](https://datatracker.ietf.org/doc/html/rfc8474).
+///
+/// Search keys can be combined using logical operators (``and(_:)``, ``or(_:_:)``, ``not(_:)``)
+/// to create complex search expressions. The server returns a list of message sequence numbers
+/// or UIDs matching all specified criteria.
+///
+/// ### Examples
+///
+/// ```
+/// C: A001 SEARCH ALL
+/// S: * SEARCH 1 3 5 7 9
+/// S: A001 OK SEARCH completed
+/// ```
+///
+/// The ``all`` case matches all messages. The server returns ``Response/untagged(_:)`` containing
+/// ``ResponsePayload/mailboxData(_:)`` with ``MailboxData/search(_:_:)`` wrapping the matching sequence numbers.
+///
+/// ```
+/// C: A002 SEARCH NOT DELETED SEEN
+/// S: * SEARCH 2 4 6 8
+/// S: A002 OK SEARCH completed
+/// ```
+///
+/// The ``not(_:)`` case with ``seen`` case matches messages that are not deleted and have been seen.
+///
+/// ## Related Types
+///
+/// - ``SearchReturnOption``: Options controlling the format of search results
+/// - ``Command/search(key:charset:returnOptions:)`` and ``Command/uidSearch(key:charset:returnOptions:)`` commands that perform searches
+/// - ``MailboxData/search(_:_:)``: Server response containing search results
+///
+/// - SeeAlso: [RFC 3501](https://datatracker.ietf.org/doc/html/rfc3501), [RFC 5032](https://datatracker.ietf.org/doc/html/rfc5032), [RFC 7162](https://datatracker.ietf.org/doc/html/rfc7162), [RFC 8474](https://datatracker.ietf.org/doc/html/rfc8474)
 public indirect enum SearchKey: Hashable, Sendable {
-    /// RFC 3501: All messages in the mailbox; the default initial key for ANDing.
+    /// Matches all messages in the mailbox.
+    ///
+    /// This is the default initial key for combining multiple search criteria with `AND` logic.
+    /// From [RFC 3501 Section 6.4.4](https://datatracker.ietf.org/doc/html/rfc3501#section-6.4.4).
     case all
 
-    /// RFC 3501: Messages with the `\Answered` flag set.
+    /// Matches messages with the `\Answered` flag set.
+    ///
+    /// The `\Answered` flag indicates a message that has been answered.
+    /// From [RFC 3501 Section 6.4.4](https://datatracker.ietf.org/doc/html/rfc3501#section-6.4.4).
     case answered
 
-    /// RFC 3501: Messages with the `\Deleted` flag set.
+    /// Matches messages with the `\Deleted` flag set.
+    ///
+    /// The `\Deleted` flag marks messages for deletion by the server.
+    /// From [RFC 3501 Section 6.4.4](https://datatracker.ietf.org/doc/html/rfc3501#section-6.4.4).
     case deleted
 
-    /// RFC 3501: Messages with the `\Flagged` flag set.
+    /// Matches messages with the `\Flagged` flag set.
+    ///
+    /// The `\Flagged` flag marks important or urgent messages.
+    /// From [RFC 3501 Section 6.4.4](https://datatracker.ietf.org/doc/html/rfc3501#section-6.4.4).
     case flagged
 
-    /// RFC 3501: Messages that have the `\Recent` flag set but not the `\Seen` flag. This is functionally equivalent to "(RECENT UNSEEN)".
+    /// Matches messages with the `\Recent` flag set but not the `\Seen` flag.
+    ///
+    /// This is functionally equivalent to the search key combination `(RECENT UNSEEN)`.
+    /// From [RFC 3501 Section 6.4.4](https://datatracker.ietf.org/doc/html/rfc3501#section-6.4.4).
     case new
 
-    /// RFC 3501: Messages that functionally equivalent to "NOT RECENT" (as opposed to "NOT NEW").
+    /// Matches messages without the `\Recent` flag set.
+    ///
+    /// This is functionally equivalent to `NOT RECENT`, as opposed to ``new`` (which is "NOT NEW").
+    /// From [RFC 3501 Section 6.4.4](https://datatracker.ietf.org/doc/html/rfc3501#section-6.4.4).
     case old
 
-    /// RFC 3501: Messages that have the `\Recent` flag set.
+    /// Matches messages with the `\Recent` flag set.
+    ///
+    /// The `\Recent` flag indicates a message that has arrived since the last session.
+    /// From [RFC 3501 Section 6.4.4](https://datatracker.ietf.org/doc/html/rfc3501#section-6.4.4).
     case recent
 
-    /// RFC 3501: Messages that have the `\Seen` flag set.
+    /// Matches messages with the `\Seen` flag set.
+    ///
+    /// The `\Seen` flag indicates a message that has been read.
+    /// From [RFC 3501 Section 6.4.4](https://datatracker.ietf.org/doc/html/rfc3501#section-6.4.4).
     case seen
 
-    /// RFC 3501: Messages that do not have the `\Answered` flag set.
+    /// Matches messages without the `\Answered` flag set.
+    ///
+    /// This is the negation of ``answered``.
+    /// From [RFC 3501 Section 6.4.4](https://datatracker.ietf.org/doc/html/rfc3501#section-6.4.4).
     case unanswered
 
-    /// RFC 3501: Messages that do not have the `\Delete` flag set.
+    /// Matches messages without the `\Deleted` flag set.
+    ///
+    /// This is the negation of ``deleted``.
+    /// From [RFC 3501 Section 6.4.4](https://datatracker.ietf.org/doc/html/rfc3501#section-6.4.4).
     case undeleted
 
-    /// RFC 3501: Messages that do not have the `\Flagged` flag set.
+    /// Matches messages without the `\Flagged` flag set.
+    ///
+    /// This is the negation of ``flagged``.
+    /// From [RFC 3501 Section 6.4.4](https://datatracker.ietf.org/doc/html/rfc3501#section-6.4.4).
     case unflagged
 
-    /// RFC 3501: Messages that do not have the `\Seen` flag set.
+    /// Matches messages without the `\Seen` flag set.
+    ///
+    /// This is the negation of ``seen``.
+    /// From [RFC 3501 Section 6.4.4](https://datatracker.ietf.org/doc/html/rfc3501#section-6.4.4).
     case unseen
 
-    /// RFC 3501: Messages with the `\Draft` flag set.
+    /// Matches messages with the `\Draft` flag set.
+    ///
+    /// The `\Draft` flag marks messages that are incomplete and not yet sent.
+    /// From [RFC 3501 Section 6.4.4](https://datatracker.ietf.org/doc/html/rfc3501#section-6.4.4).
     case draft
 
-    /// RFC 3501: Messages that do not have the `\Draft` flag set.
+    /// Matches messages without the `\Draft` flag set.
+    ///
+    /// This is the negation of ``draft``.
+    /// From [RFC 3501 Section 6.4.4](https://datatracker.ietf.org/doc/html/rfc3501#section-6.4.4).
     case undraft
 
-    /// RFC 3501: Messages that contain the specified string in the envelope structure’s BCC field.
+    /// Matches messages containing the specified string in the BCC (blind carbon copy) field.
+    ///
+    /// The search string is performed on the envelope structure’s BCC field.
+    /// From [RFC 3501 Section 6.4.4](https://datatracker.ietf.org/doc/html/rfc3501#section-6.4.4).
     case bcc(ByteBuffer)
 
-    /// RFC 3501: Messages whose internal date (disregarding time and timezone) is earlier than the specified date.
+    /// Matches messages whose internal date (disregarding time and timezone) is earlier than the specified date.
+    ///
+    /// The `BEFORE` search key compares only the date portion, not the time.
+    /// From [RFC 3501 Section 6.4.4](https://datatracker.ietf.org/doc/html/rfc3501#section-6.4.4).
     case before(IMAPCalendarDay)
 
-    /// RFC 3501: Messages that contain the specified string in the body of the message.
+    /// Matches messages containing the specified string in the message body.
+    ///
+    /// The search is performed on the complete message body, including both text and encoded parts.
+    /// From [RFC 3501 Section 6.4.4](https://datatracker.ietf.org/doc/html/rfc3501#section-6.4.4).
     case body(ByteBuffer)
 
-    /// RFC 3501: Messages that contain the specified string in the envelope structure’s CC field.
+    /// Matches messages containing the specified string in the CC (carbon copy) field.
+    ///
+    /// The search string is performed on the envelope structure’s CC field.
+    /// From [RFC 3501 Section 6.4.4](https://datatracker.ietf.org/doc/html/rfc3501#section-6.4.4).
     case cc(ByteBuffer)
 
-    /// RFC 3501: Messages that contain the specified string in the envelope structure’s FROM field.
+    /// Matches messages containing the specified string in the FROM field.
+    ///
+    /// The search string is performed on the envelope structure’s FROM field.
+    /// From [RFC 3501 Section 6.4.4](https://datatracker.ietf.org/doc/html/rfc3501#section-6.4.4).
     case from(ByteBuffer)
 
-    /// RFC 3501: Messages with the specified keyword flag set.
+    /// Matches messages with the specified keyword flag set.
+    ///
+    /// Keyword flags are user-defined flags that don’t start with a backslash.
+    /// From [RFC 3501 Section 6.4.4](https://datatracker.ietf.org/doc/html/rfc3501#section-6.4.4).
     case keyword(Flag.Keyword)
 
-    /// RFC 3501: Messages whose internal date (disregarding time and timezone) is within the specified date.
+    /// Matches messages whose internal date (disregarding time and timezone) is exactly the specified date.
+    ///
+    /// The `ON` search key compares only the date portion, not the time.
+    /// From [RFC 3501 Section 6.4.4](https://datatracker.ietf.org/doc/html/rfc3501#section-6.4.4).
     case on(IMAPCalendarDay)
 
-    /// RFC 3501: Messages whose internal date (disregarding time and timezone) is within or later than the specified date.
+    /// Matches messages whose internal date (disregarding time and timezone) is on or later than the specified date.
+    ///
+    /// The `SINCE` search key compares only the date portion, not the time.
+    /// From [RFC 3501 Section 6.4.4](https://datatracker.ietf.org/doc/html/rfc3501#section-6.4.4).
     case since(IMAPCalendarDay)
 
-    /// RFC 3501: Messages that contain the specified string in the envelope structure’s SUBJECT field.
+    /// Matches messages containing the specified string in the SUBJECT field.
+    ///
+    /// The search string is performed on the envelope structure’s SUBJECT field.
+    /// From [RFC 3501 Section 6.4.4](https://datatracker.ietf.org/doc/html/rfc3501#section-6.4.4).
     case subject(ByteBuffer)
 
-    /// RFC 3501: Messages that contain the specified string in the header or body of the message.
+    /// Matches messages containing the specified string in either the header or body of the message.
+    ///
+    /// This performs a broad search across the entire message content.
+    /// From [RFC 3501 Section 6.4.4](https://datatracker.ietf.org/doc/html/rfc3501#section-6.4.4).
     case text(ByteBuffer)
 
-    /// RFC 3501: Messages that contain the specified string in the envelope structure’s TO field.
+    /// Matches messages containing the specified string in the TO field.
+    ///
+    /// The search string is performed on the envelope structure’s TO field.
+    /// From [RFC 3501 Section 6.4.4](https://datatracker.ietf.org/doc/html/rfc3501#section-6.4.4).
     case to(ByteBuffer)
 
-    /// RFC 3501: Messages that do not have the specified keyword flag set.
+    /// Matches messages without the specified keyword flag set.
+    ///
+    /// This is the negation of ``keyword(_:)``.
+    /// From [RFC 3501 Section 6.4.4](https://datatracker.ietf.org/doc/html/rfc3501#section-6.4.4).
     case unkeyword(Flag.Keyword)
 
-    /// RFC 3501: Messages that have a header with the specified field-name (as defined in [RFC-2822]) and that contains the specified string in the text of the header (what comes after the colon). If the string to search is zero-length, this matches all messages that have a header the contents.
+    /// Matches messages containing a header field with the specified name and text value.
+    ///
+    /// The header field name and text value are both searched for. If the text value is empty,
+    /// this matches all messages that contain the specified header field, regardless of its value.
+    /// From [RFC 3501 Section 6.4.4](https://datatracker.ietf.org/doc/html/rfc3501#section-6.4.4).
     case header(String, ByteBuffer)
 
-    /// RFC 3501: Messages with an [RFC-2822] size larger than the specified number of octets.
+    /// Matches messages larger than the specified number of octets.
+    ///
+    /// The size comparison is based on the RFC 2822 message size.
+    /// From [RFC 3501 Section 6.4.4](https://datatracker.ietf.org/doc/html/rfc3501#section-6.4.4).
     case messageSizeLarger(Int)
 
-    /// RFC 3501: Messages that do not match the specified search key.
+    /// Matches messages that do not match the specified search key.
+    ///
+    /// This negates the given search key. Search keys are combined recursively using this case.
+    /// From [RFC 3501 Section 6.4.4](https://datatracker.ietf.org/doc/html/rfc3501#section-6.4.4).
     case not(SearchKey)
 
-    /// RFC 3501: Messages that match either search key.
+    /// Matches messages that match either of the two specified search keys.
+    ///
+    /// This is a logical `OR` operation between two search keys.
+    /// From [RFC 3501 Section 6.4.4](https://datatracker.ietf.org/doc/html/rfc3501#section-6.4.4).
     case or(SearchKey, SearchKey)
 
-    /// RFC 3501: Messages whose [RFC-2822] Date: header (disregarding time and timezone) is earlier than the specified date.
+    /// Matches messages whose RFC 2822 Date header (disregarding time and timezone) is earlier than the specified date.
+    ///
+    /// This differs from ``before(_:)`` which uses the message’s internal date. `SENTBEFORE` uses the message’s
+    /// Date: header field instead. From [RFC 3501 Section 6.4.4](https://datatracker.ietf.org/doc/html/rfc3501#section-6.4.4).
     case sentBefore(IMAPCalendarDay)
 
-    /// RFC 3501: Messages whose [RFC-2822] Date: header (disregarding time and timezone) is within the specified date.
+    /// Matches messages whose RFC 2822 Date header (disregarding time and timezone) is exactly the specified date.
+    ///
+    /// This differs from ``on(_:)`` which uses the message’s internal date. `SENTON` uses the message’s
+    /// Date: header field instead. From [RFC 3501 Section 6.4.4](https://datatracker.ietf.org/doc/html/rfc3501#section-6.4.4).
     case sentOn(IMAPCalendarDay)
 
-    /// RFC 3501: Messages whose [RFC-2822] Date: header (disregarding time and timezone) is within or later than the specified date.
+    /// Matches messages whose RFC 2822 Date header (disregarding time and timezone) is on or later than the specified date.
+    ///
+    /// This differs from ``since(_:)`` which uses the message’s internal date. `SENTSINCE` uses the message’s
+    /// Date: header field instead. From [RFC 3501 Section 6.4.4](https://datatracker.ietf.org/doc/html/rfc3501#section-6.4.4).
     case sentSince(IMAPCalendarDay)
 
-    /// RFC 3501: Messages with an [RFC-2822] size smaller than the specified number of octets.
+    /// Matches messages smaller than the specified number of octets.
+    ///
+    /// The size comparison is based on the RFC 2822 message size.
+    /// From [RFC 3501 Section 6.4.4](https://datatracker.ietf.org/doc/html/rfc3501#section-6.4.4).
     case messageSizeSmaller(Int)
 
-    /// RFC 3501: Messages with unique identifiers corresponding to the specified unique identifier set. Sequence set ranges are permitted.
+    /// Matches messages with unique identifiers (UIDs) in the specified UID set.
+    ///
+    /// Sequence set ranges are permitted in the UID set. This allows searching for a specific
+    /// set of messages by their unique identifiers.
+    /// From [RFC 3501 Section 6.4.4](https://datatracker.ietf.org/doc/html/rfc3501#section-6.4.4).
     case uid(LastCommandSet<UID>)
 
+    /// Matches messages with UIDs after the specified UID.
+    ///
+    /// This is an extension search key that references UIDs relative to the last `SEARCH` result.
+    /// From [RFC 5182](https://datatracker.ietf.org/doc/html/rfc5182).
     case uidAfter(LastCommandMessageID<UID>)
+
+    /// Matches messages with UIDs before the specified UID.
+    ///
+    /// This is an extension search key that references UIDs relative to the last `SEARCH` result.
+    /// From [RFC 5182](https://datatracker.ietf.org/doc/html/rfc5182).
     case uidBefore(LastCommandMessageID<UID>)
 
-    /// RFC 3501: Messages that match a given sequence set.
+    /// Matches messages with sequence numbers in the specified sequence set.
+    ///
+    /// Sequence set ranges are permitted. This allows searching for a specific set of messages
+    /// by their message sequence numbers.
+    /// From [RFC 3501 Section 6.4.4](https://datatracker.ietf.org/doc/html/rfc3501#section-6.4.4).
     case sequenceNumbers(LastCommandSet<SequenceNumber>)
 
-    /// RFC 3501: Messages that match all of the given keys.
+    /// Matches messages that match all of the given search keys.
+    ///
+    /// This is a logical `AND` operation combining all search keys in the array.
+    /// An empty array matches no messages.
+    /// From [RFC 3501 Section 6.4.4](https://datatracker.ietf.org/doc/html/rfc3501#section-6.4.4).
     case and([SearchKey])
 
-    /// RFC 5032: Messages that are older than the given number of seconds.
+    /// Matches messages older than the specified number of seconds.
+    ///
+    /// The age is calculated from the current time to the message’s internal date.
+    /// From [RFC 5032](https://datatracker.ietf.org/doc/html/rfc5032).
     case older(Int)
 
-    /// RFC 5032: Messages that are younger than the given number of seconds.
+    /// Matches messages younger than the specified number of seconds.
+    ///
+    /// The age is calculated from the current time to the message’s internal date.
+    /// From [RFC 5032](https://datatracker.ietf.org/doc/html/rfc5032).
     case younger(Int)
 
-    /// RFC 5466: References a stored filter by name on the server.
+    /// References a server-side saved filter by name.
+    ///
+    /// This allows searching using pre-defined server-side filters, identified by name.
+    /// From [RFC 5466](https://datatracker.ietf.org/doc/html/rfc5466).
     case filter(String)
 
-    /// RFC 7162
+    /// Matches messages with a modification sequence (MODSEQ) value matching the specified criteria.
+    ///
+    /// The modification sequence allows searching based on when messages were last modified,
+    /// useful in CONDSTORE-enabled mailboxes.
+    /// From [RFC 7162 Section 3.1](https://datatracker.ietf.org/doc/html/rfc7162#section-3.1).
     case modificationSequence(SearchModificationSequence)
 
-    /// RFC 8474: Messages with the given `EmailID`.
+    /// Matches messages with the specified ``EmailID``.
+    ///
+    /// The `EMAILID` search key is part of the OBJECTID extension and allows searching by
+    /// message object identifier.
+    /// From [RFC 8474 Section 3](https://datatracker.ietf.org/doc/html/rfc8474#section-3).
     case emailID(EmailID)
 
-    /// RFC 8474: Messages with the given `ThreadID`.
+    /// Matches messages with the specified ``ThreadID``.
+    ///
+    /// The `THREADID` search key is part of the OBJECTID extension and allows searching by
+    /// message thread object identifier.
+    /// From [RFC 8474 Section 3](https://datatracker.ietf.org/doc/html/rfc8474#section-3).
     case threadID(ThreadID)
 }
 
 extension SearchKey {
-    /// Are there any (nested) search keys that use strings?
+    /// Indicates whether this search key uses string comparisons at any level.
     ///
-    /// We use this to check if we need to specify `CHARSET UTF-8`
+    /// This property checks if this search key or any nested search keys (through ``not(_:)``, ``or(_:_:)``,
+    /// or ``and(_:)``) use string-based searches like ``bcc(_:)``, ``body(_:)``, ``cc(_:)``, ``from(_:)``,
+    /// ``subject(_:)``, ``text(_:)``, ``to(_:)``, or ``header(_:_:)``.
+    ///
+    /// This is used internally to determine if a `CHARSET UTF-8` specification is needed in the `SEARCH` command
+    /// when the search includes string-based criteria.
+    ///
+    /// - Returns: `true` if this key or any nested key uses string comparisons; `false` otherwise
     var usesString: Bool {
         switch self {
         case .all,
