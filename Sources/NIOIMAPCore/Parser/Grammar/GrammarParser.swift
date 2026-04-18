@@ -2403,34 +2403,6 @@ extension GrammarParser {
         }
     }
 
-    func parseSortData(buffer: inout ParseBuffer, tracker: StackTracker) throws -> SortData? {
-        try PL.composite(buffer: &buffer, tracker: tracker) { (buffer, tracker) -> SortData? in
-            try PL.parseFixedString("SORT", buffer: &buffer, tracker: tracker)
-            let _components = try PL.parseOptional(buffer: &buffer, tracker: tracker) {
-                (buffer, tracker) -> ([Int], ModificationSequenceValue) in
-                try PL.parseSpaces(buffer: &buffer, tracker: tracker)
-                var array = [try self.parseNZNumber(buffer: &buffer, tracker: tracker)]
-                try PL.parseZeroOrMore(
-                    buffer: &buffer,
-                    into: &array,
-                    tracker: tracker,
-                    parser: { (buffer, tracker) in
-                        try PL.parseSpaces(buffer: &buffer, tracker: tracker)
-                        return try self.parseNZNumber(buffer: &buffer, tracker: tracker)
-                    }
-                )
-                try PL.parseSpaces(buffer: &buffer, tracker: tracker)
-                let seq = try self.parseSearchSortModificationSequence(buffer: &buffer, tracker: tracker)
-                return (array, seq)
-            }
-
-            guard let components = _components else {
-                return nil
-            }
-            return SortData(identifiers: components.0, modificationSequence: components.1)
-        }
-    }
-
     // status-att      = "MESSAGES" / "UIDNEXT" / "UIDVALIDITY" /
     //                   "UNSEEN" / "DELETED" / "SIZE"
     func parseStatusAttribute(buffer: inout ParseBuffer, tracker: StackTracker) throws -> MailboxAttribute {

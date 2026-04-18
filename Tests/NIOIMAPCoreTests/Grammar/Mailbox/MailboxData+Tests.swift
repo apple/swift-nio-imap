@@ -63,8 +63,12 @@ struct MailboxDataTests {
         ),
         EncodeFixture.mailboxData(.recent(5678), "5678 RECENT"),
         EncodeFixture.mailboxData(
-            .searchSort(.init(identifiers: [1, 2, 3], modificationSequence: 2)),
-            "SEARCH 1 2 3 (MODSEQ 2)"
+            .sort([1, 2, 3], ModificationSequenceValue(2)),
+            "SORT 1 2 3 (MODSEQ 2)"
+        ),
+        EncodeFixture.mailboxData(
+            .sort([]),
+            "SORT"
         ),
         EncodeFixture.mailboxData(
             .uidBatches(
@@ -94,24 +98,6 @@ struct MailboxDataTests {
         ),
     ])
     func encode(_ fixture: EncodeFixture<MailboxData>) {
-        fixture.checkEncoding()
-    }
-
-    @Test(
-        "encode search/sort",
-        arguments: [
-            EncodeFixture.mailboxDataSearchSort(nil, "SEARCH"),
-            EncodeFixture.mailboxDataSearchSort(
-                .init(identifiers: [1], modificationSequence: 2),
-                "SEARCH 1 (MODSEQ 2)"
-            ),
-            EncodeFixture.mailboxDataSearchSort(
-                .init(identifiers: [1, 2, 3], modificationSequence: 2),
-                "SEARCH 1 2 3 (MODSEQ 2)"
-            ),
-        ]
-    )
-    func encodeSearchSort(_ fixture: EncodeFixture<MailboxData.SearchSort?>) {
         fixture.checkEncoding()
     }
 
@@ -199,14 +185,19 @@ struct MailboxDataTests {
             expected: .success(.namespace(.init(userNamespace: [], otherUserNamespace: [], sharedNamespace: [])))
         ),
         ParseFixture.mailboxData(
-            "SEARCH 1 2 3 (MODSEQ 4)",
+            "SORT 1 2 3 (MODSEQ 4)",
             "\r\n",
-            expected: .success(.searchSort(.init(identifiers: [1, 2, 3], modificationSequence: 4)))
+            expected: .success(.sort([1, 2, 3], ModificationSequenceValue(4)))
         ),
         ParseFixture.mailboxData(
-            "SEARCH 1 (MODSEQ 2)",
+            "SORT 1 (MODSEQ 2)",
             "\r\n",
-            expected: .success(.searchSort(.init(identifiers: [1], modificationSequence: 2)))
+            expected: .success(.sort([1], ModificationSequenceValue(2)))
+        ),
+        ParseFixture.mailboxData(
+            "SORT",
+            "\r\n",
+            expected: .success(.sort([]))
         ),
         ParseFixture.mailboxData(
             "NAMESPACE NIL NIL NIL",
@@ -235,17 +226,6 @@ extension EncodeFixture<MailboxData> {
             bufferKind: .defaultServer,
             expectedString: expectedString,
             encoder: { $0.writeMailboxData($1) }
-        )
-    }
-}
-
-extension EncodeFixture<MailboxData.SearchSort?> {
-    fileprivate static func mailboxDataSearchSort(_ input: MailboxData.SearchSort?, _ expectedString: String) -> Self {
-        EncodeFixture(
-            input: input,
-            bufferKind: .defaultServer,
-            expectedString: expectedString,
-            encoder: { $0.writeMailboxDataSearchSort($1) }
         )
     }
 }

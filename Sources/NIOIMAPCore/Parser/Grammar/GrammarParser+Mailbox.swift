@@ -94,7 +94,8 @@ extension GrammarParser {
                     )
                     try PL.parseSpaces(buffer: &buffer, tracker: tracker)
                     let seq = try self.parseSearchSortModificationSequence(buffer: &buffer, tracker: tracker)
-                    return .searchSort(.init(identifiers: array, modificationSequence: seq))
+                    let identifiers = array.compactMap { UnknownMessageIdentifier(exactly: $0) }
+                    return .search(identifiers, seq)
                 }
 
                 return try PL.parseOneOf(
@@ -119,6 +120,24 @@ extension GrammarParser {
                 .namespace(try self.parseNamespaceResponse(buffer: &buffer, tracker: tracker))
             }
 
+            func parseMailboxData_sort(buffer: inout ParseBuffer, tracker: StackTracker) throws -> MailboxData {
+                let identifiers = try PL.parseZeroOrMore(buffer: &buffer, tracker: tracker) {
+                    (buffer, tracker) -> UnknownMessageIdentifier in
+                    try PL.parseSpaces(buffer: &buffer, tracker: tracker)
+                    let num = try self.parseNZNumber(buffer: &buffer, tracker: tracker)
+                    guard let id = UnknownMessageIdentifier(exactly: num) else {
+                        throw ParserError(hint: "Can't make unknown message identfiier from \(num)")
+                    }
+                    return id
+                }
+                let modificationSequence = try PL.parseOptional(buffer: &buffer, tracker: tracker) {
+                    (buffer, tracker) -> ModificationSequenceValue in
+                    try PL.parseSpaces(buffer: &buffer, tracker: tracker)
+                    return try self.parseSearchSortModificationSequence(buffer: &buffer, tracker: tracker)
+                }
+                return .sort(identifiers, modificationSequence)
+            }
+
             func parseMailboxData_uidBatchesResponse(
                 buffer: inout ParseBuffer,
                 tracker: StackTracker
@@ -132,6 +151,7 @@ extension GrammarParser {
                 "LSUB": parseMailboxData_lsub,
                 "ESEARCH": parseMailboxData_extendedSearch,
                 "SEARCH": parseMailboxData_search_combined,
+                "SORT": parseMailboxData_sort,
                 "STATUS": parseMailboxData_status,
                 "NAMESPACE": parseMailboxData_namespace,
                 "UIDBATCHES": parseMailboxData_uidBatchesResponse,
