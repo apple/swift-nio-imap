@@ -177,7 +177,7 @@ public enum MessageAttribute: Hashable, Sendable {
     /// This is used with the `CONDSTORE` extension for efficient synchronization.
     ///
     /// - SeeAlso: [RFC 7162 IMAP4 Extensions: CONDSTORE and QRESYNC](https://datatracker.ietf.org/doc/html/rfc7162)
-    case modificationSequence(ModificationSequenceValue)
+    case fetchModificationSequence(ModificationSequenceValue)
 
     /// Gmail-specific message unique identifier (vendor extension).
     ///
@@ -273,7 +273,7 @@ extension EncodeBuffer {
             return self.writeMessageAttributeFlags(flags)
         case .nilBody(let kind):
             return self.writeMessageAttributeNilBody(kind)
-        case .modificationSequence(let val):
+        case .fetchModificationSequence(let val):
             return self.writeString("MODSEQ (") + self.writeModificationSequenceValue(val) + self.writeString(")")
         case .gmailMessageID(let id):
             return self.writeMessageAttribute_gmailMessageID(id)

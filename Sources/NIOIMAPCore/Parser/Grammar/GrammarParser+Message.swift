@@ -183,7 +183,7 @@ extension GrammarParser {
                 try PL.parseFixedString("(", buffer: &buffer, tracker: tracker)
                 let val = try self.parseModificationSequenceValue(buffer: &buffer, tracker: tracker)
                 try PL.parseFixedString(")", buffer: &buffer, tracker: tracker)
-                return .modificationSequence(val)
+                return .fetchModificationSequence(val)
             }
         }
 
