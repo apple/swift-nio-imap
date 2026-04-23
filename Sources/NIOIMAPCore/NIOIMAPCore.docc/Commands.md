@@ -1,6 +1,6 @@
 # Commands
 
-The IMAP protocol is built on a command-response model where clients send tagged commands to perform operations, and servers respond with updates and status.
+Construct and send typed IMAP commands, from authentication and mailbox management to message retrieval and server extensions.
 
 ## Overview
 

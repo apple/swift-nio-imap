@@ -1,6 +1,6 @@
 # Parsing and Encoding
 
-Parser and encoder infrastructure for IMAP protocol streams.
+Parse IMAP server responses and encode client commands using these streaming parsers and encode buffers.
 
 ## Overview
 

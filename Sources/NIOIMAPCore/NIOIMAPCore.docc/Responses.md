@@ -1,10 +1,11 @@
 # Responses
 
-Supporting types used when interpreting and handling server responses.
+Interpret server response payloads and message data using these supporting types.
 
 ## Overview
 
-When the server sends responses, these types help you interpret the data it contains. They organize the various kinds of response payloads and the information embedded within them.
+When the server sends responses, these types help you interpret the data they contain.
+They organize the response payload types and the information embedded in them.
 
 ## Topics
 

@@ -1,6 +1,6 @@
 # Protocol Core
 
-Essential types for the IMAP communication lifecycle.
+The core types for IMAP client-server communication: commands, responses, capabilities, and authentication.
 
 ## Overview
 
@@ -10,7 +10,7 @@ The protocol core encompasses the fundamental types exchanged between clients an
 
 ### Commands
 
-Commands are what the client sends to the server to request actions or retrieve data.
+Use these types to send commands to the server and request actions or retrieve data.
 
 - ``Command``
 - ``CommandStreamPart``
@@ -19,7 +19,7 @@ Commands are what the client sends to the server to request actions or retrieve 
 
 ### Responses
 
-Responses are what the server sends back, ranging from simple confirmations to complex streaming data.
+Use these types to handle the server's responses, from simple confirmations to complex streaming data.
 
 - ``Response``
 - ``FetchResponse``
@@ -30,7 +30,7 @@ Responses are what the server sends back, ranging from simple confirmations to c
 
 ### Response Text
 
-These types are used within response messages to convey status information and additional context.
+These types appear within response messages and convey status information and additional context.
 
 - ``ResponseText``
 - ``ResponseTextCode``
@@ -39,7 +39,7 @@ These types are used within response messages to convey status information and a
 
 ### Capabilities & Authentication
 
-Types related to server capabilities and client authentication.
+Discover server capabilities and authenticate with these types.
 
 - ``Capability``
 - ``AuthenticationMechanism``
