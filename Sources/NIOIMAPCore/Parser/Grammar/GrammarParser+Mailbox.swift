@@ -62,48 +62,22 @@ extension GrammarParser {
                 return .extendedSearch(response)
             }
 
-            func parseMailboxData_search_combined(
-                buffer: inout ParseBuffer,
-                tracker: StackTracker
-            ) throws -> MailboxData {
-                func parseMailboxData_search(buffer: inout ParseBuffer, tracker: StackTracker) throws -> MailboxData {
-                    let nums = try PL.parseZeroOrMore(buffer: &buffer, tracker: tracker) {
-                        (buffer, tracker) -> UnknownMessageIdentifier in
-                        try PL.parseSpaces(buffer: &buffer, tracker: tracker)
-                        let num = try self.parseNZNumber(buffer: &buffer, tracker: tracker)
-                        guard let id = UnknownMessageIdentifier(exactly: num) else {
-                            throw ParserError(hint: "Can't make unknown message identfiier from \(num)")
-                        }
-                        return id
+            func parseMailboxData_search(buffer: inout ParseBuffer, tracker: StackTracker) throws -> MailboxData {
+                let identifiers = try PL.parseZeroOrMore(buffer: &buffer, tracker: tracker) {
+                    (buffer, tracker) -> UnknownMessageIdentifier in
+                    try PL.parseSpaces(buffer: &buffer, tracker: tracker)
+                    let num = try self.parseNZNumber(buffer: &buffer, tracker: tracker)
+                    guard let id = UnknownMessageIdentifier(exactly: num) else {
+                        throw ParserError(hint: "Can't make unknown message identfiier from \(num)")
                     }
-                    return .search(nums)
+                    return id
                 }
-
-                func parseMailboxData_searchSort(buffer: inout ParseBuffer, tracker: StackTracker) throws -> MailboxData
-                {
+                let modificationSequence = try PL.parseOptional(buffer: &buffer, tracker: tracker) {
+                    (buffer, tracker) -> ModificationSequenceValue in
                     try PL.parseSpaces(buffer: &buffer, tracker: tracker)
-                    var array = [try self.parseNZNumber(buffer: &buffer, tracker: tracker)]
-                    try PL.parseZeroOrMore(
-                        buffer: &buffer,
-                        into: &array,
-                        tracker: tracker,
-                        parser: { (buffer, tracker) in
-                            try PL.parseSpaces(buffer: &buffer, tracker: tracker)
-                            return try self.parseNZNumber(buffer: &buffer, tracker: tracker)
-                        }
-                    )
-                    try PL.parseSpaces(buffer: &buffer, tracker: tracker)
-                    let seq = try self.parseSearchSortModificationSequence(buffer: &buffer, tracker: tracker)
-                    let identifiers = array.compactMap { UnknownMessageIdentifier(exactly: $0) }
-                    return .search(identifiers, seq)
+                    return try self.parseSearchSortModificationSequence(buffer: &buffer, tracker: tracker)
                 }
-
-                return try PL.parseOneOf(
-                    parseMailboxData_searchSort,
-                    parseMailboxData_search,
-                    buffer: &buffer,
-                    tracker: tracker
-                )
+                return .search(identifiers, modificationSequence)
             }
 
             func parseMailboxData_status(buffer: inout ParseBuffer, tracker: StackTracker) throws -> MailboxData {
@@ -150,7 +124,7 @@ extension GrammarParser {
                 "LIST": parseMailboxData_list,
                 "LSUB": parseMailboxData_lsub,
                 "ESEARCH": parseMailboxData_extendedSearch,
-                "SEARCH": parseMailboxData_search_combined,
+                "SEARCH": parseMailboxData_search,
                 "SORT": parseMailboxData_sort,
                 "STATUS": parseMailboxData_status,
                 "NAMESPACE": parseMailboxData_namespace,

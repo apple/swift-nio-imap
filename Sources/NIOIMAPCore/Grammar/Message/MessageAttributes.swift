@@ -174,11 +174,10 @@ public enum MessageAttribute: Hashable, Sendable {
     /// The modification sequence number for the message.
     ///
     /// The `MODSEQ` attribute contains a modification sequence number indicating when the message or its flags last changed.
-    /// This is used with the `CONDSTORE` extension for efficient synchronization. The attribute also includes the `UNCHANGEDSINCE`
-    /// or `CHANGEDSINCE` modifier information.
+    /// This is used with the `CONDSTORE` extension for efficient synchronization.
     ///
     /// - SeeAlso: [RFC 7162 IMAP4 Extensions: CONDSTORE and QRESYNC](https://datatracker.ietf.org/doc/html/rfc7162)
-    case fetchModificationResponse(FetchModificationResponse)
+    case fetchModificationSequence(ModificationSequenceValue)
 
     /// Gmail-specific message unique identifier (vendor extension).
     ///
@@ -274,8 +273,8 @@ extension EncodeBuffer {
             return self.writeMessageAttributeFlags(flags)
         case .nilBody(let kind):
             return self.writeMessageAttributeNilBody(kind)
-        case .fetchModificationResponse(let resp):
-            return self.writeFetchModificationResponse(resp)
+        case .fetchModificationSequence(let val):
+            return self.writeString("MODSEQ (") + self.writeModificationSequenceValue(val) + self.writeString(")")
         case .gmailMessageID(let id):
             return self.writeMessageAttribute_gmailMessageID(id)
         case .gmailThreadID(let id):

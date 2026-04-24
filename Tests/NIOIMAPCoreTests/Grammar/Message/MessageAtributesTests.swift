@@ -81,7 +81,7 @@ struct MessageAttributeTests {
         EncodeFixture.messageAttribute(.binarySize(section: [2], size: 3), "BINARY.SIZE[2] 3"),
         EncodeFixture.messageAttribute(.flags([.draft]), "FLAGS (\\Draft)"),
         EncodeFixture.messageAttribute(.flags([.flagged, .draft]), "FLAGS (\\Flagged \\Draft)"),
-        EncodeFixture.messageAttribute(.fetchModificationResponse(.init(modifierSequenceValue: 3)), "MODSEQ (3)"),
+        EncodeFixture.messageAttribute(.fetchModificationSequence(3), "MODSEQ (3)"),
         EncodeFixture.messageAttribute(.gmailMessageID(1_278_455_344_230_334_865), "X-GM-MSGID 1278455344230334865"),
         EncodeFixture.messageAttribute(.gmailThreadID(1_266_894_439_832_287_888), "X-GM-THRID 1266894439832287888"),
         EncodeFixture.messageAttribute(
@@ -411,7 +411,7 @@ struct MessageAttributeTests {
             ParseFixture.messageAttribute(
                 "MODSEQ (3)",
                 " ",
-                expected: .success(.fetchModificationResponse(.init(modifierSequenceValue: 3)))
+                expected: .success(.fetchModificationSequence(3))
             ),
             ParseFixture.messageAttribute(
                 "X-GM-MSGID 1278455344230334865",
