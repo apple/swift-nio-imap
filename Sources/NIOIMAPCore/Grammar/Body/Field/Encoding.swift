@@ -69,7 +69,7 @@ extension BodyStructure {
 
         /// The encoding as an uppercase string.
         ///
-        /// - Returns: The encoding name in uppercase (e.g., `"7BIT"`, `"BASE64"`, `"QUOTED-PRINTABLE"`).
+        /// - Returns: The encoding name in uppercase, for example `"7BIT"`, `"BASE64"`, or `"QUOTED-PRINTABLE"`.
         public var debugDescription: String { stringValue }
 
         /// Creates a new encoding from a string representation.
@@ -77,7 +77,7 @@ extension BodyStructure {
         /// The provided string is automatically uppercased to normalize the encoding value. This allows
         /// case-insensitive comparison between encoding values.
         ///
-        /// - parameter stringValue: The encoding name as a string (e.g., `"7bit"`, `"base64"`). Will be uppercased.
+        /// - parameter stringValue: The encoding name as a string (for example, `"7bit"` or `"base64"`). Will be uppercased.
         public init(_ stringValue: String) {
             self.stringValue = stringValue.uppercased()
         }

@@ -18,7 +18,7 @@
 /// IMAP URL. It pairs the authorization parameters (expiration and access) with the verification
 /// information (mechanism and token).
 ///
-/// This type represents the `;URLAUTH=<access>:<mechanism>:<token>` component appended to IMAP URLs
+/// The `;URLAUTH=<access>:<mechanism>:<token>` component is appended to IMAP URLs
 /// according to RFC 4467. It is used when:
 ///
 /// 1. **Generating URLAUTH URLs** (GENURLAUTH command): Server creates authorization information
@@ -63,7 +63,7 @@
 /// S: a002 OK URLFETCH completed
 /// ```
 ///
-/// ## Related Types
+/// ## Related types
 ///
 /// - ``AuthenticatedURLRump`` provides expiration and access information
 /// - ``AuthenticatedURLVerifier`` provides mechanism and token for verification

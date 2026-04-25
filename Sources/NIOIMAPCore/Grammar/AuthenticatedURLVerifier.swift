@@ -22,7 +22,7 @@
 /// The verifier allows the IMAP server to validate that the URL has been properly authorized
 /// by verifying the token using the specified mechanism and a stored mailbox access key.
 ///
-/// ### Verification Process (RFC 4467 Section 6)
+/// ### Verification process (RFC 4467 Section 6)
 ///
 /// When a URLFETCH command is issued with a URLAUTH-authorized URL:
 ///
@@ -49,7 +49,7 @@
 /// S: * URLFETCH ("imap://user@example.com/INBOX/;uid=20;urlauth=anonymous:internal:91354a473744909de610943775f92038" "message-data")
 /// ```
 ///
-/// ## Related Types
+/// ## Related types
 ///
 /// - ``URLAuthenticationMechanism`` specifies the token generation algorithm
 /// - ``EncodedAuthenticatedURL`` wraps the hexadecimal-encoded token

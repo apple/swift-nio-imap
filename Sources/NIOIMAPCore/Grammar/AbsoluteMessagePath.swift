@@ -40,7 +40,7 @@
 /// Result: imap://user@example.com/INBOX/;uid=20
 /// ```
 ///
-/// ## Related Types
+/// ## Related types
 ///
 /// - ``RelativeIMAPURL`` uses absolute message paths as one variant of relative URLs
 /// - ``URLCommand`` specifies the fetch operation details

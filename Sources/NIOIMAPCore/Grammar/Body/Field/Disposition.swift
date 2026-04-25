@@ -26,8 +26,7 @@ extension BodyStructure {
     public struct DispositionKind: Hashable, RawRepresentable, Sendable {
         /// The `inline` disposition, indicating the part should be displayed as part of the message body.
         ///
-        /// This is the default disposition when not specified. Inline parts are typically displayed automatically
-        /// by mail clients as part of the message preview.
+        /// The default disposition when not specified.
         public static let inline = Self(rawValue: "inline")
 
         /// The `attachment` disposition, indicating the part should be treated as a downloadable attachment.
@@ -43,7 +42,7 @@ extension BodyStructure {
         /// The provided string is automatically lowercased to normalize the disposition value, allowing
         /// case-insensitive comparison.
         ///
-        /// - parameter rawValue: The disposition kind (e.g., `"inline"`, `"attachment"`). Will be lowercased.
+        /// - parameter rawValue: The disposition kind (for example, `"inline"` or `"attachment"`). Will be lowercased.
         public init(rawValue: String) {
             self.rawValue = rawValue.lowercased()
         }
@@ -74,7 +73,7 @@ extension BodyStructure {
     /// - SeeAlso: [RFC 2183](https://datatracker.ietf.org/doc/html/rfc2183)
     /// - SeeAlso: [RFC 3501 Section 7.4.2](https://datatracker.ietf.org/doc/html/rfc3501#section-7.4.2)
     public struct Disposition: Hashable, Sendable {
-        /// The disposition kind (e.g., `inline` or `attachment`).
+        /// The disposition kind, such as `inline` or `attachment`.
         public var kind: DispositionKind
 
         /// Optional parameters associated with the disposition.
@@ -86,7 +85,7 @@ extension BodyStructure {
         /// Creates a new disposition.
         ///
         /// - parameter kind: The disposition kind (`inline` or `attachment`).
-        /// - parameter parameters: An ordered dictionary of disposition parameters (e.g., filename, size).
+        /// - parameter parameters: An ordered dictionary of disposition parameters (for example, filename and size).
         public init(kind: DispositionKind, parameters: OrderedDictionary<String, String>) {
             self.kind = kind
             self.parameters = parameters
@@ -112,7 +111,6 @@ extension BodyStructure {
         /// The `filename` parameter value, if present.
         ///
         /// The `filename` parameter provides a recommended filename for saving the message part to disk.
-        /// This is commonly used for attachment parts.
         ///
         /// - Returns: The filename string, or `nil` if the parameter is not present.
         public var filename: String? {

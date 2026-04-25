@@ -17,14 +17,12 @@ import struct NIO.ByteBuffer
 extension BodyStructure {
     /// Content location URI and future extension fields for a message part.
     ///
-    /// This type pairs a content location URI (defined in [RFC 2557](https://datatracker.ietf.org/doc/html/rfc2557))
+    /// Pairs a content location URI (defined in [RFC 2557](https://datatracker.ietf.org/doc/html/rfc2557))
     /// with a list of future extension fields. The location provides a URI where the message part content can be
     /// retrieved, and extensions allow servers to add new fields without breaking existing clients.
     ///
     /// Both the location and extensions are optional fields in the body structure defined in
     /// [RFC 3501 Section 7.4.2](https://datatracker.ietf.org/doc/html/rfc3501#section-7.4.2).
-    ///
-    /// This is an API abstraction to simplify working with the location/extension pairing from the raw IMAP message.
     ///
     /// ### Example
     ///

@@ -25,7 +25,7 @@ import struct NIO.ByteBuffer
 /// Attribute flags are case-insensitive for comparison but preserve their original casing when transmitted.
 /// They are normalized to lowercase for comparison.
 ///
-/// ### Standard Attribute Flags
+/// ### Standard attribute flags
 ///
 /// - ``answered`` - The message has been replied to.
 /// - ``flagged`` - The message has been marked for attention.
@@ -69,7 +69,7 @@ public struct AttributeFlag: Hashable, Sendable {
     /// The provided string is automatically lowercased to normalize the flag value, allowing case-insensitive
     /// comparison while preserving the original casing for transmission.
     ///
-    /// - parameter stringValue: The flag string (e.g., `"\\Answered"`, `"\\SEEN"`). Will be lowercased.
+    /// - parameter stringValue: The flag string (for example, `"\\Answered"` or `"\\SEEN"`). Will be lowercased.
     public init(_ stringValue: String) {
         self.stringValue = stringValue.lowercased()
     }

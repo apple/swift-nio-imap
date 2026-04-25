@@ -30,7 +30,7 @@ import struct NIO.ByteBuffer
 /// S: * CAPABILITY IMAP4rev1 STARTTLS AUTH=GSSAPI XPIG-LATIN
 /// ```
 ///
-/// This server response advertises capabilities: `IMAP4rev1` (simple), `STARTTLS` (simple), `AUTH=GSSAPI`
+/// The server response advertises capabilities: `IMAP4rev1` (simple), `STARTTLS` (simple), `AUTH=GSSAPI`
 /// (configurable with name `AUTH` and value `GSSAPI`), and `XPIG-LATIN` (custom vendor extension).
 ///
 /// - SeeAlso: [RFC 3501 Section 7.2.1](https://datatracker.ietf.org/doc/html/rfc3501#section-7.2.1)
@@ -50,9 +50,9 @@ public struct Capability: Hashable, Sendable {
         return String(self.rawValue[..<index])
     }
 
-    /// If the capability is _simple_, e.g. `STARTTLS`, then the value will be `nil`.
-    /// Otherwise, if the capability is configurable such as `AUTH=GSSAPI`, then the value will
-    /// be `GSSAPI`.
+    /// If the capability is _simple_, for example `STARTTLS`, the value is `nil`.
+    /// Otherwise, if the capability is configurable such as `AUTH=GSSAPI`, the value
+    /// is `GSSAPI`.
     public var value: String? {
         guard var index = self.splitIndex else {
             return nil
@@ -63,7 +63,7 @@ public struct Capability: Hashable, Sendable {
     }
 
     /// Creates a new capability from a `String`, and parses any configuration if present.
-    /// - parameter value: The raw `String` value of the capability, e.g. *STARTTLS* or *AUTH=GSSAPI*.
+    /// - parameter value: The raw `String` value of the capability, for example `STARTTLS` or `AUTH=GSSAPI`.
     public init(_ value: String) {
         self.init(unchecked: value)
     }
@@ -98,7 +98,7 @@ extension Capability {
         ///
         /// The provided value is uppercased for consistency with IMAP protocol conventions.
         ///
-        /// - parameter value: The context kind as a string (e.g., SEARCH, SORT).
+        /// - parameter value: The context kind as a string (for example, SEARCH or SORT).
         public init(_ value: String) {
             self.rawValue = value.uppercased()
         }
@@ -125,7 +125,7 @@ extension Capability {
         ///
         /// The provided value is uppercased for consistency with IMAP protocol conventions.
         ///
-        /// - parameter value: The sort kind as a string (e.g., DISPLAY).
+        /// - parameter value: The sort kind as a string (for example, DISPLAY).
         public init(_ value: String) {
             self.rawValue = value.uppercased()
         }
@@ -155,7 +155,7 @@ extension Capability {
         ///
         /// The provided value is uppercased for consistency with IMAP protocol conventions.
         ///
-        /// - parameter value: The thread kind as a string (e.g., ORDEREDSUBJECT, REFERENCES).
+        /// - parameter value: The thread kind as a string (for example, ORDEREDSUBJECT or REFERENCES).
         public init(_ value: String) {
             self.rawValue = value.uppercased()
         }
@@ -182,7 +182,7 @@ extension Capability {
         ///
         /// The provided value is uppercased for consistency with IMAP protocol conventions.
         ///
-        /// - parameter value: The status kind as a string (e.g., SIZE).
+        /// - parameter value: The status kind as a string (for example, SIZE).
         public init(_ value: String) {
             self.rawValue = value.uppercased()
         }
@@ -210,7 +210,7 @@ extension Capability {
         ///
         /// The provided value is uppercased for consistency with IMAP protocol conventions.
         ///
-        /// - parameter value: The UTF-8 kind as a string (e.g., ACCEPT).
+        /// - parameter value: The UTF-8 kind as a string (for example, ACCEPT).
         public init(_ value: String) {
             self.rawValue = value.uppercased()
         }
@@ -237,7 +237,7 @@ extension Capability {
         ///
         /// The provided value is uppercased for consistency with IMAP protocol conventions.
         ///
-        /// - parameter value: The rights kind as a string (e.g., TEKX).
+        /// - parameter value: The rights kind as a string (for example, TEKX).
         public init(_ value: String) {
             self.rawValue = value.uppercased()
         }
@@ -264,7 +264,7 @@ extension Capability {
         ///
         /// The provided value is uppercased for consistency with IMAP protocol conventions.
         ///
-        /// - parameter value: The compression kind as a string (e.g., DEFLATE).
+        /// - parameter value: The compression kind as a string (for example, DEFLATE).
         public init(_ value: String) {
             self.rawValue = value.uppercased()
         }
