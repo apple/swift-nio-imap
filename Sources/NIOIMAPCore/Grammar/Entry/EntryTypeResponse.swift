@@ -20,7 +20,7 @@ import struct NIO.ByteBuffer
 ///
 /// Entry kind response indicates whether a metadata entry belongs to the private namespace
 /// (visible only to the authenticated user) or the shared namespace (visible to all users).
-/// This information is returned by the server when responding to metadata queries.
+/// The server returns this information when responding to metadata queries.
 /// See [RFC 5464 Section 3.3](https://datatracker.ietf.org/doc/html/rfc5464#section-3.3).
 ///
 /// ### Example
@@ -34,7 +34,7 @@ import struct NIO.ByteBuffer
 /// The response includes the entry type `priv` to indicate that the `/flags/\Seen` modification
 /// sequence metadata is private to the authenticated user.
 ///
-/// ## Related Types
+/// ## Related types
 ///
 /// - See ``EntryKindRequest`` for client-side entry type specification
 /// - See ``MetadataResponse`` for complete metadata responses

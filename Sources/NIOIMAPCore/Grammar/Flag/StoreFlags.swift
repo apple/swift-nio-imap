@@ -106,7 +106,7 @@ public struct StoreGmailLabels: Hashable, Sendable {
 
 /// Standard IMAP message flags for a `STORE` command.
 ///
-/// This type specifies a set of flags to add to, remove from, or replace on messages via the `STORE` command.
+/// Specifies a set of flags to add to, remove from, or replace on messages via the `STORE` command.
 /// The operation (add/remove/replace) and whether to suppress the server response are configured separately.
 ///
 /// Flags are described in [RFC 3501 Section 2.3](https://datatracker.ietf.org/doc/html/rfc3501#section-2.3)

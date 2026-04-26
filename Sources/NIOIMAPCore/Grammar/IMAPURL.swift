@@ -57,7 +57,7 @@
 /// - **`/`**: Path separator
 /// - **Command** (``URLCommand``, optional): Mailbox, search, or fetch operation
 ///
-/// ## Related Types
+/// ## Related types
 ///
 /// - ``IMAPServer`` provides server connection specification
 /// - ``UserAuthenticationMechanism`` specifies user and auth mechanism

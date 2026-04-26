@@ -14,7 +14,7 @@
 
 /// The internal date and time of a message as stored on the server.
 ///
-/// This type represents the server's record of when a message was received or stored,
+/// Represents the server's record of when a message was received or stored,
 /// not the date from the message's headers (which is represented by ``InternetMessageDate``).
 /// The internal date consists of a calendar date, time of day, and timezone offset.
 ///
@@ -28,7 +28,7 @@
 /// * 1 FETCH (INTERNALDATE “15-Mar-2026 10:30:45 +0100”)
 /// ```
 ///
-/// This response indicates the message was received on March 15, 2026 at 10:30:45 AM
+/// The response indicates the message was received on March 15, 2026 at 10:30:45 AM
 /// in the UTC+01:00 timezone. This is wrapped as ``ServerMessageDate`` with components
 /// accessible via the ``components`` property.
 ///
@@ -38,7 +38,7 @@ public struct ServerMessageDate: Hashable, Sendable {
 
     /// The individual date and time components for this internal date.
     ///
-    /// This computed property extracts the encoded date, time, and timezone components
+    /// Extracts the encoded date, time, and timezone components
     /// from the compact internal representation. The components can be used to
     /// display or work with individual date and time fields.
     ///
@@ -82,7 +82,7 @@ public struct ServerMessageDate: Hashable, Sendable {
 
     /// Creates a new `ServerMessageDate` from individual date and time components.
     ///
-    /// This initializer constructs a ``ServerMessageDate`` by encoding the provided
+    /// Constructs a ``ServerMessageDate`` by encoding the provided
     /// components into the compact rawValue representation.
     ///
     /// - Parameter components: A ``Components`` structure containing the date, time, and timezone information.
@@ -139,11 +139,11 @@ extension ServerMessageDate {
     /// let date = ServerMessageDate(components)
     /// ```
     ///
-    /// This creates an ``ServerMessageDate`` representing March 15, 2026 at 10:30:45 UTC+01:00.
+    /// Creates a ``ServerMessageDate`` representing March 15, 2026 at 10:30:45 UTC+01:00.
     public struct Components: Sendable {
         /// The year, typically represented as a 4-digit integer.
         ///
-        /// This is a full year value (e.g., 2026), constrained to fit within an unsigned 16-bit integer.
+        /// A full year value (for example, 2026), constrained to fit within an unsigned 16-bit integer.
         public let year: Int
 
         /// The month, typically represented as a 2-digit integer in the range `1...12`.

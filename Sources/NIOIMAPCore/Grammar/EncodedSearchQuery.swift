@@ -14,7 +14,7 @@
 
 /// A mailbox reference paired with an optional percent-encoded search query.
 ///
-/// This type combines a mailbox identifier with UID validity and an optional search query for use
+/// Combines a mailbox identifier with UID validity and an optional search query for use
 /// in IMAP URLs (RFC 5092). It specifies both which mailbox to search and what to search for.
 ///
 /// - SeeAlso: [RFC 5092 IMAP URL Scheme](https://datatracker.ietf.org/doc/html/rfc5092)

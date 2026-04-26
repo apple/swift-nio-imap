@@ -17,10 +17,10 @@ import struct NIO.ByteBuffer
 /// A percent-encoded message section reference for use in IMAP URLs.
 ///
 /// IMAP message sections (as defined in RFC 3501) specify parts of message structures
-/// using dot-separated numeric notation (e.g., "1", "1.2", "1.2.3"). When used in IMAP URLs,
+/// using dot-separated numeric notation (for example, "1", "1.2", or "1.2.3"). When used in IMAP URLs,
 /// section references are percent-encoded to ensure URL safety (RFC 2192, RFC 3986).
 ///
-/// This type wraps a percent-encoded section reference for use in URL construction.
+/// Wraps a percent-encoded section reference for use in URL construction.
 /// The encoded string contains only ASCII-safe characters and can be safely included in IMAP URL syntax.
 ///
 /// ### Example
@@ -42,7 +42,7 @@ import struct NIO.ByteBuffer
 /// )
 /// ```
 ///
-/// ## Related Types
+/// ## Related types
 ///
 /// See ``URLMessageSection`` for the complete message section specification,
 /// ``MessagePath`` for the full message location including sections, and

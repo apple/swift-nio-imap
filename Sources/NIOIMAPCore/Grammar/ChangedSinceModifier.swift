@@ -56,7 +56,7 @@ public struct ChangedSinceModifier: Hashable, Sendable {
 /// the specified value. If the message has changed (higher mod-sequence), the operation is rejected, preventing
 /// lost updates in multimailbox environments.
 ///
-/// This implements optimistic concurrency control, allowing multiple clients to safely modify messages without
+/// Implements optimistic concurrency control, allowing multiple clients to safely modify messages without
 /// overwriting each other's changes.
 ///
 /// **Requires server capability:** ``Capability/condStore``

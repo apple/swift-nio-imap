@@ -16,7 +16,7 @@ import struct NIO.ByteBuffer
 
 /// An RFC 2822 electronic mail address with structured components.
 ///
-/// This type represents an address as returned in the `ENVELOPE` structure of a `FETCH` response.
+/// Represents an address as returned in the `ENVELOPE` structure of a `FETCH` response.
 /// The `ENVELOPE` address format breaks email addresses into four distinct components to help applications
 /// display mail headers consistently and reliably.
 ///
@@ -30,7 +30,7 @@ import struct NIO.ByteBuffer
 /// S: * 1 FETCH (ENVELOPE (NIL "Alice Smith" "alice" "example.com" ...))
 /// ```
 ///
-/// This response contains an address with nil at-domain-list, personName "Alice Smith", mailbox "alice", and host "example.com".
+/// The response contains an address with nil at-domain-list, personName "Alice Smith", mailbox "alice", and host "example.com".
 ///
 /// - SeeAlso: [RFC 3501 Section 7.4.2](https://datatracker.ietf.org/doc/html/rfc3501#section-7.4.2)
 public struct EmailAddress: Hashable, Sendable {

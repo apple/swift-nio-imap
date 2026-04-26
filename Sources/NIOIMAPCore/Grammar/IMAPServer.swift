@@ -55,7 +55,7 @@ import struct NIO.ByteBuffer
 /// S: * GENURLAUTH "imap://owner@example.com/INBOX/;uid=20;urlauth=user+fred:internal:..."
 /// ```
 ///
-/// ## Related Types
+/// ## Related types
 ///
 /// See ``UserAuthenticationMechanism`` for the optional user and authentication specification,
 /// ``IMAPURLAuthenticationMechanism`` for authentication mechanism constraints, and

@@ -34,7 +34,7 @@ import struct NIO.ByteBuffer
 /// S: A001 OK APPEND completed
 /// ```
 ///
-/// This wire format is managed through multiple `AppendCommand` values:
+/// The wire format above is managed through multiple `AppendCommand` values:
 /// - `start(tag: "A001", appendingTo: "INBOX")` produces the command prefix
 /// - `beginMessage(...)` produces the metadata (flags, date, size)
 /// - `messageBytes(buffer)` streams the message data
@@ -137,7 +137,7 @@ public enum AppendCommand: Hashable, Sendable {
 extension AppendCommand {
     /// Management of inline data catenation using the `CATENATE` extension (RFC 4469).
     ///
-    /// This enum manages the lifecycle of sending inline data as part of a catenation.
+    /// Manages the lifecycle of sending inline data as part of a catenation.
     /// One `begin(size:)` message must be sent before exactly one `end` message, with
     /// zero or more `bytes(_:)` messages in between.
     ///
@@ -250,7 +250,7 @@ public enum CommandStreamPart: Hashable, Sendable {
 
     /// Sends data in response to a server continuation request (`+`).
     ///
-    /// When a server sends a continuation request (e.g., during authentication or
+    /// When a server sends a continuation request (for example, during authentication or
     /// literal data upload), the client responds with this case. The buffer typically
     /// contains base64-encoded credentials for `AUTHENTICATE` commands or raw message
     /// bytes for message uploads.

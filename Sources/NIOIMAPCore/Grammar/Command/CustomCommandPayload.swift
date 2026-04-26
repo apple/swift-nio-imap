@@ -36,7 +36,7 @@ extension Command {
         /// literal with `{size}\r\n` prefix followed by the raw bytes. Otherwise, they
         /// are sent as a quoted string with `"..."` syntax.
         ///
-        /// This is the safer option when the payload should be treated as data rather
+        /// The safer option when the payload should be treated as data rather
         /// than protocol syntax.
         ///
         /// ### Example

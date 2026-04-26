@@ -57,7 +57,7 @@ public enum FetchModifier: Hashable, Sendable {
 
     /// A server extension modifier not defined in this library.
     ///
-    /// This case captures future `FETCH` modifiers defined by extensions, allowing forward compatibility
+    /// Captures future `FETCH` modifiers defined by extensions, allowing forward compatibility
     /// with new IMAP capabilities without requiring library updates.
     case other(KeyValue<String, ParameterValue?>)
 }

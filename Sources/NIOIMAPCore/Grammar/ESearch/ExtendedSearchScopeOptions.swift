@@ -24,7 +24,7 @@ import struct OrderedCollections.OrderedDictionary
 /// These options are specified as key-value pairs and are optional in search commands.
 /// See [RFC 7377 Section 2.1.1](https://datatracker.ietf.org/doc/html/rfc7377#section-2.1.1) for details.
 ///
-/// ## Related Types
+/// ## Related types
 ///
 /// - See ``ExtendedSearchSourceOptions`` for mailbox selection
 /// - See ``ExtendedSearchOptions`` for complete search options

@@ -22,10 +22,10 @@ import struct NIO.ByteBuffer
 /// 1. **Network Message Path**: Server location and message content reference
 /// 2. **Authorization Information**: Complete URLAUTH with access, expiration, mechanism, and token
 ///
-/// This is the endpoint of the GENURL AUTH flow: after GENURLAUTH is issued by the client,
+/// The endpoint of the GENURL AUTH flow: after GENURLAUTH is issued by the client,
 /// the server returns one or more ``FullAuthenticatedURL`` structures wrapped in a GENURLAUTH response.
 ///
-/// ### Complete URL Structure
+/// ### Complete URL structure
 ///
 /// A full authenticated URL encompasses:
 /// ```
@@ -66,7 +66,7 @@ import struct NIO.ByteBuffer
 /// 4. **Client Uses URL**: Submits the complete URL to URLFETCH command
 /// 5. **Server Validates and Returns Data**: Verifies token and returns message content
 ///
-/// ## Related Types
+/// ## Related types
 ///
 /// - ``NetworkMessagePath`` provides server and message content specification
 /// - ``AuthenticatedURL`` provides complete URLAUTH authorization

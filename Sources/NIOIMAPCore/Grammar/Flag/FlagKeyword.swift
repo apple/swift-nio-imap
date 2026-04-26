@@ -51,7 +51,7 @@ extension Flag {
 
         /// The case-preserved raw string representation of the keyword.
         ///
-        /// This value preserves the original casing for wire format transmission, while comparison operations
+        /// Preserves the original casing for wire format transmission, while comparison operations
         /// use case-insensitive matching.
         let rawValue: String
 
@@ -119,52 +119,52 @@ extension Flag.Keyword: CustomDebugStringConvertible {
 extension Flag.Keyword {
     /// The `$Forwarded` keyword, commonly used to mark messages that have been forwarded.
     ///
-    /// This is a registered keyword in the special-use keywords registry.
+    /// A registered keyword in the special-use keywords registry.
     public static let forwarded = Self(unchecked: "$Forwarded")
 
     /// The `$Junk` keyword, commonly used to mark messages as spam or junk mail.
     ///
-    /// This is a registered keyword in the special-use keywords registry.
+    /// A registered keyword in the special-use keywords registry.
     public static let junk = Self(unchecked: "$Junk")
 
     /// The `$NotJunk` keyword, commonly used to mark messages as not spam.
     ///
-    /// This is a registered keyword in the special-use keywords registry.
+    /// A registered keyword in the special-use keywords registry.
     public static let notJunk = Self(unchecked: "$NotJunk")
 
     /// The `Redirected` keyword (unregistered).
     ///
-    /// This is a non-standard keyword sometimes used by mail systems to mark redirected messages.
+    /// A non-standard keyword sometimes used by mail systems to mark redirected messages.
     public static let unregistered_redirected = Self(unchecked: "Redirected")
 
     /// The `Forwarded` keyword (unregistered).
     ///
-    /// This is a non-standard keyword for marking forwarded messages. Prefer ``forwarded`` for standard usage.
+    /// A non-standard keyword for marking forwarded messages. Prefer ``forwarded`` for standard usage.
     public static let unregistered_forwarded = Self(unchecked: "Forwarded")
 
     /// The `Junk` keyword (unregistered).
     ///
-    /// This is a non-standard keyword for marking spam. Prefer ``junk`` for standard usage.
+    /// A non-standard keyword for marking spam. Prefer ``junk`` for standard usage.
     public static let unregistered_junk = Self(unchecked: "Junk")
 
     /// The `NotJunk` keyword (unregistered).
     ///
-    /// This is a non-standard keyword for marking non-spam messages. Prefer ``notJunk`` for standard usage.
+    /// A non-standard keyword for marking non-spam messages. Prefer ``notJunk`` for standard usage.
     public static let unregistered_notJunk = Self(unchecked: "NotJunk")
 
     /// The `$MailFlagBit0` keyword for color marking (bit 0).
     ///
-    /// This keyword is commonly used by mail systems to represent color flags on messages, with different bits representing different colors.
+    /// A color-flag keyword for messages, where different bits represent different colors.
     public static let colorBit0 = Self(unchecked: "$MailFlagBit0")
 
     /// The `$MailFlagBit1` keyword for color marking (bit 1).
     ///
-    /// This keyword is commonly used by mail systems to represent color flags on messages.
+    /// A color-flag keyword for messages.
     public static let colorBit1 = Self(unchecked: "$MailFlagBit1")
 
     /// The `$MailFlagBit2` keyword for color marking (bit 2).
     ///
-    /// This keyword is commonly used by mail systems to represent color flags on messages.
+    /// A color-flag keyword for messages.
     public static let colorBit2 = Self(unchecked: "$MailFlagBit2")
 
     /// The `$MDNSent` keyword, indicating a Message Disposition Notification has been sent for this message.
@@ -176,7 +176,7 @@ extension Flag.Keyword {
 extension Flag: ExpressibleByStringLiteral {
     /// Creates a flag from a string literal, used for creating static custom keywords.
     ///
-    /// This allows writing flags directly as string literals (e.g., `let flag: Flag = "$Custom"`),
+    /// This allows writing flags directly as string literals (for example, `let flag: Flag = "$Custom"`),
     /// which is useful for static keyword definitions and testing.
     ///
     /// - parameter value: The string literal to construct a keyword flag from.
