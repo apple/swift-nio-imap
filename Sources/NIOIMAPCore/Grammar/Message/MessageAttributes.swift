@@ -30,13 +30,13 @@ import struct NIO.ByteBuffer
 /// The response line contains three attributes: ``flags(_:)`` wrapping `\Seen`, ``envelope(_:)`` containing the message envelope,
 /// and ``uid(_:)`` with UID `123`.
 ///
-/// ## Request vs Response
+/// ## Request versus response
 ///
 /// Use ``FetchAttribute`` to request specific message attributes in a `FETCH` command. The server responds with ``MessageAttribute``
 /// values containing the requested data. Not all ``FetchAttribute`` cases have corresponding ``MessageAttribute`` cases — for example,
 /// ``FetchAttribute/bodyStructure(extensions:)`` (a request) produces ``body(_:hasExtensionData:)`` (response).
 ///
-/// ## Related Types
+/// ## Related types
 ///
 /// - ``FetchAttribute`` — Request side (what the client asks for)
 /// - ``FetchModifier`` — Modifiers for `FETCH` commands (RFC 7162)
@@ -56,7 +56,7 @@ public enum MessageAttribute: Hashable, Sendable {
     /// S: * 1 FETCH (FLAGS (\Seen \Flagged))
     /// ```
     ///
-    /// This response contains the ``flags(_:)`` case with two system flags.
+    /// The response contains the ``flags(_:)`` case with two system flags.
     ///
     /// - SeeAlso: [RFC 3501 Section 7.4.2](https://datatracker.ietf.org/doc/html/rfc3501#section-7.4.2)
     case flags([Flag])
@@ -149,7 +149,7 @@ public enum MessageAttribute: Hashable, Sendable {
     /// S: * 1 FETCH (BINARY.SIZE[2] 5000)
     /// ```
     ///
-    /// This indicates body part 2 has 5000 octets when decoded.
+    /// Indicates body part 2 has 5000 octets when decoded.
     ///
     /// - SeeAlso: [RFC 3516 IMAP4 Binary Content Extension](https://datatracker.ietf.org/doc/html/rfc3516)
     case binarySize(section: SectionSpecifier.Part, size: Int)
@@ -166,7 +166,7 @@ public enum MessageAttribute: Hashable, Sendable {
     /// S: * 1 FETCH (BODY[4.TEXT] NIL)
     /// ```
     ///
-    /// This indicates that body part 4 has no TEXT section (it doesn’t exist).
+    /// Indicates that body part 4 has no TEXT section (it doesn’t exist).
     ///
     /// - SeeAlso: [RFC 3501 Section 7.4.2](https://datatracker.ietf.org/doc/html/rfc3501#section-7.4.2)
     case nilBody(StreamingKind)
@@ -174,7 +174,7 @@ public enum MessageAttribute: Hashable, Sendable {
     /// The modification sequence number for the message.
     ///
     /// The `MODSEQ` attribute contains a modification sequence number indicating when the message or its flags last changed.
-    /// This is used with the `CONDSTORE` extension for efficient synchronization.
+    /// Used with the `CONDSTORE` extension for efficient synchronization.
     ///
     /// - SeeAlso: [RFC 7162 IMAP4 Extensions: CONDSTORE and QRESYNC](https://datatracker.ietf.org/doc/html/rfc7162)
     case fetchModificationSequence(ModificationSequenceValue)
@@ -182,7 +182,7 @@ public enum MessageAttribute: Hashable, Sendable {
     /// Gmail-specific message unique identifier (vendor extension).
     ///
     /// The `X-GM-MSGID` attribute contains a Gmail-specific unique message ID that remains stable across mailboxes.
-    /// This is a 64-bit unsigned integer. This is a Gmail-only extension, not part of the standard IMAP protocol.
+    /// A 64-bit unsigned integer and Gmail-only extension, not part of the standard IMAP protocol.
     ///
     /// For standard IMAP object identifiers, see ``emailID(_:)`` which uses RFC 8474.
     ///
@@ -192,7 +192,7 @@ public enum MessageAttribute: Hashable, Sendable {
     /// Gmail-specific thread identifier (vendor extension).
     ///
     /// The `X-GM-THRID` attribute contains a Gmail-specific thread ID that associates messages belonging to the same thread.
-    /// This is a 64-bit unsigned integer. This is a Gmail-only extension, not part of the standard IMAP protocol.
+    /// A 64-bit unsigned integer and Gmail-only extension, not part of the standard IMAP protocol.
     ///
     /// For standard IMAP object identifiers, see ``threadID(_:)`` which uses RFC 8474.
     ///
@@ -202,7 +202,7 @@ public enum MessageAttribute: Hashable, Sendable {
     /// Gmail-specific message labels (vendor extension).
     ///
     /// The `X-GM-LABELS` attribute contains a list of labels (tags) applied to the message in Gmail. Each label is a ``GmailLabel``.
-    /// This is a Gmail-only extension, not part of the standard IMAP protocol.
+    /// A Gmail-only extension, not part of the standard IMAP protocol.
     ///
     /// - SeeAlso: [Gmail IMAP Extensions](https://developers.google.com/gmail/imap/imap-extensions)
     case gmailLabels([GmailLabel])
@@ -219,7 +219,7 @@ public enum MessageAttribute: Hashable, Sendable {
     /// An object identifier for the message content.
     ///
     /// The `EMAILID` attribute contains an object identifier that uniquely identifies the message’s content.
-    /// This is stable across servers and can be used to detect when a message with the same content exists
+    /// Stable across servers and can be used to detect when a message with the same content exists
     /// in different mailboxes or on different servers.
     ///
     /// For Gmail-specific message identifiers, see ``gmailMessageID(_:)`` which uses the `X-GM-MSGID` extension.
@@ -230,7 +230,7 @@ public enum MessageAttribute: Hashable, Sendable {
     /// An object identifier for the message thread.
     ///
     /// The `THREADID` attribute contains an object identifier for the thread the message belongs to.
-    /// This is `nil` if the message is not part of a thread or if the server does not support threading.
+    /// `nil` if the message is not part of a thread or if the server does not support threading.
     ///
     /// For Gmail-specific thread identifiers, see ``gmailThreadID(_:)`` which uses the `X-GM-THRID` extension.
     ///

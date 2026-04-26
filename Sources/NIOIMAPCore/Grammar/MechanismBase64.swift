@@ -16,7 +16,7 @@ import struct NIO.ByteBuffer
 
 /// An authorization mechanism paired with base64-encoded authentication data.
 ///
-/// This type is used in URLAUTH contexts (RFC 4467) to specify both the mechanism used to
+/// Used in URLAUTH contexts (RFC 4467) to specify both the mechanism used to
 /// generate authorization credentials and the base64-encoded credentials themselves.
 ///
 /// - SeeAlso: [RFC 4467 IMAP4 Capabilities for SMTP and SUBMIT](https://datatracker.ietf.org/doc/html/rfc4467)

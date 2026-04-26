@@ -35,7 +35,7 @@ import struct OrderedCollections.OrderedDictionary
 /// ``ResponsePayload/metadata(_:)`` with a ``MetadataResponse/values(values:mailbox:)`` case.
 /// Each entry name maps to a ``MetadataValue`` (which may be `nil` if not found).
 ///
-/// ## Related Types
+/// ## Related types
 ///
 /// - See ``MetadataEntryName`` for entry name representation
 /// - See ``MetadataValue`` for entry values

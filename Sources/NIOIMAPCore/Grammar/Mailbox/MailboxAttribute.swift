@@ -36,19 +36,19 @@ import struct NIO.ByteBuffer
 public enum MailboxAttribute: String, CaseIterable, Sendable {
     /// The `MESSAGES` attribute: the number of messages in the mailbox.
     ///
-    /// This attribute returns the total count of messages in the mailbox.
+    /// Returns the total count of messages in the mailbox.
     /// See [RFC 3501 Section 7.3.2](https://datatracker.ietf.org/doc/html/rfc3501#section-7.3.2).
     case messageCount = "MESSAGES"
 
     /// The `RECENT` attribute: the number of messages with the `\Recent` flag.
     ///
-    /// This attribute returns the count of messages that have been added to the mailbox since
+    /// Returns the count of messages that have been added to the mailbox since
     /// the last time it was selected. See [RFC 3501 Section 7.3.2](https://datatracker.ietf.org/doc/html/rfc3501#section-7.3.2).
     case recentCount = "RECENT"
 
     /// The `UIDNEXT` attribute: the next unique identifier value.
     ///
-    /// This attribute predicts the UID value that will be assigned to the next message appended
+    /// Predicts the UID value that will be assigned to the next message appended
     /// to the mailbox. See [RFC 3501 Section 7.3.2](https://datatracker.ietf.org/doc/html/rfc3501#section-7.3.2).
     case uidNext = "UIDNEXT"
 
@@ -60,20 +60,20 @@ public enum MailboxAttribute: String, CaseIterable, Sendable {
 
     /// The `UNSEEN` attribute: the number of messages without the `\Seen` flag.
     ///
-    /// This attribute returns the count of messages in the mailbox that do not have the `\Seen` flag set.
+    /// Returns the count of messages in the mailbox that do not have the `\Seen` flag set.
     /// See [RFC 3501 Section 7.3.2](https://datatracker.ietf.org/doc/html/rfc3501#section-7.3.2).
     case unseenCount = "UNSEEN"
 
     /// The `SIZE` attribute: the total size of the mailbox in octets.
     ///
-    /// This attribute returns the total size of all messages in the mailbox in bytes (octets).
+    /// Returns the total size of all messages in the mailbox in bytes (octets).
     /// **Requires server capability:** ``Capability/status(_:)`` with ``Capability/StatusKind/size``
     /// See [RFC 8438](https://datatracker.ietf.org/doc/html/rfc8438).
     case size = "SIZE"
 
     /// The `HIGHESTMODSEQ` attribute: the highest modification sequence value.
     ///
-    /// This attribute returns the highest mod-sequence value assigned to any message in the mailbox.
+    /// Returns the highest mod-sequence value assigned to any message in the mailbox.
     /// The `CONDSTORE` extension uses modification sequences to track message changes.
     /// **Requires server capability:** ``Capability/condStore``
     /// See [RFC 7162 Section 3.1](https://datatracker.ietf.org/doc/html/rfc7162#section-3.1).
@@ -81,14 +81,14 @@ public enum MailboxAttribute: String, CaseIterable, Sendable {
 
     /// The `APPENDLIMIT` attribute: the maximum message upload size in octets.
     ///
-    /// This attribute specifies the maximum size (in bytes) of a single message that can be appended to the mailbox.
+    /// Specifies the maximum size (in bytes) of a single message that can be appended to the mailbox.
     /// **Requires server capability:** ``Capability/mailboxSpecificAppendLimit`` or ``Capability/appendLimit(_:)``
     /// See [RFC 7889 Section 4](https://datatracker.ietf.org/doc/html/rfc7889#section-4).
     case appendLimit = "APPENDLIMIT"
 
     /// The `MAILBOXID` attribute: the server's object identifier for the mailbox.
     ///
-    /// This attribute returns a permanent, server-assigned identifier that uniquely identifies the mailbox.
+    /// Returns a permanent, server-assigned identifier that uniquely identifies the mailbox.
     /// Unlike `UIDVALIDITY`, this identifier is globally unique and never reused.
     /// **Requires server capability:** ``Capability/objectID``
     /// See [RFC 8474 Section 3](https://datatracker.ietf.org/doc/html/rfc8474#section-3).
@@ -119,19 +119,19 @@ public enum MailboxAttribute: String, CaseIterable, Sendable {
 public struct MailboxStatus: Hashable, Sendable {
     /// The `MESSAGES` attribute: total number of messages in the mailbox.
     ///
-    /// This property is `nil` if the `MESSAGES` attribute was not requested or returned.
+    /// `nil` if the `MESSAGES` attribute was not requested or returned.
     /// See [RFC 3501 Section 7.3.2](https://datatracker.ietf.org/doc/html/rfc3501#section-7.3.2).
     public var messageCount: Int?
 
     /// The `RECENT` attribute: number of messages with the `\Recent` flag.
     ///
-    /// This property is `nil` if the `RECENT` attribute was not requested or returned.
+    /// `nil` if the `RECENT` attribute was not requested or returned.
     /// See [RFC 3501 Section 7.3.2](https://datatracker.ietf.org/doc/html/rfc3501#section-7.3.2).
     public var recentCount: Int?
 
     /// The `UIDNEXT` attribute: the next unique identifier value to be assigned.
     ///
-    /// This property is `nil` if the `UIDNEXT` attribute was not requested or returned.
+    /// `nil` if the `UIDNEXT` attribute was not requested or returned.
     /// See [RFC 3501 Section 7.3.2](https://datatracker.ietf.org/doc/html/rfc3501#section-7.3.2).
     public var nextUID: UID?
 
@@ -145,20 +145,20 @@ public struct MailboxStatus: Hashable, Sendable {
 
     /// The `UNSEEN` attribute: number of messages without the `\Seen` flag.
     ///
-    /// This property is `nil` if the `UNSEEN` attribute was not requested or returned.
+    /// `nil` if the `UNSEEN` attribute was not requested or returned.
     /// See [RFC 3501 Section 7.3.2](https://datatracker.ietf.org/doc/html/rfc3501#section-7.3.2).
     public var unseenCount: Int?
 
     /// The `SIZE` attribute: total size of the mailbox in bytes (octets).
     ///
-    /// This property is `nil` if the `SIZE` attribute was not requested or returned.
+    /// `nil` if the `SIZE` attribute was not requested or returned.
     /// **Requires server capability:** ``Capability/status(_:)`` with ``Capability/StatusKind/size``
     /// See [RFC 8438](https://datatracker.ietf.org/doc/html/rfc8438).
     public var size: Int?
 
     /// The `HIGHESTMODSEQ` attribute: the highest modification sequence value assigned to any message.
     ///
-    /// This property is `nil` if the `HIGHESTMODSEQ` attribute was not requested or returned.
+    /// `nil` if the `HIGHESTMODSEQ` attribute was not requested or returned.
     /// The `CONDSTORE` extension uses modification sequences to track which messages have changed.
     /// **Requires server capability:** ``Capability/condStore``
     /// See [RFC 7162 Section 3.1](https://datatracker.ietf.org/doc/html/rfc7162#section-3.1).
@@ -166,7 +166,7 @@ public struct MailboxStatus: Hashable, Sendable {
 
     /// The `APPENDLIMIT` attribute: maximum size per message in bytes (octets).
     ///
-    /// This property is `nil` if the `APPENDLIMIT` attribute was not requested or returned.
+    /// `nil` if the `APPENDLIMIT` attribute was not requested or returned.
     /// The `APPENDLIMIT` extension specifies per-mailbox upload limits.
     /// **Requires server capability:** ``Capability/mailboxSpecificAppendLimit`` or ``Capability/appendLimit(_:)``
     /// See [RFC 7889 Section 4](https://datatracker.ietf.org/doc/html/rfc7889#section-4).
@@ -174,7 +174,7 @@ public struct MailboxStatus: Hashable, Sendable {
 
     /// The `MAILBOXID` attribute: the server's permanent object identifier for the mailbox.
     ///
-    /// This property is `nil` if the `MAILBOXID` attribute was not requested or returned.
+    /// `nil` if the `MAILBOXID` attribute was not requested or returned.
     /// The `OBJECTID` extension assigns stable, unique identifiers to mailboxes that persist
     /// even if the mailbox is renamed or moved.
     /// **Requires server capability:** ``Capability/objectID``

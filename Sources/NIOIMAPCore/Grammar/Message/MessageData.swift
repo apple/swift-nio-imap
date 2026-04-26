@@ -40,7 +40,7 @@ public enum MessageData: Hashable, Sendable {
     ///
     /// The EXPUNGE response indicates that the message at the specified sequence number
     /// no longer exists. Clients must renumber remaining messages accordingly.
-    /// This response is not sent for UID-based commands.
+    /// Not sent for UID-based commands.
     ///
     /// - SeeAlso: [RFC 3501 Section 7.4.1 EXPUNGE](https://datatracker.ietf.org/doc/html/rfc3501#section-7.4.1)
     case expunge(SequenceNumber)

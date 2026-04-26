@@ -42,7 +42,7 @@
 /// Messages 1 and 2 have the same `THREADID (abc123def456)`, indicating they are related.
 /// Message 3 has a different `THREADID (xyz789abc123)`, indicating it belongs to a different thread.
 ///
-/// ## Related Proprietary Identifiers
+/// ## Related proprietary identifiers
 ///
 /// Gmail servers provide a similar but proprietary identifier via the `X-GM-THRID` field (see
 /// ``FetchAttribute/gmailThreadID``). While both serve similar purposes, `THREADID` is

@@ -20,7 +20,7 @@
 ///
 /// **Requires server capability:** ``Capability/searchRes``
 ///
-/// The `$` marker can be used anywhere a message set is expected (e.g., in `FETCH`, `STORE`,
+/// The `$` marker can be used anywhere a message set is expected (for example, in `FETCH`, `STORE`,
 /// `COPY`, `EXPUNGE` commands). It allows clients to pipeline a `SEARCH` command with subsequent
 /// operations without waiting for results and reformatting them.
 ///
@@ -51,7 +51,7 @@
 /// See [RFC 5182](https://datatracker.ietf.org/doc/html/rfc5182) for the full specification
 /// of the search result reference extension.
 ///
-/// ## Related Types
+/// ## Related types
 ///
 /// - ``LastCommandMessageID`` allows referencing the last search result as a single identifier instead of a set.
 /// - ``MessageIdentifierSet`` represents a specific non-empty set of message identifiers.
@@ -59,7 +59,7 @@
 public enum LastCommandSet<N: MessageIdentifier>: Hashable, Sendable {
     /// A specific non-empty set of message identifiers.
     ///
-    /// This set will be encoded and sent to the IMAP server. Example values: `1`, `5:10`, or `1,3,5:7,9:*`.
+    /// Encoded and sent to the IMAP server. Example values: `1`, `5:10`, or `1,3,5:7,9:*`.
     case set(MessageIdentifierSetNonEmpty<N>)
 
     /// References the result of the most recent `SEARCH` command.

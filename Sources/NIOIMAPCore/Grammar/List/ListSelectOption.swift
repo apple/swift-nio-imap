@@ -34,7 +34,7 @@ import struct NIO.ByteBuffer
 /// The command `LIST (SUBSCRIBED) "" "*"` uses the ``subscribed`` selection option to return only subscribed mailboxes.
 /// The resulting responses wrap mailbox information in ``Response/untagged(_:)`` cases.
 ///
-/// ## Related Types
+/// ## Related types
 ///
 /// Use ``ListSelectBaseOption`` for options that control the basic filtering mode,
 /// ``ListSelectIndependentOption`` for options that don't interact syntactically with other options,
@@ -44,19 +44,19 @@ import struct NIO.ByteBuffer
 public enum ListSelectOption: Hashable, Sendable {
     /// The `SUBSCRIBED` selection option returns only mailboxes that the user has subscribed to.
     ///
-    /// This option filters the mailbox list to show subscription state rather than all mailboxes.
+    /// Filters the mailbox list to show subscription state rather than all mailboxes.
     /// From [RFC 5258 Section 3.1](https://datatracker.ietf.org/doc/html/rfc5258#section-3.1).
     case subscribed
 
     /// The `REMOTE` selection option requests mailbox information from remote mailbox stores.
     ///
-    /// This is used to include both remote and local mailboxes in the response.
+    /// Includes both remote and local mailboxes in the response.
     /// From [RFC 5258 Section 3.2](https://datatracker.ietf.org/doc/html/rfc5258#section-3.2).
     case remote
 
     /// The `SPECIAL-USE` selection option returns only mailboxes with special-use attributes.
     ///
-    /// This filters results to mailboxes marked with attributes like `\All`, `\Archive`, `\Drafts`,
+    /// Filters results to mailboxes marked with attributes like `\All`, `\Archive`, `\Drafts`,
     /// `\Flagged`, `\Junk`, `\Sent`, or `\Trash` (from [RFC 6154](https://datatracker.ietf.org/doc/html/rfc6154)).
     case specialUse
 
@@ -77,7 +77,7 @@ public enum ListSelectOption: Hashable, Sendable {
 ///
 /// **Requires server capability:** ``Capability/listExtended``
 ///
-/// This structure represents the complete set of selection options for a `LIST` command,
+/// Represents the complete set of selection options for a `LIST` command,
 /// combining a base mode with additional filtering criteria. The base option determines
 /// the primary filtering mode, while the selection options provide additional constraints.
 public struct ListSelectOptions: Hashable, Sendable {
@@ -90,14 +90,14 @@ public struct ListSelectOptions: Hashable, Sendable {
     /// Additional selection criteria to apply.
     ///
     /// These options further constrain which mailboxes are returned. Multiple options
-    /// can be combined (e.g., both ``ListSelectOption/remote`` and ``ListSelectOption/specialUse``
+    /// can be combined (for example, both ``ListSelectOption/remote`` and ``ListSelectOption/specialUse``
     /// to get remote special-use mailboxes).
     public var options: [ListSelectOption]
 
     /// Creates a new combination of `LIST` selection options.
     ///
     /// - Parameters:
-    ///   - baseOption: The base selection mode (e.g., ``ListSelectBaseOption/subscribed``)
+    ///   - baseOption: The base selection mode (for example, ``ListSelectBaseOption/subscribed``)
     ///   - options: Additional selection criteria to apply
     public init(baseOption: ListSelectBaseOption, options: [ListSelectOption]) {
         self.baseOption = baseOption

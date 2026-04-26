@@ -16,7 +16,7 @@ import struct NIO.ByteBuffer
 
 /// A response containing the server's namespace configuration for personal, other users', and shared mailboxes.
 ///
-/// This type represents the response to a `NAMESPACE` command (RFC 2342), which allows clients to discover
+/// Represents the response to a `NAMESPACE` command (RFC 2342), which allows clients to discover
 /// the mailbox namespace structure used by the server. The response contains three namespace categories,
 /// each consisting of zero or more ``NamespaceDescription`` objects. Any category that is not available
 /// on the server will contain an empty array.
@@ -32,7 +32,7 @@ import struct NIO.ByteBuffer
 /// S: A001 OK NAMESPACE command completed
 /// ```
 ///
-/// This response is wrapped as ``NamespaceResponse`` where:
+/// The response is wrapped as ``NamespaceResponse`` where:
 /// - `userNamespace` is `[NamespaceDescription(string: "", delimiter: "/")]`
 /// - `otherUserNamespace` is `[NamespaceDescription(string: "~", delimiter: "/")]`
 /// - `sharedNamespace` is `[]` (NIL indicates no shared namespace available)

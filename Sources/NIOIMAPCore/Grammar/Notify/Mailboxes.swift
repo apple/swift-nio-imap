@@ -18,7 +18,7 @@ import struct NIO.ByteBuffer
 ///
 /// **Requires server capability:** ``Capability/multiSearch``
 ///
-/// This type represents a non-empty list of mailbox names used with mailbox filters in RFC 7377 MULTIMAILBOX SEARCH.
+/// Represents a non-empty list of mailbox names used with mailbox filters in RFC 7377 MULTIMAILBOX SEARCH.
 /// The filter types are defined in RFC 5465 NOTIFY but are re-used by RFC 7377. Certain filters like
 /// ``MailboxFilter/subtree(_:)`` and ``MailboxFilter/mailboxes(_:)`` require one or more specific mailbox names.
 /// See [RFC 7377 Section 3](https://datatracker.ietf.org/doc/html/rfc7377#section-3).
@@ -34,7 +34,7 @@ import struct NIO.ByteBuffer
 /// The mailbox names `"Archive"` and `"Sent Mail"` form a ``Mailboxes`` collection that specifies
 /// which mailboxes (via ``MailboxFilter``) are included in a multi-mailbox search operation.
 ///
-/// ## Related Types
+/// ## Related types
 ///
 /// - See ``MailboxFilter`` for different ways to select mailboxes
 /// - See ``MailboxName`` for individual mailbox name representation
@@ -43,7 +43,7 @@ import struct NIO.ByteBuffer
 public struct Mailboxes: Hashable, Sendable {
     /// Array of one or more mailbox names.
     ///
-    /// This collection must contain at least one mailbox. The mailboxes are represented as
+    /// Must contain at least one mailbox. The mailboxes are represented as
     /// ``MailboxName`` values, which can include standard or UTF-7-modified mailbox names.
     public let content: [MailboxName]
 

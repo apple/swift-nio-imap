@@ -17,7 +17,7 @@ import struct NIO.ByteBuffer
 /// Untagged response data from the server about mailboxes, messages, or search results.
 ///
 /// Servers send untagged responses (prefixed with `*`) that convey information about mailboxes, messages, and operation results.
-/// This enum represents the various types of mailbox-related untagged data that a server can send.
+/// Represents the various types of mailbox-related untagged data that a server can send.
 ///
 /// These responses are typically encountered as the data within ``Response`` untagged responses, which may
 /// be wrapped in ``ResponsePayload/mailboxData(_:)``.

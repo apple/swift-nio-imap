@@ -47,7 +47,7 @@
 /// See [RFC 5182](https://datatracker.ietf.org/doc/html/rfc5182) for the full specification
 /// of the search result reference extension.
 ///
-/// ## Related Types
+/// ## Related types
 ///
 /// - ``LastCommandSet`` allows referencing the last search result as a message set instead of a single identifier.
 /// - ``MessageIdentifier`` represents a specific message identifier (``UID`` or ``SequenceNumber``).

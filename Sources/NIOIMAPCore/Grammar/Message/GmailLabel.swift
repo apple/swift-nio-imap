@@ -19,7 +19,7 @@ import struct NIO.ByteBuffer
 /// in the X-GM-LABELS attribute of a FETCH response. Labels are stored as byte buffers and may be
 /// encoded in modified UTF-7 format (the same encoding used for mailbox names).
 ///
-/// This is a Gmail-specific extension not part of the standard IMAP protocol. It is available when
+/// A Gmail-specific extension not part of the standard IMAP protocol. It is available when
 /// the server advertises the X-GM-EXT-1 capability.
 ///
 /// ### Example
@@ -29,7 +29,7 @@ import struct NIO.ByteBuffer
 /// S: * 1 FETCH (X-GM-LABELS ("Important" "Work"))
 /// ```
 ///
-/// This response indicates message 1 has two labels: "Important" and "Work".
+/// The response indicates message 1 has two labels: "Important" and "Work".
 ///
 /// - SeeAlso: [Gmail IMAP Extensions](https://developers.google.com/gmail/imap/imap-extensions)
 /// - SeeAlso: ``MessageAttribute/gmailLabels(_:)``

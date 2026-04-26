@@ -32,7 +32,7 @@ import struct NIO.ByteBuffer
 ///
 /// The command `LIST SUBSCRIBED "" "*"` uses the ``subscribed`` base option to return only subscribed mailboxes.
 ///
-/// ## Related Types
+/// ## Related types
 ///
 /// Combine this with ``ListSelectOption`` values to add additional filtering constraints.
 /// See ``ListSelectOptions`` for how to construct a complete set of `LIST` selection options.
@@ -41,7 +41,7 @@ import struct NIO.ByteBuffer
 public enum ListSelectBaseOption: Hashable, Sendable {
     /// The `SUBSCRIBED` base option returns only mailboxes the user has subscribed to.
     ///
-    /// This is the primary filtering mode that controls which mailboxes are included in the response.
+    /// The primary filtering mode that controls which mailboxes are included in the response.
     /// From [RFC 5258 Section 3.1](https://datatracker.ietf.org/doc/html/rfc5258#section-3.1).
     case subscribed
 

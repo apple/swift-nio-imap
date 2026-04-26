@@ -52,7 +52,7 @@
 /// // Represents: imap://user@example.com/;auth=PLAIN
 /// ```
 ///
-/// ## Related Types
+/// ## Related types
 ///
 /// - ``UserAuthenticationMechanism`` combines user and mechanism specifications
 /// - ``IMAPServer`` uses mechanism specifications in server definitions

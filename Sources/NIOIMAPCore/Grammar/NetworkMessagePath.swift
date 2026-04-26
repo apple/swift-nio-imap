@@ -25,7 +25,7 @@ import struct NIO.ByteBuffer
 ///
 /// ### Usage in IMAP URLs
 ///
-/// This type represents the base URL before any URLAUTH authorization is added:
+/// Represents the base URL before any URLAUTH authorization is added:
 /// ```
 /// imap://user@example.com/INBOX/;uidvalidity=100/;uid=20
 /// ```
@@ -52,7 +52,7 @@ import struct NIO.ByteBuffer
 ///
 /// The `imap://owner@example.com/INBOX/;uid=20` portion would be a ``NetworkMessagePath``.
 ///
-/// ## Related Types
+/// ## Related types
 ///
 /// - ``MessagePath`` provides the message location (mailbox, UID, section, range)
 /// - ``IMAPServer`` provides the server connection details

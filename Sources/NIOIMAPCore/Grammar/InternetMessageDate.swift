@@ -14,7 +14,7 @@
 
 /// A textual RFC 2822 date as it appears in email message headers.
 ///
-/// This type represents the date field value from an email message's `Date` header,
+/// Represents the date field value from an email message's `Date` header,
 /// formatted according to RFC 2822 section 3.3. Unlike ``ServerMessageDate``, which records
 /// when the server received the message, this date represents the date the message was
 /// composed by its sender.
@@ -40,7 +40,7 @@ public struct InternetMessageDate: Hashable, Sendable {
     /// The string is stored as-is without parsing or validation. The caller is responsible
     /// for ensuring the string represents a valid RFC 2822 date format.
     ///
-    /// - Parameter string: A `String` containing the RFC 2822 date value (e.g., `”Fri, 15 Mar 2026 10:30:45 +0100”`).
+    /// - Parameter string: A `String` containing the RFC 2822 date value (for example, `”Fri, 15 Mar 2026 10:30:45 +0100”`).
     public init(_ string: String) {
         self.value = string
     }
@@ -49,7 +49,7 @@ public struct InternetMessageDate: Hashable, Sendable {
 extension String {
     /// Creates a new ``Swift/String`` from an ``InternetMessageDate``.
     ///
-    /// This extracts the underlying string value from the ``InternetMessageDate``.
+    /// Extracts the underlying string value from the ``InternetMessageDate``.
     ///
     /// - Parameter date: The ``InternetMessageDate`` to convert.
     public init(_ date: InternetMessageDate) {
@@ -60,7 +60,7 @@ extension String {
 extension InternetMessageDate: ExpressibleByStringLiteral {
     /// Creates a new `InternetMessageDate` from a string literal.
     ///
-    /// This allows you to write RFC 2822 dates as string literals:
+    /// Allows writing RFC 2822 dates as string literals:
     /// ```swift
     /// let date: InternetMessageDate = “Fri, 15 Mar 2026 10:30:45 +0100”
     /// ```
