@@ -41,7 +41,7 @@ public struct ExceededMaximumMessageAttributesError: Error {
 
 /// Parsing a server response exceeded the maximum allowed body size.
 ///
-/// Server responses can include large message bodies (e.g., in FETCH responses).
+/// Server responses can include large message bodies (for example, in FETCH responses).
 /// If a body exceeds the configured maximum size, this error is thrown. This is a
 /// DoS and memory protection limit.
 ///
@@ -126,7 +126,7 @@ public struct ResponseParser: Parser, Sendable {
         ///
         /// When provided, every parsed string is passed through this function, which
         /// can return a cached version. This reduces memory usage for responses with
-        /// many repeated strings (e.g., flag names). Defaults to `nil` (no caching).
+        /// many repeated strings (for example, flag names). Defaults to `nil` (no caching).
         public var parsedStringCache: (@Sendable (String) -> String)?
 
         /// Creates new response parser options.

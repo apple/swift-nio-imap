@@ -79,7 +79,7 @@ extension GrammarParser {
         }
     }
 
-    /// This is a combination of `resp-cond-state`, `resp-cond-bye`, and `greeting`.
+    /// A combination of `resp-cond-state`, `resp-cond-bye`, and `greeting`.
     func parseUntaggedResponseStatus(buffer: inout ParseBuffer, tracker: StackTracker) throws -> UntaggedStatus {
         try PL.composite(buffer: &buffer, tracker: tracker) { (buffer, tracker) in
             let code = try self.parseAtom(buffer: &buffer, tracker: tracker)
