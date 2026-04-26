@@ -63,6 +63,14 @@ struct MailboxDataTests {
         ),
         EncodeFixture.mailboxData(.recent(5678), "5678 RECENT"),
         EncodeFixture.mailboxData(
+            .sort([1, 2, 3], ModificationSequenceValue(2)),
+            "SORT 1 2 3 (MODSEQ 2)"
+        ),
+        EncodeFixture.mailboxData(
+            .sort([]),
+            "SORT"
+        ),
+        EncodeFixture.mailboxData(
             .uidBatches(
                 UIDBatchesResponse(
                     correlator: .init(tag: "A143"),
@@ -177,14 +185,19 @@ struct MailboxDataTests {
             expected: .success(.namespace(.init(userNamespace: [], otherUserNamespace: [], sharedNamespace: [])))
         ),
         ParseFixture.mailboxData(
-            "SEARCH 1 2 3 (MODSEQ 4)",
+            "SORT 1 2 3 (MODSEQ 4)",
             "\r\n",
-            expected: .success(.search([1, 2, 3], 4))
+            expected: .success(.sort([1, 2, 3], ModificationSequenceValue(4)))
         ),
         ParseFixture.mailboxData(
-            "SEARCH 1 (MODSEQ 2)",
+            "SORT 1 (MODSEQ 2)",
             "\r\n",
-            expected: .success(.search([1], 2))
+            expected: .success(.sort([1], ModificationSequenceValue(2)))
+        ),
+        ParseFixture.mailboxData(
+            "SORT",
+            "\r\n",
+            expected: .success(.sort([]))
         ),
         ParseFixture.mailboxData(
             "NAMESPACE NIL NIL NIL",

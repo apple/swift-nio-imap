@@ -94,6 +94,9 @@ public enum MailboxData: Hashable, Sendable {
     /// - SeeAlso: [RFC 3501 Section 7.2.5](https://datatracker.ietf.org/doc/html/rfc3501#section-7.2.5)
     case search([UnknownMessageIdentifier], ModificationSequenceValue? = nil)
 
+    /// Response to a sort command.
+    case sort([UnknownMessageIdentifier], ModificationSequenceValue? = nil)
+
     /// Response to a search command in `ESEARCH` response format (RFC 4731).
     ///
     /// The `ESEARCH` response format is defined in RFC 4731 with optional `MIN`, `MAX`, `COUNT`, and `ALL` fields.
@@ -190,6 +193,8 @@ extension EncodeBuffer {
             return self.writeMailboxData_lsub(list)
         case .search(let list, let modificationSequence):
             return self.writeMailboxData_search(list, modificationSequence: modificationSequence)
+        case .sort(let list, let modificationSequence):
+            return self.writeMailboxData_sort(list, modificationSequence: modificationSequence)
         case .extendedSearch(let response):
             return self.writeExtendedSearchResponse(response)
         case .status(let mailbox, let status):
@@ -210,6 +215,19 @@ extension EncodeBuffer {
         modificationSequence: ModificationSequenceValue?
     ) -> Int {
         self.writeString("SEARCH")
+            + self.writeArray(list, prefix: " ", separator: " ", parenthesis: false) { (id, buffer) -> Int in
+                buffer.writeMessageIdentifier(id)
+            }
+            + self.writeIfExists(modificationSequence) { value -> Int in
+                self.writeString(" (MODSEQ ") + self.writeModificationSequenceValue(value) + self.writeString(")")
+            }
+    }
+
+    private mutating func writeMailboxData_sort(
+        _ list: [UnknownMessageIdentifier],
+        modificationSequence: ModificationSequenceValue?
+    ) -> Int {
+        self.writeString("SORT")
             + self.writeArray(list, prefix: " ", separator: " ", parenthesis: false) { (id, buffer) -> Int in
                 buffer.writeMessageIdentifier(id)
             }
