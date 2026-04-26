@@ -68,7 +68,7 @@ public struct ResponseEncodeBuffer: Sendable {
 extension ResponseEncodeBuffer {
     /// Creates a new response encoding buffer from server capabilities.
     ///
-    /// This initializer converts a list of ``Capability`` values into ``ResponseEncodingOptions``,
+    /// Converts a list of ``Capability`` values into ``ResponseEncodingOptions``,
     /// which enables capability-dependent encoding options if the server advertises them.
     ///
     /// - Parameters:

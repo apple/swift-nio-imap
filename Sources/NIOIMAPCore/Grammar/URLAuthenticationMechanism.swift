@@ -48,7 +48,7 @@
 /// // Represents: :internal:91354a473744909de610943775f92038
 /// ```
 ///
-/// ## Related Types
+/// ## Related types
 ///
 /// - ``AuthenticatedURLVerifier`` pairs the mechanism with a verification token
 /// - ``AuthenticatedURL`` combines the URL rump with verification details
@@ -69,13 +69,13 @@ public struct URLAuthenticationMechanism: Hashable, Sendable {
 
     /// The mechanism name as a string.
     ///
-    /// This is the name that appears in the URLAUTH component (case may be normalized by the server).
+    /// The name that appears in the URLAUTH component (case may be normalized by the server).
     /// Common values include `"INTERNAL"` for the standard mechanism, but servers may support
     /// other mechanisms.
     internal let stringValue: String
 
     /// Creates a new mechanism by name.
-    /// - parameter stringValue: The mechanism name (e.g., "INTERNAL").
+    /// - parameter stringValue: The mechanism name (for example, "INTERNAL").
     public init(_ stringValue: String) {
         self.stringValue = stringValue
     }

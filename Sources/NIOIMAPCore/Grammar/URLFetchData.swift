@@ -47,7 +47,7 @@ import struct NIO.ByteBuffer
 /// imap://user@example.com/INBOX/;uid=20;section=1.2;urlauth=anonymous:internal:...
 /// ```
 ///
-/// ## Related Types
+/// ## Related types
 ///
 /// - ``NetworkMessagePath`` represents the base URL before authorization
 /// - ``AuthenticatedURL`` provides URLAUTH verification for the URL
@@ -59,14 +59,14 @@ import struct NIO.ByteBuffer
 public struct URLFetchData: Hashable, Sendable {
     /// The IMAP URL that was fetched.
     ///
-    /// This is the URL as submitted in the URLFETCH command, typically including
+    /// The URL as submitted in the URLFETCH command, typically including
     /// URLAUTH authorization information if the URL was authorized.
     public var url: ByteBuffer
 
     /// The message data associated with the URL, or `nil` if unavailable.
     ///
     /// When `nil`, indicates that the server could not retrieve the message data
-    /// (e.g., because the URL was invalid, authorization failed, or the message was deleted).
+    /// (for example, because the URL was invalid, authorization failed, or the message was deleted).
     /// When present, contains the message content (or partial content if the URL
     /// specified a section or byte range).
     public var data: ByteBuffer?

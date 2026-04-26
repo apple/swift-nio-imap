@@ -43,7 +43,7 @@ public struct ResponseEncodingOptions: Hashable, Sendable {
 extension ResponseEncodingOptions {
     /// Creates response encoding options based on server capabilities.
     ///
-    /// This initializer provides a hook for capability-dependent encoding configuration,
+    /// Provides a hook for capability-dependent encoding configuration,
     /// though currently no capabilities affect response encoding options. The capabilities
     /// parameter is provided for future extensibility.
     ///

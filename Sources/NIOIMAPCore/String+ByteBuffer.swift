@@ -34,8 +34,8 @@ extension String {
         )
     }
 
-    /// Will try to decode the bytes as UTF8, skipping any that are invalid.
-    /// This will ignore any invalid UTF8 bytes, and so should *only* be used when
+    /// Decodes bytes as UTF-8, skipping any that are invalid.
+    /// Ignores any invalid UTF8 bytes, and so should *only* be used when
     /// displaying the string to a user. Don't use over the network.
     init<T: Collection>(bestEffortDecodingUTF8Bytes buffer: T) where T.Element == UInt8 {
         self = ""

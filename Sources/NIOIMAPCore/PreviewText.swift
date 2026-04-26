@@ -19,7 +19,7 @@
 /// along with the full message, improving client UX without requiring clients to parse
 /// message structures themselves.
 ///
-/// This type provides type safety by wrapping the raw string in a distinct type, making
+/// Provides type safety by wrapping the raw string in a distinct type, making
 /// it clear in the API that a given string is specifically a message preview.
 ///
 /// - SeeAlso: [RFC 8970](https://datatracker.ietf.org/doc/html/rfc8970), ``MessageAttribute/preview(_:)``

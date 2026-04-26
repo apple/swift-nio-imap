@@ -14,7 +14,7 @@
 
 /// Different ways to specify message data to fetch via IMAP URLs.
 ///
-/// This enum provides flexible message fetch specifications for IMAP URLs (RFC 2192/5092)
+/// Provides flexible message fetch specifications for IMAP URLs (RFC 2192/5092)
 /// and URLAUTH-authorized fetch operations (RFC 4467). Each case represents a different
 /// combination of message location components that can be specified in a URL, allowing
 /// for relative paths and partial URL information.
@@ -22,7 +22,7 @@
 /// The fetch type is used in ``URLCommand/fetch(path:authenticatedURL:)`` to specify
 /// exactly what message content should be retrieved.
 ///
-/// ### Fetch Variants
+/// ### Fetch variants
 ///
 /// The cases support different levels of path specification, from complete absolute paths
 /// (with mailbox reference and UID) to partial paths (UID only, section only, or byte range only).
@@ -49,7 +49,7 @@
 /// imap://user@example.com/INBOX/;partial=512.1024
 /// ```
 ///
-/// ## Related Types
+/// ## Related types
 ///
 /// - ``MessagePath`` provides complete message location with mailbox, UID, optional section, and range
 /// - ``MailboxUIDValidity`` identifies a mailbox with optional UID validity
@@ -62,7 +62,7 @@
 public enum URLFetchType: Hashable, Sendable {
     /// Complete message specification with mailbox reference, UID, optional section, and optional byte range.
     ///
-    /// This is the most explicit form, providing all location information in a single
+    /// The most explicit form, providing all location information in a single
     /// fully-qualified URL path. Useful for creating complete, standalone URLs.
     case refUidSectionPartial(
         ref: MailboxUIDValidity,
@@ -73,7 +73,7 @@ public enum URLFetchType: Hashable, Sendable {
 
     /// Message specification with UID (and optional section and byte range) but no explicit mailbox.
     ///
-    /// Assumes the mailbox context is provided separately (e.g., by `SELECT`). Useful
+    /// Assumes the mailbox context is provided separately (for example, by `SELECT`). Useful
     /// for relative URLs within an already-selected mailbox.
     case uidSectionPartial(uid: IUID, section: URLMessageSection?, partial: MessagePath.ByteRange?)
 

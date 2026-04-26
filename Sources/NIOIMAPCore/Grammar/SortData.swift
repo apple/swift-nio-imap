@@ -29,7 +29,7 @@ import struct NIO.ByteBuffer
 /// S: A001 OK SORT completed
 /// ```
 ///
-/// This response indicates messages 3, 2, and 1 are the result in sorted order (most recent arrival first).
+/// The response indicates messages 3, 2, and 1 are the result in sorted order (most recent arrival first).
 ///
 /// - SeeAlso: [RFC 5256 SORT Extension](https://datatracker.ietf.org/doc/html/rfc5256)
 /// - SeeAlso: [RFC 7162 CONDSTORE MODSEQ](https://datatracker.ietf.org/doc/html/rfc7162)

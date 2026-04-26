@@ -39,7 +39,7 @@ extension ByteBufferView: _ByteBufferViewAPITemplate {}
 ///  - `Foundation`'s `Data`
 ///  - `[UInt8]` and generally any `Collection` of `UInt8`
 ///
-/// ### Random Access
+/// ### Random access
 /// For every supported type `ByteBuffer` usually contains two methods for random access:
 ///
 ///  1. `get<Type>(at: Int, length: Int)` where `<type>` is for example `String`, `Data`, `Bytes` (for `[UInt8]`)
@@ -58,7 +58,7 @@ extension ByteBufferView: _ByteBufferViewAPITemplate {}
 ///
 /// If needed, `ByteBuffer` will automatically resize its storage to accommodate your `set` request.
 ///
-/// ### Sequential Access
+/// ### Sequential access
 /// `ByteBuffer` provides two properties which are indices into the `ByteBuffer` to support sequential access:
 ///  - `readerIndex`, the index of the next readable byte
 ///  - `writerIndex`, the index of the next byte to write
@@ -121,8 +121,8 @@ protocol _ByteBufferAPITemplate where Self: Hashable, Self: CustomStringConverti
 
     /// Reserves enough space to store the specified number of bytes.
     ///
-    /// This method will ensure that the buffer has space for at least as many bytes as requested.
-    /// This includes any bytes already stored, and completely disregards the reader/writer indices.
+    /// Ensures that the buffer has space for at least as many bytes as requested.
+    /// Includes any bytes already stored, and completely disregards the reader/writer indices.
     /// If the buffer already has space to store the requested number of bytes, this method will be
     /// a no-op.
     ///
@@ -132,7 +132,7 @@ protocol _ByteBufferAPITemplate where Self: Hashable, Self: CustomStringConverti
 
     /// Reserves enough space to write at least the specified number of bytes.
     ///
-    /// This method will ensure that the buffer has enough writable space for at least as many bytes
+    /// Ensures that the buffer has enough writable space for at least as many bytes
     /// as requested. If the buffer already has space to write the requested number of bytes, this
     /// method will be a no-op.
     ///

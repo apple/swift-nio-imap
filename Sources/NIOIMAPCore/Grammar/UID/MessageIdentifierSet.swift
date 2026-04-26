@@ -49,10 +49,10 @@ import struct NIO.ByteBuffer
 /// let max = set.max()                         // Returns 20
 /// ```
 ///
-/// This type conforms to `BidirectionalCollection` and `SetAlgebra`, allowing iteration,
+/// Conforms to `BidirectionalCollection` and `SetAlgebra`, allowing iteration,
 /// queries, and set operations like `union`, `intersection`, and `isSubset`.
 ///
-/// ## Related Types
+/// ## Related types
 ///
 /// - ``MessageIdentifierRange`` represents a single contiguous range.
 /// - ``MessageIdentifierSetNonEmpty`` wraps a non-empty set for use in commands requiring at least one message.
@@ -173,7 +173,7 @@ extension MessageIdentifierSet {
 // MARK: -
 
 extension MessageIdentifierSet {
-    /// Returns `true` if there are no gaps in the values, i.e. the set is non-sparse.
+    /// Returns `true` if there are no gaps in the values (that is, the set is non-sparse).
     ///
     /// For example: `5:10` is contiguous, but `5:6,8` is _not_.
     ///

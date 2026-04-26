@@ -36,7 +36,7 @@ import struct NIO.ByteBuffer
 public struct CommandEncodeBuffer: Hashable, Sendable {
     /// The underlying buffer containing data to be written.
     ///
-    /// This provides access to the raw ``EncodeBuffer`` for advanced operations,
+    /// Provides access to the raw ``EncodeBuffer`` for advanced operations,
     /// though most users should interact through the public API of `CommandEncodeBuffer`.
     @_spi(NIOIMAPInternal) public var buffer: EncodeBuffer
 
@@ -68,7 +68,7 @@ public struct CommandEncodeBuffer: Hashable, Sendable {
 extension CommandEncodeBuffer {
     /// The encoding options currently in use.
     ///
-    /// These options determine how protocol elements are encoded (e.g., whether to use
+    /// These options determine how protocol elements are encoded (for example, whether to use
     /// quoted strings, which literal formats are supported). You can modify these
     /// options at runtime to change encoding behavior for subsequent write operations.
     ///
@@ -88,7 +88,7 @@ extension CommandEncodeBuffer {
 
     /// Creates a new command encoding buffer from server capabilities.
     ///
-    /// This initializer converts a list of ``Capability`` values into ``CommandEncodingOptions``,
+    /// Converts a list of ``Capability`` values into ``CommandEncodingOptions``,
     /// which automatically enables extended literal formats and binary support if the
     /// server advertises the corresponding capabilities.
     ///

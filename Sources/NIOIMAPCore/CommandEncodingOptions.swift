@@ -53,7 +53,7 @@ public struct CommandEncodingOptions: Hashable, Sendable {
 
     /// Use the RFC 3501 synchronizing literal format (`{20}\r\n`).
     ///
-    /// This is the standard literal format that requires the server to send a `+`
+    /// The standard literal format that requires the server to send a `+`
     /// continuation request before the client sends the literal data. Set to `true`
     /// for RFC 3501-compliant encoding.
     ///
@@ -82,7 +82,7 @@ public struct CommandEncodingOptions: Hashable, Sendable {
 
     /// Use binary content literals (`~{20}\r\n`).
     ///
-    /// This format is defined in RFC 3516 and allows sending arbitrary binary data.
+    /// Defined in RFC 3516, this format allows sending arbitrary binary data.
     /// Note that binary literals can only be used in certain contexts, such as the
     /// `APPEND` command with the `BINARY` extension.
     ///
@@ -142,7 +142,7 @@ public struct CommandEncodingOptions: Hashable, Sendable {
 extension CommandEncodingOptions {
     /// Creates encoding options by inspecting server capabilities.
     ///
-    /// This initializer automatically enables extended literal formats based on
+    /// Automatically enables extended literal formats based on
     /// server capabilities, making it easy to use the best available encoding strategy.
     ///
     /// The initialization process:

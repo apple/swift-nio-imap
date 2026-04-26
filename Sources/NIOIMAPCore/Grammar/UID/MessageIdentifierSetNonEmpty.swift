@@ -14,7 +14,7 @@
 
 /// A non-empty wrapper around ``MessageIdentifierSet`` guaranteeing at least one message identifier.
 ///
-/// Many IMAP commands require a non-empty message set (e.g., `FETCH 1:5`, `STORE`, `COPY`,
+/// Many IMAP commands require a non-empty message set (for example, `FETCH 1:5`, `STORE`, `COPY`,
 /// `EXPUNGE`). `MessageIdentifierSetNonEmpty` wraps a ``MessageIdentifierSet`` with a type-level
 /// guarantee that it contains at least one element.
 ///
@@ -38,7 +38,7 @@
 /// let max = all.max()  // Returns UInt32.max
 /// ```
 ///
-/// ## Related Types
+/// ## Related types
 ///
 /// - ``MessageIdentifierSet`` is the wrapped type (may be empty).
 /// - ``MessageIdentifierRange`` represents a single contiguous range.

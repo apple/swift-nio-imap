@@ -18,7 +18,7 @@ import struct NIO.ByteBuffer
 ///
 /// A `MessageIdentifierRange` represents a contiguous sequence of message identifiers using
 /// lower and upper bounds. It wraps a native Swift `ClosedRange` and supports conversion
-/// from partial ranges (e.g., `1...` or `...42`).
+/// from partial ranges (for example, `1...` or `...42`).
 ///
 /// In IMAP wire format, ranges are encoded as `lower:upper`, where both bounds can be the
 /// special value `*` (representing `UInt32.max`, the maximum message identifier).
@@ -43,7 +43,7 @@ import struct NIO.ByteBuffer
 /// These ranges are used in set-based commands like `FETCH 1:5`, `STORE 1,3:7 +FLAGS \Deleted`,
 /// and `COPY 1:* Archive`.
 ///
-/// ## Related Types
+/// ## Related types
 ///
 /// - ``MessageIdentifierSet`` contains an array of ranges to represent non-contiguous sets.
 /// - ``SequenceRange`` is a type alias for `MessageIdentifierRange<SequenceNumber>`.

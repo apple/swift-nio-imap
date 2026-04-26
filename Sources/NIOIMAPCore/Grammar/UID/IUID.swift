@@ -29,14 +29,14 @@ public struct InvalidUID: Error {}
 /// - `;UID=<uid-value>` (in relative paths or CATENATE operations)
 /// - `/;UID=<uid-value>` (in absolute message paths)
 ///
-/// This type is primarily used internally for IMAP URL constructs, URLAUTH-authorized URL
+/// Primarily used internally for IMAP URL constructs, URLAUTH-authorized URL
 /// verification, and CATENATE append operations that reference existing messages on the server.
 ///
 /// See [RFC 4467](https://datatracker.ietf.org/doc/html/rfc4467) (URLAUTH Extension)
 /// and [RFC 4469](https://datatracker.ietf.org/doc/html/rfc4469) (CATENATE Extension)
 /// for details on how IUIDs are used to reference message content.
 ///
-/// ## Related Types
+/// ## Related types
 ///
 /// - ``UID`` is the wrapped type containing the actual message identifier
 /// - ``MessagePath`` uses ``IUID`` for URL-style message identification

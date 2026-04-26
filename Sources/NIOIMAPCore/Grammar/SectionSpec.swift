@@ -38,7 +38,7 @@ public struct SectionSpecifier: Hashable, Sendable {
     /// The part of the body.
     public let part: Part
 
-    /// The type of section, e.g. `HEADER`.
+    /// The type of section, for example `HEADER`.
     public let kind: Kind
 
     /// Creates a new *complete* `SectionSpecifier`.
@@ -47,7 +47,7 @@ public struct SectionSpecifier: Hashable, Sendable {
     /// See the documentation for ``SectionSpecifier/Kind`` for more details.
     ///
     /// - parameter part: The part of the body. Can only be empty if `kind` is not `.MIMEHeader`.
-    /// - parameter kind: The type of section, e.g. *HEADER*. Defaults to `.complete`.
+    /// - parameter kind: The type of section, for example `HEADER`. Defaults to `.complete`.
     public init(part: Part = .init([]), kind: Kind = .complete) {
         if part.array.count == 0 {
             precondition(kind != .MIMEHeader, "Cannot use MIME with an empty section part")
@@ -58,7 +58,7 @@ public struct SectionSpecifier: Hashable, Sendable {
 }
 
 extension SectionSpecifier {
-    /// Corresponds to no specifier, i.e. the complete message (including its headers).
+    /// Corresponds to no specifier, that is, the complete message (including its headers).
     public static let complete = SectionSpecifier(kind: .complete)
 
     /// `Header` -- RFC 2822 header of the message
@@ -110,7 +110,7 @@ extension SectionSpecifier: CustomDebugStringConvertible {
 extension SectionSpecifier {
     /// Specifies a particular body section.
     ///
-    /// This corresponds to the part number mentioned in RFC 3501 section 6.4.5.
+    /// Corresponds to the part number mentioned in RFC 3501 section 6.4.5.
     ///
     /// Examples are `1`, `4.1`, and `4.2.2.1`.
     public struct Part: Hashable, ExpressibleByArrayLiteral, Sendable {
@@ -145,33 +145,33 @@ extension SectionSpecifier {
     ///   * `.header` / `HEADER` (and by extension `.headerFields` and `.headerFieldsNot`)
     ///   * `.text` / `TEXT`
     ///
-    ///  For other parts (i.e. non-`message/rfc822` and not the message itself) these are valid:
+    ///  For other parts (that is, non-`message/rfc822` and not the message itself) these are valid:
     ///   * `.complete` (the part without its MIME header)
     ///   * `.MIMEHeader` / `MIME` (the MIME header)
     public enum Kind: Hashable, Sendable {
-        /// A section specifier that ends in a part number, e.g. `4.2.2.1`.
+        /// A section specifier that ends in a part number, for example `4.2.2.1`.
         ///
         /// If the numeric part refers to the complete message or a `message/rfc822` part, this
         /// will refer to that _complete_ message.
         ///
         /// For any other part (single- or multi-part), it will refer to that parts
-        /// content, i.e. it will _not_ include any of the MIME headers of that part.
+        /// content, that is, it will _not_ include any of the MIME headers of that part.
         case complete
         /// If the numeric part refers to the complete message or a `message/rfc822` part, this
         /// will refer to that message’s headers.
         case header
-        /// The specified fields, corresponding to e.g. `4.2.HEADER.FIELDS (SUBJECT)`.
+        /// The specified fields, corresponding to, for example, `4.2.HEADER.FIELDS (SUBJECT)`.
         case headerFields([String])
-        /// All except the specified fields, corresponding to e.g. `4.2.HEADER.FIELDS.NOT (SUBJECT)`.
+        /// All except the specified fields, corresponding to, for example, `4.2.HEADER.FIELDS.NOT (SUBJECT)`.
         case headerFieldsNot([String])
-        /// MIME IMB header, corresponding to e.g. `4.2.MIME`.
+        /// MIME IMB header, corresponding to, for example, `4.2.MIME`.
         ///
-        /// This is only valid for a part that is _not_ a `message/rfc822` part. And in those cases,
+        /// Valid only for a part that is _not_ a `message/rfc822` part. And in those cases,
         /// this refers to the MIME header of that (single- or multi-) part.
         case MIMEHeader
-        /// Text body without header, corresponding to e.g. `4.2.TEXT`.
+        /// Text body without header, corresponding to, for example, `4.2.TEXT`.
         ///
-        /// This is only valid for a part that’s a `message/rfc822` part, e.g. the complete message.
+        /// Valid only for a part that’s a `message/rfc822` part (for example, the complete message).
         case text
     }
 }
@@ -304,7 +304,7 @@ extension SectionSpecifier.Kind: Comparable {
 extension SectionSpecifier.Part {
     /// Returns a `Part` containing all but the initial part number.
     ///
-    /// If the `Part` is empty (i.e. the complete message), it returns the empty
+    /// If the `Part` is empty (that is, the complete message), it returns the empty
     /// `Part` / complete message specifier.
     public func dropFirst() -> SectionSpecifier.Part {
         SectionSpecifier.Part(Array(self.array.dropFirst()))
@@ -312,7 +312,7 @@ extension SectionSpecifier.Part {
 
     /// Returns a `Part` containing all but the last part number.
     ///
-    /// If the `Part` is empty (i.e. the complete message), it returns the empty
+    /// If the `Part` is empty (that is, the complete message), it returns the empty
     /// `Part` / complete message specifier.
     public func dropLast() -> SectionSpecifier.Part {
         SectionSpecifier.Part(Array(self.array.dropLast()))
@@ -334,7 +334,7 @@ extension SectionSpecifier.Part {
         return zip(a, b).allSatisfy { $0.0 == $0.1 }
     }
 
-    /// Returns `true` if the `other` part is a directly below this `Part`, e.g. `2.1` is a child of `2`, and `2` is a child of the top-level part. Returns `false` otherwise.
+    /// Returns `true` if the `other` part is a directly below this `Part`, for example `2.1` is a child of `2`, and `2` is a child of the top-level part. Returns `false` otherwise.
     public func isChildPart(of other: SectionSpecifier.Part) -> Bool {
         guard
             self.array.count == other.array.count + 1

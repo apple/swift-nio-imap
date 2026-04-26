@@ -152,7 +152,7 @@ extension EncodeBuffer {
     }
 
     /// Writes a collection of bytes in the `literal8` syntax defined in RFC 3516.
-    /// This function allows the `null` byte `\0` to be written.
+    /// Allows the `null` byte `\0` to be written.
     /// - parameters:
     ///     - bytes: The raw bytes to write to `self`.
     /// - returns: The number of bytes written.

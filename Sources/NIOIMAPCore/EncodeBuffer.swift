@@ -22,7 +22,7 @@ import struct NIO.CircularBuffer
 /// that can be transmitted over the network. It wraps a `ByteBuffer` and tracks
 /// encoding state, supporting both client commands and server responses.
 ///
-/// This type is part of the internal SPI and is primarily used by:
+/// Part of the internal SPI and is primarily used by:
 /// - ``CommandEncodeBuffer`` for encoding client commands
 /// - ``ResponseEncodeBuffer`` for encoding server responses
 ///
@@ -43,7 +43,7 @@ import struct NIO.CircularBuffer
 @_spi(NIOIMAPInternal) public struct EncodeBuffer: Hashable, Sendable {
     /// Determines whether the buffer encodes for a client or server.
     ///
-    /// This affects how the buffer formats protocol elements like literals, strings,
+    /// Affects how the buffer formats protocol elements like literals, strings,
     /// and response codes. The mode also carries encoding options specific to each role.
     public enum Mode: Hashable, Sendable {
         /// Encodes client commands using the specified options.
@@ -67,7 +67,7 @@ import struct NIO.CircularBuffer
     ///
     /// When `true`, methods like ``writeBytes(_:)`` and ``writeBuffer(_:)`` will
     /// write placeholder text like `[N bytes]` instead of the actual binary content.
-    /// This is useful for logging and debugging without exposing sensitive data.
+    /// Useful for logging and debugging without exposing sensitive data.
     public var loggingMode: Bool
 
     internal var mode: Mode
@@ -159,7 +159,7 @@ extension EncodeBuffer {
     public struct Chunk: Hashable, Sendable {
         /// The encoded bytes ready to write to the network.
         ///
-        /// This buffer contains the next portion of IMAP protocol data to transmit.
+        /// Contains the next portion of IMAP protocol data to transmit.
         public var bytes: ByteBuffer
 
         /// Whether a continuation request (`+`) should be expected before sending the next chunk.

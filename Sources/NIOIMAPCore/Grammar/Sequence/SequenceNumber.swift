@@ -29,7 +29,7 @@
 /// See [RFC 3501 Section 2.3.1.2](https://datatracker.ietf.org/doc/html/rfc3501#section-2.3.1.2)
 /// for details on message sequence numbers.
 ///
-/// ## Related Types
+/// ## Related types
 ///
 /// Use ``UID`` to reference messages by a stable, session-independent identifier.
 /// Use ``MessageIdentifierSet`` or ``MessageIdentifierRange`` to represent collections of sequence numbers.

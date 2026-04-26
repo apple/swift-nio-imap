@@ -20,7 +20,7 @@
 ///
 /// URL commands appear after the mailbox portion of an IMAP URL path.
 ///
-/// ### Command Types
+/// ### Command types
 ///
 /// - ``messageList(_:)``: Search for messages matching specific criteria (` `SEARCH` or `` `SELECT` `` semantics)
 /// - ``fetch(path:authenticatedURL:)``: Fetch message content from a specific message location
@@ -49,7 +49,7 @@
 /// S: a001 OK URLFETCH completed
 /// ```
 ///
-/// ## Related Types
+/// ## Related types
 ///
 /// - ``MessagePath`` specifies message location details
 /// - ``AuthenticatedURL`` provides URLAUTH verification for authorized access
@@ -63,7 +63,7 @@ public enum URLCommand: Hashable, Sendable {
     /// A search query to identify messages matching specific criteria.
     ///
     /// When used in an IMAP URL, indicates that messages should be selected based on
-    /// search criteria (e.g., `UNSEEN`, `ALL`, `TEXT "search text"`). This effectively
+    /// search criteria (for example, `UNSEEN`, `ALL`, or `TEXT "search text"`). Effectively
     /// performs a `SEARCH` command within the specified mailbox.
     case messageList(EncodedSearchQuery)
 
