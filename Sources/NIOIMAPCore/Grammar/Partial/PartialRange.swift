@@ -16,7 +16,7 @@
 ///
 /// The `PARTIAL` extension (RFC 9394) allows clients to request `SEARCH` and `FETCH` results
 /// in fixed-size pages, either from the beginning (`.first`) or end (`.last`) of the result set.
-/// This enables efficient pagination of large result sets without retrieving the entire list.
+/// Enables efficient pagination of large result sets without retrieving the entire list.
 ///
 /// The two forms are:
 /// - `.first`: Requests N results starting from the lowest UID (beginning)
@@ -30,7 +30,7 @@ public enum PartialRange: Hashable, Sendable {
     case first(SequenceRange)
     /// A range relative to the newest (highest UID) message.
     ///
-    /// This is encoded as negative number.
+    /// Encoded as a negative number.
     ///
     /// Aka. `partial-range-last`.
     case last(SequenceRange)

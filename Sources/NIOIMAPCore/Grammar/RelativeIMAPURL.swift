@@ -55,7 +55,7 @@
 /// imap://user@example.com/INBOX/
 /// ```
 ///
-/// ## Related Types
+/// ## Related types
 ///
 /// - ``IMAPURL`` provides absolute URL specification
 /// - ``NetworkPath`` represents network-accessible paths

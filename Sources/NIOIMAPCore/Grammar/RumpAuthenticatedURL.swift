@@ -18,7 +18,7 @@ import struct NIO.ByteBuffer
 ///
 /// A ``RumpAuthenticatedURL`` combines a complete message URL on a network-accessible server
 /// (``NetworkMessagePath``) with URLAUTH authorization information (``AuthenticatedURLRump``).
-/// This represents a URL that can be resolved to fetch message content with proper authorization.
+/// Represents a URL that can be resolved to fetch message content with proper authorization.
 ///
 /// The "rump" term refers to the URL portion used for token generation and verification in
 /// RFC 4467. In URLAUTH processing:
@@ -54,7 +54,7 @@ import struct NIO.ByteBuffer
 /// The server converts the client's "rump URL" (without mechanism and token) into a complete URL
 /// by appending `:internal:<calculated-token>`.
 ///
-/// ## Related Types
+/// ## Related types
 ///
 /// - ``NetworkMessagePath`` provides the server and message location
 /// - ``AuthenticatedURLRump`` provides expiration and access information

@@ -19,7 +19,7 @@ import struct NIO.ByteBuffer
 /// Every client command receives exactly one tagged response from the server. The response contains
 /// the original command tag (to correlate with the sent command), a status code (`OK`, `NO`, or `BAD`),
 /// and optional human-readable text with additional information. Tagged responses mark the completion
-/// of command processing and may include structured status codes (e.g., `[CANNOT]`, `[TRYCREATE]`)
+/// of command processing and may include structured status codes (for example, `[CANNOT]` or `[TRYCREATE]`)
 /// that provide machine-readable details.
 /// See [RFC 3501 Section 7.1](https://datatracker.ietf.org/doc/html/rfc3501#section-7.1) for details.
 ///
@@ -39,10 +39,10 @@ import struct NIO.ByteBuffer
 /// S: A002 NO [CANNOT] Mailbox does not exist
 /// ```
 ///
-/// This tagged response has tag `A002`, state ``State/no(_:)``, and a ``ResponseText`` containing
+/// The tagged response has tag `A002`, state ``State/no(_:)``, and a ``ResponseText`` containing
 /// a ``ResponseTextCode/cannot`` code with human-readable text explaining the failure.
 ///
-/// ## Related Types
+/// ## Related types
 ///
 /// - ``Response/tagged(_:)`` - Wraps this type within the ``Response`` enum
 /// - ``State`` - Represents the outcome status (OK, NO, or BAD)
@@ -52,7 +52,7 @@ import struct NIO.ByteBuffer
 public struct TaggedResponse: Hashable, Sendable {
     /// The tag of the command that led to this response.
     ///
-    /// This is the same tag that appeared in the original client command, allowing the client
+    /// The same tag that appeared in the original client command, allowing the client
     /// to correlate the response with its request. The tag uniquely identifies the command within
     /// the connection session.
     public var tag: String

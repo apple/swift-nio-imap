@@ -27,7 +27,7 @@ public enum ResponseOrContinuationRequest: Hashable, Sendable {
 /// and command continuation requests (prefixed with `+`). This enum wraps all response variants.
 /// See [RFC 3501 Section 7](https://datatracker.ietf.org/doc/html/rfc3501#section-7) for details.
 ///
-/// ## Response Types
+/// ## Response types
 ///
 /// **Untagged responses** (``untagged(_:)``) convey server data or status information that does not
 /// indicate command completion. Examples include capabilities, mailbox status, and message data.
@@ -123,7 +123,7 @@ public enum Response: Hashable, Sendable {
     /// S: * BYE Server shutting down
     /// ```
     ///
-    /// This line is wrapped as ``Response/fatal(_:)`` containing a ``ResponseText`` with the
+    /// The line is wrapped as ``Response/fatal(_:)`` containing a ``ResponseText`` with the
     /// server's message.
     ///
     /// - SeeAlso: ``ResponseText``, [RFC 3501 Section 7.1.3](https://datatracker.ietf.org/doc/html/rfc3501#section-7.1.3)
@@ -195,7 +195,7 @@ extension Response: CustomDebugStringConvertible {
 
     /// Creates a string from the array of `Response` with all _personally identifiable information_ redacted.
     ///
-    /// This is equivalent to joining `debugDescription` of all elements.
+    /// Equivalent to joining `debugDescription` of all elements.
     public static func descriptionWithoutPII(_ responses: some Sequence<Response>) -> String {
         ResponseEncodeBuffer.makeDescription(loggingMode: true) {
             for response in responses {
@@ -228,7 +228,7 @@ extension Response: CustomDebugStringConvertible {
 /// S: )
 /// ```
 ///
-/// This represents a fetch for message 1. The first line contains the simple attributes
+/// The above represents a fetch for message 1. The first line contains the simple attributes
 /// (UID and FLAGS), wrapped in separate ``FetchResponse/simpleAttribute(_:)`` events. The
 /// second part begins a streaming section with ``FetchResponse/streamingBegin(kind:byteCount:)``
 /// for the message body, followed by ``FetchResponse/streamingBytes(_:)`` events, and
@@ -238,7 +238,7 @@ extension Response: CustomDebugStringConvertible {
 public enum FetchResponse: Hashable, Sendable {
     /// The beginning of a fetch response for the message at the given sequence number.
     ///
-    /// This is the first event in a fetch response sequence. The sequence number can be used to
+    /// The first event in a fetch response sequence. The sequence number can be used to
     /// correlate this fetch with the original FETCH command.
     ///
     /// - SeeAlso: ``SequenceNumber``, [RFC 3501 Section 2.3.1.2](https://datatracker.ietf.org/doc/html/rfc3501#section-2.3.1.2)
@@ -248,7 +248,7 @@ public enum FetchResponse: Hashable, Sendable {
     ///
     /// When a client uses “UID Only” mode (see [RFC 9586](https://datatracker.ietf.org/doc/html/rfc9586)),
     /// the server returns only the UID in the FETCH response rather than the sequence number.
-    /// This is more efficient for pipelined commands.
+    /// More efficient for pipelined commands.
     ///
     /// - SeeAlso: ``UID``, [RFC 9586](https://datatracker.ietf.org/doc/html/rfc9586) - IMAP Extension: SUBMIT
     case startUID(UID)
@@ -264,7 +264,7 @@ public enum FetchResponse: Hashable, Sendable {
 
     /// The start of a streaming section containing potentially large data.
     ///
-    /// This event indicates that a large message part (body, RFC 822 header, etc.) is about to be
+    /// Indicates that a large message part (body, RFC 822 header, etc.) is about to be
     /// streamed to the client. The ``StreamingKind`` specifies which part is being streamed,
     /// and the `byteCount` parameter indicates the total bytes that will follow.
     ///
@@ -288,7 +288,7 @@ public enum FetchResponse: Hashable, Sendable {
 
     /// The end of the currently streaming section.
     ///
-    /// This marks the completion of a streaming section started by ``streamingBegin(kind:byteCount:)``.
+    /// Marks the completion of a streaming section started by ``streamingBegin(kind:byteCount:)``.
     /// More streaming sections may immediately follow, or the fetch may complete with ``finish``.
     ///
     /// - SeeAlso: ``streamingBegin(kind:byteCount:)``
@@ -296,7 +296,7 @@ public enum FetchResponse: Hashable, Sendable {
 
     /// The end of all fetch data for this message.
     ///
-    /// This is the final event in a fetch response sequence. After this, processing of the message
+    /// The final event in a fetch response sequence. After this, processing of the message
     /// is complete, and a new fetch (or other response) may begin.
     case finish
 }
@@ -328,7 +328,7 @@ public enum StreamingKind: Hashable, Sendable {
     /// The `BINARY[1] {512}` indicates that 512 bytes of binary data from message part 1 will be
     /// streamed. This corresponds to ``StreamingKind/binary(section:offset:)`` with an empty offset.
     ///
-    /// - parameter section: The part of the message to fetch (e.g., 1, 2.1)
+    /// - parameter section: The part of the message to fetch (for example, 1 or 2.1)
     /// - parameter offset: Optional byte offset for partial fetch (requires RFC 9394 PARTIAL extension)
     ///
     /// - SeeAlso: ``SectionSpecifier/Part``, [RFC 3516](https://datatracker.ietf.org/doc/html/rfc3516)
@@ -337,7 +337,7 @@ public enum StreamingKind: Hashable, Sendable {
     /// A body section being streamed.
     ///
     /// The `BODY` fetch item returns message structure and content according to [RFC 3501](https://datatracker.ietf.org/doc/html/rfc3501).
-    /// The `section` specifies which part of the message is being returned (e.g., TEXT for the message body,
+    /// The `section` specifies which part of the message is being returned (for example, TEXT for the message body,
     /// HEADER for headers, or 1.2.3 for nested MIME parts). The `offset` specifies a byte offset for
     /// partial fetches.
     ///
@@ -350,7 +350,7 @@ public enum StreamingKind: Hashable, Sendable {
     /// ```
     ///
     /// The `BODY[TEXT] {1024}` indicates that 1024 bytes of the message body text will be streamed.
-    /// This corresponds to ``StreamingKind/body(section:offset:)`` with the TEXT section specifier.
+    /// Corresponds to ``StreamingKind/body(section:offset:)`` with the TEXT section specifier.
     ///
     /// - parameter section: The section specifier (part and section type)
     /// - parameter offset: Optional byte offset for partial fetch (requires RFC 9394 PARTIAL extension)
@@ -372,7 +372,7 @@ public enum StreamingKind: Hashable, Sendable {
     /// ```
     ///
     /// The `RFC822 {2048}` indicates that 2048 bytes of the complete message will be streamed.
-    /// This corresponds to ``StreamingKind/rfc822``.
+    /// Corresponds to ``StreamingKind/rfc822``.
     ///
     /// - SeeAlso: [RFC 3501 Section 6.4.5](https://datatracker.ietf.org/doc/html/rfc3501#section-6.4.5)
     case rfc822
@@ -391,7 +391,7 @@ public enum StreamingKind: Hashable, Sendable {
     /// ```
     ///
     /// The `RFC822.TEXT {1024}` indicates that 1024 bytes of the message body will be streamed.
-    /// This corresponds to ``StreamingKind/rfc822Text``.
+    /// Corresponds to ``StreamingKind/rfc822Text``.
     ///
     /// - SeeAlso: [RFC 3501 Section 6.4.5](https://datatracker.ietf.org/doc/html/rfc3501#section-6.4.5)
     case rfc822Text
@@ -410,7 +410,7 @@ public enum StreamingKind: Hashable, Sendable {
     /// ```
     ///
     /// The `RFC822.HEADER {512}` indicates that 512 bytes of the message headers will be streamed.
-    /// This corresponds to ``StreamingKind/rfc822Header``.
+    /// Corresponds to ``StreamingKind/rfc822Header``.
     ///
     /// - SeeAlso: [RFC 3501 Section 6.4.5](https://datatracker.ietf.org/doc/html/rfc3501#section-6.4.5)
     case rfc822Header

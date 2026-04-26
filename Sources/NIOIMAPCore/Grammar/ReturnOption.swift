@@ -38,7 +38,7 @@ import struct NIO.ByteBuffer
 /// `STATUS` responses are ``Response/untagged(_:)`` with ``ResponsePayload/mailboxData(_:)`` containing
 /// ``MailboxData/status(_:_:)`` variants.
 ///
-/// ## Related Types
+/// ## Related types
 ///
 /// Return options are used with the ``Command/list(_:reference:_:_:)`` command.
 /// See ``MailboxAttribute`` for the attributes returned in status responses.
@@ -47,13 +47,13 @@ import struct NIO.ByteBuffer
 public enum ReturnOption: Hashable, Sendable {
     /// The `SUBSCRIBED` return option causes `LIST` to return subscription state for all matching mailboxes.
     ///
-    /// This is used with the ``Command/list(_:reference:_:_:)`` command to include subscription information
+    /// Used with the ``Command/list(_:reference:_:_:)`` command to include subscription information
     /// in the `LIST` responses. From [RFC 5819 Section 2](https://datatracker.ietf.org/doc/html/rfc5819#section-2).
     case subscribed
 
     /// The `CHILDREN` return option requests mailbox child information.
     ///
-    /// This instructs the server to return information about which mailboxes have children
+    /// Instructs the server to return information about which mailboxes have children
     /// (subfolders). The standard mailbox attributes `\HasChildren` and `\HasNoChildren`
     /// provide this information. From [RFC 3501 Section 7.2.2](https://datatracker.ietf.org/doc/html/rfc3501#section-7.2.2).
     case children
@@ -62,13 +62,13 @@ public enum ReturnOption: Hashable, Sendable {
     ///
     /// When this option is specified, the server MUST return untagged `STATUS` responses
     /// in addition to `LIST` responses for each matching mailbox. The specified attributes
-    /// determine what status data is returned (e.g., `MESSAGES`, `UNSEEN`, `UIDVALIDITY`).
+    /// determine what status data is returned (for example, `MESSAGES`, `UNSEEN`, or `UIDVALIDITY`).
     /// From [RFC 5819 Section 2.1](https://datatracker.ietf.org/doc/html/rfc5819#section-2.1).
     case statusOption([MailboxAttribute])
 
     /// The `SPECIAL-USE` return option requests only mailboxes with special-use attributes.
     ///
-    /// This filters `LIST` results to return only mailboxes marked with special-use attributes
+    /// Filters `LIST` results to return only mailboxes marked with special-use attributes
     /// like `\All`, `\Archive`, `\Drafts`, `\Flagged`, `\Junk`, `\Sent`, or `\Trash`.
     /// From [RFC 6154 Section 3](https://datatracker.ietf.org/doc/html/rfc6154#section-3).
     case specialUse

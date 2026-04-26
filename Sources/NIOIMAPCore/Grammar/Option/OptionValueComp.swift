@@ -16,7 +16,7 @@ import struct NIO.ByteBuffer
 
 /// An option value, which can be a single string or a nested array of values.
 ///
-/// This recursive enum allows option values to be nested arbitrarily deep, enabling representation
+/// Allows option values to be nested arbitrarily deep, enabling representation
 /// of complex structured data in the RFC 4466 extension mechanism. Values can be simple strings
 /// or arrays of other option values, supporting flexible data representation.
 ///

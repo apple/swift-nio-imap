@@ -44,7 +44,7 @@ import struct OrderedCollections.OrderedDictionary
 /// The third line corresponds to ``capabilityData(_:)``, while the fourth corresponds
 /// to ``id(_:)``.
 ///
-/// ## Related Types
+/// ## Related types
 ///
 /// See ``Response`` for the main response wrapper, ``UntaggedStatus`` for conditional status responses,
 /// and ``ResponsePayload`` cases for detailed information types.
@@ -53,7 +53,7 @@ import struct OrderedCollections.OrderedDictionary
 public enum ResponsePayload: Hashable, Sendable {
     /// Indicates if a command executed successfully or encountered an error.
     ///
-    /// This case wraps an ``UntaggedStatus`` which can be `OK` (success), `NO` (warning/rejection),
+    /// Wraps an ``UntaggedStatus`` which can be `OK` (success), `NO` (warning/rejection),
     /// `BAD` (protocol error), `PREAUTH` (pre-authenticated), or `BYE` (server closing connection).
     /// See [RFC 3501 Section 7.1](https://datatracker.ietf.org/doc/html/rfc3501#section-7.1) for
     /// details on status responses.
@@ -61,33 +61,33 @@ public enum ResponsePayload: Hashable, Sendable {
 
     /// Contains information on a single mailbox.
     ///
-    /// This case wraps mailbox-specific data such as flags, existence counts, recent count,
+    /// Wraps mailbox-specific data such as flags, existence counts, recent count,
     /// and search results. See ``MailboxData`` for the various mailbox information types.
     case mailboxData(MailboxData)
 
     /// Contains information on a single message.
     ///
-    /// This case wraps message-specific data returned during FETCH operations or other
+    /// Wraps message-specific data returned during FETCH operations or other
     /// message queries. See ``MessageData`` for the various message attribute types.
     case messageData(MessageData)
 
     /// An array of capabilities supported by the server.
     ///
-    /// This case is returned in response to `CAPABILITY` commands or as part of the initial
+    /// Returned in response to `CAPABILITY` commands or as part of the initial
     /// server greeting. It indicates which IMAP extensions and features the server supports.
     /// See [RFC 3501 Section 7.1](https://datatracker.ietf.org/doc/html/rfc3501#section-7.1) and ``Capability``.
     case capabilityData([Capability])
 
     /// An array of capabilities that have been enabled on the server by the client.
     ///
-    /// This case is returned in response to an `ENABLE` command and lists the capabilities
+    /// Returned in response to an `ENABLE` command and lists the capabilities
     /// that were successfully enabled. See [RFC 5161](https://datatracker.ietf.org/doc/html/rfc5161)
     /// (ENABLE Extension) for details.
     case enableData([Capability])
 
     /// The server's implementation details used for identification.
     ///
-    /// This case contains an ordered dictionary of key-value pairs providing server identification
+    /// Contains an ordered dictionary of key-value pairs providing server identification
     /// information. Common keys include "name", "version", and "os". Returned in response to
     /// the ID command. See [RFC 2971](https://datatracker.ietf.org/doc/html/rfc2971) (ID Extension)
     /// for details.
@@ -95,26 +95,26 @@ public enum ResponsePayload: Hashable, Sendable {
 
     /// Matches a quota root with a mailbox.
     ///
-    /// This case associates a mailbox with its quota root. Multiple mailboxes may share the same
+    /// Associates a mailbox with its quota root. Multiple mailboxes may share the same
     /// quota root. See [RFC 2087](https://datatracker.ietf.org/doc/html/rfc2087) (QUOTA Extension)
     /// for details and ``QuotaRoot``.
     case quotaRoot(MailboxName, QuotaRoot)
 
     /// Contains quotas and resource limits for the specified quota root.
     ///
-    /// This case provides the usage and limit information for a quota root. See [RFC 2087](https://datatracker.ietf.org/doc/html/rfc2087)
+    /// Provides the usage and limit information for a quota root. See [RFC 2087](https://datatracker.ietf.org/doc/html/rfc2087)
     /// for details on quota resources and ``QuotaResource``.
     case quota(QuotaRoot, [QuotaResource])
 
     /// Metadata for a mailbox.
     ///
-    /// This case provides metadata entries for a mailbox, as requested by a `GETMETADATA` command.
+    /// Provides metadata entries for a mailbox, as requested by a `GETMETADATA` command.
     /// See [RFC 5464](https://datatracker.ietf.org/doc/html/rfc5464) (METADATA Extension) for details.
     case metadata(MetadataResponse)
 
     /// JMAP Access URL for the mailbox.
     ///
-    /// This case provides a URL that allows clients to access mailbox data via JMAP (JSON Mail
+    /// Provides a URL that allows clients to access mailbox data via JMAP (JSON Mail
     /// Access Protocol). See [RFC 9698](https://datatracker.ietf.org/doc/html/rfc9698) (JMAPACCESS Extension)
     /// for details.
     case jmapAccess(URL)

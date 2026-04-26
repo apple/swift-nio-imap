@@ -45,7 +45,7 @@ import struct NIO.ByteBuffer
 ///
 /// The ``not(_:)`` case with ``seen`` case matches messages that are not deleted and have been seen.
 ///
-/// ## Related Types
+/// ## Related types
 ///
 /// - ``SearchReturnOption``: Options controlling the format of search results
 /// - ``Command/search(key:charset:returnOptions:)`` and ``Command/uidSearch(key:charset:returnOptions:)`` commands that perform searches
@@ -55,7 +55,7 @@ import struct NIO.ByteBuffer
 public indirect enum SearchKey: Hashable, Sendable {
     /// Matches all messages in the mailbox.
     ///
-    /// This is the default initial key for combining multiple search criteria with `AND` logic.
+    /// The default initial key for combining multiple search criteria with `AND` logic.
     /// From [RFC 3501 Section 6.4.4](https://datatracker.ietf.org/doc/html/rfc3501#section-6.4.4).
     case all
 
@@ -79,13 +79,13 @@ public indirect enum SearchKey: Hashable, Sendable {
 
     /// Matches messages with the `\Recent` flag set but not the `\Seen` flag.
     ///
-    /// This is functionally equivalent to the search key combination `(RECENT UNSEEN)`.
+    /// Functionally equivalent to the search key combination `(RECENT UNSEEN)`.
     /// From [RFC 3501 Section 6.4.4](https://datatracker.ietf.org/doc/html/rfc3501#section-6.4.4).
     case new
 
     /// Matches messages without the `\Recent` flag set.
     ///
-    /// This is functionally equivalent to `NOT RECENT`, as opposed to ``new`` (which is "NOT NEW").
+    /// Functionally equivalent to `NOT RECENT`, as opposed to ``new`` (which is "NOT NEW").
     /// From [RFC 3501 Section 6.4.4](https://datatracker.ietf.org/doc/html/rfc3501#section-6.4.4).
     case old
 
@@ -103,25 +103,25 @@ public indirect enum SearchKey: Hashable, Sendable {
 
     /// Matches messages without the `\Answered` flag set.
     ///
-    /// This is the negation of ``answered``.
+    /// The negation of ``answered``.
     /// From [RFC 3501 Section 6.4.4](https://datatracker.ietf.org/doc/html/rfc3501#section-6.4.4).
     case unanswered
 
     /// Matches messages without the `\Deleted` flag set.
     ///
-    /// This is the negation of ``deleted``.
+    /// The negation of ``deleted``.
     /// From [RFC 3501 Section 6.4.4](https://datatracker.ietf.org/doc/html/rfc3501#section-6.4.4).
     case undeleted
 
     /// Matches messages without the `\Flagged` flag set.
     ///
-    /// This is the negation of ``flagged``.
+    /// The negation of ``flagged``.
     /// From [RFC 3501 Section 6.4.4](https://datatracker.ietf.org/doc/html/rfc3501#section-6.4.4).
     case unflagged
 
     /// Matches messages without the `\Seen` flag set.
     ///
-    /// This is the negation of ``seen``.
+    /// The negation of ``seen``.
     /// From [RFC 3501 Section 6.4.4](https://datatracker.ietf.org/doc/html/rfc3501#section-6.4.4).
     case unseen
 
@@ -133,7 +133,7 @@ public indirect enum SearchKey: Hashable, Sendable {
 
     /// Matches messages without the `\Draft` flag set.
     ///
-    /// This is the negation of ``draft``.
+    /// The negation of ``draft``.
     /// From [RFC 3501 Section 6.4.4](https://datatracker.ietf.org/doc/html/rfc3501#section-6.4.4).
     case undraft
 
@@ -193,7 +193,7 @@ public indirect enum SearchKey: Hashable, Sendable {
 
     /// Matches messages containing the specified string in either the header or body of the message.
     ///
-    /// This performs a broad search across the entire message content.
+    /// Performs a broad search across the entire message content.
     /// From [RFC 3501 Section 6.4.4](https://datatracker.ietf.org/doc/html/rfc3501#section-6.4.4).
     case text(ByteBuffer)
 
@@ -205,7 +205,7 @@ public indirect enum SearchKey: Hashable, Sendable {
 
     /// Matches messages without the specified keyword flag set.
     ///
-    /// This is the negation of ``keyword(_:)``.
+    /// The negation of ``keyword(_:)``.
     /// From [RFC 3501 Section 6.4.4](https://datatracker.ietf.org/doc/html/rfc3501#section-6.4.4).
     case unkeyword(Flag.Keyword)
 
@@ -224,31 +224,31 @@ public indirect enum SearchKey: Hashable, Sendable {
 
     /// Matches messages that do not match the specified search key.
     ///
-    /// This negates the given search key. Search keys are combined recursively using this case.
+    /// Negates the given search key. Search keys are combined recursively using this case.
     /// From [RFC 3501 Section 6.4.4](https://datatracker.ietf.org/doc/html/rfc3501#section-6.4.4).
     case not(SearchKey)
 
     /// Matches messages that match either of the two specified search keys.
     ///
-    /// This is a logical `OR` operation between two search keys.
+    /// A logical `OR` operation between two search keys.
     /// From [RFC 3501 Section 6.4.4](https://datatracker.ietf.org/doc/html/rfc3501#section-6.4.4).
     case or(SearchKey, SearchKey)
 
     /// Matches messages whose RFC 2822 Date header (disregarding time and timezone) is earlier than the specified date.
     ///
-    /// This differs from ``before(_:)`` which uses the message’s internal date. `SENTBEFORE` uses the message’s
+    /// Differs from ``before(_:)`` which uses the message’s internal date. `SENTBEFORE` uses the message’s
     /// Date: header field instead. From [RFC 3501 Section 6.4.4](https://datatracker.ietf.org/doc/html/rfc3501#section-6.4.4).
     case sentBefore(IMAPCalendarDay)
 
     /// Matches messages whose RFC 2822 Date header (disregarding time and timezone) is exactly the specified date.
     ///
-    /// This differs from ``on(_:)`` which uses the message’s internal date. `SENTON` uses the message’s
+    /// Differs from ``on(_:)`` which uses the message’s internal date. `SENTON` uses the message’s
     /// Date: header field instead. From [RFC 3501 Section 6.4.4](https://datatracker.ietf.org/doc/html/rfc3501#section-6.4.4).
     case sentOn(IMAPCalendarDay)
 
     /// Matches messages whose RFC 2822 Date header (disregarding time and timezone) is on or later than the specified date.
     ///
-    /// This differs from ``since(_:)`` which uses the message’s internal date. `SENTSINCE` uses the message’s
+    /// Differs from ``since(_:)`` which uses the message’s internal date. `SENTSINCE` uses the message’s
     /// Date: header field instead. From [RFC 3501 Section 6.4.4](https://datatracker.ietf.org/doc/html/rfc3501#section-6.4.4).
     case sentSince(IMAPCalendarDay)
 
@@ -267,13 +267,13 @@ public indirect enum SearchKey: Hashable, Sendable {
 
     /// Matches messages with UIDs after the specified UID.
     ///
-    /// This is an extension search key that references UIDs relative to the last `SEARCH` result.
+    /// An extension search key that references UIDs relative to the last `SEARCH` result.
     /// From [RFC 5182](https://datatracker.ietf.org/doc/html/rfc5182).
     case uidAfter(LastCommandMessageID<UID>)
 
     /// Matches messages with UIDs before the specified UID.
     ///
-    /// This is an extension search key that references UIDs relative to the last `SEARCH` result.
+    /// An extension search key that references UIDs relative to the last `SEARCH` result.
     /// From [RFC 5182](https://datatracker.ietf.org/doc/html/rfc5182).
     case uidBefore(LastCommandMessageID<UID>)
 
@@ -286,7 +286,7 @@ public indirect enum SearchKey: Hashable, Sendable {
 
     /// Matches messages that match all of the given search keys.
     ///
-    /// This is a logical `AND` operation combining all search keys in the array.
+    /// A logical `AND` operation combining all search keys in the array.
     /// An empty array matches no messages.
     /// From [RFC 3501 Section 6.4.4](https://datatracker.ietf.org/doc/html/rfc3501#section-6.4.4).
     case and([SearchKey])
@@ -305,7 +305,7 @@ public indirect enum SearchKey: Hashable, Sendable {
 
     /// References a server-side saved filter by name.
     ///
-    /// This allows searching using pre-defined server-side filters, identified by name.
+    /// Allows searching using pre-defined server-side filters, identified by name.
     /// From [RFC 5466](https://datatracker.ietf.org/doc/html/rfc5466).
     case filter(String)
 

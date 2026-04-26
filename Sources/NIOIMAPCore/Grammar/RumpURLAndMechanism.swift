@@ -43,9 +43,9 @@ import struct NIO.ByteBuffer
 /// ## RFC 4467 Context
 ///
 /// According to RFC 4467 Section 5, the GENURLAUTH command accepts "one or more URL/mechanism pairs".
-/// This type represents one such pair: the rump URL and the corresponding mechanism.
+/// Represents one such pair: the rump URL and the corresponding mechanism.
 ///
-/// ## Related Types
+/// ## Related types
 ///
 /// - ``URLAuthenticationMechanism`` specifies the token generation algorithm
 /// - ``AuthenticatedURLRump`` contains the EXPIRE and ACCESS components
@@ -56,7 +56,7 @@ import struct NIO.ByteBuffer
 public struct RumpURLAndMechanism: Hashable, Sendable {
     /// The IMAP URL without the mechanism and token components.
     ///
-    /// This is the complete URL including all components except the final `:mechanism:token` portion.
+    /// The complete URL including all components except the final `:mechanism:token` portion.
     /// It includes the server, mailbox, UID, optional section, optional byte range, expiration,
     /// and access identifier.
     public var urlRump: ByteBuffer

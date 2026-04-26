@@ -39,7 +39,7 @@
 public struct ResponseCodeCopy: Hashable, Sendable {
     /// The UID validity value of the destination mailbox.
     ///
-    /// This value allows clients to validate that the destination UIDs are still correct if
+    /// Allows clients to validate that the destination UIDs are still correct if
     /// referenced later. If the UID validity of the destination mailbox changes, the cached
     /// destination UIDs become invalid.
     ///
