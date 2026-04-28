@@ -17,12 +17,12 @@ import struct NIO.ByteBuffer
 /// A calendar day formatted as `dd-MMM-yyyy` as defined in RFC 3501.
 ///
 /// This type represents a date in the IMAP date format, where the month is represented
-/// as a three-letter abbreviation (e.g., `Jan`, `Feb`, etc.). This format is used in various
+/// as a three-letter abbreviation (for example, `Jan` or `Feb`). This format is used in various
 /// IMAP protocol messages including the `INTERNALDATE` message attribute and `APPEND` commands.
 ///
 /// The `IMAPCalendarDay` provides basic validation of date components. Note that the
 /// validation checks component ranges but does not validate whether the combination
-/// represents a valid calendar date (e.g., February 30 is accepted).
+/// represents a valid calendar date (for example, February 30 is accepted).
 ///
 /// ### Example
 ///
@@ -37,8 +37,8 @@ import struct NIO.ByteBuffer
 public struct IMAPCalendarDay: Hashable, Sendable {
     /// The year, constrained to the range `1900...2500`.
     ///
-    /// This is a 4-digit year value. The range constraint reflects common IMAP server
-    /// implementations which typically support dates in this range.
+    /// A 4-digit year value. The range constraint covers common IMAP server
+    /// implementations.
     public let year: Int
 
     /// The month, constrained to the range `1...12`.
@@ -49,7 +49,7 @@ public struct IMAPCalendarDay: Hashable, Sendable {
     /// The day of the month, constrained to the range `1...31`.
     ///
     /// The range accepts all valid day numbers across different months. No validation
-    /// is performed to verify the day is valid for the specific month (e.g., February 30 is accepted).
+    /// is performed to verify the day is valid for the specific month (for example, February 30 is accepted).
     public let day: Int
 
     /// Creates a new `IMAPCalendarDay` and performs basic validation on the input.
@@ -88,7 +88,7 @@ extension EncodeBuffer {
 extension IMAPCalendarDay {
     /// The three-letter month abbreviation for this calendar day.
     ///
-    /// Returns the month name as used in the IMAP date format (e.g., `Jan`, `Feb`, `Mar`, etc.).
+    /// Returns the month name as used in the IMAP date format (for example, `Jan`, `Feb`, or `Mar`).
     fileprivate var monthString: String {
         switch month {
         case 1: return "Jan"

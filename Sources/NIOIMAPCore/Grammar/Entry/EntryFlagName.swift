@@ -16,7 +16,7 @@
 ///
 /// **Requires server capability:** ``Capability/metadata`` or ``Capability/metadataServer``
 ///
-/// This type wraps an ``AttributeFlag`` to represent it as a metadata entry name in the special
+/// Wraps an ``AttributeFlag`` to represent it as a metadata entry name in the special
 /// `/flags/` namespace. Flag entries allow metadata operations on flag modification sequences
 /// through the entry name format `/flags/flagname`. See [RFC 5464](https://datatracker.ietf.org/doc/html/rfc5464)
 /// for details on metadata entry organization.
@@ -32,7 +32,7 @@
 /// The entry name `/flags/\Seen` is represented using ``EntryFlagName`` wrapping the
 /// ``AttributeFlag`` for `\Seen`. The value `12345` is the modification sequence for that flag.
 ///
-/// ## Related Types
+/// ## Related types
 ///
 /// - See ``AttributeFlag`` for system flag representation
 /// - See ``MetadataEntryName`` for general metadata entry names
@@ -42,7 +42,7 @@
 public struct EntryFlagName: Hashable, Sendable {
     /// The flag wrapped as a metadata entry.
     ///
-    /// Represents a system flag (e.g., `\Seen`, `\Flagged`, `\Deleted`) in metadata entry form.
+    /// Represents a system flag (for example, `\Seen`, `\Flagged`, or `\Deleted`) in metadata entry form.
     public var flag: AttributeFlag
 
     /// Creates a new `EntryFlagName` wrapping an `AttributeFlag`.

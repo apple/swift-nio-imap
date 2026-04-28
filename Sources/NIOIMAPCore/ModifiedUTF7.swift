@@ -21,7 +21,7 @@ import struct NIO.ByteBuffer
 /// mailbox names must be transmitted as UTF-7 in the IMAP protocol, even when the client
 /// and server both support UTF-8.
 ///
-/// ## Modified UTF-7 Rules
+/// ## Modified UTF-7 rules
 ///
 /// The modified UTF-7 encoding replaces the standard UTF-7 "shift" characters:
 /// - Uses `&` (U+0026) instead of `+` to begin Base64 sequences
@@ -51,7 +51,7 @@ public enum ModifiedUTF7 {
 
     /// Thrown when bytes cannot successfully roundtrip through encoding and decoding.
     ///
-    /// This typically indicates the encoded data is corrupted or uses invalid UTF-7 sequences.
+    /// Typically indicates the encoded data is corrupted or uses invalid UTF-7 sequences.
     public struct EncodingRoundtripError: Error {
         /// The buffer that failed to roundtrip.
         public var buffer: ByteBuffer
@@ -59,7 +59,7 @@ public enum ModifiedUTF7 {
 
     /// Encodes a `String` into modified UTF-7 bytes for use as an IMAP mailbox name.
     ///
-    /// This function converts a Unicode string into modified UTF-7 format, where
+    /// Converts a Unicode string into modified UTF-7 format, where
     /// non-ASCII characters are represented using Base64 encoding with `&` as the
     /// escape character.
     ///
@@ -113,7 +113,7 @@ public enum ModifiedUTF7 {
     /// Decodes a `ByteBuffer` containing UTF-7 bytes into a `String`
     /// - parameter buffer: The bytes to decode.
     /// - throws: An `OddByteCountError` if `buffer` contains an off number of bytes.
-    /// - returns: A `String` that can be used to e.g. display to a user.
+    /// - returns: A `String` that can be used to, for example, display to a user.
     static func decode(_ buffer: ByteBuffer) throws -> String {
         var string = ""
         string.reserveCapacity(buffer.readableBytes)

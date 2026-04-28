@@ -15,7 +15,7 @@
 extension MessagePath {
     /// A byte range suffix for partial IMAP URL fetches.
     ///
-    /// This type wraps a ``/NIOIMAPCore/ByteRange`` for use in IMAP URLs with the `/;PARTIAL=` encoding
+    /// Wraps a ``/NIOIMAPCore/ByteRange`` for use in IMAP URLs with the `/;PARTIAL=` encoding
     /// (RFC 5092). It enables clients to request only a portion of a message via URL without
     /// downloading the entire body.
     ///

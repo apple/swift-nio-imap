@@ -35,7 +35,7 @@ import struct NIO.ByteBuffer
 /// indicates the search matched 42 messages (COUNT 42) and provides the UIDs of all matches
 /// (ALL 1,3,5,7,9,...) because UID was specified and RETURN (COUNT ALL) was requested.
 ///
-/// ## Related Types
+/// ## Related types
 ///
 /// Link to related types using DocC symbol links: ``SearchReturnOption``, ``SearchReturnData``,
 /// ``SearchCorrelator``.
@@ -115,7 +115,7 @@ extension ExtendedSearchResponse {
     /// Returns `nil` if this is not a UID response or if the response does not contain matched UIDs.
     /// When no matching UIDs exist, this property returns an empty set rather than `nil`.
     ///
-    /// This property extracts UIDs from ``SearchReturnData/all(_:)`` if present, or falls back to
+    /// Extracts UIDs from ``SearchReturnData/all(_:)`` if present, or falls back to
     /// ``SearchReturnData/partial(_:_:)`` if only partial results are available. Per RFC 9394, a
     /// single SEARCH response should contain either ALL or PARTIAL, but not both; if both are
     /// present, ALL takes precedence.
@@ -132,7 +132,7 @@ extension ExtendedSearchResponse {
     /// Returns `nil` if this is not a sequence number response or if the response does not contain matched sequence numbers.
     /// When no matching sequence numbers exist, this property returns an empty set rather than `nil`.
     ///
-    /// This property extracts sequence numbers from ``SearchReturnData/all(_:)`` if present, or falls back to
+    /// Extracts sequence numbers from ``SearchReturnData/all(_:)`` if present, or falls back to
     /// ``SearchReturnData/partial(_:_:)`` if only partial results are available. Per RFC 9394, a
     /// single SEARCH response should contain either ALL or PARTIAL, but not both; if both are
     /// present, ALL takes precedence.

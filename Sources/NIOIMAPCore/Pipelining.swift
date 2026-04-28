@@ -38,7 +38,7 @@
 public enum PipeliningRequirement: Hashable, Sendable {
     /// No command that depends on or changes the mailbox selection can be running.
     ///
-    /// This requirement is imposed by commands like `SELECT`, `EXAMINE`, `UNSELECT`,
+    /// Imposed by commands like `SELECT`, `EXAMINE`, `UNSELECT`,
     /// and `CLOSE` that establish or clear the mailbox selection context.
     case noMailboxCommandsRunning
 
@@ -50,7 +50,7 @@ public enum PipeliningRequirement: Hashable, Sendable {
 
     /// No command using UIDs to specify messages can be running.
     ///
-    /// This is a requirement for sequence number-based commands, since a UID-based
+    /// A requirement for sequence number-based commands, since a UID-based
     /// command might invalidate the mailbox state.
     case noUIDBasedCommandRunning
 
@@ -105,20 +105,20 @@ extension PipeliningRequirement {
 /// - SeeAlso: ``PipeliningRequirement``, ``CommandStreamPart/pipeliningBehavior``,
 ///   [RFC 3501 Section 5.5](https://datatracker.ietf.org/doc/html/rfc3501#section-5.5)
 public enum PipeliningBehavior: Hashable, Sendable {
-    /// This command establishes a new mailbox selection.
+    /// Indicates the command establishes a new mailbox selection.
     ///
     /// Commands like `SELECT`, `EXAMINE`, and `UNSELECT` change which mailbox is active.
     /// These commands satisfy the requirement ``PipeliningRequirement/noMailboxCommandsRunning``
     /// imposed by other mailbox-selection commands.
     case changesMailboxSelection
 
-    /// This command operates within and depends on the current mailbox selection.
+    /// Indicates the command depends on and operates within the current mailbox selection.
     ///
     /// Commands like `FETCH`, `STORE`, `SEARCH`, `EXPUNGE`, etc. require a mailbox
     /// to be selected and will fail if no selection is active.
     case dependsOnMailboxSelection
 
-    /// This command may trigger untagged `EXPUNGE` responses.
+    /// Indicates the command may trigger untagged `EXPUNGE` responses.
     ///
     /// Most commands can cause the server to send untagged `EXPUNGE` responses,
     /// invalidating the sequence numbers of remaining messages. Only `FETCH`, `STORE`,
@@ -126,20 +126,20 @@ public enum PipeliningBehavior: Hashable, Sendable {
     /// requirement ``PipeliningRequirement/noUntaggedExpungeResponse``.
     case mayTriggerUntaggedExpunge
 
-    /// This command uses UIDs to identify messages or is itself a `UID` command.
+    /// Indicates the command uses UIDs to identify messages or is itself a `UID` command.
     ///
     /// Commands like `UID FETCH`, `UID STORE`, etc. operate on UIDs. This behavior
     /// satisfies the requirement ``PipeliningRequirement/noUIDBasedCommandRunning``.
     case isUIDBased
 
-    /// This command changes flags on these specific messages.
+    /// Indicates the command changes flags on these specific messages.
     ///
     /// For non-silent `STORE` operations and similar flag-modifying commands, this
     /// behavior indicates which messages have their flags changed. Satisfies
     /// ``PipeliningRequirement/noFlagReads(_:)`` requirements on those messages.
     case changesFlags(MessageIdentifierSetNonEmpty<UID>)
 
-    /// This command queries flags from these specific messages.
+    /// Indicates the command queries flags from these specific messages.
     ///
     /// For `FETCH` commands with flag attributes and similar flag-reading commands,
     /// this behavior indicates which messages have their flags read. Satisfies
@@ -160,13 +160,13 @@ public enum PipeliningBehavior: Hashable, Sendable {
 }
 
 extension PipeliningBehavior {
-    /// This command is changing flags on all messages.
+    /// A convenience member: indicates the command is changing flags on all messages.
     ///
     /// Convenience static member equivalent to ``changesFlags(_:)`` with
     /// ``MessageIdentifierSetNonEmpty/all``.
     public static let changesFlagsOnAnyMessage = PipeliningBehavior.changesFlags(.all)
 
-    /// This command is querying flags from all messages.
+    /// A convenience member: indicates the command is querying flags from all messages.
     ///
     /// Convenience static member equivalent to ``readsFlags(_:)`` with
     /// ``MessageIdentifierSetNonEmpty/all``.
@@ -176,7 +176,7 @@ extension PipeliningBehavior {
 extension CommandStreamPart {
     /// The requirements that must be satisfied before this command can start.
     ///
-    /// This property returns the ``PipeliningRequirement`` constraints imposed by this
+    /// Returns the ``PipeliningRequirement`` constraints imposed by this
     /// command. Before sending this command, verify that all currently running commands
     /// together satisfy these requirements.
     ///
@@ -324,7 +324,7 @@ extension Command {
 extension CommandStreamPart {
     /// The pipelining characteristics of this command.
     ///
-    /// This property returns the ``PipeliningBehavior`` values that describe how this
+    /// Returns the ``PipeliningBehavior`` values that describe how this
     /// command behaves with respect to pipelining. These behaviors affect what new
     /// commands can be sent while this command is running.
     ///

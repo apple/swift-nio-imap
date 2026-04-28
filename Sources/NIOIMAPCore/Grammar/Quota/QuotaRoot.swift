@@ -35,7 +35,7 @@ import struct NIO.ByteBufferView
 /// along with an array of ``QuotaResource`` values. This response is wrapped as
 /// ``Response/untagged(_:)`` containing ``ResponsePayload/quota(_:_:)``.
 ///
-/// ## Related Types
+/// ## Related types
 ///
 /// - See ``QuotaResource`` for resource usage and limits
 /// - See ``ResponsePayload/quotaRoot(_:_:)`` for mailbox-to-quota-root associations

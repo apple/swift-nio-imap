@@ -22,7 +22,7 @@ import struct NIO.ByteBuffer
 ///
 /// **Requires server capability:** ``Capability/extendedSearch``
 ///
-/// The ESEARCH response can include multiple data elements (e.g., both `MIN` and `COUNT`), and clients should handle
+/// The ESEARCH response can include multiple data elements (for example, both `MIN` and `COUNT`), and clients should handle
 /// each independently. Some result options (like ``count(_:)``) are always present, while others (like ``min(_:)``
 /// and ``max(_:)``) are omitted if the search returns no matches.
 ///
@@ -102,7 +102,7 @@ public enum SearchReturnData: Hashable, Sendable {
 
     /// A server extension result option not defined in this library.
     ///
-    /// This case captures future ESEARCH result data defined by extensions, allowing
+    /// Captures future ESEARCH result data defined by extensions, allowing
     /// forward compatibility with new IMAP capabilities without requiring library updates.
     case dataExtension(KeyValue<String, ParameterValue>)
 }

@@ -61,7 +61,7 @@ public struct AppendData: Hashable, Sendable {
     /// not MIME content-transfer-encoded.
     ///
     /// When `false` (default), the data is sent using standard literal syntax `{size}`,
-    /// indicating the bytes are MIME content-transfer-encoded (e.g., base64 for binary content).
+    /// indicating the bytes are MIME content-transfer-encoded (for example, base64 for binary content).
     ///
     /// **Requires server capability:** ``Capability/binary`` (when `true`)
     ///

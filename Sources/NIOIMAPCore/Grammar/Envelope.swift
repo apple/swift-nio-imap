@@ -46,13 +46,13 @@ public struct Envelope: Hashable, Sendable {
 
     /// The sender(s) of the message, as from the `From:` header.
     ///
-    /// This is the author or originator of the message content. Multiple addresses indicate
+    /// The author or originator of the message content. Multiple addresses indicate
     /// multiple authors are credited with writing the message.
     public var from: [EmailAddressListElement]
 
     /// The actual sender on behalf of the author, as from the `Sender:` header.
     ///
-    /// This is used when one entity sends a message on behalf of another (e.g., an assistant
+    /// Used when one entity sends a message on behalf of another (for example, an assistant
     /// sending mail on behalf of their boss). If absent, the `from` field should be used.
     public var sender: [EmailAddressListElement]
 
@@ -80,12 +80,12 @@ public struct Envelope: Hashable, Sendable {
 
     /// The message ID of the message this message is replying to, as from the `In-Reply-To:` header.
     ///
-    /// This field links this message to a previous message in a conversation thread.
+    /// Links this message to a previous message in a conversation thread.
     public var inReplyTo: MessageID?
 
     /// The unique message identifier, as from the `Message-ID:` header.
     ///
-    /// This identifier is assigned by the originating SMTP server and is globally unique
+    /// Assigned by the originating SMTP server and globally unique
     /// for the originating system.
     public var messageID: MessageID?
 

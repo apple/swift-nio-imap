@@ -50,7 +50,7 @@ public enum UntaggedStatus: Hashable, Sendable {
     /// S: * OK [CAPABILITY IMAP4rev1 STARTTLS LOGIN] server ready
     /// ```
     ///
-    /// This line is wrapped as ``ok(_:)`` with a ``ResponseText`` containing the server's capabilities
+    /// The line is wrapped as ``ok(_:)`` with a ``ResponseText`` containing the server's capabilities
     /// and a ready message. This is typically the first response received after connecting.
     ///
     /// - SeeAlso: [RFC 3501 Section 7.1.2.1](https://datatracker.ietf.org/doc/html/rfc3501#section-7.1.2.1)
@@ -69,7 +69,7 @@ public enum UntaggedStatus: Hashable, Sendable {
     /// S: * NO [ALERT] Server disk is low on space
     /// ```
     ///
-    /// This line is wrapped as ``no(_:)`` with a ``ResponseText`` containing code
+    /// The line is wrapped as ``no(_:)`` with a ``ResponseText`` containing code
     /// ``ResponseTextCode/alert`` and warning text about disk space.
     ///
     /// - SeeAlso: [RFC 3501 Section 7.1.2.2](https://datatracker.ietf.org/doc/html/rfc3501#section-7.1.2.2)
@@ -89,7 +89,7 @@ public enum UntaggedStatus: Hashable, Sendable {
     /// S: * BAD Unexpected character in message sequence
     /// ```
     ///
-    /// This line is wrapped as ``bad(_:)`` with a ``ResponseText`` describing the protocol error.
+    /// The line is wrapped as ``bad(_:)`` with a ``ResponseText`` describing the protocol error.
     ///
     /// - SeeAlso: [RFC 3501 Section 7.1.2.3](https://datatracker.ietf.org/doc/html/rfc3501#section-7.1.2.3)
     case bad(ResponseText)
@@ -98,7 +98,7 @@ public enum UntaggedStatus: Hashable, Sendable {
     ///
     /// The `PREAUTH` response is always untagged and is one of three possible greetings at connection
     /// startup (along with `OK` and `BYE`). It indicates that the connection has already been
-    /// authenticated through external means (e.g., TLS client certificate verification), so no
+    /// authenticated through external means (for example, TLS client certificate verification), so no
     /// `LOGIN` command is needed. After `PREAUTH`, the client is in the authenticated state and can
     /// access mailboxes.
     ///
@@ -108,7 +108,7 @@ public enum UntaggedStatus: Hashable, Sendable {
     /// S: * PREAUTH [CAPABILITY IMAP4rev1 SELECT CREATE] already authenticated
     /// ```
     ///
-    /// This line is wrapped as ``preauth(_:)`` with a ``ResponseText`` indicating the client is
+    /// The line is wrapped as ``preauth(_:)`` with a ``ResponseText`` indicating the client is
     /// already authenticated and listing available capabilities.
     ///
     /// - SeeAlso: [RFC 3501 Section 7.1.2.4](https://datatracker.ietf.org/doc/html/rfc3501#section-7.1.2.4)
@@ -127,7 +127,7 @@ public enum UntaggedStatus: Hashable, Sendable {
     /// S: * BYE [UNAVAILABLE] Server maintenance in progress, please reconnect later
     /// ```
     ///
-    /// This line is wrapped as ``bye(_:)`` with a ``ResponseText`` containing code
+    /// The line is wrapped as ``bye(_:)`` with a ``ResponseText`` containing code
     /// ``ResponseTextCode/unavailable`` and an explanation of why the connection is closing.
     ///
     /// - SeeAlso: [RFC 3501 Section 7.1.2.5](https://datatracker.ietf.org/doc/html/rfc3501#section-7.1.2.5)

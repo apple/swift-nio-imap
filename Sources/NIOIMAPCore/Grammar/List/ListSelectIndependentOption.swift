@@ -35,7 +35,7 @@ import struct NIO.ByteBuffer
 /// The command `LIST SUBSCRIBED (REMOTE SPECIAL-USE) "" "*"` uses the independent options
 /// ``remote`` and ``specialUse`` to return subscribed remote mailboxes marked with special-use attributes.
 ///
-/// ## Related Types
+/// ## Related types
 ///
 /// These differ from ``ListSelectOption`` which may have syntactic relationships.
 /// Combine independent options with ``ListSelectBaseOption`` using ``ListSelectOptions``.
@@ -44,13 +44,13 @@ import struct NIO.ByteBuffer
 public enum ListSelectIndependentOption: Hashable, Sendable {
     /// The `REMOTE` independent option returns information about remote mailbox stores.
     ///
-    /// This asks the server to include mailboxes from remote mailbox stores in addition
+    /// Asks the server to include mailboxes from remote mailbox stores in addition
     /// to local mailboxes. From [RFC 5258 Section 3.2](https://datatracker.ietf.org/doc/html/rfc5258#section-3.2).
     case remote
 
     /// The `SPECIAL-USE` independent option returns only mailboxes with special-use attributes.
     ///
-    /// This filters results to mailboxes marked with attributes like `\All`, `\Archive`, `\Drafts`,
+    /// Filters results to mailboxes marked with attributes like `\All`, `\Archive`, `\Drafts`,
     /// `\Flagged`, `\Junk`, `\Sent`, or `\Trash` (from [RFC 6154](https://datatracker.ietf.org/doc/html/rfc6154)).
     case specialUse
 

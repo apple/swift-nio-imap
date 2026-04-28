@@ -54,7 +54,7 @@ public enum SearchReturnOption: Hashable, Sendable {
     /// Return all message numbers/UIDs that satisfies the search criteria in sequence-set syntax.
     ///
     /// Unlike standard `SEARCH` responses which use space-separated lists, results are returned
-    /// as a compact sequence-set representation (e.g., `2,10:11`) that can be used directly
+    /// as a compact sequence-set representation (for example, `2,10:11`) that can be used directly
     /// in subsequent commands. If the search returns no matches, the server MUST NOT include
     /// this option in the response.
     ///
@@ -80,7 +80,7 @@ public enum SearchReturnOption: Hashable, Sendable {
 
     /// Request a subset of the results using pagination.
     ///
-    /// This option is part of the PARTIAL extension for paginated search results. When specified,
+    /// Part of the PARTIAL extension for paginated search results. When specified,
     /// the server returns only the requested range of matching messages rather than all results,
     /// reducing bandwidth and server processing time.
     ///
@@ -89,7 +89,7 @@ public enum SearchReturnOption: Hashable, Sendable {
 
     /// A server extension result option not defined in this library.
     ///
-    /// This case captures future ESEARCH result options defined by extensions, allowing
+    /// Captures future ESEARCH result options defined by extensions, allowing
     /// forward compatibility with new IMAP capabilities without requiring library updates.
     case optionExtension(KeyValue<String, ParameterValue?>)
 }

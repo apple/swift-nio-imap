@@ -24,7 +24,7 @@ import struct NIO.ByteBuffer
 /// The token appears in the final component of the URLAUTH extension:
 /// `;URLAUTH=<access>:<mechanism>:<token>`
 ///
-/// This type wraps the hexadecimal-encoded token string for use in URLAUTH verification
+/// Wraps the hexadecimal-encoded token string for use in URLAUTH verification
 /// structures (via ``AuthenticatedURLVerifier``).
 ///
 /// ### Example
@@ -45,7 +45,7 @@ import struct NIO.ByteBuffer
 /// When a client later uses this URL with URLFETCH, the server re-calculates the token
 /// to verify authorization before returning the message data.
 ///
-/// ## Related Types
+/// ## Related types
 ///
 /// See ``URLAuthenticationMechanism`` for the mechanism specification, ``AuthenticatedURLVerifier``
 /// for the complete mechanism and token pair, and ``AuthenticatedURL`` for the full
@@ -57,7 +57,7 @@ import struct NIO.ByteBuffer
 public struct EncodedAuthenticatedURL: Hashable, Sendable {
     /// The hexadecimal-encoded authorization token string.
     ///
-    /// This is an ASCII-encoded hexadecimal representation of the token bytes. The RFC 4467
+    /// An ASCII-encoded hexadecimal representation of the token bytes. The RFC 4467
     /// specification recommends using hexadecimal instead of Base64 to avoid URL-problematic
     /// padding characters.
     public var data: String

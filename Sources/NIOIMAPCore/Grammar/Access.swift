@@ -20,7 +20,7 @@ import struct NIO.ByteBuffer
 /// It restricts which users or sessions are permitted to access the message data referenced by the URL.
 /// Each ``AuthenticatedURLRump`` includes an access identifier that determines authorization policy.
 ///
-/// ### Access Types
+/// ### Access types
 ///
 /// - ``anonymous``: Any user, including non-authenticated sessions, may access the URL
 /// - ``authenticateUser``: Only authenticated (non-anonymous) sessions may access the URL
@@ -46,7 +46,7 @@ import struct NIO.ByteBuffer
 ///
 /// Only sessions authenticated as "fred" may use this URL.
 ///
-/// ## Related Types
+/// ## Related types
 ///
 /// See ``AuthenticatedURLRump`` for how access identifiers are combined with expiration dates,
 /// ``AuthenticatedURLVerifier`` for the verification token, and ``AuthenticatedURL`` for

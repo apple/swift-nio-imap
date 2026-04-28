@@ -44,7 +44,7 @@ import struct OrderedCollections.OrderedDictionary
 public struct SearchModificationSequence: Hashable, Sendable {
     /// Extension-specific entry attributes for future CONDSTORE enhancements.
     ///
-    /// This dictionary may contain additional entry attributes defined by future IMAP extensions.
+    /// May contain additional entry attributes defined by future IMAP extensions.
     /// For basic MODSEQ searches (RFC 7162), this is typically empty.
     public var extensions: OrderedDictionary<EntryFlagName, EntryKindRequest>
 

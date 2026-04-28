@@ -92,7 +92,7 @@ extension MailboxInfo {
     public struct Attribute: Hashable, Sendable {
         /// The mailbox cannot be selected with a `SELECT` command.
         ///
-        /// This attribute indicates that the mailbox exists but is not selectable.
+        /// Indicates that the mailbox exists but is not selectable.
         /// A common example is a mailbox used only to contain child mailboxes.
         /// See [RFC 3501 Section 7.2.2](https://datatracker.ietf.org/doc/html/rfc3501#section-7.2.2).
         public static var noSelect: Self { Self(#"\Noselect"#) }
@@ -157,7 +157,7 @@ extension MailboxInfo {
         /// or create custom attributes for extension or server-specific attributes.
         /// Attribute names are case-insensitive per the IMAP specification.
         ///
-        /// - Parameter str: The attribute name, typically starting with backslash (e.g., "\\Noselect")
+        /// - Parameter str: The attribute name, typically starting with backslash (for example, "\\Noselect")
         public init(_ str: String) {
             self.backing = str
         }

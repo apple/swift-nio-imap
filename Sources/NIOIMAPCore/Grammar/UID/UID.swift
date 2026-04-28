@@ -32,7 +32,7 @@
 /// See [RFC 3501 Section 2.3.1.1](https://datatracker.ietf.org/doc/html/rfc3501#section-2.3.1.1)
 /// for details on unique identifier handling.
 ///
-/// ## Related Types
+/// ## Related types
 ///
 /// Use ``SequenceNumber`` to reference messages by their current position in the mailbox.
 /// Use ``MessageIdentifierSet`` or ``MessageIdentifierRange`` to represent collections of UIDs.

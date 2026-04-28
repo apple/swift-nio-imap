@@ -22,7 +22,7 @@
 /// Together, ``AuthenticatedURLRump`` and ``AuthenticatedURLVerifier`` form a complete
 /// ``AuthenticatedURL`` that defines all authorization parameters for a URLAUTH-authorized URL.
 ///
-/// ### URLAUTH Format
+/// ### URLAUTH format
 ///
 /// A complete URLAUTH component has the form:
 /// ```
@@ -58,7 +58,7 @@
 /// imap://owner@example.com/INBOX/;uid=20;EXPIRE=2025-12-31T23:59:59Z;URLAUTH=anonymous:internal:TOKEN
 /// ```
 ///
-/// ## Related Types
+/// ## Related types
 ///
 /// - ``Expire`` wraps the optional expiration date
 /// - ``Access`` defines the access identifier

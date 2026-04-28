@@ -46,7 +46,7 @@
 /// Result: imap://other.com/
 /// ```
 ///
-/// ## Related Types
+/// ## Related types
 ///
 /// - ``RelativeIMAPURL`` uses network paths as one variant of relative URLs
 /// - ``IMAPServer`` provides the server connection specification

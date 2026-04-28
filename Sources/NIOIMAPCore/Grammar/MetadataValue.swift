@@ -35,7 +35,7 @@ import struct NIO.ByteBuffer
 /// - `MetadataValue(ByteBuffer("Team folder"))` for `/shared/comment`
 /// - `MetadataValue(nil)` for `/private/notes` (not set or deleted)
 ///
-/// ## Related Types
+/// ## Related types
 ///
 /// - See ``MetadataEntryName`` for entry names
 /// - See ``MetadataResponse`` for complete metadata responses

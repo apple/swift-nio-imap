@@ -26,7 +26,7 @@ import struct OrderedCollections.OrderedDictionary
 /// The server responds with untagged data (prefixed with `*`) and a tagged response (using the same tag)
 /// indicating success (`OK`), failure (`NO`), or protocol error (`BAD`). See ``Response`` for response types.
 ///
-/// ## Command Structure
+/// ## Command structure
 ///
 /// Every IMAP command follows this basic structure:
 /// ```
@@ -39,7 +39,7 @@ import struct OrderedCollections.OrderedDictionary
 /// A0003 FETCH 1:* (FLAGS BODY)
 /// ```
 ///
-/// ## Protocol State Requirements
+/// ## Protocol state requirements
 ///
 /// Commands are restricted based on the connection's current state:
 /// - **Any State**: Commands like ``capability``, ``noop``, and ``logout`` are valid at any time.
@@ -50,7 +50,7 @@ import struct OrderedCollections.OrderedDictionary
 /// - **Selected**: Commands like ``fetch(_:_:_:)`` and ``search(key:charset:returnOptions:)`` work with messages
 ///   in the currently selected mailbox.
 ///
-/// ## Extension Support
+/// ## Extension support
 ///
 /// Many commands support IMAP extensions defined in RFCs beyond [RFC 3501](https://datatracker.ietf.org/doc/html/rfc3501).
 /// For example, the ``list(_:reference:_:_:)`` command supports extensions from
@@ -58,7 +58,7 @@ import struct OrderedCollections.OrderedDictionary
 /// [RFC 5819](https://datatracker.ietf.org/doc/html/rfc5819) (RETURN option), and
 /// [RFC 6154](https://datatracker.ietf.org/doc/html/rfc6154) (SPECIAL-USE mailboxes).
 ///
-/// ## Streaming Commands
+/// ## Streaming commands
 ///
 /// Some commands like `APPEND` involve uploading large messages and are handled separately by the
 /// ``AppendCommand`` type to support streaming of data.
@@ -127,7 +127,7 @@ public enum Command: Hashable, Sendable {
     /// The `LIST` command allows a client to discover what mailboxes are available on the server,
     /// with support for pattern matching and filtering.
     ///
-    /// ## Base Functionality ([RFC 3501 Section 6.3.8](https://datatracker.ietf.org/doc/html/rfc3501#section-6.3.8))
+    /// ## Base functionality ([RFC 3501 Section 6.3.8](https://datatracker.ietf.org/doc/html/rfc3501#section-6.3.8))
     ///
     /// The base `LIST` command takes two arguments:
     /// - **reference**: A mailbox name or hierarchy level that provides context for interpreting the pattern.
@@ -150,7 +150,7 @@ public enum Command: Hashable, Sendable {
     /// pattern as `"*"`. The server responds with zero or more `S: * LIST...` lines (each wrapped as
     /// ``MailboxData/list(_:)``), followed by the tagged response `S: A001 OK LIST Completed`.
     ///
-    /// ## Selection Options ([RFC 5258](https://datatracker.ietf.org/doc/html/rfc5258))
+    /// ## Selection options ([RFC 5258](https://datatracker.ietf.org/doc/html/rfc5258))
     ///
     /// The optional `options` parameter uses ``ListSelectOptions`` to control which mailboxes are listed:
     /// - ``ListSelectBaseOption/subscribed``: Only list mailboxes that the user has subscribed to
@@ -159,7 +159,7 @@ public enum Command: Hashable, Sendable {
     ///   - ``ListSelectOption/recursiveMatch``: Include parent mailboxes that don't match but have matching children
     ///     ([RFC 5258](https://datatracker.ietf.org/doc/html/rfc5258)).
     ///
-    /// ## Independent Options ([RFC 5258](https://datatracker.ietf.org/doc/html/rfc5258), [RFC 6154](https://datatracker.ietf.org/doc/html/rfc6154))
+    /// ## Independent options ([RFC 5258](https://datatracker.ietf.org/doc/html/rfc5258), [RFC 6154](https://datatracker.ietf.org/doc/html/rfc6154))
     ///
     /// When syntax conflicts prevent combining options, use ``listIndependent(_:reference:_:_:)`` instead:
     /// - ``ListSelectIndependentOption/remote``: Include remote mailboxes in the results
@@ -167,7 +167,7 @@ public enum Command: Hashable, Sendable {
     /// - ``ListSelectIndependentOption/specialUse``: Only return mailboxes with special-use attributes
     ///   like `\Drafts`, `\Sent`, or `\Trash` ([RFC 6154](https://datatracker.ietf.org/doc/html/rfc6154)).
     ///
-    /// ## Return Options ([RFC 5258](https://datatracker.ietf.org/doc/html/rfc5258), [RFC 5819](https://datatracker.ietf.org/doc/html/rfc5819), [RFC 6154](https://datatracker.ietf.org/doc/html/rfc6154))
+    /// ## Return options ([RFC 5258](https://datatracker.ietf.org/doc/html/rfc5258), [RFC 5819](https://datatracker.ietf.org/doc/html/rfc5819), [RFC 6154](https://datatracker.ietf.org/doc/html/rfc6154))
     ///
     /// The optional `returnOptions` array specifies what additional data should be returned for each mailbox:
     /// - ``ReturnOption/subscribed``: Include subscription state for each mailbox
@@ -179,7 +179,7 @@ public enum Command: Hashable, Sendable {
     /// - ``ReturnOption/statusOption(_:)``: Request `STATUS` data (mailbox statistics like `MESSAGES`, `UNSEEN`, `UIDVALIDITY`)
     ///   be returned alongside `LIST` responses ([RFC 5819](https://datatracker.ietf.org/doc/html/rfc5819)).
     ///
-    /// ### Example with Return Options
+    /// ### Example with return options
     ///
     /// ```
     /// C: A002 LIST "" "INBOX" RETURN (SUBSCRIBED STATUS (MESSAGES UNSEEN))
@@ -406,7 +406,7 @@ public enum Command: Hashable, Sendable {
 
     /// Searches the currently-selected mailbox for messages that match the search criteria.
     ///
-    /// This is a RFC 3501 / RFC 4731 style search. RFC 7377 style searches use `.extendedSearch`.
+    /// Uses RFC 3501 / RFC 4731 style search. RFC 7377 style searches use `.extendedSearch`.
     ///
     /// If `returnOptions` is empty, this is a RFC 3501 style search. But note that the empty
     /// RFC 7377 `RETURN ()` maps to `[.all]` — as it’s equivalent to `RETURN (ALL)`.
@@ -418,7 +418,7 @@ public enum Command: Hashable, Sendable {
     /// `MOVE` – Moves each message in the given sequence number set to the destination mailbox.
     ///
     /// Copies the specified messages to the end of the destination mailbox and removes the copies from the current mailbox.
-    /// This operation is equivalent to performing ``copy(_:_:)`` followed by ``store(_:_:_:)`` with `\Deleted` flag.
+    /// Equivalent to performing ``copy(_:_:)`` followed by ``store(_:_:_:)`` with `\Deleted` flag.
     ///
     /// - SeeAlso: [RFC 6851](https://datatracker.ietf.org/doc/html/rfc6851)
     case move(LastCommandSet<SequenceNumber>, MailboxName)
@@ -472,7 +472,7 @@ public enum Command: Hashable, Sendable {
     /// - Parameters:
     ///   - criteria: One or more ``SortCriterion`` values defining the sort order. Later criteria
     ///     are used as tie-breakers when earlier criteria produce equal values.
-    ///   - charset: The character set for string comparisons (e.g., `"UTF-8"`, `"US-ASCII"`). Required.
+    ///   - charset: The character set for string comparisons (for example, `"UTF-8"` or `"US-ASCII"`). Required.
     ///   - key: The ``SearchKey`` filtering which messages to include in the result.
     ///   - returnOptions: Optional ``SearchReturnOption`` values controlling the response format.
     ///
@@ -544,7 +544,7 @@ public enum Command: Hashable, Sendable {
 
     /// Performs a “multimailbox” search as defined in RFC 7377.
     ///
-    /// This command enables searching across multiple mailboxes in a single request. The search results are
+    /// Enables searching across multiple mailboxes in a single request. The search results are
     /// returned using the `ESEARCH` response format defined in RFC 4731, which includes optional `MIN`, `MAX`,
     /// `COUNT`, and `ALL` return options. This command is equivalent to the extended `SEARCH` command but can
     /// target multiple mailboxes via the ``MailboxFilter`` and ``Mailboxes`` filters.
@@ -1119,7 +1119,7 @@ extension Command {
     }
 
     /// Convenience for creating a *UID MOVE* command.
-    /// Pass in a `UIDSet`, and if that set is valid (i.e. non-empty) then a command is returned.
+    /// Pass in a `UIDSet`, and if that set is valid (that is, non-empty) then a command is returned.
     /// - parameter messages: The set of message UIDs to use.
     /// - parameter mailbox: The destination mailbox.
     /// - returns: `nil` if `messages` is empty, otherwise a `Command`.
@@ -1131,7 +1131,7 @@ extension Command {
     }
 
     /// Convenience for creating a *UID COPY* command.
-    /// Pass in a `UIDSet`, and if that set is valid (i.e. non-empty) then a command is returned.
+    /// Pass in a `UIDSet`, and if that set is valid (that is, non-empty) then a command is returned.
     /// - parameter messages: The set of message UIDs to use.
     /// - parameter mailbox: The destination mailbox.
     /// - returns: `nil` if `messages` is empty, otherwise a `Command`.
@@ -1143,7 +1143,7 @@ extension Command {
     }
 
     /// Convenience for creating a *UID FETCH* command.
-    /// Pass in a `UIDSet`, and if that set is valid (i.e. non-empty) then a command is returned.
+    /// Pass in a `UIDSet`, and if that set is valid (that is, non-empty) then a command is returned.
     /// - parameter messages: The set of message UIDs to use.
     /// - parameter attributes: Which attributes to retrieve.
     /// - parameter modifiers: Fetch modifiers.
@@ -1157,7 +1157,7 @@ extension Command {
     }
 
     /// Convenience for creating a *UID STORE* command.
-    /// Pass in a `UIDSet`, and if that set is valid (i.e. non-empty) then a command is returned.
+    /// Pass in a `UIDSet`, and if that set is valid (that is, non-empty) then a command is returned.
     /// - parameter messages: The set of message UIDs to use.
     /// - parameter modifiers: Store modifiers.
     /// - parameter data: The store data to apply.
@@ -1170,7 +1170,7 @@ extension Command {
     }
 
     /// Convenience for creating a *UID EXPUNGE* command.
-    /// Pass in a `UIDSet`, and if that set is valid (i.e. non-empty) then a command is returned.
+    /// Pass in a `UIDSet`, and if that set is valid (that is, non-empty) then a command is returned.
     /// - parameter messages: The set of message UIDs to use.
     /// - parameter mailbox: The mailbox on which to perform the expunge.
     /// - returns: `nil` if `messages` is empty, otherwise a `Command`.

@@ -40,7 +40,7 @@ extension TaggedResponse {
         /// The command executed successfully.
         ///
         /// An OK status indicates the server has completed the command without error. The associated
-        /// ``ResponseText`` may contain optional status codes (e.g., ``ResponseTextCode/uidNext(_:)``)
+        /// ``ResponseText`` may contain optional status codes (for example, ``ResponseTextCode/uidNext(_:)``)
         /// with additional information about the command result. This is the expected outcome for most
         /// successful commands.
         ///
@@ -50,7 +50,7 @@ extension TaggedResponse {
         /// S: A001 OK [UIDVALIDITY 3] SELECT completed
         /// ```
         ///
-        /// This line is wrapped as ``State/ok(_:)`` with a ``ResponseText`` containing code
+        /// The line is wrapped as ``State/ok(_:)`` with a ``ResponseText`` containing code
         /// ``ResponseTextCode/uidValidity(_:)`` and text "`SELECT` completed".
         ///
         /// - SeeAlso: [RFC 3501 Section 7.1.2.1](https://datatracker.ietf.org/doc/html/rfc3501#section-7.1.2.1)
@@ -60,7 +60,7 @@ extension TaggedResponse {
         ///
         /// A NO status indicates the server understood the command syntax but declined to execute it
         /// for logical or protocol reasons. The associated ``ResponseText`` often includes a structured
-        /// status code (e.g., ``ResponseTextCode/cannot``, ``ResponseTextCode/tryCreate``, or
+        /// status code (for example, ``ResponseTextCode/cannot``, ``ResponseTextCode/tryCreate``, or
         /// ``ResponseTextCode/overQuota``) explaining the reason for rejection. This is not a protocol
         /// error; the client may retry with different parameters.
         ///
@@ -70,7 +70,7 @@ extension TaggedResponse {
         /// S: A002 NO [TRYCREATE] APPEND failed - mailbox does not exist
         /// ```
         ///
-        /// This line is wrapped as ``State/no(_:)`` with a ``ResponseText`` containing code
+        /// The line is wrapped as ``State/no(_:)`` with a ``ResponseText`` containing code
         /// ``ResponseTextCode/tryCreate`` and text "`APPEND` failed - mailbox does not exist".
         ///
         /// - SeeAlso: [RFC 3501 Section 7.1.2.2](https://datatracker.ietf.org/doc/html/rfc3501#section-7.1.2.2)
@@ -89,7 +89,7 @@ extension TaggedResponse {
         /// S: A003 BAD Invalid command syntax
         /// ```
         ///
-        /// This line is wrapped as ``State/bad(_:)`` with a ``ResponseText`` containing text
+        /// The line is wrapped as ``State/bad(_:)`` with a ``ResponseText`` containing text
         /// "Invalid command syntax".
         ///
         /// - SeeAlso: [RFC 3501 Section 7.1.2.3](https://datatracker.ietf.org/doc/html/rfc3501#section-7.1.2.3)

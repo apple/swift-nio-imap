@@ -36,7 +36,7 @@ import struct NIO.ByteBuffer
 /// `UNSEEN` search criteria. The response is ``Response/untagged(_:)`` containing
 /// ``ResponsePayload/mailboxData(_:)`` with ``MailboxData/extendedSearch(_:)``.
 ///
-/// ## Related Types
+/// ## Related types
 ///
 /// - See ``SearchKey`` for search criteria
 /// - See ``SearchReturnOption`` for return options
@@ -60,14 +60,14 @@ public struct ExtendedSearchOptions: Hashable, Sendable {
 
     /// Return options that filter and shape the data returned from the search.
     ///
-    /// Specifies which fields should be returned in the search response (e.g., ``SearchReturnOption/min``,
-    /// ``SearchReturnOption/max``, ``SearchReturnOption/all``, etc.).
+    /// Specifies which fields should be returned in the search response (for example, ``SearchReturnOption/min``,
+    /// ``SearchReturnOption/max``, or ``SearchReturnOption/all``).
     public var returnOptions: [SearchReturnOption]
 
     /// The mailboxes and scope to search across.
     ///
     /// Specifies which mailbox(es) to include in the search operation using mailbox filters
-    /// (e.g., personal namespace, specific mailbox names). When `nil`, the current mailbox context is used.
+    /// (for example, personal namespace or specific mailbox names). When `nil`, the current mailbox context is used.
     public var sourceOptions: ExtendedSearchSourceOptions?
 
     /// Creates a new `ExtendedSearchOptions` for multi-mailbox search.

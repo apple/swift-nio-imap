@@ -19,7 +19,7 @@ import struct NIO.ByteBuffer
 /// **Requires server capability:** ``Capability/multiSearch``
 ///
 /// Source options define the mailbox context for an extended search operation, allowing searches to span
-/// multiple mailboxes using mailbox filters (e.g., personal namespace mailboxes, specific named mailboxes).
+/// multiple mailboxes using mailbox filters (for example, personal namespace mailboxes or specific named mailboxes).
 /// The `IN` clause specifies one or more mailbox filters, and optional scope options can further refine
 /// the search context. See [RFC 7377 Section 2.1.1](https://datatracker.ietf.org/doc/html/rfc7377#section-2.1.1).
 ///
@@ -35,7 +35,7 @@ import struct NIO.ByteBuffer
 /// - ``MailboxFilter/personal`` - all personal mailboxes
 /// - ``MailboxFilter/subtree(_:)`` - the "Archive" mailbox and its subfolders
 ///
-/// ## Related Types
+/// ## Related types
 ///
 /// - See ``MailboxFilter`` for individual mailbox filter types
 /// - See ``ExtendedSearchOptions`` for complete search options
@@ -46,7 +46,7 @@ public struct ExtendedSearchSourceOptions: Hashable, Sendable {
     /// Array of mailbox filters specifying which mailboxes to search.
     ///
     /// At least one mailbox filter must be present. Multiple filters can be combined to search
-    /// across different mailbox categories (e.g., personal mailboxes, specific named mailboxes,
+    /// across different mailbox categories (for example, personal mailboxes, specific named mailboxes, or
     /// subscribed mailboxes).
     public let sourceMailbox: [MailboxFilter]
 

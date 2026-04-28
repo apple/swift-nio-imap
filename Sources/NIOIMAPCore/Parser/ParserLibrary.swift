@@ -75,7 +75,7 @@ extension ParseBuffer {
 public struct BadCommand: Error {
     /// The tag of the bad command.
     ///
-    /// This allows the server to send a properly-tagged error response to the client,
+    /// Allows the server to send a properly-tagged error response to the client,
     /// maintaining IMAP's request/response correlation even when the command is malformed.
     public var commandTag: String
 
@@ -90,7 +90,7 @@ public struct BadCommand: Error {
 /// `ParserError` is thrown when the IMAP protocol parser encounters bytes that cannot be
 /// interpreted according to the IMAP grammar (RFC 3501 or extensions). Common causes include:
 /// - Invalid UTF-8 sequences in string fields
-/// - Malformed protocol syntax (e.g., unexpected characters or missing required elements)
+/// - Malformed protocol syntax (for example, unexpected characters or missing required elements)
 /// - Non-conforming protocol elements
 ///
 /// The ``hint`` field provides a developer-friendly description of what went wrong.
@@ -104,7 +104,7 @@ public struct ParserError: Error {
 
     /// If possible, a description of the error and why it occurred.
     ///
-    /// This hint describes the parsing failure in human-readable terms, such as
+    /// Describes the parsing failure in human-readable terms, such as
     /// "Invalid UTF8", "Missing CRLF", "Unexpected character", etc. It's intended
     /// for logging and debugging purposes.
     public var hint: String
@@ -120,12 +120,12 @@ public struct ParserError: Error {
 
 /// Signals that a protocol message was too complex and required excessive recursive parsing.
 ///
-/// IMAP protocol elements can nest (e.g., nested parenthesized lists in BODYSTRUCTURE),
+/// IMAP protocol elements can nest (for example, nested parenthesized lists in BODYSTRUCTURE),
 /// and parsing uses recursion to handle this. To prevent stack overflow attacks,
 /// the parser enforces a maximum recursion depth. If this limit is exceeded, this error
 /// is thrown.
 ///
-/// This is a safety limit to prevent malicious or extremely unusual protocol messages
+/// A safety limit to prevent malicious or extremely unusual protocol messages
 /// from causing a stack overflow.
 ///
 /// - SeeAlso: [RFC 3501 Section 4.3](https://datatracker.ietf.org/doc/html/rfc3501#section-4.3) (protocol syntax)
@@ -136,7 +136,7 @@ public struct TooMuchRecursion: Error {
     /// depth would exceed this limit. This prevents stack overflow from deeply nested
     /// protocol structures.
     ///
-    /// This limit is currently fixed at compile-time and not configurable at runtime.
+    /// Currently fixed at compile-time and not configurable at runtime.
     public var limit: Int
 
     init(limit: Int) {

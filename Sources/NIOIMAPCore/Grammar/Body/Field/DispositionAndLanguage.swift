@@ -17,11 +17,9 @@ import struct NIO.ByteBuffer
 extension BodyStructure {
     /// Content disposition and language information for a message part.
     ///
-    /// This type pairs optional content disposition (indicating how the part should be handled) with optional
+    /// Pairs optional content disposition (indicating how the part should be handled) with optional
     /// language and location information. Both are optional fields in the body structure defined in
     /// [RFC 3501 Section 7.4.2](https://datatracker.ietf.org/doc/html/rfc3501#section-7.4.2).
-    ///
-    /// This is an API abstraction to simplify working with the disposition and language/location pairing from the raw IMAP message.
     ///
     /// ### Example
     ///

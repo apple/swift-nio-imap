@@ -20,7 +20,7 @@ import struct NIO.ByteBuffer
 /// characters. This encoding is applied when a user identifier contains non-ASCII characters,
 /// spaces, or special characters that are not allowed in URL syntax (RFC 2192, RFC 3986).
 ///
-/// This type wraps a percent-encoded user identifier for use in server specifications
+/// Wraps a percent-encoded user identifier for use in server specifications
 /// (via ``UserAuthenticationMechanism`` and ``IMAPServer``) and in URLAUTH access identifiers
 /// (via ``Access`` with `user+` and `submit+` prefixes).
 ///
@@ -43,7 +43,7 @@ import struct NIO.ByteBuffer
 /// imap://owner@example.com/INBOX/;uid=20;urlauth=submit+Fr%C3%A9d%C3%A9ric:internal:...
 /// ```
 ///
-/// ## Related Types
+/// ## Related types
 ///
 /// See ``Access`` for how encoded users are used in URLAUTH access identifiers,
 /// ``UserAuthenticationMechanism`` for server-level user specifications, and

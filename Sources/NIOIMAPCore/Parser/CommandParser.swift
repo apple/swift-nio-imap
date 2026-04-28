@@ -36,7 +36,7 @@ public struct SynchronizedCommand: Hashable, Sendable {
 
     /// A command to be sent to a server.
     ///
-    /// This is the actual ``CommandStreamPart`` (or part of a command in streaming mode).
+    /// The actual ``CommandStreamPart`` (or part of a command in streaming mode).
     /// May be `nil` if only continuation data is being sent.
     public var commandPart: CommandStreamPart?
 
@@ -109,13 +109,13 @@ public struct CommandParser: Parser, Sendable {
     /// The maximum number of bytes that can be buffered at any time.
     ///
     /// When the parser accumulates more than this limit, an error is thrown.
-    /// This serves as DoS protection against malicious or malformed input.
+    /// Serves as DoS protection against malicious or malformed input.
     /// Defaults to ``IMAPDefaults/lineLengthLimit`` (8192 bytes).
     public let bufferLimit: Int
 
     /// The maximum size of a single literal (data between `{size}` markers).
     ///
-    /// This serves as DoS protection against excessively large literal data.
+    /// Serves as DoS protection against excessively large literal data.
     /// Defaults to ``IMAPDefaults/literalSizeLimit`` (4096 bytes).
     public var literalSizeLimit: Int { parser.literalSizeLimit }
     private(set) var mode: Mode = .lines

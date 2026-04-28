@@ -23,7 +23,7 @@
 /// - **URLAUTH URLs**: `imap://server/mailbox/;uidvalidity=V/;uid=N;urlauth=...`
 /// - **CATENATE operations**: Reference existing messages when composing new messages (RFC 4469)
 ///
-/// ### Message Path Components
+/// ### Message path components
 ///
 /// 1. **Mailbox Reference** (``MailboxUIDValidity``): Identifies the mailbox with optional UID validity
 /// 2. **Message UID** (``IUID``): The message unique identifier
@@ -53,7 +53,7 @@
 /// S: * GENURLAUTH "imap://user@example.com/INBOX/;uidvalidity=4294967295/;uid=20;urlauth=anonymous:internal:..."
 /// ```
 ///
-/// ## Related Types
+/// ## Related types
 ///
 /// - ``MailboxUIDValidity`` provides the mailbox reference
 /// - ``IUID`` wraps the message unique identifier
@@ -74,7 +74,7 @@ public struct MessagePath: Hashable, Sendable {
     /// The unique identifier of the message within the mailbox.
     public var iUID: IUID
 
-    /// Optional section of the message (e.g., "1", "2.MIME", "TEXT").
+    /// Optional section of the message (for example, "1", "2.MIME", or "TEXT").
     ///
     /// When `nil`, refers to the entire message. When specified, refers to a specific
     /// part or substructure of the message.

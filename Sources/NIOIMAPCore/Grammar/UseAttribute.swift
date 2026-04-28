@@ -17,7 +17,7 @@ import struct NIO.ByteBuffer
 /// A special-use mailbox attribute from RFC 6154.
 ///
 /// The `SPECIAL-USE` extension allows servers to advertise the special purpose of certain mailboxes.
-/// This helps clients automatically identify important mailboxes like Drafts, Sent, Trash, and Junk
+/// Helps clients automatically identify important mailboxes like Drafts, Sent, Trash, and Junk
 /// without relying on localized mailbox names or user configuration.
 ///
 /// The attribute values are case-insensitive and are stored lowercase internally for comparison.
@@ -38,7 +38,7 @@ public struct UseAttribute: Hashable, Sendable {
     /// Stores messages that have been marked as "important" for some reason.
     public static let flagged = Self("\\Flagged")
 
-    /// Stores messages deemed to be spam of junk mail, e.g. from a mailing list.
+    /// Stores messages deemed to be spam or junk mail, for example, from a mailing list.
     public static let junk = Self("\\Junk")
 
     /// Holds copies of messages that have been sent.
@@ -50,7 +50,7 @@ public struct UseAttribute: Hashable, Sendable {
     internal let stringValue: String
 
     /// Creates a new `UseAttribute` from the raw `String`. Note that
-    /// usually it should be sufficient to just use the predefined attributes, e.g. `.drafts`.
+    /// usually it should be sufficient to just use the predefined attributes, for example `.drafts`.
     /// `rawValue` will be lowercased.
     public init(_ stringValue: String) {
         self.stringValue = stringValue
@@ -74,7 +74,7 @@ extension UseAttribute {
 }
 
 extension String {
-    /// The raw value of the attribute, e.g. `\Trash`. Always lowercase..
+    /// The raw value of the attribute, for example `\Trash`. Always lowercase.
     public init(_ other: UseAttribute) {
         self = other.stringValue
     }

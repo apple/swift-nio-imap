@@ -33,7 +33,7 @@ import struct NIO.ByteBuffer
 /// The `ALL` option in the command queries modification sequences for the specified flags,
 /// considering both private and shared metadata sources.
 ///
-/// ## Related Types
+/// ## Related types
 ///
 /// - See ``EntryKindResponse`` for server-returned entry type information
 /// - See ``MetadataOption`` for other metadata query options

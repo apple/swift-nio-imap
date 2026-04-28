@@ -18,7 +18,7 @@ extension BodyStructure {
     /// A single-part MIME message body as defined in RFC 3501.
     ///
     /// A single-part body represents a message containing only one MIME part. This includes simple
-    /// media types (e.g., `text/plain`, `image/jpeg`), the `message/rfc822` encapsulated message type,
+    /// media types (for example, `text/plain` or `image/jpeg`), the `message/rfc822` encapsulated message type,
     /// and text-specific types. Single-part bodies may have optional extension fields for forward compatibility.
     ///
     /// ### Example
@@ -27,7 +27,7 @@ extension BodyStructure {
     /// ("text" "plain" ("charset" "us-ascii") NIL NIL "7bit" 3445 65)
     /// ```
     ///
-    /// This is parsed as a ``Singlepart`` with `kind: .text(...)`, `fields: Fields(...)`, and no extension.
+    /// The wire format above is parsed as a ``Singlepart`` with `kind: .text(...)`, `fields: Fields(...)`, and no extension.
     ///
     /// - SeeAlso: [RFC 3501 Section 2.6.3](https://datatracker.ietf.org/doc/html/rfc3501#section-2.6.3)
     /// - SeeAlso: ``Kind``
@@ -65,19 +65,19 @@ extension BodyStructure.Singlepart {
     /// Represents the three main kinds of single-part bodies: basic media types, encapsulated messages,
     /// and text-specific types. Each kind may have additional properties specific to that type.
     public indirect enum Kind: Hashable, Sendable {
-        /// A simple, non-message media type (e.g., `image/jpeg`, `application/pdf`).
+        /// A simple, non-message media type (for example, `image/jpeg` or `application/pdf`).
         ///
         /// The associated ``Media/MediaType`` specifies the exact MIME type and subtype.
         case basic(Media.MediaType)
 
-        /// An encapsulated RFC 822 email message (e.g., `message/rfc822`).
+        /// An encapsulated RFC 822 email message (for example, `message/rfc822`).
         ///
         /// The associated ``Message`` contains the envelope and nested body of the embedded message.
         case message(Message)
 
         /// A text-specific body type with optional line count information.
         ///
-        /// The associated ``Text`` specifies the text subtype (e.g., `plain` or `html`).
+        /// The associated ``Text`` specifies the text subtype (for example, `plain` or `html`).
         case text(Text)
     }
 
@@ -94,12 +94,10 @@ extension BodyStructure.Singlepart {
 
         /// The hierarchical body structure of the embedded message.
         ///
-        /// This may itself be multipart, creating arbitrarily deep nesting of messages.
+        /// May itself be multipart, creating arbitrarily deep nesting of messages.
         public var body: BodyStructure
 
         /// The number of lines in the message (per RFC 2045/RFC 3501).
-        ///
-        /// This is the line count of the message in its canonical form.
         public var lineCount: Int
 
         /// Creates a new encapsulated message.
@@ -117,10 +115,10 @@ extension BodyStructure.Singlepart {
 
     /// A text-specific body part with MIME type `text/*` (RFC 3501).
     ///
-    /// Text bodies are specialized single-part bodies with a specific subtype (e.g., `plain`, `html`)
+    /// Text bodies are specialized single-part bodies with a specific subtype (for example, `plain` or `html`)
     /// and an associated line count.
     public struct Text: Hashable, Sendable {
-        /// The text subtype (e.g., `plain` for `text/plain`, `html` for `text/html`).
+        /// The text subtype (for example, `plain` for `text/plain` or `html` for `text/html`).
         public var mediaSubtype: Media.Subtype
 
         /// The number of lines in the text body (per RFC 2045/RFC 3501).
@@ -129,7 +127,7 @@ extension BodyStructure.Singlepart {
         public var lineCount: Int
 
         /// Creates a new text body.
-        /// - parameter mediaSubtype: The text subtype (e.g., `plain` or `html`)
+        /// - parameter mediaSubtype: The text subtype (for example, `plain` or `html`)
         /// - parameter lineCount: The number of lines in the text
         public init(mediaSubtype: Media.Subtype, lineCount: Int) {
             self.mediaSubtype = mediaSubtype

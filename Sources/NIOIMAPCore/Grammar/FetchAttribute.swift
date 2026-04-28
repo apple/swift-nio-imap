@@ -20,11 +20,11 @@ import struct NIO.ByteBuffer
 /// This enum represents all available fetch attributes, including standard RFC 3501 attributes and
 /// attributes from various IMAP extensions.
 ///
-/// ### Standard Attributes (RFC 3501)
+/// ### Standard attributes (RFC 3501)
 ///
 /// Basic message properties like envelope, flags, internal date, and RFC 822 message format.
 ///
-/// ### Extension Attributes
+/// ### Extension attributes
 ///
 /// - `BODYSTRUCTURE`: Detailed message structure information (RFC 3501)
 /// - `BINARY`: Raw binary content of message sections (RFC 3516 BINARY extension)
@@ -33,7 +33,7 @@ import struct NIO.ByteBuffer
 /// - `EMAILID` / `THREADID`: Message and thread identifiers (RFC 8474)
 /// - `X-GM-*`: Gmail-specific attributes (non-standard)
 ///
-/// ### Attributes with Options
+/// ### Attributes with options
 ///
 /// Some attributes support optional parameters:
 /// - ``bodySection(peek:_:_:)`` supports a `peek` flag (prevents \\Seen flag modification) and partial byte ranges
@@ -57,7 +57,7 @@ public enum FetchAttribute: Hashable, Sendable {
     /// The message envelope structure containing sender, recipient, subject, and date information.
     ///
     /// Returns an ``Envelope`` structure with the sender, recipient lists, subject, and other message metadata.
-    /// This is a parsed representation of the message headers.
+    /// A parsed representation of the message headers.
     ///
     /// - SeeAlso: [RFC 3501 Section 7.4.2](https://datatracker.ietf.org/doc/html/rfc3501#section-7.4.2)
     case envelope
@@ -126,7 +126,7 @@ public enum FetchAttribute: Hashable, Sendable {
     /// their headers. Supports partial byte ranges for efficient fetching of large parts.
     ///
     /// - parameter peek: If `true`, does not set the `\Seen` flag on the message; if `false`, sets `\Seen`
-    /// - parameter section: The section specifier (e.g., `1`, `1.1`, `HEADER`, `TEXT`)
+    /// - parameter section: The section specifier (for example, `1`, `1.1`, `HEADER`, or `TEXT`)
     /// - parameter partial: Optional byte range `startOctet..<endOctet` to fetch only a portion
     /// - SeeAlso: [RFC 3501 Section 7.4.2](https://datatracker.ietf.org/doc/html/rfc3501#section-7.4.2)
     case bodySection(peek: Bool, _ section: SectionSpecifier, ClosedRange<UInt32>?)
@@ -168,7 +168,7 @@ public enum FetchAttribute: Hashable, Sendable {
     /// **Requires server capability:** ``Capability/binary``
     ///
     /// - parameter peek: If `true`, does not set the `\Seen` flag; if `false`, sets `\Seen`
-    /// - parameter section: The specific MIME part to fetch (e.g., `1`, `1.1`)
+    /// - parameter section: The specific MIME part to fetch (for example, `1` or `1.1`)
     /// - parameter partial: Optional byte range to fetch only a portion
     /// - SeeAlso: [RFC 3516](https://datatracker.ietf.org/doc/html/rfc3516)
     case binary(peek: Bool, section: SectionSpecifier.Part, partial: ClosedRange<UInt32>?)
@@ -185,7 +185,7 @@ public enum FetchAttribute: Hashable, Sendable {
 
     /// The message's Gmail-assigned message ID (Gmail extension, non-standard).
     ///
-    /// This is a Gmail-specific extension that returns the unique message identifier within
+    /// A Gmail-specific extension that returns the unique message identifier within
     /// Gmail's system. Not part of the IMAP standard.
     ///
     /// - SeeAlso:  https://developers.google.com/gmail/imap/imap-extensions
@@ -193,7 +193,7 @@ public enum FetchAttribute: Hashable, Sendable {
 
     /// The message's Gmail thread ID (Gmail extension, non-standard).
     ///
-    /// This is a Gmail-specific extension that returns the identifier for the thread/conversation
+    /// A Gmail-specific extension that returns the identifier for the thread/conversation
     /// this message belongs to. Not part of the IMAP standard.
     ///
     /// - SeeAlso:  https://developers.google.com/gmail/imap/imap-extensions
@@ -201,7 +201,7 @@ public enum FetchAttribute: Hashable, Sendable {
 
     /// The message's Gmail labels (Gmail extension, non-standard).
     ///
-    /// This is a Gmail-specific extension that returns the list of labels (like folders) applied
+    /// A Gmail-specific extension that returns the list of labels (like folders) applied
     /// to this message. Not part of the IMAP standard.
     ///
     /// - SeeAlso:  https://developers.google.com/gmail/imap/imap-extensions

@@ -21,7 +21,7 @@ import struct NIO.ByteBufferView
 /// a command containing a literal, it first sends `{size}` and then waits for a `+`
 /// continuation response from the server before sending the actual literal bytes.
 ///
-/// This parser scans command data to identify literal sizes and locations, determining
+/// Scans command data to identify literal sizes and locations, determining
 /// which bytes must wait for continuation responses and which can be sent immediately.
 /// It distinguishes between:
 /// - Synchronizing literals (`{100}`) - require continuation

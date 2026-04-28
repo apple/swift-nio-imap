@@ -16,10 +16,10 @@
 ///
 /// In IMAP URLs, a mailbox is identified by its percent-encoded name and an optional UID validity value.
 /// The UID validity (``UIDValidity``) is a server-assigned value that helps detect when messages in a
-/// mailbox have been invalidated (e.g., after a mailbox has been deleted and recreated).
+/// mailbox have been invalidated (for example, after a mailbox has been deleted and recreated).
 /// Including the UID validity in a URL helps ensure the URL is not referencing stale or invalid message UIDs.
 ///
-/// This type combines a ``EncodedMailbox`` and optional ``UIDValidity`` to create a complete mailbox
+/// Combines a ``EncodedMailbox`` and optional ``UIDValidity`` to create a complete mailbox
 /// reference for use in ``MessagePath`` structures. It forms the core of IMAP URL mailbox addressing.
 ///
 /// ### Examples
@@ -40,7 +40,7 @@
 /// S: * GENURLAUTH "imap://user@example.com/INBOX/;uidvalidity=4294967295/;uid=20;urlauth=anonymous:internal:..."
 /// ```
 ///
-/// ## Related Types
+/// ## Related types
 ///
 /// See ``MessagePath`` for the complete message location (mailbox reference, UID, optional section, optional byte range),
 /// ``UIDValidity`` for UID validity value details, and ``NetworkMessagePath`` for the full network-accessible URL.

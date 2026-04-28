@@ -1,6 +1,6 @@
 # Grammar Types
 
-The complete type vocabulary of the IMAP protocol, organized by domain.
+The complete vocabulary of IMAP protocol types, organized by domain for mailboxes, messages, flags, and more.
 
 ## Overview
 

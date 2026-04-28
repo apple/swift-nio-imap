@@ -20,8 +20,8 @@ extension BodyStructure {
     ///
     /// A multipart body represents a message divided into multiple MIME parts. Common multipart types include:
     /// - `multipart/mixed`: Parts with different media types mixed together
-    /// - `multipart/alternative`: Alternative representations of the same content (e.g., plain text and HTML)
-    /// - `multipart/related`: Parts that reference each other (e.g., HTML with embedded images)
+    /// - `multipart/alternative`: Alternative representations of the same content (such as plain text and HTML)
+    /// - `multipart/related`: Parts that reference each other (such as HTML with embedded images)
     ///
     /// Each part in a multipart body is itself a ``BodyStructure``, which may be another multipart, creating
     /// arbitrarily deep nesting. Optional extension fields provide forward compatibility with future extensions.
@@ -32,7 +32,7 @@ extension BodyStructure {
     /// (("text" "plain" ("charset" "us-ascii") NIL NIL "7bit" 1234 20) ("text" "html" ("charset" "us-ascii") NIL NIL "7bit" 5678 45) "alternative")
     /// ```
     ///
-    /// This is parsed as a ``Multipart`` with two parts (text/plain and text/html) and media subtype `alternative`.
+    /// The wire format above is parsed as a ``Multipart`` with two parts (text/plain and text/html) and media subtype `alternative`.
     ///
     /// - SeeAlso: [RFC 3501 Section 6.4.5](https://datatracker.ietf.org/doc/html/rfc3501#section-6.4.5)
     /// - SeeAlso: [RFC 2045](https://datatracker.ietf.org/doc/html/rfc2045)
@@ -43,7 +43,7 @@ extension BodyStructure {
         /// Parts may be accessed using ``SectionSpecifier/Part`` indices.
         public var parts: [BodyStructure]
 
-        /// The multipart subtype (e.g., `mixed` for `multipart/mixed`, `alternative` for `multipart/alternative`).
+        /// The multipart subtype (for example, `mixed` for `multipart/mixed` or `alternative` for `multipart/alternative`).
         ///
         /// The subtype indicates how the parts should be interpreted or presented.
         public var mediaSubtype: Media.Subtype
@@ -56,7 +56,7 @@ extension BodyStructure {
 
         /// Creates a new multipart body.
         /// - parameter parts: The MIME parts that comprise this multipart
-        /// - parameter mediaSubtype: The multipart subtype (e.g., `mixed`, `alternative`)
+        /// - parameter mediaSubtype: The multipart subtype (for example, `mixed` or `alternative`)
         /// - parameter extension: Optional extension fields (defaults to `nil`)
         public init(parts: [BodyStructure], mediaSubtype: Media.Subtype, extension: Extension? = nil) {
             self.parts = parts
@@ -73,7 +73,7 @@ extension BodyStructure.Multipart {
     /// (parameters and optional disposition/language information) to support future extensions
     /// without breaking existing clients.
     public struct Extension: Hashable, Sendable {
-        /// MIME parameters for the multipart structure itself (e.g., `boundary` parameter).
+        /// MIME parameters for the multipart structure itself (for example, the `boundary` parameter).
         ///
         /// Contains key/value pairs as an ordered dictionary, preserving the server's order.
         public var parameters: OrderedDictionary<String, String>

@@ -20,7 +20,7 @@ import struct NIO.ByteBuffer
 /// When the mechanism name contains characters that are not allowed in URLs, the name must be
 /// percent-encoded using UTF-8 followed by hexadecimal encoding (RFC 2192, RFC 3986).
 ///
-/// This type wraps a percent-encoded authentication mechanism name for use in URL construction.
+/// Wraps a percent-encoded authentication mechanism name for use in URL construction.
 /// The encoded string contains only ASCII-safe characters and can be safely included in IMAP URL syntax.
 ///
 /// ### Examples
@@ -48,7 +48,7 @@ import struct NIO.ByteBuffer
 /// )
 /// ```
 ///
-/// ## Related Types
+/// ## Related types
 ///
 /// See ``IMAPURLAuthenticationMechanism`` for the authentication mechanism specification,
 /// ``UserAuthenticationMechanism`` for how mechanisms are combined with user identifiers,

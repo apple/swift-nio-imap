@@ -17,12 +17,10 @@ import struct NIO.ByteBuffer
 extension BodyStructure {
     /// Language and content location information for a message part.
     ///
-    /// This type pairs one or more language identifiers with an optional content location URI. The language values
+    /// Pairs one or more language identifiers with an optional content location URI. The language values
     /// follow [BCP 47](https://datatracker.ietf.org/doc/html/bcp47) language tags and the location follows
     /// [RFC 2557](https://datatracker.ietf.org/doc/html/rfc2557) for MIME content location URIs. Both are optional
     /// fields in the body structure defined in [RFC 3501 Section 7.4.2](https://datatracker.ietf.org/doc/html/rfc3501#section-7.4.2).
-    ///
-    /// This is an API abstraction to simplify working with the language/location pairing from the raw IMAP message.
     ///
     /// ### Example
     ///
@@ -42,7 +40,7 @@ extension BodyStructure {
         /// One or more language identifiers for the message part.
         ///
         /// Language values follow [BCP 47](https://datatracker.ietf.org/doc/html/bcp47) language tag format
-        /// (e.g., `"en"` for English, `"en-US"` for US English, `"fr"` for French).
+        /// (for example, `"en"` for English, `"en-US"` for US English, or `"fr"` for French).
         public var languages: [String]
 
         /// Optional content location URI for the message part.

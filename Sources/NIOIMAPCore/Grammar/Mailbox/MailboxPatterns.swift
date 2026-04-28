@@ -26,7 +26,7 @@ import struct NIO.ByteBuffer
 /// - `*` - matches any sequence of zero or more characters, including the hierarchy delimiter
 ///
 /// To list **all mailboxes** on the server, use the pattern `*` (the wildcard that matches everything).
-/// This is the most common LIST usage and returns the complete mailbox hierarchy.
+/// Using `*` is the most common LIST usage and returns the complete mailbox hierarchy.
 ///
 /// ### Example
 ///
@@ -41,7 +41,7 @@ import struct NIO.ByteBuffer
 /// LIST request, and the server returns matching mailboxes wrapped as ``Response/untagged(_:)``
 /// containing ``ResponsePayload/mailboxData(_:)`` entries for each match.
 ///
-/// ### Listing All Mailboxes
+/// ### Listing all mailboxes
 ///
 /// ```
 /// C: A001 LIST "" "*"

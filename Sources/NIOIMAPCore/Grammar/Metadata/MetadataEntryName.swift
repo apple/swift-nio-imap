@@ -35,7 +35,7 @@ import NIO
 /// in the ``MetadataResponse/values(values:mailbox:)`` response. They appear in ``Response/untagged(_:)``
 /// containing ``ResponsePayload/metadata(_:)``.
 ///
-/// ## Related Types
+/// ## Related types
 ///
 /// - See ``MetadataValue`` for metadata entry values
 /// - See ``MetadataResponse`` for complete metadata responses
@@ -54,7 +54,7 @@ public struct MetadataEntryName: Hashable, Sendable {
 
     /// Creates a `MetadataEntryName` from a `String`.
     ///
-    /// - parameter string: The entry name as a string (e.g., `"/shared/comment"`, `"/private/notes"`).
+    /// - parameter string: The entry name as a string (for example, `"/shared/comment"` or `"/private/notes"`).
     public init(_ string: String) {
         self.backing = ByteBuffer(string: string)
     }

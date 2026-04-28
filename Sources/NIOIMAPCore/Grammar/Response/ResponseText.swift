@@ -37,7 +37,7 @@ import struct NIO.ByteBuffer
 public struct ResponseText: Hashable, Sendable {
     /// The optional structured status code providing additional semantic information.
     ///
-    /// Status codes are brief tokens that communicate specific server conditions (e.g., `[ALERT]`,
+    /// Status codes are brief tokens that communicate specific server conditions (for example, `[ALERT]`,
     /// `[CANNOT]`, `[PERMANENT]`). They provide machine-readable information to clients that extends
     /// the human-readable text. Not all responses include a code; `nil` indicates no code is present.
     ///

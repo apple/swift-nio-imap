@@ -16,7 +16,7 @@ import struct NIO.ByteBuffer
 
 /// A parameter value that can be a sequence reference or a composite value array.
 ///
-/// This type serves as a catch-all for future extension parameter values in the RFC 4466 extension mechanism.
+/// Serves as a catch-all for future extension parameter values in the RFC 4466 extension mechanism.
 /// It supports both `$` references to the last command result and arrays of string components for complex
 /// extension data structures.
 ///

@@ -37,7 +37,7 @@
 /// for this message. If copied to another mailbox, the copied message will receive the same
 /// `EMAILID`, allowing clients to recognize the messages as identical content.
 ///
-/// ## Related Proprietary Identifiers
+/// ## Related proprietary identifiers
 ///
 /// Gmail servers provide a similar but proprietary identifier via the `X-GM-MSGID` field (see
 /// ``FetchAttribute/gmailMessageID``). While both serve similar purposes, `EMAILID` is

@@ -27,7 +27,7 @@
 /// See [RFC 3501 Section 2.3.1.1](https://datatracker.ietf.org/doc/html/rfc3501#section-2.3.1.1)
 /// for details on unique identifier validity.
 ///
-/// ## Related Types
+/// ## Related types
 ///
 /// Combine with ``UID`` to create persistent message identifiers: a (UID, UIDValidity) pair
 /// uniquely identifies a message across all sessions and mailbox reincarnations.

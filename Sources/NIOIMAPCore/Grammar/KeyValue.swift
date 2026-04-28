@@ -14,7 +14,7 @@
 
 /// A generic key-value pair container.
 ///
-/// This generic type is used throughout the IMAP protocol implementation to pair related values,
+/// Used throughout the IMAP protocol implementation to pair related values,
 /// such as extension names with their parameters, vendor tags with their values, or tagged
 /// extension data with their content.
 ///

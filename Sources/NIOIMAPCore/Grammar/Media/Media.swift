@@ -14,15 +14,15 @@
 
 /// Namespace grouping MIME media type related types.
 ///
-/// This namespace organizes MIME media type components as defined in [RFC 2045](https://datatracker.ietf.org/doc/html/rfc2045).
+/// Organizes MIME media type components as defined in [RFC 2045](https://datatracker.ietf.org/doc/html/rfc2045).
 public enum Media {}
 
 extension Media {
     /// A MIME media type consisting of a top-level type and subtype.
     ///
     /// MIME media types (also called MIME types or content types) identify the format of message part content.
-    /// Each media type is composed of a top-level type (e.g., `text`, `image`, `application`) and a subtype
-    /// (e.g., `plain`, `html`, `jpeg`), separated by a slash in standard notation (e.g., `text/plain`).
+    /// Each media type is composed of a top-level type (for example, `text`, `image`, or `application`) and a subtype
+    /// (for example, `plain`, `html`, or `jpeg`), separated by a slash in standard notation (for example, `text/plain`).
     ///
     /// Media types are defined in [RFC 2045 Section 5](https://datatracker.ietf.org/doc/html/rfc2045#section-5) and
     /// are included in message body structures retrieved via the `BODYSTRUCTURE` FETCH attribute.
@@ -41,10 +41,10 @@ extension Media {
     /// - SeeAlso: ``TopLevelType``
     /// - SeeAlso: ``Subtype``
     public struct MediaType: Hashable, Sendable {
-        /// The top-level type component (e.g., `text`, `image`, `application`).
+        /// The top-level type component (for example, `text`, `image`, or `application`).
         public var topLevel: TopLevelType
 
-        /// The subtype component (e.g., `plain`, `html`, `jpeg`).
+        /// The subtype component (for example, `plain`, `html`, or `jpeg`).
         public var sub: Subtype
 
         /// Creates a media type from top-level type and subtype components.
@@ -61,11 +61,11 @@ extension Media {
 extension Media.MediaType {
     /// Creates a media type from string components.
     ///
-    /// This is a convenience initializer that creates ``TopLevelType`` and ``Subtype`` instances
+    /// A convenience initializer that creates ``TopLevelType`` and ``Subtype`` instances
     /// from the provided strings, which are automatically lowercased.
     ///
-    /// - parameter topLevel: The top-level type as a string (e.g., `"text"`, `"image"`).
-    /// - parameter sub: The subtype as a string (e.g., `"plain"`, `"html"`).
+    /// - parameter topLevel: The top-level type as a string (for example, `"text"` or `"image"`).
+    /// - parameter sub: The subtype as a string (for example, `"plain"` or `"html"`).
     public init(topLevel: String, sub: String) {
         self.topLevel = Media.TopLevelType(topLevel)
         self.sub = Media.Subtype(sub)
@@ -77,7 +77,7 @@ extension Media.MediaType {
 extension Media {
     /// The top-level type component of a MIME media type.
     ///
-    /// The top-level type is the first component of a media type (e.g., `text` in `text/plain`).
+    /// The top-level type is the first component of a media type (for example, `text` in `text/plain`).
     /// Standard top-level types are registered with IANA and are case-insensitive, normalized to lowercase.
     ///
     /// Defined in [RFC 2045 Section 5](https://datatracker.ietf.org/doc/html/rfc2045#section-5) with types
@@ -130,7 +130,7 @@ extension Media {
 
         /// The top-level type as a lowercase string.
         ///
-        /// - Returns: The type name in lowercase (e.g., `"text"`, `"image"`, `"multipart"`).
+        /// - Returns: The type name in lowercase (for example, `"text"`, `"image"`, or `"multipart"`).
         public var debugDescription: String {
             self.stringValue
         }
@@ -140,7 +140,7 @@ extension Media {
         /// The provided string is automatically lowercased to normalize the type value. This allows
         /// case-insensitive comparison between type values.
         ///
-        /// - parameter stringValue: The type name as a string (e.g., `"TEXT"`, `"Image"`, `"text"`). Will be lowercased.
+        /// - parameter stringValue: The type name as a string (for example, `"TEXT"`, `"Image"`, or `"text"`). Will be lowercased.
         public init(_ stringValue: String) {
             self.stringValue = stringValue.lowercased()
         }
@@ -150,10 +150,10 @@ extension Media {
 extension Media.TopLevelType: ExpressibleByStringLiteral {
     /// Creates a top-level type from a string literal.
     ///
-    /// This allows direct initialization like `let topLevel: Media.TopLevelType = "text"`.
+    /// Allows direct initialization like `let topLevel: Media.TopLevelType = "text"`.
     /// The string literal is automatically lowercased.
     ///
-    /// - parameter stringLiteral: The type name as a string literal (e.g., `"text"`, `"image"`).
+    /// - parameter stringLiteral: The type name as a string literal (for example, `"text"` or `"image"`).
     public init(stringLiteral: String) {
         self.init(stringLiteral)
     }
@@ -173,7 +173,7 @@ extension String {
 extension Media {
     /// The subtype component of a MIME media type.
     ///
-    /// The subtype is the second component of a media type (e.g., `plain` in `text/plain`).
+    /// The subtype is the second component of a media type (for example, `plain` in `text/plain`).
     /// Subtypes are case-insensitive, normalized to lowercase, and are specific to their top-level type.
     ///
     /// Defined in [RFC 2045](https://datatracker.ietf.org/doc/html/rfc2045) with subtypes registered at
@@ -186,20 +186,20 @@ extension Media {
         /// Clients should display the most appropriate alternative according to user preferences.
         public static let alternative = Self("alternative")
 
-        /// The `multipart/related` subtype, specifying related body parts (e.g., HTML with embedded images).
+        /// The `multipart/related` subtype, specifying related body parts (for example, HTML with embedded images).
         ///
-        /// Parts in a multipart/related message are typically related to one another (e.g., an HTML
+        /// Parts in a multipart/related message are typically related to one another (for example, an HTML
         /// document with embedded images or stylesheets).
         public static let related = Self("related")
 
         /// The `multipart/mixed` subtype, specifying a generic set of mixed data types.
         ///
-        /// This is the default multipart subtype for messages with multiple unrelated parts.
+        /// The default multipart subtype for messages with multiple unrelated parts.
         public static let mixed = Self("mixed")
 
         /// The `message/rfc822` subtype for encapsulated email messages.
         ///
-        /// This subtype indicates the message part contains a complete RFC 822 (email) message,
+        /// Indicates the message part contains a complete RFC 822 (email) message,
         /// which may have its own headers, body structure, and attachments.
         public static let rfc822 = Self("rfc822")
 
@@ -208,7 +208,7 @@ extension Media {
 
         /// The subtype as a lowercase string.
         ///
-        /// - Returns: The subtype name in lowercase (e.g., `"plain"`, `"html"`, `"mixed"`).
+        /// - Returns: The subtype name in lowercase (for example, `"plain"`, `"html"`, or `"mixed"`).
         public var debugDescription: String { self.stringValue }
 
         /// Creates a subtype from a string.
@@ -216,7 +216,7 @@ extension Media {
         /// The provided string is automatically lowercased to normalize the subtype value. This allows
         /// case-insensitive comparison between subtype values.
         ///
-        /// - parameter stringValue: The subtype name as a string (e.g., `"PLAIN"`, `"Html"`, `"plain"`). Will be lowercased.
+        /// - parameter stringValue: The subtype name as a string (for example, `"PLAIN"`, `"Html"`, or `"plain"`). Will be lowercased.
         public init(_ stringValue: String) {
             self.stringValue = stringValue.lowercased()
         }
@@ -226,10 +226,10 @@ extension Media {
 extension Media.Subtype: ExpressibleByStringLiteral {
     /// Creates a subtype from a string literal.
     ///
-    /// This allows direct initialization like `let subtype: Media.Subtype = "plain"`.
+    /// Allows direct initialization like `let subtype: Media.Subtype = "plain"`.
     /// The string literal is automatically lowercased.
     ///
-    /// - parameter stringLiteral: The subtype name as a string literal (e.g., `"plain"`, `"html"`).
+    /// - parameter stringLiteral: The subtype name as a string literal (for example, `"plain"` or `"html"`).
     public init(stringLiteral: String) {
         self.init(stringLiteral)
     }

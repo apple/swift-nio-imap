@@ -19,7 +19,7 @@ import struct NIO.ByteBuffer
 /// Flags are attributes attached to messages that indicate message state or special properties.
 /// They are part of the base [IMAP protocol](https://datatracker.ietf.org/doc/html/rfc3501).
 ///
-/// ## Standard Flags
+/// ## Standard flags
 ///
 /// [RFC 3501](https://datatracker.ietf.org/doc/html/rfc3501) defines five standard system flags:
 /// - ``answered`` - The message has been replied to.
@@ -28,12 +28,12 @@ import struct NIO.ByteBuffer
 /// - ``seen`` - The message has been read by the user.
 /// - ``draft`` - The message is incomplete and has not been sent.
 ///
-/// ## Case Handling
+/// ## Case handling
 ///
 /// Flags are compared case-insensitively, meaning `Flag("\\SEEN")` and `Flag("\\Seen")` are considered equal.
 /// Flags also preserve their original casing when encoded and decoded.
 ///
-/// ## Extension Flags
+/// ## Extension flags
 ///
 /// Beyond the five standard flags, custom flags can be created. These are defined in
 /// [RFC 3501 Section 2.3.2](https://datatracker.ietf.org/doc/html/rfc3501#section-2.3.2).
@@ -94,30 +94,29 @@ extension Flag: CustomDebugStringConvertible {
 extension Flag {
     /// `\Answered` - The message has been replied to.
     ///
-    /// This standard flag ([RFC 3501](https://datatracker.ietf.org/doc/html/rfc3501)) indicates that the
+    /// Defined in [RFC 3501](https://datatracker.ietf.org/doc/html/rfc3501). Indicates the
     /// message is a response to another message.
     public static let answered = Self("\\Answered")
 
     /// `\Flagged` - The message has been marked for attention.
     ///
-    /// This standard flag ([RFC 3501](https://datatracker.ietf.org/doc/html/rfc3501)).
+    /// Defined in [RFC 3501](https://datatracker.ietf.org/doc/html/rfc3501).
     public static let flagged = Self("\\Flagged")
 
     /// `\Deleted` - The message has been deleted.
     ///
-    /// This standard flag ([RFC 3501](https://datatracker.ietf.org/doc/html/rfc3501)) marks a message for
-    /// deletion. The message is not permanently removed until the ``Command/expunge`` command is executed
-    /// or the mailbox is closed.
+    /// Defined in [RFC 3501](https://datatracker.ietf.org/doc/html/rfc3501). Marks a message for
+    /// deletion until the ``Command/expunge`` command is executed or the mailbox is closed.
     public static let deleted = Self("\\Deleted")
 
     /// `\Seen` - The message has been read by the user.
     ///
-    /// This standard flag ([RFC 3501](https://datatracker.ietf.org/doc/html/rfc3501)).
+    /// Defined in [RFC 3501](https://datatracker.ietf.org/doc/html/rfc3501).
     public static let seen = Self("\\Seen")
 
     /// `\Draft` - The message is not yet complete.
     ///
-    /// This standard flag ([RFC 3501](https://datatracker.ietf.org/doc/html/rfc3501)).
+    /// Defined in [RFC 3501](https://datatracker.ietf.org/doc/html/rfc3501).
     public static let draft = Self("\\Draft")
 
     /// Convenience function to create a new flag from a `Keyword`.

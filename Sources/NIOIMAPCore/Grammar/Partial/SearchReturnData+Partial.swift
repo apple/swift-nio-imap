@@ -17,7 +17,7 @@ import struct NIO.ByteBuffer
 extension SearchReturnData {
     /// Partial search results with a specified range.
     ///
-    /// This type contains the range that was requested via the `PARTIAL` modifier and the
+    /// Contains the range that was requested via the `PARTIAL` modifier and the
     /// message numbers matching the search within that range. The `PARTIAL` extension (RFC 9394)
     /// enables efficient pagination of large search results.
     ///

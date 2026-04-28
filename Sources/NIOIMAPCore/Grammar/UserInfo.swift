@@ -14,7 +14,7 @@
 
 /// Optional user identification and/or authentication mechanism requirement for an IMAP server connection.
 ///
-/// This type specifies which user context and/or which authentication mechanism should be used
+/// Specifies which user context and/or which authentication mechanism should be used
 /// when connecting to an IMAP server. It appears in the server component of IMAP URLs
 /// (before the `@` symbol). At least one of ``encodedUser`` or ``authenticationMechanism`` must be present.
 ///
@@ -46,7 +46,7 @@
 ///
 /// The `owner@example.com` specifies who owns the mailbox access key that will authorize the URL.
 ///
-/// ## Related Types
+/// ## Related types
 ///
 /// See ``IMAPServer`` for the complete server specification, ``IMAPURLAuthenticationMechanism`` for
 /// authentication mechanism details, and ``EncodedUser`` for the percent-encoded user representation.

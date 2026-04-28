@@ -1,12 +1,12 @@
 # ``NIOIMAPCore``
 
-Type-safe parsing and encoding of IMAP4 protocol messages.
+Parse and encode IMAP4rev1 protocol messages with type safety.
 
 ## Overview
 
 NIOIMAPCore is the foundation of the swift-nio-imap project. It provides comprehensive, type-safe parsing and encoding of IMAP4rev1 protocol messages as described in RFC 3501 and related RFCs.
 
-This module is designed to be used as a building block for creating IMAP clients and servers. It handles the complexity of the IMAP wire protocol, converting between byte streams and strongly-typed Swift data structures.
+Use this module as a building block for creating IMAP clients and servers. It handles the complexity of the IMAP wire protocol, converting between byte streams and strongly-typed Swift data structures.
 
 ### Key Features
 
@@ -26,7 +26,7 @@ The IMAP protocol is text-based and involves continuous streams of commands and 
 
 ### Example
 
-Here's a simple example of parsing and encoding an IMAP response:
+Here's an example of parsing and encoding an IMAP response:
 
 ```swift
 // Parse: "* 18 EXISTS"

@@ -37,11 +37,11 @@
 public enum StoreModifier: Hashable, Sendable {
     /// Only perform the store operation if the message's modification sequence is unchanged (RFC 7162 `CONDSTORE` extension).
     ///
-    /// This modifier implements optimistic concurrency control. The server compares the message's current mod-sequence
-    /// with the specified value. If the message's mod-sequence is equal to or less than the specified value, the STORE
+    /// Implements optimistic concurrency control. The server compares the message's current mod-sequence
+    /// with the specified value. If the message's mod-sequence is equal to or less than the specified value, the `STORE`
     /// operation succeeds. Otherwise, the operation is rejected, indicating that another client has modified the message.
     ///
-    /// This prevents "lost updates" where one client's changes could overwrite another client's changes in a
+    /// Prevents "lost updates" where one client's changes could overwrite another client's changes in a
     /// multimailbox environment.
     ///
     /// **Requires server capability:** ``Capability/condStore``
@@ -51,7 +51,7 @@ public enum StoreModifier: Hashable, Sendable {
 
     /// A server extension modifier not defined in this library.
     ///
-    /// This case captures future `STORE` modifiers defined by extensions, allowing forward compatibility
+    /// Captures future `STORE` modifiers defined by extensions, allowing forward compatibility
     /// with new IMAP capabilities without requiring library updates.
     case other(KeyValue<String, ParameterValue?>)
 }

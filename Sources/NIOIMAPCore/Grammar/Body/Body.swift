@@ -51,7 +51,7 @@ extension MessageAttribute {
 /// S: A001 OK FETCH completed
 /// ```
 ///
-/// This represents a ``singlepart(_:)`` case containing a ``Singlepart`` with media type `text/plain`.
+/// The response is a ``singlepart(_:)`` case containing a ``Singlepart`` with media type `text/plain`.
 ///
 /// **Multipart message:**
 /// ```
@@ -60,7 +60,7 @@ extension MessageAttribute {
 /// S: A002 OK FETCH completed
 /// ```
 ///
-/// This represents a ``multipart(_:)`` case containing two parts (text/plain and text/html) with media subtype `alternative`.
+/// The response is a ``multipart(_:)`` case containing two parts (text/plain and text/html) with media subtype `alternative`.
 ///
 /// - SeeAlso: [RFC 3501 Section 7.4.2](https://datatracker.ietf.org/doc/html/rfc3501#section-7.4.2)
 /// - SeeAlso: [RFC 3501 Section 2.6.3](https://datatracker.ietf.org/doc/html/rfc3501#section-2.6.3)
@@ -74,7 +74,7 @@ public enum BodyStructure: Hashable, Sendable {
 
     /// A multipart message body containing one or more sub-parts.
     ///
-    /// Multipart messages have multiple MIME parts (e.g., `multipart/mixed` for mixed content,
+    /// Multipart messages have multiple MIME parts (such as `multipart/mixed` for mixed content or
     /// `multipart/alternative` for alternative representations).
     case multipart(Multipart)
 }
@@ -101,7 +101,7 @@ extension BodyStructure: RandomAccessCollection {
 
     /// Gets the body at the given `position`.
     ///
-    /// This will assert if `position` is not a valid part of this ``BodyStructure``.
+    /// Crashes if `position` is not a valid part of this ``BodyStructure``.
     ///
     /// - parameter position: The position of the desired body.
     /// - returns: The body located at the given `position`.

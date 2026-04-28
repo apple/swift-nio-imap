@@ -31,7 +31,7 @@
 /// The options `(MAXSIZE 1024 DEPTH 1)` are ``MetadataOption`` values that limit results to entries
 /// with a maximum size of 1024 bytes and restrict the search to a depth of 1 level.
 ///
-/// ## Related Types
+/// ## Related types
 ///
 /// - See ``MetadataEntryName`` for metadata entry names
 /// - See ``MetadataValue`` for metadata entry values

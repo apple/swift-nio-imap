@@ -23,7 +23,7 @@ extension BodyStructure {
     /// transfer encoding, and octet count.
     ///
     /// These fields are derived from MIME headers (`Content-Type`, `Content-Transfer-Encoding`,
-    /// etc.) and are essential for understanding how to process each message part.
+    /// and so on) and are essential for understanding how to process each message part.
     ///
     /// ### Example
     ///
@@ -58,7 +58,7 @@ extension BodyStructure {
 
         /// The content transfer encoding from the `Content-Transfer-Encoding` header.
         ///
-        /// Describes how the message part is encoded (e.g., `7bit`, `base64`, `quoted-printable`).
+        /// Describes how the message part is encoded (for example, `7bit`, `base64`, or `quoted-printable`).
         public var encoding: Encoding?
 
         /// The size of the body part in octets (bytes).

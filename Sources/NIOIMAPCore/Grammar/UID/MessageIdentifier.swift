@@ -30,7 +30,7 @@
 /// See [RFC 3501](https://datatracker.ietf.org/doc/html/rfc3501) for details on message
 /// identifiers and their usage in IMAP commands and responses.
 ///
-/// ## Related Types
+/// ## Related types
 ///
 /// - ``MessageIdentifierRange`` represents a range of message identifiers.
 /// - ``MessageIdentifierSet`` represents a collection of message identifier ranges.
@@ -87,7 +87,7 @@ extension MessageIdentifier {
 /// Either a ``UID`` or a ``SequenceNumber``, determined at runtime by command context.
 ///
 /// When parsing protocol messages, some values could represent either a ``UID`` or a
-/// ``SequenceNumber`` depending on the command context (e.g., whether the command is prefixed
+/// ``SequenceNumber`` depending on the command context (for example, whether the command is prefixed
 /// with `UID`). The `UnknownMessageIdentifier` type preserves the numeric value without
 /// committing to a specific type.
 ///

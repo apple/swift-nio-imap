@@ -18,7 +18,7 @@
 /// formatted as angle-bracketed text, for example <B27397-0100000@cac.washington.edu>. The Message-ID
 /// appears in the In-Reply-To header and is used to correlate related messages in threads.
 ///
-/// This type wraps the raw string value including angle brackets as sent by the server.
+/// Wraps the raw string value including angle brackets as sent by the server.
 ///
 /// ### Example
 ///

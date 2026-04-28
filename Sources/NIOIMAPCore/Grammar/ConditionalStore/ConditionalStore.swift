@@ -40,7 +40,7 @@ import struct NIO.ByteBuffer
 /// sequence tracking is enabled for this mailbox. The server responds with `* OK [MODSEQ 12345]`
 /// indicating the current modification sequence value.
 ///
-/// ## Related Types
+/// ## Related types
 ///
 /// - See ``SearchModificationSequence`` for conditional search operations
 /// - See ``StoreModifier`` for conditional store modifiers in STORE commands

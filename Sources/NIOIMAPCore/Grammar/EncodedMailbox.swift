@@ -21,7 +21,7 @@ import struct NIO.ByteBuffer
 /// characters), the name must be percent-encoded using UTF-8 followed by hexadecimal encoding
 /// (RFC 2192, RFC 3986).
 ///
-/// This type wraps a percent-encoded mailbox name for use in URL construction. The encoded
+/// Wraps a percent-encoded mailbox name for use in URL construction. The encoded
 /// string contains only ASCII-safe characters and can be safely included in IMAP URL syntax.
 ///
 /// ### Example
@@ -46,7 +46,7 @@ import struct NIO.ByteBuffer
 /// )
 /// ```
 ///
-/// ## Related Types
+/// ## Related types
 ///
 /// See ``MailboxUIDValidity`` for mailbox references with UID validity values, and
 /// ``MessagePath`` for the complete message location specification in URLs.

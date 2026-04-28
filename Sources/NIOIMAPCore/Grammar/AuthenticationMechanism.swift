@@ -60,7 +60,7 @@ public struct AuthenticationMechanism: Hashable, Sendable {
     ///
     /// The provided value is uppercased for consistency with IMAP protocol conventions.
     ///
-    /// - parameter value: The mechanism name (e.g., PLAIN, GSSAPI).
+    /// - parameter value: The mechanism name (for example, PLAIN or GSSAPI).
     public init(_ value: String) {
         self.rawValue = value.uppercased()
     }

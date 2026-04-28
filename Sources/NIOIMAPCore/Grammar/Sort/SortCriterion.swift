@@ -39,7 +39,7 @@
 /// S: A002 OK SORT completed
 /// ```
 ///
-/// ## Related Types
+/// ## Related types
 ///
 /// - ``Command/sort(criteria:charset:key:returnOptions:)`` and ``Command/uidSort(criteria:charset:key:returnOptions:)``: Commands that perform sorting
 /// - ``SearchKey``: Criteria for filtering messages before sorting
@@ -79,14 +79,14 @@ public enum SortCriterion: Hashable, Sendable {
 
         /// Sort by the size of the message in octets.
         ///
-        /// This corresponds to the `RFC822.SIZE` message attribute.
+        /// Corresponds to the `RFC822.SIZE` message attribute.
         /// From [RFC 5256 Section 2.2](https://datatracker.ietf.org/doc/html/rfc5256#section-2.2).
         case size
 
         /// Sort by the base subject text.
         ///
         /// The subject is processed according to [RFC 5256 Section 2.1](https://datatracker.ietf.org/doc/html/rfc5256#section-2.1)
-        /// to strip reply prefixes (e.g., "Re:", "Fwd:") and normalize whitespace before comparison.
+        /// to strip reply prefixes (for example, "Re:" or "Fwd:") and normalize whitespace before comparison.
         case subject
 
         /// Sort by the first address in the `To` header.

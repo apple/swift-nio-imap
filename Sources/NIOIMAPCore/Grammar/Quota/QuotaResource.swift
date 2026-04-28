@@ -37,7 +37,7 @@ import struct NIO.ByteBuffer
 ///
 /// These appear as part of the ``ResponsePayload/quota(_:_:)`` response.
 ///
-/// ## Related Types
+/// ## Related types
 ///
 /// - See ``QuotaLimit`` for just the maximum limit without usage
 /// - See ``QuotaRoot`` for quota root names
@@ -65,7 +65,7 @@ public struct QuotaResource: Hashable, Sendable {
 
     /// Creates a new `QuotaResource` with current usage and maximum limit.
     ///
-    /// - parameter resourceName: The resource name (e.g., `"STORAGE"`, `"MESSAGE"`).
+    /// - parameter resourceName: The resource name (for example, `"STORAGE"` or `"MESSAGE"`).
     /// - parameter usage: The current usage of the resource.
     /// - parameter limit: The maximum allowed value for the resource.
     public init(resourceName: String, usage: Int, limit: Int) {

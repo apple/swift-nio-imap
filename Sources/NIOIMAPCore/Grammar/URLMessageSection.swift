@@ -20,10 +20,10 @@ import struct NIO.ByteBuffer
 /// numeric notation. When used in IMAP URLs (RFC 2192/5092) and URLAUTH-authorized URLs (RFC 4467),
 /// section references are percent-encoded to ensure they contain only URL-safe characters.
 ///
-/// This type wraps a percent-encoded section reference for use in IMAP URL construction.
+/// Wraps a percent-encoded section reference for use in IMAP URL construction.
 /// It appears in URL paths as `;SECTION=<section>` (or `/;SECTION=<section>` in some contexts).
 ///
-/// ### Section Reference Format
+/// ### Section reference format
 ///
 /// Message sections use dot-separated numbers to reference structure parts:
 /// - `"1"` - First part of the message body
@@ -56,7 +56,7 @@ import struct NIO.ByteBuffer
 /// S: * GENURLAUTH "imap://user@example.com/INBOX/;uid=20;section=1.2;urlauth=anonymous:internal:..."
 /// ```
 ///
-/// ## Related Types
+/// ## Related types
 ///
 /// - ``EncodedSection`` wraps the percent-encoded section string
 /// - ``MessagePath`` includes an optional ``URLMessageSection``

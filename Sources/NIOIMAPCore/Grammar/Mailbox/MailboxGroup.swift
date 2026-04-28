@@ -43,18 +43,18 @@ import struct NIO.ByteBuffer
 public struct EmailAddressGroup: Hashable, Sendable {
     /// The name of the address group.
     ///
-    /// This is the human-readable name for the collection of addresses, such as "Family" or "Work Team".
+    /// The human-readable name for the collection of addresses, such as "Family" or "Work Team".
     public var groupName: ByteBuffer
 
     /// The optional source root for the address group.
     ///
-    /// This field may contain additional routing information for the group.
+    /// May contain additional routing information for the group.
     /// Per [RFC 5322](https://datatracker.ietf.org/doc/html/rfc5322), this is typically `nil`.
     public var sourceRoot: ByteBuffer?
 
     /// The nested addresses and groups within this group.
     ///
-    /// This list can contain both individual addresses (``EmailAddressListElement/singleAddress(_:)``)
+    /// Can contain both individual addresses (``EmailAddressListElement/singleAddress(_:)``)
     /// and nested address groups (``EmailAddressListElement/group(_:)``), allowing for arbitrarily
     /// deep hierarchies.
     public var children: [EmailAddressListElement]
@@ -78,7 +78,7 @@ public struct EmailAddressGroup: Hashable, Sendable {
 /// the ENVELOPE structure includes address lists (such as `To:`, `From:`, `Cc:`) that may contain
 /// both individual email addresses and named address groups.
 ///
-/// This is an indirect enum, allowing arbitrarily deep nesting of groups within groups.
+/// An indirect enum, allowing arbitrarily deep nesting of groups within groups.
 ///
 /// ### Example
 ///
@@ -101,12 +101,12 @@ public struct EmailAddressGroup: Hashable, Sendable {
 public indirect enum EmailAddressListElement: Hashable, Sendable {
     /// A single email address with no children.
     ///
-    /// This case wraps a single ``EmailAddress`` in the address list.
+    /// Wraps a single ``EmailAddress`` in the address list.
     case singleAddress(EmailAddress)
 
     /// A collection of addresses organized under a group name.
     ///
-    /// This case wraps an ``EmailAddressGroup`` containing a group name and nested
+    /// Wraps an ``EmailAddressGroup`` containing a group name and nested
     /// ``EmailAddressListElement`` children (which can themselves be addresses or groups).
     case group(EmailAddressGroup)
 }

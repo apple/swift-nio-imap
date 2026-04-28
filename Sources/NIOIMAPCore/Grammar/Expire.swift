@@ -18,7 +18,7 @@
 /// remains valid. After the expiration date and time, the IMAP server must reject the URL
 /// (RFC 4467 Section 3).
 ///
-/// This is an optional component appended to IMAP URLs as `;EXPIRE=<datetime>` (in RFC 3339 format).
+/// An optional component appended to IMAP URLs as `;EXPIRE=<datetime>` (in RFC 3339 format).
 /// If not specified, the URL has no expiration time, though it can still be revoked by other means
 /// (such as regenerating the mailbox access key).
 ///
@@ -31,7 +31,7 @@
 ///
 /// The `;expire=2025-12-31T23:59:59Z` component indicates the URL expires at that date and time.
 ///
-/// ## Related Types
+/// ## Related types
 ///
 /// See ``AuthenticatedURLRump`` for how expiration is combined with ``Access`` identifiers,
 /// and ``FullDateTime`` for the datetime format specification.
@@ -41,7 +41,7 @@ public struct Expire: Hashable, Sendable {
     /// The latest date and time that a URLAUTH-authorized URL is valid.
     ///
     /// After this date and time, the URL must be rejected by the IMAP server. The datetime is
-    /// encoded in RFC 3339 format (e.g., `2025-12-31T23:59:59Z`).
+    /// encoded in RFC 3339 format (for example, `2025-12-31T23:59:59Z`).
     public var dateTime: FullDateTime
 
     /// Creates a new expiration date and time.

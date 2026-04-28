@@ -36,7 +36,7 @@ let badOS = { fatalError("unsupported OS") }()
 /// To prevent memory exhaustion from malformed or malicious input, a maximum literal
 /// size is enforced. If a literal exceeds this limit, this error is thrown.
 ///
-/// This is a DoS protection mechanism.
+/// A DoS protection mechanism.
 ///
 /// - SeeAlso: [RFC 3501 Section 4.3.3](https://datatracker.ietf.org/doc/html/rfc3501#section-4.3.3),
 ///   ``ExceededMaximumBodySizeError``
@@ -2568,8 +2568,8 @@ extension GrammarParser {
 
     /// Variant of `parseString()` allowing non-ASCII inside quoted strings.
     ///
-    /// This is not allowed by RFC 3501, but some emails have non-ASCII headers, and some servers
-    /// end up copying the non-ASCII values into e.g. `BODYSTRUCTURE` parameters.
+    /// Not allowed by RFC 3501, but some emails have non-ASCII headers, and some servers
+    /// end up copying the non-ASCII values into, for example, `BODYSTRUCTURE` parameters.
     func parseStringAllowingNonASCII(buffer: inout ParseBuffer, tracker: StackTracker) throws -> ByteBuffer {
         try PL.parseOneOf(
             self.parseQuoted,

@@ -35,7 +35,7 @@
 public struct ResponseCodeAppend: Hashable, Sendable {
     /// The UID validity value of the destination mailbox.
     ///
-    /// This value allows clients to validate that the UIDs returned in this response are still
+    /// Allows clients to validate that the UIDs returned in this response are still
     /// correct if they are later referenced. If the UID validity changes, all cached UIDs are invalid.
     ///
     /// - SeeAlso: ``UIDValidity``
@@ -43,7 +43,7 @@ public struct ResponseCodeAppend: Hashable, Sendable {
 
     /// The UIDs of the messages after they have been appended.
     ///
-    /// This set contains the UID or UIDs assigned by the server to the messages that were just
+    /// Contains the UID or UIDs assigned by the server to the messages that were just
     /// appended. The sequence and count of UIDs corresponds to the number of messages appended by
     /// the APPEND command.
     ///

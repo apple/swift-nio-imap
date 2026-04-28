@@ -1,6 +1,6 @@
 # Supported IMAP Extensions
 
-NIOIMAP supports a variety of known IMAP extensions. This page documents the complete list of supported capabilities and their corresponding RFC specifications.
+A complete list of IMAP extension capabilities NIOIMAPCore supports, with links to their RFC specifications.
 
 For more information about IMAP capabilities, see the [IANA IMAP Capabilities Registry](https://www.iana.org/assignments/imap-capabilities/imap-capabilities.xhtml).
 
@@ -212,4 +212,4 @@ The [UIDBATCHES extension](https://datatracker.ietf.org/doc/draft-ietf-mailmaint
 
 Google's [Gmail IMAP Extensions](https://developers.google.com/gmail/imap/imap-extensions) provide additional capabilities for working with Gmail-specific features like conversation threading and labels. The extensions are indicated by the ``Capability/gmailExtensions`` capability and require the `X-GM-EXT-1` capability.
 
-Gmail labels (equivalent to mailbox tags) are represented using ``GmailLabel`` and can be modified via ``StoreGmailLabels`` for add, remove, or replace operations. Messages include ``MessageAttribute/gmailMessageID(_:)`` for a stable message identifier, ``MessageAttribute/gmailThreadID(_:)`` for conversation threading, and ``MessageAttribute/gmailLabels(_:)`` for label information. Use ``FetchAttribute/gmailMessageID``, ``FetchAttribute/gmailThreadID``, and ``FetchAttribute/gmailLabels`` to retrieve these attributes in FETCH responses.
+Gmail labels, which are equivalent to mailbox tags, are represented using ``GmailLabel`` and can be modified via ``StoreGmailLabels`` for add, remove, or replace operations. Messages include ``MessageAttribute/gmailMessageID(_:)`` for a stable message identifier, ``MessageAttribute/gmailThreadID(_:)`` for conversation threading, and ``MessageAttribute/gmailLabels(_:)`` for label information. Use ``FetchAttribute/gmailMessageID``, ``FetchAttribute/gmailThreadID``, and ``FetchAttribute/gmailLabels`` to retrieve these attributes in FETCH responses.

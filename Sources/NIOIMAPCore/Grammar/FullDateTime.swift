@@ -14,7 +14,7 @@
 
 /// A complete date and time value in RFC 3339 format with an optional fraction-of-second.
 ///
-/// This type represents a full date-time specification as defined in RFC 3339, combining
+/// Represents a full date-time specification as defined in RFC 3339, combining
 /// a ``FullDate`` and ``FullTime`` into a single value. RFC 3339 is used in IMAP extensions
 /// such as MULTIMAILBOX SEARCH (RFC 7377) and METADATA (RFC 5464) for precise timestamp representation.
 ///
@@ -56,11 +56,11 @@ public struct FullDateTime: Hashable, Sendable {
 
 /// A calendar date in RFC 3339 format (`YYYY-MM-DD`).
 ///
-/// This type represents a date value as defined in RFC 3339, containing year, month, and day
+/// Represents a date value as defined in RFC 3339, containing year, month, and day
 /// components. It is used in combination with ``FullTime`` to form a complete ``FullDateTime``.
 ///
 /// The initializer uses `precondition` to verify month and day are within valid ranges but does
-/// not validate whether the day is appropriate for the given month (e.g., February 30 is accepted).
+/// not validate whether the day is appropriate for the given month (for example, February 30 is accepted).
 public struct FullDate: Hashable, Sendable {
     /// The year as any non-negative integer.
     ///
@@ -76,12 +76,12 @@ public struct FullDate: Hashable, Sendable {
     /// The day in the range `1...31`.
     ///
     /// The range accepts all valid day numbers. No validation is performed to verify
-    /// the day is valid for the specific month (e.g., February 30 is accepted).
+    /// the day is valid for the specific month (for example, February 30 is accepted).
     public let day: Int
 
     /// Creates a new `FullDate`.
     ///
-    /// This initializer validates that month is in the range `1...12` and day is in the
+    /// Validates that month is in the range `1...12` and day is in the
     /// range `1...31` using `precondition`. The year can be any non-negative integer.
     ///
     /// - Parameters:
@@ -99,7 +99,7 @@ public struct FullDate: Hashable, Sendable {
 
 /// A time of day in RFC 3339 format (`HH:MM:SS[.FRACTION]`).
 ///
-/// This type represents a time value as defined in RFC 3339, containing hour, minute, second,
+/// Represents a time value as defined in RFC 3339, containing hour, minute, second,
 /// and an optional fractional-second component. It is used in combination with ``FullDate``
 /// to form a complete ``FullDateTime``.
 ///
@@ -120,7 +120,7 @@ public struct FullTime: Hashable, Sendable {
 
     /// The fractional-second component, or `nil` if not included.
     ///
-    /// This is a partially-dynamic field and does not directly represent milliseconds,
+    /// A partially-dynamic field that does not directly represent milliseconds,
     /// microseconds, or any specific fractional unit. The number you provide is the number
     /// that will be written directly to the output. For example:
     /// - `123` encodes as `HH:MM:SS.123`

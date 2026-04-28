@@ -29,7 +29,7 @@ public struct MailboxTooBigError: Error, Equatable {
 
 /// A mailbox name contained invalid characters or violated naming constraints.
 ///
-/// This error is raised when a mailbox name contains characters that are not permitted by the IMAP protocol,
+/// Raised when a mailbox name contains characters that are not permitted by the IMAP protocol,
 /// such as path separators in the display name.
 public struct InvalidMailboxNameError: Error, Equatable {
     /// A description of why the mailbox name was considered invalid.
@@ -73,7 +73,7 @@ public struct InvalidPathSeparatorError: Error, Equatable {
 public struct MailboxPath: Hashable, Sendable {
     /// The full mailbox path in Modified UTF-7 encoding.
     ///
-    /// This name may contain path separator characters and represents the complete hierarchical path
+    /// May contain path separator characters and represents the complete hierarchical path
     /// to the mailbox as known to the server. The encoding follows
     /// [RFC 2152](https://datatracker.ietf.org/doc/html/rfc2152) as required by RFC 3501.
     public let name: MailboxName
@@ -99,7 +99,7 @@ public struct MailboxPath: Hashable, Sendable {
 
     /// Creates a new `MailboxPath` with the given name and optional path separator.
     ///
-    /// This initializer accepts raw bytes and does not perform encoding. Use ``makeRootMailbox(displayName:pathSeparator:)``
+    /// Accepts raw bytes and does not perform encoding. Use ``makeRootMailbox(displayName:pathSeparator:)``
     /// to create a new mailbox from a display string with automatic encoding, or ``makeSubMailbox(displayName:)``
     /// to create a hierarchical mailbox path.
     ///
@@ -146,7 +146,7 @@ extension MailboxPath {
 
     /// Splits the mailbox path into human-readable display components using the path separator.
     ///
-    /// This method converts the Modified UTF-7-encoded mailbox name to a display string by splitting on
+    /// Converts the Modified UTF-7-encoded mailbox name to a display string by splitting on
     /// the path separator. The conversion is lossy and intended for display purposes only. Do not use the
     /// returned components as mailbox names for protocol operations.
     ///
@@ -172,7 +172,7 @@ extension MailboxPath {
 
     /// Creates a new root mailbox path from a display name.
     ///
-    /// This factory method encodes the display name using Modified UTF-7 (RFC 2152) and validates
+    /// Encodes the display name using Modified UTF-7 (RFC 2152) and validates
     /// that the resulting mailbox name does not contain the path separator character (if provided).
     /// Root mailboxes are top-level mailboxes with no parent hierarchy.
     ///
@@ -202,7 +202,7 @@ extension MailboxPath {
 
     /// Creates a nested child mailbox path within this mailbox.
     ///
-    /// This method encodes the display name using Modified UTF-7 and appends it as a child to the current
+    /// Encodes the display name using Modified UTF-7 and appends it as a child to the current
     /// mailbox path. The path separator is inserted between the parent and child names.
     ///
     /// **Important:** This method should only be used when creating new mailboxes that do not yet exist
