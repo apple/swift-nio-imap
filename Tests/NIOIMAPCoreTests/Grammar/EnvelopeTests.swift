@@ -81,6 +81,24 @@ struct EnvelopeTests {
     @Test(
         "parse envelope",
         arguments: [
+            // Envelope where env-to is `()` instead of `NIL`.
+            ParseFixture.envelope(
+                #"("Wed, 11 Oct 2023 03:11:07 +0000" "some subject" (("Tn" NIL "info" "e.example.com")) NIL NIL () NIL NIL "<426119111385110898173554@bar.example.com>" "<foo@example.com>")"#,
+                expected: .success(
+                    Envelope(
+                        date: "Wed, 11 Oct 2023 03:11:07 +0000",
+                        subject: "some subject",
+                        from: [.singleAddress(.init(personName: "Tn", sourceRoot: nil, mailbox: "info", host: "e.example.com"))],
+                        sender: [],
+                        reply: [],
+                        to: [],
+                        cc: [],
+                        bcc: [],
+                        inReplyTo: "<426119111385110898173554@bar.example.com>",
+                        messageID: "<foo@example.com>"
+                    )
+                )
+            ),
             ParseFixture.envelope(
                 #"("date" "subject" (("name1" "adl1" "mailbox1" "host1")) (("name2" "adl2" "mailbox2" "host2")) (("name3" "adl3" "mailbox3" "host3")) (("name4" "adl4" "mailbox4" "host4") ("name5" "adl5" "mailbox5" "host5")) (("name6" "adl6" "mailbox6" "host6")("name7" "adl7" "mailbox7" "host7")) (("name8" "adl8" "mailbox8" "host8")) "someone" "messageid")"#,
                 expected: .success(
@@ -163,6 +181,7 @@ struct EnvelopeTests {
                 expected: .success([.singleAddress(.init(personName: "a", sourceRoot: "b", mailbox: "c", host: "d"))])
             ),
             ParseFixture.optionalEnvelopeEmailAddresses("NIL", " ", expected: .success([])),
+            ParseFixture.optionalEnvelopeEmailAddresses("()", " ", expected: .success([])),
         ]
     )
     func parseOptionalEnvelopeEmailAddresses(_ fixture: ParseFixture<[EmailAddressListElement]>) {
