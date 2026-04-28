@@ -38,7 +38,7 @@ public struct UseAttribute: Hashable, Sendable {
     /// Stores messages that have been marked as "important" for some reason.
     public static let flagged = Self("\\Flagged")
 
-    /// Stores messages deemed to be spam of junk mail, for example, from a mailing list.
+    /// Stores messages deemed to be spam or junk mail, for example, from a mailing list.
     public static let junk = Self("\\Junk")
 
     /// Holds copies of messages that have been sent.
@@ -74,7 +74,7 @@ extension UseAttribute {
 }
 
 extension String {
-    /// The raw value of the attribute, for example `\Trash`. Always lowercase..
+    /// The raw value of the attribute, for example `\Trash`. Always lowercase.
     public init(_ other: UseAttribute) {
         self = other.stringValue
     }
