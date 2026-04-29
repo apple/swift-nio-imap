@@ -88,7 +88,11 @@ struct EnvelopeTests {
                     Envelope(
                         date: "Wed, 11 Oct 2023 03:11:07 +0000",
                         subject: "some subject",
-                        from: [.singleAddress(.init(personName: "Tn", sourceRoot: nil, mailbox: "info", host: "e.example.com"))],
+                        from: [
+                            .singleAddress(
+                                .init(personName: "Tn", sourceRoot: nil, mailbox: "info", host: "e.example.com")
+                            )
+                        ],
                         sender: [],
                         reply: [],
                         to: [],
