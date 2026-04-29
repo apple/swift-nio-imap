@@ -149,7 +149,7 @@ struct EnvelopeTests {
                         messageID: "messageid"
                     )
                 )
-            )
+            ),
         ]
     )
     func parseEnvelope(_ fixture: ParseFixture<Envelope>) {
