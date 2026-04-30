@@ -76,9 +76,19 @@ extension GrammarParser {
             try self.parseNil(buffer: &buffer, tracker: tracker)
             return []
         }
+        func parseOptionalEnvelopeEmailAddresses_emptyList(
+            buffer: inout ParseBuffer,
+            tracker: StackTracker
+        ) throws -> [EmailAddress] {
+            // Some servers emit `()` instead of `NIL` for empty addr-list fields.
+            // This is non-conformant per RFC 3501 but seen in practice.
+            try PL.parseFixedString("()", buffer: &buffer, tracker: tracker)
+            return []
+        }
         let addresses = try PL.parseOneOf(
             parseEnvelopeEmailAddresses,
             parseOptionalEnvelopeEmailAddresses_nil,
+            parseOptionalEnvelopeEmailAddresses_emptyList,
             buffer: &buffer,
             tracker: tracker
         )
