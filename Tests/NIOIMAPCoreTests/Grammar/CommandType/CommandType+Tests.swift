@@ -288,6 +288,17 @@ struct CommandTypeTests {
         #expect(String(buffer: buffer.buffer.nextChunk().bytes) == "AUTHENTICATE GSSAPI ∅")
     }
 
+    @Test("login credentials redacted in loggingMode")
+    func loginCredentialsRedactedInLoggingMode() {
+        var buffer = CommandEncodeBuffer(
+            buffer: ByteBufferAllocator().buffer(capacity: 64),
+            capabilities: [],
+            loggingMode: true
+        )
+        _ = buffer.writeCommand(.login(username: "alice", password: "s3cr3t"))
+        #expect(String(buffer: buffer.buffer.nextChunk().bytes) == #"LOGIN "∅" "∅""#)
+    }
+
     @Test("UID convenience functions return nil for empty UIDSet")
     func uidConvenienceFunctionsReturnNilForEmpty() {
         #expect(Command.uidMove(messages: UIDSet(), mailbox: .inbox) == nil)
