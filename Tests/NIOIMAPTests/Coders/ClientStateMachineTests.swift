@@ -396,6 +396,26 @@ extension ClientStateMachineTests {
             try stateMachine.receiveResponse(.idleStarted)
         }
     }
+
+    @Test("sending a continuation response while expecting a normal response throws instead of crashing")
+    func sendingContinuationResponseWhileExpectingNormalResponseThrows() {
+        // A spurious `.continuationResponse` (e.g. one forwarded after being misparsed from
+        // untrusted bytes) must not crash the process. A fresh state machine is in
+        // `.expectingNormalResponse`, where this command is invalid.
+        var stateMachine = makeStateMachine()
+        #expect(throws: InvalidCommandForState.self) {
+            try stateMachine.sendCommand(.continuationResponse("spurious"))
+        }
+    }
+
+    @Test("sending idleDone while expecting a normal response throws instead of crashing")
+    func sendingIdleDoneWhileExpectingNormalResponseThrows() {
+        // Likewise, an out-of-context `.idleDone` must throw rather than hit a precondition.
+        var stateMachine = makeStateMachine()
+        #expect(throws: InvalidCommandForState.self) {
+            try stateMachine.sendCommand(.idleDone)
+        }
+    }
 }
 
 // MARK: - Append

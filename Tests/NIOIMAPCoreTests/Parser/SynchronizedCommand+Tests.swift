@@ -396,19 +396,108 @@ struct SynchronizedCommandTests {
 
     // MARK: - Continuation response
 
-    @Test("authentication continuation response is parsed from base64 line")
+    @Test("authentication continuation response is parsed from base64 line during AUTHENTICATE")
     func authenticationContinuationResponseIsParsedFromBase64Line() throws {
-        // A base64-encoded line (not a tagged command or APPEND) is parsed as a
-        // continuationResponse via parseAuthenticationChallengeResponse.
+        // A base64 challenge response is only parsed as a continuationResponse while an
+        // AUTHENTICATE exchange is in progress.
         var parser = CommandParser()
         // "AHRlc3R1c2VyAHRlc3RwYXNz" is base64 for "\0testuser\0testpass"
-        var buf = ByteBuffer("AHRlc3R1c2VyAHRlc3RwYXNz\r\n")
-        let result = try parser.parseCommandStream(buffer: &buf)
-        guard case .continuationResponse = result?.commandPart else {
-            Issue.record("Expected continuationResponse, got \(String(describing: result))")
+        var buf = ByteBuffer("1 AUTHENTICATE PLAIN\r\nAHRlc3R1c2VyAHRlc3RwYXNz\r\n")
+
+        // The AUTHENTICATE command puts the parser into "expecting authentication response" mode.
+        let auth = try parser.parseCommandStream(buffer: &buf)
+        guard case .tagged(let tc) = auth?.commandPart, case .authenticate = tc.command else {
+            Issue.record("Expected tagged AUTHENTICATE, got \(String(describing: auth))")
+            return
+        }
+
+        // Now the base64 line is parsed as a continuation response.
+        let response = try parser.parseCommandStream(buffer: &buf)
+        guard case .continuationResponse = response?.commandPart else {
+            Issue.record("Expected continuationResponse, got \(String(describing: response))")
             return
         }
         #expect(buf.readableBytes == 0)
+    }
+
+    @Test(
+        "bare line terminator without a preceding AUTHENTICATE is rejected",
+        arguments: [
+            "\r\n",  // conforming CRLF
+            "\n",  // non-conforming bare LF (Unix)
+        ]
+    )
+    func bareLineTerminatorWithoutAuthenticateIsRejected(_ lineEnding: String) {
+        // Without an AUTHENTICATE in progress, a bare line terminator must be a parse error rather
+        // than being silently misclassified as a continuation response. This must hold both for the
+        // conforming CRLF terminator and for a non-conforming bare LF (Unix) terminator.
+        var parser = CommandParser()
+        var buf = ByteBuffer(string: lineEnding)
+        #expect(throws: (any Error).self) {
+            try parser.parseCommandStream(buffer: &buf)
+        }
+    }
+
+    @Test("unsolicited base64 line without a preceding AUTHENTICATE is rejected")
+    func unsolicitedBase64LineWithoutAuthenticateIsRejected() {
+        // Without an AUTHENTICATE in progress, an unsolicited base64 line must be a parse error.
+        var parser = CommandParser()
+        var buf = ByteBuffer("AHRlc3R1c2VyAHRlc3RwYXNz\r\n")
+        #expect(throws: (any Error).self) {
+            try parser.parseCommandStream(buffer: &buf)
+        }
+    }
+
+    @Test("multi-round AUTHENTICATE keeps parsing continuation responses")
+    func multiRoundAuthenticateKeepsParsingContinuationResponses() throws {
+        // Multi-round SASL (e.g. GSSAPI) sends several base64 responses; the parser stays in
+        // authenticate mode across all of them.
+        var parser = CommandParser()
+        var buf = ByteBuffer("1 AUTHENTICATE GSSAPI\r\ncmVzcG9uc2Ux\r\ncmVzcG9uc2Uy\r\n")
+
+        let auth = try parser.parseCommandStream(buffer: &buf)
+        guard case .tagged(let tc) = auth?.commandPart, case .authenticate = tc.command else {
+            Issue.record("Expected tagged AUTHENTICATE, got \(String(describing: auth))")
+            return
+        }
+
+        for _ in 0..<2 {
+            let response = try parser.parseCommandStream(buffer: &buf)
+            guard case .continuationResponse = response?.commandPart else {
+                Issue.record("Expected continuationResponse, got \(String(describing: response))")
+                return
+            }
+        }
+        #expect(buf.readableBytes == 0)
+    }
+
+    @Test("ordinary command after AUTHENTICATE exits authenticate mode")
+    func ordinaryCommandAfterAuthenticateExitsAuthenticateMode() throws {
+        // After an AUTHENTICATE exchange, an ordinary command resets the parser back to `.lines`,
+        // and a later stray base64 line is again rejected.
+        var parser = CommandParser()
+        var buf = ByteBuffer("1 AUTHENTICATE PLAIN\r\nAHRlc3R1c2Vy\r\n2 NOOP\r\nAHRlc3R1c2Vy\r\n")
+
+        let auth = try parser.parseCommandStream(buffer: &buf)
+        guard case .tagged(let tc) = auth?.commandPart, case .authenticate = tc.command else {
+            Issue.record("Expected tagged AUTHENTICATE, got \(String(describing: auth))")
+            return
+        }
+
+        let response = try parser.parseCommandStream(buffer: &buf)
+        guard case .continuationResponse = response?.commandPart else {
+            Issue.record("Expected continuationResponse, got \(String(describing: response))")
+            return
+        }
+
+        // The NOOP exits authenticate mode and parses as an ordinary command.
+        let noop = try parser.parseCommandStream(buffer: &buf)
+        #expect(noop?.commandPart == .tagged(.init(tag: "2", command: .noop)))
+
+        // The trailing base64 line is now rejected because we are back in `.lines` mode.
+        #expect(throws: (any Error).self) {
+            try parser.parseCommandStream(buffer: &buf)
+        }
     }
 
     // MARK: - Incomplete CRLF in waitingForMessage mode
