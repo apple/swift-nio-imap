@@ -584,7 +584,10 @@ extension ClientStateMachine {
 
         switch command {
         case .idleDone, .continuationResponse:
-            preconditionFailure("Invalid command for state: \(command)")
+            // These can only arrive here if a malformed or forwarded command is fed to the state
+            // machine out of context (e.g. a spurious `.continuationResponse` parsed from
+            // untrusted bytes). Throw rather than crash the process.
+            throw InvalidCommandForState(command)
         case .tagged(let tc):
             return self.sendTaggedCommand(tc, promise: promise)
         case .append(let ac):

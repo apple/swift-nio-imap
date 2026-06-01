@@ -89,6 +89,9 @@ public struct CommandParser: Parser, Sendable {
     enum Mode: Hashable, Sendable {
         case lines
         case idle
+        /// An `AUTHENTICATE` command has been parsed and we expect either the client's base64
+        /// challenge response(s) or the next ordinary command once authentication completes.
+        case expectingAuthenticationResponse
         case waitingForMessage
         case streamingBytes(Int)
         case streamingEnd
@@ -102,6 +105,19 @@ public struct CommandParser: Parser, Sendable {
             }
             return true
         }
+    }
+
+    /// The context in which a command line is being parsed, controlling which inputs
+    /// ``parseCommandOrAppend(in:buffer:tracker:)`` accepts in addition to tagged commands
+    /// and `APPEND`.
+    private enum CommandLineContext {
+        /// Ordinary command parsing (corresponds to `Mode.lines`). Only tagged commands and
+        /// `APPEND` are valid; a bare CRLF or an unsolicited base64 line is a parse error.
+        case standard
+        /// An `AUTHENTICATE` exchange is in progress (corresponds to
+        /// `Mode.expectingAuthenticationResponse`), so a base64 challenge response is additionally
+        /// accepted — e.g. for multi-round SASL mechanisms such as `GSSAPI`.
+        case authenticating
     }
 
     let parser: GrammarParser
@@ -232,6 +248,8 @@ public struct CommandParser: Parser, Sendable {
                 return try self.handleIdle(buffer: &buffer, tracker: tracker)
             case .lines:
                 return try self.handleLines(buffer: &buffer, tracker: tracker)
+            case .expectingAuthenticationResponse:
+                return try self.handleAuthentication(buffer: &buffer, tracker: tracker)
             case .waitingForMessage:
                 return try self.handleWaitingForMessage(buffer: &buffer, tracker: tracker)
             case .streamingBytes(let remaining):
@@ -270,11 +288,48 @@ public struct CommandParser: Parser, Sendable {
     }
 
     private mutating func handleLines(buffer: inout ParseBuffer, tracker: StackTracker) throws -> CommandStreamPart {
+        // In `.lines` mode there is no `AUTHENTICATE` in progress, so a bare CRLF / unsolicited
+        // base64 line must be rejected rather than misclassified as a continuation response.
+        try self.parseCommandOrAppend(in: .standard, buffer: &buffer, tracker: tracker)
+    }
+
+    /// Parses while an `AUTHENTICATE` exchange is in progress.
+    ///
+    /// In addition to ordinary commands and `APPEND`, the client may send one or more base64
+    /// challenge responses (multi-round SASL, e.g. `GSSAPI`). The parser leaves this mode only
+    /// once an ordinary command or `APPEND` is parsed, since it never sees the server's tagged
+    /// completion response.
+    private mutating func handleAuthentication(
+        buffer: inout ParseBuffer,
+        tracker: StackTracker
+    ) throws -> CommandStreamPart {
+        try self.parseCommandOrAppend(in: .authenticating, buffer: &buffer, tracker: tracker)
+    }
+
+    /// Shared implementation for `.lines` and `.expectingAuthenticationResponse` modes.
+    ///
+    /// Both contexts accept a tagged command or an `APPEND`; only `.authenticating` additionally
+    /// accepts a base64 continuation response. `parseCommand` is tried first and a tagged command
+    /// requires `tag SP …` while a base64 line contains no space, so there is no ambiguity between
+    /// the two.
+    private mutating func parseCommandOrAppend(
+        in context: CommandLineContext,
+        buffer: inout ParseBuffer,
+        tracker: StackTracker
+    ) throws -> CommandStreamPart {
         func parseCommand(buffer: inout ParseBuffer, tracker: StackTracker) throws -> CommandStreamPart {
             let command = try self.parser.parseTaggedCommand(buffer: &buffer, tracker: tracker)
             try PL.parseNewline(buffer: &buffer, tracker: tracker)
-            if case .idleStart = command.command {
+            switch command.command {
+            case .idleStart:
                 self.mode = .idle
+            case .authenticate:
+                // Expect the client's base64 challenge response(s) until authentication completes.
+                self.mode = .expectingAuthenticationResponse
+            default:
+                // Any other command exits a preceding `AUTHENTICATE` exchange. This is a harmless
+                // no-op when we are already in `.lines`.
+                self.mode = .lines
             }
             return .tagged(command)
         }
@@ -291,16 +346,27 @@ public struct CommandParser: Parser, Sendable {
         ) throws -> CommandStreamPart {
             let authenticationChallengeResponse = try self.parser.parseBase64(buffer: &buffer, tracker: tracker)
             try PL.parseNewline(buffer: &buffer, tracker: tracker)
+            // Stay in `.expectingAuthenticationResponse` to support multi-round SASL exchanges.
             return .continuationResponse(authenticationChallengeResponse)
         }
 
-        return try PL.parseOneOf(
-            parseCommand,
-            parseAppend,
-            parseAuthenticationChallengeResponse,
-            buffer: &buffer,
-            tracker: tracker
-        )
+        switch context {
+        case .standard:
+            return try PL.parseOneOf(
+                parseCommand,
+                parseAppend,
+                buffer: &buffer,
+                tracker: tracker
+            )
+        case .authenticating:
+            return try PL.parseOneOf(
+                parseCommand,
+                parseAppend,
+                parseAuthenticationChallengeResponse,
+                buffer: &buffer,
+                tracker: tracker
+            )
+        }
     }
 
     private mutating func handleWaitingForMessage(
