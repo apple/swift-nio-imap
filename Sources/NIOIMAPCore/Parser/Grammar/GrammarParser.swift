@@ -26,6 +26,8 @@ import Glibc
 import Musl
 #elseif os(Windows)
 import ucrt
+#elseif canImport(Bionic)
+import Bionic
 #else
 let badOS = { fatalError("unsupported OS") }()
 #endif
