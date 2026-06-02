@@ -24,9 +24,9 @@ import func Glibc.isalpha
 #elseif canImport(Musl)
 import func Musl.isalnum
 import func Musl.isalpha
-#elseif canImport(Bionic)
-import func Bionic.isalnum
-import func Bionic.isalpha
+#elseif canImport(Android)
+import func Android.isalnum
+import func Android.isalpha
 #else
 let badOS = { fatalError("unsupported OS") }()
 #endif
