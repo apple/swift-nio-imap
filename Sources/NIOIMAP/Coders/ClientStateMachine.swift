@@ -93,6 +93,22 @@ public struct InvalidCommandForState: Error, Equatable {
     }
 }
 
+extension InvalidCommandForState: CustomStringConvertible, CustomDebugStringConvertible {
+    /// A textual representation of the error with all _personally identifiable information_ in
+    /// ``command`` redacted.
+    ///
+    /// `command` can carry sensitive data — e.g. an `AUTHENTICATE` continuation response holding
+    /// credentials — so the default (reflective) description is overridden to route ``command``
+    /// through ``CommandStreamPart/descriptionWithoutPII(_:)`` and avoid leaking it into logs.
+    public var description: String {
+        "InvalidCommandForState(\(CommandStreamPart.descriptionWithoutPII([self.command])))"
+    }
+
+    public var debugDescription: String {
+        self.description
+    }
+}
+
 struct OutgoingChunk: Equatable {
     var bytes: ByteBuffer
     var promise: EventLoopPromise<Void>?
