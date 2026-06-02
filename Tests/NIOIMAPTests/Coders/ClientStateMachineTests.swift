@@ -771,3 +771,27 @@ extension ClientStateMachineTests {
         }
     }
 }
+
+// MARK: - InvalidCommandForState PII redaction
+
+extension ClientStateMachineTests {
+    @Test("InvalidCommandForState redacts continuation-response PII")
+    func invalidCommandForStateRedactsContinuationResponsePII() {
+        // A continuation response can carry credentials (e.g. a SASL exchange), so neither the
+        // raw bytes nor a plain rendering of them may appear in the error's description.
+        let error = InvalidCommandForState(.continuationResponse(ByteBuffer(string: "topsecretcredentials")))
+
+        #expect("\(error)" == "InvalidCommandForState([28 bytes]\r\n)")
+        #expect(String(reflecting: error) == "InvalidCommandForState([28 bytes]\r\n)")
+    }
+
+    @Test("InvalidCommandForState redacts LOGIN credentials")
+    func invalidCommandForStateRedactsLoginCredentials() {
+        // LOGIN carries a username and password; neither may leak via the description.
+        let error = InvalidCommandForState(
+            .tagged(.init(tag: "A1", command: .login(username: "alice", password: "hunter2hunter2")))
+        )
+
+        #expect("\(error)" == "InvalidCommandForState(A1 LOGIN \"∅\" \"∅\"\r\n)")
+    }
+}
