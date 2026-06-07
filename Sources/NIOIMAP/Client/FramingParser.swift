@@ -225,21 +225,31 @@ public struct FramingParser: Hashable, Sendable {
         while self.frameLength < self.buffer.readableBytes {
             switch self.state {
             case .normalTraversal(let lineFeedStrategy):
-                let status = self.readByte_state_normalTraversal(lineFeedStrategy: lineFeedStrategy)
-                switch status {
-                case .parsedCompleteFrame:
-                    return .complete(self.readFrame())
-                case .continueParsing:
-                    continue
+                do {
+                    let status = try self.readByte_state_normalTraversal(lineFeedStrategy: lineFeedStrategy)
+                    switch status {
+                    case .parsedCompleteFrame:
+                        return .complete(self.readFrame())
+                    case .continueParsing:
+                        continue
+                    }
+                } catch {
+                    self.state = .normalTraversal(.includeInFrame)
+                    return .invalid(self.readFrame())
                 }
 
             case .insideQuoted(let s):
-                let status = readByte_state_insideQuoted(quotedState: s)
-                switch status {
-                case .parsedCompleteFrame:
-                    return .complete(self.readFrame())
-                case .continueParsing:
-                    continue
+                do {
+                    let status = try readByte_state_insideQuoted(quotedState: s)
+                    switch status {
+                    case .parsedCompleteFrame:
+                        return .complete(self.readFrame())
+                    case .continueParsing:
+                        continue
+                    }
+                } catch {
+                    self.state = .normalTraversal(.includeInFrame)
+                    return .invalid(self.readFrame())
                 }
 
             case .foundCR:
@@ -340,11 +350,11 @@ public struct FramingParser: Hashable, Sendable {
 
 extension FramingParser {
     /// Returns `.parsedCompleteFrame` if the frame is complete.
-    private mutating func readByte_state_normalTraversal(lineFeedStrategy: LineFeedByteStrategy) -> FrameStatus {
+    private mutating func readByte_state_normalTraversal(lineFeedStrategy: LineFeedByteStrategy) throws -> FrameStatus {
         let byte = self.readByte()
         switch byte {
         case CR, LF:
-            return processLineBreakByte_state(
+            return try processLineBreakByte_state(
                 byte: byte,
                 lineFeedStrategy: lineFeedStrategy
             )
@@ -358,14 +368,24 @@ extension FramingParser {
             return .continueParsing
 
         default:
-            // We don't need to do anything this byte, as it's just a "normal" part of a
+            // We don't need to do anything with this byte, as it's just a "normal" part of a
             // command. We "consume" it in the call to readByte above, which just makes
             // the current frame one byte longer.
+            //
+            // If we were in the `.ignoreFirst` strategy — set after a bare CR ended the previous
+            // frame so that a *leading* LF would be skipped — then consuming a non-LF byte means
+            // this is the start of a fresh frame. Any LF later in this frame is a genuine
+            // terminator, so revert to `.includeInFrame`. Failing to do so would leave the
+            // strategy stale and desync the state machine: a subsequent LF would reach
+            // `processLineBreakByte_state` with `frameLength > 1`.
+            if case .ignoreFirst = lineFeedStrategy {
+                self.state = .normalTraversal(.includeInFrame)
+            }
             return .continueParsing
         }
     }
 
-    private mutating func readByte_state_insideQuoted(quotedState: QuotedState) -> FrameStatus {
+    private mutating func readByte_state_insideQuoted(quotedState: QuotedState) throws -> FrameStatus {
         let byte = self.readByte()
         switch (byte, quotedState) {
         case (CR, _), (LF, _):
@@ -373,7 +393,7 @@ extension FramingParser {
             // parts (notably `text`) is allowed to have _any_ character
             // (except CR or LF).
             // Thus, fall through to “normal” state:
-            return processLineBreakByte_state(
+            return try processLineBreakByte_state(
                 byte: byte,
                 lineFeedStrategy: .includeInFrame
             )
@@ -398,7 +418,7 @@ extension FramingParser {
     private mutating func processLineBreakByte_state(
         byte: UInt8,
         lineFeedStrategy: LineFeedByteStrategy
-    ) -> FrameStatus {
+    ) throws -> FrameStatus {
         switch byte {
         case CR:
             self.readByte_state_foundCR()
@@ -407,7 +427,15 @@ extension FramingParser {
         case LF:
             switch lineFeedStrategy {
             case .ignoreFirst:
-                precondition(self.frameLength == 1)
+                // Reaching here means a bare CR completed the previous frame and this LF is its
+                // partner — so it must be the only byte consumed in this frame. The `.ignoreFirst`
+                // reset in `readByte_state_normalTraversal` makes `frameLength == 1` an invariant,
+                // but these bytes come straight off the network, so we defensively treat any
+                // violation as a recoverable invalid frame rather than aborting the whole process
+                // with a `precondition`.
+                guard self.frameLength == 1 else {
+                    throw InvalidFrame()
+                }
                 self.stepBackAndIgnoreByte()
                 self.state = .normalTraversal(.includeInFrame)
                 return .continueParsing

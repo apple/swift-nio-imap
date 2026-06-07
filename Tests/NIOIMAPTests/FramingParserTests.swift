@@ -201,6 +201,236 @@ import Testing
         #expect(result == [.complete("A2 NOOP\r")])
     }
 
+    // MARK: - Bare CR at a segment boundary
+
+    // When a bare CR is the *last* byte of a segment, the parser completes the frame but can't yet
+    // tell whether the matching LF will follow in the next segment. It therefore enters the
+    // `.ignoreFirst` line-feed strategy: skip a *leading* LF next, but otherwise treat the byte
+    // stream normally.
+    //
+    // The bug these tests guard against: if the next segment contained a non-LF byte followed by a
+    // *bare* LF (no preceding CR — e.g. a Unix-style terminator), the `.ignoreFirst` strategy was
+    // not reset, so that LF reached `processLineBreakByte_state` with `frameLength > 1` and tripped
+    // a `precondition`, aborting the whole process. The tests below pin down every continuation of
+    // a bare CR.
+    //
+    // (Note: a continuation ending in CRLF does *not* trigger the bug — the CR completes the frame
+    // and `readByte_state_foundCR` consumes the trailing LF — so the crash repros below all use a
+    // bare LF terminator.)
+
+    // The original crash: `CR` (end of segment), then a command terminated by a bare LF. Pre-fix
+    // this aborted the process; it must now frame cleanly.
+    @Test("bare CR then a command terminated by a bare LF")
+    func bareCRThenCommandTerminatedByBareLF() {
+        var parser = self.parser
+
+        var buffer: ByteBuffer = "A1 NOOP\r"
+        var result: [FramingResult]?
+        #expect(throws: Never.self) {
+            result = try parser.appendAndFrameBuffer(&buffer)
+        }
+        #expect(result == [.complete("A1 NOOP\r")])
+
+        // The next segment is a fresh command with a Unix-style bare LF terminator. It must frame
+        // normally rather than trip the precondition.
+        buffer = "A2 NOOP\n"
+        #expect(throws: Never.self) {
+            result = try parser.appendAndFrameBuffer(&buffer)
+        }
+        #expect(result == [.complete("A2 NOOP\n")])
+    }
+
+    // The minimal repro, drip-fed one byte per segment: `\r`, then `X`, then `\n`.
+    @Test("bare CR then byte then LF drip-fed")
+    func bareCRThenByteThenLFDripFed() {
+        var parser = self.parser
+
+        var buffer: ByteBuffer = "\r"
+        var result: [FramingResult]?
+        #expect(throws: Never.self) {
+            result = try parser.appendAndFrameBuffer(&buffer)
+        }
+        #expect(result == [.complete("\r")])
+
+        // A non-LF byte after the bare CR begins a new frame, so `.ignoreFirst` must be dropped.
+        buffer = "X"
+        #expect(throws: Never.self) {
+            result = try parser.appendAndFrameBuffer(&buffer)
+        }
+        #expect(result == [.incomplete(2)])
+
+        // The LF now terminates the "X" frame instead of being mistaken for the CR's partner.
+        buffer = "\n"
+        #expect(throws: Never.self) {
+            result = try parser.appendAndFrameBuffer(&buffer)
+        }
+        #expect(result == [.complete("X\n")])
+    }
+
+    // The legitimate `.ignoreFirst` case: when the LF *is* the first byte of the next segment, it
+    // is the CR's partner and must be silently consumed (not emitted as an empty frame).
+    @Test("bare CR then leading LF is ignored")
+    func bareCRThenLeadingLFIsIgnored() {
+        var parser = self.parser
+
+        var buffer: ByteBuffer = "A1 NOOP\r"
+        var result: [FramingResult]?
+        #expect(throws: Never.self) {
+            result = try parser.appendAndFrameBuffer(&buffer)
+        }
+        #expect(result == [.complete("A1 NOOP\r")])
+
+        // Leading LF (the CR's partner) is swallowed, and the following command frames normally.
+        buffer = "\nA2 NOOP\r\n"
+        #expect(throws: Never.self) {
+            result = try parser.appendAndFrameBuffer(&buffer)
+        }
+        #expect(result == [.complete("A2 NOOP\r\n")])
+    }
+
+    // A bare CR followed by a non-LF byte and *another* bare CR: the second frame is itself
+    // CR-terminated and the parser must re-enter `.ignoreFirst` for the next segment.
+    @Test("bare CR then a frame also ending in a bare CR")
+    func bareCRThenFrameAlsoEndingInBareCR() {
+        var parser = self.parser
+
+        var buffer: ByteBuffer = "A1\r"
+        var result: [FramingResult]?
+        #expect(throws: Never.self) {
+            result = try parser.appendAndFrameBuffer(&buffer)
+        }
+        #expect(result == [.complete("A1\r")])
+
+        buffer = "B2\r"
+        #expect(throws: Never.self) {
+            result = try parser.appendAndFrameBuffer(&buffer)
+        }
+        #expect(result == [.complete("B2\r")])
+
+        // Still in `.ignoreFirst`; a lone trailing LF is the second CR's partner and is ignored.
+        buffer = "\n"
+        #expect(throws: Never.self) {
+            result = try parser.appendAndFrameBuffer(&buffer)
+        }
+        #expect(result == [.incomplete(2)])
+    }
+
+    // A bare CR immediately followed by `CR LF` in the next segment: the leading CR opens an empty
+    // line, and because its LF *is* present it is folded into a single empty `\r\n` frame.
+    @Test("bare CR then CRLF empty line")
+    func bareCRThenCRLFEmptyLine() {
+        var parser = self.parser
+
+        var buffer: ByteBuffer = "A1\r"
+        var result: [FramingResult]?
+        #expect(throws: Never.self) {
+            result = try parser.appendAndFrameBuffer(&buffer)
+        }
+        #expect(result == [.complete("A1\r")])
+
+        buffer = "\r\n"
+        #expect(throws: Never.self) {
+            result = try parser.appendAndFrameBuffer(&buffer)
+        }
+        #expect(result == [.complete("\r\n")])
+    }
+
+    // After a bare CR, a `{` must still open a literal header (the `.ignoreFirst` strategy applies
+    // only to a leading LF, never to other bytes).
+    @Test("bare CR then literal header")
+    func bareCRThenLiteralHeader() {
+        var parser = self.parser
+
+        var buffer: ByteBuffer = "A1 LOGIN \r"
+        var result: [FramingResult]?
+        #expect(throws: Never.self) {
+            result = try parser.appendAndFrameBuffer(&buffer)
+        }
+        #expect(result == [.complete("A1 LOGIN \r")])
+
+        buffer = "{3}\r\nhey\r\n"
+        #expect(throws: Never.self) {
+            result = try parser.appendAndFrameBuffer(&buffer)
+        }
+        #expect(result == [.complete("{3}\r\n"), .insideLiteral("hey", remainingBytes: 0), .complete("\r\n")])
+    }
+
+    // After a bare CR, a `"` must still open a quoted string.
+    @Test("bare CR then quoted string")
+    func bareCRThenQuotedString() {
+        var parser = self.parser
+
+        var buffer: ByteBuffer = "A1 LOGIN \r"
+        var result: [FramingResult]?
+        #expect(throws: Never.self) {
+            result = try parser.appendAndFrameBuffer(&buffer)
+        }
+        #expect(result == [.complete("A1 LOGIN \r")])
+
+        buffer = "\"foo\"\r\n"
+        #expect(throws: Never.self) {
+            result = try parser.appendAndFrameBuffer(&buffer)
+        }
+        #expect(result == [.complete("\"foo\"\r\n")])
+    }
+
+    // Several bare CRs each ending their own segment must not desync the state machine: each one
+    // simply completes a frame and re-arms `.ignoreFirst`.
+    @Test("repeated bare CRs across segments")
+    func repeatedBareCRsAcrossSegments() {
+        var parser = self.parser
+        for _ in 0..<3 {
+            var buffer: ByteBuffer = "\r"
+            var result: [FramingResult]?
+            #expect(throws: Never.self) {
+                result = try parser.appendAndFrameBuffer(&buffer)
+            }
+            #expect(result == [.complete("\r")])
+        }
+    }
+
+    // MARK: - Literal-header CRLF split across a segment boundary
+
+    // The literal-body path uses the *same* `.ignoreFirst` strategy when a literal header's CRLF
+    // is split (`…{3}\r` ends a segment). A following non-LF byte must begin the literal body
+    // directly...
+    @Test("literal header CR split then body without LF")
+    func literalHeaderCRSplitThenBodyWithoutLF() {
+        var parser = self.parser
+
+        var buffer: ByteBuffer = "A1 LOGIN {3}\r"
+        var result: [FramingResult]?
+        #expect(throws: Never.self) {
+            result = try parser.appendAndFrameBuffer(&buffer)
+        }
+        #expect(result == [.complete("A1 LOGIN {3}\r")])
+
+        buffer = "hey\r\n"
+        #expect(throws: Never.self) {
+            result = try parser.appendAndFrameBuffer(&buffer)
+        }
+        #expect(result == [.insideLiteral("hey", remainingBytes: 0), .complete("\r\n")])
+    }
+
+    // ...while a following LF (the CR's partner) is skipped before the literal body begins.
+    @Test("literal header CR split then leading LF before body")
+    func literalHeaderCRSplitThenLeadingLFBeforeBody() {
+        var parser = self.parser
+
+        var buffer: ByteBuffer = "A1 LOGIN {3}\r"
+        var result: [FramingResult]?
+        #expect(throws: Never.self) {
+            result = try parser.appendAndFrameBuffer(&buffer)
+        }
+        #expect(result == [.complete("A1 LOGIN {3}\r")])
+
+        buffer = "\nhey\r\n"
+        #expect(throws: Never.self) {
+            result = try parser.appendAndFrameBuffer(&buffer)
+        }
+        #expect(result == [.insideLiteral("hey", remainingBytes: 0), .complete("\r\n")])
+    }
+
     @Test("two commands across multiple buffers")
     func twoCommandsAcrossMultipleBuffers() {
         var parser = self.parser
