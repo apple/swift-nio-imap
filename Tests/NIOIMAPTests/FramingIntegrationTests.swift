@@ -79,7 +79,7 @@ import Testing
         for entry in Self.wellFormedCorpus {
             let bytes = Array(entry.input.utf8)
 
-            // Sanity: the un-split stream parses to the expected commands.
+            // Baseline: the un-split stream parses to the expected commands.
             #expect(
                 self.parsedParts(of: bytes, splittingAt: []) == entry.expected,
                 "unsplit: \(entry.input.debugDescription)"
