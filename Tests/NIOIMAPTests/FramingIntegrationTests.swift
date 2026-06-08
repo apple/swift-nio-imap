@@ -80,7 +80,10 @@ import Testing
             let bytes = Array(entry.input.utf8)
 
             // Sanity: the un-split stream parses to the expected commands.
-            #expect(self.parsedParts(of: bytes, splittingAt: []) == entry.expected, "unsplit: \(entry.input.debugDescription)")
+            #expect(
+                self.parsedParts(of: bytes, splittingAt: []) == entry.expected,
+                "unsplit: \(entry.input.debugDescription)"
+            )
 
             // Every two-way split (both segments non-empty) must agree.
             for splitIndex in 1..<bytes.count {
@@ -100,7 +103,10 @@ import Testing
             for first in 1..<bytes.count {
                 for second in (first + 1)..<bytes.count {
                     let parts = self.parsedParts(of: bytes, splittingAt: [first, second])
-                    #expect(parts == entry.expected, "split \(entry.input.debugDescription) at bytes \(first), \(second)")
+                    #expect(
+                        parts == entry.expected,
+                        "split \(entry.input.debugDescription) at bytes \(first), \(second)"
+                    )
                 }
             }
         }
