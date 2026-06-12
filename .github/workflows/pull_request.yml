@@ -27,3 +27,7 @@ jobs:
   cxx-interop:
     name: Cxx interop
     uses: apple/swift-nio/.github/workflows/cxx_interop.yml@main
+
+  android-sdk:
+    name: Android Swift SDK
+    uses: apple/swift-nio/.github/workflows/android_swift_sdk.yml@main
