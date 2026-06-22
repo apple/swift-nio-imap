@@ -17,7 +17,7 @@ import NIOIMAPCore
 extension ClientStateMachine {
     struct Authentication: Hashable {
         enum State: Hashable {
-            /// The client has sent the authentiction command
+            /// The client has sent the authentication command
             /// and is now waiting for either a server challenge
             /// or for the server to confirm authentication is
             /// complete.
