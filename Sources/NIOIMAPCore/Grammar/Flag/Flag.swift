@@ -100,7 +100,15 @@ extension Flag {
 
     /// `\Flagged` - The message has been marked for attention.
     ///
-    /// Defined in [RFC 3501](https://datatracker.ietf.org/doc/html/rfc3501).
+    /// Defined in [RFC 9051](https://www.rfc-editor.org/rfc/rfc9051.html).
+    ///
+    /// A flagged message can additionally carry one of seven colors, encoded as
+    /// a 3-bit mask via the ``Keyword/colorBit0``, ``Keyword/colorBit1``, and
+    /// ``Keyword/colorBit2`` keywords ([RFC 9979](https://www.rfc-editor.org/rfc/rfc9979.html)).
+    /// Prefer the higher-level ``FlaggedState`` API for reading and updating a
+    /// message's flagged mark and its color.
+    ///
+    /// - SeeAlso: ``FlaggedState``
     public static let flagged = Self("\\Flagged")
 
     /// `\Deleted` - The message has been deleted.

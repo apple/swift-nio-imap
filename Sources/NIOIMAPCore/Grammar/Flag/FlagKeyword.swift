@@ -152,19 +152,37 @@ extension Flag.Keyword {
     /// A non-standard keyword for marking non-spam messages. Prefer ``notJunk`` for standard usage.
     public static let unregistered_notJunk = Self(unchecked: "NotJunk")
 
-    /// The `$MailFlagBit0` keyword for color marking (bit 0).
+    /// The `$MailFlagBit0` keyword, bit 0 of a flagged message's color.
     ///
-    /// A color-flag keyword for messages, where different bits represent different colors.
+    /// Together with ``colorBit1`` and ``colorBit2``, this keyword forms a 3-bit
+    /// mask that gives a `\Flagged` message one of seven colors. Prefer the
+    /// higher-level ``FlaggedState`` API for reading and updating a message's flagged
+    /// state and color.
+    ///
+    /// - SeeAlso: [RFC 9979 Section 3](https://www.rfc-editor.org/rfc/rfc9979.html#section-3)
+    /// - SeeAlso: ``FlaggedState``
     public static let colorBit0 = Self(unchecked: "$MailFlagBit0")
 
-    /// The `$MailFlagBit1` keyword for color marking (bit 1).
+    /// The `$MailFlagBit1` keyword, bit 1 of a flagged message's color.
     ///
-    /// A color-flag keyword for messages.
+    /// Together with ``colorBit0`` and ``colorBit2``, this keyword forms a 3-bit
+    /// mask that gives a `\Flagged` message one of seven colors. Prefer the
+    /// higher-level ``FlaggedState`` API for reading and updating a message's flagged
+    /// state and color.
+    ///
+    /// - SeeAlso: [RFC 9979 Section 3](https://www.rfc-editor.org/rfc/rfc9979.html#section-3)
+    /// - SeeAlso: ``FlaggedState``
     public static let colorBit1 = Self(unchecked: "$MailFlagBit1")
 
-    /// The `$MailFlagBit2` keyword for color marking (bit 2).
+    /// The `$MailFlagBit2` keyword, bit 2 of a flagged message's color.
     ///
-    /// A color-flag keyword for messages.
+    /// Together with ``colorBit0`` and ``colorBit1``, this keyword forms a 3-bit
+    /// mask that gives a `\Flagged` message one of seven colors. Prefer the
+    /// higher-level ``FlaggedState`` API for reading and updating a message's flagged
+    /// state and color.
+    ///
+    /// - SeeAlso: [RFC 9979 Section 3](https://www.rfc-editor.org/rfc/rfc9979.html#section-3)
+    /// - SeeAlso: ``FlaggedState``
     public static let colorBit2 = Self(unchecked: "$MailFlagBit2")
 
     /// The `$MDNSent` keyword, indicating a Message Disposition Notification has been sent for this message.
