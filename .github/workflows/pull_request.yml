@@ -31,3 +31,9 @@ jobs:
   android-sdk:
     name: Android Swift SDK
     uses: apple/swift-nio/.github/workflows/android_swift_sdk.yml@main
+    with:
+      # swift-collections 1.6.0 uses `@inline(always)` under `#if compiler(>=6.3)`, but the
+      # attribute is still gated behind the experimental `InlineAlways` feature in the nightly
+      # `main` toolchain this job builds with. Enable it until the dependency's guard is fixed
+      # upstream (cf. apple/swift-collections #580/#584).
+      additional_command_arguments: "-Xswiftc -enable-experimental-feature -Xswiftc InlineAlways"
