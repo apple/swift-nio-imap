@@ -462,6 +462,23 @@ extension GrammarParser {
             try parseUseAttribute_fixed(expected: "\\Trash", returning: .trash, buffer: &buffer, tracker: tracker)
         }
 
+        func parseUseAttribute_snoozed(buffer: inout ParseBuffer, tracker: StackTracker) throws -> UseAttribute {
+            try parseUseAttribute_fixed(expected: "\\Snoozed", returning: .snoozed, buffer: &buffer, tracker: tracker)
+        }
+
+        func parseUseAttribute_scheduled(buffer: inout ParseBuffer, tracker: StackTracker) throws -> UseAttribute {
+            try parseUseAttribute_fixed(
+                expected: "\\Scheduled",
+                returning: .scheduled,
+                buffer: &buffer,
+                tracker: tracker
+            )
+        }
+
+        func parseUseAttribute_memos(buffer: inout ParseBuffer, tracker: StackTracker) throws -> UseAttribute {
+            try parseUseAttribute_fixed(expected: "\\Memos", returning: .memos, buffer: &buffer, tracker: tracker)
+        }
+
         func parseUseAttribute_other(buffer: inout ParseBuffer, tracker: StackTracker) throws -> UseAttribute {
             try PL.parseFixedString("\\", buffer: &buffer, tracker: tracker)
             let att = try self.parseAtom(buffer: &buffer, tracker: tracker)
@@ -477,6 +494,9 @@ extension GrammarParser {
                 parseUseAttribute_junk,
                 parseUseAttribute_sent,
                 parseUseAttribute_trash,
+                parseUseAttribute_snoozed,
+                parseUseAttribute_scheduled,
+                parseUseAttribute_memos,
                 parseUseAttribute_other,
             ],
             buffer: &buffer,

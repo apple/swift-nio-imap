@@ -26,6 +26,9 @@ struct UseAttributeTests {
         EncodeFixture.useAttribute(.junk, "\\Junk"),
         EncodeFixture.useAttribute(.sent, "\\Sent"),
         EncodeFixture.useAttribute(.trash, "\\Trash"),
+        EncodeFixture.useAttribute(.snoozed, "\\Snoozed"),
+        EncodeFixture.useAttribute(.scheduled, "\\Scheduled"),
+        EncodeFixture.useAttribute(.memos, "\\Memos"),
         EncodeFixture.useAttribute(.init("\\test"), "\\test"),
     ])
     func encode(_ fixture: EncodeFixture<UseAttribute>) {
@@ -65,6 +68,9 @@ struct UseAttributeTests {
         ParseFixture.useAttribute("\\Trash", "", expected: .success(.trash)),
         ParseFixture.useAttribute("\\Sent", "", expected: .success(.sent)),
         ParseFixture.useAttribute("\\Drafts", "", expected: .success(.drafts)),
+        ParseFixture.useAttribute("\\Snoozed", "", expected: .success(.snoozed)),
+        ParseFixture.useAttribute("\\Scheduled", "", expected: .success(.scheduled)),
+        ParseFixture.useAttribute("\\Memos", "", expected: .success(.memos)),
         ParseFixture.useAttribute("\\Other", " ", expected: .success(.init("\\Other"))),
     ])
     func parse(_ fixture: ParseFixture<UseAttribute>) {
