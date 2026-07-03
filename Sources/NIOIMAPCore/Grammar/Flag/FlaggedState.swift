@@ -114,7 +114,7 @@ public enum FlaggedState: Hashable, Sendable {
     /// the message transits through a valid intermediate color rather than the
     /// unassigned `111` combination. (The two commands are not atomic, so another
     /// client may still observe the intermediate state.) Skip either command when
-    /// its set ``Swift/Set/isEmpty`` is `true` — for example, ``FlaggedState/unflagged``
+    /// its set is empty — for example, ``FlaggedState/unflagged``
     /// produces an empty `flagsToSet` — since a `STORE` with an empty flag list is
     /// a wasted round-trip. Only the ``FlaggedState/unflagged`` and
     /// ``RawFlaggedState/unflagged`` states ever produce an empty side; every

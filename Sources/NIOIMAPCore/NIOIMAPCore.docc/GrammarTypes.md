@@ -52,6 +52,8 @@ Message flags and flag management.
 
 - ``Flag``
 - ``Flag/Keyword``
+- ``FlaggedState``
+- ``RawFlaggedState``
 - ``PermanentFlag``
 - ``UseAttribute``
 - ``AttributeFlag``
@@ -193,7 +195,7 @@ Additional specialized types for protocol extensions.
 - ``KeyValue``
 - ``GmailLabel``
 - ``PreviewText``
-- ``SortData``
+- ``SortCriterion``
 - ``SearchCorrelator``
 - ``OptionExtensionKind``
 - ``OptionValueComp``
