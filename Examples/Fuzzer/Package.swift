@@ -6,7 +6,7 @@ import PackageDescription
 let package = Package(
     name: "imap-fuzzer-example",
     platforms: [
-        .macOS(.v15),
+        .macOS(.v15)
     ],
     dependencies: [
         .package(name: "swift-nio-imap", path: "../.."),
@@ -19,6 +19,6 @@ let package = Package(
                 .product(name: "NIOIMAP", package: "swift-nio-imap"),
                 .product(name: "NIO", package: "swift-nio"),
             ]
-        ),
+        )
     ]
 )

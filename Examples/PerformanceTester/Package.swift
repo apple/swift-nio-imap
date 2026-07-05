@@ -6,17 +6,17 @@ import PackageDescription
 let package = Package(
     name: "imap-performance-tester-example",
     platforms: [
-        .macOS(.v15),
+        .macOS(.v15)
     ],
     dependencies: [
-        .package(name: "swift-nio-imap", path: "../.."),
+        .package(name: "swift-nio-imap", path: "../..")
     ],
     targets: [
         .executableTarget(
             name: "NIOIMAPPerformanceTester",
             dependencies: [
-                .product(name: "NIOIMAP", package: "swift-nio-imap"),
+                .product(name: "NIOIMAP", package: "swift-nio-imap")
             ]
-        ),
+        )
     ]
 )

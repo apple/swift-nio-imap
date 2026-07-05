@@ -6,7 +6,7 @@ import PackageDescription
 let package = Package(
     name: "imap-cli-example",
     platforms: [
-        .macOS(.v15),
+        .macOS(.v15)
     ],
     dependencies: [
         .package(name: "swift-nio-imap", path: "../.."),

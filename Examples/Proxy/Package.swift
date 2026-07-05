@@ -6,7 +6,7 @@ import PackageDescription
 let package = Package(
     name: "imap-proxy-example",
     platforms: [
-        .macOS(.v15),
+        .macOS(.v15)
     ],
     dependencies: [
         .package(name: "swift-nio-imap", path: "../.."),
@@ -21,6 +21,6 @@ let package = Package(
                 .product(name: "NIO", package: "swift-nio"),
                 .product(name: "NIOSSL", package: "swift-nio-ssl"),
             ]
-        ),
+        )
     ]
 )
