@@ -33,3 +33,23 @@ jobs:
       # `main` toolchain this job builds with. Enable it until the dependency's guard is fixed
       # upstream (cf. apple/swift-collections #580/#584).
       additional_command_arguments: "-Xswiftc -enable-experimental-feature -Xswiftc InlineAlways"
+
+  examples:
+    name: Build examples
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        example: [CLI, Proxy, Fuzzer, PerformanceTester]
+    container:
+      image: swift:6.0
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Build
+        run: swift build --package-path "Examples/${{ matrix.example }}"
+      - name: Test
+        if: matrix.example == 'CLI'
+        run: swift test --package-path "Examples/CLI"
