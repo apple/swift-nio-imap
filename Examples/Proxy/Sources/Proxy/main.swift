@@ -12,23 +12,18 @@
 //
 //===----------------------------------------------------------------------===//
 
-import Foundation
 import NIO
 import NIOIMAP
 import NIOIMAPCore
 import NIOSSL
 
-func log(_ string: String, buffer: ByteBuffer? = nil) {
-    if let buffer = buffer {
-        print(string, String(decoding: buffer.readableBytesView, as: Unicode.UTF8.self))
-    } else {
-        print(string)
-    }
-}
-
-let eventLoopGroup = MultiThreadedEventLoopGroup(numberOfThreads: 1)
-defer {
-    try! eventLoopGroup.syncShutdownGracefully()
+/// Logs a single line of proxy output.
+///
+/// Callers are responsible for redacting personally identifiable information
+/// (PII) before calling this — see `CommandStreamPart.descriptionWithoutPII(_:)`
+/// and `Response.descriptionWithoutPII(_:)`.
+func log(_ message: String) {
+    print(message)
 }
 
 // MARK: - Configuration
@@ -52,18 +47,43 @@ guard let serverPort = Int(CommandLine.arguments[4]) else {
 
 // MARK: - Run
 
-try ServerBootstrap(group: eventLoopGroup)
-    .childChannelInitializer { channel -> EventLoopFuture<Void> in
+let eventLoopGroup = MultiThreadedEventLoopGroup(numberOfThreads: 1)
+
+// The listening socket. Each accepted mail-client connection is surfaced as its own
+// `NIOAsyncChannel` that decodes the client's commands (`CommandStreamPart`) and
+// encodes our responses (`Response`).
+let serverChannel = try await ServerBootstrap(group: eventLoopGroup)
+    .serverChannelOption(ChannelOptions.socket(SocketOptionLevel(SOL_SOCKET), SO_REUSEADDR), value: 1)
+    .bind(host: host, port: port) { channel in
         channel.eventLoop.makeCompletedFuture {
-            try! channel.pipeline.syncOperations.addHandlers([
-                InboundPrintHandler(type: "CLIENT (Original)"),
-                OutboundPrintHandler(type: "SERVER (Decoded)"),
+            try channel.pipeline.syncOperations.addHandlers([
                 ByteToMessageHandler(FrameDecoder()),
                 IMAPServerHandler(),
-                MailClientToProxyHandler(serverHost: serverHost, serverPort: serverPort),
             ])
+            return try NIOAsyncChannel<CommandStreamPart, Response>(wrappingChannelSynchronously: channel)
         }
     }
-    .serverChannelOption(ChannelOptions.socket(SocketOptionLevel(SOL_SOCKET), SO_REUSEADDR), value: 1)
-    .bind(host: host, port: port).wait()
-    .closeFuture.wait()
+
+log("Proxy listening on \(host):\(port), forwarding to \(serverHost):\(serverPort)")
+
+// Accept connections forever. Each client runs in its own child task, so a failure on
+// one connection — a malformed command, a broken TLS handshake, a parser error — only
+// tears down that connection and never the whole proxy.
+try await withThrowingDiscardingTaskGroup { taskGroup in
+    try await serverChannel.executeThenClose { inbound in
+        for try await clientChannel in inbound {
+            taskGroup.addTask {
+                do {
+                    try await proxyConnection(
+                        clientChannel,
+                        toServerHost: serverHost,
+                        serverPort: serverPort,
+                        group: eventLoopGroup
+                    )
+                } catch {
+                    log("Connection closed with error: \(error)")
+                }
+            }
+        }
+    }
+}
