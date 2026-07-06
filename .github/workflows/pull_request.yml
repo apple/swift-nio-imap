@@ -18,8 +18,6 @@ jobs:
     name: Unit tests
     uses: apple/swift-nio/.github/workflows/unit_tests.yml@main
     with:
-      linux_5_9_arguments_override: "-Xswiftc -warnings-as-errors --explicit-target-dependency-import-check error"
-      linux_5_10_arguments_override: "-Xswiftc -warnings-as-errors --explicit-target-dependency-import-check error"
       linux_6_0_arguments_override: "-Xswiftc -warnings-as-errors --explicit-target-dependency-import-check error"
       linux_nightly_6_0_arguments_override: "--explicit-target-dependency-import-check error"
       linux_nightly_main_arguments_override: "--explicit-target-dependency-import-check error"
@@ -37,3 +35,13 @@ jobs:
       # `main` toolchain this job builds with. Enable it until the dependency's guard is fixed
       # upstream (cf. apple/swift-collections #580/#584).
       additional_command_arguments: "-Xswiftc -enable-experimental-feature -Xswiftc InlineAlways"
+
+  macos-tests:
+    name: macOS tests
+    uses: apple/swift-nio/.github/workflows/macos_tests.yml@main
+    with:
+      runner_pool: general
+      build_scheme: swift-certificates
+      swift_6_1_build_arguments_override: "-Xswiftc -Xfrontend -Xswiftc -require-explicit-sendable -Xswiftc -warnings-as-errors"
+      swift_6_2_build_arguments_override: "-Xswiftc -Xfrontend -Xswiftc -require-explicit-sendable -Xswiftc -warnings-as-errors"
+      swift_6_3_build_arguments_override: "-Xswiftc -Xfrontend -Xswiftc -require-explicit-sendable -Xswiftc -warnings-as-errors"
