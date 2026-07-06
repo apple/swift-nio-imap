@@ -15,7 +15,7 @@
 /// Namespace grouping MIME media type related types.
 ///
 /// Organizes MIME media type components as defined in [RFC 2045](https://datatracker.ietf.org/doc/html/rfc2045).
-public enum Media {}
+public enum Media: Sendable {}
 
 extension Media {
     /// A MIME media type consisting of a top-level type and subtype.
