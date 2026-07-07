@@ -164,3 +164,8 @@ extension IMAPClientHandler {
         case fixed(CommandEncodingOptions)
     }
 }
+
+// `IMAPClientHandler` holds per-connection mutable state and is confined to a
+// single `EventLoop`, so it is deliberately non-`Sendable`.
+@available(*, unavailable)
+extension IMAPClientHandler: Sendable {}
