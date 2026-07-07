@@ -75,7 +75,7 @@
 // minor modifications to remove public attributes
 
 @usableFromInline
-enum Base64 {
+enum Base64: Sendable {
     @usableFromInline
     struct EncodingOptions: OptionSet, Sendable {
         @usableFromInline

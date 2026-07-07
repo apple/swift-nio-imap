@@ -21,7 +21,7 @@
 ///
 /// - SeeAlso: [RFC 3501](https://datatracker.ietf.org/doc/html/rfc3501),
 ///   [RFC 7162 Section 4](https://datatracker.ietf.org/doc/html/rfc7162#section-4)
-public struct IMAPDefaults {
+public struct IMAPDefaults: Sendable {
     /// The maximum recommended line length for IMAP protocol messages.
     ///
     /// RFC 7162 Section 4 recommends that servers not send lines longer than 8192 bytes.

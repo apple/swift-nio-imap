@@ -39,7 +39,7 @@ import struct NIO.ByteBuffer
 /// ```
 ///
 /// - SeeAlso: [RFC 3501 Section 5.1.3](https://datatracker.ietf.org/doc/html/rfc3501#section-5.1.3)
-public enum ModifiedUTF7 {
+public enum ModifiedUTF7: Sendable {
     /// Thrown when a UTF-7 decoder receives an odd number of bytes.
     ///
     /// UTF-7 Base64 encoding produces an even number of bytes, so an odd count

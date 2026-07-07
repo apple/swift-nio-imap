@@ -71,3 +71,8 @@ public class ResponseRoundtripHandler: ChannelInboundHandler {
         //        context.fireChannelRead(self.wrapInboundOut(buffer))
     }
 }
+
+// `ResponseRoundtripHandler` holds mutable state and is confined to a single
+// `EventLoop`, so it is deliberately non-`Sendable`.
+@available(*, unavailable)
+extension ResponseRoundtripHandler: Sendable {}

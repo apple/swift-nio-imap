@@ -70,3 +70,8 @@ public class CommandRoundtripHandler: ChannelOutboundHandler {
         }
     }
 }
+
+// `CommandRoundtripHandler` holds mutable state and is confined to a single
+// `EventLoop`, so it is deliberately non-`Sendable`.
+@available(*, unavailable)
+extension CommandRoundtripHandler: Sendable {}
