@@ -204,6 +204,10 @@ The base protocol is implemented throughout NIOIMAPCore with types like ``Comman
 
 [RFC 9738](https://datatracker.ietf.org/doc/html/rfc9738) (February 2024) allows servers to advertise a maximum number of messages that can be stored in a mailbox. Check ``Capability/messageLimit(_:)`` for the server's message limit.
 
+### RFC 9979: Further IMAP/JMAP Keywords and Mailbox Name Attributes
+
+[RFC 9979](https://datatracker.ietf.org/doc/html/rfc9979) (May 2026) registers a set of message keywords and mailbox name attributes that were already in use across mail servers and clients, so that implementations can rely on their meaning without name collisions. The message keywords are available as ``Flag/Keyword`` constants — for example ``Flag/Keyword/hasAttachment``, ``Flag/Keyword/memo``, ``Flag/Keyword/muted``, and ``Flag/Keyword/notify``. The three flag-color keywords ``Flag/Keyword/colorBit0``, ``Flag/Keyword/colorBit1``, and ``Flag/Keyword/colorBit2`` encode one of seven colors on a `\Flagged` message; use the higher-level ``FlaggedState`` (or the lossless ``RawFlaggedState``) to read and update a flagged message's color. The mailbox name attributes are available as ``UseAttribute/snoozed``, ``UseAttribute/scheduled``, and ``UseAttribute/memos``.
+
 ### draft-ietf-mailmaint-imap-uidbatches: UIDBATCHES Extension
 
 The [UIDBATCHES extension](https://datatracker.ietf.org/doc/draft-ietf-mailmaint-imap-uidbatches/) allows the server to return ranges of UIDs more efficiently when there are large contiguous sequences of UIDs. The ``UIDBatchesResponse`` type supports this efficient UID batch representation.

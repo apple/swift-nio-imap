@@ -78,6 +78,62 @@ struct FlagKeywordTests {
             .unregistered_redirected,
             "Redirected"
         ),
+        EncodeFixture.flagKeyword(
+            .autoSent,
+            "$autosent"
+        ),
+        EncodeFixture.flagKeyword(
+            .canUnsubscribe,
+            "$canunsubscribe"
+        ),
+        EncodeFixture.flagKeyword(
+            .followed,
+            "$followed"
+        ),
+        EncodeFixture.flagKeyword(
+            .hasAttachment,
+            "$hasattachment"
+        ),
+        EncodeFixture.flagKeyword(
+            .hasMemo,
+            "$hasmemo"
+        ),
+        EncodeFixture.flagKeyword(
+            .hasNoAttachment,
+            "$hasnoattachment"
+        ),
+        EncodeFixture.flagKeyword(
+            .imported,
+            "$imported"
+        ),
+        EncodeFixture.flagKeyword(
+            .isTrusted,
+            "$istrusted"
+        ),
+        EncodeFixture.flagKeyword(
+            .maskedEmail,
+            "$maskedemail"
+        ),
+        EncodeFixture.flagKeyword(
+            .memo,
+            "$memo"
+        ),
+        EncodeFixture.flagKeyword(
+            .muted,
+            "$muted"
+        ),
+        EncodeFixture.flagKeyword(
+            .new,
+            "$new"
+        ),
+        EncodeFixture.flagKeyword(
+            .notify,
+            "$notify"
+        ),
+        EncodeFixture.flagKeyword(
+            .unsubscribed,
+            "$unsubscribed"
+        ),
     ])
     func encode(_ fixture: EncodeFixture<Flag.Keyword>) {
         fixture.checkEncoding()

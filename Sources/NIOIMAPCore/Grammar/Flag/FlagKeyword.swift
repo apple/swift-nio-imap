@@ -152,23 +152,166 @@ extension Flag.Keyword {
     /// A non-standard keyword for marking non-spam messages. Prefer ``notJunk`` for standard usage.
     public static let unregistered_notJunk = Self(unchecked: "NotJunk")
 
-    /// The `$MailFlagBit0` keyword for color marking (bit 0).
+    /// The `$MailFlagBit0` keyword, bit 0 of a flagged message's color.
     ///
-    /// A color-flag keyword for messages, where different bits represent different colors.
+    /// Together with ``colorBit1`` and ``colorBit2``, this keyword forms a 3-bit
+    /// mask that gives a `\Flagged` message one of seven colors. Prefer the
+    /// higher-level ``FlaggedState`` API for reading and updating a message's flagged
+    /// state and color.
+    ///
+    /// - SeeAlso: [RFC 9979 Section 3](https://www.rfc-editor.org/rfc/rfc9979.html#section-3)
+    /// - SeeAlso: ``FlaggedState``
     public static let colorBit0 = Self(unchecked: "$MailFlagBit0")
 
-    /// The `$MailFlagBit1` keyword for color marking (bit 1).
+    /// The `$MailFlagBit1` keyword, bit 1 of a flagged message's color.
     ///
-    /// A color-flag keyword for messages.
+    /// Together with ``colorBit0`` and ``colorBit2``, this keyword forms a 3-bit
+    /// mask that gives a `\Flagged` message one of seven colors. Prefer the
+    /// higher-level ``FlaggedState`` API for reading and updating a message's flagged
+    /// state and color.
+    ///
+    /// - SeeAlso: [RFC 9979 Section 3](https://www.rfc-editor.org/rfc/rfc9979.html#section-3)
+    /// - SeeAlso: ``FlaggedState``
     public static let colorBit1 = Self(unchecked: "$MailFlagBit1")
 
-    /// The `$MailFlagBit2` keyword for color marking (bit 2).
+    /// The `$MailFlagBit2` keyword, bit 2 of a flagged message's color.
     ///
-    /// A color-flag keyword for messages.
+    /// Together with ``colorBit0`` and ``colorBit1``, this keyword forms a 3-bit
+    /// mask that gives a `\Flagged` message one of seven colors. Prefer the
+    /// higher-level ``FlaggedState`` API for reading and updating a message's flagged
+    /// state and color.
+    ///
+    /// - SeeAlso: [RFC 9979 Section 3](https://www.rfc-editor.org/rfc/rfc9979.html#section-3)
+    /// - SeeAlso: ``FlaggedState``
     public static let colorBit2 = Self(unchecked: "$MailFlagBit2")
 
     /// The `$MDNSent` keyword, indicating a Message Disposition Notification has been sent for this message.
     public static let mdnSent = Self(unchecked: "$MDNSent")
+
+    // MARK: RFC 9979
+
+    /// The `$autosent` keyword, marking a message that was generated and sent
+    /// automatically on the user's behalf, such as a vacation auto-reply.
+    ///
+    /// Advisory; set by the server on delivery of the user's copy.
+    ///
+    /// - SeeAlso: [RFC 9979 Section 7.1](https://www.rfc-editor.org/rfc/rfc9979.html#section-7.1)
+    public static let autoSent = Self(unchecked: "$autosent")
+
+    /// The `$canunsubscribe` keyword, indicating the message carries a
+    /// [RFC 8058](https://datatracker.ietf.org/doc/html/rfc8058)-compliant
+    /// `List-Unsubscribe` header that a client can use for one-click unsubscribe.
+    ///
+    /// Advisory; set by the server on delivery after its own reputation checks.
+    ///
+    /// - SeeAlso: [RFC 9979 Section 6.1](https://www.rfc-editor.org/rfc/rfc9979.html#section-6.1)
+    public static let canUnsubscribe = Self(unchecked: "$canunsubscribe")
+
+    /// The `$followed` keyword, indicating the user is particularly interested in
+    /// future messages in the thread.
+    ///
+    /// Set and cleared by the client. Mutually exclusive with ``muted``: if both
+    /// appear on a thread, the thread is treated as followed.
+    ///
+    /// - SeeAlso: [RFC 9979 Section 7.2](https://www.rfc-editor.org/rfc/rfc9979.html#section-7.2)
+    public static let followed = Self(unchecked: "$followed")
+
+    /// The `$hasattachment` keyword, indicating the message has one or more attachments.
+    ///
+    /// Advisory; set by the server on delivery, or by the client when neither
+    /// ``hasAttachment`` nor ``hasNoAttachment`` is set. Mutually exclusive with
+    /// ``hasNoAttachment``.
+    ///
+    /// - SeeAlso: [RFC 9979 Section 4.1](https://www.rfc-editor.org/rfc/rfc9979.html#section-4.1)
+    public static let hasAttachment = Self(unchecked: "$hasattachment")
+
+    /// The `$hasmemo` keyword, applied to a message that has an associated memo
+    /// (a message bearing the ``memo`` keyword) in the same thread.
+    ///
+    /// Advisory; set and cleared by the client. Mutually exclusive with ``memo``.
+    ///
+    /// - SeeAlso: [RFC 9979 Section 5.1](https://www.rfc-editor.org/rfc/rfc9979.html#section-5.1)
+    public static let hasMemo = Self(unchecked: "$hasmemo")
+
+    /// The `$hasnoattachment` keyword, explicitly indicating the message has no
+    /// attachments (as opposed to not yet having been analyzed).
+    ///
+    /// Advisory; set by the server on delivery, or by the client when neither
+    /// ``hasAttachment`` nor ``hasNoAttachment`` is set. Mutually exclusive with
+    /// ``hasAttachment``.
+    ///
+    /// - SeeAlso: [RFC 9979 Section 4.2](https://www.rfc-editor.org/rfc/rfc9979.html#section-4.2)
+    public static let hasNoAttachment = Self(unchecked: "$hasnoattachment")
+
+    /// The `$imported` keyword, marking a message that was imported from another
+    /// system rather than received through normal mail delivery.
+    ///
+    /// Advisory; set by the server during import.
+    ///
+    /// - SeeAlso: [RFC 9979 Section 7.3](https://www.rfc-editor.org/rfc/rfc9979.html#section-7.3)
+    public static let imported = Self(unchecked: "$imported")
+
+    /// The `$istrusted` keyword, indicating the server verified the sender's
+    /// identity with a high degree of confidence.
+    ///
+    /// Advisory; set by the server on delivery. Servers must apply it with care,
+    /// and never solely on the basis of SPF, DKIM, or DMARC.
+    ///
+    /// - SeeAlso: [RFC 9979 Section 7.4](https://www.rfc-editor.org/rfc/rfc9979.html#section-7.4)
+    public static let isTrusted = Self(unchecked: "$istrusted")
+
+    /// The `$maskedemail` keyword, indicating the message arrived via a masked
+    /// email alias created to protect the user's primary address.
+    ///
+    /// Advisory; set by the server on delivery.
+    ///
+    /// - SeeAlso: [RFC 9979 Section 7.5](https://www.rfc-editor.org/rfc/rfc9979.html#section-7.5)
+    public static let maskedEmail = Self(unchecked: "$maskedemail")
+
+    /// The `$memo` keyword, identifying a message as a note-to-self regarding
+    /// another message in the same thread.
+    ///
+    /// Set and cleared by the client. Mutually exclusive with ``hasMemo``, which
+    /// is applied to the annotated message.
+    ///
+    /// - SeeAlso: [RFC 9979 Section 5.2](https://www.rfc-editor.org/rfc/rfc9979.html#section-5.2)
+    public static let memo = Self(unchecked: "$memo")
+
+    /// The `$muted` keyword, indicating the user is not interested in future
+    /// messages in the thread.
+    ///
+    /// Set and cleared by the client. Mutually exclusive with ``followed``: if
+    /// both appear on a thread, the thread is treated as followed.
+    ///
+    /// - SeeAlso: [RFC 9979 Section 7.6](https://www.rfc-editor.org/rfc/rfc9979.html#section-7.6)
+    public static let muted = Self(unchecked: "$muted")
+
+    /// The `$new` keyword, indicating the message should be emphasized as if it
+    /// were new — typically a snoozed message that has just returned to the inbox.
+    ///
+    /// Advisory; set by the server. Clients clear it once the user interacts with
+    /// the message.
+    ///
+    /// - SeeAlso: [RFC 9979 Section 7.7](https://www.rfc-editor.org/rfc/rfc9979.html#section-7.7)
+    public static let new = Self(unchecked: "$new")
+
+    /// The `$notify` keyword, indicating the client should present a notification
+    /// for the message.
+    ///
+    /// Set by the server on delivery, or by client filtering rules. Clients may
+    /// clear it once the user interacts with the message.
+    ///
+    /// - SeeAlso: [RFC 9979 Section 7.8](https://www.rfc-editor.org/rfc/rfc9979.html#section-7.8)
+    public static let notify = Self(unchecked: "$notify")
+
+    /// The `$unsubscribed` keyword, recording that the user has attempted to
+    /// unsubscribe from the message's mailing list.
+    ///
+    /// Set by the client after a one-click unsubscribe attempt. Must not be set if
+    /// the attempt definitely failed.
+    ///
+    /// - SeeAlso: [RFC 9979 Section 6.2](https://www.rfc-editor.org/rfc/rfc9979.html#section-6.2)
+    public static let unsubscribed = Self(unchecked: "$unsubscribed")
 }
 
 // MARK: - String Literal

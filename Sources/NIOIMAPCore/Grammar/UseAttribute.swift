@@ -47,6 +47,24 @@ public struct UseAttribute: Hashable, Sendable {
     /// Holds messages that have been deleted or marked for deletion.
     public static let trash = Self("\\Trash")
 
+    /// Holds messages that have been temporarily removed from the user's
+    /// attention and scheduled to reappear at a later "awaken" time.
+    ///
+    /// - SeeAlso: [RFC 9979 Section 8.1](https://www.rfc-editor.org/rfc/rfc9979.html#section-8.1)
+    public static let snoozed = Self("\\Snoozed")
+
+    /// Holds messages that have been composed but are scheduled to be sent at a
+    /// future time rather than immediately.
+    ///
+    /// - SeeAlso: [RFC 9979 Section 8.2](https://www.rfc-editor.org/rfc/rfc9979.html#section-8.2)
+    public static let scheduled = Self("\\Scheduled")
+
+    /// Holds messages bearing the ``Flag/Keyword/memo`` keyword: user-created
+    /// notes or annotations regarding other messages.
+    ///
+    /// - SeeAlso: [RFC 9979 Section 8.3](https://www.rfc-editor.org/rfc/rfc9979.html#section-8.3)
+    public static let memos = Self("\\Memos")
+
     internal let stringValue: String
 
     /// Creates a new `UseAttribute` from the raw `String`. Note that
