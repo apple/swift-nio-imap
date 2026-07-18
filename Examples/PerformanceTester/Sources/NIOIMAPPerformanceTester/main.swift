@@ -264,7 +264,7 @@ func measureAndPrint(desc: String, fn: () throws -> Int) rethrows {
 
 // MARK: Utilities
 
-let humanReadable = false
+let humanReadable = ProcessInfo.processInfo.environment["NIO_IMAP_HUMAN_READABLE"] != nil
 
 let startDate = Date()
 for (description, command) in commands {
