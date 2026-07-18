@@ -14,23 +14,6 @@
 
 import struct NIO.ByteBuffer
 
-// TODO: Remove these
-#if os(macOS) || os(iOS) || os(watchOS) || os(tvOS) || os(visionOS)
-import func Darwin.isalnum
-import func Darwin.isalpha
-#elseif canImport(Glibc)
-import func Glibc.isalnum
-import func Glibc.isalpha
-#elseif canImport(Musl)
-import func Musl.isalnum
-import func Musl.isalpha
-#elseif canImport(Android)
-import func Android.isalnum
-import func Android.isalpha
-#else
-let badOS = { fatalError("unsupported OS") }()
-#endif
-
 extension UInt8 {
     var isCR: Bool {
         self == UInt8(ascii: "\r")
@@ -118,7 +101,7 @@ extension UInt8 {
         case UInt8(ascii: "+"), UInt8(ascii: "/"):
             return true
         default:
-            return isalnum(Int32(self)) != 0
+            return self.isAlphaNum
         }
     }
 
@@ -127,7 +110,7 @@ extension UInt8 {
     }
 
     var isAlphaNum: Bool {
-        isalnum(Int32(self)) != 0
+        self.isAlpha || self.isNum
     }
 
     var isNum: Bool {
