@@ -36,6 +36,7 @@ struct MailboxAttributeTests {
                 "HIGHESTMODSEQ MESSAGES"
             ),
             EncodeFixture.mailboxAttributes([MailboxAttribute.mailboxID], "MAILBOXID"),
+            EncodeFixture.mailboxAttributes([MailboxAttribute.objectID], "OBJECTID"),
         ]
     )
     func encodeAttributes(_ fixture: EncodeFixture<[MailboxAttribute]>) {
@@ -67,6 +68,14 @@ struct MailboxAttributeTests {
             EncodeFixture.mailboxStatus(
                 .init(nextUID: 377_003),
                 "UIDNEXT 377003"
+            ),
+            EncodeFixture.mailboxStatus(
+                .init(objectID: CompoundObjectID(mailboxID: "abc123", accountID: "def456")),
+                "OBJECTID (MAILBOXID abc123 ACCOUNTID def456)"
+            ),
+            EncodeFixture.mailboxStatus(
+                .init(messageCount: 1, objectID: CompoundObjectID(mailboxID: "abc123")),
+                "MESSAGES 1 OBJECTID (MAILBOXID abc123)"
             ),
         ]
     )
@@ -128,6 +137,14 @@ struct MailboxAttributeTests {
                 "MAILBOXID (F2212ea87-6097-4256-9d51-71338625)",
                 expected: .success(.init(mailboxID: "F2212ea87-6097-4256-9d51-71338625"))
             ),
+            ParseFixture.mailboxStatus(
+                "OBJECTID (MAILBOXID abc123 ACCOUNTID def456)",
+                expected: .success(.init(objectID: CompoundObjectID(mailboxID: "abc123", accountID: "def456")))
+            ),
+            ParseFixture.mailboxStatus(
+                "OBJECTID ()",
+                expected: .success(.init(objectID: CompoundObjectID()))
+            ),
             ParseFixture.mailboxStatus("MESSAGES UNSEEN 3 RECENT 4", "\r", expected: .failure),
             ParseFixture.mailboxStatus("2 UNSEEN 3 RECENT 4", "\r", expected: .failure),
             ParseFixture.mailboxStatus("", "", expected: .incompleteMessage),
@@ -146,6 +163,7 @@ struct MailboxAttributeTests {
                 expected: .success([.messageCount, .recentCount, .unseenCount])
             ),
             ParseFixture.statusOption("STATUS (UIDNEXT)", expected: .success([.uidNext])),
+            ParseFixture.statusOption("STATUS (OBJECTID)", expected: .success([.objectID])),
             ParseFixture.statusOption("", "", expected: .incompleteMessage),
         ]
     )

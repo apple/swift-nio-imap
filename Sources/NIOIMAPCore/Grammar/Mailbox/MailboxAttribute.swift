@@ -93,6 +93,15 @@ public enum MailboxAttribute: String, CaseIterable, Sendable {
     /// **Requires server capability:** ``Capability/objectID``
     /// See [RFC 8474 Section 3](https://datatracker.ietf.org/doc/html/rfc8474#section-3).
     case mailboxID = "MAILBOXID"
+
+    /// The `OBJECTID` attribute: a compound bundle of the mailbox's object identifiers.
+    ///
+    /// Returns whichever of `MAILBOXID`/`ACCOUNTID` the server chooses to disclose, bundled
+    /// together in a single ``CompoundObjectID`` value. Part of the `OBJECTID+` extension, which
+    /// supersedes ``mailboxID`` (RFC 8474) with this compound format.
+    /// **Requires server capability:** ``Capability/objectIDPlus``
+    /// See `draft-ietf-mailmaint-imap-objectid-bis` for details.
+    case objectID = "OBJECTID"
 }
 
 /// Information about a mailbox returned by a `STATUS` command.
@@ -181,6 +190,13 @@ public struct MailboxStatus: Hashable, Sendable {
     /// See [RFC 8474 Section 3](https://datatracker.ietf.org/doc/html/rfc8474#section-3).
     public var mailboxID: MailboxID?
 
+    /// The `OBJECTID` attribute: a compound bundle of the mailbox's object identifiers.
+    ///
+    /// `nil` if the `OBJECTID` attribute was not requested or returned.
+    /// **Requires server capability:** ``Capability/objectIDPlus``
+    /// See `draft-ietf-mailmaint-imap-objectid-bis` for details.
+    public var objectID: CompoundObjectID?
+
     /// Creates a new mailbox status record with optional attribute values.
     ///
     /// All parameters default to `nil`. Initialize only the attributes that were requested
@@ -195,6 +211,7 @@ public struct MailboxStatus: Hashable, Sendable {
     /// - Parameter highestModificationSequence: The `HIGHESTMODSEQ` value if requested
     /// - Parameter appendLimit: The `APPENDLIMIT` value if requested
     /// - Parameter mailboxID: The `MAILBOXID` value if requested
+    /// - Parameter objectID: The `OBJECTID` value if requested
     public init(
         messageCount: Int? = nil,
         recentCount: Int? = nil,
@@ -204,7 +221,8 @@ public struct MailboxStatus: Hashable, Sendable {
         size: Int? = nil,
         highestModificationSequence: ModificationSequenceValue? = nil,
         appendLimit: Int? = nil,
-        mailboxID: MailboxID? = nil
+        mailboxID: MailboxID? = nil,
+        objectID: CompoundObjectID? = nil
     ) {
         self.messageCount = messageCount
         self.recentCount = recentCount
@@ -215,6 +233,7 @@ public struct MailboxStatus: Hashable, Sendable {
         self.highestModificationSequence = highestModificationSequence
         self.appendLimit = appendLimit
         self.mailboxID = mailboxID
+        self.objectID = objectID
     }
 }
 
@@ -259,5 +278,10 @@ extension EncodeBuffer {
         return self.writeArray(array, parenthesis: false) { (element, self) -> Int in
             self.writeString("\(element.0) \(element.1)")
         }
+            + self.writeIfExists(status.objectID) { (compound) -> Int in
+                self.write(if: !array.isEmpty) { self.writeSpace() }
+                    + self.writeString("OBJECTID ")
+                    + self.writeCompoundObjectID(compound)
+            }
     }
 }
