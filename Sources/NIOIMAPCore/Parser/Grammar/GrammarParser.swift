@@ -2395,10 +2395,23 @@ extension GrammarParser {
             )
         }
 
+        func parseSelectParameter_objectID(buffer: inout ParseBuffer, tracker: StackTracker) throws -> SelectParameter {
+            try PL.parseFixedString("OBJECTID", buffer: &buffer, tracker: tracker)
+            let compound = try PL.parseOptional(buffer: &buffer, tracker: tracker) {
+                (buffer, tracker) -> CompoundObjectID in
+                try PL.parseSpaces(buffer: &buffer, tracker: tracker)
+                return try self.parseCompoundObjectID(buffer: &buffer, tracker: tracker)
+            }
+            return .objectID(compound)
+        }
+
         return try PL.parseOneOf(
-            parseSelectParameter_qresync,
-            parseSelectParameter_condstore,
-            parseSelectParameter_basic,
+            [
+                parseSelectParameter_objectID,
+                parseSelectParameter_qresync,
+                parseSelectParameter_condstore,
+                parseSelectParameter_basic,
+            ],
             buffer: &buffer,
             tracker: tracker
         )

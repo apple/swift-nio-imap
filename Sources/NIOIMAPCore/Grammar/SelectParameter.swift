@@ -137,6 +137,22 @@ public enum SelectParameter: Hashable, Sendable {
     /// - SeeAlso: [RFC 7162 Section 3.1.1](https://datatracker.ietf.org/doc/html/rfc7162#section-3.1.1)
     /// - SeeAlso: ``UnchangedSinceModifier``, ``ChangedSinceModifier``
     case condStore
+
+    /// Activate the `OBJECTID+` extension, and optionally select the mailbox by identifier
+    /// rather than by name (RFC OBJECTID+ extension).
+    ///
+    /// Without arguments (`nil`), this merely activates the extension and requests the compound
+    /// `OBJECTID` response code in place of the `MAILBOXID` response code. With arguments, it
+    /// additionally asks the server to select the mailbox matching the given identifiers,
+    /// regardless of whether the mailbox name given to `SELECT`/`EXAMINE` still refers to it. If
+    /// no mailbox matches, the server falls back to selecting by name.
+    ///
+    /// **Requires server capability:** ``Capability/objectIDPlus``
+    ///
+    /// - parameter CompoundObjectID: The identifiers to select by, if selecting by identifier
+    ///
+    /// - SeeAlso: `draft-ietf-mailmaint-imap-objectid-bis`
+    case objectID(CompoundObjectID?)
 }
 
 // MARK: - Encoding
@@ -162,6 +178,11 @@ extension EncodeBuffer {
             return self.writeParameter(param)
         case .condStore:
             return self.writeString("CONDSTORE")
+        case .objectID(let compound):
+            return self.writeString("OBJECTID")
+                + self.writeIfExists(compound) { (compound) -> Int in
+                    self.writeSpace() + self.writeCompoundObjectID(compound)
+                }
         }
     }
 
