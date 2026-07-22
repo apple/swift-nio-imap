@@ -237,6 +237,17 @@ public enum FetchAttribute: Hashable, Sendable {
     ///
     /// - SeeAlso: [RFC 8474](https://datatracker.ietf.org/doc/html/rfc8474)
     case threadID
+
+    /// A compound bundle of the message's object identifiers (`OBJECTID+` extension).
+    ///
+    /// Returns whichever of `EMAILID`/`THREADID` the server chooses to disclose, bundled
+    /// together in a single ``CompoundObjectID`` value. Supersedes ``emailID``/``threadID``
+    /// (RFC 8474) with this compound format.
+    ///
+    /// **Requires server capability:** ``Capability/objectIDPlus``
+    ///
+    /// - SeeAlso: `draft-ietf-mailmaint-imap-objectid-bis`
+    case objectID
 }
 
 extension Array where Element == FetchAttribute {
@@ -330,6 +341,8 @@ extension EncodeBuffer {
             return self.writeFetchAttribute_emailID()
         case .threadID:
             return self.writeFetchAttribute_threadID()
+        case .objectID:
+            return self.writeFetchAttribute_objectID()
         }
     }
 
@@ -420,5 +433,9 @@ extension EncodeBuffer {
 
     @discardableResult mutating func writeFetchAttribute_threadID() -> Int {
         return writeString("THREADID")
+    }
+
+    @discardableResult mutating func writeFetchAttribute_objectID() -> Int {
+        return writeString("OBJECTID")
     }
 }

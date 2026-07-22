@@ -98,6 +98,11 @@ struct MessageAttributeTests {
         EncodeFixture.messageAttribute(.emailID(.init("123-456-789")!), "EMAILID (123-456-789)"),
         EncodeFixture.messageAttribute(.threadID(.init("123-456-789")!), "THREADID (123-456-789)"),
         EncodeFixture.messageAttribute(.threadID(nil), "THREADID NIL"),
+        EncodeFixture.messageAttribute(.objectID(CompoundObjectID()), "OBJECTID ()"),
+        EncodeFixture.messageAttribute(
+            .objectID(CompoundObjectID(emailID: "m1", threadID: "t1")),
+            "OBJECTID (EMAILID m1 THREADID t1)"
+        ),
         EncodeFixture.messageAttribute(.body(.invalid, hasExtensionData: false), "BODY ()"),
         EncodeFixture.messageAttribute(.body(.invalid, hasExtensionData: true), "BODYSTRUCTURE ()"),
         EncodeFixture.messageAttribute(.nilBody(.rfc822Text), "RFC822.TEXT NIL"),
@@ -465,6 +470,16 @@ struct MessageAttributeTests {
                 expected: .success(.threadID(.init("123-456-789")!))
             ),
             ParseFixture.messageAttribute("THREADID NIL", " ", expected: .success(.threadID(nil))),
+            ParseFixture.messageAttribute(
+                "OBJECTID ()",
+                " ",
+                expected: .success(.objectID(CompoundObjectID()))
+            ),
+            ParseFixture.messageAttribute(
+                "OBJECTID (EMAILID m1 THREADID t1)",
+                " ",
+                expected: .success(.objectID(CompoundObjectID(emailID: "m1", threadID: "t1")))
+            ),
         ]
     }
 }
