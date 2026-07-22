@@ -26,7 +26,7 @@
 ///
 /// **Requires server capability:** ``Capability/objectIDPlus``
 ///
-/// - SeeAlso: ``ObjectIDCompound``
+/// - SeeAlso: ``CompoundObjectID``
 public struct AccountID: Hashable, Sendable {
     fileprivate var objectID: ObjectID
 
