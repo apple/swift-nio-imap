@@ -100,7 +100,7 @@ struct MIMEMessageLineScanningTests {
         let message = MIMEMessage.data(Data(input.utf8))
         message.withContiguousBytes { buffer in
             message.enumerateHeaderLines(in: buffer) { name, _ in
-                names.append(String(decoding: name, as: UTF8.self))
+                names.append(name.utf8String)
                 return true
             }
         }
@@ -201,7 +201,7 @@ struct MIMEMessageHeadersOfInterestTests {
             var messageID: MessageID?
             message.enumerateHeaderLines(in: buffer) { name, value in
                 headerCount += 1
-                let nameStr = String(decoding: name, as: UTF8.self).lowercased()
+                let nameStr = name.utf8String.lowercased()
                 if nameStr == "date" {
                     date = InternetMessageDate("x")
                 } else if nameStr == "message-id" {

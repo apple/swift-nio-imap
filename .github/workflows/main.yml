@@ -42,7 +42,7 @@ jobs:
       matrix:
         example: [IMAPTool, CLI, Proxy, Fuzzer, PerformanceTester]
     container:
-      image: swift:6.1
+      image: swift:6.2
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4

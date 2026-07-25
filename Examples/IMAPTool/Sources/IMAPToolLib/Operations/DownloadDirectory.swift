@@ -303,9 +303,12 @@ extension DownloadDirectory.Filename {
     }
 
     init?(
-        regularFilename filename: borrowing UnsafeBufferPointer<Unicode.UTF8.CodeUnit>
+        regularFilename filename: Span<Unicode.UTF8.CodeUnit>
     ) {
-        var remainder = filename[...]
+        // Filenames are short, so copying out of the span costs nothing and lets
+        // the scanning below stay in ordinary, consuming `Collection` code —
+        // `Span` is non-escapable and so cannot have `mutating` methods.
+        var remainder = filename.withUnsafeBufferPointer { Array($0) }[...]
         if remainder.popDot() {
             guard
                 remainder.dropMessageSuffix(),
@@ -336,7 +339,7 @@ extension DownloadDirectory {
 
 private let fileExtension: StaticString = ".message"
 
-extension Slice<UnsafeBufferPointer<Unicode.UTF8.CodeUnit>> {
+extension ArraySlice<Unicode.UTF8.CodeUnit> {
     /// If the buffer has a ".message" suffix remove it and return `true`,
     /// return `false` otherwise.
     fileprivate mutating func dropMessageSuffix() -> Bool {
@@ -345,13 +348,8 @@ extension Slice<UnsafeBufferPointer<Unicode.UTF8.CodeUnit>> {
         else { return false }
         // Check for ".message" file extension
         let start = self.index(self.endIndex, offsetBy: -fileExtension.utf8CodeUnitCount)
-        let a = self[start...]
-        let b = UnsafeBufferPointer(
-            start: fileExtension.utf8Start,
-            count: fileExtension.utf8CodeUnitCount
-        )[...]
         guard
-            zip(a, b).allSatisfy({ $0.0 == $0.1 })
+            fileExtension.withUTF8Buffer({ self[start...].elementsEqual($0) })
         else { return false }
 
         self = self[..<start]

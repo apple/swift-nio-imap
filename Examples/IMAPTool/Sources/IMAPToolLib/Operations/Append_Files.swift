@@ -290,10 +290,10 @@ extension FileBasedMessageToAppendSequence {
                     of: CInterop.PlatformChar.self,
                     capacity: buffer.count + 1
                 ) { temp in
-                    buffer.withMemoryRebound(to: CInterop.PlatformChar.self) { src in
-                        let term = temp.initialize(from: src).index
-                        temp[term] = 0
+                    for i in buffer.indices {
+                        temp[i] = CInterop.PlatformChar(bitPattern: buffer[i])
                     }
+                    temp[buffer.count] = 0
                     return temp.baseAddress.flatMap { FilePath.Component(platformString: $0) }
                 }
             }

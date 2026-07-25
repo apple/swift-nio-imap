@@ -61,7 +61,7 @@ enum DownloadDirectoryTests {
         var name = fixture.0
         name.withUTF8 { buffer in
             #expect(
-                DownloadDirectory.Filename(regularFilename: buffer)
+                DownloadDirectory.Filename(regularFilename: buffer.span)
                     == fixture.1
             )
         }
@@ -80,7 +80,7 @@ enum DownloadDirectoryTests {
     static func initFromFilenameRejectsOverflow(name: String) async throws {
         var name = name
         name.withUTF8 { buffer in
-            #expect(DownloadDirectory.Filename(regularFilename: buffer) == nil)
+            #expect(DownloadDirectory.Filename(regularFilename: buffer.span) == nil)
         }
     }
 

@@ -12,19 +12,12 @@
 //
 //===----------------------------------------------------------------------===//
 
-import NIOIMAP
-
-func stableCompare(
-    _ lhs: MailboxName,
-    _ rhs: MailboxName
-) -> Bool {
-    switch (lhs.isInbox, rhs.isInbox) {
-    case (true, false): return true
-    case (true, true): return false
-    case (false, true): return false
-    case (false, false): break
+extension Span<UInt8> {
+    /// Decodes the bytes as UTF-8, repairing any ill-formed sequences.
+    ///
+    /// `Span` is not a `Collection`, so `String(decoding:as:)` can’t take it
+    /// directly. This borrows the underlying buffer for the length of the call.
+    var utf8String: String {
+        withUnsafeBufferPointer { String(decoding: $0, as: UTF8.self) }
     }
-    // Byte-wise ordering, with a shorter name sorting before a longer one that
-    // shares its prefix — the same ordering `memcmp` plus a length tie-break gives.
-    return lhs.bytes.lexicographicallyPrecedes(rhs.bytes)
 }

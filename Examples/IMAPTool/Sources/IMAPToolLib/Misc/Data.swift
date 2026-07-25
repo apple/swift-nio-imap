@@ -22,9 +22,8 @@ import NIO
 extension ByteBuffer {
     init(_ other: Data) {
         self.init()
-        _ = other.withUnsafeBytes { buffer in
-            writeBytes(buffer)
-        }
+        // `Data` is a `Collection` of `UInt8`, so this needs no pointer access.
+        writeBytes(other)
     }
 
     init(_ other: String) {
@@ -34,12 +33,7 @@ extension ByteBuffer {
 
 extension Data {
     init(_ other: ByteBuffer) {
-        var o = other
-        var d: Data!
-        _ = o.readWithUnsafeReadableBytes { buffer in
-            d = Data(buffer)
-            return 0
-        }
-        self = d!
+        // `readableBytesView` is a `Collection` of the buffer's readable bytes.
+        self.init(other.readableBytesView)
     }
 }

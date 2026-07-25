@@ -59,10 +59,10 @@ func scan(
 struct UnableToScanDirectory: Swift.Error {}
 
 /// If `entry` describes a regular file, invokes `body` with the file name as a
-/// UTF-8 buffer (no NUL terminator) and returns its result. Returns `nil` if the
+/// UTF-8 span (no NUL terminator) and returns its result. Returns `nil` if the
 /// entry is not a regular file or if `body` itself returns `nil`.
 ///
-/// The buffer is only valid for the duration of `body` — copy out anything you
+/// The span is only valid for the duration of `body` — copy out anything you
 /// need to keep.
 ///
 /// - Note: On filesystems that don't report a `d_type` (returning `DT_UNKNOWN`),
@@ -70,7 +70,7 @@ struct UnableToScanDirectory: Swift.Error {}
 ///   targets, but a fully general implementation would `stat` such entries.
 func withRegularFileName<R>(
     dirent entry: UnsafePointer<dirent>,
-    _ body: (UnsafeBufferPointer<Unicode.UTF8.CodeUnit>) -> R?
+    _ body: (Span<Unicode.UTF8.CodeUnit>) -> R?
 ) -> R? {
     guard entry.pointee.d_type == DT_REG else { return nil }
     // `d_name` is a fixed-size C array. Darwin also carries the exact length in
@@ -90,7 +90,7 @@ func withRegularFileName<R>(
                 count += 1
             }
             #endif
-            return body(UnsafeBufferPointer(start: rebound, count: count))
+            return body(UnsafeBufferPointer(start: rebound, count: count).span)
         }
     }
 }

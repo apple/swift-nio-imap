@@ -74,12 +74,12 @@ enum MIMEMessage {
 // MARK: - Internal
 
 extension MIMEMessage {
-    func withContiguousBytes<R>(_ body: (UnsafeRawBufferPointer) -> R) -> R {
+    func withContiguousBytes<R>(_ body: (Span<UInt8>) -> R) -> R {
         switch self {
         case .data(let data):
-            return data.withUnsafeBytes(body)
+            return body(data.span)
         case .byteBuffer(let buffer):
-            return buffer.withUnsafeReadableBytes(body)
+            return buffer.withUnsafeReadableBytes { body($0.bindMemory(to: UInt8.self).span) }
         }
     }
 
@@ -87,59 +87,48 @@ extension MIMEMessage {
     /// portions of each line. Stops at the first empty line (end of headers)
     /// or when `body` returns `false`.
     func enumerateHeaderLines(
-        in buffer: UnsafeRawBufferPointer,
-        body: (_ name: UnsafeRawBufferPointer, _ value: UnsafeRawBufferPointer) -> Bool
+        in buffer: Span<UInt8>,
+        body: (_ name: Span<UInt8>, _ value: Span<UInt8>) -> Bool
     ) {
-        guard buffer.count > 0 else { return }
         var position = 0
         let count = buffer.count
-        let bytes = buffer.baseAddress!.assumingMemoryBound(to: UInt8.self)
 
         while position < count {
             let lineStart = position
-            while position < count && bytes[position] != UInt8(ascii: "\n") {
+            while position < count && buffer[position] != UInt8(ascii: "\n") {
                 position += 1
             }
             var lineEnd = position
-            if lineEnd > lineStart && bytes[lineEnd - 1] == UInt8(ascii: "\r") {
+            if lineEnd > lineStart && buffer[lineEnd - 1] == UInt8(ascii: "\r") {
                 lineEnd -= 1
             }
             if position < count {
                 position += 1
             }
 
-            let lineLength = lineEnd - lineStart
-            if lineLength == 0 { return }
+            if lineEnd == lineStart { return }
 
             // Find the colon separating name from value.
             var colonIndex = lineStart
-            while colonIndex < lineEnd && bytes[colonIndex] != UInt8(ascii: ":") {
+            while colonIndex < lineEnd && buffer[colonIndex] != UInt8(ascii: ":") {
                 colonIndex += 1
             }
             guard colonIndex < lineEnd else { continue }
 
-            let name = UnsafeRawBufferPointer(
-                start: bytes + lineStart,
-                count: colonIndex - lineStart
-            )
-            let valueStart = colonIndex + 1
-            let value = UnsafeRawBufferPointer(
-                start: bytes + valueStart,
-                count: lineEnd - valueStart
-            )
+            let name = buffer.extracting(lineStart..<colonIndex)
+            let value = buffer.extracting((colonIndex + 1)..<lineEnd)
             if !body(name, value) { return }
         }
     }
 
     private func caseInsensitiveEqual(
-        _ buffer: UnsafeRawBufferPointer,
+        _ buffer: Span<UInt8>,
         _ expected: StaticString
     ) -> Bool {
         guard buffer.count == expected.utf8CodeUnitCount else { return false }
-        let bytes = buffer.baseAddress!.assumingMemoryBound(to: UInt8.self)
         return expected.withUTF8Buffer { expectedBytes in
             for i in 0..<expectedBytes.count {
-                let b = bytes[i]
+                let b = buffer[i]
                 let lower = (b >= 0x41 && b <= 0x5A) ? b | 0x20 : b
                 if lower != expectedBytes[i] { return false }
             }
@@ -147,20 +136,15 @@ extension MIMEMessage {
         }
     }
 
-    private func trimmedString(_ buffer: UnsafeRawBufferPointer) -> String {
-        guard buffer.count > 0 else { return "" }
-        let bytes = buffer.baseAddress!.assumingMemoryBound(to: UInt8.self)
+    private func trimmedString(_ buffer: Span<UInt8>) -> String {
         var start = 0
         var end = buffer.count
-        while start < end && (bytes[start] == UInt8(ascii: " ") || bytes[start] == UInt8(ascii: "\t")) {
+        while start < end && (buffer[start] == UInt8(ascii: " ") || buffer[start] == UInt8(ascii: "\t")) {
             start += 1
         }
-        while end > start && (bytes[end - 1] == UInt8(ascii: " ") || bytes[end - 1] == UInt8(ascii: "\t")) {
+        while end > start && (buffer[end - 1] == UInt8(ascii: " ") || buffer[end - 1] == UInt8(ascii: "\t")) {
             end -= 1
         }
-        return String(
-            decoding: UnsafeRawBufferPointer(start: bytes + start, count: end - start),
-            as: UTF8.self
-        )
+        return buffer.extracting(start..<end).utf8String
     }
 }

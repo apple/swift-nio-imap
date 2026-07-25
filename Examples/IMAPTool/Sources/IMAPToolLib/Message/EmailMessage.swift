@@ -17,12 +17,6 @@ import FoundationEssentials
 #else
 import Foundation
 #endif
-// `memmem`/`memchr` come from the C library.
-#if canImport(Glibc)
-import Glibc
-#elseif canImport(Darwin)
-import Darwin
-#endif
 import NIOIMAP
 import SystemPackage
 
@@ -51,60 +45,38 @@ extension EmailMessage {
 extension EmailMessage {
     /// Checks whether the message header uses CRLF line endings.
     static func headerIsCRLFClean(_ input: Data) -> Bool {
-        input.withUnsafeBytes { buffer in
-            var isCRLFClean = true
-            // Find the first 4 line breaks:
-            let max = min(buffer.count, 10_000)
-            var remainder = buffer[..<max]
-            var count = 0
-            while count < 4, !remainder.isEmpty {
-                guard
-                    isCRLFClean,
-                    let index = remainder.firstIndex(where: { $0 == 0x0d || $0 == 0x0a })
-                else { break }
-
-                var next = index + 1
-                defer {
-                    let start = min(remainder.endIndex, next)
-                    remainder = remainder[start...]
-                }
-
-                switch remainder[index] {
-                case 0x0d:
-                    if index + 1 < remainder.endIndex {
-                        if remainder[index + 1] == 0xa {
-                            next += 1
-                            count += 1
-                        } else {
-                            isCRLFClean = false
-                        }
-                    } else {
-                        isCRLFClean = false
-                    }
-                default:
-                    isCRLFClean = false
-                }
-            }
-            return isCRLFClean
+        let bytes = input.span
+        // Only the first four line breaks are inspected, and only near the start.
+        let limit = min(bytes.count, 10_000)
+        var position = 0
+        var lineBreakCount = 0
+        while lineBreakCount < 4, position < limit {
+            guard let index = bytes.firstIndexOfLineBreak(in: position..<limit) else { break }
+            // Every line break in the header has to be a CRLF pair.
+            guard
+                bytes[index] == 0x0D,
+                index + 1 < limit,
+                bytes[index + 1] == 0x0A
+            else { return false }
+            lineBreakCount += 1
+            position = index + 2
         }
+        return true
     }
 
     /// Creates an email message by converting all line endings to CRLF.
     static func convertingLineEndings(_ input: Data) -> EmailMessage {
         // Convert to CRLF:
         var output = Data(capacity: input.count)
-        input.withUnsafeBytes { inputBuffer in
-            guard !inputBuffer.isEmpty else { return }
-            var remainder = inputBuffer[...]
-            while let end = remainder.locateLineEnding() {
-                let line = remainder[remainder.startIndex..<end.lowerBound]
-                output.append(contentsOf: line)
-                output.append(contentsOf: [0xD, 0xA])
-                remainder = remainder[end.upperBound..<remainder.endIndex]
-            }
-            if !remainder.isEmpty {
-                output.append(contentsOf: remainder)
-            }
+        let bytes = input.span
+        var position = 0
+        while let ending = bytes.locateLineEnding(from: position) {
+            output.append(bytes.extracting(position..<ending.lowerBound))
+            output.append(contentsOf: [0xD, 0xA])
+            position = ending.upperBound
+        }
+        if position < bytes.count {
+            output.append(bytes.extracting(position..<bytes.count))
         }
         return EmailMessage(data: output)
     }
@@ -132,100 +104,37 @@ extension EmailMessage {
 
 // MARK: -
 
-extension Slice where Base == UnsafeRawBufferPointer {
-    func locateLineEnding() -> Range<Int>? {
-        guard let r = locate(0xA) else { return nil }
-        // Check if there’s an CR:
-        guard startIndex < r.lowerBound, self[r.lowerBound - 1] == 0xD else {
-            return r
-        }
-        return (r.lowerBound - 1)..<r.upperBound
-    }
-
-    func locate(_ needle: UInt8) -> Range<Int>? {
-        guard
-            let rebased = UnsafeRawBufferPointer(rebasing: self).locate(needle)
-        else { return nil }
-        let start = rebased.lowerBound.advanced(by: startIndex)
-        let end = rebased.upperBound.advanced(by: startIndex)
-        return start..<end
-    }
-
-    func locateDoubleLineEnding() -> Range<Int>? {
-        self.locate([0xD, 0xA, 0xD, 0xA])
-    }
-
-    func locate(_ needle: [UInt8]) -> Range<Int>? {
-        needle.withUnsafeBytes { needleBuffer -> Range<Int>? in
-            guard
-                let rebased = UnsafeRawBufferPointer(rebasing: self)
-                    .locate(needleBuffer.baseAddress!, needleBuffer.count)
-            else { return nil }
-            let start = rebased.lowerBound.advanced(by: startIndex)
-            let end = rebased.upperBound.advanced(by: startIndex)
-            return start..<end
-        }
-    }
-}
-
-extension UnsafeRawBufferPointer {
-    func locate(_ needle: UnsafeRawPointer, _ needleCount: Int) -> Range<Int>? {
-        guard
-            let location = locateBytes(needle, needleCount)
-        else { return nil }
-
-        let start = location
-        guard startIndex <= start else { return nil }
-
-        let end = start.advanced(by: needleCount)
-        guard end <= endIndex else { return nil }
-
-        return start..<end
-    }
-
-    /// Returns the offset of the first occurrence of `needle`, or `nil` if there is none.
-    ///
-    /// This stands in for `memmem`, which is a GNU extension that Swift’s Glibc
-    /// overlay does not expose. It scans for candidate positions of the needle’s
-    /// first byte with `memchr`, then compares the remainder with `memcmp`.
-    private func locateBytes(_ needle: UnsafeRawPointer, _ needleCount: Int) -> Int? {
-        guard
-            let addr = baseAddress
-        else { return nil }
-        // An empty needle matches at the start, which is what `memmem` returns.
-        guard 0 < needleCount else { return 0 }
-        guard needleCount <= count else { return nil }
-
-        let first = Int32(needle.load(as: UInt8.self))
-        var offset = 0
-        // The needle can only start where at least `needleCount` bytes remain.
-        while offset <= count - needleCount {
-            guard
-                let candidate = memchr(addr + offset, first, count - needleCount - offset + 1)
-            else { return nil }
-            let start = addr.distance(to: candidate)
-            if memcmp(candidate, needle, needleCount) == 0 {
-                return start
-            }
-            offset = start + 1
+extension Span<UInt8> {
+    /// Returns the index of the first CR or LF within `range`, or `nil` if there is none.
+    func firstIndexOfLineBreak(in range: Range<Int>) -> Int? {
+        for index in range where self[index] == 0x0D || self[index] == 0x0A {
+            return index
         }
         return nil
     }
 
-    func locate(_ needle: UInt8) -> Range<Int>? {
-        guard
-            let addr = baseAddress
-        else { return nil }
-        guard
-            let location = memchr(addr, Int32(needle), count)
-        else { return nil }
+    /// Locates the next line ending at or after `start`, returning the range it
+    /// occupies. A CRLF pair is reported as a single two-byte ending.
+    func locateLineEnding(from start: Int) -> Range<Int>? {
+        guard let lf = firstIndexOfLineEnding(from: start) else { return nil }
+        // Include a preceding CR, so that CRLF is treated as one ending.
+        if start < lf, self[lf - 1] == 0x0D {
+            return (lf - 1)..<(lf + 1)
+        }
+        return lf..<(lf + 1)
+    }
 
-        let start = addr.distance(to: location)
-        guard startIndex <= start else { return nil }
+    private func firstIndexOfLineEnding(from start: Int) -> Int? {
+        for index in start..<count where self[index] == 0x0A {
+            return index
+        }
+        return nil
+    }
+}
 
-        let end = start.advanced(by: 1)
-        guard end <= endIndex else { return nil }
-
-        return start..<end
+extension Data {
+    /// Appends the bytes of `span`.
+    fileprivate mutating func append(_ span: Span<UInt8>) {
+        span.withUnsafeBufferPointer { append(contentsOf: $0) }
     }
 }
