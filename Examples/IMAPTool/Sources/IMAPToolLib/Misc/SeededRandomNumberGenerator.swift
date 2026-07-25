@@ -13,11 +13,8 @@
 //===----------------------------------------------------------------------===//
 
 import ArgumentParser
-#if canImport(FoundationEssentials)
-import FoundationEssentials
-#else
+// `Scanner`/`CharacterSet` are not part of `FoundationEssentials`.
 import Foundation
-#endif
 
 /// Generates deterministic pseudo-random numbers from a fixed seed.
 struct SeededRandomNumberGenerator: RandomNumberGenerator {

@@ -12,14 +12,10 @@
 //
 //===----------------------------------------------------------------------===//
 
-import Darwin
 import Foundation
+import NIOCore
 @testable import NIOIMAP
-#if canImport(System)
-import System
-#else
 import SystemPackage
-#endif
 import Testing
 @testable import IMAPToolLib
 
@@ -31,7 +27,7 @@ private enum AsyncReadFileTests {
         content: String
     ) throws -> FilePath {
         let path = dir.appending(name)
-        try Data(content.utf8).write(to: URL(filePath: path)!)
+        try Data(content.utf8).write(to: URL(path))
         return path
     }
 
@@ -56,8 +52,8 @@ private enum AsyncReadFileTests {
                     let index = element.0
                     let path = element.1
                     group.addTask {
-                        let data = try await DispatchData(asyncContentsOf: path)
-                        let s = String(decoding: data, as: UTF8.self)
+                        let buffer = try await ByteBuffer(asyncContentsOf: path)
+                        let s = String(buffer: buffer)
                         return (index, s)
                     }
                 }

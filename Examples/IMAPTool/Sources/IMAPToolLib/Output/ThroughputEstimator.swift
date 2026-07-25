@@ -71,14 +71,31 @@ extension ThroughputEstimator.Throughput {
             0.001 < tasksPerSecond
         else { return nil }
 
-        let now = Date()
         let secondsRemaining = Double(remainingCount) / tasksPerSecond
-        let interval = now..<(now.addingTimeInterval(secondsRemaining))
-        return
-            interval
-            .formatted(
-                .components(style: .condensedAbbreviated, fields: [.hour, .minute, .second])
-                    .locale(Locale(identifier: "en_US.posix"))
-            )
+        return formatCondensedDuration(seconds: secondsRemaining)
     }
+}
+
+/// Formats a duration as `1hr 2min 3s`, omitting zero components.
+///
+/// `Date`’s `.components(style:fields:)` format style is Darwin-only, and this is
+/// user-visible output, so it is spelled out by hand.
+func formatCondensedDuration(seconds: Double) -> String {
+    // Anything non-finite (or negative) has no sensible representation.
+    guard seconds.isFinite, 0 < seconds else { return "0sec" }
+    // Clamp rather than trap when converting to an integer.
+    guard seconds < Double(Int.max) else { return "0sec" }
+    // Truncate towards zero, matching the format style this replaces.
+    let total = Int(seconds)
+    let components = [
+        (total / 3600, "hr"),
+        ((total % 3600) / 60, "min"),
+        (total % 60, "sec"),
+    ]
+    let parts =
+        components
+        .filter { value, _ in value != 0 }
+        .map { value, unit in "\(value)\(unit)" }
+    guard !parts.isEmpty else { return "0sec" }
+    return parts.joined(separator: " ")
 }

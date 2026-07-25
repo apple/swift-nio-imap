@@ -12,11 +12,8 @@
 //
 //===----------------------------------------------------------------------===//
 
-#if canImport(FoundationEssentials)
-import FoundationEssentials
-#else
+// `FileHandle` is not part of `FoundationEssentials`.
 import Foundation
-#endif
 
 #if canImport(Glibc)
 import Glibc

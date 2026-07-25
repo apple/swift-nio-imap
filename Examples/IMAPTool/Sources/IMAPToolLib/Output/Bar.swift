@@ -12,11 +12,8 @@
 //
 //===----------------------------------------------------------------------===//
 
-#if canImport(FoundationEssentials)
-import FoundationEssentials
-#else
+// `NumberFormatter` is not part of `FoundationEssentials`.
 import Foundation
-#endif
 
 extension String {
     /// Creates a Unicode bar that’s `width` wide, and `fraction` of it filled in.

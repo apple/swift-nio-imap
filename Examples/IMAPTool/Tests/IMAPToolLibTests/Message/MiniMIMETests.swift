@@ -13,7 +13,7 @@
 //===----------------------------------------------------------------------===//
 
 import Testing
-import Dispatch
+import NIOCore
 import Foundation
 import NIOIMAPCore
 @testable import IMAPToolLib
@@ -213,12 +213,10 @@ struct MIMEMessageHeadersOfInterestTests {
         #expect(headerCount == 2)
     }
 
-    @Test("Works with DispatchData")
-    func worksWithDispatchData() {
+    @Test("Works with ByteBuffer")
+    func worksWithByteBuffer() {
         let input = "Message-ID: <dd@host>\r\nDate: Fri, 01 Jan 2024 00:00:00 +0000\r\n\r\n"
-        let data = input.data(using: .utf8)!
-        let dd = data.withUnsafeBytes { DispatchData(bytes: $0) }
-        let message = MIMEMessage.dispatchData(dd)
+        let message = MIMEMessage.byteBuffer(ByteBuffer(string: input))
         let result = message.headersOfInterest()
         #expect(result != nil)
         #expect(String(result!.messageID) == "<dd@host>")

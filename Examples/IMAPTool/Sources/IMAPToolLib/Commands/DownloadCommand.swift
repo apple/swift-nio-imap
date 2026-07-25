@@ -20,11 +20,7 @@ import FoundationEssentials
 import Foundation
 #endif
 import NIOIMAP
-#if canImport(System)
-import System
-#else
 import SystemPackage
-#endif
 
 struct DownloadCommand: AsyncParsableCommand {
     static let configuration = CommandConfiguration(

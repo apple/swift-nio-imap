@@ -21,11 +21,7 @@ import Foundation
 import NIOIMAP
 import NIO
 import Synchronization
-#if canImport(System)
-import System
-#else
 import SystemPackage
-#endif
 
 /// Uploads (`APPEND`s) the given messages into the given mailbox.
 ///

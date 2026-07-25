@@ -13,10 +13,12 @@
 //===----------------------------------------------------------------------===//
 
 import ArgumentParser
-#if canImport(FoundationEssentials)
-import FoundationEssentials
-#else
+// `FileHandle` is not part of `FoundationEssentials`.
 import Foundation
+#if canImport(Glibc)
+import Glibc
+#elseif canImport(Darwin)
+import Darwin
 #endif
 
 /// The output format for command results.

@@ -12,18 +12,18 @@
 //
 //===----------------------------------------------------------------------===//
 
-import Dispatch
 #if canImport(FoundationEssentials)
 import FoundationEssentials
 #else
 import Foundation
 #endif
+import NIOCore
 import NIOIMAP
 
 // Does not handle header folding (continuation lines).
 enum MIMEMessage {
     case data(Data)
-    case dispatchData(DispatchData)
+    case byteBuffer(ByteBuffer)
 
     func dateHeader() -> InternetMessageDate? {
         withContiguousBytes { buffer in
@@ -78,8 +78,8 @@ extension MIMEMessage {
         switch self {
         case .data(let data):
             return data.withUnsafeBytes(body)
-        case .dispatchData(let dd):
-            return Data(dd).withUnsafeBytes(body)
+        case .byteBuffer(let buffer):
+            return buffer.withUnsafeReadableBytes(body)
         }
     }
 

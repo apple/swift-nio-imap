@@ -31,9 +31,15 @@ func stableCompare(
     }
     return lhs.bytes.withUnsafeBytes { lhsBuffer -> Bool in
         rhs.bytes.withUnsafeBytes { rhsBuffer -> Bool in
+            // Glibc’s `memcmp` takes non-optional pointers, and an empty buffer has
+            // no base address. Two names can only compare equal by length in that case.
+            guard
+                let lhsAddress = lhsBuffer.baseAddress,
+                let rhsAddress = rhsBuffer.baseAddress
+            else { return lhsBuffer.count < rhsBuffer.count }
             let r = memcmp(
-                lhsBuffer.baseAddress,
-                rhsBuffer.baseAddress,
+                lhsAddress,
+                rhsAddress,
                 Swift.min(lhsBuffer.count, rhsBuffer.count)
             )
             if r < 0 {

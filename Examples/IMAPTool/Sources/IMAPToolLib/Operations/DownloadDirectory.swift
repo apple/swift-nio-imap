@@ -12,19 +12,15 @@
 //
 //===----------------------------------------------------------------------===//
 
-#if canImport(System)
-import System
-#else
 import SystemPackage
-#endif
 #if canImport(Glibc)
 import Glibc
 #elseif canImport(Darwin)
 import Darwin
 #endif
+import NIOCore
+import NIOFileSystem
 import NIOIMAP
-import Dispatch
-import NIOConcurrencyHelpers
 
 /// Tracks which message files exist in a download directory and determines file names for new downloads.
 struct DownloadDirectory: Sendable {
@@ -102,8 +98,14 @@ extension FilePath {
 
     func unlink() throws {
         try withPlatformString { path in
+            // Qualified because an unqualified `unlink` would resolve to this method.
+            #if canImport(Glibc)
+            let result = Glibc.unlink(path)
+            #elseif canImport(Darwin)
+            let result = Darwin.unlink(path)
+            #endif
             guard
-                Darwin.unlink(path) == 0
+                result == 0
             else {
                 let error = Errno(rawValue: errno)
                 throw error
@@ -114,38 +116,23 @@ extension FilePath {
 
 // MARK: -
 
-private let ioQueue = DispatchQueue(label: "download-io")
-
 extension DownloadDirectory {
+    /// Writes a downloaded message to a temporary file, then moves it into place.
+    ///
+    /// Writing to `NIOFileSystem` is `async`, but callers hand over chunks synchronously as
+    /// they arrive off the connection. The chunks therefore go into a stream that a
+    /// detached task drains, and the file is opened, written, closed, and renamed entirely
+    /// inside that task. `waitForCompletion()` awaits it.
     struct Writer: ~Copyable {
         let uid: UID
-        private let io: DispatchIO
-        private let state: NIOLockedValueBox<State>
+        private let continuation: AsyncStream<Chunk>.Continuation
+        private let task: Task<Void, Never>
 
-        enum State {
-            /// Writing to the channel is in progress.
-            case writing([CheckedContinuation<(), Never>])
-            /// Writing succeeded, but the channel has not closed yet.
-            ///
-            /// The file moves into place when the channel closes.
-            case doneWriting([CheckedContinuation<(), Never>])
-            /// Writing failed, but the channel has not closed yet.
-            case failed([CheckedContinuation<(), Never>])
-            /// The channel’s completion handler has run.
-            case didComplete
-
-            mutating func markAsClosed(
-                didSucceed: Bool
-            ) {
-                switch (self, didSucceed) {
-                case (.writing(let c), true):
-                    self = .doneWriting(c)
-                case (.writing(let c), false):
-                    self = .failed(c)
-                case (.doneWriting, _), (.failed, _), (.didComplete, _):
-                    break
-                }
-            }
+        /// A unit of work handed to the writing task.
+        fileprivate enum Chunk: Sendable {
+            case write(ByteBuffer)
+            /// Stop writing and discard the file.
+            case fail
         }
 
         init(
@@ -154,130 +141,99 @@ extension DownloadDirectory {
             finalPath: FilePath
         ) throws {
             self.uid = uid
-            let state = NIOLockedValueBox(State.writing([]))
-            let io: DispatchIO
             guard
                 let finalFilename = finalPath.lastComponent
             else { throw InvalidFilePath(path: finalPath) }
-            io = try DispatchIO.streamWrite(
-                path: path
-            ) { error in
-                enum Step {
-                    case run(didSucceed: Bool, continuations: [CheckedContinuation<(), Never>], logMessage: Output?)
-                    case alreadyCompleted
-                }
-                // Transition to `.didComplete` and take ownership of the parked
-                // continuations *while holding the lock*. This closes the race with
-                // `waitForCompletion()`: a continuation parked before this runs is
-                // resumed here; one that races after observes `.didComplete` and
-                // resumes itself. Either way none is orphaned.
-                let step: Step = state.withLockedValue { s in
-                    switch s {
-                    case .writing(let c):
-                        s = .didComplete
-                        return .run(
-                            didSucceed: false,
-                            continuations: c,
-                            logMessage:
-                                "error: failed to write file '\(String(decoding: finalFilename))' (errno \(error)) — never called close()"
-                        )
-                    case .failed(let c):
-                        s = .didComplete
-                        return .run(
-                            didSucceed: false,
-                            continuations: c,
-                            logMessage: "error: failed to write file '\(String(decoding: finalFilename))' (errno \(error))"
-                        )
-                    case .doneWriting(let c):
-                        s = .didComplete
-                        if error == 0 {
-                            return .run(didSucceed: true, continuations: c, logMessage: nil)
-                        } else {
-                            return .run(
-                                didSucceed: false,
-                                continuations: c,
-                                logMessage: "error: IO while writing file '\(String(decoding: finalFilename))' (errno \(error))"
-                            )
-                        }
-                    case .didComplete:
-                        return .alreadyCompleted
-                    }
-                }
+            let name = String(decoding: finalFilename)
 
-                guard case .run(let didSucceed, let continuations, let logMessage) = step else { return }
-                if let logMessage {
-                    writeStatus(logMessage)
-                }
-                defer {
-                    for c in continuations {
-                        c.resume()
-                    }
-                }
-                guard didSucceed else { return }
-                rename(old: path, new: finalPath)
+            let (stream, continuation) = AsyncStream.makeStream(of: Chunk.self)
+            self.continuation = continuation
+            self.task = Task {
+                await Writer.run(
+                    stream: stream,
+                    path: path,
+                    finalPath: finalPath,
+                    name: name
+                )
             }
-            self.state = state
-            self.io = io
         }
 
-        func write(_ data: DispatchData) {
-            io.write(offset: 0, data: data, queue: ioQueue, ioHandler: { _, _, _ in })
+        /// Consumes `stream`, writing each chunk to the file at `path`.
+        ///
+        /// The file is renamed to `finalPath` only if the stream completes without a
+        /// `.fail` chunk and every write succeeds.
+        private static func run(
+            stream: AsyncStream<Chunk>,
+            path: FilePath,
+            finalPath: FilePath,
+            name: String
+        ) async {
+            do {
+                let didSucceed = try await FileSystem.shared.withFileHandle(
+                    forWritingAt: path,
+                    options: .newFile(replaceExisting: true)
+                ) { handle -> Bool in
+                    var offset: Int64 = 0
+                    for await chunk in stream {
+                        switch chunk {
+                        case .write(let buffer):
+                            offset += try await handle.write(
+                                contentsOf: buffer.readableBytesView,
+                                toAbsoluteOffset: offset
+                            )
+                        case .fail:
+                            return false
+                        }
+                    }
+                    return true
+                }
+                guard didSucceed else {
+                    await Writer.removeTemporaryFile(at: path)
+                    return
+                }
+                try await FileSystem.shared.moveItem(at: path, to: finalPath)
+            } catch {
+                writeStatus("error: failed to write file '\(name)' (\(error))")
+                await Writer.removeTemporaryFile(at: path)
+            }
+        }
+
+        /// Removes the partially written file, ignoring the case where it was never created.
+        private static func removeTemporaryFile(at path: FilePath) async {
+            do {
+                _ = try await FileSystem.shared.removeItem(at: path)
+            } catch {
+                writeStatus("error: failed to remove temporary file '\(path)' (\(error))")
+            }
+        }
+
+        func write(_ buffer: ByteBuffer) {
+            continuation.yield(.write(buffer))
         }
 
         func closeAndFail() {
-            close(didSucceed: false)
+            continuation.yield(.fail)
+            continuation.finish()
         }
 
         func closeAndSucceed() {
-            close(didSucceed: true)
-        }
-
-        fileprivate func close(
-            didSucceed: Bool
-        ) {
-            state.withLockedValue {
-                $0.markAsClosed(didSucceed: didSucceed)
-            }
-            io.close()
+            continuation.finish()
         }
 
         func close() {
-            io.close()
+            continuation.finish()
         }
 
-        /// Waits for the underlying channel’s completion handler to run.
-        ///
-        /// Returns after the file is written, closed, and moved into place.
+        /// Waits for the file to be written, closed, and moved into place.
         func waitForCompletion() async {
-            // Call close. This is a no-op if it’s already closed, but
-            // will make sure that the completion closure will run if
-            // the channel hasn’t already been closed.
-            io.close()
-            await withCheckedContinuation { c in
-                let cc = state.withLockedValue { s -> CheckedContinuation<(), Never>? in
-                    switch s {
-                    case .writing(var continuations):
-                        continuations.append(c)
-                        s = .writing(continuations)
-                        return nil
-                    case .doneWriting(var continuations):
-                        continuations.append(c)
-                        s = .doneWriting(continuations)
-                        return nil
-                    case .failed(var continuations):
-                        continuations.append(c)
-                        s = .failed(continuations)
-                        return nil
-                    case .didComplete:
-                        return c
-                    }
-                }
-                cc?.resume()
-            }
+            // Finishing is a no-op if the stream is already finished, but it makes sure
+            // the writing task can run to completion rather than waiting for more chunks.
+            continuation.finish()
+            await task.value
         }
 
         deinit {
-            io.close()
+            continuation.finish()
         }
     }
 
@@ -301,52 +257,6 @@ private struct InvalidFilePath: Swift.Error {
     var path: String
     init(path: FilePath) {
         self.path = String(decoding: path)
-    }
-}
-
-private func rename(old: FilePath, new: FilePath) {
-    old.withPlatformString { platformOld in
-        new.withPlatformString { platformNew in
-            let result = rename(platformOld, platformNew)
-            if result != 0 {
-                let error = errno
-                let oldPath = String(decoding: old)
-                if let filename = new.lastComponent {
-                    writeStatus(
-                        "error: failed to move file '\(String(decoding: filename))' into place (errno \(error)) — message was downloaded but remains at temp path '\(oldPath)'"
-                    )
-                } else {
-                    writeStatus(
-                        "error: failed to move file into place (errno \(error)) — message was downloaded but remains at temp path '\(oldPath)'"
-                    )
-                }
-            }
-        }
-    }
-}
-
-extension DispatchIO {
-    static func streamWrite(
-        path: FilePath,
-        cleanupHandler: @escaping (Int32) -> Void
-    ) throws -> DispatchIO {
-        let io = path.withPlatformString { platformPath in
-            DispatchIO(
-                type: .stream,
-                path: platformPath,
-                oflag: O_WRONLY | O_CREAT | O_EXCL,
-                mode: 0o644,
-                queue: ioQueue,
-                cleanupHandler: cleanupHandler
-            )
-        }
-        guard
-            let io
-        else {
-            struct UnableToCreateFile: Swift.Error {}
-            throw UnableToCreateFile()
-        }
-        return io
     }
 }
 

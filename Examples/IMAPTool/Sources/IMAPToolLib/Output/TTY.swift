@@ -17,11 +17,8 @@ import Glibc
 #elseif canImport(Darwin)
 import Darwin
 #endif
-#if canImport(FoundationEssentials)
-import FoundationEssentials
-#else
+// `FileHandle` is not part of `FoundationEssentials`.
 import Foundation
-#endif
 
 /// Returns `true` if standard input connects to an interactive terminal session.
 var standardInputIsTTY: Bool {

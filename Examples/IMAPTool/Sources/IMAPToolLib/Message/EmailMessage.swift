@@ -17,12 +17,14 @@ import FoundationEssentials
 #else
 import Foundation
 #endif
-import NIOIMAP
-#if canImport(System)
-import System
-#else
-import SystemPackage
+// `memmem`/`memchr` come from the C library.
+#if canImport(Glibc)
+import Glibc
+#elseif canImport(Darwin)
+import Darwin
 #endif
+import NIOIMAP
+import SystemPackage
 
 /// An RFC 5322 email message stored as raw data.
 public struct EmailMessage: Hashable, Sendable {
@@ -169,19 +171,45 @@ extension Slice where Base == UnsafeRawBufferPointer {
 extension UnsafeRawBufferPointer {
     func locate(_ needle: UnsafeRawPointer, _ needleCount: Int) -> Range<Int>? {
         guard
-            let addr = baseAddress
-        else { return nil }
-        guard
-            let location = memmem(addr, count, needle, needleCount)
+            let location = locateBytes(needle, needleCount)
         else { return nil }
 
-        let start = addr.distance(to: location)
+        let start = location
         guard startIndex <= start else { return nil }
 
         let end = start.advanced(by: needleCount)
         guard end <= endIndex else { return nil }
 
         return start..<end
+    }
+
+    /// Returns the offset of the first occurrence of `needle`, or `nil` if there is none.
+    ///
+    /// This stands in for `memmem`, which is a GNU extension that Swift’s Glibc
+    /// overlay does not expose. It scans for candidate positions of the needle’s
+    /// first byte with `memchr`, then compares the remainder with `memcmp`.
+    private func locateBytes(_ needle: UnsafeRawPointer, _ needleCount: Int) -> Int? {
+        guard
+            let addr = baseAddress
+        else { return nil }
+        // An empty needle matches at the start, which is what `memmem` returns.
+        guard 0 < needleCount else { return 0 }
+        guard needleCount <= count else { return nil }
+
+        let first = Int32(needle.load(as: UInt8.self))
+        var offset = 0
+        // The needle can only start where at least `needleCount` bytes remain.
+        while offset <= count - needleCount {
+            guard
+                let candidate = memchr(addr + offset, first, count - needleCount - offset + 1)
+            else { return nil }
+            let start = addr.distance(to: candidate)
+            if memcmp(candidate, needle, needleCount) == 0 {
+                return start
+            }
+            offset = start + 1
+        }
+        return nil
     }
 
     func locate(_ needle: UInt8) -> Range<Int>? {

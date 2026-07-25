@@ -12,11 +12,8 @@
 //
 //===----------------------------------------------------------------------===//
 
-#if canImport(FoundationEssentials)
-import FoundationEssentials
-#else
+// `round`/`floor`/`log10`/`pow` are not part of `FoundationEssentials`.
 import Foundation
-#endif
 
 struct Histogram: Equatable, Encodable {
     var bins: [Bin]

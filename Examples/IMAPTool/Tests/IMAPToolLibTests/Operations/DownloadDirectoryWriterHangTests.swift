@@ -12,30 +12,24 @@
 //
 //===----------------------------------------------------------------------===//
 
-import Dispatch
 import Foundation
+import NIOCore
 @testable import IMAPToolLib
 import NIOIMAP
 import Synchronization
-#if canImport(System)
-import System
-#else
 import SystemPackage
-#endif
 import Testing
 
 @Suite("DownloadDirectory.Writer hang")
 enum DownloadDirectoryWriterHangTests {
 
-    /// Bug #4: The `Writer` state machine never assigns `.didComplete`. The DispatchIO
-    /// cleanup handler runs exactly once; it resumes any parked continuations but leaves
-    /// the state as `.writing`/`.doneWriting`/`.failed`. If `waitForCompletion()` parks
-    /// its continuation *after* that one-shot handler has already fired, nothing will
-    /// ever resume it and the download task hangs forever.
+    /// Bug #4 (regression): `waitForCompletion()` must return even when the writer has
+    /// already finished everything — including moving the file into place — before it is
+    /// called. The original DispatchIO implementation parked a continuation that the
+    /// already-fired, one-shot cleanup handler could never resume, hanging the download.
     ///
-    /// This test forces the "cleanup ran first" ordering by waiting until the temp file
-    /// has been renamed into place (which happens inside the cleanup handler) before
-    /// calling `waitForCompletion()`.
+    /// This test forces that ordering by waiting until the file exists at its final path
+    /// before calling `waitForCompletion()`.
     @Test(.timeLimit(.minutes(1)))
     static func waitForCompletionDoesNotHangWhenCleanupRanFirst() async throws {
         try await withTemporaryDirectory { dir in
@@ -54,32 +48,25 @@ enum DownloadDirectoryWriterHangTests {
                         path: tempPath,
                         finalPath: finalPath
                     )
-                    // Write some bytes so DispatchIO actually creates the temp file
-                    // (it defers open() until the first write). Otherwise the cleanup
-                    // handler's rename has nothing to move and never creates finalPath.
-                    let bytes: [UInt8] = Array("From: test\r\n\r\nbody\r\n".utf8)
-                    let data = bytes.withUnsafeBytes { DispatchData(bytes: $0) }
-                    writer.write(data)
+                    writer.write(ByteBuffer(string: "From: test\r\n\r\nbody\r\n"))
                     writer.closeAndSucceed()
 
-                    // Wait until the one-shot cleanup handler has fired. It renames the
-                    // temp file into place, so the final file's existence means the
-                    // handler has run (and will never run again).
+                    // Wait until the writing task has moved the file into place, so that
+                    // it has finished before `waitForCompletion()` is called.
                     var attempts = 0
                     while !FileManager.default.fileExists(atPath: finalPath.string) {
                         attempts += 1
                         if attempts > 1_000 {
-                            setupError.withLock { $0 = "cleanup handler never ran (final file was not created)" }
+                            setupError.withLock { $0 = "writing task never ran (final file was not created)" }
                             return
                         }
                         try await Task.sleep(for: .milliseconds(10))
                     }
-                    // Let the cleanup handler's continuation-resuming section finish.
+                    // Let the writing task finish completely.
                     try await Task.sleep(for: .milliseconds(50))
 
                     reachedWait.withLock { $0 = true }
-                    // With the bug, the state never reached `.didComplete`, so this parks
-                    // a continuation the (already-fired) cleanup handler cannot resume.
+                    // With the bug, this parked a continuation that nothing could resume.
                     await writer.waitForCompletion()
                 } catch {
                     setupError.withLock { $0 = "\(error)" }
@@ -96,7 +83,7 @@ enum DownloadDirectoryWriterHangTests {
             )
             #expect(
                 finished,
-                "Writer.waitForCompletion() hung: the cleanup handler ran before the continuation parked, and the state never reached .didComplete."
+                "Writer.waitForCompletion() hung after the writer had already completed."
             )
         }
     }

@@ -17,11 +17,7 @@ import ArgumentParser
 import Foundation
 import NIO
 import NIOIMAP
-#if canImport(System)
-import System
-#else
 import SystemPackage
-#endif
 import Testing
 
 private struct ArgumentFixture<A: ExpressibleByArgument & Equatable & Sendable>: Sendable {

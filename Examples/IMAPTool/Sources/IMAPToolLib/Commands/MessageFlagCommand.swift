@@ -21,11 +21,7 @@ import Foundation
 #endif
 import NIO
 import NIOIMAP
-#if canImport(System)
-import System
-#else
 import SystemPackage
-#endif
 
 struct MessageFlagCommand: AsyncParsableCommand {
     static let configuration = CommandConfiguration(

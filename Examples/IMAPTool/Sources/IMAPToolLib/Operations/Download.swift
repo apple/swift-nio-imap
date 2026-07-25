@@ -20,11 +20,7 @@ import Foundation
 #endif
 import NIO
 import NIOIMAP
-#if canImport(System)
-import System
-#else
 import SystemPackage
-#endif
 
 /// Downloads messages specified by `query` into the directory at `root`.
 ///
@@ -265,7 +261,7 @@ extension FetchState {
 
     enum UpdateAction: Sendable {
         case none
-        case writeData(DispatchData)
+        case writeData(ByteBuffer)
         case closeAndFail
         case closeAndSucceed
     }
@@ -290,10 +286,7 @@ extension FetchState {
             self = .didBeginStream(byteCount: byteCount)
             return .none
         case (.didBeginStream, .streamingBytes(let bytes)):
-            let data = bytes.withUnsafeReadableBytes {
-                DispatchData(bytesNoCopy: $0, deallocator: .custom(nil, { _ = bytes }))
-            }
-            return .writeData(data)
+            return .writeData(bytes)
         case (.didBeginStream(byteCount: let byteCount), .streamingEnd):
             self = .didEndStream(byteCount: byteCount)
             return .none

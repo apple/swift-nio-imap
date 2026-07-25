@@ -12,14 +12,9 @@
 //
 //===----------------------------------------------------------------------===//
 
-import Darwin
 import Foundation
 @testable import NIOIMAP
-#if canImport(System)
-import System
-#else
 import SystemPackage
-#endif
 import Testing
 @testable import IMAPToolLib
 
@@ -31,7 +26,7 @@ private enum Append_FilesTests {
         content: String
     ) throws -> FilePath {
         let path = dir.appending(name)
-        try Data(content.utf8).write(to: URL(filePath: path)!)
+        try Data(content.utf8).write(to: URL(path))
         return path
     }
 

@@ -13,14 +13,9 @@
 //===----------------------------------------------------------------------===//
 
 import IMAPCommands
-import Dispatch
 import NIO
 import NIOIMAP
-#if canImport(System)
-import System
-#else
 import SystemPackage
-#endif
 #if canImport(Glibc)
 import Glibc
 #elseif canImport(Darwin)
@@ -320,13 +315,13 @@ extension FileBasedMessageToAppendSequence {
     ) async throws(UnableToParseFile) -> IndexedFilePath {
         do {
             // Read the first 100,000 bytes:
-            let data = try await DispatchData(
+            let data = try await Data(
                 asyncContentsOf: path,
                 length: 100_000
             )
             // Parse the date from it:
             guard
-                let date = MessageHeaderParser.current.dateHeader(Data(data))
+                let date = MessageHeaderParser.current.dateHeader(data)
             else {
                 throw NoMessageDateInFile()
             }

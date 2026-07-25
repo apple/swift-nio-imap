@@ -12,14 +12,10 @@
 //
 //===----------------------------------------------------------------------===//
 
-import Darwin
 import Foundation
+import NIOCore
 import NIOIMAP
-#if canImport(System)
-import System
-#else
 import SystemPackage
-#endif
 import Testing
 @testable import IMAPToolLib
 
@@ -93,7 +89,7 @@ enum DownloadDirectoryTests {
         try await withTemporaryDirectory { dir in
             func create(name: FilePath.Component) throws {
                 let path = dir.appending(name)
-                try Data().write(to: URL(filePath: path)!)
+                try Data().write(to: URL(path))
             }
 
             try create(name: "790954.033de3.message")
@@ -125,7 +121,7 @@ enum DownloadDirectoryTests {
         try await withTemporaryDirectory { dir in
             func create(name: FilePath.Component) throws {
                 let path = dir.appending(name)
-                try Data().write(to: URL(filePath: path)!)
+                try Data().write(to: URL(path))
             }
 
             try create(name: "790954.033de3.message")
@@ -156,7 +152,7 @@ enum DownloadDirectoryTests {
         try await withTemporaryDirectory { dir in
             func create(name: FilePath.Component) throws {
                 let path = dir.appending(name)
-                try Data().write(to: URL(filePath: path)!)
+                try Data().write(to: URL(path))
             }
 
             try create(name: "790954.033de3.message")
@@ -195,14 +191,8 @@ enum DownloadDirectoryTests {
 
             do {
                 let writer = try sut.makeWriter(uid: 790_954)
-                let bytesA: [UInt8] = [0x1, 0x2, 0x3, 0x4]
-                bytesA.withUnsafeBufferPointer { buffer in
-                    writer.write(DispatchData(bytes: UnsafeRawBufferPointer(buffer)))
-                }
-                let bytesB: [UInt8] = [0xa1, 0xa2, 0xa3, 0xa4]
-                bytesB.withUnsafeBufferPointer { buffer in
-                    writer.write(DispatchData(bytes: UnsafeRawBufferPointer(buffer)))
-                }
+                writer.write(ByteBuffer(bytes: [0x1, 0x2, 0x3, 0x4]))
+                writer.write(ByteBuffer(bytes: [0xa1, 0xa2, 0xa3, 0xa4]))
                 writer.closeAndSucceed()
                 await writer.waitForCompletion()
 
@@ -216,14 +206,8 @@ enum DownloadDirectoryTests {
 
             do {
                 let writer = try sut.makeWriter(uid: 545_548)
-                let bytesA: [UInt8] = [0x1, 0x2, 0x3, 0x4]
-                bytesA.withUnsafeBufferPointer { buffer in
-                    writer.write(DispatchData(bytes: UnsafeRawBufferPointer(buffer)))
-                }
-                let bytesB: [UInt8] = [0xa1, 0xa2, 0xa3, 0xa4]
-                bytesB.withUnsafeBufferPointer { buffer in
-                    writer.write(DispatchData(bytes: UnsafeRawBufferPointer(buffer)))
-                }
+                writer.write(ByteBuffer(bytes: [0x1, 0x2, 0x3, 0x4]))
+                writer.write(ByteBuffer(bytes: [0xa1, 0xa2, 0xa3, 0xa4]))
                 writer.closeAndFail()  // <- Failing here.
                 await writer.waitForCompletion()
 
@@ -236,14 +220,13 @@ enum DownloadDirectoryTests {
 // MARK: -
 
 func fileExists(at path: FilePath) -> Bool {
-    (try? URL(filePath: path)?.checkResourceIsReachable()) == true
+    (try? URL(path).checkResourceIsReachable()) == true
 }
 
 extension Data {
     init?(contentsOf path: FilePath) {
         guard
-            let url = URL(filePath: path),
-            let data = try? Data(contentsOf: url)
+            let data = try? Data(contentsOf: URL(path))
         else { return nil }
         self = data
     }
@@ -258,19 +241,6 @@ extension String {
     }
 
     func write(to path: FilePath) throws {
-        guard
-            let url = URL(filePath: path)
-        else { throw FilePathIsInvalid(path: path) }
-        try Data(utf8).write(to: url)
-    }
-}
-
-private struct FilePathIsInvalid: Swift.Error {
-    var path: String
-    init(path: String) {
-        self.path = path
-    }
-    init(path: FilePath) {
-        self.init(path: String(decoding: path))
+        try Data(utf8).write(to: URL(path))
     }
 }

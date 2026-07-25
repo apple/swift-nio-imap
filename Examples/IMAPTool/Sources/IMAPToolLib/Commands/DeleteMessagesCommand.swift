@@ -21,11 +21,7 @@ import Foundation
 #endif
 import NIO
 import NIOIMAP
-#if canImport(System)
-import System
-#else
 import SystemPackage
-#endif
 
 struct DeleteMessagesCommand: AsyncParsableCommand {
     static let configuration = CommandConfiguration(
@@ -173,7 +169,7 @@ extension DeleteMessagesCommand {
             else { exitWithErrorMessage("'\(input)' != '\(messageCount)'") }
         } else {
             guard
-                let home = ProcessInfo().environment["HOME"]
+                let home = ProcessInfo.processInfo.environment["HOME"]
             else { exitWithErrorMessage("HOME not set") }
             let path = FilePath(home).appending(".imap-tool-allow-delete-all")
             do {

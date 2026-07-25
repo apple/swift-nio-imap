@@ -12,11 +12,8 @@
 //
 //===----------------------------------------------------------------------===//
 
-#if canImport(FoundationEssentials)
-import FoundationEssentials
-#else
+// `NumberFormatter` is not part of `FoundationEssentials`.
 import Foundation
-#endif
 
 /// A text-based histogram suitable for terminal output.
 struct TextHistogram: Equatable, Encodable, TextOutputEncodable {

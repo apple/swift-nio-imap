@@ -16,11 +16,7 @@ import ArgumentParser
 import Foundation
 @testable import IMAPToolLib
 import Testing
-#if canImport(System)
-import System
-#else
 import SystemPackage
-#endif
 
 @Suite("EmailMessage")
 private enum EmailMessageTests {

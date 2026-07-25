@@ -12,20 +12,14 @@
 //
 //===----------------------------------------------------------------------===//
 
-import Dispatch
-#if canImport(System)
-import System
-#else
+import NIOCore
+import NIOFileSystem
 import SystemPackage
-#endif
 #if canImport(FoundationEssentials)
 import FoundationEssentials
 #else
 import Foundation
 #endif
-import Synchronization
-
-private let queue = DispatchSerialQueue(label: "async-file-read")
 
 private let tokenBucket = TokenBucket(tokens: 20)
 
@@ -35,15 +29,16 @@ extension Data {
         asyncContentsOf filePath: FilePath,
         length: Int = .max
     ) async throws {
-        let other = try await read(
+        let buffer = try await read(
             filePath: filePath,
             length: length
         )
-        self.init(other)
+        self.init(buffer.readableBytesView)
     }
 }
 
-extension DispatchData {
+extension ByteBuffer {
+    /// Reads the contents of the file at the given path asynchronously.
     init(
         asyncContentsOf filePath: FilePath,
         length: Int = .max
@@ -58,7 +53,7 @@ extension DispatchData {
 private func read(
     filePath: FilePath,
     length: Int
-) async throws -> DispatchData {
+) async throws -> ByteBuffer {
     // Use the TokenBucket to limit concurrency.
     try await tokenBucket.withToken {
         try await readWithToken(
@@ -71,100 +66,23 @@ private func read(
 private func readWithToken(
     filePath: FilePath,
     length: Int
-) async throws -> DispatchData {
-    let io = try await withCheckedThrowingContinuation { continuation in
-        let syncContinuation: Mutex<CheckedContinuation<IO, any Error>?> = Mutex(continuation)
-        func getContinuation() -> CheckedContinuation<IO, any Error>? {
-            syncContinuation.withLock {
-                let c = $0
-                $0 = nil
-                return c
+) async throws -> ByteBuffer {
+    try await FileSystem.shared.withFileHandle(forReadingAt: filePath) { handle in
+        guard length != .max else {
+            return try await handle.readToEnd(maximumSizeAllowed: .unlimited)
+        }
+        // `length` is an upper bound, not the exact size to read: callers use it to
+        // look at just the start of a message. Reading in chunks lets us stop early
+        // rather than pulling a whole (potentially huge) file into memory.
+        var result = ByteBuffer()
+        for try await var chunk in handle.readChunks() {
+            let remaining = length - result.readableBytes
+            guard chunk.readableBytes < remaining else {
+                result.writeImmutableBuffer(chunk.readSlice(length: remaining)!)
+                break
             }
+            result.writeImmutableBuffer(chunk)
         }
-
-        do {
-            let io = try IO(
-                filePath: filePath,
-                queue: queue,
-                cleanupHandler: { error in
-                    if let e = POSIXErrorCode(rawValue: error) {
-                        getContinuation()?.resume(throwing: POSIXError(e))
-                    }
-                }
-            )
-            getContinuation()?.resume(returning: io)
-        } catch {
-            getContinuation()?.resume(throwing: error)
-        }
-    }
-    return try await io.read(
-        length: length
-    )
-}
-
-private final class IO {
-    let underlying: DispatchIO
-    let queue: DispatchQueue
-
-    init(
-        underlying: DispatchIO,
-        queue: DispatchQueue
-    ) {
-        self.underlying = underlying
-        self.queue = queue
-    }
-
-    convenience init(
-        filePath: FilePath,
-        queue: DispatchQueue,
-        cleanupHandler: @escaping (Int32) -> Void
-    ) throws {
-        let io = filePath.withPlatformString { platformPath in
-            DispatchIO(
-                type: .stream,
-                path: platformPath,
-                oflag: O_RDONLY,
-                mode: 0,
-                queue: queue,
-                cleanupHandler: cleanupHandler
-            )
-        }
-        guard let io else {
-            struct UnableToOpen: Swift.Error {}
-
-            throw UnableToOpen()
-        }
-        self.init(
-            underlying: io,
-            queue: queue
-        )
-    }
-
-    deinit {
-        underlying.close()
-    }
-
-    func read(
-        length: Int = .max
-    ) async throws -> DispatchData {
-        try await withCheckedThrowingContinuation { continuation in
-            var result: Result<DispatchData, any Error> = .success(.empty)
-            underlying.read(offset: 0, length: length, queue: queue) { done, data, error in
-                switch (result, data, error) {
-                case (.failure, _, _):
-                    break
-                case (.success(var all), let new?, 0):
-                    all.append(new)
-                    result = .success(all)
-                case (.success, nil, 0):
-                    break
-                case (.success, _, let e):
-                    result = .failure(POSIXError(POSIXErrorCode(rawValue: e) ?? .EIO))
-                }
-                if done {
-                    continuation.resume(with: result)
-                }
-            }
-        }
+        return result
     }
 }

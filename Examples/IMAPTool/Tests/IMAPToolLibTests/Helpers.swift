@@ -19,11 +19,19 @@ import Foundation
 import NIO
 import NIOIMAP
 import Testing
-#if canImport(System)
-import System
-#else
 import SystemPackage
+#if canImport(Glibc)
+import Glibc
+#elseif canImport(Darwin)
+import Darwin
 #endif
+
+/// `URL(filePath:)` is Darwin-only; on Linux the initializer takes a `String`.
+extension URL {
+    init(_ filePath: FilePath) {
+        self.init(fileURLWithPath: filePath.string)
+    }
+}
 
 func firstLineOfErrorMessage(for error: any Error) -> Substring {
     RootCommand
@@ -92,10 +100,12 @@ func withTemporaryDirectory<R>(
         ) { buffer -> FilePath? in
             let (_, index) = buffer.initialize(from: immutable)
             buffer[index] = 0
+            // Glibc’s `mkdtemp` takes a non-optional pointer.
             guard
-                mkdtemp(buffer.baseAddress) != nil
+                let template = buffer.baseAddress,
+                mkdtemp(template) != nil
             else { return nil }
-            return buffer.baseAddress.map { FilePath(platformString: $0) }
+            return FilePath(platformString: template)
         }
     }
     guard let p else { throw FailedToCreateTemporaryDirectory() }
@@ -107,24 +117,7 @@ func withTemporaryDirectory<R>(
 private struct FailedToCreateTemporaryDirectory: Swift.Error {}
 
 private func deleteDirectory(_ root: FilePath) {
-    root.withPlatformString { platformRoot in
-        _ = nftw(
-            platformRoot,
-            { path, sb, type, _ in
-                switch type {
-                case FTW_D:
-                    break
-                case FTW_DP, FTW_DNR:
-                    _ = rmdir(path)
-                case FTW_F, FTW_NS, FTW_SL, FTW_SLN:
-                    _ = unlink(path)
-                default:
-                    break
-                }
-                return 0
-            },
-            64,
-            FTW_DEPTH | FTW_PHYS
-        )
-    }
+    // `nftw` is not exposed by Swift’s Glibc overlay, so this walks the tree
+    // with `FileManager`, which is portable. Deletion is best effort.
+    try? FileManager.default.removeItem(at: URL(root))
 }
