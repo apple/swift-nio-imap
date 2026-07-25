@@ -128,7 +128,10 @@ enum IMAPConnectionLifecycleTests {
             do {
                 try await IMAPConnection.withConnection(configuration: configuration) { _, connection in
                     do {
-                        try await connection.sendAuthenticate(mechanism: .plain, initialResponse: nil) { _, _, _ -> Void in
+                        try await connection.sendAuthenticate(
+                            mechanism: .plain,
+                            initialResponse: nil
+                        ) { _, _, _ -> Void in
                             throw HandlerError()
                         }
                     } catch is HandlerError {

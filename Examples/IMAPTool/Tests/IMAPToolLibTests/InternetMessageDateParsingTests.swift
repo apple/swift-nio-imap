@@ -157,7 +157,9 @@ private enum InternetMessageDateParsingTests {
     // These dates omit the time-zone, so the parser interprets them in the
     // local time zone. We compute the expected timestamp the same way, which
     // means these tests are sensitive to the test machine's time zone — but
-    // also mirror the parser's behavior exactly.
+    // also mirror the parser's behavior exactly. `Calendar.current` resolves
+    // the wall-clock components against the local zone including DST, so a
+    // summer date is read as e.g. CEST rather than CET.
 
     struct LocalTZParseFixture: Sendable, CustomTestStringConvertible {
         var input: String
@@ -218,10 +220,8 @@ private enum InternetMessageDateParsingTests {
             minute: fixture.minute,
             second: fixture.second
         )
-        let expectedDate = Calendar(identifier: .gregorian).date(from: components)!
-        let expected =
-            expectedDate.timeIntervalSinceReferenceDate
-            + TimeZone.current.daylightSavingTimeOffset(for: expectedDate)
+        let expectedDate = Calendar.current.date(from: components)!
+        let expected = expectedDate.timeIntervalSinceReferenceDate
         let actualInterval = actual.timeIntervalSinceReferenceDate
         #expect(
             abs(actualInterval - expected) < 0.000_5,

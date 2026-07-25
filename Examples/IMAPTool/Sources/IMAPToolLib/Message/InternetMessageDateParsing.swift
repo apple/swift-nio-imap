@@ -141,7 +141,7 @@ extension InternetMessageDate {
     }
 
     func parseWithFoundation() -> Foundation.Date? {
-        let string = String(self)
+        let string = String(self).strippingTrailingTimeZoneName()
         // Strict:
         for formatter in FoundationFormatters() {
             formatter.isLenient = false
@@ -160,6 +160,24 @@ extension InternetMessageDate {
     }
 }
 
+extension String {
+    /// Drops a trailing parenthesised time-zone name, e.g. the `(GMT)` in
+    /// `"Sat, 5 Sep 2020 02:25:49 +0000 (GMT)"`.
+    ///
+    /// Such a name is redundant next to the numeric offset that precedes it, but
+    /// `DateFormatter` has no pattern for it and fails the whole parse. The
+    /// Darwin `strptime` path tolerates it via `zeroTerminatedRemainderIsTimeZoneName`;
+    /// stripping it here gives the Foundation path the same tolerance on every platform.
+    fileprivate func strippingTrailingTimeZoneName() -> String {
+        let trimmed = self.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard trimmed.hasSuffix(")"), let open = trimmed.lastIndex(of: "(") else { return self }
+        let name = trimmed[trimmed.index(after: open)..<trimmed.index(before: trimmed.endIndex)]
+        // Only an all-uppercase abbreviation counts, matching the Darwin path.
+        guard !name.isEmpty, name.allSatisfy({ $0.isUppercase }) else { return self }
+        return String(trimmed[trimmed.startIndex..<open]).trimmingCharacters(in: .whitespacesAndNewlines)
+    }
+}
+
 /// Create all our formatters / scanners.
 ///
 /// - Note: See https://developer.apple.com/library/archive/qa/qa1480/_index.html
@@ -168,6 +186,13 @@ private func scan(zeroTerminated inputBuffer: UnsafePointer<Int8>, format: Strin
     return format.withCString { formatBuffer -> Foundation.Date? in
         var t = tm()
         guard let r = strptime_l(inputBuffer, formatBuffer, &t, nil) else { return nil }
+        if !format.contains("%z") {
+            // Without an offset in the input the date is a local wall-clock time, and
+            // `strptime` leaves `tm_isdst` at 0 — asserting "standard time". `mktime`
+            // then reads a summer date such as "19 Aug 2003 14:49" as CET rather than
+            // CEST, an hour off. -1 tells `mktime` to work out DST from the date itself.
+            t.tm_isdst = -1
+        }
         let time = mktime(&t)
         let date = Date(timeIntervalSince1970: TimeInterval(time))
         if r.pointee == 0 {
@@ -329,7 +354,11 @@ private let foundationDateFormats: [String] = [
     "EEE',' MMM d',' y HH':'mm zzz",
     "EEE MMM d',' y HH':'mm':'ss vvvv",
     "MMMM d',' y HH':'mm':'ss zzz",
-    "EEE',' MMM d',' y 'at' HH':'mm a",
+    // Uses `h` (1-12) rather than `HH` (0-23) because of the trailing AM/PM
+    // marker: ICU ignores `a` when it's paired with a 24-hour field, which made
+    // "3:22 PM" parse as 03:22. Darwin's `strptime` applies the marker either
+    // way, so this only ever misparsed on non-Darwin platforms.
+    "EEE',' MMM d',' y 'at' h':'mm a",
 ]
 
 #if canImport(Darwin)
