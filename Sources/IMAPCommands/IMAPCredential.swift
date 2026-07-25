@@ -59,24 +59,22 @@ extension IMAPCredential {
         case (let u?, let p?, nil, nil):
             self = .username(u, password: p)
         case (nil, nil, let s?, nil):
-            let scanner = Scanner(string: s)
-            scanner.charactersToBeSkipped = nil
+            let mechanism = s.prefix { $0.isASCII && $0.isLetter }
+            let remainder = s[mechanism.endIndex...]
             guard
-                let mechanism = scanner.scanSASLMechanism(),
-                scanner.scanString(":") != nil,
-                let response = scanner.scanSASLResponseUntilEnd()
+                !mechanism.isEmpty,
+                remainder.first == ":",
+                let response = Self.parseSASLResponse(remainder.dropFirst())
             else { throw UnableToParseSASL() }
-            self = .sasl(mechanism: mechanism, response: response)
+            self = .sasl(mechanism: mechanism.uppercased(), response: response)
         case (nil, nil, nil, let text?):
-            let scanner = Scanner(string: text)
-            scanner.charactersToBeSkipped = nil
+            let parts = text.split(separator: ":", omittingEmptySubsequences: false)
             guard
-                let user = scanner.scanUpToString(":"),
-                scanner.scanString(":") != nil,
-                let password = scanner.scanUpToString(":"),
-                scanner.isAtEnd
+                parts.count == 2,
+                !parts[0].isEmpty,
+                !parts[1].isEmpty
             else { throw UnableToParseUsernamePassword() }
-            self = .username(user, password: password)
+            self = .username(String(parts[0]), password: String(parts[1]))
         case (nil, nil, nil, nil):
             throw NoCredentials()
         default:
@@ -107,52 +105,60 @@ extension IMAPCredential {
 
 // MARK: -
 
-extension Scanner {
-    func scanSASLMechanism() -> String? {
-        scanCharacters(from: .saslMechanism).map { $0.uppercased() }
+extension IMAPCredential {
+    /// Parses the part of the SASL text that follows the `mechanism:` prefix.
+    ///
+    /// A response that is a single base64 encoded value is decoded as-is. Anything else is
+    /// treated as a list of whitespace separated parts, which are joined with a `NUL`
+    /// separator — the wire format used by mechanisms such as `PLAIN`.
+    ///
+    /// Returns `nil` if the text is neither.
+    private static func parseSASLResponse(_ text: Substring) -> Data? {
+        singleBase64SASLResponse(text) ?? whitespaceSeparatedSASLResponse(text)
     }
 
-    func scanSASLResponseUntilEnd() -> Data? {
-        self.scanSASLResponseUntilEnd_singleBase64() ?? self.scanSASLResponseUntilEnd_stringParts()
-    }
-
-    private func scanSASLResponseUntilEnd_singleBase64() -> Data? {
-        let original = currentIndex
+    private static func singleBase64SASLResponse(_ text: Substring) -> Data? {
         guard
-            let t = scanCharacters(from: .base64),
-            isAtEnd,
-            let d = Data(base64Encoded: t)
-        else {
-            currentIndex = original
-            return nil
-        }
-        return d
+            !text.isEmpty,
+            text.utf8.allSatisfy({ $0.isBase64Byte })
+        else { return nil }
+        return Data(base64Encoded: String(text))
     }
 
-    private func scanSASLResponseUntilEnd_stringParts() -> Data? {
-        let original = currentIndex
-        var parts: [String] = []
-        while let next = scanUpToCharacters(from: .whitespaces) {
-            parts.append(next)
-            guard scanCharacters(from: .whitespaces) != nil else { break }
-        }
-        guard isAtEnd else {
-            currentIndex = original
-            return nil
-        }
+    private static func whitespaceSeparatedSASLResponse(_ text: Substring) -> Data? {
+        // A response must not start with whitespace. An empty response is allowed, and
+        // results in an empty (zero byte) response.
+        guard !(text.first?.isSASLWhitespace ?? false) else { return nil }
         return
-            parts
-            .map { $0.data(using: .utf8)! }
+            text
+            .split(whereSeparator: { $0.isSASLWhitespace })
             .reduce(into: Data()) {
                 if !$0.isEmpty {
                     $0.append(0)
                 }
-                $0.append($1)
+                $0.append(contentsOf: $1.utf8)
             }
     }
 }
 
-extension CharacterSet {
-    static let saslMechanism = CharacterSet(charactersIn: "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ")
-    static let base64 = CharacterSet(charactersIn: "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789/+=")
+extension Character {
+    /// Whether this is a space or tab.
+    ///
+    /// SASL responses are separated by ASCII whitespace only.
+    fileprivate var isSASLWhitespace: Bool {
+        (self == " ") || (self == "\t")
+    }
+}
+
+extension UInt8 {
+    /// Whether this is a byte that can appear in base64 encoded data, including its padding.
+    fileprivate var isBase64Byte: Bool {
+        switch self {
+        case UInt8(ascii: "0")...UInt8(ascii: "9"): true
+        case UInt8(ascii: "A")...UInt8(ascii: "Z"): true
+        case UInt8(ascii: "a")...UInt8(ascii: "z"): true
+        case UInt8(ascii: "/"), UInt8(ascii: "+"), UInt8(ascii: "="): true
+        default: false
+        }
+    }
 }

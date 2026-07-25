@@ -15,7 +15,11 @@
 import Darwin
 import Foundation
 @testable import NIOIMAP
+#if canImport(System)
 import System
+#else
+import SystemPackage
+#endif
 import Testing
 @testable import IMAPToolLib
 

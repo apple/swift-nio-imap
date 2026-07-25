@@ -21,7 +21,11 @@ import Foundation
 #endif
 import NIO
 import NIOIMAP
+#if canImport(System)
 import System
+#else
+import SystemPackage
+#endif
 
 struct DeleteMessagesCommand: AsyncParsableCommand {
     static let configuration = CommandConfiguration(

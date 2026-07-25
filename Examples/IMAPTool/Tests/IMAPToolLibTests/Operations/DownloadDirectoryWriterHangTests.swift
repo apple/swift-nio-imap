@@ -17,7 +17,11 @@ import Foundation
 @testable import IMAPToolLib
 import NIOIMAP
 import Synchronization
+#if canImport(System)
 import System
+#else
+import SystemPackage
+#endif
 import Testing
 
 @Suite("DownloadDirectory.Writer hang")

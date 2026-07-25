@@ -19,7 +19,11 @@ import Foundation
 import NIO
 import NIOIMAP
 import Testing
+#if canImport(System)
 import System
+#else
+import SystemPackage
+#endif
 
 func firstLineOfErrorMessage(for error: any Error) -> Substring {
     RootCommand

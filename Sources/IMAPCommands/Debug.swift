@@ -14,10 +14,12 @@
 
 import NIO
 import NIOExtras
-#if canImport(FoundationEssentials)
-import FoundationEssentials
-#else
-import Foundation
+#if canImport(Darwin)
+import Darwin
+#elseif canImport(Glibc)
+import Glibc
+#elseif canImport(Musl)
+import Musl
 #endif
 
 /// Creates a channel handler that logs inbound events to standard error.
@@ -62,9 +64,23 @@ private func debugLog(
     writeStatus("\(name): Event -> \(eventDescription(event))")
 }
 
+/// Writes the given text to standard error.
+///
+/// This writes to the file descriptor directly: the C `stderr` stream is a mutable global,
+/// and hence not usable from concurrent code.
 func writeStatus(_ output: String, terminator: String = "\n") {
-    let text = output + terminator
-    FileHandle.standardError.write(text.data(using: .utf8)!)
+    var text = output + terminator
+    text.withUTF8 { bytes in
+        guard var pointer = bytes.baseAddress else { return }
+        var remaining = bytes.count
+        while 0 < remaining {
+            // Debug output is best effort: give up when the write fails instead of retrying.
+            let written = write(2, pointer, remaining)
+            guard 0 < written else { break }
+            pointer += written
+            remaining -= written
+        }
+    }
 }
 
 private func eventDescription(

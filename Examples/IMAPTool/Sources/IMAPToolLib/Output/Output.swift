@@ -19,7 +19,11 @@ import Foundation
 #endif
 import NIOIMAP
 import IMAPCommands
+#if canImport(System)
 import System
+#else
+import SystemPackage
+#endif
 
 /// A formatted output value that supports custom string interpolations.
 public struct Output: Equatable {

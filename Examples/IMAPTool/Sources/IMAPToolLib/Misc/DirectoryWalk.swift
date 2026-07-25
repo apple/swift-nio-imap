@@ -12,7 +12,11 @@
 //
 //===----------------------------------------------------------------------===//
 
+#if canImport(System)
 import System
+#else
+import SystemPackage
+#endif
 #if canImport(Glibc)
 import Glibc
 #elseif canImport(Darwin)

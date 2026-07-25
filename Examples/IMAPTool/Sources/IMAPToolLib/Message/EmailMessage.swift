@@ -18,7 +18,11 @@ import FoundationEssentials
 import Foundation
 #endif
 import NIOIMAP
+#if canImport(System)
 import System
+#else
+import SystemPackage
+#endif
 
 /// An RFC 5322 email message stored as raw data.
 public struct EmailMessage: Hashable, Sendable {

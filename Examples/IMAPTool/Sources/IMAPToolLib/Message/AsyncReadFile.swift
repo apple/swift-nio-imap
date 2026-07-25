@@ -13,7 +13,11 @@
 //===----------------------------------------------------------------------===//
 
 import Dispatch
+#if canImport(System)
 import System
+#else
+import SystemPackage
+#endif
 #if canImport(FoundationEssentials)
 import FoundationEssentials
 #else

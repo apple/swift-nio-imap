@@ -69,6 +69,51 @@ import Testing
             try IMAPCredential(url: nil, sasl: "PLAIN:dGVzdAB0ZXN0AHRlc3Q=", username: nil)
                 == IMAPCredential.sasl(mechanism: "PLAIN", response: Data(base64Encoded: "dGVzdAB0ZXN0AHRlc3Q=")!)
         )
+
+        // Not valid base64 (the length is not a multiple of 4), and hence a single part:
+        #expect(
+            try IMAPCredential(url: nil, sasl: "PLAIN:foo", username: nil)
+                == IMAPCredential.sasl(mechanism: "PLAIN", response: Data("foo".utf8))
+        )
+    }
+
+    /// An empty response is valid and results in a zero byte response.
+    @Test static func parsingSASL_emptyResponse() throws {
+        #expect(
+            try IMAPCredential(url: nil, sasl: "PLAIN:", username: nil)
+                == IMAPCredential.sasl(mechanism: "PLAIN", response: Data())
+        )
+    }
+
+    @Test(
+        arguments: [
+            "",
+            "PLAIN",
+            ":foo bar",
+            "PL4IN:foo bar",
+            "PLAIN: foo bar",
+            "PLAIN:\tfoo bar",
+        ]
+    )
+    static func parsingInvalidSASL(_ text: String) throws {
+        #expect(throws: (any Error).self) {
+            try IMAPCredential(url: nil, sasl: text, username: nil)
+        }
+    }
+
+    @Test(
+        arguments: [
+            "",
+            "foo",
+            "foo:",
+            ":bar",
+            "foo:bar:baz",
+        ]
+    )
+    static func parsingInvalidUsername(_ text: String) throws {
+        #expect(throws: (any Error).self) {
+            try IMAPCredential(url: nil, sasl: nil, username: text)
+        }
     }
 
     @Test static func multipleUsername() throws {

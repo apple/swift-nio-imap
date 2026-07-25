@@ -20,7 +20,11 @@ import Foundation
 #endif
 import NIO
 import NIOIMAP
+#if canImport(System)
 import System
+#else
+import SystemPackage
+#endif
 
 /// Downloads messages specified by `query` into the directory at `root`.
 ///

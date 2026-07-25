@@ -141,22 +141,40 @@ extension IMAPConnection.Configuration {
         }
     }
 
+    /// Creates a configuration from a hostname with an optional `:port` suffix.
+    ///
+    /// Returns `nil` if the text is not a hostname (optionally followed by a port), in which
+    /// case ``init(serverText:logging:)`` falls back to parsing the text as an IMAP URL.
     private init?(hostnameAndPortText text: String, logging: Logging) {
-        let scanner = Scanner(string: text)
-        scanner.charactersToBeSkipped = nil
-        guard let hostname = scanner.scanHostname() else {
-            return nil
-        }
-        if scanner.isAtEnd {
-            self.init(hostname: hostname, port: 993, useTLS: true, logging: logging)
-        } else {
+        if let colon = text.firstIndex(of: ":") {
+            let hostname = text[..<colon]
             guard
-                scanner.scanString(":") != nil,
-                let _port = scanner.scanUInt64(),
-                let port = UInt16(exactly: _port)
+                Self.isValidHostname(hostname),
+                let portNumber = UInt64(text[text.index(after: colon)...]),
+                let port = UInt16(exactly: portNumber)
             else { return nil }
-            self.init(hostname: hostname, port: port, logging: logging)
+            self.init(hostname: String(hostname), port: port, logging: logging)
+        } else {
+            guard Self.isValidHostname(text) else { return nil }
+            self.init(hostname: text, port: 993, useTLS: true, logging: logging)
         }
+    }
+
+    /// Whether the text is a non-empty, dot-separated list of valid hostname labels.
+    private static func isValidHostname(_ text: some StringProtocol) -> Bool {
+        guard !text.isEmpty else { return false }
+        return text.split(separator: ".", omittingEmptySubsequences: false)
+            .allSatisfy { isValidHostnameLabel($0) }
+    }
+
+    /// Whether the text is a valid hostname label, i.e. non-empty, made up of ASCII letters,
+    /// digits, and hyphens, and neither starting nor ending with a hyphen.
+    private static func isValidHostnameLabel(_ label: some StringProtocol) -> Bool {
+        guard
+            !label.isEmpty,
+            label.utf8.allSatisfy({ $0.isHostnameLabelByte })
+        else { return false }
+        return (label.first != "-") && (label.last != "-")
     }
 
     /// An error indicating the server text could not be parsed into a valid configuration.
@@ -167,45 +185,15 @@ extension IMAPConnection.Configuration {
 
 // MARK: -
 
-extension Scanner {
-    fileprivate func scanHostname() -> String? {
-        guard let first = scanHostnameLabel() else { return nil }
-        var parts: [String] = [first]
-        while true {
-            guard let next = scanDotAndHostnameLabel() else { break }
-            parts.append(next)
+extension UInt8 {
+    /// Whether this is an ASCII letter, digit, or hyphen.
+    fileprivate var isHostnameLabelByte: Bool {
+        switch self {
+        case UInt8(ascii: "0")...UInt8(ascii: "9"): true
+        case UInt8(ascii: "A")...UInt8(ascii: "Z"): true
+        case UInt8(ascii: "a")...UInt8(ascii: "z"): true
+        case UInt8(ascii: "-"): true
+        default: false
         }
-        return parts.joined(separator: ".")
     }
-
-    private func scanDotAndHostnameLabel() -> String? {
-        let original = currentIndex
-        guard
-            scanString(".") != nil,
-            let label = scanHostnameLabel()
-        else {
-            currentIndex = original
-            return nil
-        }
-        return label
-    }
-
-    private func scanHostnameLabel() -> String? {
-        let original = currentIndex
-        guard
-            let s = scanCharacters(from: .hostnameLabel),
-            !s.hasPrefix("-"),
-            !s.hasSuffix("-")
-        else {
-            currentIndex = original
-            return nil
-        }
-        return s
-    }
-}
-
-extension CharacterSet {
-    static let hostnameLabel = CharacterSet(
-        charactersIn: "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ-"
-    )
 }

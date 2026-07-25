@@ -72,4 +72,30 @@ private enum ConfigurationTests {
                 )
         )
     }
+
+    /// Text that is neither a hostname (with optional port) nor an IMAP URL is rejected.
+    ///
+    /// Anything following the port is _not_ ignored: such text falls through to URL parsing,
+    /// which then fails because the scheme is not `imap`.
+    @Test(
+        arguments: [
+            "",
+            "mail.example.com:143abc",
+            "mail.example.com:143:144",
+            "mail.example.com:65536",
+            "mail.example.com:",
+            "mail..example.com",
+            ".mail.example.com",
+            "mail.example.com.",
+            "-mail.example.com",
+            "mail.example.com-",
+            "mail.example.com/inbox",
+            "http://mail.example.com",
+        ]
+    )
+    static func parsingInvalidServerText(_ text: String) throws {
+        #expect(throws: (any Error).self) {
+            try IMAPConnection.Configuration(serverText: text, logging: .noLogging)
+        }
+    }
 }

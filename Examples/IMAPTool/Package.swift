@@ -51,6 +51,7 @@ let package = Package(
                 .product(name: "NIOIMAP", package: "swift-nio-imap"),
                 .product(name: "NIO", package: "swift-nio"),
                 .product(name: "Numerics", package: "swift-numerics"),
+                .product(name: "SystemPackage", package: "swift-system"),
             ]
         ),
     ]

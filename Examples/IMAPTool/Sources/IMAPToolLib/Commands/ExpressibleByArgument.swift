@@ -14,7 +14,11 @@
 
 import ArgumentParser
 import NIOIMAP
+#if canImport(System)
 import System
+#else
+import SystemPackage
+#endif
 
 extension NIOIMAP.MailboxName: ArgumentParser.ExpressibleByArgument {
     public init?(argument: String) {
