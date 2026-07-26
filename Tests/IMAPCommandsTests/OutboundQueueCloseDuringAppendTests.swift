@@ -25,7 +25,7 @@ enum OutboundQueueCloseDuringAppendTests {
     /// `pending` untouched, so any continuation parked there is orphaned. If the
     /// in-flight append never returns (so `finishAppend()` never drains `pending`), the
     /// parked write stalls forever instead of failing when the connection is closed.
-    @Test(.timeLimit(.minutes(1)))
+    @Test(.timeLimit(.minutes(3)))
     static func closeResumesWritesParkedDuringAppend() async throws {
         let sut = OutboundQueue()
 
@@ -57,8 +57,9 @@ enum OutboundQueueCloseDuringAppendTests {
         sut.close()
 
         // The parked write must now complete; if it stalls, the timer resolves `false`.
+        // The budget is generous on purpose — see `finishesWithoutStalling(within:_:)`.
         let timer = Task {
-            try? await Task.sleep(for: .seconds(5))
+            try? await Task.sleep(for: .seconds(60))
             await writeFinished.resolve(false)
         }
         let finished = await writeFinished.wait()

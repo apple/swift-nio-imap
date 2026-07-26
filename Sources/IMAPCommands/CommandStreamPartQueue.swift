@@ -81,6 +81,11 @@ extension CommandStreamPartQueue {
             writeState = .closed
             pendingWrites = nil
         case .writing(let p):
+            // Must end up `.closed`: the pending items' completions are failed below, so
+            // leaving them in a `.writing` deque would let `next()` pop them and resume
+            // the same continuations a second time. It also makes any later `write()`
+            // park in a queue nobody drains instead of failing fast.
+            writeState = .closed
             pendingWrites = p
         }
 

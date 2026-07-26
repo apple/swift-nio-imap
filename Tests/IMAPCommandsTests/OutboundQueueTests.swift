@@ -16,6 +16,7 @@
 import Testing
 import NIO
 import NIOIMAP
+import Synchronization
 
 @Suite("Outbound Queue")
 enum OutboundQueueTests {
@@ -43,5 +44,27 @@ enum OutboundQueueTests {
                 }
             }
         }
+    }
+
+    /// `close()` must leave the queue closed, so a write issued afterwards fails
+    /// immediately. If the queue stays in its writing state, the write is appended to a
+    /// deque that nobody drains any more (the outbound runner has stopped), and its
+    /// continuation is parked forever.
+    @Test(.timeLimit(.minutes(3)))
+    static func writeAfterCloseFailsInsteadOfStalling() async throws {
+        let sut = OutboundQueue()
+        sut.close()
+
+        let threw = Mutex(false)
+        let finished = await finishesWithoutStalling {
+            do {
+                try await sut.write([TaggedCommand(tag: "A", command: .noop)])
+            } catch {
+                threw.withLock { $0 = true }
+            }
+        }
+
+        #expect(finished, "A write issued after close() must not park in a queue nobody drains.")
+        #expect(threw.withLock { $0 }, "A write issued after close() must fail.")
     }
 }

@@ -39,8 +39,21 @@ actor CompletionGate {
 
     func wait() async -> Bool {
         if let resolved { return resolved }
-        return await withCheckedContinuation { c in
-            waiters.append(c)
+        // Waiting is cancellation-aware so that a caller which is itself timed out (e.g.
+        // by swift-testing's `.timeLimit`) can never be left parked here forever, which
+        // would hang the whole test process rather than fail a single test.
+        return await withTaskCancellationHandler {
+            await withCheckedContinuation { c in
+                // `onCancel` may have resolved the gate before the continuation was
+                // installed, so re-check instead of parking unconditionally.
+                if let resolved {
+                    c.resume(returning: resolved)
+                } else {
+                    waiters.append(c)
+                }
+            }
+        } onCancel: {
+            Task { await self.resolve(false) }
         }
     }
 }
@@ -51,16 +64,29 @@ actor CompletionGate {
 /// The operation runs in an unstructured task. On timeout that task is cancelled and
 /// abandoned — if it is stuck on a non-cancellable continuation it will leak, which is
 /// acceptable for a bug-reproduction test that would otherwise stall forever.
+///
+/// - Important: `seconds` is a *wall-clock* budget for detecting a deadlock, not a
+///   performance assertion. The rest of the test suite runs in parallel on the same
+///   cooperative thread pool, so on a busy or CPU-starved machine (a CI container with
+///   few cores) these tasks can be left unscheduled for many seconds at a time. The
+///   clock therefore only starts once `operation` actually begins running, and the
+///   budget is deliberately generous: the operations under test need milliseconds of
+///   work, so anything close to the budget is a stall, whereas a tight budget only
+///   produces spurious failures. Keep the budget well below the enclosing `.timeLimit`
+///   so this gate — and not the test harness — is what reports a stall.
 func finishesWithoutStalling(
-    within seconds: Double = 5,
+    within seconds: Double = 60,
     _ operation: @escaping @Sendable () async -> Void
 ) async -> Bool {
     let gate = CompletionGate()
+    let started = CompletionGate()
     let work = Task {
+        await started.resolve(true)
         await operation()
         await gate.resolve(true)
     }
     let timer = Task {
+        _ = await started.wait()
         try? await Task.sleep(for: .seconds(seconds))
         await gate.resolve(false)
     }

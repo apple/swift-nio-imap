@@ -50,7 +50,17 @@ final class OutboundQueue: Sendable {
 extension OutboundQueue {
     func run(outbound: NIOAsyncChannelOutboundWriter<IMAPClientHandler.OutboundIn>) async throws {
         while let next = try await nextOutboundOut() {
-            try await outbound.write(contentsOf: next.payload)
+            do {
+                try await outbound.write(contentsOf: next.payload)
+            } catch {
+                // The items are already popped off the queue, so `close()` will not fail
+                // them. Fail them here — otherwise the writers stay parked forever when
+                // the channel goes away (or this task is cancelled) mid-write.
+                for c in next.completions {
+                    c.resume(throwing: error)
+                }
+                throw error
+            }
             for c in next.completions {
                 c.resume()
             }

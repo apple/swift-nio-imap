@@ -29,7 +29,7 @@ enum IMAPConnectionLifecycleTests {
     /// is in flight, the inbound read loop exits without calling `close()`, so the
     /// outbound task stays parked and the in-flight command's response stream is never
     /// finished. `withConnection` then stalls forever instead of failing the command.
-    @Test(.timeLimit(.minutes(1)))
+    @Test(.timeLimit(.minutes(3)))
     static func gracefulEOFWhileAwaitingResponseDoesNotStall() async throws {
         let server = try await LoopbackServer.greetThenCloseOnFirstCommand()
         defer { server.shutdown() }
@@ -42,7 +42,7 @@ enum IMAPConnectionLifecycleTests {
         )
 
         let outcome = Mutex<String>("did-not-run")
-        let finished = await finishesWithoutStalling(within: 10) {
+        let finished = await finishesWithoutStalling {
             do {
                 try await IMAPConnection.withConnection(configuration: configuration) { _, connection in
                     try await connection.send(.noop) { _, responses in
@@ -72,7 +72,7 @@ enum IMAPConnectionLifecycleTests {
     /// continuation the `body` task is parked on is never resumed. Because the greeting
     /// getter is not cancellation-aware, the structured task group can never finish and
     /// `withConnection` stalls instead of throwing the connection error.
-    @Test(.timeLimit(.minutes(1)))
+    @Test(.timeLimit(.minutes(3)))
     static func connectFailureThrowsInsteadOfStalling() async throws {
         // Port 1 is (essentially) always closed on loopback, so the connect is refused.
         let configuration = IMAPConnection.Configuration(
@@ -83,7 +83,7 @@ enum IMAPConnectionLifecycleTests {
         )
 
         let outcome = Mutex<String>("did-not-run")
-        let finished = await finishesWithoutStalling(within: 10) {
+        let finished = await finishesWithoutStalling {
             do {
                 try await IMAPConnection.withConnection(configuration: configuration) { _, _ in
                     // Should never get here — the connection can't be established.
@@ -107,7 +107,7 @@ enum IMAPConnectionLifecycleTests {
     /// When the `AUTHENTICATE` handler throws mid-exchange there is no way to cleanly
     /// abort the exchange, so `sendAuthenticate` closes the connection. A subsequent
     /// command must then fail fast rather than write on a half-authenticated connection.
-    @Test(.timeLimit(.minutes(1)))
+    @Test(.timeLimit(.minutes(3)))
     static func authenticateHandlerThrowClosesConnection() async throws {
         let server = try await LoopbackServer.greetThenStayOpen()
         defer { server.shutdown() }
@@ -124,7 +124,7 @@ enum IMAPConnectionLifecycleTests {
         let handlerThrew = Mutex(false)
         let secondCommandFailed = Mutex(false)
 
-        let finished = await finishesWithoutStalling(within: 10) {
+        let finished = await finishesWithoutStalling {
             do {
                 try await IMAPConnection.withConnection(configuration: configuration) { _, connection in
                     do {
