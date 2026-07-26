@@ -186,11 +186,15 @@ private func withPendingItems(
         )
         let o = Array(original.suffix(from: 1))
         Task {
-            try await withPendingItems(
-                original: o,
-                pendingItems: p,
-                do: closure
-            )
+            do {
+                try await withPendingItems(
+                    original: o,
+                    pendingItems: p,
+                    do: closure
+                )
+            } catch {
+                Issue.record(error)
+            }
         }
     }
 }

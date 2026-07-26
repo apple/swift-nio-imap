@@ -17,7 +17,7 @@ import NIOIMAP
 
 extension IMAPConnection {
     /// Sends continuation data to the server during authentication.
-    public struct ContinuationWriter: ~Copyable {
+    public struct ContinuationWriter: ~Copyable, Sendable {
         var underlying: OutboundQueue
 
         /// Sends the given bytes as a continuation response.

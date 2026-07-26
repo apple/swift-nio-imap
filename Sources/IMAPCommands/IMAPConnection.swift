@@ -131,7 +131,7 @@ public final class IMAPConnection: Sendable {
     ///   (which `waitForCompletion()` waits for) is specific to this command. This is
     ///   inherent to the protocol and how pipelining works; when you send commands
     ///   concurrently, each handler must inspect only the responses it actually cares about.
-    public func send<Result: Sendable>(
+    public func send<Result>(
         _ command: Command,
         _ handler: (Tag, ResponseStream) async throws -> Result
     ) async throws -> Result {
@@ -150,7 +150,7 @@ public final class IMAPConnection: Sendable {
     }
 
     /// Sends an `IDLE` command to the server.
-    public func sendIdle<Result: Sendable>(
+    public func sendIdle<Result>(
         _ handler: (Tag, ResponseStream) async throws -> Result
     ) async throws -> Result {
         let (tag, responseStream) = try state.withLock { state in
@@ -182,7 +182,7 @@ public final class IMAPConnection: Sendable {
     /// Sends an `AUTHENTICATE` command to the server.
     ///
     /// Use the ``ContinuationWriter`` to respond to authentication challenges.
-    public func sendAuthenticate<Result: Sendable>(
+    public func sendAuthenticate<Result>(
         mechanism: AuthenticationMechanism,
         initialResponse: InitialResponse?,
         _ handler: (Tag, ResponseStream, borrowing ContinuationWriter) async throws -> Result
@@ -239,7 +239,11 @@ public final class IMAPConnection: Sendable {
                 .read(try await readClosure(tag, ResponseStream(underlying: responseStream)))
             }
             group.addTask {
-                try await outboundWriter.withAppendWriter { writer in
+                // The `consuming` ownership of the closure parameter is spelled out
+                // explicitly: Swift 6.0 otherwise infers it as `borrowing` here and
+                // rejects handing it on to `AppendWriter.withAppendWriter`.
+                try await outboundWriter.withAppendWriter {
+                    (writer: consuming OutboundQueue.AppendQueueWriter) in
                     try await AppendWriter.withAppendWriter(
                         tag: "\(tag)",
                         appendingTo: mailbox,
@@ -325,7 +329,7 @@ extension IMAPConnection {
             logging: logging
         ).executeThenClose { inbound, outbound in
             let outboundWriter = self.outboundWriter
-            try await withThrowingTaskGroup { group in
+            try await withThrowingTaskGroup(of: Void.self) { group in
                 group.addTask {
                     // When the inbound stream ends — via a graceful EOF, a read error, or
                     // cancellation — tear the connection down. This finishes any in-flight
@@ -452,6 +456,10 @@ extension IMAPConnection {
         }
     }
 }
+
+// The iterator wraps `AsyncThrowingStream.AsyncIterator`, which is not `Sendable`.
+@available(*, unavailable)
+extension IMAPConnection.ResponseStream.AsyncIterator: Sendable {}
 
 extension IMAPConnection.ResponseStream {
     /// Iterates over all responses and returns the command’s `TaggedResponse` on completion.

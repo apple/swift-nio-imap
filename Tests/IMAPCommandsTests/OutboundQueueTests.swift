@@ -25,7 +25,7 @@ enum OutboundQueueTests {
 
         let sut = OutboundQueue()
 
-        await withTaskGroup { group in
+        await withTaskGroup(of: Void.self) { group in
             group.addTask {
                 try? await sut.run(outbound: outbound)
                 print("A")

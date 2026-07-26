@@ -19,7 +19,7 @@ extension IMAPConnection {
     /// Writes message data to the server as part of an `APPEND` command.
     ///
     /// Create an append writer using ``IMAPConnection/append(to:writeClosure:readClosure:)``.
-    public struct AppendWriter: ~Copyable {
+    public struct AppendWriter: ~Copyable, Sendable {
         var underlying: OutboundQueue.AppendQueueWriter
 
         fileprivate init(
@@ -68,7 +68,7 @@ extension IMAPConnection.AppendWriter {
         try await underlying.write([.endMessage])
     }
 
-    public struct MessageWriter: ~Copyable {
+    public struct MessageWriter: ~Copyable, Sendable {
         var underlying: OutboundQueue.AppendQueueWriter
 
         /// Writes message bytes to the server.
@@ -99,7 +99,7 @@ extension IMAPConnection.AppendWriter {
         try await underlying.write([.endCatenate])
     }
 
-    public struct CatenateWriter: ~Copyable {
+    public struct CatenateWriter: ~Copyable, Sendable {
         var underlying: OutboundQueue.AppendQueueWriter
 
         public mutating func writeURL(
@@ -125,7 +125,7 @@ extension IMAPConnection.AppendWriter {
         }
     }
 
-    public struct CatenateDataWriter: ~Copyable {
+    public struct CatenateDataWriter: ~Copyable, Sendable {
         var underlying: OutboundQueue.AppendQueueWriter
 
         public mutating func write(
