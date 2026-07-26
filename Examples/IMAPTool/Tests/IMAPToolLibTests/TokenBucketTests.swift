@@ -64,7 +64,7 @@ struct TokenBucketTests {
 
         let peak = await observer.peak
         #expect(peak <= tokens)
-        // Sanity: the bucket should also be saturated at some point.
+        // Also verify that the bucket is saturated at some point.
         #expect(peak >= 1)
     }
 
@@ -92,7 +92,7 @@ struct TokenBucketTests {
     @Test
     func cancellingAParkedWaiterThrowsPromptly() async throws {
         // No tokens -> any `withToken` parks immediately. A cancelled waiter
-        // must throw `CancellationError` rather than hang forever.
+        // must throw `CancellationError` rather than stall forever.
         let bucket = TokenBucket(tokens: 0)
         let task = Task {
             try await bucket.withToken {}
@@ -100,7 +100,7 @@ struct TokenBucketTests {
         task.cancel()
 
         // Race the result against a timeout so a regression fails the test
-        // instead of hanging the whole suite.
+        // instead of stalling the whole suite.
         let threwCancellation = await withTaskGroup(of: Bool.self) { group in
             group.addTask {
                 do {

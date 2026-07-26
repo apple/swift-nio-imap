@@ -28,9 +28,9 @@ enum IMAPConnectionLifecycleTests {
     /// Bug #1: When the server closes the connection gracefully (EOF) while a command
     /// is in flight, the inbound read loop exits without calling `close()`, so the
     /// outbound task stays parked and the in-flight command's response stream is never
-    /// finished. `withConnection` then hangs forever instead of failing the command.
+    /// finished. `withConnection` then stalls forever instead of failing the command.
     @Test(.timeLimit(.minutes(1)))
-    static func gracefulEOFWhileAwaitingResponseDoesNotHang() async throws {
+    static func gracefulEOFWhileAwaitingResponseDoesNotStall() async throws {
         let server = try await LoopbackServer.greetThenCloseOnFirstCommand()
         defer { server.shutdown() }
 
@@ -42,7 +42,7 @@ enum IMAPConnectionLifecycleTests {
         )
 
         let outcome = Mutex<String>("did-not-run")
-        let finished = await finishesWithoutHanging(within: 10) {
+        let finished = await finishesWithoutStalling(within: 10) {
             do {
                 try await IMAPConnection.withConnection(configuration: configuration) { _, connection in
                     try await connection.send(.noop) { _, responses in
@@ -57,7 +57,7 @@ enum IMAPConnectionLifecycleTests {
 
         #expect(
             finished,
-            "withConnection hung after the server closed the connection (graceful EOF) while a command was awaiting its tagged response."
+            "withConnection stalled after the server closed the connection (graceful EOF) while a command was awaiting its tagged response."
         )
         // Once fixed, the in-flight command fails with a connection-closed error, so
         // `withConnection` propagates that error rather than completing successfully.
@@ -71,9 +71,9 @@ enum IMAPConnectionLifecycleTests {
     /// propagates the error before `close()` is ever called, so the greeting
     /// continuation the `body` task is parked on is never resumed. Because the greeting
     /// getter is not cancellation-aware, the structured task group can never finish and
-    /// `withConnection` hangs instead of throwing the connection error.
+    /// `withConnection` stalls instead of throwing the connection error.
     @Test(.timeLimit(.minutes(1)))
-    static func connectFailureThrowsInsteadOfHanging() async throws {
+    static func connectFailureThrowsInsteadOfStalling() async throws {
         // Port 1 is (essentially) always closed on loopback, so the connect is refused.
         let configuration = IMAPConnection.Configuration(
             hostname: "127.0.0.1",
@@ -83,7 +83,7 @@ enum IMAPConnectionLifecycleTests {
         )
 
         let outcome = Mutex<String>("did-not-run")
-        let finished = await finishesWithoutHanging(within: 10) {
+        let finished = await finishesWithoutStalling(within: 10) {
             do {
                 try await IMAPConnection.withConnection(configuration: configuration) { _, _ in
                     // Should never get here — the connection can't be established.
@@ -96,7 +96,7 @@ enum IMAPConnectionLifecycleTests {
 
         #expect(
             finished,
-            "withConnection hung when the connection could not be established, instead of throwing the connection error."
+            "withConnection stalled when the connection could not be established, instead of throwing the connection error."
         )
         #expect(
             outcome.withLock { $0 } == "threw",
@@ -124,7 +124,7 @@ enum IMAPConnectionLifecycleTests {
         let handlerThrew = Mutex(false)
         let secondCommandFailed = Mutex(false)
 
-        let finished = await finishesWithoutHanging(within: 10) {
+        let finished = await finishesWithoutStalling(within: 10) {
             do {
                 try await IMAPConnection.withConnection(configuration: configuration) { _, connection in
                     do {
@@ -153,7 +153,7 @@ enum IMAPConnectionLifecycleTests {
             }
         }
 
-        #expect(finished, "withConnection hung after the AUTHENTICATE handler threw.")
+        #expect(finished, "withConnection stalled after the AUTHENTICATE handler threw.")
         #expect(handlerThrew.withLock { $0 }, "The AUTHENTICATE handler error should propagate.")
         #expect(
             secondCommandFailed.withLock { $0 },

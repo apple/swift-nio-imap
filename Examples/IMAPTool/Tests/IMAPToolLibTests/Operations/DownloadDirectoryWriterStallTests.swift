@@ -20,18 +20,18 @@ import Synchronization
 import SystemPackage
 import Testing
 
-@Suite("DownloadDirectory.Writer hang")
-enum DownloadDirectoryWriterHangTests {
+@Suite("DownloadDirectory.Writer stall")
+enum DownloadDirectoryWriterStallTests {
 
     /// Bug #4 (regression): `waitForCompletion()` must return even when the writer has
     /// already finished everything — including moving the file into place — before it is
     /// called. The original DispatchIO implementation parked a continuation that the
-    /// already-fired, one-shot cleanup handler could never resume, hanging the download.
+    /// already-fired, one-shot cleanup handler could never resume, stalling the download.
     ///
     /// This test forces that ordering by waiting until the file exists at its final path
     /// before calling `waitForCompletion()`.
     @Test(.timeLimit(.minutes(1)))
-    static func waitForCompletionDoesNotHangWhenCleanupRanFirst() async throws {
+    static func waitForCompletionDoesNotStallWhenCleanupRanFirst() async throws {
         try await withTemporaryDirectory { dir in
             let uid: UID = 42
             let uidValidity: UIDValidity = 1
@@ -40,9 +40,9 @@ enum DownloadDirectoryWriterHangTests {
             let setupError = Mutex<String?>(nil)
             let reachedWait = Mutex<Bool>(false)
 
-            let finished = await finishesWithoutHanging(within: 10) {
+            let finished = await finishesWithoutStalling(within: 10) {
                 do {
-                    let tempPath = dir.appending(.temporary("hangtest.\(uid)"))
+                    let tempPath = dir.appending(.temporary("stalltest.\(uid)"))
                     let writer = try DownloadDirectory.Writer(
                         uid: uid,
                         path: tempPath,
@@ -83,7 +83,7 @@ enum DownloadDirectoryWriterHangTests {
             )
             #expect(
                 finished,
-                "Writer.waitForCompletion() hung after the writer had already completed."
+                "Writer.waitForCompletion() stalled after the writer had already completed."
             )
         }
     }

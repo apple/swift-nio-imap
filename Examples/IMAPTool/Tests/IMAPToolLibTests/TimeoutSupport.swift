@@ -15,7 +15,7 @@
 /// A one-shot async gate.
 ///
 /// Used to race an operation against a timeout *without* structured `await`-ing the
-/// operation task, so an operation that hangs on a non-cancellable continuation
+/// operation task, so an operation that stalls on a non-cancellable continuation
 /// surfaces as a deterministic test failure instead of freezing the whole suite.
 actor CompletionGate {
     private var resolved: Bool?
@@ -39,12 +39,12 @@ actor CompletionGate {
 }
 
 /// Runs `operation` and returns `true` if it finished within `seconds`, `false` if it
-/// timed out (i.e. hung).
+/// timed out (i.e. stalled).
 ///
 /// The operation runs in an unstructured task. On timeout that task is cancelled and
 /// abandoned — if it is stuck on a non-cancellable continuation it will leak, which is
-/// acceptable for a bug-reproduction test that would otherwise hang forever.
-func finishesWithoutHanging(
+/// acceptable for a bug-reproduction test that would otherwise stall forever.
+func finishesWithoutStalling(
     within seconds: Double = 5,
     _ operation: @escaping @Sendable () async -> Void
 ) async -> Bool {

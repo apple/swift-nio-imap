@@ -19,10 +19,10 @@ import NIO
 /// A one-shot async gate.
 ///
 /// Used to race an operation against a timeout *without* structured `await`-ing the
-/// operation task. If the operation hangs on a non-cancellable continuation (which is
+/// operation task. If the operation stalls on a non-cancellable continuation (which is
 /// exactly what the connection-lifecycle bugs cause), a structured `withTaskGroup`
-/// timeout would itself hang on scope exit while awaiting the stuck child. This gate
-/// lets a hung operation surface as a deterministic test failure instead of freezing
+/// timeout would itself stall on scope exit while awaiting the stuck child. This gate
+/// lets a stalled operation surface as a deterministic test failure instead of freezing
 /// the whole suite.
 actor CompletionGate {
     private var resolved: Bool?
@@ -46,12 +46,12 @@ actor CompletionGate {
 }
 
 /// Runs `operation` and returns `true` if it finished within `seconds`, `false` if it
-/// timed out (i.e. hung).
+/// timed out (i.e. stalled).
 ///
 /// The operation runs in an unstructured task. On timeout that task is cancelled and
 /// abandoned — if it is stuck on a non-cancellable continuation it will leak, which is
-/// acceptable for a bug-reproduction test that would otherwise hang forever.
-func finishesWithoutHanging(
+/// acceptable for a bug-reproduction test that would otherwise stall forever.
+func finishesWithoutStalling(
     within seconds: Double = 5,
     _ operation: @escaping @Sendable () async -> Void
 ) async -> Bool {

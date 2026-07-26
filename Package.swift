@@ -26,7 +26,7 @@ let package = Package(
         .target(
             name: "NIOIMAP",
             dependencies: [
-                .target(name: "NIOIMAPCore"),
+                .target(name: "NIOIMAPCore")
             ]
         ),
         .testTarget(
