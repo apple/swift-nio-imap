@@ -28,7 +28,6 @@ enum OutboundQueueTests {
         await withTaskGroup(of: Void.self) { group in
             group.addTask {
                 try? await sut.run(outbound: outbound)
-                print("A")
             }
 
             group.addTask {
@@ -36,14 +35,12 @@ enum OutboundQueueTests {
                 let a = await s.next()
                 sut.close()
                 #expect(a == .part(.tagged(.init(tag: "A", command: .noop))))
-                print("B")
             }
 
             group.addTask {
                 await #expect(throws: Never.self) {
                     try await sut.write([.init(tag: "A", command: .noop)])
                 }
-                print("C")
             }
         }
     }
