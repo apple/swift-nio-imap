@@ -19,6 +19,7 @@ import NIO
 @testable import NIOIMAP
 import NIOIMAPCore
 import NIOTestUtils
+import OrderedCollections
 
 @Suite("ByteToMessageDecoderVerifier")
 struct ByteToMessageDecoderVerifierTests {}
