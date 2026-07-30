@@ -44,7 +44,7 @@ For more information about IMAP capabilities, see the [IANA IMAP Capabilities Re
 | `SPECIAL-USE` | ``Capability/specialUse`` | [RFC 6154](https://www.iana.org/go/rfc6154) | IMAP LIST Extension for Special-Use Mailboxes |
 | `STARTTLS` | ``Capability/startTLS`` | [RFC 3501](https://www.iana.org/go/rfc3501) | IMAP4rev1 |
 | `STATUS=SIZE` | ``Capability/status(_:)`` | [RFC 8438](https://www.iana.org/go/rfc8438) | IMAP4 STATUS Command Extension for Message Size Information |
-| `UIDBATCHES` | ``Capability/uidBatches`` | [draft-ietf-mailmaint-imap-uidbatches](https://datatracker.ietf.org/doc/draft-ietf-mailmaint-imap-uidbatches/) | IMAP UID BATCH Extension |
+| `UIDBATCHES` | ``Capability/uidBatches`` | [RFC 10022](https://www.iana.org/go/rfc10022) | IMAP UIDBATCHES Extension |
 | `UIDONLY` | ``Capability/uidOnly`` | [RFC 9586](https://www.iana.org/go/rfc9586) | IMAP4 UIDONLY Extension |
 | `UIDPLUS` | ``Capability/uidPlus`` | [RFC 4315](https://www.iana.org/go/rfc4315) | Internet Message Access Protocol (IMAP) - UIDPLUS Extension |
 | `UNSELECT` | ``Capability/unselect`` | [RFC 3691](https://www.iana.org/go/rfc3691) | Internet Message Access Protocol (IMAP) UNSELECT Command |
@@ -208,9 +208,9 @@ The base protocol is implemented throughout NIOIMAPCore with types like ``Comman
 
 [RFC 9979](https://datatracker.ietf.org/doc/html/rfc9979) (May 2026) registers a set of message keywords and mailbox name attributes that were already in use across mail servers and clients, so that implementations can rely on their meaning without name collisions. The message keywords are available as ``Flag/Keyword`` constants — for example ``Flag/Keyword/hasAttachment``, ``Flag/Keyword/memo``, ``Flag/Keyword/muted``, and ``Flag/Keyword/notify``. The three flag-color keywords ``Flag/Keyword/colorBit0``, ``Flag/Keyword/colorBit1``, and ``Flag/Keyword/colorBit2`` encode one of seven colors on a `\Flagged` message; use the higher-level ``FlaggedState`` (or the lossless ``RawFlaggedState``) to read and update a flagged message's color. The mailbox name attributes are available as ``UseAttribute/snoozed``, ``UseAttribute/scheduled``, and ``UseAttribute/memos``.
 
-### draft-ietf-mailmaint-imap-uidbatches: UIDBATCHES Extension
+### RFC 10022: UIDBATCHES Extension
 
-The [UIDBATCHES extension](https://datatracker.ietf.org/doc/draft-ietf-mailmaint-imap-uidbatches/) allows the server to return ranges of UIDs more efficiently when there are large contiguous sequences of UIDs. The ``UIDBatchesResponse`` type supports this efficient UID batch representation.
+[RFC 10022](https://datatracker.ietf.org/doc/html/rfc10022) (July 2026) allows the server to return ranges of UIDs more efficiently when there are large contiguous sequences of UIDs. The ``UIDBatchesResponse`` type supports this efficient UID batch representation.
 
 ### Gmail IMAP Extensions
 
