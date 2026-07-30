@@ -20,7 +20,7 @@ let package = Package(
                 "NIOIMAPCore"
             ],
             swiftSettings: [
-                .enableUpcomingFeature("MemberImportVisibility"),
+                .enableUpcomingFeature("MemberImportVisibility")
             ]
         ),
         .testTarget(
@@ -32,7 +32,7 @@ let package = Package(
                 .product(name: "NIOTestUtils", package: "swift-nio"),
             ],
             swiftSettings: [
-                .enableUpcomingFeature("MemberImportVisibility"),
+                .enableUpcomingFeature("MemberImportVisibility")
             ]
         ),
 
@@ -44,7 +44,7 @@ let package = Package(
                 .product(name: "OrderedCollections", package: "swift-collections"),
             ],
             swiftSettings: [
-                .enableUpcomingFeature("MemberImportVisibility"),
+                .enableUpcomingFeature("MemberImportVisibility")
             ]
         ),
         .testTarget(
@@ -56,7 +56,7 @@ let package = Package(
                 .product(name: "OrderedCollections", package: "swift-collections"),
             ],
             swiftSettings: [
-                .enableUpcomingFeature("MemberImportVisibility"),
+                .enableUpcomingFeature("MemberImportVisibility")
             ]
         ),
     ]
