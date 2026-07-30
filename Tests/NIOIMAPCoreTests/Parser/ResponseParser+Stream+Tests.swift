@@ -14,6 +14,7 @@
 
 import NIO
 @testable import NIOIMAPCore
+import OrderedCollections
 import Testing
 
 extension ResponseParserTests {

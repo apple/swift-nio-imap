@@ -14,6 +14,7 @@
 
 import NIO
 @testable import NIOIMAPCore
+import OrderedCollections
 import Testing
 
 /// Integration tests for `SynchronizedCommand` parsing via `CommandParser.parseCommandStream`.

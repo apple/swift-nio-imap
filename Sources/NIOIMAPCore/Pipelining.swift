@@ -12,6 +12,8 @@
 //
 //===----------------------------------------------------------------------===//
 
+import OrderedCollections
+
 /// Requirements that must be satisfied before starting a command.
 ///
 /// IMAP supports command pipelining, where multiple commands can be in flight simultaneously.

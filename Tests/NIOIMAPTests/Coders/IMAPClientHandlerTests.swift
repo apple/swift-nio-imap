@@ -15,6 +15,7 @@
 import NIO
 @testable import NIOIMAP
 @testable import NIOIMAPCore
+import OrderedCollections
 import Testing
 import Synchronization
 
@@ -630,7 +631,7 @@ struct IMAPClientHandlerTests {
         }
     }
 
-    @available(macOS 15.0, *)
+    @available(macOS 15.0, iOS 18.0, tvOS 18.0, watchOS 11.0, *)
     @Test("protect against reentrancy")
     func protectAgainstReentrancy() {
         var helper = Helper()
@@ -701,7 +702,7 @@ struct IMAPClientHandlerTests {
         )
     }
 
-    @available(macOS 15.0, *)
+    @available(macOS 15.0, iOS 18.0, tvOS 18.0, watchOS 11.0, *)
     @Test("write cascades promise failure")
     func writeCascadesPromiseFailure() {
         var helper = Helper()
@@ -733,7 +734,7 @@ struct IMAPClientHandlerTests {
         #expect(a)
     }
 
-    @available(macOS 15.0, *)
+    @available(macOS 15.0, iOS 18.0, tvOS 18.0, watchOS 11.0, *)
     @Test("write cascades continuation promise failure")
     func writeCascadesContinuationPromiseFailure() {
         var helper = Helper()
