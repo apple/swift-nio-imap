@@ -16,6 +16,7 @@ import NIO
 @testable import NIOIMAP
 @testable import NIOIMAPCore
 import NIOTestUtils
+import OrderedCollections
 
 import Testing
 

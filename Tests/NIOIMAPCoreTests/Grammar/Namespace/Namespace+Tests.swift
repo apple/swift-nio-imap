@@ -14,6 +14,7 @@
 
 import NIO
 @_spi(NIOIMAPInternal) @testable import NIOIMAPCore
+import OrderedCollections
 import Testing
 
 @Suite("NamespaceDescription")

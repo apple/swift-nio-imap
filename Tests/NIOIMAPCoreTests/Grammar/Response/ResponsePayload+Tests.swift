@@ -19,6 +19,7 @@ import Foundation
 #endif
 import NIO
 @_spi(NIOIMAPInternal) @testable import NIOIMAPCore
+import OrderedCollections
 import Testing
 
 @Suite("ResponsePayload")
