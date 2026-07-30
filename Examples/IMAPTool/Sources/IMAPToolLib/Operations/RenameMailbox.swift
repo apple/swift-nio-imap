@@ -28,7 +28,10 @@ func renameMailbox<C: ConnectionProtocol>(
     old oldName: MailboxName,
     new newName: MailboxName
 ) async throws {
-    let text = try await connection.send(.rename(from: oldName, to: newName, parameters: [:])) { tag, responses in
+    let text = try await connection.send(
+        .rename(from: oldName, to: newName, parameters: [:]),
+        isolation: #isolation
+    ) { tag, responses in
         writeStatus("Did send RENAME mailbox '\(oldName)' to '\(newName)' with tag \(tag)")
         return try await responses.waitForCompletion()
     }.getOK()

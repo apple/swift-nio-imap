@@ -169,7 +169,7 @@ private func selectOrCreate<C: ConnectionProtocol>(
     }
 
     // Try to create:
-    let createText = try await connection.send(.create(mailbox, parameters)) { tag, responses in
+    let createText = try await connection.send(.create(mailbox, parameters), isolation: #isolation) { tag, responses in
         writeStatus("Did send CREATE with tag \(tag)")
         return try await responses.waitForCompletion()
     }.getOK()
@@ -218,7 +218,7 @@ private func sendSelect<C: ConnectionProtocol>(
     connection: C,
     mailbox: MailboxName
 ) async throws -> (SelectInfo.Temporary, TaggedResponse) {
-    try await connection.send(.select(mailbox)) { _, responses in
+    try await connection.send(.select(mailbox), isolation: #isolation) { _, responses in
         var info = SelectInfo.Temporary(mailbox: mailbox)
         let response = try await responses.forEach { response in
             switch response {

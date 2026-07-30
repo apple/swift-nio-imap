@@ -30,10 +30,18 @@ import NIOIMAP
 /// continuation-driven flows (literals, SASL challenges, IDLE) that don't fit the
 /// simple "send a `Command`, consume the `IMAPConnection.ResponseStream`" shape, so adding them
 /// here would complicate the mock surface used by tests.
+///
+/// ## The `isolation` parameter
+///
+/// The requirement mirrors `IMAPConnection.send(_:isolation:_:)`, so that the handler needs to
+/// be neither `@Sendable` nor `@escaping` and runs in the caller's isolation domain. A protocol
+/// requirement can't carry a default argument, so — unlike calls on the concrete type — generic
+/// code has to pass `isolation: #isolation` explicitly.
 protocol ConnectionProtocol: Sendable {
-    func send<Result: Sendable>(
+    func send<Result>(
         _ command: Command,
-        _ handler: @Sendable (IMAPConnection.Tag, IMAPConnection.ResponseStream) async throws -> Result
+        isolation: isolated (any Actor)?,
+        _ handler: (IMAPConnection.Tag, IMAPConnection.ResponseStream) async throws -> Result
     ) async throws -> Result
 }
 

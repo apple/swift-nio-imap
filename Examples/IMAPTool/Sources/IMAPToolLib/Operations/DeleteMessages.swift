@@ -34,11 +34,11 @@ func deleteMessages<C: ConnectionProtocol>(
             data: StoreData.flags(StoreFlags.add(silent: true, list: [.deleted]))
         )
     else { return }
-    try await connection.send(command) { tag, responses in
+    try await connection.send(command, isolation: #isolation) { tag, responses in
         return try await responses.waitForCompletion()
     }.checkOK()
     writeStatus("Did mark \(uids.count) UIDs as \\Deleted")
-    try await connection.send(.expunge) { tag, responses in
+    try await connection.send(.expunge, isolation: #isolation) { tag, responses in
         return try await responses.waitForCompletion()
     }.checkOK()
     writeStatus("Did EXPUNGE")
@@ -55,11 +55,11 @@ func deleteAllMessages<C: ConnectionProtocol>(
             data: StoreData.flags(StoreFlags.add(silent: true, list: [.deleted]))
         )
     else { return }
-    try await connection.send(command) { tag, responses in
+    try await connection.send(command, isolation: #isolation) { tag, responses in
         return try await responses.waitForCompletion()
     }.checkOK()
     writeStatus("Did mark as \\Deleted")
-    try await connection.send(.expunge) { tag, responses in
+    try await connection.send(.expunge, isolation: #isolation) { tag, responses in
         return try await responses.waitForCompletion()
     }.checkOK()
     writeStatus("Did EXPUNGE")

@@ -84,10 +84,22 @@ final actor TestConnection: ConnectionProtocol {
     private var currentContinuations:
         [IMAPConnection.Tag: AsyncThrowingStream<Response, any Swift.Error>.Continuation] = [:]
 
+    /// Isolated to the caller — like `IMAPConnection.send(_:isolation:_:)` — so that the
+    /// handler runs in the caller's isolation domain and not on this actor.
     func send<Result>(
         _ command: NIOIMAPCore.Command,
-        _ handler: @Sendable (IMAPConnection.Tag, IMAPConnection.ResponseStream) async throws -> Result
-    ) async throws -> Result where Result: Sendable {
+        isolation: isolated (any Actor)? = #isolation,
+        _ handler: (IMAPConnection.Tag, IMAPConnection.ResponseStream) async throws -> Result
+    ) async throws -> Result {
+        let (tag, responses) = try await beginCommand(command)
+        let r = try await handler(tag, responses)
+        await finishCommand(tag: tag)
+        return r
+    }
+
+    private func beginCommand(
+        _ command: NIOIMAPCore.Command
+    ) throws -> (IMAPConnection.Tag, IMAPConnection.ResponseStream) {
         let commandAndResponses: TestConnection.CommandAndResponses
         switch expectedOrdering {
         case .inOrder:
@@ -108,9 +120,11 @@ final actor TestConnection: ConnectionProtocol {
             tag: tag,
             commandAndResponses: commandAndResponses
         )
-        let r = try await handler(tag, responses)
+        return (tag, responses)
+    }
+
+    private func finishCommand(tag: IMAPConnection.Tag) {
         currentContinuations.removeValue(forKey: tag)
-        return r
     }
 
     private func makeResponseStream(

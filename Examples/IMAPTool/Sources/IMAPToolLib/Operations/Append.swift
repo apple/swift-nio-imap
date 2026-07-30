@@ -118,7 +118,8 @@ func append<ID: Sendable>(
 
     let tagged: TaggedResponse = try await connection.append(
         to: mailbox,
-        writeClosure: { writer in
+        writing: { tag, writer in
+            writeStatus("Appending message \(message.messageID) with tag \(tag)")
             try await writer.write(
                 message: AppendMessage(
                     options: options,
@@ -133,9 +134,8 @@ func append<ID: Sendable>(
                 }
             }
         },
-        readClosure: { tag, responses -> TaggedResponse in
-            writeStatus("Appending message \(message.messageID) with tag \(tag)")
-            return try await responses.waitForCompletion()
+        reading: { _, responses in
+            try await responses.waitForCompletion()
         }
     )
     guard

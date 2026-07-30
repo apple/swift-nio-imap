@@ -27,7 +27,7 @@ func deleteMailbox<C: ConnectionProtocol>(
     capabilities: [Capability],
     mailbox: MailboxName
 ) async throws {
-    let text = try await connection.send(.delete(mailbox)) { tag, responses in
+    let text = try await connection.send(.delete(mailbox), isolation: #isolation) { tag, responses in
         writeStatus("Did send DELETE mailbox '\(mailbox)' with tag \(tag)")
         return try await responses.waitForCompletion()
     }.getOK()

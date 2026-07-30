@@ -160,4 +160,114 @@ enum IMAPConnectionLifecycleTests {
             "After the AUTHENTICATE handler threw, sendAuthenticate should have closed the connection so a subsequent command fails."
         )
     }
+
+    /// A failing connection must not cancel the `body`. The failure has to surface through
+    /// the connection instead: the in-flight command fails, and so does every command after
+    /// it — but `body` keeps running and its result is what `withConnection` returns.
+    @Test(.timeLimit(.minutes(3)))
+    static func connectionFailureSurfacesThroughTheConnectionRatherThanCancellingTheBody() async throws {
+        let server = try await LoopbackServer.greetThenCloseOnFirstCommand()
+        defer { server.shutdown() }
+
+        let configuration = IMAPConnection.Configuration(
+            hostname: "127.0.0.1",
+            port: server.port,
+            useTLS: false,
+            logging: .noLogging
+        )
+
+        let outcome = Mutex<String>("did-not-run")
+        let finished = await finishesWithoutStalling {
+            do {
+                // Note that `steps` is a plain, mutable local: the body is neither
+                // `@Sendable` nor `@escaping`, so it can capture non-`Sendable` state.
+                var steps: [String] = []
+                let result = try await IMAPConnection.withConnection(configuration: configuration) { _, connection in
+                    do {
+                        try await connection.send(.noop) { _, responses in
+                            _ = try await responses.waitForCompletion()
+                        }
+                        steps.append("first-succeeded")
+                    } catch {
+                        steps.append("first-failed")
+                    }
+                    // The connection failed, but this task was not cancelled by it.
+                    steps.append(Task.isCancelled ? "cancelled" : "still-running")
+                    // Interacting with the failed connection keeps failing.
+                    do {
+                        try await connection.send(.noop) { _, responses in
+                            _ = try await responses.waitForCompletion()
+                        }
+                        steps.append("second-succeeded")
+                    } catch {
+                        steps.append("second-failed")
+                    }
+                    return steps.joined(separator: ",")
+                }
+                outcome.withLock { $0 = result }
+            } catch {
+                outcome.withLock { $0 = "threw: \(error)" }
+            }
+        }
+
+        #expect(finished, "withConnection stalled after the server closed the connection.")
+        #expect(
+            outcome.withLock { $0 } == "first-failed,still-running,second-failed",
+            "The connection failure should surface through the connection, not as cancellation of the body."
+        )
+    }
+
+    /// A closure that throws part-way through an `APPEND` leaves the command unfinished, and
+    /// the protocol offers no way to abort it. `append` therefore closes the connection, so
+    /// that a subsequent command fails instead of being written into the middle of the
+    /// half-sent `APPEND`.
+    @Test(.timeLimit(.minutes(3)))
+    static func appendClosureThrowClosesConnection() async throws {
+        let server = try await LoopbackServer.greetThenStayOpen()
+        defer { server.shutdown() }
+
+        let configuration = IMAPConnection.Configuration(
+            hostname: "127.0.0.1",
+            port: server.port,
+            useTLS: false,
+            logging: .noLogging
+        )
+
+        struct WriterError: Swift.Error {}
+
+        let outcome = Mutex<String>("did-not-run")
+        let finished = await finishesWithoutStalling {
+            do {
+                var steps: [String] = []
+                let result = try await IMAPConnection.withConnection(configuration: configuration) { _, connection in
+                    do {
+                        _ = try await connection.append(to: MailboxName(Array("INBOX".utf8))) { _, _, _ in
+                            throw WriterError()
+                        }
+                        steps.append("append-succeeded")
+                    } catch is WriterError {
+                        steps.append("append-threw")
+                    }
+                    do {
+                        try await connection.send(.noop) { _, responses in
+                            _ = try await responses.waitForCompletion()
+                        }
+                        steps.append("noop-succeeded")
+                    } catch {
+                        steps.append("noop-failed")
+                    }
+                    return steps.joined(separator: ",")
+                }
+                outcome.withLock { $0 = result }
+            } catch {
+                outcome.withLock { $0 = "threw: \(error)" }
+            }
+        }
+
+        #expect(finished, "withConnection stalled after the APPEND closure threw.")
+        #expect(
+            outcome.withLock { $0 } == "append-threw,noop-failed",
+            "An aborted APPEND should propagate its error and close the connection."
+        )
+    }
 }

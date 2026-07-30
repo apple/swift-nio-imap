@@ -31,7 +31,7 @@ func identify<C: ConnectionProtocol>(
         capabilities.contains(.id)
     else { return Identity(capabilities: capabilities) }
 
-    return try await connection.send(.id(clientID)) { _, responses -> Identity in
+    return try await connection.send(.id(clientID), isolation: #isolation) { _, responses -> Identity in
         var result = Identity(
             capabilities: capabilities
         )

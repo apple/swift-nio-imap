@@ -31,7 +31,7 @@ import Synchronization
 ///
 /// - Important: IMAP does not tag untagged responses, so while commands are pipelined every
 ///   untagged `Response` is delivered to _all_ in-flight command handlers (see
-///   ``send(_:_:)``). Handlers must act only on the responses they care about.
+///   ``send(_:isolation:_:)``). Handlers must act only on the responses they care about.
 public final class IMAPConnection: Sendable {
     private init(
         configuration: Configuration
@@ -49,66 +49,60 @@ public final class IMAPConnection: Sendable {
         var greeting: GreetingState = .waiting([])
     }
 
-    private enum ChildResult<Result: Sendable>: Sendable {
-        case run
-        case body(Result)
-    }
-
     /// Creates an IMAP connection and runs the given closure.
     ///
     /// The closure can send commands to the connection and receive responses from the server.
     /// Use task groups to pipeline commands concurrently.
     ///
-    /// The connection closes when the `body` closure returns.
-    public static func withConnection<Result: Sendable>(
+    /// The connection itself runs in a child task while `body` runs in the calling task. As a
+    /// result `body` needs to be neither `@Sendable` nor `@escaping`: it can capture and mutate
+    /// non-`Sendable` state, and it runs in the caller’s isolation domain.
+    ///
+    /// The connection closes when the `body` closure returns or throws.
+    ///
+    /// - Note: A failing connection does _not_ cancel `body`. Instead, the failure surfaces the
+    ///   next time `body` interacts with the connection: pending and subsequent
+    ///   ``ResponseStream``s and ``send(_:isolation:_:)`` calls fail with the underlying error.
+    ///   A `body` that neither returns nor touches the connection again keeps
+    ///   `withConnection(configuration:isolation:_:)` from returning.
+    public static func withConnection<Result>(
         configuration: Configuration,
-        _ body: @Sendable @escaping (Greeting, IMAPConnection) async throws -> Result
+        isolation: isolated (any Actor)? = #isolation,
+        _ body: (Greeting, IMAPConnection) async throws -> Result
     ) async throws -> Result {
         let connection = IMAPConnection(configuration: configuration)
 
         return try await withThrowingTaskGroup(
-            of: ChildResult<Result>.self,
+            of: Void.self,
             returning: Result.self
         ) { group in
-
-            // Create a task that “runs” the connection receiving inbound and sending commands:
+            // Create a child task that “runs” the connection receiving inbound and sending
+            // commands. Its error is never rethrown from here — the group discards the errors
+            // of tasks that are still running when this closure returns, and `run(logging:)`
+            // reports its failure through `close(reason:)` instead, so that whatever `body`
+            // does with the connection next fails with that error.
             group.addTask {
-                // Run the connection:
                 try await connection.run(logging: configuration.logging)
-                return ChildResult<Result>.run
             }
 
-            // Create a task that runs the passed in `body` closure:
-            group.addTask {
-                do {
-                    // Wait for the greeting:
-                    let greeting = try await connection.greeting
-                    // Run the `body` that lets the caller send commands:
-                    let result = try await body(greeting, connection)
-                    connection.configuration.logger.debug("Closing connection after body completed")
-                    connection.close()
-                    return ChildResult.body(result)
-                } catch {
-                    connection.configuration.logger.debug(
-                        "Closing connection after body threw",
-                        metadata: ["error": "\(error)"]
-                    )
-                    connection.close()
-                    throw error
-                }
-            }
-
-            var result: ChildResult<Result>?
-            for try await task in group {
-                if case .body = task {
-                    result = task
-                }
+            // Run the `body` — the caller’s code that sends commands — in _this_ task:
+            do {
+                // Wait for the greeting:
+                let greeting = try await connection.greeting
+                let result = try await body(greeting, connection)
+                connection.configuration.logger.debug("Closing connection after body completed")
+                connection.close(reason: .closed)
                 group.cancelAll()
+                return result
+            } catch {
+                connection.configuration.logger.debug(
+                    "Closing connection after body threw",
+                    metadata: ["error": "\(error)"]
+                )
+                connection.close(reason: .failed(error))
+                group.cancelAll()
+                throw error
             }
-            guard
-                case .body(let r) = result
-            else { throw ConnectionClosedBeforeBodyCompleted() }
-            return r
         }
     }
 
@@ -133,6 +127,7 @@ public final class IMAPConnection: Sendable {
     ///   concurrently, each handler must inspect only the responses it actually cares about.
     public func send<Result>(
         _ command: Command,
+        isolation: isolated (any Actor)? = #isolation,
         _ handler: (Tag, ResponseStream) async throws -> Result
     ) async throws -> Result {
         let (tag, responseStream) = try state.withLock { state in
@@ -150,7 +145,15 @@ public final class IMAPConnection: Sendable {
     }
 
     /// Sends an `IDLE` command to the server.
+    ///
+    /// The handler receives the `Response` values the server produces while idling. Returning
+    /// from the handler ends the `IDLE`: `sendIdle(isolation:_:)` then sends `DONE`.
+    ///
+    /// - Important: The command’s `TaggedResponse` only arrives _after_ `DONE`, so the handler
+    ///   must not wait for the command to complete — use the stream to observe untagged
+    ///   responses and return once you want to stop idling.
     public func sendIdle<Result>(
+        isolation: isolated (any Actor)? = #isolation,
         _ handler: (Tag, ResponseStream) async throws -> Result
     ) async throws -> Result {
         let (tag, responseStream) = try state.withLock { state in
@@ -185,6 +188,7 @@ public final class IMAPConnection: Sendable {
     public func sendAuthenticate<Result>(
         mechanism: AuthenticationMechanism,
         initialResponse: InitialResponse?,
+        isolation: isolated (any Actor)? = #isolation,
         _ handler: (Tag, ResponseStream, borrowing ContinuationWriter) async throws -> Result
     ) async throws -> Result {
         let (tag, responseStream) = try state.withLock { state in
@@ -212,74 +216,192 @@ public final class IMAPConnection: Sendable {
             // `*` cancellation cannot be expressed through a base64 continuation
             // response), so if the handler fails mid-challenge we close the connection
             // rather than leave it in a half-authenticated state that can't be reused.
-            close()
+            close(reason: .failed(error))
             throw error
         }
     }
 
     /// Sends an `APPEND` command as a stream to the server.
+    ///
+    /// The closure writes the message data with the provided ``AppendWriter`` and consumes the
+    /// command's responses from the ``ResponseStream``. `APPEND` needs at least one message, and
+    /// the command is complete when the closure returns — or as soon as the closure calls
+    /// ``AppendWriter/finish()``.
+    ///
+    /// The server sends the command's `TaggedResponse` only once the command is complete, so a
+    /// closure that waits for it finishes the command first:
+    ///
+    /// ```swift
+    /// let tagged = try await connection.append(to: mailbox) { tag, responses, writer in
+    ///     try await writer.write(message: message) { messageWriter in
+    ///         try await messageWriter.write(messageBytes: bytes)
+    ///     }
+    ///     try await writer.finish()
+    ///     return try await responses.waitForCompletion()
+    /// }
+    /// ```
+    ///
+    /// To act on responses while the message data is still going out, read them from a task group
+    /// of your own. The ``ResponseStream`` is `Sendable` and the ``AppendWriter`` is not, so the
+    /// writer stays in the parent task:
+    ///
+    /// ```swift
+    /// try await connection.append(to: mailbox) { tag, responses, writer in
+    ///     try await withThrowingTaskGroup(of: Void.self) { group in
+    ///         group.addTask {
+    ///             for try await response in responses {
+    ///                 print(response)
+    ///             }
+    ///         }
+    ///         try await writer.write(message: message) { messageWriter in
+    ///             try await messageWriter.write(messageBytes: bytes)
+    ///         }
+    ///         try await writer.finish()
+    ///     }
+    /// }
+    /// ```
+    ///
+    /// ``append(to:isolation:writing:reading:)`` is that second form written for you: it takes a
+    /// write closure and a `@Sendable` read closure, and runs them concurrently.
+    ///
+    /// - Warning: The `TaggedResponse` cannot arrive while the command is still open. Waiting for
+    ///   it inside the closure without first calling ``AppendWriter/finish()`` — and without
+    ///   another task writing concurrently — therefore never returns.
+    /// - Note: `APPEND` cannot be pipelined: the protocol only allows the message literals to
+    ///   follow the command, so any other command sent on this connection while `append` runs
+    ///   is queued and written once the append completes. As with ``send(_:isolation:_:)``, the
+    ///   stream also delivers untagged responses that belong to other commands, or to no command
+    ///   at all; only the `TaggedResponse` is this command's.
+    /// - Important: A synchronizing literal cannot be cancelled once begun. If the closure leaves
+    ///   the command incomplete — because it throws part-way through, writes no message, or
+    ///   begins a message it never finishes — the command cannot be completed, so this method
+    ///   closes the connection. It rethrows the closure's error, or throws ``IncompleteAppend``
+    ///   if the closure itself succeeded. An error the closure throws _after_ completing the
+    ///   command leaves the connection intact, exactly like an error from a
+    ///   ``send(_:isolation:_:)`` handler.
     /// - Parameters:
     ///   - mailbox: The mailbox to append the message to.
-    ///   - writeClosure: Writes message parts using the provided ``AppendWriter``.
-    ///   - readClosure: Receives server responses during the append operation.
-    public func append<Result: Sendable>(
+    ///   - isolation: The actor to run the closure on. Defaults to the caller’s isolation.
+    ///   - body: Writes the message(s) with the provided ``AppendWriter`` and handles the
+    ///     command's responses. It also receives the ``Tag`` that identifies this command in the
+    ///     `TaggedResponse` completing it.
+    /// - Returns: The value `body` returns.
+    public func append<Result>(
         to mailbox: MailboxName,
-        writeClosure: @Sendable @escaping (inout AppendWriter) async throws -> Void,
-        readClosure: @Sendable @escaping (Tag, ResponseStream) async throws -> Result
+        isolation: isolated (any Actor)? = #isolation,
+        _ body: (Tag, ResponseStream, inout AppendWriter) async throws -> Result
     ) async throws -> Result {
         let (tag, responseStream) = try state.withLock { state in
             state.perCommandResponseStreams.makeTagAndResponseStream()
         }.get()
 
-        return try await withThrowingTaskGroup(
-            of: AppendChildResult<Result>.self,
-            returning: Result.self
-        ) { [outboundWriter] group in
-            group.addTask {
-                .read(try await readClosure(tag, ResponseStream(underlying: responseStream)))
-            }
-            group.addTask {
-                // The `consuming` ownership of the closure parameter is spelled out
-                // explicitly: Swift 6.0 otherwise infers it as `borrowing` here and
-                // rejects handing it on to `AppendWriter.withAppendWriter`.
-                try await outboundWriter.withAppendWriter {
-                    (writer: consuming OutboundQueue.AppendQueueWriter) in
-                    try await AppendWriter.withAppendWriter(
-                        tag: "\(tag)",
-                        appendingTo: mailbox,
-                        underlying: writer
-                    ) { innerWriter in
-                        try await writeClosure(&innerWriter)
-                    }
-                }
-                return .write
-            }
-
-            // Wait for both children. If either throws, the group rethrows and
-            // cancels the other. The read child provides the result.
-            var readResult: Result?
-            for try await child in group {
-                switch child {
-                case .read(let r):
-                    readResult = r
-                case .write:
-                    break
+        // Whether the `APPEND` command was written in full. If it wasn't, the server is still
+        // waiting for the rest of it, and no other command can be sent on this connection.
+        var didCompleteCommand = false
+        do {
+            // The `consuming` ownership of the closure parameter is spelled out
+            // explicitly: Swift 6.0 otherwise infers it as `borrowing` here and
+            // rejects handing it on to `AppendWriter.withAppendWriter`.
+            return try await outboundWriter.withAppendWriter {
+                (writer: consuming OutboundQueue.AppendQueueWriter) in
+                try await AppendWriter.withAppendWriter(
+                    tag: "\(tag)",
+                    appendingTo: mailbox,
+                    underlying: writer,
+                    didCompleteCommand: &didCompleteCommand
+                ) { innerWriter in
+                    try await body(tag, ResponseStream(underlying: responseStream), &innerWriter)
                 }
             }
-            guard let readResult else {
-                throw AppendCompletedWithoutReadResult()
-            }
-            return readResult
+        } catch {
+            guard
+                !didCompleteCommand
+            else { throw error }
+            // The command was started but never finished. There is no way to abort it — sending
+            // anything but the remaining append data would be a protocol violation — so the
+            // connection is unusable.
+            configuration.logger.debug(
+                "Closing connection after APPEND was left incomplete",
+                metadata: ["error": "\(error)"]
+            )
+            close(reason: .failed(error))
+            throw error
         }
     }
 
-    private enum AppendChildResult<Result: Sendable>: Sendable {
-        case read(Result)
-        case write
+    /// Sends an `APPEND` command as a stream to the server, reading its responses as it writes.
+    ///
+    /// This is ``append(to:isolation:_:)`` with the task group written for you: `write` writes the
+    /// message data while `read` concurrently consumes the responses the server sends — including
+    /// any that arrive while the message data is still in flight. `read` receives the command's
+    /// ``Tag`` and ``ResponseStream`` and returns the result, the same shape
+    /// ``send(_:isolation:_:)``'s handler has.
+    ///
+    /// ```swift
+    /// let tagged = try await connection.append(
+    ///     to: mailbox,
+    ///     writing: { tag, writer in
+    ///         try await writer.write(message: message) { messageWriter in
+    ///             for try await bytes in file {
+    ///                 try await messageWriter.write(messageBytes: bytes)
+    ///             }
+    ///         }
+    ///     },
+    ///     reading: { tag, responses in
+    ///         try await responses.waitForCompletion()
+    ///     }
+    /// )
+    /// ```
+    ///
+    /// `write` has to write at least one message, and the command completes once it returns — so
+    /// `read` can wait for the command's `TaggedResponse`, which arrives after the message data
+    /// has gone out in full.
+    ///
+    /// - Note: `read` runs in a child task, which is why — alone among the closures in this API —
+    ///   it has to be `@Sendable`, and `Result` has to be `Sendable`. `write` holds the
+    ///   ``AppendWriter``, which cannot leave the task that owns it, so `write` runs in the
+    ///   calling task and needs neither. Use ``append(to:isolation:_:)`` to keep everything in
+    ///   one task.
+    /// - Note: As with ``send(_:isolation:_:)``, `read` also sees untagged responses that belong
+    ///   to other commands, or to no command at all; only the `TaggedResponse` is this command's.
+    /// - Important: If `read` throws, `write` still writes the message in full before this method
+    ///   rethrows the error: abandoning a synchronizing literal part-way would leave the
+    ///   connection unusable. If `write` throws, or leaves the command incomplete, this method
+    ///   cancels `read` and closes the connection, as ``append(to:isolation:_:)`` describes.
+    /// - Parameters:
+    ///   - mailbox: The mailbox to append the message to.
+    ///   - isolation: The actor to run `write` on. Defaults to the caller’s isolation.
+    ///   - write: Writes the message(s) using the provided ``AppendWriter``.
+    ///   - read: Receives the responses the server sends for the command, concurrently with
+    ///     `write`.
+    /// - Returns: The value `read` returns.
+    public func append<Result: Sendable>(
+        to mailbox: MailboxName,
+        isolation: isolated (any Actor)? = #isolation,
+        writing write: (Tag, inout AppendWriter) async throws -> Void,
+        reading read: @Sendable @escaping (Tag, ResponseStream) async throws -> Result
+    ) async throws -> Result {
+        try await append(to: mailbox, isolation: isolation) { tag, responses, writer in
+            try await withThrowingTaskGroup(of: Result.self, returning: Result.self) { group in
+                group.addTask {
+                    try await read(tag, responses)
+                }
+                // The writer cannot be sent to another task — it is non-copyable and `inout` —
+                // so writing happens here, in this task, while `read` runs in the child.
+                try await write(tag, &writer)
+                // The `TaggedResponse` can only arrive once the command is complete, so `read`
+                // would never finish if the command were left open until this closure returns.
+                try await writer.finish()
+                guard
+                    let result = try await group.next()
+                else { throw AppendCompletedWithoutReadResult() }
+                return result
+            }
+        }
     }
 
-    /// An error indicating the `APPEND` operation finished without the read closure producing a result.
-    struct AppendCompletedWithoutReadResult: Swift.Error {}
+    /// An error indicating the `APPEND` read closure finished without producing a result.
+    private struct AppendCompletedWithoutReadResult: Swift.Error {}
 }
 
 // MARK: -
@@ -322,68 +444,112 @@ extension IMAPConnection {
     private func run(
         logging: Configuration.Logging
     ) async throws {
-        // Ensure any awaiting caller is unblocked no matter how `run()` exits — in
-        // particular a task parked on `greeting` when the channel fails to open.
-        defer { self.close() }
-        try await makeChannel(
-            logging: logging
-        ).executeThenClose { inbound, outbound in
-            let outboundWriter = self.outboundWriter
-            try await withThrowingTaskGroup(of: Void.self) { group in
-                group.addTask {
-                    // When the inbound stream ends — via a graceful EOF, a read error, or
-                    // cancellation — tear the connection down. This finishes any in-flight
-                    // command response streams (and any greeting waiter) and closes the
-                    // outbound queue so the outbound runner stops, instead of leaving
-                    // callers parked forever.
-                    defer { self.close() }
-                    // Get the greeting:
-                    var iterator = inbound.makeAsyncIterator()
-                    do {
-                        guard
-                            let response = try await iterator.next()
-                        else { return }
-                        guard
-                            case .untagged(.conditionalState(let s)) = response
-                        else {
-                            throw ServerSendOtherResponseBeforeGreeting(response: response)
-                        }
-                        self.didReceive(greeting: Greeting(status: s))
+        do {
+            try await makeChannel(
+                logging: logging
+            ).executeThenClose { inbound, outbound in
+                let outboundWriter = self.outboundWriter
+                try await withThrowingTaskGroup(of: Void.self) { group in
+                    group.addTask {
+                        await self.runInbound(inbound)
                     }
-                    // Loop through the remaining:
-                    do {
-                        while let response = try await iterator.next() {
-                            switch response {
-                            case .tagged(let tagged):
-                                try self.commandDidComplete(response: tagged)
-                            default:
-                                self.didReceive(response: response)
-                            }
+                    group.addTask {
+                        do {
+                            try await outboundWriter.run(outbound: outbound)
+                        } catch {
+                            // Tear the connection down: the channel is gone, so anything the
+                            // caller does next must fail with this error rather than park.
+                            self.close(reason: .failed(error))
+                            throw error
                         }
-                    } catch {
-                        self.configuration.logger.debug(
-                            "Ignoring inbound read error; closing connection",
-                            metadata: ["error": "\(error)"]
-                        )
-                        // Ignore any read errors; the `defer { self.close() }` above tears
-                        // the connection down. The write closures (if any) will observe
-                        // the errors from the connection being closed.
                     }
-                }
-                group.addTask {
-                    try await outboundWriter.run(outbound: outbound)
-                }
 
-                try await group.waitForAll()
+                    try await group.waitForAll()
+                }
             }
-            close()
+            close(reason: .closed)
+        } catch {
+            // Ensure any awaiting caller is unblocked no matter how this exits — in
+            // particular a task parked on `greeting` when the channel fails to open — and
+            // that it sees _why_ the connection went away.
+            close(reason: .failed(error))
+            throw error
+        }
+    }
+
+    /// Reads the greeting and then every subsequent response, until the stream ends.
+    ///
+    /// When the inbound stream ends — via a graceful EOF, a read error, or cancellation — this
+    /// tears the connection down. That finishes any in-flight command response streams (and any
+    /// greeting waiter) and closes the outbound queue so the outbound runner stops, instead of
+    /// leaving callers parked forever.
+    private func runInbound(
+        _ inbound: NIOAsyncChannelInboundStream<Response>
+    ) async {
+        do {
+            var iterator = inbound.makeAsyncIterator()
+            // Get the greeting:
+            guard
+                let first = try await iterator.next()
+            else {
+                // EOF before the greeting.
+                close(reason: .closed)
+                return
+            }
+            guard
+                case .untagged(.conditionalState(let s)) = first
+            else {
+                throw ServerSendOtherResponseBeforeGreeting(response: first)
+            }
+            didReceive(greeting: Greeting(status: s))
+            // Loop through the remaining:
+            while let response = try await iterator.next() {
+                switch response {
+                case .tagged(let tagged):
+                    try commandDidComplete(response: tagged)
+                default:
+                    didReceive(response: response)
+                }
+            }
+            close(reason: .closed)
+        } catch {
+            configuration.logger.debug(
+                "Closing connection after inbound error",
+                metadata: ["error": "\(error)"]
+            )
+            // The error is not rethrown: `close(reason:)` hands it to the caller instead, as
+            // the error of every response stream that was still running, and of every
+            // subsequent interaction with this connection.
+            close(reason: .failed(error))
+        }
+    }
+
+    /// Why the connection was closed.
+    ///
+    /// The reason determines what anything still using — or subsequently using — this
+    /// connection fails with.
+    enum CloseReason {
+        /// The connection was closed in an orderly fashion: the caller is done with it, or the
+        /// server sent EOF.
+        case closed
+        /// The connection failed with this error.
+        case failed(any Swift.Error)
+
+        var error: (any Swift.Error)? {
+            switch self {
+            case .closed: nil
+            case .failed(let error): error
+            }
         }
     }
 
     /// Mark the state as closed:
-    private func close() {
+    ///
+    /// Only the first call has an effect; a connection that already failed keeps the error it
+    /// failed with.
+    private func close(reason: CloseReason) {
         state.withLock { state in
-            state.markAsClosed()
+            state.markAsClosed(reason: reason)
         }.run(logger: configuration.logger)
         outboundWriter.close()
     }
@@ -418,8 +584,6 @@ extension ClientBootstrap {
 }
 
 extension IMAPConnection {
-    private struct ConnectionClosedBeforeBodyCompleted: Swift.Error {}
-
     /// An error indicating the server sent an unexpected response before the greeting.
     public struct ServerSendOtherResponseBeforeGreeting: Swift.Error {
         public var response: Response
@@ -464,6 +628,7 @@ extension IMAPConnection.ResponseStream.AsyncIterator: Sendable {}
 extension IMAPConnection.ResponseStream {
     /// Iterates over all responses and returns the command’s `TaggedResponse` on completion.
     public func forEach(
+        isolation: isolated (any Actor)? = #isolation,
         _ closure: (AsyncIterator.Element) async throws -> Void
     ) async throws -> TaggedResponse {
         var t: TaggedResponse?
@@ -483,7 +648,9 @@ extension IMAPConnection.ResponseStream {
     }
 
     /// Waits for the command to complete, discarding intermediate responses.
-    public func waitForCompletion() async throws -> TaggedResponse {
+    public func waitForCompletion(
+        isolation: isolated (any Actor)? = #isolation
+    ) async throws -> TaggedResponse {
         try await forEach { _ in }
     }
 }
@@ -491,10 +658,10 @@ extension IMAPConnection.ResponseStream {
 // MARK: - Mark as Closed
 
 extension IMAPConnection.State {
-    mutating func markAsClosed() -> CloseAction {
+    mutating func markAsClosed(reason: IMAPConnection.CloseReason) -> CloseAction {
         return CloseAction(
-            perCommandResponseStreams: perCommandResponseStreams.markAsClosed(),
-            greeting: greeting.markAsClosed()
+            perCommandResponseStreams: perCommandResponseStreams.markAsClosed(reason: reason),
+            greeting: greeting.markAsClosed(reason: reason)
         )
     }
 
@@ -514,7 +681,8 @@ extension IMAPConnection.State {
 extension IMAPConnection {
     enum PerCommandResponseStream {
         case streams(Tag, [Tag: AsyncThrowingStream<Response, any Swift.Error>.Continuation])
-        case connectionClosed
+        /// The connection is gone. Anything that interacts with it fails with this error.
+        case connectionClosed(any Swift.Error)
 
         init() {
             self = .streams(Tag.first, [:])
@@ -538,13 +706,13 @@ extension IMAPConnection.PerCommandResponseStream {
             // `continuations`, so the dictionary is uniquely referenced when we insert
             // into it below and no copy-on-write copy is made. We immediately restore
             // the real `.streams` state.
-            self = .connectionClosed
+            self = .connectionClosed(ConnectionClosed())
             continuations[tag] = continuation
             self = .streams(nextTag, continuations)
             return .success((tag, stream))
 
-        case .connectionClosed:
-            return .failure(ConnectionClosed())
+        case .connectionClosed(let error):
+            return .failure(error)
         }
     }
 
@@ -589,28 +757,34 @@ extension IMAPConnection.PerCommandResponseStream {
         }
     }
 
-    mutating func markAsClosed() -> CloseAction {
-        let action: CloseAction =
-            switch self {
-            case .streams(_, let c): .finishContinuations(c)
-            case .connectionClosed: .none
-            }
-        self = .connectionClosed
-        return action
+    mutating func markAsClosed(reason: IMAPConnection.CloseReason) -> CloseAction {
+        // Keep the error the connection first failed with: a later, orderly close must not
+        // overwrite the reason the caller is waiting to hear about.
+        switch self {
+        case .streams(_, let continuations):
+            let error = reason.error ?? ConnectionClosed()
+            self = .connectionClosed(error)
+            return .finishContinuations(continuations, error)
+        case .connectionClosed:
+            return .none
+        }
     }
 
     enum CloseAction {
         case none
-        case finishContinuations([IMAPConnection.Tag: AsyncThrowingStream<Response, any Swift.Error>.Continuation])
+        case finishContinuations(
+            [IMAPConnection.Tag: AsyncThrowingStream<Response, any Swift.Error>.Continuation],
+            any Swift.Error
+        )
 
         func run(logger: Logger) {
             switch self {
             case .none:
                 break
-            case .finishContinuations(let continuations):
+            case .finishContinuations(let continuations, let error):
                 for (tag, c) in continuations {
                     logger.debug("Command was still running when connection was closed", metadata: ["tag": "\(tag)"])
-                    c.yield(with: .failure(ConnectionClosed()))
+                    c.yield(with: .failure(error))
                     c.finish()
                 }
             }
@@ -658,20 +832,23 @@ extension IMAPConnection.State {
     enum GreetingState: Sendable {
         case greeting(IMAPConnection.Greeting)
         case waiting([CheckedContinuation<IMAPConnection.Greeting, any Swift.Error>])
-        case connectionClosed
+        /// The connection is gone. Anything waiting for the greeting fails with this error.
+        case connectionClosed(any Swift.Error)
     }
 }
 
 extension IMAPConnection.State.GreetingState {
     mutating func store(_ new: IMAPConnection.Greeting) -> StoreAction {
-        let action: StoreAction =
-            switch self {
-            case .greeting: .none
-            case .waiting(let waiting): .resume(waiting, new)
-            case .connectionClosed: .none
-            }
-        self = .greeting(new)
-        return action
+        switch self {
+        case .greeting:
+            return .none
+        case .waiting(let waiting):
+            self = .greeting(new)
+            return .resume(waiting, new)
+        case .connectionClosed:
+            // The connection is already gone: keep the failure, don't resurrect the state.
+            return .none
+        }
     }
 
     enum StoreAction: Sendable {
@@ -695,15 +872,19 @@ extension IMAPConnection.State.GreetingState {
         }
     }
 
-    mutating func markAsClosed() -> StoreAction {
-        let action: StoreAction =
-            switch self {
-            case .greeting: .none
-            case .waiting(let w): .fail(w, ConnectionClosedWhileWaitingForGreeting())
-            case .connectionClosed: .none
-            }
-        self = .connectionClosed
-        return action
+    mutating func markAsClosed(reason: IMAPConnection.CloseReason) -> StoreAction {
+        switch self {
+        case .greeting:
+            // The greeting arrived; nothing is waiting and later commands report the closure.
+            return .none
+        case .waiting(let waiting):
+            let error = reason.error ?? ConnectionClosedWhileWaitingForGreeting()
+            self = .connectionClosed(error)
+            return .fail(waiting, error)
+        case .connectionClosed:
+            // Keep the error the connection first failed with.
+            return .none
+        }
     }
 
     mutating func get(
@@ -716,8 +897,8 @@ extension IMAPConnection.State.GreetingState {
             w.append(continuation)
             self = .waiting(w)
             return .none
-        case .connectionClosed:
-            return .fail(continuation, ConnectionClosedWhileWaitingForGreeting())
+        case .connectionClosed(let error):
+            return .fail(continuation, error)
         }
     }
 

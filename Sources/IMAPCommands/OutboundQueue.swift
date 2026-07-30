@@ -308,6 +308,7 @@ extension OutboundQueue {
     }
 
     func withAppendWriter<R>(
+        isolation: isolated (any Actor)? = #isolation,
         _ closure: (consuming AppendQueueWriter) async throws -> R
     ) async throws -> R {
         // Try to create a writer:

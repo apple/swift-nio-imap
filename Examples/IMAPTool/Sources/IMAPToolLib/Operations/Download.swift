@@ -172,7 +172,7 @@ extension DownloadDirectory.Helper {
         )
 
         let writer = try makeWriter(uid: uid)
-        let byteCount = try await connection.send(command) { tag, responses -> Int? in
+        let byteCount = try await connection.send(command, isolation: #isolation) { tag, responses -> Int? in
             writeStatus("Did send \(tag) UID FETCH \(uid) for complete message")
 
             var state = FetchState.waiting

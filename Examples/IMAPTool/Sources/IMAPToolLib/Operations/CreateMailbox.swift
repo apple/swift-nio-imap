@@ -61,7 +61,7 @@ func createAndList<C: ConnectionProtocol>(
         parameters = []
     }
 
-    let createText = try await connection.send(.create(mailbox, parameters)) { tag, responses in
+    let createText = try await connection.send(.create(mailbox, parameters), isolation: #isolation) { tag, responses in
         writeStatus("Did send CREATE mailbox '\(mailbox)' with tag \(tag)")
         return try await responses.waitForCompletion()
     }.getOK()
