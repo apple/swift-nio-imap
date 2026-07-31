@@ -41,7 +41,7 @@ actor CompletionGate {
         if let resolved { return resolved }
         // Waiting is cancellation-aware so that a caller which is itself timed out (e.g.
         // by swift-testing's `.timeLimit`) can never be left parked here forever, which
-        // would hang the whole test process rather than fail a single test.
+        // would stall the whole test process rather than fail a single test.
         return await withTaskCancellationHandler {
             await withCheckedContinuation { c in
                 // `onCancel` may have resolved the gate before the continuation was
