@@ -14,6 +14,7 @@
 
 import NIO
 @_spi(NIOIMAPInternal) @testable import NIOIMAPCore
+import OrderedCollections
 import Testing
 
 @Suite("BodyStructure")
@@ -2052,7 +2053,7 @@ private struct BodyStructureTests {
         fixture.checkEncoding()
     }
 
-    #if swift(>=6.2)
+    #if swift(>=6.2) && !os(iOS) && !os(watchOS) && !os(tvOS) && !os(visionOS)
     @Test("subscript fatal error for invalid part") func subscriptFatalErrorForInvalidPart() async {
         await #expect(
             processExitsWith: ExitTest.Condition.failure,

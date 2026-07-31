@@ -14,6 +14,7 @@
 
 import Foundation
 @testable import NIOIMAP
+import OrderedCollections
 import Testing
 
 @Suite struct IdleStateMachineTests {

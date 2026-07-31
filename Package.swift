@@ -27,6 +27,9 @@ let package = Package(
             name: "NIOIMAP",
             dependencies: [
                 .target(name: "NIOIMAPCore")
+            ],
+            swiftSettings: [
+                .enableUpcomingFeature("MemberImportVisibility")
             ]
         ),
         .testTarget(
@@ -36,6 +39,9 @@ let package = Package(
                 .target(name: "NIOIMAPCore"),
                 .product(name: "NIO", package: "swift-nio"),
                 .product(name: "NIOTestUtils", package: "swift-nio"),
+            ],
+            swiftSettings: [
+                .enableUpcomingFeature("MemberImportVisibility")
             ]
         ),
 
@@ -45,6 +51,9 @@ let package = Package(
                 .product(name: "NIO", package: "swift-nio"),
                 .product(name: "SE0270_RangeSet", package: "swift-se0270-range-set"),
                 .product(name: "OrderedCollections", package: "swift-collections"),
+            ],
+            swiftSettings: [
+                .enableUpcomingFeature("MemberImportVisibility")
             ]
         ),
         .testTarget(
@@ -53,6 +62,10 @@ let package = Package(
                 .target(name: "NIOIMAPCore"),
                 .product(name: "NIO", package: "swift-nio"),
                 .product(name: "NIOTestUtils", package: "swift-nio"),
+                .product(name: "OrderedCollections", package: "swift-collections"),
+            ],
+            swiftSettings: [
+                .enableUpcomingFeature("MemberImportVisibility")
             ]
         ),
 
