@@ -14,7 +14,6 @@ let package = Package(
         .library(name: "IMAPCommands", targets: ["IMAPCommands"]),
     ],
     dependencies: [
-        .package(url: "https://github.com/apple/swift-async-algorithms", from: "1.1.0"),
         .package(url: "https://github.com/apple/swift-collections", "1.4.0"..<"2.0.0"),
         .package(url: "https://github.com/apple/swift-nio-extras", from: "1.0.0"),
         .package(url: "https://github.com/apple/swift-nio-ssl", from: "2.24.0"),
@@ -76,7 +75,6 @@ let package = Package(
                 .product(name: "NIO", package: "swift-nio"),
                 .product(name: "NIOSSL", package: "swift-nio-ssl"),
                 .product(name: "NIOExtras", package: "swift-nio-extras"),
-                .product(name: "AsyncAlgorithms", package: "swift-async-algorithms"),
                 .product(name: "Logging", package: "swift-log"),
             ]
         ),

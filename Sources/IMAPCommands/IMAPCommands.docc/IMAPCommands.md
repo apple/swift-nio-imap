@@ -46,6 +46,7 @@ The package is layered so you can work at whichever level suits your needs:
 
 - ``CompletedCommand``
 - ``SuccessfulCommand``
+- ``_IMAPClosureResult``
 
 ### Debugging
 

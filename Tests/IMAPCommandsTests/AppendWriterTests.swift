@@ -278,8 +278,8 @@ enum AppendWriterTests {
     ) async -> (parts: [IMAPClientHandler.OutboundIn], error: (any Swift.Error)?, didComplete: Bool) {
         let (outbound, sink) = NIOAsyncChannelOutboundWriter<IMAPClientHandler.OutboundIn>.makeTestingWriter()
         let queue = OutboundQueue()
-        let parts = Mutex<[IMAPClientHandler.OutboundIn]>([])
-        let thrownError = Mutex<(any Swift.Error)?>(nil)
+        let parts = LockedBox<[IMAPClientHandler.OutboundIn]>([])
+        let thrownError = LockedBox<(any Swift.Error)?>(nil)
         var didCompleteCommand = false
 
         await withTaskGroup(of: Void.self) { group in

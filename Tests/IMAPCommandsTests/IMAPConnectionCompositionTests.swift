@@ -15,7 +15,6 @@
 import IMAPCommands
 import NIO
 import NIOIMAP
-import Synchronization
 import Testing
 
 /// Pins the composability contract of `IMAPConnection`'s closure-based API: none of the
@@ -155,6 +154,31 @@ struct IMAPConnectionCompositionTests {
         #expect(steps.isEmpty)
     }
 
+    // A closure may also _return_ non-`Sendable` state: it runs in the caller's isolation
+    // domain, so what it returns never leaves that domain. Swift 6.0 and 6.1 reject that and
+    // require the result to be `Sendable` — see ``_IMAPClosureResult`` — which is why this one
+    // is compiled conditionally.
+    #if compiler(>=6.2)
+    /// Closures return their results into the caller's isolation domain, so a non-`Sendable`
+    /// result is fine.
+    @Test(.timeLimit(.minutes(1)))
+    func closuresCanReturnNonSendableResults() async throws {
+        await #expect(throws: (any Swift.Error).self) {
+            let recorder = try await IMAPConnection.withConnection(
+                configuration: Self.unreachableConfiguration
+            ) { _, connection in
+                try await connection.send(.noop) { _, responses in
+                    let recorder = Recorder()
+                    _ = try await responses.waitForCompletion()
+                    return recorder
+                }
+            }
+            // Never reached: the connection always fails.
+            #expect(recorder.lines.isEmpty)
+        }
+    }
+    #endif
+
     /// And from a custom actor, where `#isolation` resolves to that actor instance.
     @Test(.timeLimit(.minutes(1)))
     func actorIsolatedClosuresCanUseActorState() async throws {
@@ -209,7 +233,7 @@ struct IMAPConnectionCompositionTests {
     func appendBodyCanReadResponsesWhileWriting() async throws {
         // What crosses into a child task still has to be `Sendable` — only the closures the
         // connection itself calls are relieved of that.
-        let responseCount = Mutex(0)
+        let responseCount = LockedBox(0)
 
         await #expect(throws: (any Swift.Error).self) {
             try await IMAPConnection.withConnection(

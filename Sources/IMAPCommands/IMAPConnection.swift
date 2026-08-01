@@ -12,7 +12,6 @@
 //
 //===----------------------------------------------------------------------===//
 
-import AsyncAlgorithms
 import Logging
 import NIO
 import NIOIMAP
@@ -65,7 +64,7 @@ public final class IMAPConnection: Sendable {
     ///   ``ResponseStream``s and ``send(_:isolation:_:)`` calls fail with the underlying error.
     ///   A `body` that neither returns nor touches the connection again keeps
     ///   `withConnection(configuration:isolation:_:)` from returning.
-    public static func withConnection<Result>(
+    public static func withConnection<Result: _IMAPClosureResult>(
         configuration: Configuration,
         isolation: isolated (any Actor)? = #isolation,
         _ body: (Greeting, IMAPConnection) async throws -> Result
@@ -125,7 +124,7 @@ public final class IMAPConnection: Sendable {
     ///   (which `waitForCompletion()` waits for) is specific to this command. This is
     ///   inherent to the protocol and how pipelining works; when you send commands
     ///   concurrently, each handler must inspect only the responses it actually cares about.
-    public func send<Result>(
+    public func send<Result: _IMAPClosureResult>(
         _ command: Command,
         isolation: isolated (any Actor)? = #isolation,
         _ handler: (Tag, ResponseStream) async throws -> Result
@@ -152,7 +151,7 @@ public final class IMAPConnection: Sendable {
     /// - Important: The command’s `TaggedResponse` only arrives _after_ `DONE`, so the handler
     ///   must not wait for the command to complete — use the stream to observe untagged
     ///   responses and return once you want to stop idling.
-    public func sendIdle<Result>(
+    public func sendIdle<Result: _IMAPClosureResult>(
         isolation: isolated (any Actor)? = #isolation,
         _ handler: (Tag, ResponseStream) async throws -> Result
     ) async throws -> Result {
@@ -185,7 +184,7 @@ public final class IMAPConnection: Sendable {
     /// Sends an `AUTHENTICATE` command to the server.
     ///
     /// Use the ``ContinuationWriter`` to respond to authentication challenges.
-    public func sendAuthenticate<Result>(
+    public func sendAuthenticate<Result: _IMAPClosureResult>(
         mechanism: AuthenticationMechanism,
         initialResponse: InitialResponse?,
         isolation: isolated (any Actor)? = #isolation,
@@ -286,7 +285,7 @@ public final class IMAPConnection: Sendable {
     ///     command's responses. It also receives the ``Tag`` that identifies this command in the
     ///     `TaggedResponse` completing it.
     /// - Returns: The value `body` returns.
-    public func append<Result>(
+    public func append<Result: _IMAPClosureResult>(
         to mailbox: MailboxName,
         isolation: isolated (any Actor)? = #isolation,
         _ body: (Tag, ResponseStream, inout AppendWriter) async throws -> Result

@@ -13,6 +13,29 @@
 //===----------------------------------------------------------------------===//
 
 import NIO
+import Synchronization
+
+// MARK: - Shared state
+
+/// A `Sendable` reference wrapper around a `Mutex`.
+///
+/// A `Mutex` is non-copyable, so a closure that uses one captures the *enclosing scope's*
+/// binding by reference. Swift 6.4 accepts that for the `sending` closures
+/// `TaskGroup.addTask` takes, but earlier compilers reject it as a potential data race —
+/// even though the mutex is what makes the access safe in the first place. Boxing the mutex
+/// in a class gives such a closure a copyable reference to capture instead.
+final class LockedBox<Value: Sendable>: Sendable {
+    private let storage: Mutex<Value>
+
+    init(_ initialValue: Value) {
+        self.storage = Mutex(initialValue)
+    }
+
+    @discardableResult
+    func withLock<Result>(_ body: (inout Value) throws -> Result) rethrows -> Result {
+        try self.storage.withLock { try body(&$0) }
+    }
+}
 
 // MARK: - Timeout support
 
