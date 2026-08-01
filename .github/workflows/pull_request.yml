@@ -41,7 +41,13 @@ jobs:
     uses: apple/swift-nio/.github/workflows/macos_tests.yml@main
     with:
       runner_pool: general
-      build_scheme: swift-nio-imap
+      # Xcode auto-generates the schemes for this package (`.swiftpm` is not checked in).
+      # A package with two or more products gets one scheme per product plus an aggregate
+      # `<package>-Package` scheme; a package with a single product gets just one scheme,
+      # named `<package>`. Since this package vends both `NIOIMAP` and `IMAPCommands`, the
+      # aggregate scheme is `swift-nio-imap-Package`. Verify with `xcodebuild -list` in a
+      # clean checkout if the product list ever changes.
+      build_scheme: swift-nio-imap-Package
       swift_6_1_build_arguments_override: "-Xswiftc -Xfrontend -Xswiftc -require-explicit-sendable -Xswiftc -warnings-as-errors"
       swift_6_2_build_arguments_override: "-Xswiftc -Xfrontend -Xswiftc -require-explicit-sendable -Xswiftc -warnings-as-errors"
       swift_6_3_build_arguments_override: "-Xswiftc -Xfrontend -Xswiftc -require-explicit-sendable -Xswiftc -warnings-as-errors"
