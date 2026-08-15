@@ -166,7 +166,7 @@ Then depend on the module for the interface you chose:
 )
 ```
 
-The package requires Swift 6, supports macOS 15 and iOS 18 (or later), and is built on SwiftNIO 2.x.
+The package requires Swift 6.2, supports macOS 15 and iOS 18 (or later), and is built on SwiftNIO 2.x.
 
 ## Examples
 
