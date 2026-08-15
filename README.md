@@ -52,7 +52,7 @@ try await IMAPConnection.withConnection(configuration: configuration) { greeting
     }
 
     // Select a mailbox and inspect the untagged responses it produces.
-    try await connection.send(.select(MailboxName("INBOX"))) { tag, responses in
+    try await connection.send(.select(.inbox)) { tag, responses in
         try await responses.forEach { response in
             print(response)
         }
@@ -126,7 +126,7 @@ The client commands above are represented as:
 
 ```swift
 CommandStreamPart.tagged(TaggedCommand(tag: "a001", command: .login(username: "mrc", password: "secret")))
-CommandStreamPart.tagged(TaggedCommand(tag: "a002", command: .select(MailboxName("inbox"))))
+CommandStreamPart.tagged(TaggedCommand(tag: "a002", command: .select(.inbox)))
 ```
 
 And the server responses as:

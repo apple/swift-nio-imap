@@ -76,7 +76,7 @@ struct QuotaCommandTests {
     @Test(
         "parse GETQUOTAROOT",
         arguments: [
-            ParseFixture.getQuotaRoot("GETQUOTAROOT INBOX", expected: .success(.getQuotaRoot(MailboxName("INBOX")))),
+            ParseFixture.getQuotaRoot("GETQUOTAROOT INBOX", expected: .success(.getQuotaRoot(.inbox))),
             ParseFixture.getQuotaRoot("GETQUOTAROOT Other", expected: .success(.getQuotaRoot(MailboxName("Other")))),
             ParseFixture.getQuotaRoot("GETQUOTAROOT", expected: .failure),
         ]
