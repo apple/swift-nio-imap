@@ -32,6 +32,9 @@ let package = Package(
             dependencies: [
                 .target(name: "NIOIMAPCore")
             ],
+            // The documentation is built out-of-band, not by SwiftPM: excluding the catalog
+            // keeps it out of the build product instead of being copied in as a resource.
+            exclude: ["NIOIMAP.docc"],
             swiftSettings: [
                 .enableUpcomingFeature("MemberImportVisibility")
             ]
@@ -56,6 +59,7 @@ let package = Package(
                 .product(name: "SE0270_RangeSet", package: "swift-se0270-range-set"),
                 .product(name: "OrderedCollections", package: "swift-collections"),
             ],
+            exclude: ["NIOIMAPCore.docc"],
             swiftSettings: [
                 .enableUpcomingFeature("MemberImportVisibility")
             ]
@@ -81,7 +85,8 @@ let package = Package(
                 .product(name: "NIOSSL", package: "swift-nio-ssl"),
                 .product(name: "NIOExtras", package: "swift-nio-extras"),
                 .product(name: "Logging", package: "swift-log"),
-            ]
+            ],
+            exclude: ["IMAPCommands.docc"]
         ),
         .testTarget(
             name: "IMAPCommandsTests",
