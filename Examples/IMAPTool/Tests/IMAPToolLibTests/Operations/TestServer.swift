@@ -13,6 +13,7 @@
 //===----------------------------------------------------------------------===//
 
 import Foundation
+import Logging
 import NIO
 import NIOIMAP
 import Testing
@@ -595,17 +596,21 @@ private func runSingleConnectionTestServer(
 private func makeServerChannel(
     path: UnixDomainSocketPath,
 ) async throws -> NIOAsyncChannel<NIOAsyncChannel<CommandStreamPart, Response>, Never> {
-    try await ServerBootstrap(
+    // The debug handlers used to be labelled "S" to tell the server's traffic apart from the
+    // client's. They log through swift-log now, so that label is logger metadata instead.
+    var logger = Logger.current
+    logger[metadataKey: "imap.side"] = "S"
+    return try await ServerBootstrap(
         group: MultiThreadedEventLoopGroup.sharedEventLoopGroup
     ).bind(
         unixDomainSocketPath: path.path,
         cleanupExistingSocketFile: true,
         serverBackPressureStrategy: nil
-    ) { childChannel in
+    ) { [logger] childChannel in
         childChannel.eventLoop.makeCompletedFuture {
             try childChannel.pipeline.syncOperations.addHandler(ByteToMessageHandler(FrameDecoder()))
-            try childChannel.pipeline.syncOperations.addHandler(makeInboundDebugHandler(name: "S"))
-            try childChannel.pipeline.syncOperations.addHandler(makeOutboundDebugHandler(name: "S"))
+            try childChannel.pipeline.syncOperations.addHandler(makeInboundDebugHandler(logger: logger))
+            try childChannel.pipeline.syncOperations.addHandler(makeOutboundDebugHandler(logger: logger))
             try childChannel.pipeline.syncOperations.addHandler(IMAPServerHandler())
             return try NIOAsyncChannel<CommandStreamPart, Response>(
                 wrappingChannelSynchronously: childChannel
