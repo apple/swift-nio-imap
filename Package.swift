@@ -24,7 +24,6 @@ let package = Package(
         .package(url: "https://github.com/apple/swift-nio", from: "2.64.0"),
         // 1.14.0 introduced the task-local `withLogger` / `Logger.current` APIs.
         .package(url: "https://github.com/apple/swift-log", from: "1.14.0"),
-        .package(url: "https://github.com/apple/swift-se0270-range-set.git", from: "1.0.1"),
     ],
     targets: [
         .target(
@@ -56,7 +55,6 @@ let package = Package(
             name: "NIOIMAPCore",
             dependencies: [
                 .product(name: "NIO", package: "swift-nio"),
-                .product(name: "SE0270_RangeSet", package: "swift-se0270-range-set"),
                 .product(name: "OrderedCollections", package: "swift-collections"),
             ],
             exclude: ["NIOIMAPCore.docc"],
