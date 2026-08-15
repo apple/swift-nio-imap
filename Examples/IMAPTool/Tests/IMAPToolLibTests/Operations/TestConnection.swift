@@ -84,12 +84,12 @@ final actor TestConnection: ConnectionProtocol {
     private var currentContinuations:
         [IMAPConnection.Tag: AsyncThrowingStream<Response, any Swift.Error>.Continuation] = [:]
 
-    /// Isolated to the caller — like `IMAPConnection.send(_:isolation:_:)` — so that the
-    /// handler runs in the caller's isolation domain and not on this actor.
-    func send<Result>(
+    /// Runs in the caller's isolation domain — like `IMAPConnection.send(_:_:)` — rather than on
+    /// this actor, so that the handler does too. `nonisolated` is explicit because an actor's
+    /// methods are otherwise isolated to `self`.
+    nonisolated(nonsending) func send<Result>(
         _ command: NIOIMAPCore.Command,
-        isolation: isolated (any Actor)? = #isolation,
-        _ handler: (IMAPConnection.Tag, IMAPConnection.ResponseStream) async throws -> Result
+        _ handler: nonisolated(nonsending) (IMAPConnection.Tag, IMAPConnection.ResponseStream) async throws -> Result
     ) async throws -> Result {
         let (tag, responses) = try await beginCommand(command)
         let r = try await handler(tag, responses)

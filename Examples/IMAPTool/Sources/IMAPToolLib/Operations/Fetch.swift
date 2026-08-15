@@ -239,7 +239,7 @@ func fetch<C: ConnectionProtocol, Result: Sendable>(
         attributes,
         modifiers
     )
-    return try await connection.send(command, isolation: #isolation) { tag, responses -> Result in
+    return try await connection.send(command) { tag, responses -> Result in
         writeStatus("Did send \(tag) \(command)")
         var result = _result
         for try await response in responses {

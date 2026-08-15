@@ -60,8 +60,7 @@ private func moveMessagesUsingMoveCommand<C: ConnectionProtocol>(
     to destinationMailbox: MailboxName
 ) async throws {
     let text = try await connection.send(
-        .uidMove(.set(uids), destinationMailbox),
-        isolation: #isolation
+        .uidMove(.set(uids), destinationMailbox)
     ) { tag, responses in
         writeStatus("Did send UID MOVE \(uids.set.count) message(s) to '\(destinationMailbox)' with tag \(tag)")
         return try await responses.waitForCompletion()
@@ -87,8 +86,7 @@ private func moveMessagesUsingCopyCommand<C: ConnectionProtocol>(
 ) async throws {
     // UID COPY
     let copyText = try await connection.send(
-        .uidCopy(.set(uids), destinationMailbox),
-        isolation: #isolation
+        .uidCopy(.set(uids), destinationMailbox)
     ) { tag, responses in
         writeStatus("Did send UID COPY \(uids.set.count) message(s) to '\(destinationMailbox)' with tag \(tag)")
         return try await responses.waitForCompletion()
@@ -97,8 +95,7 @@ private func moveMessagesUsingCopyCommand<C: ConnectionProtocol>(
 
     // UID STORE
     let storeText = try await connection.send(
-        .uidStore(.set(uids), [], .flags(.add(silent: true, list: [.deleted]))),
-        isolation: #isolation
+        .uidStore(.set(uids), [], .flags(.add(silent: true, list: [.deleted])))
     ) { tag, responses in
         writeStatus("Did send UID STORE \\Deleted with tag \(tag)")
         return try await responses.waitForCompletion()
@@ -106,7 +103,7 @@ private func moveMessagesUsingCopyCommand<C: ConnectionProtocol>(
     writeStatus("Did mark message(s) as deleted: \(storeText)")
 
     // EXPUNGE
-    let expungeText = try await connection.send(.expunge, isolation: #isolation) { tag, responses in
+    let expungeText = try await connection.send(.expunge) { tag, responses in
         writeStatus("Did send EXPUNGE with tag \(tag)")
         return try await responses.waitForCompletion()
     }.getOK()

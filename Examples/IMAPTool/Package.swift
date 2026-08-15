@@ -35,6 +35,11 @@ let package = Package(
                 .product(name: "NIOConcurrencyHelpers", package: "swift-nio"),
                 .product(name: "OrderedCollections", package: "swift-collections"),
                 .product(name: "DequeModule", package: "swift-collections"),
+            ],
+            swiftSettings: [
+                // `IMAPCommands`' closure-taking APIs are caller-isolated, and so are this
+                // library's operations that wrap them.
+                .enableUpcomingFeature("NonisolatedNonsendingByDefault")
             ]
         ),
         .executableTarget(
@@ -42,6 +47,9 @@ let package = Package(
             dependencies: [
                 .target(name: "IMAPToolLib"),
                 .product(name: "ArgumentParser", package: "swift-argument-parser"),
+            ],
+            swiftSettings: [
+                .enableUpcomingFeature("NonisolatedNonsendingByDefault")
             ]
         ),
         .testTarget(
@@ -53,6 +61,9 @@ let package = Package(
                 .product(name: "NIO", package: "swift-nio"),
                 .product(name: "Numerics", package: "swift-numerics"),
                 .product(name: "SystemPackage", package: "swift-system"),
+            ],
+            swiftSettings: [
+                .enableUpcomingFeature("NonisolatedNonsendingByDefault")
             ]
         ),
     ]

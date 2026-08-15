@@ -269,13 +269,23 @@ extension MessageToAppend: AsyncSequence {
         }
 
         mutating func next() async throws -> NIOIMAP.AppendCommand? {
+            try await next(isolation: #isolation)
+        }
+
+        /// Both `next` overloads are implemented, and the isolation is forwarded to the wrapped
+        /// `AsyncStream` iterator, because neither iterator is `Sendable`: falling back to
+        /// `AsyncIteratorProtocol`'s default implementation of `next(isolation:)` — which calls
+        /// the `@concurrent` `next()` — would send them out of the caller's isolation domain.
+        mutating func next(
+            isolation actor: isolated (any Actor)?
+        ) async throws -> NIOIMAP.AppendCommand? {
             switch state {
             case .beginMessage(let message):
                 state = .messageBytes(message.data.makeAsyncIterator())
                 return .beginMessage(message: AppendMessage(message))
             case .messageBytes(var data):
                 guard
-                    let bytes = await data.next()
+                    let bytes = await data.next(isolation: actor)
                 else {
                     state = .endMessage
                     return .endMessage

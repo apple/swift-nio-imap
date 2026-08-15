@@ -86,7 +86,14 @@ let package = Package(
                 .product(name: "NIOExtras", package: "swift-nio-extras"),
                 .product(name: "Logging", package: "swift-log"),
             ],
-            exclude: ["IMAPCommands.docc"]
+            exclude: ["IMAPCommands.docc"],
+            swiftSettings: [
+                // The closure-taking APIs are caller-isolated: their closures need to be able to
+                // capture, mutate and return non-`Sendable` state belonging to whatever actor
+                // called them. That requires both the methods and the closure types to be
+                // `nonisolated(nonsending)`, which is what this makes the default.
+                .enableUpcomingFeature("NonisolatedNonsendingByDefault")
+            ]
         ),
         .testTarget(
             name: "IMAPCommandsTests",
@@ -94,6 +101,9 @@ let package = Package(
                 .target(name: "IMAPCommands"),
                 .target(name: "NIOIMAP"),
                 .product(name: "Logging", package: "swift-log"),
+            ],
+            swiftSettings: [
+                .enableUpcomingFeature("NonisolatedNonsendingByDefault")
             ]
         ),
     ]

@@ -31,17 +31,16 @@ import NIOIMAP
 /// simple "send a `Command`, consume the `IMAPConnection.ResponseStream`" shape, so adding them
 /// here would complicate the mock surface used by tests.
 ///
-/// ## The `isolation` parameter
+/// ## Closure isolation
 ///
-/// The requirement mirrors `IMAPConnection.send(_:isolation:_:)`, so that the handler needs to
-/// be neither `@Sendable` nor `@escaping` and runs in the caller's isolation domain. A protocol
-/// requirement can't carry a default argument, so — unlike calls on the concrete type — generic
-/// code has to pass `isolation: #isolation` explicitly.
+/// The requirement mirrors `IMAPConnection.send(_:_:)`: the handler is
+/// `nonisolated(nonsending)`, so it needs to be neither `@Sendable` nor `@escaping` and runs in
+/// the caller's isolation domain. Unlike an `isolated (any Actor)?` parameter — which a protocol
+/// requirement cannot give a default argument — this needs nothing at the call site.
 protocol ConnectionProtocol: Sendable {
     func send<Result>(
         _ command: Command,
-        isolation: isolated (any Actor)?,
-        _ handler: (IMAPConnection.Tag, IMAPConnection.ResponseStream) async throws -> Result
+        _ handler: nonisolated(nonsending) (IMAPConnection.Tag, IMAPConnection.ResponseStream) async throws -> Result
     ) async throws -> Result
 }
 

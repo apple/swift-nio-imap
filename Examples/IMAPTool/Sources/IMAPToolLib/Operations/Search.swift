@@ -287,8 +287,7 @@ private func sendUIDSearch<C: ConnectionProtocol>(
             key: searchKey,
             charset: nil,
             returnOptions: returnOptions
-        ),
-        isolation: #isolation
+        )
     ) { tag, responses in
         var didFind = false
         var uids: UIDSet?

@@ -73,7 +73,7 @@ private func sendStore<C: ConnectionProtocol>(
             data: StoreData.flags(makeStoreFlags(flags))
         )
     else { return }
-    try await connection.send(command, isolation: #isolation) { tag, responses in
+    try await connection.send(command) { tag, responses in
         writeStatus(
             "Did send UID STORE \(operatorLabel) \(flags.map { String($0) }.joined(separator: ", ")) with tag \(tag)"
         )

@@ -267,7 +267,7 @@ private func list<C: ConnectionProtocol>(
         target: target,
         returnOptions: listReturnOptions
     )
-    return try await connection.send(command, isolation: #isolation) { tag, responses in
+    return try await connection.send(command) { tag, responses in
         var all: [MailboxPath: [MailboxInfo.Attribute]] = [:]
         for try await response in responses {
             switch response {
@@ -344,7 +344,7 @@ private func status<C: ConnectionProtocol>(
     mailbox: MailboxName,
     statusAttributes: [MailboxAttribute]
 ) async throws -> MailboxStatus? {
-    try await connection.send(.status(mailbox, statusAttributes), isolation: #isolation) { tag, responses in
+    try await connection.send(.status(mailbox, statusAttributes)) { tag, responses in
         var result: MailboxStatus?
         for try await response in responses {
             switch response {
@@ -373,7 +373,7 @@ private func listStatus<C: ConnectionProtocol>(
         target: target,
         returnOptions: listReturnOptions + [.statusOption(statusAttributes)]
     )
-    return try await connection.send(command, isolation: #isolation) { tag, responses in
+    return try await connection.send(command) { tag, responses in
         var list: [MailboxPath: [MailboxInfo.Attribute]] = [:]
         var status: [MailboxName: MailboxStatus] = [:]
         for try await response in responses {

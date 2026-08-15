@@ -18,7 +18,8 @@ import NIOIMAP
 import Testing
 
 /// Pins the composability contract of `IMAPConnection`'s closure-based API: none of the
-/// closures are `@Sendable` or `@escaping`, and they all inherit the caller's isolation.
+/// closures are `@Sendable` or `@escaping`, and they are all `nonisolated(nonsending)`, so they
+/// run in the caller's isolation domain.
 ///
 /// These are primarily _compile-time_ tests. Each one passes a closure that captures and
 /// mutates non-`Sendable` state — a plain local `var`, or a class instance isolated to the
@@ -179,7 +180,7 @@ struct IMAPConnectionCompositionTests {
     }
     #endif
 
-    /// And from a custom actor, where `#isolation` resolves to that actor instance.
+    /// And from a custom actor, whose isolation the closures pick up.
     @Test(.timeLimit(.minutes(1)))
     func actorIsolatedClosuresCanUseActorState() async throws {
         actor Session {

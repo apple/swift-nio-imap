@@ -41,7 +41,7 @@ import Synchronization
 ///
 /// - Important: IMAP does not tag untagged responses, so while commands are pipelined every
 ///   untagged `Response` is delivered to _all_ in-flight command handlers (see
-///   ``send(_:isolation:_:)``). Handlers must act only on the responses they care about.
+///   ``send(_:_:)``). Handlers must act only on the responses they care about.
 public final class IMAPConnection: Sendable {
     private init(
         configuration: Configuration
@@ -107,13 +107,12 @@ public final class IMAPConnection: Sendable {
     ///
     /// - Note: A failing connection does _not_ cancel `body`. Instead, the failure surfaces the
     ///   next time `body` interacts with the connection: pending and subsequent
-    ///   ``ResponseStream``s and ``send(_:isolation:_:)`` calls fail with the underlying error.
+    ///   ``ResponseStream``s and ``send(_:_:)`` calls fail with the underlying error.
     ///   A `body` that neither returns nor touches the connection again keeps
-    ///   `withConnection(configuration:isolation:_:)` from returning.
+    ///   `withConnection(configuration:_:)` from returning.
     public static func withConnection<Result: _IMAPClosureResult>(
         configuration: Configuration,
-        isolation: isolated (any Actor)? = #isolation,
-        _ body: (Greeting, IMAPConnection) async throws -> Result
+        _ body: nonisolated(nonsending) (Greeting, IMAPConnection) async throws -> Result
     ) async throws -> Result {
         let connection = IMAPConnection(configuration: configuration)
 
@@ -175,8 +174,7 @@ public final class IMAPConnection: Sendable {
     ///   metadata keys.
     public func send<Result: _IMAPClosureResult>(
         _ command: Command,
-        isolation: isolated (any Actor)? = #isolation,
-        _ handler: (Tag, ResponseStream) async throws -> Result
+        _ handler: nonisolated(nonsending) (Tag, ResponseStream) async throws -> Result
     ) async throws -> Result {
         let (tag, responseStream) = try state.withLock { state in
             state.perCommandResponseStreams.makeTagAndResponseStream()
@@ -197,14 +195,13 @@ public final class IMAPConnection: Sendable {
     /// Sends an `IDLE` command to the server.
     ///
     /// The handler receives the `Response` values the server produces while idling. Returning
-    /// from the handler ends the `IDLE`: `sendIdle(isolation:_:)` then sends `DONE`.
+    /// from the handler ends the `IDLE`: `sendIdle(_:)` then sends `DONE`.
     ///
     /// - Important: The command’s `TaggedResponse` only arrives _after_ `DONE`, so the handler
     ///   must not wait for the command to complete — use the stream to observe untagged
     ///   responses and return once you want to stop idling.
     public func sendIdle<Result: _IMAPClosureResult>(
-        isolation: isolated (any Actor)? = #isolation,
-        _ handler: (Tag, ResponseStream) async throws -> Result
+        _ handler: nonisolated(nonsending) (Tag, ResponseStream) async throws -> Result
     ) async throws -> Result {
         let (tag, responseStream) = try state.withLock { state in
             state.perCommandResponseStreams.makeTagAndResponseStream()
@@ -240,8 +237,7 @@ public final class IMAPConnection: Sendable {
     public func sendAuthenticate<Result: _IMAPClosureResult>(
         mechanism: AuthenticationMechanism,
         initialResponse: InitialResponse?,
-        isolation: isolated (any Actor)? = #isolation,
-        _ handler: (Tag, ResponseStream, borrowing ContinuationWriter) async throws -> Result
+        _ handler: nonisolated(nonsending) (Tag, ResponseStream, borrowing ContinuationWriter) async throws -> Result
     ) async throws -> Result {
         let (tag, responseStream) = try state.withLock { state in
             state.perCommandResponseStreams.makeTagAndResponseStream()
@@ -315,7 +311,7 @@ public final class IMAPConnection: Sendable {
     /// }
     /// ```
     ///
-    /// ``append(to:isolation:writing:reading:)`` is that second form written for you: it takes a
+    /// ``append(to:writing:reading:)`` is that second form written for you: it takes a
     /// write closure and a `@Sendable` read closure, and runs them concurrently.
     ///
     /// - Warning: The `TaggedResponse` cannot arrive while the command is still open. Waiting for
@@ -323,7 +319,7 @@ public final class IMAPConnection: Sendable {
     ///   another task writing concurrently — therefore never returns.
     /// - Note: `APPEND` cannot be pipelined: the protocol only allows the message literals to
     ///   follow the command, so any other command sent on this connection while `append` runs
-    ///   is queued and written once the append completes. As with ``send(_:isolation:_:)``, the
+    ///   is queued and written once the append completes. As with ``send(_:_:)``, the
     ///   stream also delivers untagged responses that belong to other commands, or to no command
     ///   at all; only the `TaggedResponse` is this command's.
     /// - Important: A synchronizing literal cannot be cancelled once begun. If the closure leaves
@@ -332,18 +328,16 @@ public final class IMAPConnection: Sendable {
     ///   closes the connection. It rethrows the closure's error, or throws ``IncompleteAppend``
     ///   if the closure itself succeeded. An error the closure throws _after_ completing the
     ///   command leaves the connection intact, exactly like an error from a
-    ///   ``send(_:isolation:_:)`` handler.
+    ///   ``send(_:_:)`` handler.
     /// - Parameters:
     ///   - mailbox: The mailbox to append the message to.
-    ///   - isolation: The actor to run the closure on. Defaults to the caller’s isolation.
     ///   - body: Writes the message(s) with the provided ``AppendWriter`` and handles the
     ///     command's responses. It also receives the ``Tag`` that identifies this command in the
     ///     `TaggedResponse` completing it.
     /// - Returns: The value `body` returns.
     public func append<Result: _IMAPClosureResult>(
         to mailbox: MailboxName,
-        isolation: isolated (any Actor)? = #isolation,
-        _ body: (Tag, ResponseStream, inout AppendWriter) async throws -> Result
+        _ body: nonisolated(nonsending) (Tag, ResponseStream, inout AppendWriter) async throws -> Result
     ) async throws -> Result {
         let (tag, responseStream) = try state.withLock { state in
             state.perCommandResponseStreams.makeTagAndResponseStream()
@@ -387,11 +381,11 @@ public final class IMAPConnection: Sendable {
 
     /// Sends an `APPEND` command as a stream to the server, reading its responses as it writes.
     ///
-    /// This is ``append(to:isolation:_:)`` with the task group written for you: `write` writes the
+    /// This is ``append(to:_:)`` with the task group written for you: `write` writes the
     /// message data while `read` concurrently consumes the responses the server sends — including
     /// any that arrive while the message data is still in flight. `read` receives the command's
     /// ``Tag`` and ``ResponseStream`` and returns the result, the same shape
-    /// ``send(_:isolation:_:)``'s handler has.
+    /// ``send(_:_:)``'s handler has.
     ///
     /// ```swift
     /// let tagged = try await connection.append(
@@ -416,28 +410,26 @@ public final class IMAPConnection: Sendable {
     /// - Note: `read` runs in a child task, which is why — alone among the closures in this API —
     ///   it has to be `@Sendable`, and `Result` has to be `Sendable`. `write` holds the
     ///   ``AppendWriter``, which cannot leave the task that owns it, so `write` runs in the
-    ///   calling task and needs neither. Use ``append(to:isolation:_:)`` to keep everything in
+    ///   calling task and needs neither. Use ``append(to:_:)`` to keep everything in
     ///   one task.
-    /// - Note: As with ``send(_:isolation:_:)``, `read` also sees untagged responses that belong
+    /// - Note: As with ``send(_:_:)``, `read` also sees untagged responses that belong
     ///   to other commands, or to no command at all; only the `TaggedResponse` is this command's.
     /// - Important: If `read` throws, `write` still writes the message in full before this method
     ///   rethrows the error: abandoning a synchronizing literal part-way would leave the
     ///   connection unusable. If `write` throws, or leaves the command incomplete, this method
-    ///   cancels `read` and closes the connection, as ``append(to:isolation:_:)`` describes.
+    ///   cancels `read` and closes the connection, as ``append(to:_:)`` describes.
     /// - Parameters:
     ///   - mailbox: The mailbox to append the message to.
-    ///   - isolation: The actor to run `write` on. Defaults to the caller’s isolation.
     ///   - write: Writes the message(s) using the provided ``AppendWriter``.
     ///   - read: Receives the responses the server sends for the command, concurrently with
     ///     `write`.
     /// - Returns: The value `read` returns.
     public func append<Result: Sendable>(
         to mailbox: MailboxName,
-        isolation: isolated (any Actor)? = #isolation,
-        writing write: (Tag, inout AppendWriter) async throws -> Void,
+        writing write: nonisolated(nonsending) (Tag, inout AppendWriter) async throws -> Void,
         reading read: @Sendable @escaping (Tag, ResponseStream) async throws -> Result
     ) async throws -> Result {
-        try await append(to: mailbox, isolation: isolation) { tag, responses, writer in
+        try await append(to: mailbox) { tag, responses, writer in
             try await withThrowingTaskGroup(of: Result.self, returning: Result.self) { group in
                 group.addTask {
                     try await read(tag, responses)
@@ -663,7 +655,18 @@ extension IMAPConnection {
             var underlying: AsyncThrowingStream<Response, any Swift.Error>.AsyncIterator
 
             public mutating func next() async throws -> Response? {
-                try await underlying.next()
+                try await next(isolation: #isolation)
+            }
+
+            /// Both `next` overloads are implemented, and the isolation is forwarded to the
+            /// underlying iterator, because the iterator is not `Sendable`: were this to fall
+            /// back to `AsyncIteratorProtocol`’s default implementation of
+            /// `next(isolation:)` — which calls the `@concurrent` `next()` — the iterator
+            /// would be sent out of the caller’s isolation domain on every element.
+            public mutating func next(
+                isolation actor: isolated (any Actor)?
+            ) async throws -> Response? {
+                try await underlying.next(isolation: actor)
             }
         }
 
@@ -684,8 +687,7 @@ extension IMAPConnection.ResponseStream.AsyncIterator: Sendable {}
 extension IMAPConnection.ResponseStream {
     /// Iterates over all responses and returns the command’s `TaggedResponse` on completion.
     public func forEach(
-        isolation: isolated (any Actor)? = #isolation,
-        _ closure: (AsyncIterator.Element) async throws -> Void
+        _ closure: nonisolated(nonsending) (AsyncIterator.Element) async throws -> Void
     ) async throws -> TaggedResponse {
         var t: TaggedResponse?
         for try await r in self {
@@ -704,9 +706,7 @@ extension IMAPConnection.ResponseStream {
     }
 
     /// Waits for the command to complete, discarding intermediate responses.
-    public func waitForCompletion(
-        isolation: isolated (any Actor)? = #isolation
-    ) async throws -> TaggedResponse {
+    public func waitForCompletion() async throws -> TaggedResponse {
         try await forEach { _ in }
     }
 }

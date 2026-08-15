@@ -4,7 +4,7 @@ Open a connection, log in, and issue commands as awaitable calls.
 
 ## Overview
 
-IMAPCommands is centered on ``IMAPConnection``. You open a connection with ``IMAPConnection/withConnection(configuration:isolation:_:)``, then send commands and `await` their responses inside the closure. The connection closes automatically when the closure returns.
+IMAPCommands is centered on ``IMAPConnection``. You open a connection with ``IMAPConnection/withConnection(configuration:_:)``, then send commands and `await` their responses inside the closure. The connection closes automatically when the closure returns.
 
 ### Configuring a connection
 
@@ -23,7 +23,7 @@ let configuration = IMAPConnection.Configuration(
 
 ### Opening a connection and sending commands
 
-``IMAPConnection/withConnection(configuration:isolation:_:)`` hands you the server ``IMAPConnection/Greeting`` and a connection. Send a command with ``IMAPConnection/send(_:isolation:_:)``: the closure receives the command’s ``IMAPConnection/Tag`` and a stream of the `Response` values the server produces while the command runs, up to and including its final `TaggedResponse`.
+``IMAPConnection/withConnection(configuration:_:)`` hands you the server ``IMAPConnection/Greeting`` and a connection. Send a command with ``IMAPConnection/send(_:_:)``: the closure receives the command’s ``IMAPConnection/Tag`` and a stream of the `Response` values the server produces while the command runs, up to and including its final `TaggedResponse`.
 
 ```swift
 try await IMAPConnection.withConnection(configuration: configuration) { greeting, connection in
@@ -45,7 +45,7 @@ Commands are pipelined by sending them concurrently from a task group. Each `sen
 
 ### Closures, isolation, and concurrency
 
-None of these closures is `@Sendable` or `@escaping`, and each one inherits the isolation of the code that calls it. A closure can therefore capture and mutate a local variable, or touch state belonging to the actor it was written in — including `@MainActor` state — without any of it having to be `Sendable`:
+None of these closures is `@Sendable` or `@escaping`, and each one is `nonisolated(nonsending)` — it runs in the isolation domain of the code that calls it. A closure can therefore capture and mutate a local variable, or touch state belonging to the actor it was written in — including `@MainActor` state — without any of it having to be `Sendable`:
 
 ```swift
 @MainActor
@@ -62,7 +62,7 @@ func refresh(model: MailboxModel) async throws {
 
 Concurrency is never imposed on you: if you want commands to overlap, spawn a task group yourself — the `IMAPConnection` and its `ResponseStream`s are `Sendable`, so they can be shared between child tasks.
 
-The connection itself runs in a child task of `withConnection(configuration:isolation:_:)`. If it fails, your closure is *not* cancelled; the failure surfaces the next time the closure touches the connection, as an error from the response stream or from the next command.
+The connection itself runs in a child task of `withConnection(configuration:_:)`. If it fails, your closure is *not* cancelled; the failure surfaces the next time the closure touches the connection, as an error from the response stream or from the next command.
 
 ### Logging
 
@@ -110,9 +110,9 @@ let configuration = IMAPConnection.Configuration(
 
 Some commands don’t fit the simple request/response shape and have dedicated APIs:
 
-- ``IMAPConnection/sendIdle(isolation:_:)`` runs `IDLE`, ending it when the closure returns.
-- ``IMAPConnection/sendAuthenticate(mechanism:initialResponse:isolation:_:)`` runs `AUTHENTICATE`, giving the closure a ``IMAPConnection/ContinuationWriter`` to answer the server’s challenges.
-- ``IMAPConnection/append(to:isolation:writing:reading:)`` streams an `APPEND`: one closure writes the message data with an ``IMAPConnection/AppendWriter`` while the other concurrently reads the command’s responses. ``IMAPConnection/append(to:isolation:_:)`` passes the writer and the responses to a single closure instead, leaving the interleaving — and whether there is any — to you.
+- ``IMAPConnection/sendIdle(_:)`` runs `IDLE`, ending it when the closure returns.
+- ``IMAPConnection/sendAuthenticate(mechanism:initialResponse:_:)`` runs `AUTHENTICATE`, giving the closure a ``IMAPConnection/ContinuationWriter`` to answer the server’s challenges.
+- ``IMAPConnection/append(to:writing:reading:)`` streams an `APPEND`: one closure writes the message data with an ``IMAPConnection/AppendWriter`` while the other concurrently reads the command’s responses. ``IMAPConnection/append(to:_:)`` passes the writer and the responses to a single closure instead, leaving the interleaving — and whether there is any — to you.
 
 ### Choosing between the two interfaces
 

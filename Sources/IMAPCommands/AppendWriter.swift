@@ -18,8 +18,8 @@ import NIOIMAP
 extension IMAPConnection {
     /// Writes message data to the server as part of an `APPEND` command.
     ///
-    /// Create an append writer using ``IMAPConnection/append(to:isolation:writing:reading:)`` or
-    /// ``IMAPConnection/append(to:isolation:_:)``.
+    /// Create an append writer using ``IMAPConnection/append(to:writing:reading:)`` or
+    /// ``IMAPConnection/append(to:_:)``.
     public struct AppendWriter: ~Copyable, Sendable {
         var underlying: OutboundQueue.AppendQueueWriter
         var state: State
@@ -54,8 +54,7 @@ extension IMAPConnection {
             appendingTo mailbox: MailboxName,
             underlying: consuming OutboundQueue.AppendQueueWriter,
             didCompleteCommand: inout Bool,
-            isolation: isolated (any Actor)? = #isolation,
-            closure: (inout AppendWriter) async throws -> R
+            closure: nonisolated(nonsending) (inout AppendWriter) async throws -> R
         ) async throws -> R {
             try await underlying.write([.start(tag: tag, appendingTo: mailbox)])
             var writer = AppendWriter(underlying: underlying, state: .empty)
@@ -89,7 +88,7 @@ extension IMAPConnection {
         /// }
         /// ```
         ///
-        /// Calling this is optional and idempotent: ``IMAPConnection/append(to:isolation:_:)``
+        /// Calling this is optional and idempotent: ``IMAPConnection/append(to:_:)``
         /// completes the command when its closure returns.
         ///
         /// - Throws: ``IMAPConnection/IncompleteAppend`` if no message was written, or if a
@@ -175,8 +174,7 @@ extension IMAPConnection.AppendWriter {
     /// the connection.
     public mutating func write(
         message: AppendMessage,
-        isolation: isolated (any Actor)? = #isolation,
-        closure: (inout MessageWriter) async throws -> Void
+        closure: nonisolated(nonsending) (inout MessageWriter) async throws -> Void
     ) async throws {
         try state.checkCanWrite()
         try await underlying.write([.beginMessage(message: message)])
@@ -208,12 +206,11 @@ extension IMAPConnection.AppendWriter {
     /// appended.
     ///
     /// The closure must add at least one URL or one piece of data. As with
-    /// ``write(message:isolation:closure:)``, a failure part-way through leaves the `APPEND`
+    /// ``write(message:closure:)``, a failure part-way through leaves the `APPEND`
     /// command unfinishable.
     public mutating func catenate(
         options: AppendOptions,
-        isolation: isolated (any Actor)? = #isolation,
-        closure: (inout CatenateWriter) async throws -> Void
+        closure: nonisolated(nonsending) (inout CatenateWriter) async throws -> Void
     ) async throws {
         try state.checkCanWrite()
         try await underlying.write([.beginCatenate(options: options)])
@@ -247,13 +244,12 @@ extension IMAPConnection.AppendWriter {
         /// Adds a message given as literal data.
         ///
         /// The closure must write exactly `byteCount` bytes, for the same reason
-        /// ``IMAPConnection/AppendWriter/write(message:isolation:closure:)`` requires: the count
+        /// ``IMAPConnection/AppendWriter/write(message:closure:)`` requires: the count
         /// goes out ahead of the data as the literal's length. Writing a different number
         /// desynchronizes the command stream, leaving the connection unusable.
         public mutating func writeData(
             byteCount: Int,
-            isolation: isolated (any Actor)? = #isolation,
-            closure: (inout CatenateDataWriter) async throws -> Void
+            closure: nonisolated(nonsending) (inout CatenateDataWriter) async throws -> Void
         ) async throws {
             try state.checkCanWrite()
             try await underlying.write([.catenateData(.begin(size: byteCount))])
