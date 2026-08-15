@@ -40,7 +40,7 @@ extension UIDSetNonEmptyTests {
         #expect(uids.set == MessageIdentifierSet<UID>([1...5]))
     }
 
-    #if swift(>=6.2) && !os(iOS) && !os(watchOS) && !os(tvOS) && !os(visionOS)
+    #if !os(iOS) && !os(watchOS) && !os(tvOS) && !os(visionOS)
     @Test("empty array literal triggers precondition failure") func emptyArrayLiteralPreconditionFailure() async {
         await #expect(
             processExitsWith: ExitTest.Condition.failure,

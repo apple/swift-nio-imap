@@ -61,7 +61,7 @@ struct FlagTests {
         #expect(String(fixture.0) == fixture.1)
     }
 
-    #if swift(>=6.2) && !os(iOS) && !os(watchOS) && !os(tvOS) && !os(visionOS)
+    #if !os(iOS) && !os(watchOS) && !os(tvOS) && !os(visionOS)
     @Test("extension(_:) precondition failure without backslash") func extensionPreconditionFailure() async {
         await #expect(
             processExitsWith: ExitTest.Condition.failure,
