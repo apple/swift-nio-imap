@@ -33,7 +33,7 @@ try await IMAPConnection.withConnection(configuration: configuration) { greeting
     }
 
     // Select a mailbox and inspect the untagged responses it produces.
-    try await connection.send(.select(MailboxName("INBOX"))) { tag, responses in
+    try await connection.send(.select(.inbox)) { tag, responses in
         try await responses.forEach { response in
             print(response)
         }
@@ -51,7 +51,7 @@ None of these closures is `@Sendable` or `@escaping`, and each one is `nonisolat
 @MainActor
 func refresh(model: MailboxModel) async throws {
     try await IMAPConnection.withConnection(configuration: configuration) { _, connection in
-        try await connection.send(.select(MailboxName("INBOX"))) { _, responses in
+        try await connection.send(.select(.inbox)) { _, responses in
             try await responses.forEach { response in
                 model.apply(response)  // `model` is @MainActor, and not Sendable
             }
@@ -84,7 +84,7 @@ try await withLogger(logger) { _ in
 Command handlers run with the command’s tag merged into the task-local logger, so anything *you* log from a handler is attributed to the command it belongs to without your having to thread the tag through:
 
 ```swift
-try await connection.send(.select(MailboxName("INBOX"))) { _, responses in
+try await connection.send(.select(.inbox)) { _, responses in
     // Logs with metadata `imap.tag: A2, imap.connection: 1`.
     Logger.current.info("Selecting mailbox")
     return try await responses.waitForCompletion()

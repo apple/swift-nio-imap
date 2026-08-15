@@ -17,11 +17,12 @@ import FoundationEssentials
 #else
 import Foundation
 #endif
+import NIOIMAP
 
-/// Authentication credentials for an IMAP connection.
+/// A credential used to authenticate an IMAP connection.
 public enum IMAPCredential: Equatable, Sendable {
     case username(String, password: String)
-    case sasl(mechanism: String, response: Data)
+    case sasl(mechanism: AuthenticationMechanism, response: Data)
 }
 
 extension IMAPCredential: CustomStringConvertible {
@@ -36,7 +37,7 @@ extension IMAPCredential: CustomStringConvertible {
         case .username(let u, password: let p):
             return "\(u):[\(p.utf8.count) bytes]"
         case .sasl(mechanism: let mechanism, response: let response):
-            return "SASL \(mechanism) [\(response.count) bytes]"
+            return "SASL \(String(mechanism)) [\(response.count) bytes]"
         }
     }
 }
@@ -59,14 +60,16 @@ extension IMAPCredential {
         case (let u?, let p?, nil, nil):
             self = .username(u, password: p)
         case (nil, nil, let s?, nil):
-            let mechanism = s.prefix { $0.isASCII && $0.isLetter }
-            let remainder = s[mechanism.endIndex...]
+            let name = s.prefix { $0 != ":" }
+            let remainder = s[name.endIndex...]
+            // `AuthenticationMechanism` normalizes the name to uppercase, and rejects a name that
+            // RFC 4422 doesn’t allow — which subsumes checking for an empty name.
             guard
-                !mechanism.isEmpty,
+                let mechanism = AuthenticationMechanism(String(name)),
                 remainder.first == ":",
                 let response = Self.parseSASLResponse(remainder.dropFirst())
             else { throw UnableToParseSASL() }
-            self = .sasl(mechanism: mechanism.uppercased(), response: response)
+            self = .sasl(mechanism: mechanism, response: response)
         case (nil, nil, nil, let text?):
             let parts = text.split(separator: ":", omittingEmptySubsequences: false)
             guard

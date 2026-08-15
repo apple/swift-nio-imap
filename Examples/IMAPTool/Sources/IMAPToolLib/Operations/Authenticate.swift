@@ -43,7 +43,7 @@ func authenticate(
 
     // Authenticate:
     let authResult: TaggedResponse
-    let (mechanism, ir) = try credential.makeAuthenticateCommand()
+    let (mechanism, ir) = credential.makeAuthenticateCommand()
     if preAuthCapabilities.contains(.authenticate(mechanism)) {
         authResult = try await authenticate(
             connection: connection,
@@ -155,7 +155,7 @@ extension ResponsePayload {
 }
 
 extension IMAPCredential {
-    func makeAuthenticateCommand() throws -> (AuthenticationMechanism, InitialResponse) {
+    func makeAuthenticateCommand() -> (AuthenticationMechanism, InitialResponse) {
         let mechanism: AuthenticationMechanism
         let data: Data
         switch self {
@@ -163,9 +163,6 @@ extension IMAPCredential {
             mechanism = .plain
             data = Data([0]) + Data(u.utf8) + Data([0]) + Data(p.utf8)
         case .sasl(mechanism: let m, response: let response):
-            guard let m = AuthenticationMechanism(m) else {
-                throw AuthenticationError(message: "Invalid authentication mechanism: \(m)")
-            }
             mechanism = m
             data = response
         }
