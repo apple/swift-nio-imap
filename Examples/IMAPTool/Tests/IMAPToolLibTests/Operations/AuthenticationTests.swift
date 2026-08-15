@@ -30,7 +30,7 @@ private struct AuthenticationTests {
                 .init(
                     command: .capability,
                     untagged: [
-                        .capabilityData([.imap4rev1, .imap4, .authenticate(AuthenticationMechanism("FOOBAR"))])
+                        .capabilityData([.imap4rev1, .imap4, .authenticate(AuthenticationMechanism("FOOBAR")!)])
                     ],
                     completion: .ok(.init(text: "Done"))
                 ),
@@ -70,13 +70,13 @@ private struct AuthenticationTests {
                 .init(
                     command: .capability,
                     untagged: [
-                        .capabilityData([.imap4rev1, .imap4, .saslIR, .authenticate(AuthenticationMechanism("PLAIN"))])
+                        .capabilityData([.imap4rev1, .imap4, .saslIR, .authenticate(.plain)])
                     ],
                     completion: .ok(.init(text: "Capabilities Done"))
                 ),
                 .init(
                     command: .authenticate(
-                        mechanism: AuthenticationMechanism("PLAIN"),
+                        mechanism: .plain,
                         initialResponse: InitialResponse(
                             ByteBuffer(bytes: [
                                 0x0, 0x6a, 0x6f, 0x68, 0x6e, 0x0, 0x73, 0x65, 0x63, 0x72, 0x65, 0x74,
@@ -117,13 +117,13 @@ private struct AuthenticationTests {
                 .init(
                     command: .capability,
                     untagged: [
-                        .capabilityData([.imap4rev1, .imap4, .saslIR, .authenticate(AuthenticationMechanism("PLAIN"))])
+                        .capabilityData([.imap4rev1, .imap4, .saslIR, .authenticate(.plain)])
                     ],
                     completion: .ok(.init(text: "Capabilities Done"))
                 ),
                 .init(
                     command: .authenticate(
-                        mechanism: AuthenticationMechanism("PLAIN"),
+                        mechanism: .plain,
                         initialResponse: InitialResponse(
                             ByteBuffer(bytes: [
                                 0x0, 0x6a, 0x6f, 0x68, 0x6e, 0x0, 0x73, 0x65, 0x63, 0x72, 0x65, 0x74,
@@ -161,14 +161,14 @@ private struct AuthenticationTests {
         await TestServer.runSingleConnectionServer(
             greeting: .ok(
                 .init(
-                    code: .capability([.imap4rev1, .imap4, .saslIR, .authenticate(AuthenticationMechanism("PLAIN"))]),
+                    code: .capability([.imap4rev1, .imap4, .saslIR, .authenticate(.plain)]),
                     text: "Hello"
                 )
             ),
             expectedCommands: [
                 .init(
                     command: .authenticate(
-                        mechanism: AuthenticationMechanism("PLAIN"),
+                        mechanism: .plain,
                         initialResponse: InitialResponse(
                             ByteBuffer(bytes: [
                                 0x0, 0x6a, 0x6f, 0x68, 0x6e, 0x0, 0x73, 0x65, 0x63, 0x72, 0x65, 0x74,
@@ -209,7 +209,7 @@ private struct AuthenticationTests {
         await TestServer.runSingleConnectionServer(
             greeting: .ok(
                 .init(
-                    code: .capability([.imap4rev1, .imap4, .authenticate(AuthenticationMechanism("PLAIN"))]),
+                    code: .capability([.imap4rev1, .imap4, .authenticate(.plain)]),
                     text: "Hello"
                 )
             ),
@@ -217,7 +217,7 @@ private struct AuthenticationTests {
                 .init(
                     part: .command(
                         .authenticate(
-                            mechanism: AuthenticationMechanism("PLAIN"),
+                            mechanism: .plain,
                             initialResponse: nil
                         )
                     ),

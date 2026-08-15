@@ -30,7 +30,7 @@ extension TestServer {
     ///     expectedCommands: [
     ///         .init(
     ///             command: .capability,
-    ///             untagged: [.capabilityData([.imap4rev1, .imap4, .authenticate(AuthenticationMechanism("FOOBAR"))])],
+    ///             untagged: [.capabilityData([.imap4rev1, .imap4, .authenticate(AuthenticationMechanism("FOOBAR")!)])],
     ///             completion: .ok(.init(text: "Done"))
     ///         ),
     ///

@@ -43,7 +43,7 @@ func authenticate(
 
     // Authenticate:
     let authResult: TaggedResponse
-    let (mechanism, ir) = credential.makeAuthenticateCommand()
+    let (mechanism, ir) = try credential.makeAuthenticateCommand()
     if preAuthCapabilities.contains(.authenticate(mechanism)) {
         authResult = try await authenticate(
             connection: connection,
@@ -122,7 +122,7 @@ private func authenticate(
         mechanism: mechanism,
         initialResponse: supportsIR ? ir : nil
     ) { tag, responses, writer in
-        writeStatus("Did send AUTHENTICATE \(mechanism.rawValue) command \(tag) \(supportsIR ? "with" : "without") IR")
+        writeStatus("Did send AUTHENTICATE \(String(mechanism)) command \(tag) \(supportsIR ? "with" : "without") IR")
         return try await responses.forEach { response in
             switch response {
             case .authenticationChallenge:
@@ -155,7 +155,7 @@ extension ResponsePayload {
 }
 
 extension IMAPCredential {
-    func makeAuthenticateCommand() -> (AuthenticationMechanism, InitialResponse) {
+    func makeAuthenticateCommand() throws -> (AuthenticationMechanism, InitialResponse) {
         let mechanism: AuthenticationMechanism
         let data: Data
         switch self {
@@ -163,7 +163,10 @@ extension IMAPCredential {
             mechanism = .plain
             data = Data([0]) + Data(u.utf8) + Data([0]) + Data(p.utf8)
         case .sasl(mechanism: let m, response: let response):
-            mechanism = AuthenticationMechanism(m)
+            guard let m = AuthenticationMechanism(m) else {
+                throw AuthenticationError(message: "Invalid authentication mechanism: \(m)")
+            }
+            mechanism = m
             data = response
         }
         return (mechanism, InitialResponse(ByteBuffer(data)))
