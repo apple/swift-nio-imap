@@ -12,6 +12,8 @@
 //
 //===----------------------------------------------------------------------===//
 
+import Logging
+
 extension IMAPConnection {
     /// A command tag that uniquely identifies an in-flight IMAP command.
     public struct Tag: Hashable, Sendable {
@@ -34,6 +36,18 @@ extension IMAPConnection.Tag {
 }
 
 extension IMAPConnection.Tag: Encodable {}
+
+extension IMAPConnection.Tag {
+    /// Logger metadata identifying the command this tag belongs to.
+    ///
+    /// Bound around every command handler — together with `imap.connection`, see
+    /// ``IMAPConnection/loggerMetadata(for:)`` — so that anything the handler logs through
+    /// `Logger.current` is attributed to the command it belongs to. The key is namespaced
+    /// because the metadata is merged into the caller's own logger.
+    var loggerMetadata: Logger.Metadata {
+        ["imap.tag": "\(self)"]
+    }
+}
 
 extension String {
     public init(_ tag: IMAPConnection.Tag) {

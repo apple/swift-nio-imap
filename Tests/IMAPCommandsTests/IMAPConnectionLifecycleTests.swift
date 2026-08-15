@@ -13,6 +13,7 @@
 //===----------------------------------------------------------------------===//
 
 @testable import IMAPCommands
+import Logging
 import NIO
 import NIOIMAP
 import Synchronization
@@ -268,6 +269,111 @@ enum IMAPConnectionLifecycleTests {
         #expect(
             outcome.withLock { $0 } == "append-threw,noop-failed",
             "An aborted APPEND should propagate its error and close the connection."
+        )
+    }
+
+    /// Command handlers run with the command's tag merged into the task-local logger, so a
+    /// handler can log through `Logger.current` and have its lines attributed to the command
+    /// without the tag being threaded through by hand. The logger the connection was created
+    /// in the scope of has to be the base that tag is merged onto.
+    @Test(.timeLimit(.minutes(3)))
+    static func commandHandlersSeeTheCommandTagInTheTaskLocalLogger() async throws {
+        let server = try await LoopbackServer.greetThenStayOpen()
+        defer { server.shutdown() }
+
+        let configuration = IMAPConnection.Configuration(
+            hostname: "127.0.0.1",
+            port: server.port,
+            useTLS: false,
+            logging: .noLogging
+        )
+
+        /// What the handler saw of the logger that was current while it ran.
+        struct Observation: Sendable {
+            var tag: String
+            var tagMetadata: String?
+            var connectionMetadata: String?
+            var label: String
+            var enclosingMetadata: String?
+        }
+
+        let observed = Mutex<Observation?>(nil)
+
+        let finished = await finishesWithoutStalling {
+            var outer = Logger(label: "test.outer")
+            outer[metadataKey: "test.scope"] = "outer"
+
+            _ = await withLogger(outer) { _ in
+                // The connection fails once the body returns; the handler has already run.
+                try? await IMAPConnection.withConnection(configuration: configuration) { _, connection in
+                    // The server never replies, so the handler must not wait for completion.
+                    try await connection.send(.noop) { tag, _ in
+                        let current = Logger.current
+                        observed.withLock {
+                            $0 = Observation(
+                                tag: "\(tag)",
+                                tagMetadata: current[metadataKey: "imap.tag"].map { "\($0)" },
+                                connectionMetadata: current[metadataKey: "imap.connection"].map { "\($0)" },
+                                label: current.label,
+                                enclosingMetadata: current[metadataKey: "test.scope"].map { "\($0)" }
+                            )
+                        }
+                    }
+                }
+            }
+        }
+
+        #expect(finished, "The command handler stalled.")
+        guard let seen = observed.withLock({ $0 }) else {
+            Issue.record("The command handler did not run.")
+            return
+        }
+        // The tag the handler was handed is the one bound as metadata.
+        #expect(
+            seen.tagMetadata == seen.tag,
+            "The handler's `imap.tag` metadata should be the tag it was given."
+        )
+        // A tag only identifies a command together with the connection it belongs to.
+        #expect(seen.connectionMetadata != nil, "The handler should also see `imap.connection`.")
+        // The tag is *merged onto* the enclosing logger rather than replacing it.
+        #expect(seen.label == "test.outer", "The enclosing logger should be the base.")
+        #expect(seen.enclosingMetadata == "outer", "Enclosing metadata should be preserved.")
+    }
+
+    /// The connection logs its own diagnostics to the logger that was current when it was
+    /// created — not to whatever `withLogger` scope happens to be active at the log site — and
+    /// tags them so that lines from concurrent connections can be told apart.
+    @Test(.timeLimit(.minutes(3)))
+    static func connectionDiagnosticsGoToTheLoggerCapturedAtCreation() async throws {
+        // Port 1 is (essentially) always closed on loopback, so this needs no server: the
+        // connect is refused, the greeting fails, and `withConnection` logs on its way out.
+        let configuration = IMAPConnection.Configuration(
+            hostname: "127.0.0.1",
+            port: 1,
+            useTLS: false,
+            logging: .noLogging
+        )
+
+        let recorder = LogRecorder()
+        let finished = await finishesWithoutStalling {
+            // Replaces the handler and level of the current logger, which needs no
+            // `LoggingSystem.bootstrap` — that is global state a test cannot own.
+            _ = await withLogger(logLevel: .trace, handler: recorder.handler) { _ in
+                try? await IMAPConnection.withConnection(configuration: configuration) { _, _ in
+                    Issue.record("The body should not run: the connection cannot be established.")
+                }
+            }
+        }
+
+        #expect(finished, "withConnection stalled.")
+        let closing = recorder.records(message: "Closing connection after body threw")
+        #expect(closing.count == 1, "Expected one closing diagnostic, got: \(recorder.records)")
+        guard let record = closing.first else { return }
+        #expect(record.level == .debug, "Lifecycle diagnostics belong at `.debug`.")
+        #expect(record.metadata["error"] != nil, "The diagnostic should say what went wrong.")
+        #expect(
+            record.metadata["imap.connection"] != nil,
+            "Connection diagnostics should identify their connection: \(record.metadata)"
         )
     }
 }

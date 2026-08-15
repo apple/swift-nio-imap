@@ -64,6 +64,48 @@ Concurrency is never imposed on you: if you want commands to overlap, spawn a ta
 
 The connection itself runs in a child task of `withConnection(configuration:isolation:_:)`. If it fails, your closure is *not* cancelled; the failure surfaces the next time the closure touches the connection, as an error from the response stream or from the next command.
 
+### Logging
+
+Diagnostics go to swift-log’s task-local logger. Bind one with `withLogger(_:)` around the connection, and the connection picks it up — there is no logger to configure on the ``IMAPConnection/Configuration``:
+
+```swift
+import Logging
+
+var logger = Logger(label: "com.example.mail")
+logger.logLevel = .trace  // Connection diagnostics are `.debug` and `.trace`.
+
+try await withLogger(logger) { _ in
+    try await IMAPConnection.withConnection(configuration: configuration) { greeting, connection in
+        // Connection lifecycle events are logged to `logger`.
+    }
+}
+```
+
+Command handlers run with the command’s tag merged into the task-local logger, so anything *you* log from a handler is attributed to the command it belongs to without your having to thread the tag through:
+
+```swift
+try await connection.send(.select(MailboxName("INBOX"))) { _, responses in
+    // Logs with metadata `imap.tag: A2, imap.connection: 1`.
+    Logger.current.info("Selecting mailbox")
+    return try await responses.waitForCompletion()
+}
+```
+
+Two metadata keys are bound: `imap.tag` identifies the command, and `imap.connection` identifies the connection it runs on — tags restart at `A1` on each connection, so the tag alone is ambiguous once you have more than one open. `imap.connection` is an opaque counter. Nothing derived from the endpoint is logged: a hostname can identify a person, and swift-log has no redaction a library can rely on, since `Logger.MetadataValueAttributes` only takes effect in handlers that opt into inspecting it. Log the endpoint yourself if you want it, where you can judge whether that is appropriate.
+
+Setting ``IMAPConnection/Configuration/logging`` to `logging` adds low-level tracing of every channel event, through the same logger at the `.trace` level:
+
+```swift
+let configuration = IMAPConnection.Configuration(
+    hostname: "imap.example.com",
+    port: 993,
+    useTLS: true,
+    logging: .logging  // Traces every channel event at `.trace`.
+)
+```
+
+> Warning: Those traces include the data read and written, so they carry message content and the commands sent to the server — including credentials. Use them for local debugging, not where the log stream is collected or shipped off the device.
+
 ### Commands with a different shape
 
 Some commands don’t fit the simple request/response shape and have dedicated APIs:

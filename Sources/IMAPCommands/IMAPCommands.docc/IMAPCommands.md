@@ -50,5 +50,5 @@ The package is layered so you can work at whichever level suits your needs:
 
 ### Debugging
 
-- ``makeInboundDebugHandler(name:)``
-- ``makeOutboundDebugHandler(name:)``
+- ``makeInboundDebugHandler(logger:)``
+- ``makeOutboundDebugHandler(logger:)``

@@ -17,7 +17,6 @@ import FoundationEssentials
 #else
 import Foundation
 #endif
-import Logging
 import NIOIMAP
 
 extension IMAPConnection {
@@ -37,37 +36,32 @@ extension IMAPConnection {
 
         /// Controls connection-level debug logging.
         public enum Logging: Hashable, Sendable {
+            /// Does not trace channel events.
             case noLogging
+            /// Traces every channel event to the task-local logger at the `.trace` level.
+            ///
+            /// - Warning: The traces include the data read and written, so they carry message
+            ///   content and the commands sent to the server — including credentials. This is
+            ///   for local debugging; do not enable it where the log stream is collected or
+            ///   shipped off the device.
             case logging
         }
 
         /// The logging mode for the connection.
-        public var logging: Logging
-
-        /// The logger used for connection-level diagnostics.
         ///
-        /// Lifecycle and per-command diagnostics are emitted at the `.debug` and `.trace`
-        /// levels, so they are suppressed by default. Provide a logger configured with a
-        /// lower log level to observe them.
-        public var logger: Logger
+        /// This only controls the low-level channel-event tracing described by ``Logging``. It is
+        /// independent of the connection's own lifecycle diagnostics, which are always emitted to
+        /// the task-local logger at `.debug` and `.trace`.
+        public var logging: Logging
 
         public init(
             endpoint: Endpoint,
             useTLS: Bool,
-            logging: Logging,
-            logger: Logger = Logger(label: "com.apple.swift-nio-imap.IMAPConnection")
+            logging: Logging
         ) {
             self.endpoint = endpoint
             self.useTLS = useTLS
             self.logging = logging
-            self.logger = logger
-        }
-
-        public static func == (lhs: Configuration, rhs: Configuration) -> Bool {
-            // `Logger` is not `Equatable`, so it is excluded from the comparison.
-            lhs.endpoint == rhs.endpoint
-                && lhs.useTLS == rhs.useTLS
-                && lhs.logging == rhs.logging
         }
     }
 }
@@ -77,14 +71,12 @@ extension IMAPConnection.Configuration {
         hostname: String,
         port: UInt16,
         useTLS: Bool,
-        logging: Logging,
-        logger: Logger = Logger(label: "com.apple.swift-nio-imap.IMAPConnection")
+        logging: Logging
     ) {
         self.init(
             endpoint: .hostname(hostname, port: port),
             useTLS: useTLS,
-            logging: logging,
-            logger: logger
+            logging: logging
         )
     }
 }

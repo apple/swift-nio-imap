@@ -22,7 +22,8 @@ let package = Package(
         .package(url: "https://github.com/apple/swift-nio-extras", from: "1.0.0"),
         .package(url: "https://github.com/apple/swift-nio-ssl", from: "2.24.0"),
         .package(url: "https://github.com/apple/swift-nio", from: "2.64.0"),
-        .package(url: "https://github.com/apple/swift-log", from: "1.4.4"),
+        // 1.14.0 introduced the task-local `withLogger` / `Logger.current` APIs.
+        .package(url: "https://github.com/apple/swift-log", from: "1.14.0"),
         .package(url: "https://github.com/apple/swift-se0270-range-set.git", from: "1.0.1"),
     ],
     targets: [
@@ -87,6 +88,7 @@ let package = Package(
             dependencies: [
                 .target(name: "IMAPCommands"),
                 .target(name: "NIOIMAP"),
+                .product(name: "Logging", package: "swift-log"),
             ]
         ),
     ]

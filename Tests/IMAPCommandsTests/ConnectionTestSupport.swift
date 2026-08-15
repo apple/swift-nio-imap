@@ -12,6 +12,7 @@
 //
 //===----------------------------------------------------------------------===//
 
+import Logging
 import NIO
 import Synchronization
 
@@ -212,5 +213,65 @@ private final class GreetAndStayOpenHandler: ChannelInboundHandler {
 
     func channelRead(context: ChannelHandlerContext, data: NIOAny) {
         // Ignore everything the client sends; stay open until the client disconnects.
+    }
+}
+
+// MARK: - Log capture
+
+/// Collects the log records written through the `RecordingLogHandler` it hands out.
+///
+/// Log handlers are value types that get copied as a `Logger` is passed around and mutated, so
+/// the records have to accumulate in shared storage behind a reference.
+final class LogRecorder: Sendable {
+    struct Record: Sendable {
+        var level: Logger.Level
+        var message: String
+        /// The handler's own metadata merged with the metadata passed at the log site — that is,
+        /// what a real handler would render.
+        var metadata: Logger.Metadata
+    }
+
+    private let storage = Mutex<[Record]>([])
+
+    /// A handler that appends everything it is given to this recorder.
+    var handler: RecordingLogHandler {
+        RecordingLogHandler(recorder: self)
+    }
+
+    var records: [Record] {
+        storage.withLock { $0 }
+    }
+
+    /// The records whose message is exactly `message`.
+    func records(message: String) -> [Record] {
+        records.filter { $0.message == message }
+    }
+
+    func append(_ record: Record) {
+        storage.withLock { $0.append(record) }
+    }
+}
+
+/// A `LogHandler` that records into a ``LogRecorder`` instead of writing anywhere.
+struct RecordingLogHandler: LogHandler {
+    let recorder: LogRecorder
+    var metadata: Logger.Metadata = [:]
+    var logLevel: Logger.Level = .trace
+
+    subscript(metadataKey key: String) -> Logger.Metadata.Value? {
+        get { metadata[key] }
+        set { metadata[key] = newValue }
+    }
+
+    func log(event: LogEvent) {
+        // Merging is the handler's job in swift-log, so do it here: it is the only way the
+        // metadata bound onto the logger (`imap.connection`) shows up in a record.
+        var merged = self.metadata
+        for (key, value) in event.metadata ?? [:] {
+            merged[key] = value
+        }
+        recorder.append(
+            LogRecorder.Record(level: event.level, message: "\(event.message)", metadata: merged)
+        )
     }
 }

@@ -28,6 +28,17 @@ import Synchronization
 /// }
 /// ```
 ///
+/// Diagnostics go to the task-local `Logger.current`, so wrap the connection in `withLogger(_:)`
+/// to direct them:
+///
+/// ```swift
+/// try await withLogger(myLogger) { _ in
+///     try await IMAPConnection.withConnection(configuration: myConfig) { greeting, connection in
+///         // Use connection here.
+///     }
+/// }
+/// ```
+///
 /// - Important: IMAP does not tag untagged responses, so while commands are pipelined every
 ///   untagged `Response` is delivered to _all_ in-flight command handlers (see
 ///   ``send(_:isolation:_:)``). Handlers must act only on the responses they care about.
@@ -36,12 +47,42 @@ public final class IMAPConnection: Sendable {
         configuration: Configuration
     ) {
         self.configuration = configuration
+        let id = Self.nextConnectionID.wrappingAdd(1, ordering: .relaxed).oldValue
+        self.connectionID = id
+        // Captured once, rather than read at each log site: `close(reason:)` and the response
+        // streams can be driven from any of the connection's tasks — or from the caller's — and
+        // the connection's own diagnostics should not vary with whichever `withLogger` scope
+        // happens to be active there.
+        var logger = Logger.current
+        // An opaque counter, so that lines from concurrent connections can be told apart. The
+        // endpoint deliberately does not go in here: a hostname can identify a person, and
+        // swift-log has no redaction a library can rely on — `Logger.MetadataValueAttributes`
+        // is only honoured by handlers that opt into inspecting it.
+        logger[metadataKey: "imap.connection"] = "\(id)"
+        self.logger = logger
         self.outboundWriter = OutboundQueue()
     }
 
+    /// Hands out the `imap.connection` identifier that distinguishes each connection's log lines.
+    private static let nextConnectionID = Atomic<UInt64>(1)
+
     let configuration: Configuration
+    /// Identifies this connection in log metadata. Not derived from anything user-identifying.
+    let connectionID: UInt64
+    /// The logger the connection was created in the scope of, tagged with ``connectionID``.
+    let logger: Logger
     private let outboundWriter: OutboundQueue
     private let state = Mutex(State())
+
+    /// Logger metadata identifying a command running on this connection.
+    ///
+    /// Both keys are needed: tags restart at `A1` on every connection, so the tag alone does not
+    /// identify a command in an app that has more than one connection open.
+    func loggerMetadata(for tag: Tag) -> Logger.Metadata {
+        var metadata = tag.loggerMetadata
+        metadata["imap.connection"] = "\(connectionID)"
+        return metadata
+    }
 
     struct State: Sendable {
         var perCommandResponseStreams = PerCommandResponseStream()
@@ -58,6 +99,11 @@ public final class IMAPConnection: Sendable {
     /// non-`Sendable` state, and it runs in the caller’s isolation domain.
     ///
     /// The connection closes when the `body` closure returns or throws.
+    ///
+    /// Connection diagnostics are logged to the task-local `Logger.current`, which the connection
+    /// captures for its lifetime. Bind one with `withLogger(_:)` around this call to observe them;
+    /// lifecycle and per-command diagnostics are emitted at the `.debug` and `.trace` levels, so
+    /// they are suppressed unless the logger's log level admits them.
     ///
     /// - Note: A failing connection does _not_ cancel `body`. Instead, the failure surfaces the
     ///   next time `body` interacts with the connection: pending and subsequent
@@ -89,12 +135,12 @@ public final class IMAPConnection: Sendable {
                 // Wait for the greeting:
                 let greeting = try await connection.greeting
                 let result = try await body(greeting, connection)
-                connection.configuration.logger.debug("Closing connection after body completed")
+                connection.logger.debug("Closing connection after body completed")
                 connection.close(reason: .closed)
                 group.cancelAll()
                 return result
             } catch {
-                connection.configuration.logger.debug(
+                connection.logger.debug(
                     "Closing connection after body threw",
                     metadata: ["error": "\(error)"]
                 )
@@ -124,6 +170,9 @@ public final class IMAPConnection: Sendable {
     ///   (which `waitForCompletion()` waits for) is specific to this command. This is
     ///   inherent to the protocol and how pipelining works; when you send commands
     ///   concurrently, each handler must inspect only the responses it actually cares about.
+    /// - Note: The handler runs with the command's tag bound to the task-local logger, so
+    ///   anything it logs through `Logger.current` carries `imap.tag` and `imap.connection`
+    ///   metadata keys.
     public func send<Result: _IMAPClosureResult>(
         _ command: Command,
         isolation: isolated (any Actor)? = #isolation,
@@ -140,7 +189,9 @@ public final class IMAPConnection: Sendable {
             )
         )
 
-        return try await handler(tag, ResponseStream(underlying: responseStream))
+        return try await withLogger(mergingMetadata: loggerMetadata(for: tag)) { _ in
+            try await handler(tag, ResponseStream(underlying: responseStream))
+        }
     }
 
     /// Sends an `IDLE` command to the server.
@@ -168,7 +219,9 @@ public final class IMAPConnection: Sendable {
 
         let result: Result
         do {
-            result = try await handler(tag, ResponseStream(underlying: responseStream))
+            result = try await withLogger(mergingMetadata: loggerMetadata(for: tag)) { _ in
+                try await handler(tag, ResponseStream(underlying: responseStream))
+            }
         } catch {
             // Best-effort: leave IDLE even when the handler fails, so a caller
             // that catches the error and keeps using the connection doesn't
@@ -205,11 +258,13 @@ public final class IMAPConnection: Sendable {
         )
 
         do {
-            return try await handler(
-                tag,
-                ResponseStream(underlying: responseStream),
-                ContinuationWriter(underlying: outboundWriter)
-            )
+            return try await withLogger(mergingMetadata: loggerMetadata(for: tag)) { _ in
+                try await handler(
+                    tag,
+                    ResponseStream(underlying: responseStream),
+                    ContinuationWriter(underlying: outboundWriter)
+                )
+            }
         } catch {
             // There is no clean way to abort an in-progress AUTHENTICATE exchange (the
             // `*` cancellation cannot be expressed through a base64 continuation
@@ -298,18 +353,20 @@ public final class IMAPConnection: Sendable {
         // waiting for the rest of it, and no other command can be sent on this connection.
         var didCompleteCommand = false
         do {
-            // The `consuming` ownership of the closure parameter is spelled out
-            // explicitly: Swift 6.0 otherwise infers it as `borrowing` here and
-            // rejects handing it on to `AppendWriter.withAppendWriter`.
-            return try await outboundWriter.withAppendWriter {
-                (writer: consuming OutboundQueue.AppendQueueWriter) in
-                try await AppendWriter.withAppendWriter(
-                    tag: "\(tag)",
-                    appendingTo: mailbox,
-                    underlying: writer,
-                    didCompleteCommand: &didCompleteCommand
-                ) { innerWriter in
-                    try await body(tag, ResponseStream(underlying: responseStream), &innerWriter)
+            return try await withLogger(mergingMetadata: loggerMetadata(for: tag)) { _ in
+                // The `consuming` ownership of the closure parameter is spelled out
+                // explicitly: it is otherwise inferred as `borrowing` here, which cannot be
+                // handed on to `AppendWriter.withAppendWriter`.
+                try await outboundWriter.withAppendWriter {
+                    (writer: consuming OutboundQueue.AppendQueueWriter) in
+                    try await AppendWriter.withAppendWriter(
+                        tag: "\(tag)",
+                        appendingTo: mailbox,
+                        underlying: writer,
+                        didCompleteCommand: &didCompleteCommand
+                    ) { innerWriter in
+                        try await body(tag, ResponseStream(underlying: responseStream), &innerWriter)
+                    }
                 }
             }
         } catch {
@@ -319,7 +376,7 @@ public final class IMAPConnection: Sendable {
             // The command was started but never finished. There is no way to abort it — sending
             // anything but the remaining append data would be a protocol violation — so the
             // connection is unusable.
-            configuration.logger.debug(
+            logger.debug(
                 "Closing connection after APPEND was left incomplete",
                 metadata: ["error": "\(error)"]
             )
@@ -412,7 +469,7 @@ extension IMAPConnection {
         let configuration = self.configuration
         return try await ClientBootstrap(group: MultiThreadedEventLoopGroup.sharedEventLoopGroup)
             .connect(endpoint: configuration.endpoint)
-            .flatMap { [configuration] channel in
+            .flatMap { [configuration, logger] channel in
                 channel.eventLoop.makeCompletedFuture {
                     var handlers: [ChannelHandler] = []
                     if configuration.useTLS {
@@ -427,8 +484,8 @@ extension IMAPConnection {
                     case .noLogging:
                         break
                     case .logging:
-                        handlers.append(makeInboundDebugHandler(name: "A"))
-                        handlers.append(makeOutboundDebugHandler(name: "A"))
+                        handlers.append(makeInboundDebugHandler(logger: logger))
+                        handlers.append(makeOutboundDebugHandler(logger: logger))
                     }
                     handlers.append(IMAPClientHandler())
                     try channel.pipeline.syncOperations.addHandlers(handlers)
@@ -512,7 +569,7 @@ extension IMAPConnection {
             }
             close(reason: .closed)
         } catch {
-            configuration.logger.debug(
+            logger.debug(
                 "Closing connection after inbound error",
                 metadata: ["error": "\(error)"]
             )
@@ -549,12 +606,12 @@ extension IMAPConnection {
     private func close(reason: CloseReason) {
         state.withLock { state in
             state.markAsClosed(reason: reason)
-        }.run(logger: configuration.logger)
+        }.run(logger: logger)
         outboundWriter.close()
     }
 
     private func commandDidComplete(response: TaggedResponse) throws {
-        configuration.logger.trace("Command did complete", metadata: ["tag": "\(response.tag)"])
+        logger.trace("Command did complete", metadata: ["imap.tag": "\(response.tag)"])
         try state.withLock { state in
             state.perCommandResponseStreams.popCompletedCommand(response: response)
         }.run()
@@ -782,7 +839,10 @@ extension IMAPConnection.PerCommandResponseStream {
                 break
             case .finishContinuations(let continuations, let error):
                 for (tag, c) in continuations {
-                    logger.debug("Command was still running when connection was closed", metadata: ["tag": "\(tag)"])
+                    logger.debug(
+                        "Command was still running when connection was closed",
+                        metadata: ["imap.tag": "\(tag)"]
+                    )
                     c.yield(with: .failure(error))
                     c.finish()
                 }

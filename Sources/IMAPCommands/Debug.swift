@@ -12,75 +12,49 @@
 //
 //===----------------------------------------------------------------------===//
 
+import Logging
 import NIO
 import NIOExtras
-#if canImport(Darwin)
-import Darwin
-#elseif canImport(Glibc)
-import Glibc
-#elseif canImport(Musl)
-import Musl
-#endif
 
-/// Creates a channel handler that logs inbound events to standard error.
+/// Creates a channel handler that logs inbound channel events to `logger` at the `.trace` level.
+///
+/// The event description includes the data that was read, so these lines carry message content
+/// and anything else the server sends. See ``IMAPConnection/Configuration/Logging/logging``.
+///
+/// - Parameter logger: The logger to write to. Channel handlers run on the event loop, outside
+///   any task, so `Logger.current` is not meaningful there and the logger has to be passed in.
 public func makeInboundDebugHandler(
-    name: String
+    logger: Logger
 ) -> some ChannelHandler {
     DebugInboundEventsHandler(
         logger: { event, _ in
-            debugLog(
-                name: name,
-                event: event
+            logger.trace(
+                "Inbound channel event",
+                metadata: ["imap.event": "\(eventDescription(event))"]
             )
         }
     )
 }
 
-/// Creates a channel handler that logs outbound events to standard error.
+/// Creates a channel handler that logs outbound channel events to `logger` at the `.trace` level.
+///
+/// The event description includes the data that was written, so these lines carry the commands
+/// sent to the server — including credentials.
+/// See ``IMAPConnection/Configuration/Logging/logging``.
+///
+/// - Parameter logger: The logger to write to. Channel handlers run on the event loop, outside
+///   any task, so `Logger.current` is not meaningful there and the logger has to be passed in.
 public func makeOutboundDebugHandler(
-    name: String
+    logger: Logger
 ) -> some ChannelHandler {
     DebugOutboundEventsHandler(
         logger: { event, _ in
-            debugLog(
-                name: name,
-                event: event
+            logger.trace(
+                "Outbound channel event",
+                metadata: ["imap.event": "\(eventDescription(event))"]
             )
         }
     )
-}
-
-private func debugLog(
-    name: String,
-    event: DebugInboundEventsHandler.Event
-) {
-    writeStatus("\(name): Event <- \(eventDescription(event))")
-}
-
-private func debugLog(
-    name: String,
-    event: DebugOutboundEventsHandler.Event
-) {
-    writeStatus("\(name): Event -> \(eventDescription(event))")
-}
-
-/// Writes the given text to standard error.
-///
-/// This writes to the file descriptor directly: the C `stderr` stream is a mutable global,
-/// and hence not usable from concurrent code.
-func writeStatus(_ output: String, terminator: String = "\n") {
-    var text = output + terminator
-    text.withUTF8 { bytes in
-        guard var pointer = bytes.baseAddress else { return }
-        var remaining = bytes.count
-        while 0 < remaining {
-            // Debug output is best effort: give up when the write fails instead of retrying.
-            let written = write(2, pointer, remaining)
-            guard 0 < written else { break }
-            pointer += written
-            remaining -= written
-        }
-    }
 }
 
 private func eventDescription(
