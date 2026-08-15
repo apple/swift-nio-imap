@@ -551,7 +551,7 @@ extension Capability {
     ///
     /// - SeeAlso: [RFC 4959](https://datatracker.ietf.org/doc/html/rfc4959)
     public static func authenticate(_ type: AuthenticationMechanism) -> Self {
-        Self("AUTH=\(type.rawValue)")
+        Self("AUTH=\(String(type))")
     }
 
     /// Creates a `CONTEXT=<kind>` capability for the specified search or sort context.
