@@ -110,7 +110,7 @@ public final class IMAPConnection: Sendable {
     ///   ``ResponseStream``s and ``send(_:_:)`` calls fail with the underlying error.
     ///   A `body` that neither returns nor touches the connection again keeps
     ///   `withConnection(configuration:_:)` from returning.
-    public static func withConnection<Result: _IMAPClosureResult>(
+    public static func withConnection<Result>(
         configuration: Configuration,
         _ body: nonisolated(nonsending) (Greeting, IMAPConnection) async throws -> Result
     ) async throws -> Result {
@@ -172,7 +172,7 @@ public final class IMAPConnection: Sendable {
     /// - Note: The handler runs with the command's tag bound to the task-local logger, so
     ///   anything it logs through `Logger.current` carries `imap.tag` and `imap.connection`
     ///   metadata keys.
-    public func send<Result: _IMAPClosureResult>(
+    public func send<Result>(
         _ command: Command,
         _ handler: nonisolated(nonsending) (Tag, ResponseStream) async throws -> Result
     ) async throws -> Result {
@@ -200,7 +200,7 @@ public final class IMAPConnection: Sendable {
     /// - Important: The command’s `TaggedResponse` only arrives _after_ `DONE`, so the handler
     ///   must not wait for the command to complete — use the stream to observe untagged
     ///   responses and return once you want to stop idling.
-    public func sendIdle<Result: _IMAPClosureResult>(
+    public func sendIdle<Result>(
         _ handler: nonisolated(nonsending) (Tag, ResponseStream) async throws -> Result
     ) async throws -> Result {
         let (tag, responseStream) = try state.withLock { state in
@@ -234,7 +234,7 @@ public final class IMAPConnection: Sendable {
     /// Sends an `AUTHENTICATE` command to the server.
     ///
     /// Use the ``ContinuationWriter`` to respond to authentication challenges.
-    public func sendAuthenticate<Result: _IMAPClosureResult>(
+    public func sendAuthenticate<Result>(
         mechanism: AuthenticationMechanism,
         initialResponse: InitialResponse?,
         _ handler: nonisolated(nonsending) (Tag, ResponseStream, borrowing ContinuationWriter) async throws -> Result
@@ -335,7 +335,7 @@ public final class IMAPConnection: Sendable {
     ///     command's responses. It also receives the ``Tag`` that identifies this command in the
     ///     `TaggedResponse` completing it.
     /// - Returns: The value `body` returns.
-    public func append<Result: _IMAPClosureResult>(
+    public func append<Result>(
         to mailbox: MailboxName,
         _ body: nonisolated(nonsending) (Tag, ResponseStream, inout AppendWriter) async throws -> Result
     ) async throws -> Result {

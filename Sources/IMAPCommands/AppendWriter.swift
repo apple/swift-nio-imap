@@ -49,7 +49,7 @@ extension IMAPConnection {
             self.state = state
         }
 
-        static func withAppendWriter<R: _IMAPClosureResult>(
+        static func withAppendWriter<R>(
             tag: String,
             appendingTo mailbox: MailboxName,
             underlying: consuming OutboundQueue.AppendQueueWriter,

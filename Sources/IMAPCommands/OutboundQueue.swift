@@ -307,7 +307,7 @@ extension OutboundQueue {
         }
     }
 
-    func withAppendWriter<R: _IMAPClosureResult>(
+    func withAppendWriter<R>(
         _ closure: nonisolated(nonsending) (consuming AppendQueueWriter) async throws -> R
     ) async throws -> R {
         // Try to create a writer:

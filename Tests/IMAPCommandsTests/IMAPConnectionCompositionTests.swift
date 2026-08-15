@@ -155,11 +155,6 @@ struct IMAPConnectionCompositionTests {
         #expect(steps.isEmpty)
     }
 
-    // A closure may also _return_ non-`Sendable` state: it runs in the caller's isolation
-    // domain, so what it returns never leaves that domain. Swift 6.0 and 6.1 reject that and
-    // require the result to be `Sendable` — see ``_IMAPClosureResult`` — which is why this one
-    // is compiled conditionally.
-    #if compiler(>=6.2)
     /// Closures return their results into the caller's isolation domain, so a non-`Sendable`
     /// result is fine.
     @Test(.timeLimit(.minutes(1)))
@@ -178,7 +173,6 @@ struct IMAPConnectionCompositionTests {
             #expect(recorder.lines.isEmpty)
         }
     }
-    #endif
 
     /// And from a custom actor, whose isolation the closures pick up.
     @Test(.timeLimit(.minutes(1)))
