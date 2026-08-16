@@ -44,7 +44,7 @@ struct AppendDataTests {
         fixture.checkEncoding()
     }
 
-    #if swift(>=6.2) && !os(iOS) && !os(watchOS) && !os(tvOS) && !os(visionOS)
+    #if !os(iOS) && !os(watchOS) && !os(tvOS) && !os(visionOS)
     @Test("encode in server mode calls preconditionFailure")
     func encodeInServerModeCallsPreconditionFailure() async {
         await #expect(

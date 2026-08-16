@@ -1,0 +1,379 @@
+//===----------------------------------------------------------------------===//
+//
+// This source file is part of the SwiftNIO open source project
+//
+// Copyright (c) 2026 Apple Inc. and the SwiftNIO project authors
+// Licensed under Apache License v2.0
+//
+// See LICENSE.txt for license information
+// See CONTRIBUTORS.txt for the list of SwiftNIO project authors
+//
+// SPDX-License-Identifier: Apache-2.0
+//
+//===----------------------------------------------------------------------===//
+
+@testable import IMAPCommands
+import Logging
+import NIO
+import NIOIMAP
+import Synchronization
+import Testing
+
+/// Regression tests for `IMAPConnection`'s connection lifecycle.
+///
+/// - Important: These open real sockets, so they cannot run in a sandboxed
+///   environment (socket `bind`/`connect` fail with errno 1). Run them manually.
+@Suite("IMAPConnection lifecycle")
+enum IMAPConnectionLifecycleTests {
+
+    /// Bug #1: When the server closes the connection gracefully (EOF) while a command
+    /// is in flight, the inbound read loop exits without calling `close()`, so the
+    /// outbound task stays parked and the in-flight command's response stream is never
+    /// finished. `withConnection` then stalls forever instead of failing the command.
+    @Test(.timeLimit(.minutes(3)))
+    static func gracefulEOFWhileAwaitingResponseDoesNotStall() async throws {
+        let server = try await LoopbackServer.greetThenCloseOnFirstCommand()
+        defer { server.shutdown() }
+
+        let configuration = IMAPConnection.Configuration(
+            hostname: "127.0.0.1",
+            port: server.port,
+            useTLS: false,
+            logging: .noLogging
+        )
+
+        let outcome = Mutex<String>("did-not-run")
+        let finished = await finishesWithoutStalling {
+            do {
+                try await IMAPConnection.withConnection(configuration: configuration) { _, connection in
+                    try await connection.send(.noop) { _, responses in
+                        _ = try await responses.waitForCompletion()
+                    }
+                }
+                outcome.withLock { $0 = "returned" }
+            } catch {
+                outcome.withLock { $0 = "threw" }
+            }
+        }
+
+        #expect(
+            finished,
+            "withConnection stalled after the server closed the connection (graceful EOF) while a command was awaiting its tagged response."
+        )
+        // Once fixed, the in-flight command fails with a connection-closed error, so
+        // `withConnection` propagates that error rather than completing successfully.
+        #expect(
+            outcome.withLock { $0 } == "threw",
+            "The in-flight command should fail with a connection-closed error."
+        )
+    }
+
+    /// Bug #2: When the channel fails to open (e.g. connection refused), `run()`
+    /// propagates the error before `close()` is ever called, so the greeting
+    /// continuation the `body` task is parked on is never resumed. Because the greeting
+    /// getter is not cancellation-aware, the structured task group can never finish and
+    /// `withConnection` stalls instead of throwing the connection error.
+    @Test(.timeLimit(.minutes(3)))
+    static func connectFailureThrowsInsteadOfStalling() async throws {
+        // Port 1 is (essentially) always closed on loopback, so the connect is refused.
+        let configuration = IMAPConnection.Configuration(
+            hostname: "127.0.0.1",
+            port: 1,
+            useTLS: false,
+            logging: .noLogging
+        )
+
+        let outcome = Mutex<String>("did-not-run")
+        let finished = await finishesWithoutStalling {
+            do {
+                try await IMAPConnection.withConnection(configuration: configuration) { _, _ in
+                    // Should never get here — the connection can't be established.
+                }
+                outcome.withLock { $0 = "returned" }
+            } catch {
+                outcome.withLock { $0 = "threw" }
+            }
+        }
+
+        #expect(
+            finished,
+            "withConnection stalled when the connection could not be established, instead of throwing the connection error."
+        )
+        #expect(
+            outcome.withLock { $0 } == "threw",
+            "Failing to connect should surface as a thrown error from withConnection."
+        )
+    }
+
+    /// When the `AUTHENTICATE` handler throws mid-exchange there is no way to cleanly
+    /// abort the exchange, so `sendAuthenticate` closes the connection. A subsequent
+    /// command must then fail fast rather than write on a half-authenticated connection.
+    @Test(.timeLimit(.minutes(3)))
+    static func authenticateHandlerThrowClosesConnection() async throws {
+        let server = try await LoopbackServer.greetThenStayOpen()
+        defer { server.shutdown() }
+
+        let configuration = IMAPConnection.Configuration(
+            hostname: "127.0.0.1",
+            port: server.port,
+            useTLS: false,
+            logging: .noLogging
+        )
+
+        struct HandlerError: Swift.Error {}
+
+        let handlerThrew = Mutex(false)
+        let secondCommandFailed = Mutex(false)
+
+        let finished = await finishesWithoutStalling {
+            do {
+                try await IMAPConnection.withConnection(configuration: configuration) { _, connection in
+                    do {
+                        try await connection.sendAuthenticate(
+                            mechanism: .plain,
+                            initialResponse: nil
+                        ) { _, _, _ -> Void in
+                            throw HandlerError()
+                        }
+                    } catch is HandlerError {
+                        handlerThrew.withLock { $0 = true }
+                    }
+                    // sendAuthenticate should have closed the connection, so a follow-up
+                    // command must fail fast rather than run on a half-authenticated
+                    // connection.
+                    do {
+                        try await connection.send(.noop) { _, responses in
+                            _ = try await responses.waitForCompletion()
+                        }
+                    } catch {
+                        secondCommandFailed.withLock { $0 = true }
+                    }
+                }
+            } catch {
+                // withConnection may also rethrow once the connection is closed.
+            }
+        }
+
+        #expect(finished, "withConnection stalled after the AUTHENTICATE handler threw.")
+        #expect(handlerThrew.withLock { $0 }, "The AUTHENTICATE handler error should propagate.")
+        #expect(
+            secondCommandFailed.withLock { $0 },
+            "After the AUTHENTICATE handler threw, sendAuthenticate should have closed the connection so a subsequent command fails."
+        )
+    }
+
+    /// A failing connection must not cancel the `body`. The failure has to surface through
+    /// the connection instead: the in-flight command fails, and so does every command after
+    /// it — but `body` keeps running and its result is what `withConnection` returns.
+    @Test(.timeLimit(.minutes(3)))
+    static func connectionFailureSurfacesThroughTheConnectionRatherThanCancellingTheBody() async throws {
+        let server = try await LoopbackServer.greetThenCloseOnFirstCommand()
+        defer { server.shutdown() }
+
+        let configuration = IMAPConnection.Configuration(
+            hostname: "127.0.0.1",
+            port: server.port,
+            useTLS: false,
+            logging: .noLogging
+        )
+
+        let outcome = Mutex<String>("did-not-run")
+        let finished = await finishesWithoutStalling {
+            do {
+                // Note that `steps` is a plain, mutable local: the body is neither
+                // `@Sendable` nor `@escaping`, so it can capture non-`Sendable` state.
+                var steps: [String] = []
+                let result = try await IMAPConnection.withConnection(configuration: configuration) { _, connection in
+                    do {
+                        try await connection.send(.noop) { _, responses in
+                            _ = try await responses.waitForCompletion()
+                        }
+                        steps.append("first-succeeded")
+                    } catch {
+                        steps.append("first-failed")
+                    }
+                    // The connection failed, but this task was not cancelled by it.
+                    steps.append(Task.isCancelled ? "cancelled" : "still-running")
+                    // Interacting with the failed connection keeps failing.
+                    do {
+                        try await connection.send(.noop) { _, responses in
+                            _ = try await responses.waitForCompletion()
+                        }
+                        steps.append("second-succeeded")
+                    } catch {
+                        steps.append("second-failed")
+                    }
+                    return steps.joined(separator: ",")
+                }
+                outcome.withLock { $0 = result }
+            } catch {
+                outcome.withLock { $0 = "threw: \(error)" }
+            }
+        }
+
+        #expect(finished, "withConnection stalled after the server closed the connection.")
+        #expect(
+            outcome.withLock { $0 } == "first-failed,still-running,second-failed",
+            "The connection failure should surface through the connection, not as cancellation of the body."
+        )
+    }
+
+    /// A closure that throws part-way through an `APPEND` leaves the command unfinished, and
+    /// the protocol offers no way to abort it. `append` therefore closes the connection, so
+    /// that a subsequent command fails instead of being written into the middle of the
+    /// half-sent `APPEND`.
+    @Test(.timeLimit(.minutes(3)))
+    static func appendClosureThrowClosesConnection() async throws {
+        let server = try await LoopbackServer.greetThenStayOpen()
+        defer { server.shutdown() }
+
+        let configuration = IMAPConnection.Configuration(
+            hostname: "127.0.0.1",
+            port: server.port,
+            useTLS: false,
+            logging: .noLogging
+        )
+
+        struct WriterError: Swift.Error {}
+
+        let outcome = Mutex<String>("did-not-run")
+        let finished = await finishesWithoutStalling {
+            do {
+                var steps: [String] = []
+                let result = try await IMAPConnection.withConnection(configuration: configuration) { _, connection in
+                    do {
+                        _ = try await connection.append(to: MailboxName(Array("INBOX".utf8))) { _, _, _ in
+                            throw WriterError()
+                        }
+                        steps.append("append-succeeded")
+                    } catch is WriterError {
+                        steps.append("append-threw")
+                    }
+                    do {
+                        try await connection.send(.noop) { _, responses in
+                            _ = try await responses.waitForCompletion()
+                        }
+                        steps.append("noop-succeeded")
+                    } catch {
+                        steps.append("noop-failed")
+                    }
+                    return steps.joined(separator: ",")
+                }
+                outcome.withLock { $0 = result }
+            } catch {
+                outcome.withLock { $0 = "threw: \(error)" }
+            }
+        }
+
+        #expect(finished, "withConnection stalled after the APPEND closure threw.")
+        #expect(
+            outcome.withLock { $0 } == "append-threw,noop-failed",
+            "An aborted APPEND should propagate its error and close the connection."
+        )
+    }
+
+    /// Command handlers run with the command's tag merged into the task-local logger, so a
+    /// handler can log through `Logger.current` and have its lines attributed to the command
+    /// without the tag being threaded through by hand. The logger the connection was created
+    /// in the scope of has to be the base that tag is merged onto.
+    @Test(.timeLimit(.minutes(3)))
+    static func commandHandlersSeeTheCommandTagInTheTaskLocalLogger() async throws {
+        let server = try await LoopbackServer.greetThenStayOpen()
+        defer { server.shutdown() }
+
+        let configuration = IMAPConnection.Configuration(
+            hostname: "127.0.0.1",
+            port: server.port,
+            useTLS: false,
+            logging: .noLogging
+        )
+
+        /// What the handler saw of the logger that was current while it ran.
+        struct Observation: Sendable {
+            var tag: String
+            var tagMetadata: String?
+            var connectionMetadata: String?
+            var label: String
+            var enclosingMetadata: String?
+        }
+
+        let observed = Mutex<Observation?>(nil)
+
+        let finished = await finishesWithoutStalling {
+            var outer = Logger(label: "test.outer")
+            outer[metadataKey: "test.scope"] = "outer"
+
+            _ = await withLogger(outer) { _ in
+                // The connection fails once the body returns; the handler has already run.
+                try? await IMAPConnection.withConnection(configuration: configuration) { _, connection in
+                    // The server never replies, so the handler must not wait for completion.
+                    try await connection.send(.noop) { tag, _ in
+                        let current = Logger.current
+                        observed.withLock {
+                            $0 = Observation(
+                                tag: "\(tag)",
+                                tagMetadata: current[metadataKey: "imap.tag"].map { "\($0)" },
+                                connectionMetadata: current[metadataKey: "imap.connection"].map { "\($0)" },
+                                label: current.label,
+                                enclosingMetadata: current[metadataKey: "test.scope"].map { "\($0)" }
+                            )
+                        }
+                    }
+                }
+            }
+        }
+
+        #expect(finished, "The command handler stalled.")
+        guard let seen = observed.withLock({ $0 }) else {
+            Issue.record("The command handler did not run.")
+            return
+        }
+        // The tag the handler was handed is the one bound as metadata.
+        #expect(
+            seen.tagMetadata == seen.tag,
+            "The handler's `imap.tag` metadata should be the tag it was given."
+        )
+        // A tag only identifies a command together with the connection it belongs to.
+        #expect(seen.connectionMetadata != nil, "The handler should also see `imap.connection`.")
+        // The tag is *merged onto* the enclosing logger rather than replacing it.
+        #expect(seen.label == "test.outer", "The enclosing logger should be the base.")
+        #expect(seen.enclosingMetadata == "outer", "Enclosing metadata should be preserved.")
+    }
+
+    /// The connection logs its own diagnostics to the logger that was current when it was
+    /// created — not to whatever `withLogger` scope happens to be active at the log site — and
+    /// tags them so that lines from concurrent connections can be told apart.
+    @Test(.timeLimit(.minutes(3)))
+    static func connectionDiagnosticsGoToTheLoggerCapturedAtCreation() async throws {
+        // Port 1 is (essentially) always closed on loopback, so this needs no server: the
+        // connect is refused, the greeting fails, and `withConnection` logs on its way out.
+        let configuration = IMAPConnection.Configuration(
+            hostname: "127.0.0.1",
+            port: 1,
+            useTLS: false,
+            logging: .noLogging
+        )
+
+        let recorder = LogRecorder()
+        let finished = await finishesWithoutStalling {
+            // Replaces the handler and level of the current logger, which needs no
+            // `LoggingSystem.bootstrap` — that is global state a test cannot own.
+            _ = await withLogger(logLevel: .trace, handler: recorder.handler) { _ in
+                try? await IMAPConnection.withConnection(configuration: configuration) { _, _ in
+                    Issue.record("The body should not run: the connection cannot be established.")
+                }
+            }
+        }
+
+        #expect(finished, "withConnection stalled.")
+        let closing = recorder.records(message: "Closing connection after body threw")
+        #expect(closing.count == 1, "Expected one closing diagnostic, got: \(recorder.records)")
+        guard let record = closing.first else { return }
+        #expect(record.level == .debug, "Lifecycle diagnostics belong at `.debug`.")
+        #expect(record.metadata["error"] != nil, "The diagnostic should say what went wrong.")
+        #expect(
+            record.metadata["imap.connection"] != nil,
+            "Connection diagnostics should identify their connection: \(record.metadata)"
+        )
+    }
+}

@@ -68,7 +68,7 @@ struct ModificationSequenceValueTests {
         #expect(advanced == end)
     }
 
-    #if swift(>=6.2) && !os(iOS) && !os(watchOS) && !os(tvOS) && !os(visionOS)
+    #if !os(iOS) && !os(watchOS) && !os(tvOS) && !os(visionOS)
     @Test("overflow triggers precondition failure") func overflowPreconditionFailure() async {
         await #expect(
             processExitsWith: ExitTest.Condition.failure,

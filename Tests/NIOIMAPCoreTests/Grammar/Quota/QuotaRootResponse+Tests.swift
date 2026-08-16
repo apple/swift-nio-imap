@@ -20,12 +20,12 @@ import Testing
 struct QuotaRootResponseTests {
     @Test(arguments: [
         EncodeFixture.quotaRootResponse(
-            MailboxName("INBOX"),
+            .inbox,
             QuotaRoot("Root"),
             #"QUOTAROOT "INBOX" "Root""#
         ),
         EncodeFixture.quotaRootResponse(
-            MailboxName("INBOX"),
+            .inbox,
             QuotaRoot("#user/alice"),
             ##"QUOTAROOT "INBOX" "#user/alice""##
         ),
