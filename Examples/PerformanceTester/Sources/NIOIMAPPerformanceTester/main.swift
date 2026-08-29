@@ -66,12 +66,12 @@ let commands: [(String, Command)] = [
             []
         )
     ),
-    ("parse_auth_plain_nil", .authenticate(mechanism: .init("PLAIN"), initialResponse: nil)),
-    ("parse_auth_plain_empty", .authenticate(mechanism: .init("PLAIN"), initialResponse: .empty)),
+    ("parse_auth_plain_nil", .authenticate(mechanism: .plain, initialResponse: nil)),
+    ("parse_auth_plain_empty", .authenticate(mechanism: .plain, initialResponse: .empty)),
     (
         "parse_auth_plain_initial data",
         .authenticate(
-            mechanism: .init("PLAIN"),
+            mechanism: .plain,
             initialResponse: .init(ByteBuffer(string: "dGhpcyBpcyB0ZXN0IGJhc2U2NA=="))
         )
     ),
