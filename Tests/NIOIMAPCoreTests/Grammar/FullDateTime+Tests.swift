@@ -127,7 +127,7 @@ struct FullDateTimeTests {
         fixture.checkParsing()
     }
 
-    #if swift(>=6.2) && !os(iOS) && !os(watchOS) && !os(tvOS) && !os(visionOS)
+    #if !os(iOS) && !os(watchOS) && !os(tvOS) && !os(visionOS)
     @Test("invalid month triggers precondition failure") func invalidMonthPrecondition() async {
         await #expect(
             processExitsWith: ExitTest.Condition.failure,
