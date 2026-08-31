@@ -67,7 +67,8 @@ struct UInt8ParseTypeMembershipTests {
             UInt8(ascii: "%"), UInt8(ascii: "*"),  // ListWildcard
             UInt8(ascii: "\""), UInt8(ascii: "\\"),  // QuotedSpecial
         ]
-        valid = valid.union(0...31)
+        valid = valid.union(0...31)  // CTL
+        valid.insert(0x7F)  // CTL — DEL
         allChars.forEach { char in
             if valid.contains(char) {
                 #expect(char.isAtomSpecial)

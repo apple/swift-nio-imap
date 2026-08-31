@@ -25,6 +25,11 @@ private struct GrammarParserPrimitivesTests {
             ParseFixture.atom("hello", " ", expected: .success("hello")),
             ParseFixture.atom("hello", "", expected: .incompleteMessageIgnoringBufferModifications),
             ParseFixture.atom(" ", "", expected: .failureIgnoringBufferModifications),
+            // RFC 3501: atom-specials includes CTL; RFC 5234: CTL = %x00-1F / %x7F.
+            // An atom must therefore stop at DEL (0x7F) just as it does at any other CTL.
+            ParseFixture.atom("ab", "\u{7F}c\r", expected: .success("ab")),
+            ParseFixture.atom("ab", "\u{1F}c\r", expected: .success("ab")),
+            ParseFixture.atom("ab~c", "\r", expected: .success("ab~c")),
         ]
     )
     func parseAtom(_ fixture: ParseFixture<String>) {
