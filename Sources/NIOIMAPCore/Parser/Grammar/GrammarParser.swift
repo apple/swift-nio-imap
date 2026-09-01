@@ -180,6 +180,24 @@ extension GrammarParser {
         )
     }
 
+    /// RFC 3501 defines
+    /// ```
+    /// auth-type = atom
+    /// ```
+    /// but [RFC 4422 section 3.1](https://datatracker.ietf.org/doc/html/rfc4422#section-3.1)
+    /// restricts what a mechanism name may contain. ``AuthenticationMechanism/init(_:)`` enforces
+    /// that, and a name it rejects is a parse error.
+    func parseAuthenticationMechanism(
+        buffer: inout ParseBuffer,
+        tracker: StackTracker
+    ) throws -> AuthenticationMechanism {
+        let atom = try self.parseAtom(buffer: &buffer, tracker: tracker)
+        guard let mechanism = AuthenticationMechanism(atom) else {
+            throw ParserError(hint: "Invalid authentication mechanism name: \(atom)")
+        }
+        return mechanism
+    }
+
     func parseAuthenticatedURL(buffer: inout ParseBuffer, tracker: StackTracker) throws -> NetworkMessagePath {
         try PL.composite(buffer: &buffer, tracker: tracker) { buffer, tracker -> NetworkMessagePath in
             try PL.parseFixedString("imap://", buffer: &buffer, tracker: tracker)
