@@ -236,6 +236,17 @@ public enum MessageAttribute: Hashable, Sendable {
     ///
     /// - SeeAlso: [RFC 8474 IMAP4 Extension: OBJECTID](https://datatracker.ietf.org/doc/html/rfc8474)
     case threadID(ThreadID?)
+
+    /// A compound bundle of the message's object identifiers (`OBJECTID+` extension).
+    ///
+    /// Contains whichever of `EMAILID`/`THREADID` the server chooses to disclose, bundled
+    /// together in a single ``CompoundObjectID`` value. Supersedes ``emailID(_:)``/``threadID(_:)``
+    /// (RFC 8474) with this compound format.
+    ///
+    /// **Requires server capability:** ``Capability/objectIDPlus``
+    ///
+    /// - SeeAlso: `draft-ietf-mailmaint-imap-objectid-bis`
+    case objectID(CompoundObjectID)
 }
 
 extension MessageAttribute: CustomDebugStringConvertible {
@@ -287,6 +298,8 @@ extension EncodeBuffer {
             return self.writeMessageAttribute_emailID(id)
         case .threadID(let id):
             return self.writeMessageAttribute_threadID(id)
+        case .objectID(let compound):
+            return self.writeString("OBJECTID ") + self.writeCompoundObjectID(compound)
         }
     }
 

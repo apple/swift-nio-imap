@@ -425,6 +425,15 @@ extension Capability {
     /// - SeeAlso: [RFC 8474](https://datatracker.ietf.org/doc/html/rfc8474)
     public static let objectID = Self(unchecked: "OBJECTID")
 
+    /// The `OBJECTID+` capability indicates the server supports the compound `OBJECTID` response
+    /// format, the `ACCOUNTID` identifier, and identifier-based mailbox selection.
+    ///
+    /// `OBJECTID+` obsoletes ``objectID`` (RFC 8474), though a server may advertise both for
+    /// backward compatibility.
+    ///
+    /// - SeeAlso: `draft-ietf-mailmaint-imap-objectid-bis`
+    public static let objectIDPlus = Self(unchecked: "OBJECTID+")
+
     /// The `QRESYNC` capability indicates the server supports quick resynchronization for mailbox reconciliation.
     ///
     /// - SeeAlso: [RFC 7162](https://datatracker.ietf.org/doc/html/rfc7162)

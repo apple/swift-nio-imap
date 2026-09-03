@@ -66,6 +66,11 @@ struct ResponseTextCodeTests {
         EncodeFixture.responseTextCode(.noPermission, "NOPERM"),
         EncodeFixture.responseTextCode(.nonExistent, "NONEXISTENT"),
         EncodeFixture.responseTextCode(.notSaved, "NOTSAVED"),
+        EncodeFixture.responseTextCode(.objectID(CompoundObjectID()), "OBJECTID ()"),
+        EncodeFixture.responseTextCode(
+            .objectID(CompoundObjectID(mailboxID: "abc123", accountID: "def456")),
+            "OBJECTID (MAILBOXID abc123 ACCOUNTID def456)"
+        ),
         EncodeFixture.responseTextCode(.other("SOMETHING", nil), "SOMETHING"),
         EncodeFixture.responseTextCode(.other("some", "thing"), "some thing"),
         EncodeFixture.responseTextCode(.other("some", nil), "some"),
@@ -187,6 +192,11 @@ struct ResponseTextCodeTests {
         ParseFixture.responseTextCode("NONEXISTENT", expected: .success(.nonExistent)),
         ParseFixture.responseTextCode("NOPERM", expected: .success(.noPermission)),
         ParseFixture.responseTextCode("NOTSAVED", expected: .success(.notSaved)),
+        ParseFixture.responseTextCode("OBJECTID ()", expected: .success(.objectID(CompoundObjectID()))),
+        ParseFixture.responseTextCode(
+            "OBJECTID (MAILBOXID abc123 ACCOUNTID def456)",
+            expected: .success(.objectID(CompoundObjectID(mailboxID: "abc123", accountID: "def456")))
+        ),
         ParseFixture.responseTextCode("OVERQUOTA", expected: .success(.overQuota)),
         ParseFixture.responseTextCode("PARSE", expected: .success(.parse)),
         ParseFixture.responseTextCode("PERMANENTFLAGS ()", expected: .success(.permanentFlags([]))),

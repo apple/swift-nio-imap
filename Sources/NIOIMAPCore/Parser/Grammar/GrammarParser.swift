@@ -2413,10 +2413,23 @@ extension GrammarParser {
             )
         }
 
+        func parseSelectParameter_objectID(buffer: inout ParseBuffer, tracker: StackTracker) throws -> SelectParameter {
+            try PL.parseFixedString("OBJECTID", buffer: &buffer, tracker: tracker)
+            let compound = try PL.parseOptional(buffer: &buffer, tracker: tracker) {
+                (buffer, tracker) -> CompoundObjectID in
+                try PL.parseSpaces(buffer: &buffer, tracker: tracker)
+                return try self.parseCompoundObjectID(buffer: &buffer, tracker: tracker)
+            }
+            return .objectID(compound)
+        }
+
         return try PL.parseOneOf(
-            parseSelectParameter_qresync,
-            parseSelectParameter_condstore,
-            parseSelectParameter_basic,
+            [
+                parseSelectParameter_objectID,
+                parseSelectParameter_qresync,
+                parseSelectParameter_condstore,
+                parseSelectParameter_basic,
+            ],
             buffer: &buffer,
             tracker: tracker
         )
@@ -3047,6 +3060,96 @@ extension GrammarParser {
             throw ParserError(hint: "Invalid object ID.")
         }
         return objectID
+    }
+
+    // OBJECTID+
+    // objectid-key = "MAILBOXID" / "ACCOUNTID" / "EMAILID" / "THREADID" / atom
+    // objectid-kvpair = objectid-key SP objectid
+    // objectid-compound = "OBJECTID" SP "(" [objectid-kvpair *(SP objectid-kvpair)] ")"
+    func parseCompoundObjectID(buffer: inout ParseBuffer, tracker: StackTracker) throws -> CompoundObjectID {
+        enum Pair {
+            case mailboxID(MailboxID)
+            case accountID(AccountID)
+            case emailID(EmailID)
+            case threadID(ThreadID)
+            case unknown
+        }
+
+        func parsePair_mailboxID(buffer: inout ParseBuffer, tracker: StackTracker) throws -> Pair {
+            try PL.parseFixedString("MAILBOXID ", buffer: &buffer, tracker: tracker)
+            return .mailboxID(try self.parseMailboxID(buffer: &buffer, tracker: tracker))
+        }
+
+        func parsePair_accountID(buffer: inout ParseBuffer, tracker: StackTracker) throws -> Pair {
+            try PL.parseFixedString("ACCOUNTID ", buffer: &buffer, tracker: tracker)
+            return .accountID(AccountID(try self.parseObjectID(buffer: &buffer, tracker: tracker)))
+        }
+
+        func parsePair_emailID(buffer: inout ParseBuffer, tracker: StackTracker) throws -> Pair {
+            try PL.parseFixedString("EMAILID ", buffer: &buffer, tracker: tracker)
+            return .emailID(EmailID(try self.parseObjectID(buffer: &buffer, tracker: tracker)))
+        }
+
+        func parsePair_threadID(buffer: inout ParseBuffer, tracker: StackTracker) throws -> Pair {
+            try PL.parseFixedString("THREADID ", buffer: &buffer, tracker: tracker)
+            return .threadID(ThreadID(try self.parseObjectID(buffer: &buffer, tracker: tracker)))
+        }
+
+        // Unrecognised keys, and their values, are parsed and discarded: clients MUST ignore
+        // unrecognised key-value pairs so that future extensions can add new identifier types.
+        func parsePair_unknown(buffer: inout ParseBuffer, tracker: StackTracker) throws -> Pair {
+            _ = try self.parseAtom(buffer: &buffer, tracker: tracker)
+            try PL.parseSpaces(buffer: &buffer, tracker: tracker)
+            _ = try self.parseObjectID(buffer: &buffer, tracker: tracker)
+            return .unknown
+        }
+
+        func parsePair(buffer: inout ParseBuffer, tracker: StackTracker) throws -> Pair {
+            try PL.parseOneOf(
+                [
+                    parsePair_mailboxID,
+                    parsePair_accountID,
+                    parsePair_emailID,
+                    parsePair_threadID,
+                    parsePair_unknown,
+                ],
+                buffer: &buffer,
+                tracker: tracker
+            )
+        }
+
+        return try PL.composite(buffer: &buffer, tracker: tracker) { (buffer, tracker) -> CompoundObjectID in
+            try PL.parseFixedString("(", buffer: &buffer, tracker: tracker)
+
+            var pairs: [Pair] = []
+            if let first = try PL.parseOptional(buffer: &buffer, tracker: tracker, parser: parsePair) {
+                pairs.append(first)
+                try PL.parseZeroOrMore(buffer: &buffer, into: &pairs, tracker: tracker) {
+                    (buffer, tracker) -> Pair in
+                    try PL.parseSpaces(buffer: &buffer, tracker: tracker)
+                    return try parsePair(buffer: &buffer, tracker: tracker)
+                }
+            }
+
+            try PL.parseFixedString(")", buffer: &buffer, tracker: tracker)
+
+            var compound = CompoundObjectID()
+            for pair in pairs {
+                switch pair {
+                case .mailboxID(let value):
+                    compound.mailboxID = value
+                case .accountID(let value):
+                    compound.accountID = value
+                case .emailID(let value):
+                    compound.emailID = value
+                case .threadID(let value):
+                    compound.threadID = value
+                case .unknown:
+                    break
+                }
+            }
+            return compound
+        }
     }
 }
 
