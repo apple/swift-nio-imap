@@ -42,14 +42,15 @@ public final class IMAPClientHandler: ChannelDuplexHandler {
 
     public init(
         encodingOptions: EncodingOptions = .automatic,
-        parserOptions: ResponseParser.Options = ResponseParser.Options()
+        parserOptions: ResponseParser.Options = ResponseParser.Options(),
+        maximumBufferSize: Int = IMAPDefaults.lineLengthLimit
     ) {
         self.state = .init(encodingOptions: encodingOptions)
         self.decoder = NIOSingleStepByteToMessageProcessor(
             ResponseDecoder(
                 options: parserOptions
             ),
-            maximumBufferSize: IMAPDefaults.lineLengthLimit
+            maximumBufferSize: maximumBufferSize
         )
     }
 
