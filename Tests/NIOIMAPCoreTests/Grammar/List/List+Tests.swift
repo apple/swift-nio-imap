@@ -22,6 +22,21 @@ struct ListTests {
     func parseListWildcard(_ fixture: ParseFixture<String>) {
         fixture.checkParsing()
     }
+
+    @Test(
+        "parse list mailbox",
+        arguments: [
+            // RFC 3501: list-mailbox = 1*list-char / string; list-char inherits
+            // the CTL exclusion via ATOM-CHAR, and RFC 5234 has
+            // CTL = %x00-1F / %x7F, so a bare list-mailbox stops at DEL and
+            // cannot start with it.
+            ParseFixture.listMailbox("ab", "\u{7F}c\r", expected: .success("ab")),
+            ParseFixture.listMailbox("\u{7F}", "", expected: .failure),
+        ]
+    )
+    func parseListMailbox(_ fixture: ParseFixture<String>) {
+        fixture.checkParsing()
+    }
 }
 
 // MARK: -
@@ -43,6 +58,22 @@ private func wildcardFixtures() -> [ParseFixture<String>] {
 }
 
 extension ParseFixture<String> {
+    fileprivate static func listMailbox(
+        _ input: String,
+        _ terminator: String,
+        expected: Expected
+    ) -> Self {
+        ParseFixture(
+            input: input,
+            terminator: terminator,
+            expected: expected,
+            parser: {
+                let buffer = try GrammarParser().parseListMailbox(buffer: &$0, tracker: $1)
+                return String(buffer: buffer)
+            }
+        )
+    }
+
     fileprivate static func listWildcard(
         _ input: String,
         expected: Expected
