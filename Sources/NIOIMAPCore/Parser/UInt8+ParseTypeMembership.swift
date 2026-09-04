@@ -80,13 +80,10 @@ extension UInt8 {
         }
     }
 
+    /// ATOM-CHAR           = <any CHAR except atom-specials>
+    /// CHAR                = %x01-7F   ; RFC 5234
     var isAtomChar: Bool {
-        switch self {
-        case _ where self.isAtomSpecial, _ where self > 0x7F:
-            return false
-        default:
-            return self >= 32
-        }
+        !self.isAtomSpecial && self <= 0x7F
     }
 
     var isListChar: Bool {

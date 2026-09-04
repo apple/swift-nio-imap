@@ -44,11 +44,8 @@ import struct NIO.ByteBuffer
 ///
 /// - SeeAlso: [RFC 2087 Section 5.1](https://datatracker.ietf.org/doc/html/rfc2087#section-5.1)
 public struct QuotaResource: Hashable, Sendable {
-    /// The resource name being tracked.
-    ///
-    /// An atom identifying the resource type, such as `STORAGE` or `MESSAGE`. Custom resources
-    /// may be defined by implementations.
-    public var resourceName: String
+    /// The resource name being tracked, such as ``Name/storage`` or ``Name/message``.
+    public var resourceName: Name
 
     /// The current usage of the resource.
     ///
@@ -65,10 +62,10 @@ public struct QuotaResource: Hashable, Sendable {
 
     /// Creates a new `QuotaResource` with current usage and maximum limit.
     ///
-    /// - parameter resourceName: The resource name (for example, `"STORAGE"` or `"MESSAGE"`).
+    /// - parameter resourceName: The resource name (for example, ``Name/storage``).
     /// - parameter usage: The current usage of the resource.
     /// - parameter limit: The maximum allowed value for the resource.
-    public init(resourceName: String, usage: Int, limit: Int) {
+    public init(resourceName: Name, usage: Int, limit: Int) {
         self.resourceName = resourceName
         self.usage = usage
         self.limit = limit
@@ -79,6 +76,7 @@ public struct QuotaResource: Hashable, Sendable {
 
 extension EncodeBuffer {
     @discardableResult mutating func writeQuotaResource(_ quotaDetails: QuotaResource) -> Int {
-        self.writeAtom(quotaDetails.resourceName) + self.writeString(" \(quotaDetails.usage) \(quotaDetails.limit)")
+        self.writeQuotaResourceName(quotaDetails.resourceName)
+            + self.writeString(" \(quotaDetails.usage) \(quotaDetails.limit)")
     }
 }

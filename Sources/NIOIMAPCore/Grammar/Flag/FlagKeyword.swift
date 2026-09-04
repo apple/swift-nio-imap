@@ -57,31 +57,39 @@ extension Flag {
 
         /// Creates a keyword from a string.
         ///
-        /// The string must contain only valid IMAP atom characters as defined in [RFC 3501](https://datatracker.ietf.org/doc/html/rfc3501),
-        /// plus response special characters. Returns `nil` if the string contains invalid characters.
+        /// The string must be a non-empty run of valid IMAP atom characters as defined in
+        /// [RFC 3501](https://datatracker.ietf.org/doc/html/rfc3501), plus response special
+        /// characters. Returns `nil` if the string contains invalid characters.
         ///
         /// - parameter string: The keyword string. Each character must be an atom character or response special.
-        /// - returns: A new keyword, or `nil` if the string contains invalid characters.
+        /// - returns: A new keyword, or `nil` if the string is empty or contains invalid characters.
         public init?(_ string: String) {
-            /// RFC 3501 defines `flag-keyword` as `atom`,
-            /// but Gmail sends flags with `[` and `]` in them.
-            guard
-                string.utf8.allSatisfy({ (c) -> Bool in
-                    c.isAtomChar || c.isResponseSpecial
-                })
-            else { return nil }
+            guard Keyword.isValidKeyword(string) else { return nil }
             self.rawValue = string
         }
 
         init(unchecked string: String) {
-            /// RFC 3501 defines `flag-keyword` as `atom`,
-            /// but Gmail sends flags with `[` and `]` in them.
-            assert(
-                string.utf8.allSatisfy { (c) -> Bool in
+            assert(Keyword.isValidKeyword(string))
+            self.rawValue = string
+        }
+
+        /// Whether the given string is a `flag-keyword`.
+        ///
+        /// RFC 3501 defines `flag-keyword` as `atom`, i.e. `1*ATOM-CHAR`, but Gmail sends keywords
+        /// containing `]` — a resp-special. So what is accepted here is `1*ASTRING-CHAR`:
+        /// ```
+        /// ASTRING-CHAR = ATOM-CHAR / resp-specials
+        /// resp-specials = "]"
+        /// ```
+        /// (`[` needs no carve-out; it is already an `ATOM-CHAR`.)
+        ///
+        /// A keyword is written verbatim, so — as with an atom — its bytes and its `String` are
+        /// the same thing.
+        static func isValidKeyword(_ string: String) -> Bool {
+            !string.isEmpty
+                && string.utf8.allSatisfy { (c) -> Bool in
                     c.isAtomChar || c.isResponseSpecial
                 }
-            )
-            self.rawValue = string
         }
 
         /// Hashes the keyword for use in sets and dictionaries.
@@ -317,14 +325,18 @@ extension Flag.Keyword {
 // MARK: - String Literal
 
 extension Flag: ExpressibleByStringLiteral {
-    /// Creates a flag from a string literal, used for creating static custom keywords.
+    /// Creates a flag from a string literal, for example `let flag: Flag = "$Custom"`.
     ///
-    /// This allows writing flags directly as string literals (for example, `let flag: Flag = "$Custom"`),
-    /// which is useful for static keyword definitions and testing.
+    /// A literal is written by the programmer, not derived from input, so an invalid one is a bug to
+    /// be caught on first run rather than handled. Use ``init(_:)`` for anything else.
     ///
-    /// - parameter value: The string literal to construct a keyword flag from.
+    /// Note that this also claims `Flag("$Custom")` — a literal argument makes the result a `Flag`,
+    /// not a `Flag?`.
+    ///
+    /// - parameter value: The string literal. Must be a valid flag; this traps if it isn't.
     public init(stringLiteral value: String) {
-        self.init(value)
+        precondition(Flag.isValidFlag(value), "Invalid flag: \(String(reflecting: value))")
+        self.init(unchecked: value)
     }
 }
 

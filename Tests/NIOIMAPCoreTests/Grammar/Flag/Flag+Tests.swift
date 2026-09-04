@@ -32,6 +32,49 @@ struct FlagTests {
         #expect(Flag.Keyword(#"a b"#) == nil)
         #expect(Flag.Keyword(#"a%b"#) == nil)
         #expect(Flag.Keyword(#"a*b"#) == nil)
+        // `atom` is `1*ATOM-CHAR`. An empty keyword would encode as nothing at all.
+        #expect(Flag.Keyword("") == nil)
+    }
+
+    /// A `Flag` is written to the wire verbatim, so ``Flag/init(_:)`` is the only thing between a
+    /// caller that builds flags from untrusted input and an injected command.
+    @Test(
+        "invalid flags are rejected",
+        arguments: [
+            "",  // `flag-keyword` is `atom` = `1*ATOM-CHAR`.
+            #"\"#,  // `flag-extension` is `"\" atom`, and the atom may not be empty.
+            "a b",
+            "a(b",
+            "a)b",
+            "a{b",
+            #"a"b"#,
+            "a%b",
+            "a*b",
+            #"a\b"#,  // Only a leading backslash is allowed.
+            // `flag-extension` is `"\" atom`, and `atom` excludes resp-specials, so the Gmail
+            // carve-out below applies to `flag-keyword` only. The parser wouldn’t read this back.
+            #"\OIB-Seen-[Gmail]/Trash"#,
+            "GRÜEZI",  // `ATOM-CHAR` is ASCII.
+            "a\u{7F}b",  // CTL.
+            "a\u{01}b",  // CTL.
+            "\r\nA1 DELETE INBOX\r\n",  // Would inject a whole command.
+            "\\Seen\r\n* 1 EXPUNGE\r\n",  // Would inject an untagged response.
+        ]
+    )
+    func invalidFlags(_ string: String) {
+        #expect(Flag(string) == nil)
+    }
+
+    @Test("valid flags", arguments: validFlagStrings)
+    func validFlags(_ string: String) {
+        #expect(Flag(string).map { String($0) } == string)
+    }
+
+    /// A `Flag` is written verbatim, so every flag we accept has to parse back unchanged —
+    /// otherwise we emit bytes we can’t read.
+    @Test("valid flags round-trip", arguments: validFlagStrings)
+    func validFlagsRoundTrip(_ string: String) throws {
+        ParseFixture.flag(string, expected: .success(try #require(Flag(string)))).checkParsing()
     }
 
     @Test(
@@ -54,6 +97,7 @@ struct FlagTests {
         arguments: [
             (Flag.answered, "\\Answered"),
             (Flag.flagged, "\\Flagged"),
+            // A literal argument, so this is `init(stringLiteral:)`, not `init(_:)`.
             (Flag("Custom"), "Custom"),
         ] as [(Flag, String)]
     )
@@ -67,6 +111,16 @@ struct FlagTests {
             processExitsWith: ExitTest.Condition.failure,
             performing: {
                 _ = Flag.extension("NoBackslash")
+            }
+        )
+    }
+
+    @Test("an invalid string literal traps") func stringLiteralPreconditionFailure() async {
+        await #expect(
+            processExitsWith: ExitTest.Condition.failure,
+            performing: {
+                let flag: Flag = "not a flag"
+                _ = flag
             }
         )
     }
@@ -196,6 +250,16 @@ struct FlagTests {
         fixture.checkParsing()
     }
 }
+
+// MARK: -
+
+private let validFlagStrings = [
+    #"\Seen"#,
+    #"\Answered"#,
+    "Custom",
+    "$Forwarded",
+    "OIB-Seen-[Gmail]/Trash",  // Gmail sends `[` and `]` in keywords.
+]
 
 // MARK: -
 
