@@ -57,6 +57,8 @@ let package = Package(
                 .product(name: "NIO", package: "swift-nio"),
                 .product(name: "OrderedCollections", package: "swift-collections"),
             ],
+            // The documentation is built out-of-band, not by SwiftPM: excluding the catalog
+            // keeps it out of the build product instead of being copied in as a resource.
             exclude: ["NIOIMAPCore.docc"],
             swiftSettings: [
                 .enableUpcomingFeature("MemberImportVisibility")

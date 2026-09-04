@@ -443,7 +443,7 @@ public enum Command: Hashable, Sendable {
     ///
     /// **Requires server capability:** ``Capability/uidBatches``
     ///
-    /// - SeeAlso: [UIDBATCHES Internet-Draft](https://datatracker.ietf.org/doc/draft-ietf-mailmaint-imap-uidbatches/)
+    /// - SeeAlso: [RFC 10022](https://datatracker.ietf.org/doc/html/rfc10022)
     case uidBatches(batchSize: Int, batchRange: ClosedRange<Int>?)
 
     /// `UID COPY` – Similar to ``copy(_:_:)``, but uses unique identifier instead of sequence numbers to identify messages.
@@ -1113,7 +1113,7 @@ extension CommandEncodeBuffer {
 extension Command {
     /// Convenience for creating a `UIDBATCHES` command.
     ///
-    /// https://datatracker.ietf.org/doc/draft-ietf-mailmaint-imap-uidbatches/
+    /// https://datatracker.ietf.org/doc/html/rfc10022
     public static func uidBatches(batchSize: Int) -> Command {
         return .uidBatches(batchSize: batchSize, batchRange: nil)
     }

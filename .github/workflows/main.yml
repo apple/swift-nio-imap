@@ -17,6 +17,7 @@ jobs:
       # `Package.swift` requires Swift 6.2, so the older matrix entries cannot build this
       # package and are not configured here.
       linux_6_2_arguments_override: "-Xswiftc -warnings-as-errors --explicit-target-dependency-import-check error"
+      linux_6_3_arguments_override: "-Xswiftc -warnings-as-errors --explicit-target-dependency-import-check error"
       linux_nightly_main_arguments_override: "--explicit-target-dependency-import-check error"
 
   cxx-interop:

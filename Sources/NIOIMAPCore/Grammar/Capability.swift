@@ -464,7 +464,7 @@ extension Capability {
 
     /// The `UIDBATCHES` capability indicates the server supports partitioning messages into evenly-sized UID batches.
     ///
-    /// - SeeAlso: [RFC 9618](https://datatracker.ietf.org/doc/html/draft-ietf-mailmaint-imap-uidbatches-22)
+    /// - SeeAlso: [RFC 10022](https://datatracker.ietf.org/doc/html/rfc10022)
     public static let uidBatches = Self(unchecked: "UIDBATCHES")
 
     /// The `UNSELECT` capability indicates the server supports the `UNSELECT` command to close without expunging.
