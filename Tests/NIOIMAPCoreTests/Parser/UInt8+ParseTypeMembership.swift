@@ -67,7 +67,8 @@ struct UInt8ParseTypeMembershipTests {
             UInt8(ascii: "%"), UInt8(ascii: "*"),  // ListWildcard
             UInt8(ascii: "\""), UInt8(ascii: "\\"),  // QuotedSpecial
         ]
-        valid = valid.union(0...31)
+        valid = valid.union(0...31)  // CTL
+        valid.insert(0x7F)  // CTL — DEL
         allChars.forEach { char in
             if valid.contains(char) {
                 #expect(char.isAtomSpecial)
@@ -75,6 +76,52 @@ struct UInt8ParseTypeMembershipTests {
                 #expect(!char.isAtomSpecial)
             }
         }
+    }
+
+    @Test("atom char")
+    func atomChar() {
+        // ATOM-CHAR = <any CHAR except atom-specials>. CHAR stops at 0x7F and
+        // atom-specials picks DEL up as a CTL, so both fences exclude it.
+        var valid = Set<UInt8>(33...126)
+        valid.subtract([
+            UInt8(ascii: "("), UInt8(ascii: ")"), UInt8(ascii: "{"),
+            UInt8(ascii: "]"),  // ResponseSpecial
+            UInt8(ascii: "%"), UInt8(ascii: "*"),  // ListWildcard
+            UInt8(ascii: "\""), UInt8(ascii: "\\"),  // QuotedSpecial
+        ])
+        let invalid = allChars.subtracting(valid)
+        #expect(valid.allSatisfy { $0.isAtomChar })
+        #expect(invalid.allSatisfy { !$0.isAtomChar })
+    }
+
+    @Test("astring char")
+    func aStringChar() {
+        // ASTRING-CHAR = ATOM-CHAR / resp-specials, so exactly "]" is
+        // re-admitted; DEL stays out because resp-specials cannot carry a CTL.
+        var valid = Set<UInt8>(33...126)
+        valid.subtract([
+            UInt8(ascii: "("), UInt8(ascii: ")"), UInt8(ascii: "{"),
+            UInt8(ascii: "%"), UInt8(ascii: "*"),  // ListWildcard
+            UInt8(ascii: "\""), UInt8(ascii: "\\"),  // QuotedSpecial
+        ])
+        let invalid = allChars.subtracting(valid)
+        #expect(valid.allSatisfy { $0.isAStringChar })
+        #expect(invalid.allSatisfy { !$0.isAStringChar })
+    }
+
+    @Test("list char")
+    func listChar() {
+        // list-char = ATOM-CHAR / list-wildcards / resp-specials, so "%", "*"
+        // and "]" are re-admitted; none of the alternatives carries a CTL, so
+        // DEL stays out here too.
+        var valid = Set<UInt8>(33...126)
+        valid.subtract([
+            UInt8(ascii: "("), UInt8(ascii: ")"), UInt8(ascii: "{"),
+            UInt8(ascii: "\""), UInt8(ascii: "\\"),  // QuotedSpecial
+        ])
+        let invalid = allChars.subtracting(valid)
+        #expect(valid.allSatisfy { $0.isListChar })
+        #expect(invalid.allSatisfy { !$0.isListChar })
     }
 
     @Test("text char")
