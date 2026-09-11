@@ -329,6 +329,41 @@ public indirect enum SearchKey: Hashable, Sendable {
     /// message thread object identifier.
     /// From [RFC 8474 Section 3](https://datatracker.ietf.org/doc/html/rfc8474#section-3).
     case threadID(ThreadID)
+
+    /// Matches the message with the specified Gmail message ID (vendor extension).
+    ///
+    /// The `X-GM-MSGID` search key matches the Gmail-specific unique message ID that remains stable across mailboxes.
+    /// A 64-bit unsigned integer and Gmail-only extension, not part of the standard IMAP protocol.
+    ///
+    /// **Requires server capability:** ``Capability/gmailExtensions``
+    ///
+    /// For standard IMAP object identifiers, see ``emailID(_:)`` which uses RFC 8474.
+    ///
+    /// - SeeAlso: [Gmail IMAP Extensions](https://developers.google.com/gmail/imap/imap-extensions)
+    case gmailMessageID(UInt64)
+
+    /// Matches messages belonging to the specified Gmail thread (vendor extension).
+    ///
+    /// The `X-GM-THRID` search key matches the Gmail-specific thread ID that associates messages belonging to the same thread.
+    /// A 64-bit unsigned integer and Gmail-only extension, not part of the standard IMAP protocol.
+    ///
+    /// **Requires server capability:** ``Capability/gmailExtensions``
+    ///
+    /// For standard IMAP object identifiers, see ``threadID(_:)`` which uses RFC 8474.
+    ///
+    /// - SeeAlso: [Gmail IMAP Extensions](https://developers.google.com/gmail/imap/imap-extensions)
+    case gmailThreadID(UInt64)
+
+    /// Matches messages using Gmail's web search syntax (vendor extension).
+    ///
+    /// The `X-GM-RAW` search key performs a search using the same query syntax as the Gmail web
+    /// interface, for example `has:attachment in:unread`. A Gmail-only extension, not part of the
+    /// standard IMAP protocol.
+    ///
+    /// **Requires server capability:** ``Capability/gmailExtensions``
+    ///
+    /// - SeeAlso: [Gmail IMAP Extensions](https://developers.google.com/gmail/imap/imap-extensions)
+    case gmailRaw(ByteBuffer)
 }
 
 extension SearchKey {
@@ -377,7 +412,9 @@ extension SearchKey {
             .modificationSequence,
             .filter,
             .emailID,
-            .threadID:
+            .threadID,
+            .gmailMessageID,
+            .gmailThreadID:
             return false
 
         case .bcc,
@@ -387,7 +424,8 @@ extension SearchKey {
             .subject,
             .text,
             .to,
-            .header:
+            .header,
+            .gmailRaw:
             return true
 
         case .not(let key):
@@ -444,7 +482,10 @@ extension SearchKey {
             .modificationSequence,
             .filter,
             .emailID,
-            .threadID:
+            .threadID,
+            .gmailMessageID,
+            .gmailThreadID,
+            .gmailRaw:
             return 1
         case .not(let inner):
             return 1 + inner.count
@@ -629,6 +670,15 @@ extension EncodeBuffer {
 
         case .threadID(let id):
             return self.writeString("THREADID ") + self.writeThreadID(id)
+
+        case .gmailMessageID(let id):
+            return self.writeString("X-GM-MSGID \(id)")
+
+        case .gmailThreadID(let id):
+            return self.writeString("X-GM-THRID \(id)")
+
+        case .gmailRaw(let query):
+            return self.writeString("X-GM-RAW ") + self.writeIMAPString(query)
         }
     }
 }
