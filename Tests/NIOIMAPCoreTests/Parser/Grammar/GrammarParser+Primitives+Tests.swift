@@ -25,6 +25,11 @@ private struct GrammarParserPrimitivesTests {
             ParseFixture.atom("hello", " ", expected: .success("hello")),
             ParseFixture.atom("hello", "", expected: .incompleteMessageIgnoringBufferModifications),
             ParseFixture.atom(" ", "", expected: .failureIgnoringBufferModifications),
+            // RFC 3501: atom-specials includes CTL; RFC 5234: CTL = %x00-1F / %x7F.
+            // An atom must therefore stop at DEL (0x7F) just as it does at any other CTL.
+            ParseFixture.atom("ab", "\u{7F}c\r", expected: .success("ab")),
+            ParseFixture.atom("ab", "\u{1F}c\r", expected: .success("ab")),
+            ParseFixture.atom("ab~c", "\r", expected: .success("ab~c")),
         ]
     )
     func parseAtom(_ fixture: ParseFixture<String>) {
@@ -90,6 +95,12 @@ private struct GrammarParserPrimitivesTests {
             ParseFixture.astring("\"", "", expected: .incompleteMessage),
             ParseFixture.astring(#""a\""#, "", expected: .incompleteMessage),
             ParseFixture.astring("{1}\r\n", "", expected: .incompleteMessage),
+            // RFC 3501: astring = 1*ASTRING-CHAR / string; ASTRING-CHAR inherits
+            // the CTL exclusion via ATOM-CHAR, and RFC 5234 has
+            // CTL = %x00-1F / %x7F, so a bare astring stops at DEL and cannot
+            // start with it.
+            ParseFixture.astring("ab", "\u{7F}c\r", expected: .success("ab")),
+            ParseFixture.astring("\u{7F}", "", expected: .failure),
         ]
     )
     func parseAstring(_ fixture: ParseFixture<String>) {
@@ -290,6 +301,11 @@ private struct GrammarParserPrimitivesTests {
             ParseFixture.tag("abc", "+", expected: .success("abc")),
             ParseFixture.tag("+", "", expected: .failure),
             ParseFixture.tag("", "", expected: .incompleteMessage),
+            // RFC 3501: tag = 1*<any ASTRING-CHAR except "+">; ASTRING-CHAR
+            // inherits the CTL exclusion via ATOM-CHAR, and RFC 5234 has
+            // CTL = %x00-1F / %x7F, so a tag stops at DEL and cannot start with it.
+            ParseFixture.tag("ab", "\u{7F}c\r", expected: .success("ab")),
+            ParseFixture.tag("\u{7F}", "", expected: .failure),
         ]
     )
     func parseTag(_ fixture: ParseFixture<String>) {

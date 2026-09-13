@@ -49,9 +49,11 @@ extension UInt8 {
         self.isTextChar && !self.isQuotedSpecial
     }
 
+    /// atom-specials       = "(" / ")" / "{" / SP / CTL / list-wildcards / quoted-specials / resp-specials
+    /// CTL                 = %x00-1F / %x7F   ; RFC 5234
     var isAtomSpecial: Bool {
         switch self {
-        case 0...31, UInt8(ascii: "("), UInt8(ascii: ")"), UInt8(ascii: "{"), UInt8(ascii: " "):
+        case 0...31, 0x7F, UInt8(ascii: "("), UInt8(ascii: ")"), UInt8(ascii: "{"), UInt8(ascii: " "):
             return true
         case _ where self.isListWildcard, _ where self.isResponseSpecial, _ where self.isQuotedSpecial:
             return true
