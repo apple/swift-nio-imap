@@ -546,6 +546,46 @@ import Testing
         #expect(result == [.complete("A1 LOGIN {3}\r\n"), .insideLiteral("hey", remainingBytes: 0), .complete("\r\n")])
     }
 
+    // A zero-length literal `{0}` is a valid IMAP string: `literal = "{" number64 ["+"] "}"
+    // CRLF *CHAR8` allows a count of zero. RFC 9051 section 6.4.5 requires a server to answer a
+    // partial fetch that starts past the end of the section with an empty string, so this occurs
+    // in practice. The empty literal contributes no bytes, so no `.insideLiteral` frame is
+    // emitted - but the bytes that follow it must still be framed.
+    @Test("parsing zero-length literal")
+    func parsingZeroLengthLiteral() {
+        var parser = self.parser
+        var buffer: ByteBuffer = "* 1 FETCH (BODY[1]<9> {0}\r\n)\r\nA1 OK Fetch completed\r\n"
+        var result: [FramingResult]?
+        #expect(throws: Never.self) {
+            result = try parser.appendAndFrameBuffer(&buffer)
+        }
+        #expect(
+            result == [
+                .complete("* 1 FETCH (BODY[1]<9> {0}\r\n"),
+                .complete(")\r\n"),
+                .complete("A1 OK Fetch completed\r\n"),
+            ]
+        )
+    }
+
+    // ...and the same when the remainder only arrives in a later read.
+    @Test("parsing zero-length literal split across buffers")
+    func parsingZeroLengthLiteralSplit() {
+        var parser = self.parser
+        var buffer: ByteBuffer = "* 1 FETCH (BODY[1]<9> {0}\r\n"
+        var result: [FramingResult]?
+        #expect(throws: Never.self) {
+            result = try parser.appendAndFrameBuffer(&buffer)
+        }
+        #expect(result == [.complete("* 1 FETCH (BODY[1]<9> {0}\r\n")])
+
+        buffer = ")\r\n"
+        #expect(throws: Never.self) {
+            result = try parser.appendAndFrameBuffer(&buffer)
+        }
+        #expect(result == [.complete(")\r\n")])
+    }
+
     @Test("parsing literal no LF")
     func parsingLiteralNoLF() {
         var parser = self.parser
