@@ -93,6 +93,8 @@ extension IMAPConnection {
         ///
         /// - Throws: ``IMAPConnection/IncompleteAppend`` if no message was written, or if a
         ///   message was begun but never finished. Neither can be completed.
+        ///   ``IMAPConnection/Error`` if the connection fails or is closed while the final
+        ///   part of the command is going out.
         /// - Important: The command is over once this returns, so writing any further message
         ///   throws ``IMAPConnection/AppendAlreadyFinished``. Write everything you mean to append
         ///   before finishing.
@@ -172,6 +174,11 @@ extension IMAPConnection.AppendWriter {
     /// unfinished: nothing more can be written, and the command cannot be completed. Even if
     /// the error is caught, `append` then throws ``IMAPConnection/IncompleteAppend`` and closes
     /// the connection.
+    ///
+    /// - Throws: ``IMAPConnection/Error`` if the connection fails or is closed,
+    ///   ``IMAPConnection/IncompleteAppend`` if an earlier message was left unfinished, or
+    ///   ``IMAPConnection/AppendAlreadyFinished`` if the command is already complete.
+    ///   Rethrows whatever `closure` throws, unchanged.
     public mutating func write(
         message: AppendMessage,
         closure: nonisolated(nonsending) (inout MessageWriter) async throws -> Void
@@ -195,7 +202,9 @@ extension IMAPConnection.AppendWriter {
         var underlying: OutboundQueue.AppendQueueWriter
 
         /// Writes message bytes to the server.
-        public mutating func write(messageBytes: ByteBuffer) async throws {
+        ///
+        /// - Throws: ``IMAPConnection/Error`` if the connection fails or is closed.
+        public mutating func write(messageBytes: ByteBuffer) async throws(IMAPConnection.Error) {
             try await underlying.write([.messageBytes(messageBytes)])
         }
     }
@@ -208,6 +217,11 @@ extension IMAPConnection.AppendWriter {
     /// The closure must add at least one URL or one piece of data. As with
     /// ``write(message:closure:)``, a failure part-way through leaves the `APPEND`
     /// command unfinishable.
+    ///
+    /// - Throws: ``IMAPConnection/Error`` if the connection fails or is closed,
+    ///   ``IMAPConnection/IncompleteAppend`` if `closure` adds neither a URL nor data, or
+    ///   ``IMAPConnection/AppendAlreadyFinished`` if the command is already complete.
+    ///   Rethrows whatever `closure` throws, unchanged.
     public mutating func catenate(
         options: AppendOptions,
         closure: nonisolated(nonsending) (inout CatenateWriter) async throws -> Void
@@ -233,6 +247,9 @@ extension IMAPConnection.AppendWriter {
         var state: State
 
         /// Adds the message the given `IMAP URL` refers to.
+        ///
+        /// - Throws: ``IMAPConnection/Error`` if the connection fails or is closed, or
+        ///   ``IMAPConnection/AppendAlreadyFinished`` if the command is already complete.
         public mutating func writeURL(
             _ bytes: ByteBuffer
         ) async throws {
@@ -247,6 +264,10 @@ extension IMAPConnection.AppendWriter {
         /// ``IMAPConnection/AppendWriter/write(message:closure:)`` requires: the count
         /// goes out ahead of the data as the literal's length. Writing a different number
         /// desynchronizes the command stream, leaving the connection unusable.
+        ///
+        /// - Throws: ``IMAPConnection/Error`` if the connection fails or is closed, or
+        ///   ``IMAPConnection/AppendAlreadyFinished`` if the command is already complete.
+        ///   Rethrows whatever `closure` throws, unchanged.
         public mutating func writeData(
             byteCount: Int,
             closure: nonisolated(nonsending) (inout CatenateDataWriter) async throws -> Void
@@ -270,9 +291,11 @@ extension IMAPConnection.AppendWriter {
         var underlying: OutboundQueue.AppendQueueWriter
 
         /// Writes message bytes to the server.
+        ///
+        /// - Throws: ``IMAPConnection/Error`` if the connection fails or is closed.
         public mutating func write(
             _ bytes: ByteBuffer
-        ) async throws {
+        ) async throws(IMAPConnection.Error) {
             try await underlying.write([.catenateData(.bytes(bytes))])
         }
     }

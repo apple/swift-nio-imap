@@ -106,6 +106,34 @@ let configuration = IMAPConnection.Configuration(
 
 > Warning: Those traces include the data read and written, so they carry message content and the commands sent to the server — including credentials. Use them for local debugging, not where the log stream is collected or shipped off the device.
 
+### What a command can throw
+
+A `NO` or `BAD` from the server is *not* a Swift error — it is the command’s `TaggedResponse`, and `waitForCompletion()` returns it. Call `checkOK()` or `getOK()` to turn it into one:
+
+```swift
+try await connection.send(.select(.inbox)) { _, responses in
+    // Connection dropped → `IMAPConnection.Error`.
+    let tagged = try await responses.waitForCompletion()
+    // Server said NO or BAD → `TaggedResponse.StateNotOK`.
+    return try tagged.getOK()
+}
+```
+
+Both of those are *typed* throws, so the error type is in the signature rather than in prose. The closure-taking APIs — ``IMAPConnection/send(_:_:)`` and its siblings — stay untyped, because they rethrow whatever your handler throws, unchanged and unwrapped. What they add on their own behalf is always an ``IMAPConnection/Error``:
+
+```swift
+do {
+    try await connection.send(.noop) { _, responses in
+        _ = try await responses.waitForCompletion()
+    }
+} catch IMAPConnection.Error.connectionClosed {
+    // Gone before the command completed.
+} catch let error as IMAPConnection.Error {
+    // .connectionFailed(_), .missingTaggedResponse, …
+    print(error)
+}
+```
+
 ### Commands with a different shape
 
 Some commands don’t fit the simple request/response shape and have dedicated APIs:

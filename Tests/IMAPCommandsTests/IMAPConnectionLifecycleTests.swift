@@ -43,6 +43,7 @@ enum IMAPConnectionLifecycleTests {
         )
 
         let outcome = Mutex<String>("did-not-run")
+        let thrown = Mutex<IMAPConnection.Error?>(nil)
         let finished = await finishesWithoutStalling {
             do {
                 try await IMAPConnection.withConnection(configuration: configuration) { _, connection in
@@ -53,6 +54,7 @@ enum IMAPConnectionLifecycleTests {
                 outcome.withLock { $0 = "returned" }
             } catch {
                 outcome.withLock { $0 = "threw" }
+                thrown.withLock { $0 = error as? IMAPConnection.Error }
             }
         }
 
@@ -66,6 +68,12 @@ enum IMAPConnectionLifecycleTests {
             outcome.withLock { $0 } == "threw",
             "The in-flight command should fail with a connection-closed error."
         )
+        // And nameable: a public case, not an internal struct you can only print.
+        let error = thrown.withLock { $0 }
+        guard case .connectionClosed = error else {
+            Issue.record("Expected IMAPConnection.Error.connectionClosed, got \(error as Any).")
+            return
+        }
     }
 
     /// Bug #2: When the channel fails to open (e.g. connection refused), `run()`
@@ -84,6 +92,7 @@ enum IMAPConnectionLifecycleTests {
         )
 
         let outcome = Mutex<String>("did-not-run")
+        let thrown = Mutex<IMAPConnection.Error?>(nil)
         let finished = await finishesWithoutStalling {
             do {
                 try await IMAPConnection.withConnection(configuration: configuration) { _, _ in
@@ -92,6 +101,7 @@ enum IMAPConnectionLifecycleTests {
                 outcome.withLock { $0 = "returned" }
             } catch {
                 outcome.withLock { $0 = "threw" }
+                thrown.withLock { $0 = error as? IMAPConnection.Error }
             }
         }
 
@@ -103,6 +113,12 @@ enum IMAPConnectionLifecycleTests {
             outcome.withLock { $0 } == "threw",
             "Failing to connect should surface as a thrown error from withConnection."
         )
+        // A refused connect is a failure, not an orderly close; the NIO error stays reachable.
+        let error = thrown.withLock { $0 }
+        guard case .connectionFailed = error else {
+            Issue.record("Expected IMAPConnection.Error.connectionFailed, got \(error as Any).")
+            return
+        }
     }
 
     /// When the `AUTHENTICATE` handler throws mid-exchange there is no way to cleanly

@@ -110,6 +110,13 @@ public final class IMAPConnection: Sendable {
     ///   ``ResponseStream``s and ``send(_:_:)`` calls fail with the underlying error.
     ///   A `body` that neither returns nor touches the connection again keeps
     ///   `withConnection(configuration:_:)` from returning.
+    /// - Throws: ``IMAPConnection/Error`` if the connection cannot be opened, or fails or closes
+    ///   before the greeting arrives. Rethrows whatever `body` throws, unchanged.
+    /// - Parameters:
+    ///   - configuration: Which server to connect to, and how.
+    ///   - body: Receives the server's greeting and the open connection. The connection closes
+    ///     when this returns or throws.
+    /// - Returns: The value `body` returns.
     public static func withConnection<Result>(
         configuration: Configuration,
         _ body: nonisolated(nonsending) (Greeting, IMAPConnection) async throws -> Result
@@ -151,9 +158,11 @@ public final class IMAPConnection: Sendable {
     }
 
     /// Sets the encoding options for commands sent to the server.
+    ///
+    /// - Throws: ``IMAPConnection/Error`` if the connection fails or is closed.
     public func setEncodingOptions(
         _ new: IMAPClientHandler.EncodingOptions
-    ) async throws {
+    ) async throws(Error) {
         try await outboundWriter.setEncodingOptions(new)
     }
 
@@ -172,6 +181,15 @@ public final class IMAPConnection: Sendable {
     /// - Note: The handler runs with the command's tag bound to the task-local logger, so
     ///   anything it logs through `Logger.current` carries `imap.tag` and `imap.connection`
     ///   metadata keys.
+    /// - Throws: ``IMAPConnection/Error`` if the connection fails or is closed before the
+    ///   command completes. Rethrows whatever `handler` throws, unchanged — a handler error is
+    ///   never wrapped. A `NO` or `BAD` from the server is not an error at all: it reaches
+    ///   `handler` as the command's `TaggedResponse`.
+    /// - Parameters:
+    ///   - command: The command to send.
+    ///   - handler: Receives the command's ``Tag`` and the responses the server sends while it
+    ///     runs.
+    /// - Returns: The value `handler` returns.
     public func send<Result>(
         _ command: Command,
         _ handler: nonisolated(nonsending) (Tag, ResponseStream) async throws -> Result
@@ -200,6 +218,11 @@ public final class IMAPConnection: Sendable {
     /// - Important: The command’s `TaggedResponse` only arrives _after_ `DONE`, so the handler
     ///   must not wait for the command to complete — use the stream to observe untagged
     ///   responses and return once you want to stop idling.
+    /// - Throws: ``IMAPConnection/Error`` if the connection fails or is closed. Rethrows
+    ///   whatever `handler` throws, unchanged; `DONE` is still sent first, on a best-effort basis.
+    /// - Parameter handler: Receives the command's ``Tag`` and the responses that arrive while
+    ///   idling. Returning ends the `IDLE`.
+    /// - Returns: The value `handler` returns.
     public func sendIdle<Result>(
         _ handler: nonisolated(nonsending) (Tag, ResponseStream) async throws -> Result
     ) async throws -> Result {
@@ -234,6 +257,16 @@ public final class IMAPConnection: Sendable {
     /// Sends an `AUTHENTICATE` command to the server.
     ///
     /// Use the ``ContinuationWriter`` to respond to authentication challenges.
+    ///
+    /// - Throws: ``IMAPConnection/Error`` if the connection fails or is closed before the
+    ///   command completes. Rethrows whatever `handler` throws, unchanged — an authentication
+    ///   exchange cannot be aborted cleanly, so the connection is closed in that case.
+    /// - Parameters:
+    ///   - mechanism: The SASL mechanism to authenticate with.
+    ///   - initialResponse: The SASL-IR initial response, if the server supports one.
+    ///   - handler: Receives the command's ``Tag``, its responses, and a writer for answering
+    ///     the server's challenges.
+    /// - Returns: The value `handler` returns.
     public func sendAuthenticate<Result>(
         mechanism: AuthenticationMechanism,
         initialResponse: InitialResponse?,
@@ -329,6 +362,9 @@ public final class IMAPConnection: Sendable {
     ///   if the closure itself succeeded. An error the closure throws _after_ completing the
     ///   command leaves the connection intact, exactly like an error from a
     ///   ``send(_:_:)`` handler.
+    /// - Throws: ``IMAPConnection/Error`` if the connection fails or is closed before the
+    ///   command completes, or ``IncompleteAppend`` if `body` returns having left the command
+    ///   unfinished. Rethrows whatever `body` throws, unchanged.
     /// - Parameters:
     ///   - mailbox: The mailbox to append the message to.
     ///   - body: Writes the message(s) with the provided ``AppendWriter`` and handles the
@@ -418,6 +454,9 @@ public final class IMAPConnection: Sendable {
     ///   rethrows the error: abandoning a synchronizing literal part-way would leave the
     ///   connection unusable. If `write` throws, or leaves the command incomplete, this method
     ///   cancels `read` and closes the connection, as ``append(to:_:)`` describes.
+    /// - Throws: ``IMAPConnection/Error`` if the connection fails or is closed before the
+    ///   command completes, or ``IncompleteAppend`` if `write` returns having left the command
+    ///   unfinished. Rethrows whatever `write` or `read` throws, unchanged.
     /// - Parameters:
     ///   - mailbox: The mailbox to append the message to.
     ///   - write: Writes the message(s) using the provided ``AppendWriter``.
@@ -547,7 +586,7 @@ extension IMAPConnection {
             guard
                 case .untagged(.conditionalState(let s)) = first
             else {
-                throw ServerSendOtherResponseBeforeGreeting(response: first)
+                throw Error.unexpectedGreeting(first)
             }
             didReceive(greeting: Greeting(status: s))
             // Loop through the remaining:
@@ -583,10 +622,10 @@ extension IMAPConnection {
         /// The connection failed with this error.
         case failed(any Swift.Error)
 
-        var error: (any Swift.Error)? {
+        var error: IMAPConnection.Error? {
             switch self {
             case .closed: nil
-            case .failed(let error): error
+            case .failed(let error): IMAPConnection.Error(wrapping: error)
             }
         }
     }
@@ -632,29 +671,15 @@ extension ClientBootstrap {
 }
 
 extension IMAPConnection {
-    /// An error indicating the server sent an unexpected response before the greeting.
-    public struct ServerSendOtherResponseBeforeGreeting: Swift.Error {
-        public var response: Response
-
-        public init(
-            response: Response
-        ) {
-            self.response = response
-        }
-    }
-}
-
-// MARK: -
-
-extension IMAPConnection {
     /// A stream of responses from the server received while a specific command runs.
     public struct ResponseStream: AsyncSequence, Sendable {
         public struct AsyncIterator: AsyncIteratorProtocol {
             public typealias Element = Response
+            public typealias Failure = IMAPConnection.Error
 
             var underlying: AsyncThrowingStream<Response, any Swift.Error>.AsyncIterator
 
-            public mutating func next() async throws -> Response? {
+            public mutating func next() async throws(IMAPConnection.Error) -> Response? {
                 try await next(isolation: #isolation)
             }
 
@@ -663,14 +688,21 @@ extension IMAPConnection {
             /// back to `AsyncIteratorProtocol`’s default implementation of
             /// `next(isolation:)` — which calls the `@concurrent` `next()` — the iterator
             /// would be sent out of the caller’s isolation domain on every element.
+            /// `Error(wrapping:)` is a pass-through: `AsyncThrowingStream` only builds with an
+            /// untyped failure, so the narrowing happens here.
             public mutating func next(
                 isolation actor: isolated (any Actor)?
-            ) async throws -> Response? {
-                try await underlying.next(isolation: actor)
+            ) async throws(IMAPConnection.Error) -> Response? {
+                do {
+                    return try await underlying.next(isolation: actor)
+                } catch {
+                    throw IMAPConnection.Error(wrapping: error)
+                }
             }
         }
 
         public typealias Element = Response
+        public typealias Failure = IMAPConnection.Error
 
         let underlying: AsyncThrowingStream<Response, any Swift.Error>
 
@@ -686,6 +718,9 @@ extension IMAPConnection.ResponseStream.AsyncIterator: Sendable {}
 
 extension IMAPConnection.ResponseStream {
     /// Iterates over all responses and returns the command’s `TaggedResponse` on completion.
+    ///
+    /// - Throws: ``IMAPConnection/Error`` if the connection fails or is closed before the
+    ///   command completes. Rethrows whatever `closure` throws, unchanged.
     public func forEach(
         _ closure: nonisolated(nonsending) (AsyncIterator.Element) async throws -> Void
     ) async throws -> TaggedResponse {
@@ -698,16 +733,28 @@ extension IMAPConnection.ResponseStream {
         }
         guard
             let t
-        else {
-            struct NoTaggedResponse: Swift.Error {}
-            throw NoTaggedResponse()
-        }
+        else { throw IMAPConnection.Error.missingTaggedResponse }
         return t
     }
 
-    /// Waits for the command to complete, discarding intermediate responses.
-    public func waitForCompletion() async throws -> TaggedResponse {
-        try await forEach { _ in }
+    /// Waits for the command to complete, discarding intermediate responses; returns its
+    /// `TaggedResponse`.
+    ///
+    /// - Throws: ``IMAPConnection/Error`` if the connection fails or is closed before the
+    ///   command completes. A `NO` or `BAD` from the server is *not* an error — it is returned
+    ///   as the `TaggedResponse`. Use `checkOK()` or `getOK()` on the result to turn it into one.
+    public func waitForCompletion() async throws(IMAPConnection.Error) -> TaggedResponse {
+        // Not `forEach { _ in }`: that takes a caller closure, so it can't be typed.
+        var t: TaggedResponse?
+        for try await r in self {
+            if case .tagged(let tagged) = r {
+                t = tagged
+            }
+        }
+        guard
+            let t
+        else { throw .missingTaggedResponse }
+        return t
     }
 }
 
@@ -738,7 +785,7 @@ extension IMAPConnection {
     enum PerCommandResponseStream {
         case streams(Tag, [Tag: AsyncThrowingStream<Response, any Swift.Error>.Continuation])
         /// The connection is gone. Anything that interacts with it fails with this error.
-        case connectionClosed(any Swift.Error)
+        case connectionClosed(IMAPConnection.Error)
 
         init() {
             self = .streams(Tag.first, [:])
@@ -748,21 +795,23 @@ extension IMAPConnection {
 
 extension IMAPConnection.PerCommandResponseStream {
     mutating func makeTagAndResponseStream() -> Result<
-        (IMAPConnection.Tag, AsyncThrowingStream<Response, any Swift.Error>), any Swift.Error
+        (IMAPConnection.Tag, AsyncThrowingStream<Response, any Swift.Error>), IMAPConnection.Error
     > {
         switch self {
         case .streams(var nextTag, var continuations):
             let tag = nextTag
             nextTag = tag.makeNext()
 
-            let (stream, continuation) = AsyncThrowingStream<Response, any Swift.Error>.makeStream(of: Response.self)
+            // `AsyncThrowingStream` only builds with an untyped failure; `ResponseStream`
+            // narrows it back.
+            let (stream, continuation) = AsyncThrowingStream.makeStream(of: Response.self)
 
             // Copy-on-write exclusivity dance: assigning the payload-free
             // `.connectionClosed` case first drops `self`'s reference to
             // `continuations`, so the dictionary is uniquely referenced when we insert
             // into it below and no copy-on-write copy is made. We immediately restore
             // the real `.streams` state.
-            self = .connectionClosed(ConnectionClosed())
+            self = .connectionClosed(.connectionClosed)
             continuations[tag] = continuation
             self = .streams(nextTag, continuations)
             return .success((tag, stream))
@@ -800,14 +849,14 @@ extension IMAPConnection.PerCommandResponseStream {
         case unknownTag(String)
         case finishContinuation(AsyncThrowingStream<Response, any Swift.Error>.Continuation, TaggedResponse)
 
-        func run() throws {
+        func run() throws(IMAPConnection.Error) {
             switch self {
             case .none:
                 break
             case .unknownTag(let tag):
-                throw UnknownTag(tag: tag)
+                throw .unknownTag(tag)
             case .finishContinuation(let c, let response):
-                c.yield(with: .success(.tagged(response)))
+                c.yield(.tagged(response))
                 c.finish()
             }
         }
@@ -818,7 +867,7 @@ extension IMAPConnection.PerCommandResponseStream {
         // overwrite the reason the caller is waiting to hear about.
         switch self {
         case .streams(_, let continuations):
-            let error = reason.error ?? ConnectionClosed()
+            let error = reason.error ?? .connectionClosed
             self = .connectionClosed(error)
             return .finishContinuations(continuations, error)
         case .connectionClosed:
@@ -830,7 +879,7 @@ extension IMAPConnection.PerCommandResponseStream {
         case none
         case finishContinuations(
             [IMAPConnection.Tag: AsyncThrowingStream<Response, any Swift.Error>.Continuation],
-            any Swift.Error
+            IMAPConnection.Error
         )
 
         func run(logger: Logger) {
@@ -843,16 +892,10 @@ extension IMAPConnection.PerCommandResponseStream {
                         "Command was still running when connection was closed",
                         metadata: ["imap.tag": "\(tag)"]
                     )
-                    c.yield(with: .failure(error))
-                    c.finish()
+                    c.finish(throwing: error)
                 }
             }
         }
-    }
-
-    struct ConnectionClosed: Swift.Error {}
-    struct UnknownTag: Swift.Error {
-        var tag: String
     }
 }
 
@@ -937,7 +980,7 @@ extension IMAPConnection.State.GreetingState {
             // The greeting arrived; nothing is waiting and later commands report the closure.
             return .none
         case .waiting(let waiting):
-            let error = reason.error ?? ConnectionClosedWhileWaitingForGreeting()
+            let error = reason.error ?? .connectionClosed
             self = .connectionClosed(error)
             return .fail(waiting, error)
         case .connectionClosed:
@@ -977,6 +1020,4 @@ extension IMAPConnection.State.GreetingState {
             }
         }
     }
-
-    struct ConnectionClosedWhileWaitingForGreeting: Swift.Error {}
 }

@@ -21,16 +21,20 @@ extension IMAPConnection {
         var underlying: OutboundQueue
 
         /// Sends the given bytes as a continuation response.
+        ///
+        /// - Throws: ``IMAPConnection/Error`` if the connection fails or is closed.
         public func writeContinuation(
             _ bytes: ByteBuffer
-        ) async throws {
+        ) async throws(IMAPConnection.Error) {
             try await underlying.writeContinuationResponse(bytes)
         }
 
         /// Sends the given byte sequence as a continuation response.
+        ///
+        /// - Throws: ``IMAPConnection/Error`` if the connection fails or is closed.
         public func writeContinuation(
             _ bytes: some Sequence<UInt8>
-        ) async throws {
+        ) async throws(IMAPConnection.Error) {
             try await writeContinuation(ByteBuffer(bytes: bytes))
         }
     }

@@ -12,6 +12,18 @@ Alongside ``IMAPConnection/send(_:_:)``, the module provides dedicated APIs for 
 
 - Note: This is one of **two** interface styles this package offers, and neither is preferred over the other. If you’d rather work directly with the SwiftNIO pipeline and the raw stream of protocol events, see the `NIOIMAP` module, which provides the event-driven `ChannelHandler`s this client is built on. Both interfaces talk to the same server and share the same `NIOIMAPCore` command and response types; choose based on how your own code wants to be structured. See <doc:GettingStarted> for a side-by-side comparison.
 
+### How a command can fail
+
+Three different things are easy to conflate, and only the first is an error the connection raises:
+
+| What went wrong | How you see it |
+| --- | --- |
+| The connection — could not open, broke, or closed mid-command | ``IMAPConnection/Error``, thrown from `send`, `append`, and the response stream |
+| The server refused the command with `NO` or `BAD` | Not an error. It arrives as the command's `TaggedResponse`; `checkOK()` or `getOK()` turns it into ``TaggedResponse/StateNotOK`` |
+| Your own handler closure threw | Rethrown unchanged. `send` and friends never wrap a handler's error |
+
+Declarations whose failures are limited to one of these use typed throws, so the error type is part of the signature: ``IMAPConnection/ResponseStream/waitForCompletion()`` throws ``IMAPConnection/Error``, and `checkOK()` / `getOK()` throw ``TaggedResponse/StateNotOK``. The closure-taking APIs stay untyped, because the error a handler throws is by definition open.
+
 ### Layering
 
 The package is layered so you can work at whichever level suits your needs:
@@ -46,6 +58,12 @@ The package is layered so you can work at whichever level suits your needs:
 
 - ``CompletedCommand``
 - ``SuccessfulCommand``
+
+### Errors
+
+- ``IMAPConnection/Error``
+- ``IMAPConnection/IncompleteAppend``
+- ``IMAPConnection/AppendAlreadyFinished``
 
 ### Debugging
 

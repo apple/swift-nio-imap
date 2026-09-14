@@ -106,10 +106,13 @@ extension IMAPConnection.Configuration {
     }
 
     /// Creates a configuration by parsing an RFC 5092 IMAP URL or a hostname with optional port.
+    ///
+    /// - Throws: ``ParseServerTextError`` if `serverText` is neither a hostname with an optional
+    ///   `:port` suffix nor a valid `imap:` URL.
     public init(
         serverText: String,
         logging: Logging
-    ) throws {
+    ) throws(ParseServerTextError) {
         if let c = Self(hostnameAndPortText: serverText, logging: logging) {
             self = c
             return
@@ -170,8 +173,14 @@ extension IMAPConnection.Configuration {
     }
 
     /// An error indicating the server text could not be parsed into a valid configuration.
-    public struct ParseServerTextError: Swift.Error {
+    public struct ParseServerTextError: Swift.Error, Sendable, CustomStringConvertible {
+        /// Which part of the server text could not be parsed.
         public var description: String
+
+        /// Creates an error with the given message.
+        public init(description: String) {
+            self.description = description
+        }
     }
 }
 

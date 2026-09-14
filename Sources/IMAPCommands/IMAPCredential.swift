@@ -47,11 +47,14 @@ extension IMAPCredential {
     ///
     /// Exactly one of the parameters must be non-`nil`. If a URL is provided, the initializer
     /// extracts the username and password from the URL's user info component.
+    ///
+    /// - Throws: ``ParseError`` if none or more than one of the parameters is non-`nil`, or if
+    ///   the one that is cannot be parsed.
     public init(
         url urlText: String?,
         sasl saslText: String?,
         username userText: String?
-    ) throws {
+    ) throws(ParseError) {
         // The `urlText` may or may not be an actual URL. That’s ok.
         // Only _if_ it’s a URL, try to get credentials from it.
         // And we also want to support a valid URL without credentials.
@@ -68,7 +71,7 @@ extension IMAPCredential {
                 let mechanism = AuthenticationMechanism(String(name)),
                 remainder.first == ":",
                 let response = Self.parseSASLResponse(remainder.dropFirst())
-            else { throw UnableToParseSASL() }
+            else { throw .unableToParseSASL }
             self = .sasl(mechanism: mechanism, response: response)
         case (nil, nil, nil, let text?):
             let parts = text.split(separator: ":", omittingEmptySubsequences: false)
@@ -76,33 +79,43 @@ extension IMAPCredential {
                 parts.count == 2,
                 !parts[0].isEmpty,
                 !parts[1].isEmpty
-            else { throw UnableToParseUsernamePassword() }
+            else { throw .unableToParseUsernamePassword }
             self = .username(String(parts[0]), password: String(parts[1]))
         case (nil, nil, nil, nil):
-            throw NoCredentials()
+            throw .noCredentials
         default:
-            throw ConflictingCredentials()
+            throw .conflictingCredentials
         }
     }
 
-    struct UnableToParseSASL: Swift.Error, CustomStringConvertible {
-        let description = "Unable to parse SASL input."
+    /// An error indicating that a credential could not be derived from the given text.
+    public enum ParseError: Swift.Error, Hashable, Sendable {
+        /// The SASL text could not be parsed.
+        ///
+        /// Either it is not of the form `mechanism:response`, the mechanism is not a name
+        /// RFC 4422 allows, or the response is neither base64 nor whitespace separated parts.
+        case unableToParseSASL
+        /// The username text is not `username:password`.
+        case unableToParseUsernamePassword
+        /// More than one of the URL, SASL, and username parameters was given.
+        case conflictingCredentials
+        /// None of the URL, SASL, and username parameters was given.
+        case noCredentials
     }
+}
 
-    struct UnableToParseURL: Swift.Error, CustomStringConvertible {
-        let description = "Unable to parse IMAP URL."
-    }
-
-    struct UnableToParseUsernamePassword: Swift.Error, CustomStringConvertible {
-        let description = "Unable to parse username + password. Use username:password pattern."
-    }
-
-    struct ConflictingCredentials: Swift.Error, CustomStringConvertible {
-        let description = "Found multiple (conflicting) credentials."
-    }
-
-    struct NoCredentials: Swift.Error, CustomStringConvertible {
-        let description = "No credentials specified."
+extension IMAPCredential.ParseError: CustomStringConvertible {
+    public var description: String {
+        switch self {
+        case .unableToParseSASL:
+            "Unable to parse SASL input."
+        case .unableToParseUsernamePassword:
+            "Unable to parse username + password. Use username:password pattern."
+        case .conflictingCredentials:
+            "Found multiple (conflicting) credentials."
+        case .noCredentials:
+            "No credentials specified."
+        }
     }
 }
 

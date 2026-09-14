@@ -161,10 +161,24 @@ extension OutboundQueue.State {
 // MARK: - Encoding Options
 
 extension OutboundQueue {
+    /// Suspends on a queue operation, mapping its failure onto ``IMAPConnection/Error``.
+    ///
+    /// The continuation is resumed from the channel, from ``close()``, or from a state-machine
+    /// guard, so the raw failure can be anything.
+    fileprivate func withQueueContinuation(
+        _ body: (CheckedContinuation<Void, any Swift.Error>) -> Void
+    ) async throws(IMAPConnection.Error) {
+        do {
+            try await withCheckedThrowingContinuation(body)
+        } catch {
+            throw IMAPConnection.Error(wrapping: error)
+        }
+    }
+
     func setEncodingOptions(
         _ new: IMAPClientHandler.EncodingOptions
-    ) async throws {
-        try await withCheckedThrowingContinuation { continuation in
+    ) async throws(IMAPConnection.Error) {
+        try await withQueueContinuation { continuation in
             state.withLock {
                 $0.setEncodingOptions(new, completion: continuation)
             }.run()
@@ -189,22 +203,22 @@ extension OutboundQueue.State {
 extension OutboundQueue {
     func write(
         _ command: TaggedCommand
-    ) async throws {
+    ) async throws(IMAPConnection.Error) {
         try await write(CollectionOfOne(command))
     }
 
     func write(
         _ commands: some Sequence<TaggedCommand>
-    ) async throws {
-        try await withCheckedThrowingContinuation { continuation in
+    ) async throws(IMAPConnection.Error) {
+        try await withQueueContinuation { continuation in
             state.withLock {
                 $0.write(commands, completion: continuation)
             }.run()
         }
     }
 
-    func writeIdleDone() async throws {
-        try await withCheckedThrowingContinuation { continuation in
+    func writeIdleDone() async throws(IMAPConnection.Error) {
+        try await withQueueContinuation { continuation in
             state.withLock {
                 $0.writeIdleDone(completion: continuation)
             }.run()
@@ -266,8 +280,8 @@ extension OutboundQueue.State {
 extension OutboundQueue {
     func writeContinuationResponse(
         _ bytes: ByteBuffer
-    ) async throws {
-        try await withCheckedThrowingContinuation { continuation in
+    ) async throws(IMAPConnection.Error) {
+        try await withQueueContinuation { continuation in
             state.withLock {
                 $0.write([.part(.continuationResponse(bytes))], completion: continuation)
             }.run()
@@ -295,8 +309,8 @@ extension OutboundQueue {
 
         func write(
             _ parts: [AppendCommand]
-        ) async throws {
-            try await withCheckedThrowingContinuation { continuation in
+        ) async throws(IMAPConnection.Error) {
+            try await queue.withQueueContinuation { continuation in
                 queue.state.withLock {
                     $0.writeAppend(
                         parts: parts,
@@ -350,19 +364,23 @@ extension OutboundQueue.State {
 }
 
 extension OutboundQueue {
-    fileprivate func makeAppendWriter() async throws -> _AppendWriter {
-        try await withCheckedThrowingContinuation { continuation in
-            let action = state.withLock {
-                $0.makeAppendWriter(continuation)
+    fileprivate func makeAppendWriter() async throws(IMAPConnection.Error) -> _AppendWriter {
+        do {
+            return try await withCheckedThrowingContinuation { continuation in
+                let action = state.withLock {
+                    $0.makeAppendWriter(continuation)
+                }
+                switch action {
+                case .none:
+                    break
+                case .resumeContinuation:
+                    continuation.resume(with: .success(_AppendWriter()))
+                case .failContinuation:
+                    continuation.resume(throwing: OutboundQueue.Error.inFailedState)
+                }
             }
-            switch action {
-            case .none:
-                break
-            case .resumeContinuation:
-                continuation.resume(with: .success(_AppendWriter()))
-            case .failContinuation:
-                continuation.resume(throwing: OutboundQueue.Error.inFailedState)
-            }
+        } catch {
+            throw IMAPConnection.Error(wrapping: error)
         }
     }
 
