@@ -42,8 +42,8 @@ import struct NIO.ByteBuffer
 /// - ``init(stringLiteral:)`` traps. A literal is written by the programmer, so an invalid one is a
 ///   bug to be caught on first run rather than handled.
 ///
-/// Note that a string literal picks the second: `Flag("\\Seen")` is a `Flag`, whereas
-/// `Flag(someString)` is a `Flag?`.
+/// Note that a string literal picks the trapping initializer: `Flag("\\Seen")` is a `Flag`,
+/// whereas `Flag(someString)` is a `Flag?`.
 ///
 /// ## Extension flags
 ///
@@ -143,7 +143,7 @@ extension Flag {
     ///
     /// Defined in [RFC 3501](https://datatracker.ietf.org/doc/html/rfc3501). Indicates the
     /// message is a response to another message.
-    public static let answered = Self(unchecked: "\\Answered")
+    public static let answered: Self = "\\Answered"
 
     /// `\Flagged` - The message has been marked for attention.
     ///
@@ -156,23 +156,23 @@ extension Flag {
     /// message's flagged mark and its color.
     ///
     /// - SeeAlso: ``FlaggedState``
-    public static let flagged = Self(unchecked: "\\Flagged")
+    public static let flagged: Self = "\\Flagged"
 
     /// `\Deleted` - The message has been deleted.
     ///
     /// Defined in [RFC 3501](https://datatracker.ietf.org/doc/html/rfc3501). Marks a message for
     /// deletion until the ``Command/expunge`` command is executed or the mailbox is closed.
-    public static let deleted = Self(unchecked: "\\Deleted")
+    public static let deleted: Self = "\\Deleted"
 
     /// `\Seen` - The message has been read by the user.
     ///
     /// Defined in [RFC 3501](https://datatracker.ietf.org/doc/html/rfc3501).
-    public static let seen = Self(unchecked: "\\Seen")
+    public static let seen: Self = "\\Seen"
 
     /// `\Draft` - The message is not yet complete.
     ///
     /// Defined in [RFC 3501](https://datatracker.ietf.org/doc/html/rfc3501).
-    public static let draft = Self(unchecked: "\\Draft")
+    public static let draft: Self = "\\Draft"
 
     /// Convenience function to create a new flag from a `Keyword`.
     /// - parameter keyword: The `Keyword` to use to make the `Flag`.

@@ -142,7 +142,7 @@ struct FlagKeywordTests {
     @Test(
         "parse",
         arguments: [
-            ParseFixture.flagKeyword("keyword", expected: .success(Flag.Keyword("keyword")!))
+            ParseFixture.flagKeyword("keyword", expected: .success("keyword"))
         ]
     )
     func parse(_ fixture: ParseFixture<Flag.Keyword>) {

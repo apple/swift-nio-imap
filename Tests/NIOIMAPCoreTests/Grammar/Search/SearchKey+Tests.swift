@@ -39,13 +39,13 @@ struct SearchKeyTests {
         EncodeFixture.searchKey(.body("some body"), "BODY \"some body\""),
         EncodeFixture.searchKey(.cc("tim@apple.com"), "CC \"tim@apple.com\""),
         EncodeFixture.searchKey(.from("tim@apple.com"), "FROM \"tim@apple.com\""),
-        EncodeFixture.searchKey(.keyword(Flag.Keyword(unchecked: "somekeyword")), "KEYWORD somekeyword"),
+        EncodeFixture.searchKey(.keyword("somekeyword"), "KEYWORD somekeyword"),
         EncodeFixture.searchKey(.on(IMAPCalendarDay(year: 1999, month: 9, day: 16)!), "ON 16-Sep-1999"),
         EncodeFixture.searchKey(.since(IMAPCalendarDay(year: 1984, month: 1, day: 17)!), "SINCE 17-Jan-1984"),
         EncodeFixture.searchKey(.subject("some subject"), "SUBJECT \"some subject\""),
         EncodeFixture.searchKey(.text("some text"), "TEXT \"some text\""),
         EncodeFixture.searchKey(.to("theboss@apple.com"), "TO \"theboss@apple.com\""),
-        EncodeFixture.searchKey(.unkeyword(Flag.Keyword(unchecked: "nokeyword")), "UNKEYWORD nokeyword"),
+        EncodeFixture.searchKey(.unkeyword("nokeyword"), "UNKEYWORD nokeyword"),
         EncodeFixture.searchKey(.header("header", "value"), "HEADER \"header\" \"value\""),
         EncodeFixture.searchKey(.messageSizeLarger(333), "LARGER 333"),
         EncodeFixture.searchKey(.not(.messageSizeLarger(444)), "NOT LARGER 444"),
@@ -143,9 +143,9 @@ struct SearchKeyTests {
         ParseFixture.searchKey("SUBJECT data5", expected: .success(.subject("data5"))),
         ParseFixture.searchKey("TEXT data6", expected: .success(.text("data6"))),
         ParseFixture.searchKey("TO data7", expected: .success(.to("data7"))),
-        ParseFixture.searchKey("KEYWORD key1", expected: .success(.keyword(Flag.Keyword("key1")!))),
+        ParseFixture.searchKey("KEYWORD key1", expected: .success(.keyword("key1"))),
         ParseFixture.searchKey("HEADER some value", expected: .success(.header("some", "value"))),
-        ParseFixture.searchKey("UNKEYWORD key2", expected: .success(.unkeyword(Flag.Keyword("key2")!))),
+        ParseFixture.searchKey("UNKEYWORD key2", expected: .success(.unkeyword("key2"))),
         ParseFixture.searchKey("NOT LARGER 1234", expected: .success(.not(.messageSizeLarger(1234)))),
         ParseFixture.searchKey(
             "OR LARGER 6 SMALLER 4",
@@ -163,7 +163,7 @@ struct SearchKeyTests {
         ParseFixture.searchKey("(LARGER 1)", expected: .success(.messageSizeLarger(1))),
         ParseFixture.searchKey(
             "(LARGER 1 SMALLER 5 KEYWORD hello)",
-            expected: .success(.and([.messageSizeLarger(1), .messageSizeSmaller(5), .keyword(Flag.Keyword("hello")!)]))
+            expected: .success(.and([.messageSizeLarger(1), .messageSizeSmaller(5), .keyword("hello")]))
         ),
         ParseFixture.searchKey("YOUNGER 34", expected: .success(.younger(34))),
         ParseFixture.searchKey("OLDER 45", expected: .success(.older(45))),

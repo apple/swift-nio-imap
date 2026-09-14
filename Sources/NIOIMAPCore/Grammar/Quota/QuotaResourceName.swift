@@ -36,8 +36,8 @@ extension QuotaResource {
     /// - ``init(stringLiteral:)`` traps. A literal is written by the programmer, so an invalid one
     ///   is a bug to be caught on first run rather than handled.
     ///
-    /// Note that a string literal picks the second: `Name("STORAGE")` is a `Name`, whereas
-    /// `Name(someString)` is a `Name?`.
+    /// Note that a string literal picks the trapping initializer: `Name("STORAGE")` is a `Name`,
+    /// whereas `Name(someString)` is a `Name?`.
     ///
     /// ## Case handling
     ///
@@ -83,7 +83,7 @@ extension QuotaResource {
 
         /// Hashes the name for use in sets and dictionaries.
         ///
-        /// Hashing is case-insensitive, matching ``==``.
+        /// Hashing is case-insensitive, matching `==`.
         ///
         /// - parameter hasher: The hasher to update with this name's hash value.
         public func hash(into hasher: inout Hasher) {
@@ -120,18 +120,18 @@ extension QuotaResource.Name {
     /// can make it differ in either direction. RFC 2087 defined it as that sum; RFC 9208 does not.
     ///
     /// - SeeAlso: [RFC 9208 Section 5.1](https://www.rfc-editor.org/rfc/rfc9208.html#section-5.1)
-    public static let storage = Self(unchecked: "STORAGE")
+    public static let storage: Self = "STORAGE"
 
     /// The `MESSAGE` resource: the number of messages stored within the mailboxes governed by the
     /// quota root.
     ///
     /// - SeeAlso: [RFC 9208 Section 5.2](https://www.rfc-editor.org/rfc/rfc9208.html#section-5.2)
-    public static let message = Self(unchecked: "MESSAGE")
+    public static let message: Self = "MESSAGE"
 
     /// The `MAILBOX` resource: the number of mailboxes governed by the quota root.
     ///
     /// - SeeAlso: [RFC 9208 Section 5.3](https://www.rfc-editor.org/rfc/rfc9208.html#section-5.3)
-    public static let mailbox = Self(unchecked: "MAILBOX")
+    public static let mailbox: Self = "MAILBOX"
 
     /// The `ANNOTATION-STORAGE` resource: the maximum size of all annotations, in units of 1024
     /// octets, associated with all messages in the mailboxes governed by the quota root.
@@ -139,22 +139,23 @@ extension QuotaResource.Name {
     /// Annotations are defined in [RFC 5257](https://www.rfc-editor.org/rfc/rfc5257.html).
     ///
     /// - SeeAlso: [RFC 9208 Section 5.4](https://www.rfc-editor.org/rfc/rfc9208.html#section-5.4)
-    public static let annotationStorage = Self(unchecked: "ANNOTATION-STORAGE")
+    public static let annotationStorage: Self = "ANNOTATION-STORAGE"
 }
 
 // MARK: - String Literal
 
 extension QuotaResource.Name: ExpressibleByStringLiteral {
-    /// Creates a resource name from a string literal, for example
-    /// `let name: QuotaResource.Name = "X-VENDOR"`.
+    /// Creates a resource name from a string literal.
     ///
-    /// A literal is written by the programmer, not derived from input, so an invalid one is a bug
-    /// to be caught on first run rather than handled. Use ``init(_:)`` for anything else.
+    /// For example, `let name: QuotaResource.Name = "X-VENDOR"`. A literal is written by the
+    /// programmer, not derived from input, so an invalid one is a bug to be caught on first run
+    /// rather than handled. Use ``init(_:)`` for anything else.
     ///
-    /// Note that this also claims `Name("STORAGE")` — a literal argument makes the result a `Name`,
-    /// not a `Name?`.
+    /// Note that a literal argument also resolves here: `Name("STORAGE")` is a `Name`, not a
+    /// `Name?`.
     ///
-    /// - parameter value: The string literal. Must be an `atom`; this traps if it isn't.
+    /// - parameter value: The string literal.
+    /// - Precondition: `value` is an `atom`; this traps if it isn't.
     public init(stringLiteral value: String) {
         precondition(Self.isValidName(value), "Invalid quota resource name: \(String(reflecting: value))")
         self.init(unchecked: value)
