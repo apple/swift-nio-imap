@@ -33,11 +33,24 @@ import struct NIO.ByteBuffer
 /// Flags are compared case-insensitively, meaning `Flag("\\SEEN")` and `Flag("\\Seen")` are considered equal.
 /// Flags also preserve their original casing when encoded and decoded.
 ///
+/// ## Validity
+///
+/// A flag is either an `atom` (a keyword) or a `\` followed by an `atom` (an extension), so it can
+/// always be written to the wire as-is. Anything else is rejected, in one of two ways:
+///
+/// - ``init(_:)`` returns `nil`. Use it for a flag derived from input.
+/// - ``init(stringLiteral:)`` traps. A literal is written by the programmer, so an invalid one is a
+///   bug to be caught on first run rather than handled.
+///
+/// Note that a string literal picks the trapping initializer: `Flag("\\Seen")` is a `Flag`,
+/// whereas `Flag(someString)` is a `Flag?`.
+///
 /// ## Extension flags
 ///
-/// Beyond the five standard flags, custom flags can be created. These are defined in
-/// [RFC 3501 Section 2.3.2](https://datatracker.ietf.org/doc/html/rfc3501#section-2.3.2).
-/// Custom flags must begin with a backslash (`\`).
+/// Beyond the five standard flags, custom flags can be created — either as keywords such as
+/// `$Forwarded`, or as extension flags, which are defined in
+/// [RFC 3501 Section 2.3.2](https://datatracker.ietf.org/doc/html/rfc3501#section-2.3.2) and
+/// begin with a backslash (`\`).
 ///
 /// Example showing standard and custom flags:
 /// ```
@@ -49,10 +62,44 @@ public struct Flag: Hashable, Sendable {
     /// The raw case-sensitive ``Swift/String`` value.
     internal let stringValue: String
 
-    /// Creates a new `Flag` from the given `String`. Note that casing is preserved, however
-    /// when checking if two `Flag`s are equal, then the comparison is case-insensitive.
-    public init(_ stringValue: String) {
+    /// Creates a new `Flag` from the given `String`, if the string is a valid flag.
+    ///
+    /// Note that casing is preserved, however when checking if two `Flag`s are equal, then the
+    /// comparison is case-insensitive.
+    ///
+    /// A string literal resolves to ``init(stringLiteral:)`` instead, which traps rather than
+    /// returning `nil`.
+    ///
+    /// - parameter stringValue: The flag, for example `\Seen` or `$Forwarded`.
+    /// - returns: A new flag, or `nil` if `stringValue` is not a valid flag.
+    public init?(_ stringValue: String) {
+        guard Flag.isValidFlag(stringValue) else { return nil }
         self.stringValue = stringValue
+    }
+
+    init(unchecked stringValue: String) {
+        assert(Flag.isValidFlag(stringValue))
+        self.stringValue = stringValue
+    }
+
+    /// Whether the given string is a `flag`:
+    /// ```
+    /// flag            = "\Answered" / "\Flagged" / "\Deleted" / "\Seen" / "\Draft" /
+    ///                   flag-keyword / flag-extension
+    ///                     ; Does not include "\Recent"
+    /// flag-extension  = "\" atom
+    /// flag-keyword    = atom
+    /// ```
+    /// The two branches differ: a keyword also admits resp-specials (see
+    /// ``Flag/Keyword/isValidKeyword(_:)``), an extension does not. The `\Recent` carve-out is
+    /// deliberately not enforced: ``Flag`` models `flag-fetch = flag / "\Recent"`, so `\Recent`
+    /// is accepted here as an ordinary `flag-extension`.
+    ///
+    /// A `Flag` is written to the wire verbatim, so this is what keeps a flag built from
+    /// untrusted input from injecting arbitrary IMAP into the stream.
+    static func isValidFlag(_ string: String) -> Bool {
+        guard string.hasPrefix("\\") else { return Keyword.isValidKeyword(string) }
+        return string.dropFirst().isIMAPAtom
     }
 
     /// Compares two flags to see if they are equivalent. Note that the comparison is case-insensitive.
@@ -96,7 +143,7 @@ extension Flag {
     ///
     /// Defined in [RFC 3501](https://datatracker.ietf.org/doc/html/rfc3501). Indicates the
     /// message is a response to another message.
-    public static let answered = Self("\\Answered")
+    public static let answered: Self = "\\Answered"
 
     /// `\Flagged` - The message has been marked for attention.
     ///
@@ -109,29 +156,30 @@ extension Flag {
     /// message's flagged mark and its color.
     ///
     /// - SeeAlso: ``FlaggedState``
-    public static let flagged = Self("\\Flagged")
+    public static let flagged: Self = "\\Flagged"
 
     /// `\Deleted` - The message has been deleted.
     ///
     /// Defined in [RFC 3501](https://datatracker.ietf.org/doc/html/rfc3501). Marks a message for
     /// deletion until the ``Command/expunge`` command is executed or the mailbox is closed.
-    public static let deleted = Self("\\Deleted")
+    public static let deleted: Self = "\\Deleted"
 
     /// `\Seen` - The message has been read by the user.
     ///
     /// Defined in [RFC 3501](https://datatracker.ietf.org/doc/html/rfc3501).
-    public static let seen = Self("\\Seen")
+    public static let seen: Self = "\\Seen"
 
     /// `\Draft` - The message is not yet complete.
     ///
     /// Defined in [RFC 3501](https://datatracker.ietf.org/doc/html/rfc3501).
-    public static let draft = Self("\\Draft")
+    public static let draft: Self = "\\Draft"
 
     /// Convenience function to create a new flag from a `Keyword`.
     /// - parameter keyword: The `Keyword` to use to make the `Flag`.
     /// - returns: A new `Flag`
     public static func keyword(_ keyword: Keyword) -> Self {
-        self.init(keyword.rawValue)
+        // A `Keyword` has already been validated, and a keyword is a flag.
+        self.init(unchecked: keyword.rawValue)
     }
 
     /// Creates a new custom flag complying to [RFC 3501](https://datatracker.ietf.org/doc/html/rfc3501) flag-extension syntax.
@@ -145,12 +193,14 @@ extension Flag {
     /// let importantFlag = Flag.extension("\\Important")
     /// ```
     ///
-    /// - parameter string: The custom flag name. Must begin with a single `\`. Will crash if not.
+    /// - parameter string: The custom flag name, a single `\` followed by an `atom`.
     /// - returns: A newly-created `Flag`
-    /// - Note: If the provided extension is invalid (does not begin with `\`), a runtime assertion will fail.
+    /// - Precondition: `string` is a valid `flag-extension`; this traps if it isn't. Use
+    ///   ``init(_:)`` for a string derived from input.
     public static func `extension`(_ string: String) -> Self {
         precondition(string.first == "\\", "Flag extensions must begin with \\")
-        return Self(string)
+        precondition(isValidFlag(string), "Invalid flag extension: \(String(reflecting: string))")
+        return Self(unchecked: string)
     }
 }
 

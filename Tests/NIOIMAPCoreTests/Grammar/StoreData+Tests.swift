@@ -77,7 +77,7 @@ struct StoreDataTests {
         arguments: [
             ParseFixture.storeData(
                 "+FLAGS (foo)",
-                expected: .success(.flags(.add(silent: false, list: [.init("foo")])))
+                expected: .success(.flags(.add(silent: false, list: ["foo"])))
             ),
             ParseFixture.storeData(
                 "-X-GM-LABELS (bar)",

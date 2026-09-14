@@ -49,9 +49,11 @@ extension UInt8 {
         self.isTextChar && !self.isQuotedSpecial
     }
 
+    /// atom-specials       = "(" / ")" / "{" / SP / CTL / list-wildcards / quoted-specials / resp-specials
+    /// CTL                 = %x00-1F / %x7F   ; RFC 5234
     var isAtomSpecial: Bool {
         switch self {
-        case 0...31, UInt8(ascii: "("), UInt8(ascii: ")"), UInt8(ascii: "{"), UInt8(ascii: " "):
+        case 0...31, 0x7F, UInt8(ascii: "("), UInt8(ascii: ")"), UInt8(ascii: "{"), UInt8(ascii: " "):
             return true
         case _ where self.isListWildcard, _ where self.isResponseSpecial, _ where self.isQuotedSpecial:
             return true
@@ -78,13 +80,10 @@ extension UInt8 {
         }
     }
 
+    /// ATOM-CHAR           = <any CHAR except atom-specials>
+    /// CHAR                = %x01-7F   ; RFC 5234
     var isAtomChar: Bool {
-        switch self {
-        case _ where self.isAtomSpecial, _ where self > 0x7F:
-            return false
-        default:
-            return self >= 32
-        }
+        !self.isAtomSpecial && self <= 0x7F
     }
 
     var isListChar: Bool {

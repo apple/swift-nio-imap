@@ -2798,13 +2798,24 @@ extension GrammarParser {
         return try ParserLibrary.parseBufferAsUTF8(parsed)
     }
 
+    // resource-name     = "STORAGE" / "MESSAGE" / "MAILBOX" /
+    //                     "ANNOTATION-STORAGE" / resource-name-ext
+    // resource-name-ext = atom
+    func parseQuotaResourceName(
+        buffer: inout ParseBuffer,
+        tracker: StackTracker
+    ) throws -> QuotaResource.Name {
+        // An atom is exactly what a `Name` requires.
+        QuotaResource.Name(unchecked: try parseAtom(buffer: &buffer, tracker: tracker))
+    }
+
     // setquota_list   ::= "(" 0#setquota_resource ")"
     func parseQuotaLimits(buffer: inout ParseBuffer, tracker: StackTracker) throws -> [QuotaLimit] {
         // setquota_resource ::= atom SP number
         func parseQuotaLimit(buffer: inout ParseBuffer, tracker: StackTracker) throws -> QuotaLimit {
             try PL.composite(buffer: &buffer, tracker: tracker) { (buffer, tracker) in
                 try PL.parseOptional(buffer: &buffer, tracker: tracker, parser: PL.parseSpaces)
-                let resourceName = try parseAtom(buffer: &buffer, tracker: tracker)
+                let resourceName = try parseQuotaResourceName(buffer: &buffer, tracker: tracker)
                 try PL.parseSpaces(buffer: &buffer, tracker: tracker)
                 let limit = try parseNumber(buffer: &buffer, tracker: tracker)
                 return QuotaLimit(resourceName: resourceName, limit: limit)

@@ -154,10 +154,10 @@ private enum SearchPredicateTests {
                 ]
             ),
             expected: .and([
-                .keyword(Flag.Keyword("$MailFlagBit0")!),
+                .keyword(Flag.Keyword("$MailFlagBit0")),
                 .flagged,
-                .not(.keyword(Flag.Keyword("$MailFlagBit1")!)),
-                .not(.keyword(Flag.Keyword("$MailFlagBit2")!)),
+                .not(.keyword(Flag.Keyword("$MailFlagBit1"))),
+                .not(.keyword(Flag.Keyword("$MailFlagBit2"))),
             ])
         ),
     ])
@@ -208,13 +208,13 @@ private enum SearchPredicateTests {
         ),
         FlagSearchKeyFixture(
             input: NIOIMAP.Flag("$MailFlagBit0"),
-            expected: .keyword(Flag.Keyword("$MailFlagBit0")!),
-            expectedInverted: .not(.keyword(Flag.Keyword("$MailFlagBit0")!))
+            expected: .keyword(Flag.Keyword("$MailFlagBit0")),
+            expectedInverted: .not(.keyword(Flag.Keyword("$MailFlagBit0")))
         ),
         FlagSearchKeyFixture(
             input: NIOIMAP.Flag("$MailFlagBit2"),
-            expected: .keyword(Flag.Keyword("$MailFlagBit2")!),
-            expectedInverted: .not(.keyword(Flag.Keyword("$MailFlagBit2")!))
+            expected: .keyword(Flag.Keyword("$MailFlagBit2")),
+            expectedInverted: .not(.keyword(Flag.Keyword("$MailFlagBit2")))
         ),
     ])
     static func `make search key from flag`(
