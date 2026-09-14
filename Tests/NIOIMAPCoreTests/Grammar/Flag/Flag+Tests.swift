@@ -18,20 +18,69 @@ import Testing
 
 @Suite("Flag")
 struct FlagTests {
-    @Test("keyword initialization")
-    func keywordInitialization() {
-        #expect(Flag.Keyword("Redirected").map { String($0) } == "Redirected")
-        #expect(Flag.Keyword("redirected").map { String($0) } == "redirected")
-        #expect(Flag.Keyword("$MailFlagBit0").map { String($0) } == "$MailFlagBit0")
-        #expect(Flag.Keyword("OIB-Seen-[Gmail]/Trash").map { String($0) } == "OIB-Seen-[Gmail]/Trash")
+    /// A `Keyword` is written to the wire verbatim, so ``Flag/Keyword/init(_:)`` is the only thing
+    /// between a caller that builds keywords from untrusted input and an injected command.
+    @Test(
+        "invalid keywords are rejected",
+        arguments: [
+            "",  // `atom` is `1*ATOM-CHAR`. An empty keyword would encode as nothing at all.
+            #"a"b"#,
+            "a(b",
+            "a)b",
+            "a{b",
+            "a b",
+            "a%b",
+            "a*b",
+        ]
+    )
+    func invalidKeywords(_ string: String) {
+        #expect(Flag.Keyword(string) == nil)
+    }
 
-        #expect(Flag.Keyword(#"a"b"#) == nil)
-        #expect(Flag.Keyword(#"a(b"#) == nil)
-        #expect(Flag.Keyword(#"a)b"#) == nil)
-        #expect(Flag.Keyword(#"a{b"#) == nil)
-        #expect(Flag.Keyword(#"a b"#) == nil)
-        #expect(Flag.Keyword(#"a%b"#) == nil)
-        #expect(Flag.Keyword(#"a*b"#) == nil)
+    @Test("valid keywords", arguments: validKeywordStrings)
+    func validKeywords(_ string: String) {
+        #expect(Flag.Keyword(string).map { String($0) } == string)
+    }
+
+    /// A `Flag` is written to the wire verbatim, so ``Flag/init(_:)`` is the only thing between a
+    /// caller that builds flags from untrusted input and an injected command.
+    @Test(
+        "invalid flags are rejected",
+        arguments: [
+            "",  // `flag-keyword` is `atom` = `1*ATOM-CHAR`.
+            #"\"#,  // `flag-extension` is `"\" atom`, and the atom may not be empty.
+            "a b",
+            "a(b",
+            "a)b",
+            "a{b",
+            #"a"b"#,
+            "a%b",
+            "a*b",
+            #"a\b"#,  // Only a leading backslash is allowed.
+            // `flag-extension` is `"\" atom`, and `atom` excludes resp-specials, so the Gmail
+            // carve-out below applies to `flag-keyword` only. The parser wouldn’t read this back.
+            #"\OIB-Seen-[Gmail]/Trash"#,
+            "GRÜEZI",  // `ATOM-CHAR` is ASCII.
+            "a\u{7F}b",  // CTL.
+            "a\u{01}b",  // CTL.
+            "\r\nA1 DELETE INBOX\r\n",  // Would inject a whole command.
+            "\\Seen\r\n* 1 EXPUNGE\r\n",  // Would inject an untagged response.
+        ]
+    )
+    func invalidFlags(_ string: String) {
+        #expect(Flag(string) == nil)
+    }
+
+    @Test("valid flags", arguments: validFlagStrings)
+    func validFlags(_ string: String) {
+        #expect(Flag(string).map { String($0) } == string)
+    }
+
+    /// A `Flag` is written verbatim, so every flag we accept has to parse back unchanged —
+    /// otherwise we emit bytes we can’t read.
+    @Test("valid flags round-trip", arguments: validFlagStrings)
+    func validFlagsRoundTrip(_ string: String) throws {
+        ParseFixture.flag(string, expected: .success(try #require(Flag(string)))).checkParsing()
     }
 
     @Test(
@@ -54,6 +103,7 @@ struct FlagTests {
         arguments: [
             (Flag.answered, "\\Answered"),
             (Flag.flagged, "\\Flagged"),
+            // A literal argument, so this is `init(stringLiteral:)`, not `init(_:)`.
             (Flag("Custom"), "Custom"),
         ] as [(Flag, String)]
     )
@@ -70,6 +120,26 @@ struct FlagTests {
             }
         )
     }
+
+    @Test("an invalid string literal traps") func stringLiteralPreconditionFailure() async {
+        await #expect(
+            processExitsWith: ExitTest.Condition.failure,
+            performing: {
+                let flag: Flag = "not a flag"
+                _ = flag
+            }
+        )
+    }
+
+    @Test("an invalid keyword string literal traps") func keywordStringLiteralPreconditionFailure() async {
+        await #expect(
+            processExitsWith: ExitTest.Condition.failure,
+            performing: {
+                let keyword: Flag.Keyword = "not a keyword"
+                _ = keyword
+            }
+        )
+    }
     #endif
 
     @Test("equality checks")
@@ -82,16 +152,16 @@ struct FlagTests {
         expectEqualAndEqualHash(Flag.keyword(.colorBit0), .keyword(.colorBit0))
         expectEqualAndEqualHash(Flag.keyword(.junk), .keyword(.junk))
         expectEqualAndEqualHash(Flag.keyword(.unregistered_junk), .keyword(.unregistered_junk))
-        expectEqualAndEqualHash(Flag.keyword(Flag.Keyword("FooBar")!), .keyword(Flag.Keyword("FooBar")!))
+        expectEqualAndEqualHash(Flag.keyword("FooBar"), .keyword("FooBar"))
         expectEqualAndEqualHash(Flag.extension("\\FooBar"), .extension("\\FooBar"))
         expectEqualAndEqualHash(Flag.answered, .extension("\\Answered"))
 
         // Case-insensitive:
         expectEqualAndEqualHash(Flag.answered, .extension("\\ANSWERED"))
         expectEqualAndEqualHash(Flag.answered, .extension("\\answered"))
-        expectEqualAndEqualHash(Flag.keyword(Flag.Keyword("foobar")!), .keyword(Flag.Keyword("FOOBAR")!))
-        expectEqualAndEqualHash(Flag.keyword(Flag.Keyword("FOOBAR")!), .keyword(Flag.Keyword("foobar")!))
-        expectEqualAndEqualHash(Flag.keyword(Flag.Keyword("FOOBAR")!), .keyword(Flag.Keyword("FooBar")!))
+        expectEqualAndEqualHash(Flag.keyword("foobar"), .keyword("FOOBAR"))
+        expectEqualAndEqualHash(Flag.keyword("FOOBAR"), .keyword("foobar"))
+        expectEqualAndEqualHash(Flag.keyword("FOOBAR"), .keyword("FooBar"))
         expectEqualAndEqualHash(Flag.extension("\\foobar"), .extension("\\FOOBAR"))
         expectEqualAndEqualHash(Flag.extension("\\FOOBAR"), .extension("\\foobar"))
         expectEqualAndEqualHash(Flag.extension("\\FOOBAR"), .extension("\\FooBar"))
@@ -106,7 +176,7 @@ struct FlagTests {
         #expect(Flag.answered != .keyword(.colorBit0))
         #expect(Flag.answered != .keyword(.junk))
         #expect(Flag.answered != .keyword(.unregistered_junk))
-        #expect(Flag.answered != .keyword(Flag.Keyword("FooBar")!))
+        #expect(Flag.answered != .keyword("FooBar"))
         #expect(Flag.answered != .extension("\\FooBar"))
 
         #expect(Flag.extension("\\Baz") != .answered)
@@ -117,7 +187,7 @@ struct FlagTests {
         #expect(Flag.extension("\\Baz") != .keyword(.colorBit0))
         #expect(Flag.extension("\\Baz") != .keyword(.junk))
         #expect(Flag.extension("\\Baz") != .keyword(.unregistered_junk))
-        #expect(Flag.extension("\\Baz") != .keyword(Flag.Keyword("FooBar")!))
+        #expect(Flag.extension("\\Baz") != .keyword("FooBar"))
         #expect(Flag.extension("\\Baz") != .extension("\\FooBar"))
         #expect(Flag.extension("\\Baz") != .extension("\\Answered"))
 
@@ -129,7 +199,7 @@ struct FlagTests {
         #expect(Flag.keyword(.notJunk) != .keyword(.colorBit0))
         #expect(Flag.keyword(.notJunk) != .keyword(.junk))
         #expect(Flag.keyword(.notJunk) != .keyword(.unregistered_junk))
-        #expect(Flag.keyword(.notJunk) != .keyword(Flag.Keyword("FooBar")!))
+        #expect(Flag.keyword(.notJunk) != .keyword("FooBar"))
         #expect(Flag.keyword(.notJunk) != .extension("\\FooBar"))
         #expect(Flag.keyword(.notJunk) != .extension("\\Answered"))
     }
@@ -145,9 +215,9 @@ struct FlagTests {
         EncodeFixture.flag(.extension("\\extension"), "\\extension"),
         EncodeFixture.flag(.extension("\\Extension"), "\\Extension"),
         EncodeFixture.flag(.extension("\\EXTENSION"), "\\EXTENSION"),
-        EncodeFixture.flag(.keyword(Flag.Keyword("$extension")!), "$extension"),
-        EncodeFixture.flag(.keyword(Flag.Keyword("$Extension")!), "$Extension"),
-        EncodeFixture.flag(.keyword(Flag.Keyword("$EXTENSION")!), "$EXTENSION"),
+        EncodeFixture.flag(.keyword("$extension"), "$extension"),
+        EncodeFixture.flag(.keyword("$Extension"), "$Extension"),
+        EncodeFixture.flag(.keyword("$EXTENSION"), "$EXTENSION"),
     ])
     func encode(_ fixture: EncodeFixture<Flag>) {
         fixture.checkEncoding()
@@ -196,6 +266,23 @@ struct FlagTests {
         fixture.checkParsing()
     }
 }
+
+// MARK: -
+
+private let validFlagStrings = [
+    #"\Seen"#,
+    #"\Answered"#,
+    "Custom",
+    "$Forwarded",
+    "OIB-Seen-[Gmail]/Trash",  // Gmail sends `[` and `]` in keywords.
+]
+
+private let validKeywordStrings = [
+    "Redirected",
+    "redirected",
+    "$MailFlagBit0",
+    "OIB-Seen-[Gmail]/Trash",  // Gmail sends `[` and `]` in keywords.
+]
 
 // MARK: -
 

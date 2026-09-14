@@ -461,7 +461,7 @@ extension GrammarParser {
         // quota_resource  ::= atom SP number SP number
         func parseQuotaResource(buffer: inout ParseBuffer, tracker: StackTracker) throws -> QuotaResource {
             try PL.composite(buffer: &buffer, tracker: tracker) { buffer, tracker in
-                let resourceName = try parseAtom(buffer: &buffer, tracker: tracker)
+                let resourceName = try parseQuotaResourceName(buffer: &buffer, tracker: tracker)
                 try PL.parseSpaces(buffer: &buffer, tracker: tracker)
                 let usage = try parseNumber(buffer: &buffer, tracker: tracker)
                 try PL.parseSpaces(buffer: &buffer, tracker: tracker)
