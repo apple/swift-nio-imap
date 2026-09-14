@@ -42,6 +42,8 @@ jobs:
     with:
       runner_pool: general
       build_scheme: swift-nio-imap
+      # macos_tests.yml requires explicit disable of 6.1.
+      swift_6_1_enabled: false
       swift_6_2_build_arguments_override: "-Xswiftc -Xfrontend -Xswiftc -require-explicit-sendable -Xswiftc -warnings-as-errors"
       swift_6_3_build_arguments_override: "-Xswiftc -Xfrontend -Xswiftc -require-explicit-sendable -Xswiftc -warnings-as-errors"
 
