@@ -90,6 +90,13 @@ struct SearchKeyTests {
         EncodeFixture.searchKey(.threadID(.init("123-456-789")!), "THREADID 123-456-789"),
         EncodeFixture.searchKey(.younger(34), "YOUNGER 34"),
         EncodeFixture.searchKey(.older(45), "OLDER 45"),
+        EncodeFixture.searchKey(.gmailMessageID(1_278_455_344_230_334_865), "X-GM-MSGID 1278455344230334865"),
+        EncodeFixture.searchKey(.gmailThreadID(1_266_894_439_832_287_888), "X-GM-THRID 1266894439832287888"),
+        EncodeFixture.searchKey(.gmailRaw("has:attachment in:unread"), #"X-GM-RAW "has:attachment in:unread""#),
+        EncodeFixture.searchKey(
+            .or(.gmailThreadID(111), .gmailThreadID(222)),
+            "OR X-GM-THRID 111 X-GM-THRID 222"
+        ),
     ])
     func encode(_ fixture: EncodeFixture<SearchKey>) {
         fixture.checkEncoding()
@@ -174,6 +181,19 @@ struct SearchKeyTests {
         ),
         ParseFixture.searchKey("EMAILID 123-456-789", expected: .success(.emailID(.init("123-456-789")!))),
         ParseFixture.searchKey("THREADID 123-456-789", expected: .success(.threadID(.init("123-456-789")!))),
+        ParseFixture.searchKey(
+            "X-GM-MSGID 1278455344230334865",
+            expected: .success(.gmailMessageID(1_278_455_344_230_334_865))
+        ),
+        ParseFixture.searchKey(
+            "X-GM-THRID 1266894439832287888",
+            expected: .success(.gmailThreadID(1_266_894_439_832_287_888))
+        ),
+        ParseFixture.searchKey(
+            #"X-GM-RAW "has:attachment in:unread""#,
+            expected: .success(.gmailRaw("has:attachment in:unread"))
+        ),
+        ParseFixture.searchKey("X-GM-RAW vacation", expected: .success(.gmailRaw("vacation"))),
     ])
     func parse(_ fixture: ParseFixture<SearchKey>) {
         fixture.checkParsing()
@@ -188,6 +208,9 @@ struct SearchKeyTests {
             (SearchKey.or(.all, .deleted), false),
             (SearchKey.and([.bcc("x"), .deleted]), true),
             (SearchKey.and([.all, .deleted]), false),
+            (SearchKey.gmailMessageID(1_278_455_344_230_334_865), false),
+            (SearchKey.gmailThreadID(1_266_894_439_832_287_888), false),
+            (SearchKey.gmailRaw("has:attachment"), true),
         ] as [(SearchKey, Bool)]
     )
     func usesString(_ fixture: (SearchKey, Bool)) {
