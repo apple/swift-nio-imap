@@ -21,15 +21,16 @@ import Foundation
 import NIO
 import NIOIMAP
 
-/// Deletes a mailbox from the server.
-func deleteMailbox<C: ConnectionProtocol>(
-    connection: C,
-    capabilities: [Capability],
-    mailbox: MailboxName
-) async throws {
-    let text = try await connection.send(.delete(mailbox)) { tag, responses in
-        writeStatus("Did send DELETE mailbox '\(mailbox)' with tag \(tag)")
-        return try await responses.waitForCompletion()
-    }.getOK()
-    writeStatus("Did DELETE mailbox '\(mailbox)': \(text)")
+extension ConnectionProtocol {
+    /// Deletes a mailbox from the server.
+    func deleteMailbox(
+        capabilities: [Capability],
+        mailbox: MailboxName
+    ) async throws {
+        let text = try await send(.delete(mailbox)) { tag, responses in
+            writeStatus("Did send DELETE mailbox '\(mailbox)' with tag \(tag)")
+            return try await responses.waitForCompletion()
+        }.getOK()
+        writeStatus("Did DELETE mailbox '\(mailbox)': \(text)")
+    }
 }

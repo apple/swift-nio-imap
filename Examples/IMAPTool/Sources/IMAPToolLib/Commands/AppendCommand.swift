@@ -110,8 +110,7 @@ struct AppendCommand: AsyncParsableCommand {
         let result: Result = try await IMAPConnection.withAuthenticatedConnection(info: connectionInfo) {
             id,
             connection in
-            let uids = try await append(
-                connection: connection,
+            let uids = try await connection.append(
                 messages: input.map { FilePath($0) },
                 options: appendOptions,
                 into: mailbox

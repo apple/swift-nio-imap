@@ -247,8 +247,7 @@ enum ListStatusTests {
             ]
         )
 
-        let info = try await listMailboxes(
-            connection: connection,
+        let info = try await connection.listMailboxes(
             capabilities: [.imap4rev1, .condStore]
         )
 
@@ -381,8 +380,7 @@ enum ListStatusTests {
             ]
         )
 
-        let info = try await listMailboxes(
-            connection: connection,
+        let info = try await connection.listMailboxes(
             capabilities: [.imap4rev1, .condStore, .listStatus]
         )
 

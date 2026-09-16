@@ -103,20 +103,20 @@ extension UIDsAndMessageIDs {
     }
 }
 
-func findMessageIDs<C: ConnectionProtocol>(
-    connection: C,
-    selectInfo: SelectInfo,
-    capabilities: [Capability],
-    ids: UIDsAndMessageIDs
-) async throws -> UIDSet {
-    guard
-        let key = SearchKey.messageID(ids.messageIDs)
-    else { return ids.uids }
+extension ConnectionProtocol {
+    func findMessageIDs(
+        selectInfo: SelectInfo,
+        capabilities: [Capability],
+        ids: UIDsAndMessageIDs
+    ) async throws -> UIDSet {
+        guard
+            let key = SearchKey.messageID(ids.messageIDs)
+        else { return ids.uids }
 
-    let new = try await search(
-        connection: connection,
-        capabilities: capabilities,
-        key: key
-    )
-    return ids.uids.union(new)
+        let new = try await search(
+            capabilities: capabilities,
+            key: key
+        )
+        return ids.uids.union(new)
+    }
 }

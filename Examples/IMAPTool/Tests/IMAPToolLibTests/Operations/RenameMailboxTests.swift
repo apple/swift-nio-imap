@@ -38,8 +38,7 @@ struct RenameMailboxTests {
             ]
         )
 
-        try await renameMailbox(
-            connection: connection,
+        try await connection.renameMailbox(
             capabilities: [.imap4rev1],
             old: "OldFolder",
             new: "NewFolder"
@@ -61,8 +60,7 @@ struct RenameMailboxTests {
             ]
         )
 
-        try await renameMailbox(
-            connection: connection,
+        try await connection.renameMailbox(
             capabilities: [.imap4rev1],
             old: "INBOX.Drafts",
             new: "INBOX.MyDrafts"
@@ -84,8 +82,7 @@ struct RenameMailboxTests {
             ]
         )
 
-        try await renameMailbox(
-            connection: connection,
+        try await connection.renameMailbox(
             capabilities: [.imap4rev1],
             old: "INBOX.Work.2023",
             new: "INBOX.Archives.2023"
@@ -107,8 +104,7 @@ struct RenameMailboxTests {
             ]
         )
 
-        try await renameMailbox(
-            connection: connection,
+        try await connection.renameMailbox(
             capabilities: [.imap4rev1],
             old: "INBOX.Work.ImportantProject",
             new: "ImportantProject"
@@ -130,8 +126,7 @@ struct RenameMailboxTests {
             ]
         )
 
-        try await renameMailbox(
-            connection: connection,
+        try await connection.renameMailbox(
             capabilities: [.imap4rev1],
             old: "TempFolder",
             new: "INBOX.Archives.TempFolder"
@@ -156,8 +151,7 @@ struct RenameMailboxTests {
         )
 
         await #expect(throws: TaggedResponse.StateNotOK.self) {
-            _ = try await renameMailbox(
-                connection: connection,
+            _ = try await connection.renameMailbox(
                 capabilities: [.imap4rev1],
                 old: "NonExistentFolder",
                 new: "NewFolder"
@@ -181,8 +175,7 @@ struct RenameMailboxTests {
         )
 
         await #expect(throws: TaggedResponse.StateNotOK.self) {
-            _ = try await renameMailbox(
-                connection: connection,
+            _ = try await connection.renameMailbox(
                 capabilities: [.imap4rev1],
                 old: "SourceFolder",
                 new: "TargetFolder"

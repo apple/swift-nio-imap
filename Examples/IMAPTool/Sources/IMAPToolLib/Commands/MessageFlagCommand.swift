@@ -125,14 +125,12 @@ struct MessageFlagCommand: AsyncParsableCommand {
         changes: IMAPToolLib.FlagChanges
     ) async throws {
         try await IMAPConnection.withAuthenticatedConnection(info: connectionInfo) { id, connection in
-            let info = try await select(
-                connection: connection,
+            let info = try await connection.select(
                 createMailbox: .fail,
                 mailbox: mailbox
             )
 
-            let allUIDs = try await findMessageIDs(
-                connection: connection,
+            let allUIDs = try await connection.findMessageIDs(
                 selectInfo: info,
                 capabilities: id.capabilities,
                 ids: ids
@@ -142,8 +140,7 @@ struct MessageFlagCommand: AsyncParsableCommand {
                 !allUIDs.isEmpty
             else { return }
 
-            try await updateFlags(
-                connection: connection,
+            try await connection.updateFlags(
                 uids: allUIDs,
                 changes: changes
             )

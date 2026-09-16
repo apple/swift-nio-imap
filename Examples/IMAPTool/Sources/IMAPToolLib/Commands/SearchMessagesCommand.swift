@@ -70,22 +70,19 @@ struct SearchMessagesCommand: AsyncParsableCommand, Sendable {
         let result: Result = try await IMAPConnection.withAuthenticatedConnection(
             info: connectionInfo
         ) { info, connection -> Result in
-            let mailboxInfo = try await select(
-                connection: connection,
+            let mailboxInfo = try await connection.select(
                 createMailbox: .fail,
                 mailbox: mailbox
             )
 
-            let uids = try await search(
-                connection: connection,
+            let uids = try await connection.search(
                 capabilities: info.capabilities,
                 key: searchKey
             )
 
             let messageInfo: [MessageInfo]?
             if shouldFetchMessageInfo {
-                messageInfo = try await fetchMessageInfo(
-                    connection: connection,
+                messageInfo = try await connection.fetchMessageInfo(
                     mailboxMessageCount: mailboxInfo.messageCount,
                     capabilities: info.capabilities,
                     query: .uids(uids)

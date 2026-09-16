@@ -37,13 +37,11 @@ struct IdentifyCommand: AsyncParsableCommand, Sendable {
 
         let result = try await IMAPConnection.withConnection(configuration: config) { greeting, connection in
             writeStatus("Server greeting: \(greeting.status)")
-            let r = try await authenticate(
-                connection: connection,
+            let r = try await connection.authenticate(
                 greeting: greeting,
                 connectionInfo: connectionInfo
             )
-            return try await identify(
-                connection: connection,
+            return try await connection.identify(
                 capabilities: r.capabilities
             )
         }
@@ -52,19 +50,19 @@ struct IdentifyCommand: AsyncParsableCommand, Sendable {
     }
 }
 
-/// Authenticates the connection using the credentials from `connectionInfo`.
-func authenticate(
-    connection: IMAPConnection,
-    greeting: IMAPConnection.Greeting,
-    connectionInfo: ConnectionInfo
-) async throws -> AuthenticationResult {
-    try await authenticate(
-        connection: connection,
-        greeting: greeting,
-        credential: try connectionInfo.makeCredential(),
-        disableSASLIR: connectionInfo.disableSASLIR,
-        forceLogin: connectionInfo.forceLogin
-    )
+extension IMAPConnection {
+    /// Authenticates the connection using the credentials from `connectionInfo`.
+    func authenticate(
+        greeting: IMAPConnection.Greeting,
+        connectionInfo: ConnectionInfo
+    ) async throws -> AuthenticationResult {
+        try await authenticate(
+            greeting: greeting,
+            credential: try connectionInfo.makeCredential(),
+            disableSASLIR: connectionInfo.disableSASLIR,
+            forceLogin: connectionInfo.forceLogin
+        )
+    }
 }
 
 extension IMAPConnection {
@@ -77,13 +75,11 @@ extension IMAPConnection {
 
         return try await IMAPConnection.withConnection(configuration: config) { greeting, connection in
             writeStatus("Connected to \(config.endpoint.hostname ?? ""), received greeting: '\(greeting.status)'")
-            let r = try await authenticate(
-                connection: connection,
+            let r = try await connection.authenticate(
                 greeting: greeting,
                 connectionInfo: connectionInfo
             )
-            let identity = try await identify(
-                connection: connection,
+            let identity = try await connection.identify(
                 capabilities: r.capabilities
             )
 

@@ -49,8 +49,7 @@ private enum SearchEndToEndTests {
                 )
             ]
         )
-        let uids = try await search(
-            connection: connection,
+        let uids = try await connection.search(
             capabilities: [.extendedSearch],
             key: .not(.deleted)
         )
@@ -117,8 +116,7 @@ private enum SearchEndToEndTests {
                 ),
             ]
         )
-        let uids = try await search(
-            connection: connection,
+        let uids = try await connection.search(
             capabilities: [.partial, .messageLimit(1_200)],
             key: .not(.deleted)
         )
@@ -178,8 +176,7 @@ private enum SearchEndToEndTests {
                 ),
             ]
         )
-        let result: UIDSet = try await allUIDs(
-            connection: connection,
+        let result: UIDSet = try await connection.allUIDs(
             query: .last(count: 900),
             mailboxMessageCount: 100_000,
             capabilities: [.imap4rev1]
@@ -250,8 +247,7 @@ private enum SearchEndToEndTests {
                 ),
             ]
         )
-        let result: UIDSet = try await batchedSearch(
-            connection: connection,
+        let result: UIDSet = try await connection.batchedSearch(
             key: .seen,
             query: .last(count: 900),
             mailboxMessageCount: 100_000,
@@ -307,8 +303,7 @@ private enum SearchEndToEndTests {
                 )
             ]
         )
-        let result: UIDSet = try await batchedSearch(
-            connection: connection,
+        let result: UIDSet = try await connection.batchedSearch(
             key: .seen,
             query: .last(count: 900),
             mailboxMessageCount: 100_000,
@@ -364,8 +359,7 @@ private enum SearchEndToEndTests {
                 ),
             ]
         )
-        let result: UIDSet = try await batchedSearch(
-            connection: connection,
+        let result: UIDSet = try await connection.batchedSearch(
             key: .all,
             query: .uids([2_000...4_000]),
             mailboxMessageCount: 100_000,
@@ -410,8 +404,7 @@ private enum SearchEndToEndTests {
                 )
             ]
         )
-        let result: UIDSet = try await batchedSearch(
-            connection: connection,
+        let result: UIDSet = try await connection.batchedSearch(
             key: .all,
             query: .uids([100, 200, 1_500, 2_000]),
             mailboxMessageCount: 100_000,
@@ -490,8 +483,7 @@ private enum SearchEndToEndTests {
                 ),
             ]
         )
-        let result: UIDSet = try await batchedSearch(
-            connection: connection,
+        let result: UIDSet = try await connection.batchedSearch(
             key: .all,
             query: .all,
             mailboxMessageCount: 3_000,
@@ -546,8 +538,7 @@ private enum SearchEndToEndTests {
                 )
             ]
         )
-        let result: UIDSet = try await batchedSearch(
-            connection: connection,
+        let result: UIDSet = try await connection.batchedSearch(
             key: .all,
             query: .all,
             mailboxMessageCount: 3_000,

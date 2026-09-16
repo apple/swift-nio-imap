@@ -47,8 +47,7 @@ private struct UpdateFlagsTests {
             )
         ])
 
-        try await updateFlags(
-            connection: connection,
+        try await connection.updateFlags(
             uids: [123, 456],
             changes: .init(
                 set: [.seen, .flagged],
@@ -84,8 +83,7 @@ private struct UpdateFlagsTests {
             )
         ])
 
-        try await updateFlags(
-            connection: connection,
+        try await connection.updateFlags(
             uids: [123, 456],
             changes: .init(
                 set: [],
@@ -143,8 +141,7 @@ private struct UpdateFlagsTests {
             ),
         ])
 
-        try await updateFlags(
-            connection: connection,
+        try await connection.updateFlags(
             uids: [123, 456],
             changes: .init(
                 set: [.flagged],

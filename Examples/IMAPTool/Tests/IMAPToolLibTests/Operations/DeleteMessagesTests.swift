@@ -47,8 +47,7 @@ enum DeleteMessagesTests {
                 completion: .ok(.init(text: "Done"))
             ),
         ])
-        try await deleteMessages(
-            connection: connection,
+        try await connection.deleteMessages(
             uids: [309_727, 967_986]
         )
     }
@@ -58,8 +57,7 @@ enum DeleteMessagesTests {
         let connection = TestConnection(
             expectedCommands: []
         )
-        try await deleteMessages(
-            connection: connection,
+        try await connection.deleteMessages(
             uids: []
         )
     }

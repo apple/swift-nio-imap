@@ -50,8 +50,7 @@ struct IdleCommand: AsyncParsableCommand {
 
     func run() async throws {
         try await IMAPConnection.withAuthenticatedConnection(info: connectionInfo) { id, connection in
-            _ = try await select(
-                connection: connection,
+            _ = try await connection.select(
                 createMailbox: .fail,
                 mailbox: mailboxName
             )
@@ -63,7 +62,7 @@ struct IdleCommand: AsyncParsableCommand {
                 }
             }()
 
-            try await runIdle(connection: connection) { _, events in
+            try await connection.runIdle { _, events in
                 for try await event in events {
                     writeResult(
                         result: event,

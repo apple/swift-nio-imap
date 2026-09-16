@@ -31,57 +31,57 @@ enum FetchQuery: Hashable, Sendable {
     case all
 }
 
-/// Determines the best combination of `UIDSet` and `[FetchModifier]` to operate on messages in the mailbox.
-///
-/// Use this for `UID FETCH`, `UID SEARCH`, and similar commands. This helper checks which capabilities
-/// the server supports, and picks the best approach to split the work into multiple ranges or multiple
-/// `UID FETCH` commands.
-///
-/// It does not perform the `UID FETCH` itself, but repeatedly calls the `fetch` closure to do any fetching,
-/// and the `update` closure to collect results.
-func batched<C: ConnectionProtocol, InnerResult: Sendable, Result: Sendable>(
-    connection: C,
-    query: FetchQuery,
-    mailboxMessageCount: Int,
-    capabilities: [Capability],
-    fetch: @Sendable @escaping (FetchBatch) async throws -> InnerResult,
-    into _result: Result,
-    update: @Sendable (inout Result, InnerResult) throws -> Void
-) async throws -> Result {
-    let batches = try await makeBatches(
-        connection: connection,
-        query: query,
-        mailboxMessageCount: mailboxMessageCount,
-        capabilities: capabilities
-    )
-    // Run multiple concurrently:
-    let maxConcurrentTasks = 11
-    return try await withThrowingTaskGroup(
-        of: InnerResult.self,
-        returning: Result.self
-    ) { group in
-        var batchIterator = batches.makeIterator()
+extension ConnectionProtocol {
+    /// Determines the best combination of `UIDSet` and `[FetchModifier]` to operate on messages in the mailbox.
+    ///
+    /// Use this for `UID FETCH`, `UID SEARCH`, and similar commands. This helper checks which capabilities
+    /// the server supports, and picks the best approach to split the work into multiple ranges or multiple
+    /// `UID FETCH` commands.
+    ///
+    /// It does not perform the `UID FETCH` itself, but repeatedly calls the `fetch` closure to do any fetching,
+    /// and the `update` closure to collect results.
+    func batched<InnerResult: Sendable, Result: Sendable>(
+        query: FetchQuery,
+        mailboxMessageCount: Int,
+        capabilities: [Capability],
+        fetch: @Sendable @escaping (FetchBatch) async throws -> InnerResult,
+        into _result: Result,
+        update: @Sendable (inout Result, InnerResult) throws -> Void
+    ) async throws -> Result {
+        let batches = try await makeBatches(
+            query: query,
+            mailboxMessageCount: mailboxMessageCount,
+            capabilities: capabilities
+        )
+        // Run multiple concurrently:
+        let maxConcurrentTasks = 11
+        return try await withThrowingTaskGroup(
+            of: InnerResult.self,
+            returning: Result.self
+        ) { group in
+            var batchIterator = batches.makeIterator()
 
-        // A helper that does the actual work:
-        func addTask() {
-            guard let batch = batchIterator.next() else { return }
-            group.addTask {
-                try await fetch(batch)
+            // A helper that does the actual work:
+            func addTask() {
+                guard let batch = batchIterator.next() else { return }
+                group.addTask {
+                    try await fetch(batch)
+                }
             }
-        }
 
-        // Start the first set of tasks:
-        for _ in 0..<maxConcurrentTasks {
-            addTask()
-        }
+            // Start the first set of tasks:
+            for _ in 0..<maxConcurrentTasks {
+                addTask()
+            }
 
-        var result = _result
-        while let innerResult = try await group.next() {
-            try update(&result, innerResult)
-            // Start the next task:
-            addTask()
+            var result = _result
+            while let innerResult = try await group.next() {
+                try update(&result, innerResult)
+                // Start the next task:
+                addTask()
+            }
+            return result
         }
-        return result
     }
 }
 

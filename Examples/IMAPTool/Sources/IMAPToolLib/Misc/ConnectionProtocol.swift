@@ -21,15 +21,20 @@ import NIOIMAP
 /// In production, this is always an ``IMAPConnection``. In tests, a mock can send
 /// simple commands without requiring `AUTHENTICATE` or `APPEND` support.
 ///
-/// ## When operations use `<C: ConnectionProtocol>` vs. concrete `IMAPConnection`
+/// ## Where the operations live
 ///
-/// Most operations in `IMAPToolLib/Operations` are generic over `ConnectionProtocol`.
-/// A few — `append`, `authenticate`, `runIdle` — are written against the concrete
-/// `IMAPConnection` type because they use methods (`append`, `sendAuthenticate`,
-/// `sendIdle`) that are not part of this protocol. Those methods deal with
-/// continuation-driven flows (literals, SASL challenges, IDLE) that don't fit the
-/// simple "send a `Command`, consume the `IMAPConnection.ResponseStream`" shape, so adding them
-/// here would complicate the mock surface used by tests.
+/// The operations in `IMAPToolLib/Operations` are methods on the connection, so they read
+/// as `connection.listMailboxes(capabilities:)`. Most are declared in an
+/// `extension ConnectionProtocol`, and that is what keeps them testable: they reach the
+/// server only through `send(_:_:)`, the single protocol requirement, so a mock that
+/// implements `send` gets all of them for free.
+///
+/// A few — `append`, `authenticate`, `runIdle` — are declared in an `extension IMAPConnection`
+/// instead, because they use methods (`append`, `sendAuthenticate`, `sendIdle`) that are not
+/// part of this protocol. Those methods deal with continuation-driven flows (literals, SASL
+/// challenges, IDLE) that don't fit the simple "send a `Command`, consume the
+/// `IMAPConnection.ResponseStream`" shape, so adding them here would complicate the mock
+/// surface used by tests.
 ///
 /// ## Closure isolation
 ///

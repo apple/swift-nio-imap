@@ -24,83 +24,82 @@ import NIOIMAP
 // Striding is anchored at the *max* sequence number so the newest batch is full —
 // callers may use that property to restrict follow-up tasks to the latest batch.
 
-/// Returns batches by first asking the server for boundary UIDs.
-///
-/// Used for `.all` / `.last(n)` queries on servers without RFC 9394 `PARTIAL`.
-func makeBoundaryFetchBatch<C: ConnectionProtocol>(
-    connection: C,
-    query: FetchQuery,
-    mailboxMessageCount: Int,
-    batchSize: SequenceNumber,
-    capabilities: [Capability],
-) async throws -> FetchBatches {
-    func make(count: Int) async throws -> FetchBatches {
-        guard
-            Int(UInt32(batchSize)) / 2 < count
-        else {
-            writeStatus("Requesting list of latest \(count) UIDs from server")
-            // Run a search to get the UIDs:
-            let uids = try await search(
-                connection: connection,
-                capabilities: capabilities,
-                key: .lastMessages(
-                    count: count,
-                    mailboxMessageCount: mailboxMessageCount
-                )
-            )
+extension ConnectionProtocol {
+    /// Returns batches by first asking the server for boundary UIDs.
+    ///
+    /// Used for `.all` / `.last(n)` queries on servers without RFC 9394 `PARTIAL`.
+    func makeBoundaryFetchBatch(
+        query: FetchQuery,
+        mailboxMessageCount: Int,
+        batchSize: SequenceNumber,
+        capabilities: [Capability],
+    ) async throws -> FetchBatches {
+        func make(count: Int) async throws -> FetchBatches {
             guard
-                let a = uids.min(),
-                let b = uids.max()
+                Int(UInt32(batchSize)) / 2 < count
+            else {
+                writeStatus("Requesting list of latest \(count) UIDs from server")
+                // Run a search to get the UIDs:
+                let uids = try await search(
+                    capabilities: capabilities,
+                    key: .lastMessages(
+                        count: count,
+                        mailboxMessageCount: mailboxMessageCount
+                    )
+                )
+                guard
+                    let a = uids.min(),
+                    let b = uids.max()
+                else {
+                    writeStatus("No UIDs — mailbox is empty?")
+                    return .empty
+                }
+                return .singleBatch(a...b)
+            }
+            // Split up into batches.
+            guard
+                let boundarySequenceNumbers = sequenceNumbersForMessageBatches(
+                    mailboxMessageCount: mailboxMessageCount,
+                    maximumCount: count,
+                    batchSize: batchSize
+                )
             else {
                 writeStatus("No UIDs — mailbox is empty?")
                 return .empty
             }
-            return .singleBatch(a...b)
-        }
-        // Split up into batches.
-        guard
-            let boundarySequenceNumbers = sequenceNumbersForMessageBatches(
-                mailboxMessageCount: mailboxMessageCount,
-                maximumCount: count,
-                batchSize: batchSize
+            writeStatus("Searching for message batches UID boundaries")
+            let boundaryUIDs = try await search(
+                capabilities: capabilities,
+                key: .sequenceNumbers(.set(boundarySequenceNumbers))
             )
-        else {
-            writeStatus("No UIDs — mailbox is empty?")
-            return .empty
+            writeStatus("Message batch UID boundaries (for \(count) messages): \(boundaryUIDs)")
+            return .fromBoundaries(UIDBatchFromBoundaries(boundaries: boundaryUIDs))
         }
-        writeStatus("Searching for message batches UID boundaries")
-        let boundaryUIDs = try await search(
-            connection: connection,
-            capabilities: capabilities,
-            key: .sequenceNumbers(.set(boundarySequenceNumbers))
-        )
-        writeStatus("Message batch UID boundaries (for \(count) messages): \(boundaryUIDs)")
-        return .fromBoundaries(UIDBatchFromBoundaries(boundaries: boundaryUIDs))
-    }
 
-    switch query {
-    case .last(count: let count):
-        // Honor `count` even on a small mailbox: fetching the whole mailbox to satisfy
-        // a `.last(n)` request would over-fetch. `make(count:)` issues a bounded SEARCH
-        // for (at most) the last `count` messages.
-        return try await make(count: min(count, mailboxMessageCount))
-    case .all:
-        // The whole mailbox is wanted. If it is small enough, fetch it in a single batch
-        // without a boundary SEARCH.
-        guard
-            Int(UInt32(batchSize)) / 2 < mailboxMessageCount
-        else {
-            writeStatus("Mailbox has very few messages — using a single batch")
-            return .fixed([UID.min...UID.max])
+        switch query {
+        case .last(count: let count):
+            // Honor `count` even on a small mailbox: fetching the whole mailbox to satisfy
+            // a `.last(n)` request would over-fetch. `make(count:)` issues a bounded SEARCH
+            // for (at most) the last `count` messages.
+            return try await make(count: min(count, mailboxMessageCount))
+        case .all:
+            // The whole mailbox is wanted. If it is small enough, fetch it in a single batch
+            // without a boundary SEARCH.
+            guard
+                Int(UInt32(batchSize)) / 2 < mailboxMessageCount
+            else {
+                writeStatus("Mailbox has very few messages — using a single batch")
+                return .fixed([UID.min...UID.max])
+            }
+            return try await make(count: mailboxMessageCount)
+        case .uids(let uids):
+            let ranges = splitUIDsIntoRanges(
+                uids: uids,
+                maximumCount: Int(batchSize)
+            )
+            writeStatus("Did split FETCH for \(uids.count) UIDs into \(ranges.count) batch(es) / range(s)")
+            return .fixed(ranges)
         }
-        return try await make(count: mailboxMessageCount)
-    case .uids(let uids):
-        let ranges = splitUIDsIntoRanges(
-            uids: uids,
-            maximumCount: Int(batchSize)
-        )
-        writeStatus("Did split FETCH for \(uids.count) UIDs into \(ranges.count) batch(es) / range(s)")
-        return .fixed(ranges)
     }
 }
 

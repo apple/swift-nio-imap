@@ -69,8 +69,7 @@ enum DownloadTests {
                 uidValidity: 543,
                 deleteUnknown: false
             )
-            try await download(
-                connection: connection,
+            try await connection.download(
                 uids: [309_727, 967_986],
                 into: &dir
             )
@@ -116,8 +115,7 @@ enum DownloadTests {
             )
             #expect(dir.downloadedUIDs == [309_727])
 
-            try await download(
-                connection: connection,
+            try await connection.download(
                 uids: [309_727, 967_986],
                 into: &dir
             )
@@ -145,8 +143,7 @@ enum DownloadTests {
             )
             #expect(dir.downloadedUIDs == [309_727, 967_986])
 
-            try await download(
-                connection: connection,
+            try await connection.download(
                 uids: [309_727, 967_986],
                 into: &dir
             )
@@ -212,8 +209,7 @@ enum DownloadTests {
                 uidValidity: 543,
                 deleteUnknown: false
             )
-            try await download(
-                connection: connection,
+            try await connection.download(
                 uids: allUIDs,
                 into: &dir
             )

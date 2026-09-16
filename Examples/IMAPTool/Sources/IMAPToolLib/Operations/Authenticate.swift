@@ -27,111 +27,109 @@ struct AuthenticationResult: Hashable, Sendable {
     var capabilities: [Capability]
 }
 
-/// Authenticates the connection using the given credential.
-func authenticate(
-    connection: IMAPConnection,
-    greeting: IMAPConnection.Greeting,
-    credential: IMAPCredential,
-    disableSASLIR: Bool,
-    forceLogin: Bool
-) async throws -> AuthenticationResult {
-    let preAuthCapabilities = try await capabilitiesFromCodeOrSendCommand(
-        connection: connection,
-        text: try greeting.status.getOK()
-    )
-    writeStatus("Pre-auth capabilities: \(preAuthCapabilities.map { String($0) }.sorted().joined(separator: " "))")
-
-    // Authenticate:
-    let authResult: TaggedResponse
-    let (mechanism, ir) = credential.makeAuthenticateCommand()
-    if preAuthCapabilities.contains(.authenticate(mechanism)) {
-        authResult = try await authenticate(
-            connection: connection,
-            saslMechanism: mechanism,
-            initialResponse: ir,
-            useSASL_IR: !disableSASLIR && preAuthCapabilities.contains(.saslIR)
+extension IMAPConnection {
+    /// Authenticates the connection using the given credential.
+    func authenticate(
+        greeting: IMAPConnection.Greeting,
+        credential: IMAPCredential,
+        disableSASLIR: Bool,
+        forceLogin: Bool
+    ) async throws -> AuthenticationResult {
+        let preAuthCapabilities = try await capabilitiesFromCodeOrSendCommand(
+            text: try greeting.status.getOK()
         )
-    } else if let login = credential.makeLoginCommand() {
-        authResult = try await connection.send(login) { tag, responses in
-            writeStatus("Did send LOGIN command \(tag)")
-            return try await responses.waitForCompletion()
-        }
-    } else {
-        throw AuthenticationError(
-            message:
-                "Server capabilities do not support the available credentials. Capabilities: \(preAuthCapabilities.map { String($0) }.sorted().joined(separator: " "))"
-        )
-    }
-    let text = try authResult.getOK()
-    writeStatus("Did authenticate: \(text.text)")
+        writeStatus("Pre-auth capabilities: \(preAuthCapabilities.map { String($0) }.sorted().joined(separator: " "))")
 
-    let postAuthCapabilities = try await capabilitiesFromCodeOrSendCommand(
-        connection: connection,
-        text: text
-    )
-    writeStatus("Post-auth capabilities: \(postAuthCapabilities.map { String($0) }.sorted().joined(separator: " "))")
-
-    return AuthenticationResult(
-        responseText: text.text,
-        capabilities: postAuthCapabilities
-    )
-}
-
-private func capabilitiesFromCodeOrSendCommand(
-    connection: IMAPConnection,
-    text: ResponseText
-) async throws -> [Capability] {
-    if case .capability(let c) = text.code {
-        return c
-    }
-    // Get them from the server:
-    return try await getCapabilities(connection: connection)
-}
-
-private func getCapabilities(
-    connection: IMAPConnection
-) async throws -> [Capability] {
-    try await connection.send(.capability) { tag, responses in
-        var result: [Capability]? = nil
-        for try await r in responses {
-            switch r {
-            case .tagged(let r):
-                try r.checkOK()
-            case .untagged(.capabilityData(let c)):
-                result = c
-            default:
-                break
+        // Authenticate:
+        let authResult: TaggedResponse
+        let (mechanism, ir) = credential.makeAuthenticateCommand()
+        if preAuthCapabilities.contains(.authenticate(mechanism)) {
+            authResult = try await authenticate(
+                saslMechanism: mechanism,
+                initialResponse: ir,
+                useSASL_IR: !disableSASLIR && preAuthCapabilities.contains(.saslIR)
+            )
+        } else if let login = credential.makeLoginCommand() {
+            authResult = try await send(login) { tag, responses in
+                writeStatus("Did send LOGIN command \(tag)")
+                return try await responses.waitForCompletion()
             }
+        } else {
+            throw AuthenticationError(
+                message:
+                    "Server capabilities do not support the available credentials. Capabilities: \(preAuthCapabilities.map { String($0) }.sorted().joined(separator: " "))"
+            )
         }
-        guard
-            let result
-        else {
-            throw AuthenticationError(message: "Server did not return Capabilities")
-        }
-        return result
-    }
-}
+        let text = try authResult.getOK()
+        writeStatus("Did authenticate: \(text.text)")
 
-private func authenticate(
-    connection: IMAPConnection,
-    saslMechanism mechanism: AuthenticationMechanism,
-    initialResponse ir: InitialResponse,
-    useSASL_IR supportsIR: Bool
-) async throws -> TaggedResponse {
-    try await connection.sendAuthenticate(
-        mechanism: mechanism,
-        initialResponse: supportsIR ? ir : nil
-    ) { tag, responses, writer in
-        writeStatus("Did send AUTHENTICATE \(String(mechanism)) command \(tag) \(supportsIR ? "with" : "without") IR")
-        return try await responses.forEach { response in
-            switch response {
-            case .authenticationChallenge:
-                guard !supportsIR else {
-                    throw AuthenticationError(message: "Unexpected challenge.")
+        let postAuthCapabilities = try await capabilitiesFromCodeOrSendCommand(
+            text: text
+        )
+        writeStatus(
+            "Post-auth capabilities: \(postAuthCapabilities.map { String($0) }.sorted().joined(separator: " "))"
+        )
+
+        return AuthenticationResult(
+            responseText: text.text,
+            capabilities: postAuthCapabilities
+        )
+    }
+
+    private func capabilitiesFromCodeOrSendCommand(
+        text: ResponseText
+    ) async throws -> [Capability] {
+        if case .capability(let c) = text.code {
+            return c
+        }
+        // Get them from the server:
+        return try await getCapabilities()
+    }
+
+    private func getCapabilities() async throws -> [Capability] {
+        try await send(.capability) { tag, responses in
+            var result: [Capability]? = nil
+            for try await r in responses {
+                switch r {
+                case .tagged(let r):
+                    try r.checkOK()
+                case .untagged(.capabilityData(let c)):
+                    result = c
+                default:
+                    break
                 }
-                try await writer.writeContinuation(ir.data)
-            default:
-                return
+            }
+            guard
+                let result
+            else {
+                throw AuthenticationError(message: "Server did not return Capabilities")
+            }
+            return result
+        }
+    }
+
+    private func authenticate(
+        saslMechanism mechanism: AuthenticationMechanism,
+        initialResponse ir: InitialResponse,
+        useSASL_IR supportsIR: Bool
+    ) async throws -> TaggedResponse {
+        try await sendAuthenticate(
+            mechanism: mechanism,
+            initialResponse: supportsIR ? ir : nil
+        ) { tag, responses, writer in
+            writeStatus(
+                "Did send AUTHENTICATE \(String(mechanism)) command \(tag) \(supportsIR ? "with" : "without") IR"
+            )
+            return try await responses.forEach { response in
+                switch response {
+                case .authenticationChallenge:
+                    guard !supportsIR else {
+                        throw AuthenticationError(message: "Unexpected challenge.")
+                    }
+                    try await writer.writeContinuation(ir.data)
+                default:
+                    return
+                }
             }
         }
     }

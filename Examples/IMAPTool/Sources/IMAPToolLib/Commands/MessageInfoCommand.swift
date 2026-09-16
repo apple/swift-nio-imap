@@ -50,13 +50,11 @@ struct MessageInfoCommand: AsyncParsableCommand {
         let result: [MessageInfo] = try await IMAPConnection.withAuthenticatedConnection(info: connectionInfo) {
             id,
             connection in
-            let info = try await select(
-                connection: connection,
+            let info = try await connection.select(
                 createMailbox: .fail,
                 mailbox: mailbox
             )
-            return try await fetchMessageInfo(
-                connection: connection,
+            return try await connection.fetchMessageInfo(
                 mailboxMessageCount: info.messageCount,
                 capabilities: id.capabilities,
                 query: query

@@ -21,79 +21,76 @@ import Foundation
 import NIO
 import NIOIMAP
 
-/// Creates the mailbox and then runs `LIST` and `STATUS` on it.
-func createAndList<C: ConnectionProtocol>(
-    connection: C,
-    capabilities: [Capability],
-    mailbox: NewMailboxAction
-) async throws -> MailboxInfoAndStatus {
-    switch mailbox {
-    case .alreadyExists(let name):
-        return try await listAlreadyExisting(
-            connection: connection,
-            capabilities: capabilities,
-            mailbox: name
-        )
-    case .create(let name, let parameters):
-        return try await createAndList(
-            connection: connection,
-            capabilities: capabilities,
-            mailbox: name,
-            parameters: parameters
-        )
-    }
-}
-
-/// Creates the mailbox and then runs `LIST` and `STATUS` on it.
-func createAndList<C: ConnectionProtocol>(
-    connection: C,
-    capabilities: [Capability],
-    mailbox: MailboxName,
-    parameters _parameters: [CreateParameter]
-) async throws -> MailboxInfoAndStatus {
-    let parameters: [CreateParameter]
-    if capabilities.contains(.createSpecialUse) {
-        parameters = _parameters
-    } else {
-        if !_parameters.isEmpty {
-            writeStatus("Server does not support CREATE-SPECIAL-USE")
+extension ConnectionProtocol {
+    /// Creates the mailbox and then runs `LIST` and `STATUS` on it.
+    func createAndList(
+        capabilities: [Capability],
+        mailbox: NewMailboxAction
+    ) async throws -> MailboxInfoAndStatus {
+        switch mailbox {
+        case .alreadyExists(let name):
+            return try await listAlreadyExisting(
+                capabilities: capabilities,
+                mailbox: name
+            )
+        case .create(let name, let parameters):
+            return try await createAndList(
+                capabilities: capabilities,
+                mailbox: name,
+                parameters: parameters
+            )
         }
-        parameters = []
     }
 
-    let createText = try await connection.send(.create(mailbox, parameters)) { tag, responses in
-        writeStatus("Did send CREATE mailbox '\(mailbox)' with tag \(tag)")
-        return try await responses.waitForCompletion()
-    }.getOK()
-    writeStatus("Did CREATE mailbox '\(mailbox)': \(createText)")
+    /// Creates the mailbox and then runs `LIST` and `STATUS` on it.
+    func createAndList(
+        capabilities: [Capability],
+        mailbox: MailboxName,
+        parameters _parameters: [CreateParameter]
+    ) async throws -> MailboxInfoAndStatus {
+        let parameters: [CreateParameter]
+        if capabilities.contains(.createSpecialUse) {
+            parameters = _parameters
+        } else {
+            if !_parameters.isEmpty {
+                writeStatus("Server does not support CREATE-SPECIAL-USE")
+            }
+            parameters = []
+        }
 
-    guard
-        let info = try await listMailbox(
-            connection: connection,
-            capabilities: capabilities,
-            mailbox: mailbox
-        )
-    else { throw NoListResponseAfterCreate(mailbox: mailbox) }
-    return info
+        let createText = try await send(.create(mailbox, parameters)) { tag, responses in
+            writeStatus("Did send CREATE mailbox '\(mailbox)' with tag \(tag)")
+            return try await responses.waitForCompletion()
+        }.getOK()
+        writeStatus("Did CREATE mailbox '\(mailbox)': \(createText)")
+
+        guard
+            let info = try await listMailbox(
+                capabilities: capabilities,
+                mailbox: mailbox
+            )
+        else { throw NoListResponseAfterCreate(mailbox: mailbox) }
+        return info
+    }
 }
 
 struct NoListResponseAfterCreate: Swift.Error {
     var mailbox: MailboxName
 }
 
-private func listAlreadyExisting<C: ConnectionProtocol>(
-    connection: C,
-    capabilities: [Capability],
-    mailbox: MailboxName,
-) async throws -> MailboxInfoAndStatus {
-    guard
-        let info = try await listMailbox(
-            connection: connection,
-            capabilities: capabilities,
-            mailbox: mailbox
-        )
-    else { throw NoListResponseForExistingMailbox(mailbox: mailbox) }
-    return info
+extension ConnectionProtocol {
+    private func listAlreadyExisting(
+        capabilities: [Capability],
+        mailbox: MailboxName,
+    ) async throws -> MailboxInfoAndStatus {
+        guard
+            let info = try await listMailbox(
+                capabilities: capabilities,
+                mailbox: mailbox
+            )
+        else { throw NoListResponseForExistingMailbox(mailbox: mailbox) }
+        return info
+    }
 }
 
 struct NoListResponseForExistingMailbox: Swift.Error {

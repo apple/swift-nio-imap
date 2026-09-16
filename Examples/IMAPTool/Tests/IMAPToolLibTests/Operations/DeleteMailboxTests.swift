@@ -32,8 +32,7 @@ enum DeleteMailboxTests {
             )
         ])
 
-        try await deleteMailbox(
-            connection: connection,
+        try await connection.deleteMailbox(
             capabilities: [.imap4rev1],
             mailbox: "TestMailbox"
         )
@@ -51,8 +50,7 @@ enum DeleteMailboxTests {
             )
         ])
 
-        try await deleteMailbox(
-            connection: connection,
+        try await connection.deleteMailbox(
             capabilities: [.imap4rev1],
             mailbox: "Projects/Work/Archive"
         )
@@ -73,8 +71,7 @@ enum DeleteMailboxTests {
         ])
 
         await #expect(throws: TaggedResponse.StateNotOK.self) {
-            _ = try await deleteMailbox(
-                connection: connection,
+            _ = try await connection.deleteMailbox(
                 capabilities: [.imap4rev1],
                 mailbox: "NonExistentMailbox"
             )
@@ -93,8 +90,7 @@ enum DeleteMailboxTests {
             )
         ])
 
-        try await deleteMailbox(
-            connection: connection,
+        try await connection.deleteMailbox(
             capabilities: [.imap4rev1],
             mailbox: "Special & Characters (Test)"
         )

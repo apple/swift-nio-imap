@@ -44,8 +44,7 @@ enum MoveMessageTests {
             uidValidity: 12345
         )
 
-        try await moveMessages(
-            connection: connection,
+        try await connection.moveMessages(
             selectInfo: selectInfo,
             capabilities: [.move],
             uids: [123, 456],
@@ -98,8 +97,7 @@ enum MoveMessageTests {
             uidValidity: 67890
         )
 
-        try await moveMessages(
-            connection: connection,
+        try await connection.moveMessages(
             selectInfo: selectInfo,
             capabilities: [],
             uids: [789, 101112],
@@ -123,8 +121,7 @@ enum MoveMessageTests {
             uidValidity: 11111
         )
 
-        try await moveMessages(
-            connection: connection,
+        try await connection.moveMessages(
             selectInfo: selectInfo,
             capabilities: [.move],
             uids: [],
@@ -155,8 +152,7 @@ enum MoveMessageTests {
             uidValidity: 99999
         )
 
-        try await moveMessages(
-            connection: connection,
+        try await connection.moveMessages(
             selectInfo: selectInfo,
             capabilities: [.move],
             uids: [42],
@@ -212,8 +208,7 @@ enum MoveMessageTests {
             uidValidity: 54321
         )
 
-        try await moveMessages(
-            connection: connection,
+        try await connection.moveMessages(
             selectInfo: selectInfo,
             capabilities: [],
             uids: [1, 2, 3, 4, 5],

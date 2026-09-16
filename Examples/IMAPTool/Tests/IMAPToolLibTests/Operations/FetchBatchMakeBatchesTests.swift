@@ -444,8 +444,7 @@ private enum `FetchBatch makeBatches Tests` {
         _ fixture: MakeBatchesFixture
     ) async throws {
         let connection = TestConnection(expectedCommands: fixture.expectedCommands)
-        let batches = try await makeBatches(
-            connection: connection,
+        let batches = try await connection.makeBatches(
             query: fixture.query,
             mailboxMessageCount: fixture.mailboxMessageCount,
             capabilities: fixture.capabilities

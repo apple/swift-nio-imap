@@ -36,48 +36,46 @@ struct FlagChanges: Hashable, Sendable {
     }
 }
 
-/// Updates flags on the messages specified by UIDs.
-func updateFlags<C: ConnectionProtocol>(
-    connection: C,
-    uids: UIDSet,
-    changes: FlagChanges
-) async throws {
-    try await sendStore(
-        connection: connection,
-        uids: uids,
-        flags: changes.set,
-        operatorLabel: "+FLAGS",
-        makeStoreFlags: { StoreFlags.add(silent: false, list: $0) }
-    )
-    try await sendStore(
-        connection: connection,
-        uids: uids,
-        flags: changes.unset,
-        operatorLabel: "-FLAGS",
-        makeStoreFlags: { StoreFlags.remove(silent: false, list: $0) }
-    )
-}
+extension ConnectionProtocol {
+    /// Updates flags on the messages specified by UIDs.
+    func updateFlags(
+        uids: UIDSet,
+        changes: FlagChanges
+    ) async throws {
+        try await sendStore(
+            uids: uids,
+            flags: changes.set,
+            operatorLabel: "+FLAGS",
+            makeStoreFlags: { StoreFlags.add(silent: false, list: $0) }
+        )
+        try await sendStore(
+            uids: uids,
+            flags: changes.unset,
+            operatorLabel: "-FLAGS",
+            makeStoreFlags: { StoreFlags.remove(silent: false, list: $0) }
+        )
+    }
 
-private func sendStore<C: ConnectionProtocol>(
-    connection: C,
-    uids: UIDSet,
-    flags: [NIOIMAP.Flag],
-    operatorLabel: String,
-    makeStoreFlags: ([NIOIMAP.Flag]) -> StoreFlags
-) async throws {
-    guard
-        !flags.isEmpty,
-        let command = Command.uidStore(
-            messages: uids,
-            modifiers: [],
-            data: StoreData.flags(makeStoreFlags(flags))
-        )
-    else { return }
-    try await connection.send(command) { tag, responses in
-        writeStatus(
-            "Did send UID STORE \(operatorLabel) \(flags.map { String($0) }.joined(separator: ", ")) with tag \(tag)"
-        )
-        return try await responses.waitForCompletion()
-    }.checkOK()
-    writeStatus("Did UID STORE \(operatorLabel) on \(uids.count) UID(s)")
+    private func sendStore(
+        uids: UIDSet,
+        flags: [NIOIMAP.Flag],
+        operatorLabel: String,
+        makeStoreFlags: ([NIOIMAP.Flag]) -> StoreFlags
+    ) async throws {
+        guard
+            !flags.isEmpty,
+            let command = Command.uidStore(
+                messages: uids,
+                modifiers: [],
+                data: StoreData.flags(makeStoreFlags(flags))
+            )
+        else { return }
+        try await send(command) { tag, responses in
+            writeStatus(
+                "Did send UID STORE \(operatorLabel) \(flags.map { String($0) }.joined(separator: ", ")) with tag \(tag)"
+            )
+            return try await responses.waitForCompletion()
+        }.checkOK()
+        writeStatus("Did UID STORE \(operatorLabel) on \(uids.count) UID(s)")
+    }
 }

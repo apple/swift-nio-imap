@@ -23,42 +23,41 @@ import NIO
 import Synchronization
 import SystemPackage
 
-/// Uploads (`APPEND`s) the given messages into the given mailbox.
-///
-/// Selects the target mailbox first to receive any updates to it.
-func append<ID: Sendable>(
-    connection: IMAPConnection,
-    createMailbox: SelectCreateOption,
-    messages: some AsyncSequence<MessageToAppend<ID>, any Swift.Error>,
-    into mailbox: MailboxName
-) async throws -> [AppendedMessageInfo<ID>] {
-    let info = try await select(
-        connection: connection,
-        createMailbox: createMailbox,
-        mailbox: mailbox
-    )
-
-    var result: [AppendedMessageInfo<ID>] = []
-
-    var messageCount = 0
-    for try await message in messages {
-        messageCount += 1
-
-        let uidAppend = try await append(
-            connection: connection,
-            message: message,
-            into: mailbox
+extension IMAPConnection {
+    /// Uploads (`APPEND`s) the given messages into the given mailbox.
+    ///
+    /// Selects the target mailbox first to receive any updates to it.
+    func append<ID: Sendable>(
+        createMailbox: SelectCreateOption,
+        messages: some AsyncSequence<MessageToAppend<ID>, any Swift.Error>,
+        into mailbox: MailboxName
+    ) async throws -> [AppendedMessageInfo<ID>] {
+        let info = try await select(
+            createMailbox: createMailbox,
+            mailbox: mailbox
         )
-        let uid = singleAppendUIDFromResponse(
-            uidAppend: uidAppend,
-            uidValidity: info.uidValidity,
-            messageCount: messageCount
-        )
-        result.append(AppendedMessageInfo(messageID: message.messageID, uid: uid, id: message.id))
+
+        var result: [AppendedMessageInfo<ID>] = []
+
+        var messageCount = 0
+        for try await message in messages {
+            messageCount += 1
+
+            let uidAppend = try await append(
+                message: message,
+                into: mailbox
+            )
+            let uid = singleAppendUIDFromResponse(
+                uidAppend: uidAppend,
+                uidValidity: info.uidValidity,
+                messageCount: messageCount
+            )
+            result.append(AppendedMessageInfo(messageID: message.messageID, uid: uid, id: message.id))
+        }
+
+        writeStatus("Did append \(result.count) message(s)")
+        return result
     }
-
-    writeStatus("Did append \(result.count) message(s)")
-    return result
 }
 
 /// Metadata about a message that was successfully appended via `APPEND`.
@@ -105,49 +104,50 @@ private func singleAppendUIDFromResponse(
     return uid
 }
 
-/// Sends an `APPEND` for the given message.
-func append<ID: Sendable>(
-    connection: IMAPConnection,
-    message: MessageToAppend<ID>,
-    into mailbox: MailboxName
-) async throws -> ResponseCodeAppend? {
-    let options = AppendOptions(
-        flagList: message.flags ?? [],
-        internalDate: message.serverMessageDate
-    )
+extension IMAPConnection {
+    /// Sends an `APPEND` for the given message.
+    func append<ID: Sendable>(
+        message: MessageToAppend<ID>,
+        into mailbox: MailboxName
+    ) async throws -> ResponseCodeAppend? {
+        let options = AppendOptions(
+            flagList: message.flags ?? [],
+            internalDate: message.serverMessageDate
+        )
 
-    let tagged: TaggedResponse = try await connection.append(
-        to: mailbox,
-        writing: { tag, writer in
-            writeStatus("Appending message \(message.messageID) with tag \(tag)")
-            try await writer.write(
-                message: AppendMessage(
-                    options: options,
-                    data: AppendData(
-                        byteCount: message.byteCount
+        let tagged: TaggedResponse = try await append(
+            to: mailbox,
+            writing: { tag, writer in
+                writeStatus("Appending message \(message.messageID) with tag \(tag)")
+                try await writer.write(
+                    message: AppendMessage(
+                        options: options,
+                        data: AppendData(
+                            byteCount: message.byteCount
+                        )
                     )
-                )
-            ) { writer in
-                for await bytes in message.data {
-                    writeStatus("Sending \(bytes.readableBytes) message bytes")
-                    try await writer.write(messageBytes: bytes)
+                ) { writer in
+                    for await bytes in message.data {
+                        writeStatus("Sending \(bytes.readableBytes) message bytes")
+                        try await writer.write(messageBytes: bytes)
+                    }
                 }
+            },
+            reading: { _, responses in
+                try await responses.waitForCompletion()
             }
-        },
-        reading: { _, responses in
-            try await responses.waitForCompletion()
+        )
+        guard
+            case .ok(let text) = tagged.state
+        else {
+            writeStatus("error: failed to append (\(tagged.state))")
+            throw FailedToAppendMessage(state: tagged.state)
         }
-    )
-    guard
-        case .ok(let text) = tagged.state
-    else {
-        writeStatus("error: failed to append (\(tagged.state))")
-        throw FailedToAppendMessage(state: tagged.state)
+        guard
+            case .uidAppend(let c) = text.code
+        else { return nil }
+        return c
     }
-    guard
-        case .uidAppend(let c) = text.code
-    else { return nil }
-    return c
 }
 
 struct FailedToAppendMessage: Equatable, Swift.Error {

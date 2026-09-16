@@ -21,18 +21,19 @@ import Foundation
 import NIO
 import NIOIMAP
 
-/// Renames a mailbox on the server.
-func renameMailbox<C: ConnectionProtocol>(
-    connection: C,
-    capabilities: [Capability],
-    old oldName: MailboxName,
-    new newName: MailboxName
-) async throws {
-    let text = try await connection.send(
-        .rename(from: oldName, to: newName, parameters: [:])
-    ) { tag, responses in
-        writeStatus("Did send RENAME mailbox '\(oldName)' to '\(newName)' with tag \(tag)")
-        return try await responses.waitForCompletion()
-    }.getOK()
-    writeStatus("Did RENAME mailbox '\(oldName)' to '\(newName)': \(text)")
+extension ConnectionProtocol {
+    /// Renames a mailbox on the server.
+    func renameMailbox(
+        capabilities: [Capability],
+        old oldName: MailboxName,
+        new newName: MailboxName
+    ) async throws {
+        let text = try await send(
+            .rename(from: oldName, to: newName, parameters: [:])
+        ) { tag, responses in
+            writeStatus("Did send RENAME mailbox '\(oldName)' to '\(newName)' with tag \(tag)")
+            return try await responses.waitForCompletion()
+        }.getOK()
+        writeStatus("Did RENAME mailbox '\(oldName)' to '\(newName)': \(text)")
+    }
 }

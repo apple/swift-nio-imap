@@ -47,8 +47,7 @@ enum FetchBatchCountTests {
                 completion: .ok(.init(text: "Done searching"))
             )
         ])
-        let batches = try await makeBatches(
-            connection: connection,
+        let batches = try await connection.makeBatches(
             query: .last(count: 100),
             mailboxMessageCount: 400,
             capabilities: [.imap4rev1]

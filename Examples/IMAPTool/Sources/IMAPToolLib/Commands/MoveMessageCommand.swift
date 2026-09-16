@@ -100,14 +100,12 @@ struct MoveMessageCommand: AsyncParsableCommand, Sendable {
 
         let result = try await IMAPConnection.withAuthenticatedConnection(info: connectionInfo) { info, connection in
             // Select the source mailbox
-            let selectInfo = try await select(
-                connection: connection,
+            let selectInfo = try await connection.select(
                 createMailbox: .fail,
                 mailbox: sourceMailbox
             )
 
-            let allUIDs = try await findMessageIDs(
-                connection: connection,
+            let allUIDs = try await connection.findMessageIDs(
                 selectInfo: selectInfo,
                 capabilities: info.capabilities,
                 ids: ids
@@ -118,8 +116,7 @@ struct MoveMessageCommand: AsyncParsableCommand, Sendable {
                 return Result(uids: [])
             }
 
-            try await moveMessages(
-                connection: connection,
+            try await connection.moveMessages(
                 selectInfo: selectInfo,
                 capabilities: info.capabilities,
                 uids: allUIDs,

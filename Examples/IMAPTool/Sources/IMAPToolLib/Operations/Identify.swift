@@ -22,29 +22,30 @@ import NIO
 import NIOIMAP
 import OrderedCollections
 
-/// Sends an `ID` command and returns the server's identity information.
-func identify<C: ConnectionProtocol>(
-    connection: C,
-    capabilities: [Capability]
-) async throws -> Identity {
-    guard
-        capabilities.contains(.id)
-    else { return Identity(capabilities: capabilities) }
+extension ConnectionProtocol {
+    /// Sends an `ID` command and returns the server's identity information.
+    func identify(
+        capabilities: [Capability]
+    ) async throws -> Identity {
+        guard
+            capabilities.contains(.id)
+        else { return Identity(capabilities: capabilities) }
 
-    return try await connection.send(.id(clientID)) { _, responses -> Identity in
-        var result = Identity(
-            capabilities: capabilities
-        )
-        _ = try await responses.forEach { response in
-            guard
-                case .untagged(.id(let id)) = response
-            else { return }
-            result.serverID.removeAll()
-            id.forEach { key, value in
-                result.serverID[key] = .some(value)
-            }
-        }.getOK()
-        return result
+        return try await send(.id(clientID)) { _, responses -> Identity in
+            var result = Identity(
+                capabilities: capabilities
+            )
+            _ = try await responses.forEach { response in
+                guard
+                    case .untagged(.id(let id)) = response
+                else { return }
+                result.serverID.removeAll()
+                id.forEach { key, value in
+                    result.serverID[key] = .some(value)
+                }
+            }.getOK()
+            return result
+        }
     }
 }
 

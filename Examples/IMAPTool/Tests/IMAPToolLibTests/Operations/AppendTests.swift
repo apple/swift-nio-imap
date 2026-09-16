@@ -88,8 +88,7 @@ private struct AppendTests {
             try await IMAPConnection.withConnection(
                 configuration: IMAPConnection.Configuration(path)
             ) { greeting, connection in
-                let result = try await append(
-                    connection: connection,
+                let result = try await connection.append(
                     message: message,
                     into: MailboxName("Food")
                 )
@@ -112,8 +111,7 @@ private struct AppendTests {
             try await IMAPConnection.withConnection(
                 configuration: IMAPConnection.Configuration(path)
             ) { greeting, connection in
-                let result = try await append(
-                    connection: connection,
+                let result = try await connection.append(
                     message: MessageToAppend(
                         message: EmailMessage(
                             data: Data(messageA.utf8)
@@ -154,8 +152,7 @@ private struct AppendTests {
                     )
                 )
 
-                let result = try await append(
-                    connection: connection,
+                let result = try await connection.append(
                     message: MessageToAppend(
                         message: EmailMessage(
                             data: Data(messageA.utf8)
@@ -187,8 +184,7 @@ private struct AppendTests {
                 await #expect(
                     throws: FailedToAppendMessage(state: .no(ResponseText(text: "Not allowed")))
                 ) {
-                    _ = try await append(
-                        connection: connection,
+                    _ = try await connection.append(
                         message: MessageToAppend(
                             message: EmailMessage(
                                 data: Data(messageA.utf8)
@@ -227,8 +223,7 @@ private struct AppendTests {
             try await IMAPConnection.withConnection(
                 configuration: IMAPConnection.Configuration(path)
             ) { greeting, connection in
-                let result = try await append(
-                    connection: connection,
+                let result = try await connection.append(
                     message: MessageToAppend(
                         message: EmailMessage(
                             data: Data(messageA.utf8)
@@ -298,8 +293,7 @@ private struct AppendTests {
                 )
                 message.flags = flags
 
-                let result = try await append(
-                    connection: connection,
+                let result = try await connection.append(
                     message: message,
                     into: MailboxName("Food")
                 )
@@ -333,8 +327,7 @@ private struct AppendTests {
                 )
                 message.flags = flags
 
-                let result = try await append(
-                    connection: connection,
+                let result = try await connection.append(
                     message: message,
                     into: MailboxName("Food")
                 )
@@ -370,8 +363,7 @@ private struct AppendTests {
                 )
                 message.flags = flags
 
-                let result = try await append(
-                    connection: connection,
+                let result = try await connection.append(
                     message: message,
                     into: MailboxName("Food")
                 )
@@ -405,8 +397,7 @@ private struct AppendTests {
                 )
                 message.flags = flags
 
-                let result = try await append(
-                    connection: connection,
+                let result = try await connection.append(
                     message: message,
                     into: MailboxName("Food")
                 )
@@ -437,8 +428,7 @@ private struct AppendTests {
                 )
                 message.flags = nil
 
-                let result = try await append(
-                    connection: connection,
+                let result = try await connection.append(
                     message: message,
                     into: MailboxName("Food")
                 )

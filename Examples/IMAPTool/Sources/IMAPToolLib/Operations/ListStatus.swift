@@ -22,32 +22,30 @@ import Foundation
 import NIO
 import NIOIMAP
 
-/// Runs `LIST` and `STATUS` on all mailboxes for the account.
-///
-/// Uses `LIST-STATUS` (RFC 5819) if available, or falls back to separate `LIST` and `STATUS` commands
-/// based on the capabilities of the server.
-func listMailboxes<C: ConnectionProtocol>(
-    connection: C,
-    capabilities: [Capability]
-) async throws -> [MailboxInfoAndStatus] {
-    try await list(
-        connection: connection,
-        capabilities: capabilities,
-        target: .allMailboxes
-    )
-}
+extension ConnectionProtocol {
+    /// Runs `LIST` and `STATUS` on all mailboxes for the account.
+    ///
+    /// Uses `LIST-STATUS` (RFC 5819) if available, or falls back to separate `LIST` and `STATUS` commands
+    /// based on the capabilities of the server.
+    func listMailboxes(
+        capabilities: [Capability]
+    ) async throws -> [MailboxInfoAndStatus] {
+        try await list(
+            capabilities: capabilities,
+            target: .allMailboxes
+        )
+    }
 
-func listMailbox<C: ConnectionProtocol>(
-    connection: C,
-    capabilities: [Capability],
-    mailbox: MailboxName
-) async throws -> MailboxInfoAndStatus? {
-    let allInfo = try await list(
-        connection: connection,
-        capabilities: capabilities,
-        target: .specific(mailbox)
-    )
-    return allInfo.first(where: { $0.path.name == mailbox })
+    func listMailbox(
+        capabilities: [Capability],
+        mailbox: MailboxName
+    ) async throws -> MailboxInfoAndStatus? {
+        let allInfo = try await list(
+            capabilities: capabilities,
+            target: .specific(mailbox)
+        )
+        return allInfo.first(where: { $0.path.name == mailbox })
+    }
 }
 
 enum ListTarget: Hashable, Sendable {
@@ -55,38 +53,36 @@ enum ListTarget: Hashable, Sendable {
     case specific(MailboxName)
 }
 
-func list<C: ConnectionProtocol>(
-    connection: C,
-    capabilities: [Capability],
-    target: ListTarget
-) async throws -> [MailboxInfoAndStatus] {
-    let strategy = ListStatusStrategy(
-        capabilities: capabilities
-    )
+extension ConnectionProtocol {
+    func list(
+        capabilities: [Capability],
+        target: ListTarget
+    ) async throws -> [MailboxInfoAndStatus] {
+        let strategy = ListStatusStrategy(
+            capabilities: capabilities
+        )
 
-    switch strategy.kind {
-    case .listThenStatus:
-        let listInfo = try await list(
-            connection: connection,
-            target: target,
-            listReturnOptions: strategy.listReturnOptions
-        )
-        let statusInfo = try await status(
-            connection: connection,
-            mailboxes: listInfo.keys.lazy.map { $0.name },
-            statusAttributes: strategy.statusAttributes
-        )
-        return combineListAndStatus(
-            listInfo: listInfo,
-            statusInfo: statusInfo
-        )
-    case .listStatus:
-        return try await listStatus(
-            connection: connection,
-            target: target,
-            listReturnOptions: strategy.listReturnOptions,
-            statusAttributes: strategy.statusAttributes
-        )
+        switch strategy.kind {
+        case .listThenStatus:
+            let listInfo = try await list(
+                target: target,
+                listReturnOptions: strategy.listReturnOptions
+            )
+            let statusInfo = try await status(
+                mailboxes: listInfo.keys.lazy.map { $0.name },
+                statusAttributes: strategy.statusAttributes
+            )
+            return combineListAndStatus(
+                listInfo: listInfo,
+                statusInfo: statusInfo
+            )
+        case .listStatus:
+            return try await listStatus(
+                target: target,
+                listReturnOptions: strategy.listReturnOptions,
+                statusAttributes: strategy.statusAttributes
+            )
+        }
     }
 }
 
@@ -258,139 +254,137 @@ extension Command {
     }
 }
 
-private func list<C: ConnectionProtocol>(
-    connection: C,
-    target: ListTarget,
-    listReturnOptions: [ReturnOption]
-) async throws -> [MailboxPath: [MailboxInfo.Attribute]] {
-    let command = Command.list(
-        target: target,
-        returnOptions: listReturnOptions
-    )
-    return try await connection.send(command) { tag, responses in
-        var all: [MailboxPath: [MailboxInfo.Attribute]] = [:]
-        for try await response in responses {
-            switch response {
-            case .untagged(.mailboxData(.list(let info))):
-                all[info.path] = info.attributes
-            case .tagged(let r):
-                try r.checkOK()
-            default:
-                break
+extension ConnectionProtocol {
+    private func list(
+        target: ListTarget,
+        listReturnOptions: [ReturnOption]
+    ) async throws -> [MailboxPath: [MailboxInfo.Attribute]] {
+        let command = Command.list(
+            target: target,
+            returnOptions: listReturnOptions
+        )
+        return try await send(command) { tag, responses in
+            var all: [MailboxPath: [MailboxInfo.Attribute]] = [:]
+            for try await response in responses {
+                switch response {
+                case .untagged(.mailboxData(.list(let info))):
+                    all[info.path] = info.attributes
+                case .tagged(let r):
+                    try r.checkOK()
+                default:
+                    break
+                }
             }
+            return all
         }
-        return all
     }
-}
 
-private func status<C: ConnectionProtocol>(
-    connection: C,
-    mailboxes: some Sequence<MailboxName>,
-    statusAttributes: [MailboxAttribute]
-) async throws -> [MailboxName: MailboxStatus] {
-    // Loop over all mailboxes
-    // Pipeline a few STATUS at the time:
-    let concurrencyLimit = 5
+    private func status(
+        mailboxes: some Sequence<MailboxName>,
+        statusAttributes: [MailboxAttribute]
+    ) async throws -> [MailboxName: MailboxStatus] {
+        // Loop over all mailboxes
+        // Pipeline a few STATUS at the time:
+        let concurrencyLimit = 5
 
-    return try await withThrowingTaskGroup { group in
-        var remaining = mailboxes.makeIterator()
-        var submittedCount = 0
+        return try await withThrowingTaskGroup { group in
+            var remaining = mailboxes.makeIterator()
+            var submittedCount = 0
 
-        func popNextMailbox() -> MailboxName? {
-            guard
-                submittedCount < concurrencyLimit,
-                let result = remaining.next()
-            else { return nil }
-            submittedCount += 1
-            return result
-        }
-
-        while let mailbox = popNextMailbox() {
-            group.addTask {
-                let s = try await status(
-                    connection: connection,
-                    mailbox: mailbox,
-                    statusAttributes: statusAttributes
-                )
-                return (mailbox, s)
-            }
-        }
-
-        var all: [MailboxName: MailboxStatus] = [:]
-        for try await result in group {
-            if let s = result.1 {
-                all[result.0] = s
+            func popNextMailbox() -> MailboxName? {
+                guard
+                    submittedCount < concurrencyLimit,
+                    let result = remaining.next()
+                else { return nil }
+                submittedCount += 1
+                return result
             }
 
-            submittedCount -= 1
-            // Every time we get a result back, check if there's more work we should submit and do so
-            if let mailbox = popNextMailbox() {
+            while let mailbox = popNextMailbox() {
                 group.addTask {
-                    let s = try await status(
-                        connection: connection,
+                    let s = try await self.status(
                         mailbox: mailbox,
                         statusAttributes: statusAttributes
                     )
                     return (mailbox, s)
                 }
             }
-        }
-        return all
-    }
-}
 
-private func status<C: ConnectionProtocol>(
-    connection: C,
-    mailbox: MailboxName,
-    statusAttributes: [MailboxAttribute]
-) async throws -> MailboxStatus? {
-    try await connection.send(.status(mailbox, statusAttributes)) { tag, responses in
-        var result: MailboxStatus?
-        for try await response in responses {
-            switch response {
-            case .untagged(.mailboxData(.status(mailbox, let status))):
-                result = status
-            case .tagged(let r):
-                try r.checkOK()
-            default:
-                break
+            var all: [MailboxName: MailboxStatus] = [:]
+            for try await result in group {
+                if let s = result.1 {
+                    all[result.0] = s
+                }
+
+                submittedCount -= 1
+                // Every time we get a result back, check if there's more work we should submit and do so
+                if let mailbox = popNextMailbox() {
+                    group.addTask {
+                        let s = try await self.status(
+                            mailbox: mailbox,
+                            statusAttributes: statusAttributes
+                        )
+                        return (mailbox, s)
+                    }
+                }
             }
+            return all
         }
-        return result
+    }
+
+    private func status(
+        mailbox: MailboxName,
+        statusAttributes: [MailboxAttribute]
+    ) async throws -> MailboxStatus? {
+        try await send(.status(mailbox, statusAttributes)) { tag, responses in
+            var result: MailboxStatus?
+            for try await response in responses {
+                switch response {
+                case .untagged(.mailboxData(.status(mailbox, let status))):
+                    result = status
+                case .tagged(let r):
+                    try r.checkOK()
+                default:
+                    break
+                }
+            }
+            return result
+        }
     }
 }
 
 // MARK: - List-Status
 
-/// Use RFC 5819 “LIST-STATUS” to get LIST and STATUS with a single command.
-private func listStatus<C: ConnectionProtocol>(
-    connection: C,
-    target: ListTarget,
-    listReturnOptions: [ReturnOption],
-    statusAttributes: [MailboxAttribute]
-) async throws -> [MailboxInfoAndStatus] {
-    let command = Command.list(
-        target: target,
-        returnOptions: listReturnOptions + [.statusOption(statusAttributes)]
-    )
-    return try await connection.send(command) { tag, responses in
-        var list: [MailboxPath: [MailboxInfo.Attribute]] = [:]
-        var status: [MailboxName: MailboxStatus] = [:]
-        for try await response in responses {
-            switch response {
-            case .untagged(.mailboxData(.list(let info))):
-                list[info.path] = info.attributes
-            case .untagged(.mailboxData(.status(let mailbox, let s))):
-                status[mailbox] = s
-            case .tagged(let r):
-                try r.checkOK()
-            default:
-                break
-            }
-        }
-        return combineListAndStatus(
-            listInfo: list,
-            statusInfo: status
+extension ConnectionProtocol {
+    /// Use RFC 5819 “LIST-STATUS” to get LIST and STATUS with a single command.
+    private func listStatus(
+        target: ListTarget,
+        listReturnOptions: [ReturnOption],
+        statusAttributes: [MailboxAttribute]
+    ) async throws -> [MailboxInfoAndStatus] {
+        let command = Command.list(
+            target: target,
+            returnOptions: listReturnOptions + [.statusOption(statusAttributes)]
         )
+        return try await send(command) { tag, responses in
+            var list: [MailboxPath: [MailboxInfo.Attribute]] = [:]
+            var status: [MailboxName: MailboxStatus] = [:]
+            for try await response in responses {
+                switch response {
+                case .untagged(.mailboxData(.list(let info))):
+                    list[info.path] = info.attributes
+                case .untagged(.mailboxData(.status(let mailbox, let s))):
+                    status[mailbox] = s
+                case .tagged(let r):
+                    try r.checkOK()
+                default:
+                    break
+                }
+            }
+            return combineListAndStatus(
+                listInfo: list,
+                statusInfo: status
+            )
+        }
     }
 }

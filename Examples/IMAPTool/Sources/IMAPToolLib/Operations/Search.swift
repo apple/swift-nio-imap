@@ -21,20 +21,20 @@ import Foundation
 import NIO
 import NIOIMAP
 
-/// Returns all UIDs matching the given fetch query.
-func allUIDs<C: ConnectionProtocol>(
-    connection: C,
-    query: FetchQuery,
-    mailboxMessageCount: Int,
-    capabilities: [Capability]
-) async throws -> UIDSet {
-    try await batchedSearch(
-        connection: connection,
-        key: .all,
-        query: query,
-        mailboxMessageCount: mailboxMessageCount,
-        capabilities: capabilities
-    )
+extension ConnectionProtocol {
+    /// Returns all UIDs matching the given fetch query.
+    func allUIDs(
+        query: FetchQuery,
+        mailboxMessageCount: Int,
+        capabilities: [Capability]
+    ) async throws -> UIDSet {
+        try await batchedSearch(
+            key: .all,
+            query: query,
+            mailboxMessageCount: mailboxMessageCount,
+            capabilities: capabilities
+        )
+    }
 }
 
 extension SearchKey {
@@ -75,34 +75,33 @@ extension SearchKey {
 
 // MARK: -
 
-/// Performs a search for the given `SearchKey`, but splits the messages into batches
-/// and runs multiple searches, one on each batch.
-func batchedSearch<C: ConnectionProtocol>(
-    connection: C,
-    key searchKey: SearchKey,
-    query: FetchQuery,
-    mailboxMessageCount: Int,
-    capabilities: [Capability]
-) async throws -> UIDSet {
-    try await batched(
-        connection: connection,
-        query: query,
-        mailboxMessageCount: mailboxMessageCount,
-        capabilities: capabilities,
-        fetch: { batch in
-            try await searchBatch(
-                connection: connection,
-                capabilities: capabilities,
-                key: searchKey,
-                query: query,
-                batch: batch
-            ) ?? UIDSet()
-        },
-        into: UIDSet(),
-        update: {
-            $0.formUnion($1)
-        }
-    )
+extension ConnectionProtocol {
+    /// Performs a search for the given `SearchKey`, but splits the messages into batches
+    /// and runs multiple searches, one on each batch.
+    func batchedSearch(
+        key searchKey: SearchKey,
+        query: FetchQuery,
+        mailboxMessageCount: Int,
+        capabilities: [Capability]
+    ) async throws -> UIDSet {
+        try await batched(
+            query: query,
+            mailboxMessageCount: mailboxMessageCount,
+            capabilities: capabilities,
+            fetch: { batch in
+                try await self.searchBatch(
+                    capabilities: capabilities,
+                    key: searchKey,
+                    query: query,
+                    batch: batch
+                ) ?? UIDSet()
+            },
+            into: UIDSet(),
+            update: {
+                $0.formUnion($1)
+            }
+        )
+    }
 }
 
 extension SearchKey {
@@ -121,78 +120,76 @@ extension SearchKey {
     }
 }
 
-/// Sends a `UID SEARCH` command.
-///
-/// Depending on the server capabilities, a normal (RFC 3501), an extended, or a partial
-/// search command may be used.
-func searchBatch<C: ConnectionProtocol>(
-    connection: C,
-    capabilities: [Capability],
-    key searchKey: SearchKey,
-    query: FetchQuery,
-    batch: FetchBatch
-) async throws -> UIDSet? {
-    let combined = SearchKey.combine(
-        key: searchKey,
-        query: query,
-        batch: batch
-    )
+extension ConnectionProtocol {
+    /// Sends a `UID SEARCH` command.
+    ///
+    /// Depending on the server capabilities, a normal (RFC 3501), an extended, or a partial
+    /// search command may be used.
+    func searchBatch(
+        capabilities: [Capability],
+        key searchKey: SearchKey,
+        query: FetchQuery,
+        batch: FetchBatch
+    ) async throws -> UIDSet? {
+        let combined = SearchKey.combine(
+            key: searchKey,
+            query: query,
+            batch: batch
+        )
 
-    switch batch {
-    case .uidRange:
-        return try await search(
-            connection: connection,
-            capabilities: capabilities,
-            kind: .nonPartial(combined)
-        )
-    case .partialLast(let partialRange):
-        return try await search(
-            connection: connection,
-            capabilities: capabilities,
-            kind: .partial(partialRange, combined)
-        )
+        switch batch {
+        case .uidRange:
+            return try await search(
+                capabilities: capabilities,
+                kind: .nonPartial(combined)
+            )
+        case .partialLast(let partialRange):
+            return try await search(
+                capabilities: capabilities,
+                kind: .partial(partialRange, combined)
+            )
+        }
     }
 }
 
 // MARK: -
 
-/// Sends a `UID SEARCH` command.
-///
-/// Depending on the server capabilities, a normal (RFC 3501), an extended, or a partial
-/// search command may be used.
-func search<C: ConnectionProtocol>(
-    connection: C,
-    capabilities: [Capability],
-    key searchKey: SearchKey
-) async throws -> UIDSet {
-    guard capabilities.contains(.partial) else {
-        return try await search(
-            connection: connection,
-            capabilities: capabilities,
-            kind: .nonPartial(searchKey)
-        ) ?? UIDSet()
-    }
-    let batchSize = effectiveBatchSize(capabilities: capabilities)
+extension ConnectionProtocol {
+    /// Sends a `UID SEARCH` command.
+    ///
+    /// Depending on the server capabilities, a normal (RFC 3501), an extended, or a partial
+    /// search command may be used.
+    func search(
+        capabilities: [Capability],
+        key searchKey: SearchKey
+    ) async throws -> UIDSet {
+        guard capabilities.contains(.partial) else {
+            return try await search(
+                capabilities: capabilities,
+                kind: .nonPartial(searchKey)
+            ) ?? UIDSet()
+        }
+        let batchSize = effectiveBatchSize(capabilities: capabilities)
 
-    var uids = UIDSet()
-    for batch in 0... {
-        let range: NIOIMAP.PartialRange = {
-            let start = SequenceNumber.min.advanced(by: Int64(batch) * Int64(batchSize))
-            let end = SequenceNumber.min.advanced(by: Int64(batch + 1) * Int64(batchSize) - 1)
-            return NIOIMAP.PartialRange.last(start...end)
-        }()
-        writeStatus("[PARTIAL SEARCH] searching range \(range)")
-        let newUIDs = try await search(
-            connection: connection,
-            capabilities: capabilities,
-            kind: .partial(range, searchKey)
-        )
-        guard let newUIDs, !newUIDs.isEmpty else { break }
-        writeStatus("[PARTIAL SEARCH] Batch \(batch + 1) returned \(newUIDs.count) UIDs")
-        uids.formUnion(newUIDs)
+        var uids = UIDSet()
+        for batch in 0... {
+            let range: NIOIMAP.PartialRange = {
+                let start = SequenceNumber.min.advanced(by: Int64(batch) * Int64(batchSize))
+                let end = SequenceNumber.min.advanced(by: Int64(batch + 1) * Int64(batchSize) - 1)
+                return NIOIMAP.PartialRange.last(start...end)
+            }()
+            writeStatus("[PARTIAL SEARCH] searching range \(range)")
+            let newUIDs = try await search(
+                capabilities: capabilities,
+                kind: .partial(range, searchKey)
+            )
+            guard let newUIDs, !newUIDs.isEmpty else { break }
+            writeStatus("[PARTIAL SEARCH] Batch \(batch + 1) returned \(newUIDs.count) UIDs")
+            uids.formUnion(newUIDs)
+        }
+        writeStatus("Did find \(uids.count) UIDs using PARTIAL SEARCH")
+        return uids
     }
-    writeStatus("Did find \(uids.count) UIDs using PARTIAL SEARCH")
-    return uids
 }
 
 /// Minimum batch size when partitioning UIDs for `FETCH` / `SEARCH` requests.
@@ -227,76 +224,74 @@ enum SearchKind: Hashable, Sendable {
     case partial(NIOIMAP.PartialRange, SearchKey)
 }
 
-func search<C: ConnectionProtocol>(
-    connection: C,
-    capabilities: [Capability],
-    kind: SearchKind,
-) async throws -> UIDSet? {
-    let searchKey: SearchKey
-    let returnOptions: [SearchReturnOption]
-    switch kind {
-    case .partial(let range, let key):
-        searchKey = key
-        returnOptions = [.partial(range)]
-    case .nonPartial(let key):
-        searchKey = key
-        returnOptions = capabilities.contains(.extendedSearch) ? [.all] : []
-    }
-
-    guard returnOptions.isEmpty else {
-        let uids = try await sendUIDSearch(
-            connection: connection,
-            key: searchKey,
-            returnOptions: returnOptions
-        ) { tag, response in
-            guard
-                case .untagged(.mailboxData(.extendedSearch(let result))) = response,
-                let c = result.correlator,
-                c.tag == "\(tag)"
-            else { return nil }
-            return result.matchedUIDs ?? UIDSet()
+extension ConnectionProtocol {
+    func search(
+        capabilities: [Capability],
+        kind: SearchKind,
+    ) async throws -> UIDSet? {
+        let searchKey: SearchKey
+        let returnOptions: [SearchReturnOption]
+        switch kind {
+        case .partial(let range, let key):
+            searchKey = key
+            returnOptions = [.partial(range)]
+        case .nonPartial(let key):
+            searchKey = key
+            returnOptions = capabilities.contains(.extendedSearch) ? [.all] : []
         }
-        writeStatus("Did find \(uids?.count ?? 0) UIDs using extended UID SEARCH")
-        return uids
-    }
-    let uids = try await sendUIDSearch(
-        connection: connection,
-        key: searchKey,
-        returnOptions: []
-    ) { _, response in
-        guard
-            case .untagged(.mailboxData(.search(let ids, _))) = response
-        else { return nil }
-        return UIDSet(MessageIdentifierSet(ids))
-    }
-    writeStatus("Did find \(uids?.count ?? 0) UIDs using UID SEARCH")
-    return uids
-}
 
-/// Sends a `UID SEARCH` command and extracts matching UIDs from untagged responses
-/// using `extract`. Throws `NoUntaggedSearchResponse` if no matching untagged response
-/// arrived before the tagged completion.
-private func sendUIDSearch<C: ConnectionProtocol>(
-    connection: C,
-    key searchKey: SearchKey,
-    returnOptions: [SearchReturnOption],
-    extract: @Sendable @escaping (IMAPConnection.Tag, Response) -> UIDSet?
-) async throws -> UIDSet? {
-    try await connection.send(
-        .uidSearch(
+        guard returnOptions.isEmpty else {
+            let uids = try await sendUIDSearch(
+                key: searchKey,
+                returnOptions: returnOptions
+            ) { tag, response in
+                guard
+                    case .untagged(.mailboxData(.extendedSearch(let result))) = response,
+                    let c = result.correlator,
+                    c.tag == "\(tag)"
+                else { return nil }
+                return result.matchedUIDs ?? UIDSet()
+            }
+            writeStatus("Did find \(uids?.count ?? 0) UIDs using extended UID SEARCH")
+            return uids
+        }
+        let uids = try await sendUIDSearch(
             key: searchKey,
-            charset: nil,
-            returnOptions: returnOptions
-        )
-    ) { tag, responses in
-        var didFind = false
-        var uids: UIDSet?
-        try await responses.forEach { response in
-            guard let extracted = extract(tag, response) else { return }
-            didFind = true
-            uids = extracted
-        }.checkOK()
-        guard didFind else { throw NoUntaggedSearchResponse() }
+            returnOptions: []
+        ) { _, response in
+            guard
+                case .untagged(.mailboxData(.search(let ids, _))) = response
+            else { return nil }
+            return UIDSet(MessageIdentifierSet(ids))
+        }
+        writeStatus("Did find \(uids?.count ?? 0) UIDs using UID SEARCH")
         return uids
+    }
+
+    /// Sends a `UID SEARCH` command and extracts matching UIDs from untagged responses
+    /// using `extract`. Throws `NoUntaggedSearchResponse` if no matching untagged response
+    /// arrived before the tagged completion.
+    private func sendUIDSearch(
+        key searchKey: SearchKey,
+        returnOptions: [SearchReturnOption],
+        extract: @Sendable @escaping (IMAPConnection.Tag, Response) -> UIDSet?
+    ) async throws -> UIDSet? {
+        try await send(
+            .uidSearch(
+                key: searchKey,
+                charset: nil,
+                returnOptions: returnOptions
+            )
+        ) { tag, responses in
+            var didFind = false
+            var uids: UIDSet?
+            try await responses.forEach { response in
+                guard let extracted = extract(tag, response) else { return }
+                didFind = true
+                uids = extracted
+            }.checkOK()
+            guard didFind else { throw NoUntaggedSearchResponse() }
+            return uids
+        }
     }
 }

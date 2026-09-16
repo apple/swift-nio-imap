@@ -119,8 +119,7 @@ extension DeleteMessagesCommand {
         let result: Result = try await IMAPConnection.withAuthenticatedConnection(info: connectionInfo) {
             id,
             connection in
-            let info = try await select(
-                connection: connection,
+            let info = try await connection.select(
                 createMailbox: .fail,
                 mailbox: mailboxName
             )
@@ -136,9 +135,7 @@ extension DeleteMessagesCommand {
                 messageCount: info.messageCount
             )
 
-            try await IMAPToolLib.deleteAllMessages(
-                connection: connection
-            )
+            try await connection.deleteAllMessages()
 
             return Result(
                 count: info.messageCount
@@ -198,21 +195,18 @@ extension DeleteMessagesCommand {
             id,
             connection in
 
-            let info = try await select(
-                connection: connection,
+            let info = try await connection.select(
                 createMailbox: .fail,
                 mailbox: mailboxName
             )
 
-            let allUIDs = try await findMessageIDs(
-                connection: connection,
+            let allUIDs = try await connection.findMessageIDs(
                 selectInfo: info,
                 capabilities: id.capabilities,
                 ids: ids
             )
 
-            try await deleteMessages(
-                connection: connection,
+            try await connection.deleteMessages(
                 uids: allUIDs
             )
 

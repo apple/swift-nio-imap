@@ -21,16 +21,17 @@ import Foundation
 import NIO
 import NIOIMAP
 
-/// Runs an `IDLE` command and passes the event stream to the given closure.
-func runIdle<Result: Sendable>(
-    connection: IMAPConnection,
-    _ closure: (IMAPConnection.Tag, IdleEventStream) async throws -> Result
-) async throws -> Result {
-    try await connection.sendIdle { tag, responses in
-        writeStatus("Running IDLE as \(tag)")
-        let r = try await closure(tag, IdleEventStream(underlying: responses))
-        writeStatus("Did run IDLE")
-        return r
+extension IMAPConnection {
+    /// Runs an `IDLE` command and passes the event stream to the given closure.
+    func runIdle<Result: Sendable>(
+        _ closure: (IMAPConnection.Tag, IdleEventStream) async throws -> Result
+    ) async throws -> Result {
+        try await sendIdle { tag, responses in
+            writeStatus("Running IDLE as \(tag)")
+            let r = try await closure(tag, IdleEventStream(underlying: responses))
+            writeStatus("Did run IDLE")
+            return r
+        }
     }
 }
 

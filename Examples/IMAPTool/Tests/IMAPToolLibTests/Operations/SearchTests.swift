@@ -198,8 +198,7 @@ private enum SearchTests {
                 completion: .ok(.init(text: "Done searching"))
             )
         ])
-        let uids = try await search(
-            connection: connection,
+        let uids = try await connection.search(
             capabilities: [],
             key: .not(.deleted)
         )

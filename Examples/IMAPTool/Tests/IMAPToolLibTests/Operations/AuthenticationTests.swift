@@ -48,8 +48,7 @@ private struct AuthenticationTests {
             try await IMAPConnection.withConnection(
                 configuration: IMAPConnection.Configuration(path)
             ) { greeting, connection in
-                let result = try await authenticate(
-                    connection: connection,
+                let result = try await connection.authenticate(
                     greeting: greeting,
                     credential: .username("john", password: "secret"),
                     disableSASLIR: false,
@@ -95,8 +94,7 @@ private struct AuthenticationTests {
             try await IMAPConnection.withConnection(
                 configuration: IMAPConnection.Configuration(path)
             ) { greeting, connection in
-                let result = try await authenticate(
-                    connection: connection,
+                let result = try await connection.authenticate(
                     greeting: greeting,
                     credential: .username("john", password: "secret"),
                     disableSASLIR: false,
@@ -142,8 +140,7 @@ private struct AuthenticationTests {
             try await IMAPConnection.withConnection(
                 configuration: IMAPConnection.Configuration(path)
             ) { greeting, connection in
-                let result = try await authenticate(
-                    connection: connection,
+                let result = try await connection.authenticate(
                     greeting: greeting,
                     credential: .username("john", password: "secret"),
                     disableSASLIR: false,
@@ -187,8 +184,7 @@ private struct AuthenticationTests {
             try await IMAPConnection.withConnection(
                 configuration: IMAPConnection.Configuration(path)
             ) { greeting, connection in
-                let result = try await authenticate(
-                    connection: connection,
+                let result = try await connection.authenticate(
                     greeting: greeting,
                     credential: .username("john", password: "secret"),
                     disableSASLIR: false,
@@ -245,8 +241,7 @@ private struct AuthenticationTests {
             try await IMAPConnection.withConnection(
                 configuration: IMAPConnection.Configuration(path)
             ) { greeting, connection in
-                let result = try await authenticate(
-                    connection: connection,
+                let result = try await connection.authenticate(
                     greeting: greeting,
                     credential: .username("john", password: "secret"),
                     disableSASLIR: false,
@@ -277,8 +272,7 @@ private struct AuthenticationTests {
                 _ = await #expect(
                     throws: AuthenticationError(message: "Server did not return Capabilities")
                 ) {
-                    try await authenticate(
-                        connection: connection,
+                    try await connection.authenticate(
                         greeting: greeting,
                         credential: .username("john", password: "secret"),
                         disableSASLIR: false,
@@ -316,8 +310,7 @@ private struct AuthenticationTests {
             try await IMAPConnection.withConnection(
                 configuration: IMAPConnection.Configuration(path)
             ) { greeting, connection in
-                let result = try await authenticate(
-                    connection: connection,
+                let result = try await connection.authenticate(
                     greeting: greeting,
                     credential: .username("john", password: "secret"),
                     disableSASLIR: false,

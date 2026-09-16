@@ -55,8 +55,7 @@ extension MailboxCommand {
             let result = try await IMAPConnection.withAuthenticatedConnection(info: connectionInfo) {
                 info,
                 connection in
-                try await listMailboxes(
-                    connection: connection,
+                try await connection.listMailboxes(
                     capabilities: info.capabilities
                 )
             }
@@ -109,8 +108,7 @@ extension MailboxCommand {
             let result = try await IMAPConnection.withAuthenticatedConnection(info: connectionInfo) {
                 info,
                 connection in
-                let list = try await listMailboxes(
-                    connection: connection,
+                let list = try await connection.listMailboxes(
                     capabilities: info.capabilities
                 )
 
@@ -120,8 +118,7 @@ extension MailboxCommand {
                 var result: [MailboxInfoAndStatus] = []
                 for m in mailboxes {
                     result.append(
-                        try await createAndList(
-                            connection: connection,
+                        try await connection.createAndList(
                             capabilities: info.capabilities,
                             mailbox: m
                         )
@@ -274,15 +271,13 @@ extension MailboxCommand {
                 connection in
                 // Delete each mailbox:
                 for mailboxName in names {
-                    try await deleteMailbox(
-                        connection: connection,
+                    try await connection.deleteMailbox(
                         capabilities: info.capabilities,
                         mailbox: mailboxName
                     )
                 }
                 // List the mailboxes after the deletion:
-                return try await listMailboxes(
-                    connection: connection,
+                return try await connection.listMailboxes(
                     capabilities: info.capabilities
                 )
             }
@@ -347,15 +342,13 @@ extension MailboxCommand {
             let result = try await IMAPConnection.withAuthenticatedConnection(info: connectionInfo) {
                 info,
                 connection in
-                try await renameMailbox(
-                    connection: connection,
+                try await connection.renameMailbox(
                     capabilities: info.capabilities,
                     old: oldName,
                     new: newName
                 )
 
-                return try await listMailboxes(
-                    connection: connection,
+                return try await connection.listMailboxes(
                     capabilities: info.capabilities
                 )
             }

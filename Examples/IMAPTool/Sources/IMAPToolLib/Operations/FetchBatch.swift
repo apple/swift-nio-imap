@@ -82,32 +82,32 @@ extension FetchBatch {
 
 // MARK: Make Sequence
 
-/// Returns a `FetchBatches` (that is, a `Sequence` of `FetchBatch`) based on the server capabilities.
-///
-/// This spans the messages based on `query` and `mailboxMessageCount`.
-func makeBatches<C: ConnectionProtocol>(
-    connection: C,
-    query: FetchQuery,
-    mailboxMessageCount: Int,
-    capabilities: [Capability]
-) async throws -> FetchBatches {
-    let batchSize =
-        SequenceNumber(exactly: effectiveBatchSize(capabilities: capabilities))
-        ?? SequenceNumber(exactly: minimumFetchBatchSize)!
-    guard capabilities.contains(.partial) else {
-        return try await makeBoundaryFetchBatch(
-            connection: connection,
+extension ConnectionProtocol {
+    /// Returns a `FetchBatches` (that is, a `Sequence` of `FetchBatch`) based on the server capabilities.
+    ///
+    /// This spans the messages based on `query` and `mailboxMessageCount`.
+    func makeBatches(
+        query: FetchQuery,
+        mailboxMessageCount: Int,
+        capabilities: [Capability]
+    ) async throws -> FetchBatches {
+        let batchSize =
+            SequenceNumber(exactly: effectiveBatchSize(capabilities: capabilities))
+            ?? SequenceNumber(exactly: minimumFetchBatchSize)!
+        guard capabilities.contains(.partial) else {
+            return try await makeBoundaryFetchBatch(
+                query: query,
+                mailboxMessageCount: mailboxMessageCount,
+                batchSize: batchSize,
+                capabilities: capabilities
+            )
+        }
+        return makePartialFetchBatch(
             query: query,
             mailboxMessageCount: mailboxMessageCount,
-            batchSize: batchSize,
-            capabilities: capabilities
+            batchSize: batchSize
         )
     }
-    return makePartialFetchBatch(
-        query: query,
-        mailboxMessageCount: mailboxMessageCount,
-        batchSize: batchSize
-    )
 }
 
 // MARK: Sequence(s)

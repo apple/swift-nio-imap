@@ -22,118 +22,116 @@ import NIO
 import NIOIMAP
 import SystemPackage
 
-/// Downloads messages specified by `query` into the directory at `root`.
-///
-/// - Parameters:
-///   - deleteUnknown: Whether to delete local message files that no longer exist on the server.
-/// - Returns: All UIDs in the directory, including previously downloaded UIDs.
-func download<C: ConnectionProtocol>(
-    connection: C,
-    mailboxMessageCount: Int,
-    capabilities: [Capability],
-    uidValidity: UIDValidity,
-    query: FetchQuery,
-    into root: FilePath,
-    deleteUnknown: Bool
-) async throws -> UIDSet {
-    // Get all UIDs on the server:
-    let uids = try await allUIDs(
-        connection: connection,
-        query: query,
-        mailboxMessageCount: mailboxMessageCount,
-        capabilities: capabilities
-    )
-    writeStatus("Did find \(uids.count) UID(s) in mailbox")
+extension ConnectionProtocol {
+    /// Downloads messages specified by `query` into the directory at `root`.
+    ///
+    /// - Parameters:
+    ///   - deleteUnknown: Whether to delete local message files that no longer exist on the server.
+    /// - Returns: All UIDs in the directory, including previously downloaded UIDs.
+    func download(
+        mailboxMessageCount: Int,
+        capabilities: [Capability],
+        uidValidity: UIDValidity,
+        query: FetchQuery,
+        into root: FilePath,
+        deleteUnknown: Bool
+    ) async throws -> UIDSet {
+        // Get all UIDs on the server:
+        let uids = try await allUIDs(
+            query: query,
+            mailboxMessageCount: mailboxMessageCount,
+            capabilities: capabilities
+        )
+        writeStatus("Did find \(uids.count) UID(s) in mailbox")
 
-    var directory = try DownloadDirectory.openDeletingInvalidFiles(
-        directory: root,
-        uidValidity: uidValidity,
-        deleteUnknown: deleteUnknown
-    )
+        var directory = try DownloadDirectory.openDeletingInvalidFiles(
+            directory: root,
+            uidValidity: uidValidity,
+            deleteUnknown: deleteUnknown
+        )
 
-    // Delete local files no longer on the server:
-    if deleteUnknown {
-        directory.unlinkFiles(notIncludedIn: uids)
+        // Delete local files no longer on the server:
+        if deleteUnknown {
+            directory.unlinkFiles(notIncludedIn: uids)
+        }
+
+        try await download(
+            uids: uids,
+            into: &directory
+        )
+
+        return directory.downloadedUIDs
     }
 
-    try await download(
-        connection: connection,
-        uids: uids,
-        into: &directory
-    )
+    /// Downloads a batch of UIDs with a concurrency limit.
+    func download(
+        uids allUIDs: UIDSet,
+        concurrencyLimit: Int = 11,
+        into _directory: inout DownloadDirectory,
+    ) async throws {
+        let directory = DownloadDirectory.Helper(
+            connection: self,
+            directory: _directory
+        )
 
-    return directory.downloadedUIDs
-}
-
-/// Downloads a batch of UIDs with a concurrency limit.
-func download<C: ConnectionProtocol>(
-    connection: C,
-    uids allUIDs: UIDSet,
-    concurrencyLimit: Int = 11,
-    into _directory: inout DownloadDirectory,
-) async throws {
-    let directory = DownloadDirectory.Helper(
-        connection: connection,
-        directory: _directory
-    )
-
-    // Loop over all UIDs and download them.
-    try await withThrowingTaskGroup(
-        of: Void.self,
-        returning: Void.self
-    ) { group in
-        let previouslyDownloadedUIDs = await directory.directory.downloadedUIDs
-        var remainingUIDs = allUIDs.subtracting(previouslyDownloadedUIDs)
-        if remainingUIDs.count != allUIDs.count {
-            writeStatus(
-                "Downloading \(remainingUIDs.count) remaining message(s) out of \(allUIDs.count) total message(s) — \(previouslyDownloadedUIDs.count) already downloaded"
-            )
-        } else {
-            writeStatus("Downloading \(remainingUIDs.count) message(s)")
-        }
-
-        func popNextUID() -> UID? {
-            guard
-                let uid = remainingUIDs.last
-            else { return nil }
-            remainingUIDs.remove(uid)
-            return uid
-        }
-
-        func addTask() {
-            guard let uid = popNextUID() else { return }
-            group.addTask {
-                try await directory.download(uid: uid)
+        // Loop over all UIDs and download them.
+        try await withThrowingTaskGroup(
+            of: Void.self,
+            returning: Void.self
+        ) { group in
+            let previouslyDownloadedUIDs = await directory.directory.downloadedUIDs
+            var remainingUIDs = allUIDs.subtracting(previouslyDownloadedUIDs)
+            if remainingUIDs.count != allUIDs.count {
+                writeStatus(
+                    "Downloading \(remainingUIDs.count) remaining message(s) out of \(allUIDs.count) total message(s) — \(previouslyDownloadedUIDs.count) already downloaded"
+                )
+            } else {
+                writeStatus("Downloading \(remainingUIDs.count) message(s)")
             }
-        }
 
-        for _ in 0..<concurrencyLimit {
-            addTask()
-        }
+            func popNextUID() -> UID? {
+                guard
+                    let uid = remainingUIDs.last
+                else { return nil }
+                remainingUIDs.remove(uid)
+                return uid
+            }
 
-        var throughputEstimator = ThroughputEstimator()
+            func addTask() {
+                guard let uid = popNextUID() else { return }
+                group.addTask {
+                    try await directory.download(uid: uid)
+                }
+            }
 
-        for try await _ in group {
-            // Every time a task completes, start another one
-            addTask()
-            if let throughput = throughputEstimator.didComplete() {
-                let remainingCount = remainingUIDs.count + concurrencyLimit
-                if let remainingTime = throughput.formattedTimeRemaining(
-                    remainingCount: remainingCount,
-                    remainingCountCutOff: max(20 + concurrencyLimit, 4 * concurrencyLimit)
-                ) {
-                    writeStatus(
-                        "Downloading at \(throughput.formattedTasksPerSecond()) messages per second — \(remainingTime) remaining"
-                    )
-                } else {
-                    writeStatus("Downloading at \(throughput.formattedTasksPerSecond()) messages per second")
+            for _ in 0..<concurrencyLimit {
+                addTask()
+            }
+
+            var throughputEstimator = ThroughputEstimator()
+
+            for try await _ in group {
+                // Every time a task completes, start another one
+                addTask()
+                if let throughput = throughputEstimator.didComplete() {
+                    let remainingCount = remainingUIDs.count + concurrencyLimit
+                    if let remainingTime = throughput.formattedTimeRemaining(
+                        remainingCount: remainingCount,
+                        remainingCountCutOff: max(20 + concurrencyLimit, 4 * concurrencyLimit)
+                    ) {
+                        writeStatus(
+                            "Downloading at \(throughput.formattedTasksPerSecond()) messages per second — \(remainingTime) remaining"
+                        )
+                    } else {
+                        writeStatus("Downloading at \(throughput.formattedTasksPerSecond()) messages per second")
+                    }
                 }
             }
         }
-    }
 
-    // Get the updated value out of the Mutex
-    _directory = await directory.directory
+        // Get the updated value out of the Mutex
+        _directory = await directory.directory
+    }
 }
 
 extension DownloadDirectory {

@@ -72,13 +72,11 @@ struct DownloadCommand: AsyncParsableCommand {
         let query = try fetchQueryGroup.makeFetchQuery()
 
         try await IMAPConnection.withAuthenticatedConnection(info: connectionInfo) { id, connection -> Void in
-            let info = try await select(
-                connection: connection,
+            let info = try await connection.select(
                 createMailbox: .fail,
                 mailbox: mailbox
             )
-            _ = try await download(
-                connection: connection,
+            _ = try await connection.download(
                 mailboxMessageCount: info.messageCount,
                 capabilities: id.capabilities,
                 uidValidity: info.uidValidity,

@@ -27,24 +27,24 @@ import FoundationEssentials
 import Foundation
 #endif
 
-/// Uploads (`APPEND`s) the given messages into the given mailbox.
-///
-/// Selects the target mailbox first to receive any updates to it.
-func append(
-    connection: IMAPConnection,
-    messages: [FilePath],
-    options: Set<AppendOption>,
-    into mailbox: MailboxName
-) async throws -> [AppendedMessageInfo<FilePath>] {
-    try await append(
-        connection: connection,
-        createMailbox: SelectCreateOption(options),
-        messages: FileBasedMessageToAppendSequence(
-            paths: messages,
-            options: options
-        ),
-        into: mailbox
-    )
+extension IMAPConnection {
+    /// Uploads (`APPEND`s) the given messages into the given mailbox.
+    ///
+    /// Selects the target mailbox first to receive any updates to it.
+    func append(
+        messages: [FilePath],
+        options: Set<AppendOption>,
+        into mailbox: MailboxName
+    ) async throws -> [AppendedMessageInfo<FilePath>] {
+        try await append(
+            createMailbox: SelectCreateOption(options),
+            messages: FileBasedMessageToAppendSequence(
+                paths: messages,
+                options: options
+            ),
+            into: mailbox
+        )
+    }
 }
 
 /// Options that control the behavior of an `APPEND` operation.

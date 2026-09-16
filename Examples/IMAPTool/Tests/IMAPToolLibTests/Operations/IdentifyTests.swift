@@ -41,8 +41,7 @@ enum IdentifyTests {
                 completion: .ok(.init(text: "Done"))
             )
         ])
-        let r = try await identify(
-            connection: connection,
+        let r = try await connection.identify(
             capabilities: [.imap4rev1, .condStore, .id]
         )
         #expect(await connection.expectedCommands.isEmpty)
@@ -54,8 +53,7 @@ enum IdentifyTests {
     @Test
     static func serverWithoutID() async throws {
         let connection = TestConnection(expectedCommands: [])
-        let r = try await identify(
-            connection: connection,
+        let r = try await connection.identify(
             capabilities: [.imap4rev1, .condStore]
         )
         #expect(await connection.expectedCommands.isEmpty)

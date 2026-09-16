@@ -108,19 +108,6 @@ extension SelectInfo {
     }
 }
 
-/// Selects the given mailbox on the connection.
-func select<C: ConnectionProtocol>(
-    connection: C,
-    createMailbox: SelectCreateOption,
-    mailbox: MailboxPath
-) async throws -> SelectInfo {
-    try await select(
-        connection: connection,
-        createMailbox: createMailbox,
-        mailbox: mailbox.name
-    )
-}
-
 /// Controls behavior when the mailbox does not exist during selection.
 enum SelectCreateOption: Hashable, Sendable {
     /// Fails selection if the mailbox does not exist.
@@ -129,106 +116,111 @@ enum SelectCreateOption: Hashable, Sendable {
     case create([CreateParameter])
 }
 
-/// Selects the given mailbox, optionally creating it first.
-func select<C: ConnectionProtocol>(
-    connection: C,
-    createMailbox: SelectCreateOption,
-    mailbox: MailboxName
-) async throws -> SelectInfo {
-    let info = try await selectOrCreate(
-        connection: connection,
-        createMailbox: createMailbox,
-        mailbox: mailbox
-    )
-    writeStatus(
-        "Did select mailbox '\(mailbox)'. Message count: \(info.messageCount), UIDNEXT: \(info.uidNext), UIDVALIDITY: \(info.uidValidity)"
-    )
-    return info
-}
-
 private enum FirstResult {
     case success(SelectInfo)
     case create([CreateParameter])
 }
 
-private func selectOrCreate<C: ConnectionProtocol>(
-    connection: C,
-    createMailbox: SelectCreateOption,
-    mailbox: MailboxName
-) async throws -> SelectInfo {
-    let parameters: [CreateParameter]
-    switch try await trySelect(
-        connection: connection,
-        createMailbox: createMailbox,
-        mailbox: mailbox
-    ) {
-    case .success(let info):
+extension ConnectionProtocol {
+    /// Selects the given mailbox.
+    func select(
+        createMailbox: SelectCreateOption,
+        mailbox: MailboxPath
+    ) async throws -> SelectInfo {
+        try await select(
+            createMailbox: createMailbox,
+            mailbox: mailbox.name
+        )
+    }
+
+    /// Selects the given mailbox, optionally creating it first.
+    func select(
+        createMailbox: SelectCreateOption,
+        mailbox: MailboxName
+    ) async throws -> SelectInfo {
+        let info = try await selectOrCreate(
+            createMailbox: createMailbox,
+            mailbox: mailbox
+        )
+        writeStatus(
+            "Did select mailbox '\(mailbox)'. Message count: \(info.messageCount), UIDNEXT: \(info.uidNext), UIDVALIDITY: \(info.uidValidity)"
+        )
         return info
-    case .create(let p):
-        parameters = p
     }
 
-    // Try to create:
-    let createText = try await connection.send(.create(mailbox, parameters)) { tag, responses in
-        writeStatus("Did send CREATE with tag \(tag)")
-        return try await responses.waitForCompletion()
-    }.getOK()
-    writeStatus("Did CREATE: \(createText)")
-    // Re-try SELECT:
-    let (info, response) = try await sendSelect(
-        connection: connection,
-        mailbox: mailbox
-    )
-    return try SelectInfo(
-        temp: info,
-        response: response
-    )
-}
+    private func selectOrCreate(
+        createMailbox: SelectCreateOption,
+        mailbox: MailboxName
+    ) async throws -> SelectInfo {
+        let parameters: [CreateParameter]
+        switch try await trySelect(
+            createMailbox: createMailbox,
+            mailbox: mailbox
+        ) {
+        case .success(let info):
+            return info
+        case .create(let p):
+            parameters = p
+        }
 
-/// Attempts a `SELECT` and either returns the result, or — if the mailbox does not
-/// exist and the caller opted in to creation — returns the parameters needed to create it.
-private func trySelect<C: ConnectionProtocol>(
-    connection: C,
-    createMailbox: SelectCreateOption,
-    mailbox: MailboxName
-) async throws -> FirstResult {
-    let (info, response) = try await sendSelect(
-        connection: connection,
-        mailbox: mailbox
-    )
-    // The only branch that diverts from the normal "construct SelectInfo" path is
-    // a `NO` response when the caller opted in to creating the mailbox.
-    // Every other state — `.ok`, `.bad`, or `.no` with `.fail` — goes through
-    // `SelectInfo.init`, which surfaces success or throws the underlying error.
-    if case .create(let parameters) = createMailbox,
-        case .no(let text) = response.state
-    {
-        writeStatus("Unable to SELECT mailbox — will try to create (\(text))")
-        return .create(parameters)
-    }
-    return try .success(
-        SelectInfo(
+        // Try to create:
+        let createText = try await send(.create(mailbox, parameters)) { tag, responses in
+            writeStatus("Did send CREATE with tag \(tag)")
+            return try await responses.waitForCompletion()
+        }.getOK()
+        writeStatus("Did CREATE: \(createText)")
+        // Re-try SELECT:
+        let (info, response) = try await sendSelect(
+            mailbox: mailbox
+        )
+        return try SelectInfo(
             temp: info,
             response: response
         )
-    )
-}
+    }
 
-private func sendSelect<C: ConnectionProtocol>(
-    connection: C,
-    mailbox: MailboxName
-) async throws -> (SelectInfo.Temporary, TaggedResponse) {
-    try await connection.send(.select(mailbox)) { _, responses in
-        var info = SelectInfo.Temporary(mailbox: mailbox)
-        let response = try await responses.forEach { response in
-            switch response {
-            case .untagged(let untagged):
-                info.update(untagged)
-            default:
-                break
-            }
+    /// Attempts a `SELECT` and either returns the result, or — if the mailbox does not
+    /// exist and the caller opted in to creation — returns the parameters needed to create it.
+    private func trySelect(
+        createMailbox: SelectCreateOption,
+        mailbox: MailboxName
+    ) async throws -> FirstResult {
+        let (info, response) = try await sendSelect(
+            mailbox: mailbox
+        )
+        // The only branch that diverts from the normal "construct SelectInfo" path is
+        // a `NO` response when the caller opted in to creating the mailbox.
+        // Every other state — `.ok`, `.bad`, or `.no` with `.fail` — goes through
+        // `SelectInfo.init`, which surfaces success or throws the underlying error.
+        if case .create(let parameters) = createMailbox,
+            case .no(let text) = response.state
+        {
+            writeStatus("Unable to SELECT mailbox — will try to create (\(text))")
+            return .create(parameters)
         }
-        return (info, response)
+        return try .success(
+            SelectInfo(
+                temp: info,
+                response: response
+            )
+        )
+    }
+
+    private func sendSelect(
+        mailbox: MailboxName
+    ) async throws -> (SelectInfo.Temporary, TaggedResponse) {
+        try await send(.select(mailbox)) { _, responses in
+            var info = SelectInfo.Temporary(mailbox: mailbox)
+            let response = try await responses.forEach { response in
+                switch response {
+                case .untagged(let untagged):
+                    info.update(untagged)
+                default:
+                    break
+                }
+            }
+            return (info, response)
+        }
     }
 }
 

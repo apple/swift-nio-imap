@@ -241,8 +241,7 @@ enum FetchTests {
     ])
     static func messageInfo(_ fixture: MessageInfoFixture) async throws {
         let connection = TestConnection(expectedCommands: fixture.expectedCommands)
-        let result = try await fetchMessageInfo(
-            connection: connection,
+        let result = try await connection.fetchMessageInfo(
             mailboxMessageCount: fixture.mailboxMessageCount,
             capabilities: fixture.capabilities,
             query: fixture.query
@@ -321,8 +320,7 @@ enum FetchTests {
             )
         ])
         let result: [(UID, SequenceNumber?, [MessageAttribute])]
-        result = try await fetchSimpleAttributes(
-            connection: connection,
+        result = try await connection.fetchSimpleAttributes(
             capabilities: [],
             uids: [309_727, 967_986],
             attributes: [.flags, .internalDate],
