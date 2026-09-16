@@ -602,6 +602,31 @@ private enum SearchMessagesCommandTests {
             "--force-login",
         ])
         #expect(sut.connectionInfo.forceLogin == true)
+        #expect(sut.connectionInfo.authenticationMethod == .login)
+    }
+
+    @Test
+    static func parseSearchCommand_withoutForceLogin() throws {
+        let sut = try parse([
+            "search-messages",
+            "--username", "user:pass",
+            "--server", "example.com",
+        ])
+        #expect(sut.connectionInfo.authenticationMethod == .automatic)
+    }
+
+    @Test
+    static func parseSearchCommand_forceLoginConflictsWithSASL() throws {
+        let saslArguments = [
+            "search-messages",
+            "--sasl", "plain:dG9rZW4=",
+            "--server", "example.com",
+        ]
+        // The same arguments parse without the flag, so the flag is what’s rejected.
+        _ = try parse(saslArguments)
+        #expect(throws: (any Error).self) {
+            try parse(saslArguments + ["--force-login"])
+        }
     }
 
     // MARK: - Real-world Usage Pattern Tests

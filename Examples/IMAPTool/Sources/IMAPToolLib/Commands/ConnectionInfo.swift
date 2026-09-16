@@ -48,8 +48,12 @@ public struct ConnectionInfo: ParsableArguments, Sendable {
     @Flag(name: .customLong("disable-sasl-ir"), help: "Disable the use of SASL-IR (RFC 4959).")
     var disableSASLIR: Bool = false
 
-    @Flag(help: "Force use of LOGIN (instead of AUTH PLAIN).")
+    @Flag(help: "Use the LOGIN command instead of AUTHENTICATE.")
     var forceLogin: Bool = false
+
+    var authenticationMethod: AuthenticationMethod {
+        forceLogin ? .login : .automatic
+    }
 
     @Option(help: ArgumentHelp("Use LOGIN or AUTH PLAIN to authenticate.", valueName: "user:password"))
     var username: String?
@@ -83,6 +87,12 @@ public struct ConnectionInfo: ParsableArguments, Sendable {
     }
 
     public mutating func validate() throws {
+        // A SASL response carries no password, so there is nothing to put in a LOGIN.
+        // `--account` can resolve to a SASL credential too, but only at connect time;
+        // ``IMAPConnection/login(credential:capabilities:method:)`` catches that case.
+        if forceLogin, sasl != nil {
+            throw ValidationError("'--force-login' needs a username and password, so it can not be used with '--sasl'.")
+        }
         _ = try self.makeConfiguration()
     }
 

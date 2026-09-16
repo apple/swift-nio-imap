@@ -27,39 +27,53 @@ struct AuthenticationResult: Hashable, Sendable {
     var capabilities: [Capability]
 }
 
+/// Which command to use to authenticate.
+enum AuthenticationMethod: Hashable, Sendable {
+    /// Use `AUTHENTICATE` when the server advertises the credential’s SASL
+    /// mechanism, and fall back to `LOGIN` when it does not.
+    case automatic
+    /// Always try `LOGIN`, even when the server advertises the mechanism. Fails without
+    /// sending anything if the credential has no password, or if the server prohibits `LOGIN`.
+    case login
+}
+
 extension IMAPConnection {
     /// Authenticates the connection using the given credential.
     func authenticate(
         greeting: IMAPConnection.Greeting,
         credential: IMAPCredential,
         disableSASLIR: Bool,
-        forceLogin: Bool
+        method: AuthenticationMethod
     ) async throws -> AuthenticationResult {
         let preAuthCapabilities = try await capabilitiesFromCodeOrSendCommand(
             text: try greeting.status.getOK()
         )
         writeStatus("Pre-auth capabilities: \(preAuthCapabilities.map { String($0) }.sorted().joined(separator: " "))")
 
-        // Authenticate:
-        let authResult: TaggedResponse
+        // Authenticate. `AUTHENTICATE` requires the server to advertise the
+        // credential’s mechanism; `.login` overrides that and uses `LOGIN`.
         let (mechanism, ir) = credential.makeAuthenticateCommand()
-        if preAuthCapabilities.contains(.authenticate(mechanism)) {
+        let useAuthenticate =
+            switch method {
+            case .automatic: preAuthCapabilities.contains(.authenticate(mechanism))
+            case .login: false
+            }
+
+        let authResult: TaggedResponse
+        if useAuthenticate {
             authResult = try await authenticate(
                 saslMechanism: mechanism,
                 initialResponse: ir,
                 useSASL_IR: !disableSASLIR && preAuthCapabilities.contains(.saslIR)
             )
-        } else if let login = credential.makeLoginCommand() {
-            authResult = try await send(login) { tag, responses in
-                writeStatus("Did send LOGIN command \(tag)")
-                return try await responses.waitForCompletion()
-            }
         } else {
-            throw AuthenticationError(
-                message:
-                    "Server capabilities do not support the available credentials. Capabilities: \(preAuthCapabilities.map { String($0) }.sorted().joined(separator: " "))"
+            authResult = try await login(
+                credential: credential,
+                capabilities: preAuthCapabilities,
+                method: method
             )
         }
+
         let text = try authResult.getOK()
         writeStatus("Did authenticate: \(text.text)")
 
@@ -105,6 +119,39 @@ extension IMAPConnection {
                 throw AuthenticationError(message: "Server did not return Capabilities")
             }
             return result
+        }
+    }
+
+    /// Sends `LOGIN`, or throws if either the credential or the server rules it out.
+    ///
+    /// The credential is checked first: when it can’t produce a `LOGIN` at all, saying so is
+    /// more useful than pointing at `LOGINDISABLED` for a command the user never asked for.
+    private func login(
+        credential: IMAPCredential,
+        capabilities: [Capability],
+        method: AuthenticationMethod
+    ) async throws -> TaggedResponse {
+        guard let loginCommand = credential.makeLoginCommand() else {
+            switch method {
+            case .login:
+                throw AuthenticationError(
+                    message: "The given credential can only be used with AUTHENTICATE, not LOGIN."
+                )
+            case .automatic:
+                throw AuthenticationError(
+                    message:
+                        "Server capabilities do not support the available credentials. Capabilities: \(capabilities.map { String($0) }.sorted().joined(separator: " "))"
+                )
+            }
+        }
+        guard !capabilities.contains(.loginDisabled) else {
+            throw AuthenticationError(
+                message: "The server advertises LOGINDISABLED, which prohibits the LOGIN command."
+            )
+        }
+        return try await send(loginCommand) { tag, responses in
+            writeStatus("Did send LOGIN command \(tag)")
+            return try await responses.waitForCompletion()
         }
     }
 

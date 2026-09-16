@@ -60,7 +60,7 @@ extension IMAPConnection {
             greeting: greeting,
             credential: try connectionInfo.makeCredential(),
             disableSASLIR: connectionInfo.disableSASLIR,
-            forceLogin: connectionInfo.forceLogin
+            method: connectionInfo.authenticationMethod
         )
     }
 }
