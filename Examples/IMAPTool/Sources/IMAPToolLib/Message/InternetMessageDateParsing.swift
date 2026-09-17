@@ -300,12 +300,8 @@ private struct FoundationFormatters: Sequence {
 // zone            =       (( "+" / "-" ) 4DIGIT) / obs-zone
 
 private let foundationDateFormats: [String] = [
-    // The order of these (as well as the uncommon ones) were determined empirically by
-    // Julie Zelenski on 1999-11-29 by examining a 5000 message mailbox. She found about
-    // 90% of the sample messages conforming to the three formats here. Her original comment
-    // can be found in NSDateAdditions.m prior to July 2012. On 2012-7-27, Ian Anderson
-    // retested with his 14,500 message Apple Inbox, code reviews mailbox, and iCloud
-    // Inbox, and found 100% of his messages conformed to the IMAP or these formats.
+    // Ordered by empirical frequency in real-world mailboxes; the uncommon formats
+    // are here because they show up in practice despite being illegal per RFC 5322.
 
     // date-time with the optional day-of-week and seconds
     // Note that in all the following format strings the year is specified with a single
@@ -319,7 +315,7 @@ private let foundationDateFormats: [String] = [
     // but NSDateFormatter doesn't appear to support that.
     "EEE',' d MMM y HH':'mm':'ss zzz",
 
-    // this one's just plain illegal, but Julie saw it in about 5% of her messages
+    // this one's just plain illegal, but appeared in ~5% of a real-world sample
     "EEE MMM d HH':'mm':'ss zzz y",
 
     // date-time without the optional day-of-week and with seconds
