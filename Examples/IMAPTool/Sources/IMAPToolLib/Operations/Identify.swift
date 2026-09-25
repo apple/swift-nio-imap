@@ -39,10 +39,7 @@ extension ConnectionProtocol {
                 guard
                     case .untagged(.id(let id)) = response
                 else { return }
-                result.serverID.removeAll()
-                id.forEach { key, value in
-                    result.serverID[key] = .some(value)
-                }
+                result.serverID = Dictionary(uniqueKeysWithValues: id.map { ($0.key, $0.value) })
             }.getOK()
             return result
         }

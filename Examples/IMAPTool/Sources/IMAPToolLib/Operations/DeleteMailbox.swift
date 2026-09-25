@@ -24,7 +24,7 @@ import NIOIMAP
 extension ConnectionProtocol {
     /// Deletes a mailbox from the server.
     func deleteMailbox(
-        capabilities: [Capability],
+        capabilities _: [Capability],
         mailbox: MailboxName
     ) async throws {
         let text = try await send(.delete(mailbox)) { tag, responses in

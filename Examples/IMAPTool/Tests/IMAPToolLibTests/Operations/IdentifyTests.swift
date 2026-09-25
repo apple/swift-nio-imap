@@ -45,8 +45,7 @@ enum IdentifyTests {
             capabilities: [.imap4rev1, .condStore, .id]
         )
         #expect(await connection.expectedCommands.isEmpty)
-        #expect(r.serverID["bar"] == "baz")
-        #expect(r.serverID.count == 2)
+        #expect(r.serverID == ["foo": nil, "bar": "baz"])
         #expect(r.capabilities == [.imap4rev1, .condStore, .id])
     }
 
