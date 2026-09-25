@@ -30,7 +30,7 @@ import NIOIMAP
 func makePartialFetchBatch(
     query: FetchQuery,
     mailboxMessageCount: Int,
-    batchSize: SequenceNumber
+    batchSize: BatchSize
 ) -> FetchBatches {
     guard
         let batches = PartialFetchBatches(
@@ -49,14 +49,14 @@ struct PartialFetchBatches: Hashable, Sendable {
     /// Note that 1 (`.min`) refers to the last message in the mailbox, whereas e.g
     /// 1,000 would refer to the 1,000th message _from the end_ of the mailbox.
     let last: SequenceNumber
-    let batchSize: SequenceNumber
+    let batchSize: BatchSize
 }
 
 extension PartialFetchBatches {
     init?(
         query: FetchQuery,
         mailboxMessageCount: Int,
-        batchSize: SequenceNumber
+        batchSize: BatchSize
     ) {
         guard
             0 < mailboxMessageCount
@@ -84,21 +84,17 @@ extension PartialFetchBatches: Sequence {
 
     struct Iterator: IteratorProtocol {
         let last: SequenceNumber
-        let batchSize: SequenceNumber
+        let batchSize: BatchSize
         var index = 0
 
         mutating func next() -> FetchBatch? {
-            let start = SequenceNumber.min.advanced(by: Int64(index) * Int64(batchSize))
+            let range = batchSize.partialRange(batch: index)
             guard
-                start <= last
+                range.lowerBound <= last
             else { return nil }
-            let offset = Int64(index + 1) * Int64(batchSize) - 1
-            let end = Swift.min(
-                last,
-                SequenceNumber.min.advanced(by: offset)
-            )
+            let end = Swift.min(last, range.upperBound)
             index += 1
-            return .partialLast(NIOIMAP.PartialRange.last(start...end))
+            return .partialLast(NIOIMAP.PartialRange.last(range.lowerBound...end))
         }
 
         typealias Element = FetchBatch

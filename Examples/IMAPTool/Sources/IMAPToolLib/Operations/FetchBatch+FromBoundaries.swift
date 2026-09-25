@@ -31,12 +31,12 @@ extension ConnectionProtocol {
     func makeBoundaryFetchBatch(
         query: FetchQuery,
         mailboxMessageCount: Int,
-        batchSize: SequenceNumber,
+        batchSize: BatchSize,
         capabilities: [Capability],
     ) async throws -> FetchBatches {
         func make(count: Int) async throws -> FetchBatches {
             guard
-                Int(UInt32(batchSize)) / 2 < count
+                batchSize.count / 2 < count
             else {
                 writeStatus("Requesting list of latest \(count) UIDs from server")
                 // Run a search to get the UIDs:
@@ -86,7 +86,7 @@ extension ConnectionProtocol {
             // The whole mailbox is wanted. If it is small enough, fetch it in a single batch
             // without a boundary SEARCH.
             guard
-                Int(UInt32(batchSize)) / 2 < mailboxMessageCount
+                batchSize.count / 2 < mailboxMessageCount
             else {
                 writeStatus("Mailbox has very few messages — using a single batch")
                 return .fixed([UID.min...UID.max])
@@ -95,7 +95,7 @@ extension ConnectionProtocol {
         case .uids(let uids):
             let ranges = splitUIDsIntoRanges(
                 uids: uids,
-                maximumCount: Int(batchSize)
+                batchSize: batchSize
             )
             writeStatus("Did split FETCH for \(uids.count) UIDs into \(ranges.count) batch(es) / range(s)")
             return .fixed(ranges)
@@ -112,7 +112,7 @@ extension ConnectionProtocol {
 func sequenceNumbersForMessageBatches(
     mailboxMessageCount: Int,
     maximumCount: Int?,
-    batchSize: SequenceNumber
+    batchSize: BatchSize
 ) -> MessageIdentifierSetNonEmpty<SequenceNumber>? {
     let min: SequenceNumber
     if let maximumCount, let m = SequenceNumber(exactly: mailboxMessageCount - maximumCount + 1) {
@@ -129,7 +129,7 @@ func sequenceNumbersForMessageBatches(
     // subsequently use that when we want to limit tasks to only operate
     // on messages in that last batch.
     var next: SequenceNumber? = max
-    let step = Int64(batchSize)
+    let step = Int64(batchSize.count)
     let boundaries = AnyIterator {
         defer {
             if let n = next, step <= min.distance(to: n) {

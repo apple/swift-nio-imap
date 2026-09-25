@@ -29,7 +29,7 @@ enum FetchBatchCountTests {
     /// ignoring `--count`. Now the whole-mailbox shortcut applies only to `.all`, and
     /// `.last(count:)` issues a bounded SEARCH for the last `count` messages.
     ///
-    /// Here `minimumFetchBatchSize` is 1,000, so `batchSize / 2 == 500 > 400`, which
+    /// Here `BatchSize.minimum` is 1,000, so `batchSize / 2 == 500 > 400`, which
     /// previously triggered the over-fetch: `.last(count: 100)` on 400 messages fetched
     /// all 400. It now searches sequence numbers `301...*` (the last 100 of 400).
     @Test

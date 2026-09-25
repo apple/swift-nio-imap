@@ -169,15 +169,11 @@ extension ConnectionProtocol {
                 kind: .nonPartial(searchKey)
             ) ?? UIDSet()
         }
-        let batchSize = effectiveBatchSize(capabilities: capabilities)
+        let batchSize = BatchSize(capabilities: capabilities)
 
         var uids = UIDSet()
         for batch in 0... {
-            let range: NIOIMAP.PartialRange = {
-                let start = SequenceNumber.min.advanced(by: Int64(batch) * Int64(batchSize))
-                let end = SequenceNumber.min.advanced(by: Int64(batch + 1) * Int64(batchSize) - 1)
-                return NIOIMAP.PartialRange.last(start...end)
-            }()
+            let range = NIOIMAP.PartialRange.last(SequenceRange(batchSize.partialRange(batch: batch)))
             writeStatus("[PARTIAL SEARCH] searching range \(range)")
             let newUIDs = try await search(
                 capabilities: capabilities,
@@ -190,29 +186,6 @@ extension ConnectionProtocol {
         writeStatus("Did find \(uids.count) UIDs using PARTIAL SEARCH")
         return uids
     }
-}
-
-/// Minimum batch size when partitioning UIDs for `FETCH` / `SEARCH` requests.
-///
-/// When a server advertises a smaller `MESSAGELIMIT`, we still use this floor as
-/// the batch size — the server's `MESSAGELIMIT` caps how many results may be
-/// returned in a single response, not how many UIDs we may include in a request.
-let minimumFetchBatchSize: UInt32 = 1_000
-
-/// The batch size to use when partitioning UIDs for `FETCH` / `SEARCH`.
-///
-/// Returns `max(minimumFetchBatchSize, serverMessageLimit)`. When the server
-/// does not advertise `MESSAGELIMIT` (RFC 9738), returns `minimumFetchBatchSize`.
-func effectiveBatchSize(
-    capabilities: [Capability]
-) -> UInt32 {
-    guard
-        let limitA = capabilities.first(where: {
-            $0.name == "MESSAGELIMIT"
-        })?.value,
-        let limitB = UInt32(limitA)
-    else { return minimumFetchBatchSize }
-    return max(minimumFetchBatchSize, limitB)
 }
 
 struct NoUntaggedSearchResponse: Swift.Error {}

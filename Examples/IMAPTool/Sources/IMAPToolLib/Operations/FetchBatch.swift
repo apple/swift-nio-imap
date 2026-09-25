@@ -91,9 +91,7 @@ extension ConnectionProtocol {
         mailboxMessageCount: Int,
         capabilities: [Capability]
     ) async throws -> FetchBatches {
-        let batchSize =
-            SequenceNumber(exactly: effectiveBatchSize(capabilities: capabilities))
-            ?? SequenceNumber(exactly: minimumFetchBatchSize)!
+        let batchSize = BatchSize(capabilities: capabilities)
         guard capabilities.contains(.partial) else {
             return try await makeBoundaryFetchBatch(
                 query: query,

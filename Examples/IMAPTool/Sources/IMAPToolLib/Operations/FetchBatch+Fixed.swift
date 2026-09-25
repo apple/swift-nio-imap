@@ -20,16 +20,16 @@ import NIOIMAP
 // without RFC 9394 `PARTIAL` support. The requested UIDs are split into ranges of
 // at most `batchSize` UIDs each, preserving the UID ordering.
 
-/// Splits the given UIDs into `UIDRange`s with at most `maximumCount` UIDs each.
+/// Splits the given UIDs into `UIDRange`s with at most `batchSize` UIDs each.
 func splitUIDsIntoRanges(
     uids: UIDSet,
-    maximumCount: Int
+    batchSize: BatchSize
 ) -> [UIDRange] {
     var ranges: [UIDRange] = []
     var remaining = uids
     while !remaining.isEmpty {
         guard
-            let next = UIDSetNonEmpty(set: remaining.suffix(maximumCount))
+            let next = UIDSetNonEmpty(set: remaining.suffix(batchSize.count))
         else { break }
         ranges.append(next.min()...next.max())
         remaining.subtract(UIDSet(next.min()...UID.max))

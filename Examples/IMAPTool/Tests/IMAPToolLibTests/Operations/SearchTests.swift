@@ -205,33 +205,4 @@ private enum SearchTests {
         #expect(await connection.expectedCommands.isEmpty)
         #expect(uids == [309_727, 967_986])
     }
-
-    struct ParseMessageLimitFixture: Sendable, CustomTestStringConvertible {
-        var capabilities: [Capability]
-        var expected: UInt32
-
-        var testDescription: String { "\(capabilities)" }
-    }
-
-    @Test(arguments: [
-        ParseMessageLimitFixture(
-            capabilities: [],
-            expected: 1_000
-        ),
-        ParseMessageLimitFixture(
-            capabilities: [.messageLimit(999)],
-            expected: 1_000
-        ),
-        ParseMessageLimitFixture(
-            capabilities: [.messageLimit(1_000)],
-            expected: 1_000
-        ),
-        ParseMessageLimitFixture(
-            capabilities: [.messageLimit(10_000)],
-            expected: 10_000
-        ),
-    ])
-    static func parseMessageLimit(_ fixture: ParseMessageLimitFixture) {
-        #expect(effectiveBatchSize(capabilities: fixture.capabilities) == fixture.expected)
-    }
 }

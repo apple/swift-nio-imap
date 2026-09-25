@@ -112,26 +112,26 @@ private enum FetchBatchTests {
 
     struct SplitUIDsIntoRangesFixture: Sendable, CustomTestStringConvertible {
         var uids: UIDSet
-        var maximumCount: Int
+        var batchSize: BatchSize
         var expected: [UIDRange]
 
-        var testDescription: String { "uids: \(uids), max: \(maximumCount)" }
+        var testDescription: String { "uids: \(uids), batchSize: \(batchSize)" }
     }
 
     @Test(arguments: [
         SplitUIDsIntoRangesFixture(
             uids: [],
-            maximumCount: 1_000,
+            batchSize: 1_000,
             expected: []
         ),
         SplitUIDsIntoRangesFixture(
             uids: [100, 200, 300],
-            maximumCount: 5,
+            batchSize: 5,
             expected: [100...300]
         ),
         SplitUIDsIntoRangesFixture(
             uids: [100, 200, 1_500, 2_000],
-            maximumCount: 2,
+            batchSize: 2,
             expected: [
                 1_500...2_000,
                 100...200,
@@ -139,7 +139,7 @@ private enum FetchBatchTests {
         ),
         SplitUIDsIntoRangesFixture(
             uids: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
-            maximumCount: 3,
+            batchSize: 3,
             expected: [
                 8...10,
                 5...7,
@@ -149,12 +149,12 @@ private enum FetchBatchTests {
         ),
         SplitUIDsIntoRangesFixture(
             uids: [100],
-            maximumCount: 1,
+            batchSize: 1,
             expected: [100...100]
         ),
         SplitUIDsIntoRangesFixture(
             uids: [100, 200, 300, 400, 500],
-            maximumCount: 1,
+            batchSize: 1,
             expected: [
                 500...500,
                 400...400,
@@ -165,7 +165,7 @@ private enum FetchBatchTests {
         ),
         SplitUIDsIntoRangesFixture(
             uids: [1, 2, 3, 100, 200, 300, 1_000, 2_000, 3_000],
-            maximumCount: 4,
+            batchSize: 4,
             expected: [
                 300...3_000,
                 2...200,
@@ -178,7 +178,7 @@ private enum FetchBatchTests {
     ) {
         let result = splitUIDsIntoRanges(
             uids: fixture.uids,
-            maximumCount: fixture.maximumCount
+            batchSize: fixture.batchSize
         )
         #expect(result == fixture.expected)
     }
