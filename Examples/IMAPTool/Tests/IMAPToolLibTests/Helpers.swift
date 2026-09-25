@@ -58,20 +58,20 @@ extension CommandStreamPart {
     }
 }
 
-extension NIOIMAP.MailboxName: ExpressibleByStringLiteral {
+extension NIOIMAP.MailboxName: @retroactive ExpressibleByStringLiteral {
     public init(stringLiteral value: String) {
         // Test code only:
         self = try! MailboxPath.makeRootMailbox(displayName: value).name
     }
 }
 
-extension NIOIMAP.MailboxPath: ExpressibleByStringLiteral {
+extension NIOIMAP.MailboxPath: @retroactive ExpressibleByStringLiteral {
     public init(stringLiteral value: String) {
         try! self.init(name: MailboxName(stringLiteral: value), pathSeparator: ".")
     }
 }
 
-extension IMAPConnection.Tag: ExpressibleByStringLiteral {
+extension IMAPConnection.Tag: @retroactive ExpressibleByStringLiteral {
     public init(stringLiteral value: String) {
         self = IMAPConnection.Tag(value)!
     }

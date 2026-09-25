@@ -161,8 +161,8 @@ public struct ConnectionInfo: ParsableArguments, Sendable {
                 serverText: text,
                 logging: connectionLogging
             )
-        } catch let e as IMAPConnection.Configuration.ParseServerTextError {
-            throw ValidationError(e.description)
+        } catch {
+            throw ValidationError("\(error)")
         }
     }
 
