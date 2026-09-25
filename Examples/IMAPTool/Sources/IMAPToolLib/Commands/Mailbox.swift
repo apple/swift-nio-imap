@@ -118,7 +118,7 @@ extension MailboxCommand {
                 var result: [MailboxInfoAndStatus] = []
                 for m in mailboxes {
                     result.append(
-                        try await connection.createAndList(
+                        try await connection.createIfNeededAndList(
                             capabilities: info.capabilities,
                             mailbox: m
                         )

@@ -22,8 +22,8 @@ import NIO
 import NIOIMAP
 
 extension ConnectionProtocol {
-    /// Creates the mailbox and then runs `LIST` and `STATUS` on it.
-    func createAndList(
+    /// Creates the mailbox unless it already exists, then runs `LIST` and `STATUS` on it.
+    func createIfNeededAndList(
         capabilities: [Capability],
         mailbox: NewMailboxAction
     ) async throws -> MailboxInfoAndStatus {

@@ -87,7 +87,7 @@ struct CreateMailboxTests {
             ]
         )
 
-        let info = try await connection.createAndList(
+        let info = try await connection.createIfNeededAndList(
             capabilities: [.imap4rev1, .condStore],
             mailbox: .create("foo", [])
         )
@@ -177,7 +177,7 @@ struct CreateMailboxTests {
             ]
         )
 
-        let info = try await connection.createAndList(
+        let info = try await connection.createIfNeededAndList(
             capabilities: [.imap4rev1, .condStore],
             mailbox: .alreadyExists("foo")
         )
