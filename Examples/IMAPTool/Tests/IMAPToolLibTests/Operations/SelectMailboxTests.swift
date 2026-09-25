@@ -40,8 +40,8 @@ struct SelectMailboxTests {
         ])
 
         let info = try await connection.select(
-            createMailbox: .fail,
-            mailbox: .inbox
+            mailbox: .inbox,
+            createMailbox: .fail
         )
 
         #expect(info.mailbox == .inbox)
@@ -69,8 +69,8 @@ struct SelectMailboxTests {
         ])
 
         let info = try await connection.select(
-            createMailbox: .fail,
-            mailbox: "Food" as MailboxName
+            mailbox: "Food" as MailboxName,
+            createMailbox: .fail
         )
 
         #expect(info.mailbox == "Food")
@@ -94,8 +94,8 @@ struct SelectMailboxTests {
         async #expect(
             performing: {
                 _ = try await connection.select(
-                    createMailbox: .fail,
-                    mailbox: "Food" as MailboxName
+                    mailbox: "Food" as MailboxName,
+                    createMailbox: .fail
                 )
             },
             throws: { _ in true }
@@ -129,8 +129,8 @@ struct SelectMailboxTests {
         ])
 
         let info = try await connection.select(
-            createMailbox: .create([.attributes([.sent])]),
-            mailbox: "Food" as MailboxName
+            mailbox: "Food" as MailboxName,
+            createMailbox: .create([.attributes([.sent])])
         )
 
         #expect(info.mailbox == "Food")
@@ -159,8 +159,8 @@ struct SelectMailboxTests {
         async #expect(
             performing: {
                 _ = try await connection.select(
-                    createMailbox: .create([.attributes([.sent])]),
-                    mailbox: "Food" as MailboxName
+                    mailbox: "Food" as MailboxName,
+                    createMailbox: .create([.attributes([.sent])])
                 )
             },
             throws: { _ in true }

@@ -73,8 +73,8 @@ struct DownloadCommand: AsyncParsableCommand {
 
         try await IMAPConnection.withAuthenticatedConnection(info: connectionInfo) { id, connection -> Void in
             let info = try await connection.select(
-                createMailbox: .fail,
-                mailbox: mailbox
+                mailbox: mailbox,
+                createMailbox: .fail
             )
             _ = try await connection.download(
                 mailboxMessageCount: info.messageCount,

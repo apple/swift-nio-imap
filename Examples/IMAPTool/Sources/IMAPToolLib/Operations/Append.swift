@@ -33,8 +33,8 @@ extension IMAPConnection {
         createMailbox: SelectCreateOption
     ) async throws -> [AppendedMessageInfo<ID>] {
         let info = try await select(
-            createMailbox: createMailbox,
-            mailbox: mailbox
+            mailbox: mailbox,
+            createMailbox: createMailbox
         )
 
         var result: [AppendedMessageInfo<ID>] = []

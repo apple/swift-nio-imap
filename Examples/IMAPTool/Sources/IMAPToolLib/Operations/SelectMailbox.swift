@@ -128,15 +128,15 @@ extension ConnectionProtocol {
         mailbox: MailboxPath
     ) async throws -> SelectInfo {
         try await select(
-            createMailbox: createMailbox,
-            mailbox: mailbox.name
+            mailbox: mailbox.name,
+            createMailbox: createMailbox
         )
     }
 
     /// Selects the given mailbox, optionally creating it first.
     func select(
-        createMailbox: SelectCreateOption,
-        mailbox: MailboxName
+        mailbox: MailboxName,
+        createMailbox: SelectCreateOption
     ) async throws -> SelectInfo {
         let info = try await selectOrCreate(
             createMailbox: createMailbox,

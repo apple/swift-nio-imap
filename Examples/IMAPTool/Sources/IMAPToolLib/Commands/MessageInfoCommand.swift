@@ -51,8 +51,8 @@ struct MessageInfoCommand: AsyncParsableCommand {
             id,
             connection in
             let info = try await connection.select(
-                createMailbox: .fail,
-                mailbox: mailbox
+                mailbox: mailbox,
+                createMailbox: .fail
             )
             return try await connection.fetchMessageInfo(
                 mailboxMessageCount: info.messageCount,

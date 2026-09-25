@@ -126,8 +126,8 @@ struct MessageFlagCommand: AsyncParsableCommand {
     ) async throws {
         try await IMAPConnection.withAuthenticatedConnection(info: connectionInfo) { id, connection in
             let info = try await connection.select(
-                createMailbox: .fail,
-                mailbox: mailbox
+                mailbox: mailbox,
+                createMailbox: .fail
             )
 
             let allUIDs = try await connection.findMessageIDs(

@@ -71,8 +71,8 @@ struct SearchMessagesCommand: AsyncParsableCommand, Sendable {
             info: connectionInfo
         ) { info, connection -> Result in
             let mailboxInfo = try await connection.select(
-                createMailbox: .fail,
-                mailbox: mailbox
+                mailbox: mailbox,
+                createMailbox: .fail
             )
 
             let uids = try await connection.search(

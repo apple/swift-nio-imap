@@ -51,8 +51,8 @@ struct IdleCommand: AsyncParsableCommand {
     func run() async throws {
         try await IMAPConnection.withAuthenticatedConnection(info: connectionInfo) { id, connection in
             _ = try await connection.select(
-                createMailbox: .fail,
-                mailbox: mailboxName
+                mailbox: mailboxName,
+                createMailbox: .fail
             )
 
             let terminator: Data = {

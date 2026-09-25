@@ -120,8 +120,8 @@ extension DeleteMessagesCommand {
             id,
             connection in
             let info = try await connection.select(
-                createMailbox: .fail,
-                mailbox: mailboxName
+                mailbox: mailboxName,
+                createMailbox: .fail
             )
 
             writeStatus("Mailbox has \(info.messageCount) messages.")
@@ -196,8 +196,8 @@ extension DeleteMessagesCommand {
             connection in
 
             let info = try await connection.select(
-                createMailbox: .fail,
-                mailbox: mailboxName
+                mailbox: mailboxName,
+                createMailbox: .fail
             )
 
             let allUIDs = try await connection.findMessageIDs(
