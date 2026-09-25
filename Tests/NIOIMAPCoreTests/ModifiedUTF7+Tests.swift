@@ -35,6 +35,12 @@ struct ModifiedUTF7Tests {
             (#"a\b\c"#, #"a\b\c"#),
             ("a+b", "a+b"),
             ("~ab", "~ab"),
+            // Printable ASCII is 0x20–0x7E; 0x1F and 0x7F must be Base64.
+            ("a b", "a b"),
+            ("\u{1F}", "&AB8-"),
+            ("\u{7F}", "&AH8-"),
+            ("é\u{1F}", "&AOkAHw-"),
+            ("é\u{7F}", "&AOkAfw-"),
         ]
     )
     func encodeConvertsStringsToModifiedUTF7(input: String, expected: String) {
@@ -59,6 +65,11 @@ struct ModifiedUTF7Tests {
             (#"a\b\c"#, #"a\b\c"#),
             ("a+b", "a+b"),
             ("~ab", "~ab"),
+            ("a b", "a b"),
+            ("&AB8-", "\u{1F}"),
+            ("&AH8-", "\u{7F}"),
+            ("&AOkAHw-", "é\u{1F}"),
+            ("&AOkAfw-", "é\u{7F}"),
         ]
     )
     func decodeConvertsModifiedUTF7ToStrings(input: String, expected: String) throws {
