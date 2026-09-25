@@ -180,7 +180,7 @@ See [`Examples/README.md`](Examples/README.md) for details on building and runni
 
 ## Contributing
 
-Contributions are welcome! Please read [CONTRIBUTING.md](CONTRIBUTING.md) and the [Code of Conduct](CODE_OF_CONDUCT.md) before opening a pull request. Security issues should be reported as described in [SECURITY.md](SECURITY.md).
+Contributions are welcome! Please read [CONTRIBUTING.md](CONTRIBUTING.md) and the [Code of Conduct](https://github.com/apple/.github/blob/main/CODE_OF_CONDUCT.md) before opening a pull request. Security issues should be reported as described in [SECURITY.md](SECURITY.md).
 
 ## License
 
