@@ -28,9 +28,9 @@ extension IMAPConnection {
     ///
     /// Selects the target mailbox first to receive any updates to it.
     func append<ID: Sendable>(
-        createMailbox: SelectCreateOption,
         messages: some AsyncSequence<MessageToAppend<ID>, any Swift.Error>,
-        into mailbox: MailboxName
+        into mailbox: MailboxName,
+        createMailbox: SelectCreateOption
     ) async throws -> [AppendedMessageInfo<ID>] {
         let info = try await select(
             createMailbox: createMailbox,

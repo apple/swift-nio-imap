@@ -37,12 +37,12 @@ extension IMAPConnection {
         into mailbox: MailboxName
     ) async throws -> [AppendedMessageInfo<FilePath>] {
         try await append(
-            createMailbox: SelectCreateOption(options),
             messages: FileBasedMessageToAppendSequence(
                 paths: messages,
                 options: options
             ),
-            into: mailbox
+            into: mailbox,
+            createMailbox: SelectCreateOption(options)
         )
     }
 }
