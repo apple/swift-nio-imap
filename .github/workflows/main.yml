@@ -14,6 +14,8 @@ jobs:
     name: Unit tests
     uses: apple/swift-nio/.github/workflows/unit_tests.yml@main
     with:
+      # `Package.swift` requires Swift 6.2, so the older matrix entries cannot build this
+      # package and are not configured here.
       linux_6_2_arguments_override: "-Xswiftc -warnings-as-errors --explicit-target-dependency-import-check error"
       linux_6_3_arguments_override: "-Xswiftc -warnings-as-errors --explicit-target-dependency-import-check error"
       linux_nightly_main_arguments_override: "--explicit-target-dependency-import-check error"
@@ -38,7 +40,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        example: [CLI, Proxy, Fuzzer, PerformanceTester]
+        example: [IMAPTool, CLI, Proxy, Fuzzer, PerformanceTester]
     container:
       image: swift:6.2
     steps:
@@ -49,5 +51,5 @@ jobs:
       - name: Build
         run: swift build --package-path "Examples/${{ matrix.example }}"
       - name: Test
-        if: matrix.example == 'CLI'
-        run: swift test --package-path "Examples/CLI"
+        if: matrix.example == 'CLI' || matrix.example == 'IMAPTool'
+        run: swift test --package-path "Examples/${{ matrix.example }}"
