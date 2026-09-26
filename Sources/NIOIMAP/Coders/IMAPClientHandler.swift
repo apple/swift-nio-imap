@@ -88,7 +88,13 @@ public final class IMAPClientHandler: ChannelDuplexHandler {
             let action = try self.state.receiveContinuationRequest(continuationRequest)
             self.handleContinuationRequestAction(action, request: continuationRequest, context: context)
         case .response(let response):
-            try self.state.receiveResponse(response)
+            let actions = try self.state.receiveResponse(response)
+            // Write what the response released before succeeding promises and forwarding the
+            // response, so that anything written in reaction to those goes out after it.
+            self.writeChunks(actions.compactMap(\.chunk), context: context)
+            for case .succeed(let promise) in actions {
+                promise?.succeed()
+            }
             context.fireChannelRead(self.wrapInboundOut(response))
             self.state.encodingOptions.updateAutomaticOptions(response: response)
         }
@@ -103,7 +109,10 @@ public final class IMAPClientHandler: ChannelDuplexHandler {
         case .sendChunks(let chunks):
             self.writeChunks(chunks, context: context)
             context.fireUserInboundEventTriggered(request)
-        case .fireIdleStarted:
+        case .fireIdleStarted(let chunks):
+            // Before forwarding `.idleStarted`, so that anything written in reaction to it goes
+            // out after a DONE that was held back for the confirmation.
+            self.writeChunks(chunks, context: context)
             context.fireChannelRead(self.wrapInboundOut(.idleStarted))
             context.fireUserInboundEventTriggered(request)
         case .fireAuthenticationChallenge:
@@ -123,8 +132,13 @@ public final class IMAPClientHandler: ChannelDuplexHandler {
         switch self.unwrapOutboundIn(data) {
         case .part(let command):
             do {
-                if let chunk = try self.state.sendCommand(command, promise: promise) {
+                switch try self.state.sendCommand(command, promise: promise) {
+                case .write(let chunk):
                     self.writeChunk(chunk, context: context)
+                case .succeed(let promise):
+                    promise?.succeed()
+                case nil:
+                    break
                 }
             } catch {
                 context.fireErrorCaught(error)
@@ -154,7 +168,13 @@ public final class IMAPClientHandler: ChannelDuplexHandler {
     }
 
     public func flush(context: ChannelHandlerContext) {
-        self.state.flush()
+        do {
+            for chunk in try self.state.flush() {
+                self.writeChunk(chunk, context: context)
+            }
+        } catch {
+            context.fireErrorCaught(error)
+        }
         context.flush()
     }
 }

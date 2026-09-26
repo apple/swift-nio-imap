@@ -154,6 +154,22 @@ final class LoopbackServer {
         try await start { GreetAndStayOpenHandler() }
     }
 
+    /// Starts a server that sends an IMAP greeting on connect, then answers each line the
+    /// client sends with the lines `respond` returns for it, `replyDelay` later.
+    ///
+    /// Both directions are recorded in `transcript`, in wire order, e.g.
+    /// `["C: A1 NOOP", "S: A1 OK done"]`.
+    static func scripted(
+        replyDelay: TimeAmount = .zero,
+        _ respond: @escaping @Sendable (_ line: String) -> [String]
+    ) async throws -> (server: LoopbackServer, transcript: LockedBox<[String]>) {
+        let transcript = LockedBox<[String]>([])
+        let server = try await start {
+            ScriptedHandler(replyDelay: replyDelay, transcript: transcript, respond: respond)
+        }
+        return (server, transcript)
+    }
+
     private static func start(
         _ makeHandler: @escaping @Sendable () -> any ChannelInboundHandler
     ) async throws -> LoopbackServer {
@@ -213,6 +229,55 @@ private final class GreetAndStayOpenHandler: ChannelInboundHandler {
 
     func channelRead(context: ChannelHandlerContext, data: NIOAny) {
         // Ignore everything the client sends; stay open until the client disconnects.
+    }
+}
+
+/// Writes an IMAP greeting on `channelActive`, then answers each CRLF-terminated line the
+/// client sends as the script says, recording both directions.
+private final class ScriptedHandler: ChannelInboundHandler {
+    typealias InboundIn = ByteBuffer
+    typealias OutboundOut = ByteBuffer
+
+    private let replyDelay: TimeAmount
+    private let transcript: LockedBox<[String]>
+    private let respond: @Sendable (String) -> [String]
+    /// Bytes of a line the client has not finished sending yet.
+    private var partialLine = ""
+
+    init(replyDelay: TimeAmount, transcript: LockedBox<[String]>, respond: @escaping @Sendable (String) -> [String]) {
+        self.replyDelay = replyDelay
+        self.transcript = transcript
+        self.respond = respond
+    }
+
+    func channelActive(context: ChannelHandlerContext) {
+        var buffer = context.channel.allocator.buffer(capacity: 64)
+        buffer.writeString("* OK [CAPABILITY IMAP4rev1 IDLE] Loopback test server ready\r\n")
+        context.writeAndFlush(self.wrapOutboundOut(buffer), promise: nil)
+        context.fireChannelActive()
+    }
+
+    func channelRead(context: ChannelHandlerContext, data: NIOAny) {
+        self.partialLine += String(buffer: self.unwrapInboundIn(data))
+        while let end = self.partialLine.range(of: "\r\n") {
+            let line = String(self.partialLine[..<end.lowerBound])
+            self.partialLine.removeSubrange(..<end.upperBound)
+            self.transcript.withLock { $0.append("C: \(line)") }
+            self.reply(self.respond(line), context: context)
+        }
+    }
+
+    private func reply(_ lines: [String], context: ChannelHandlerContext) {
+        guard !lines.isEmpty else { return }
+        let transcript = self.transcript
+        let channel = context.channel
+        context.eventLoop.scheduleTask(in: self.replyDelay) {
+            for line in lines {
+                transcript.withLock { $0.append("S: \(line)") }
+                channel.write(ByteBuffer(string: line + "\r\n"), promise: nil)
+            }
+            channel.flush()
+        }
     }
 }
 

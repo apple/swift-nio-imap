@@ -95,7 +95,7 @@ struct ClientStateMachineTests {
 
         // send the command, the state machine should tell us to send the first chunk
         var result: OutgoingChunk?
-        #expect(throws: Never.self) { result = try stateMachine.sendCommand(.tagged(command)) }
+        #expect(throws: Never.self) { result = try stateMachine.sendCommand(.tagged(command))?.chunk }
         #expect(result?.bytes == "A1 LOGIN {2}\r\n")
 
         // receive a continuation, we should then send another chunk
@@ -114,22 +114,22 @@ struct ClientStateMachineTests {
     }
 
     @Test("chunking multiple commands")
-    func chunkingMultipleCommands() {
+    func chunkingMultipleCommands() throws {
         var stateMachine = makeStateMachine()
         let command = TaggedCommand(tag: "A1", command: .login(username: "å", password: "pass"))
 
         var result1: OutgoingChunk?
-        #expect(throws: Never.self) { result1 = try stateMachine.sendCommand(.tagged(command)) }
+        #expect(throws: Never.self) { result1 = try stateMachine.sendCommand(.tagged(command))?.chunk }
         #expect(result1!.bytes == "A1 LOGIN {2}\r\n")
 
         // We haven't yet continued the first command
         // so we shouldn't get anything back here.
         var result2: OutgoingChunk?
         #expect(throws: Never.self) {
-            result2 = try stateMachine.sendCommand(.tagged(.init(tag: "A2", command: .noop)))
+            result2 = try stateMachine.sendCommand(.tagged(.init(tag: "A2", command: .noop)))?.chunk
         }
         #expect(result2 == nil)
-        stateMachine.flush()
+        #expect(try stateMachine.flush() == [])
 
         var result3: ClientStateMachine.ContinuationRequestAction!
         #expect(throws: Never.self) { result3 = try stateMachine.receiveContinuationRequest(.data("OK")) }
@@ -178,7 +178,7 @@ struct ClientStateMachineTests {
         let command = TaggedCommand(tag: "A1", command: .select(MailboxName(ByteBuffer(string: "äÿ")), []))
 
         var result1: OutgoingChunk?
-        #expect(throws: Never.self) { result1 = try stateMachine.sendCommand(.tagged(command)) }
+        #expect(throws: Never.self) { result1 = try stateMachine.sendCommand(.tagged(command))?.chunk }
         #expect(result1!.bytes == "A1 SELECT {4}\r\n")
 
         // At this point, we're waiting for a Continuation Request from the server.
@@ -212,13 +212,13 @@ struct ClientStateMachineTests {
 
         // Send a command that we can complete later:
         #expect(throws: Never.self) {
-            result = try stateMachine.sendCommand(.tagged(.init(tag: "B2", command: .expunge)))
+            result = try stateMachine.sendCommand(.tagged(.init(tag: "B2", command: .expunge)))?.chunk
         }
         #expect(result!.bytes == "B2 EXPUNGE\r\n")
 
         // Now send a command that will drop us into "expecting literal Continuation Request":
         let command = TaggedCommand(tag: "A1", command: .select(MailboxName(ByteBuffer(string: "äÿ")), []))
-        #expect(throws: Never.self) { result = try stateMachine.sendCommand(.tagged(command)) }
+        #expect(throws: Never.self) { result = try stateMachine.sendCommand(.tagged(command))?.chunk }
         #expect(result!.bytes == "A1 SELECT {4}\r\n")
 
         // At this point, we're waiting for a Continuation Request from the server.
@@ -254,7 +254,7 @@ struct ClientStateMachineTests {
 
         // Send a command that will drop us into "expecting literal Continuation Request":
         let command = TaggedCommand(tag: "A1", command: .select(MailboxName(ByteBuffer(string: "äÿ")), []))
-        #expect(throws: Never.self) { result = try stateMachine.sendCommand(.tagged(command)) }
+        #expect(throws: Never.self) { result = try stateMachine.sendCommand(.tagged(command))?.chunk }
         #expect(result!.bytes == "A1 SELECT {4}\r\n")
 
         // If we receive a (tagged) completion for the current command, we need to throw an error:
@@ -294,64 +294,143 @@ extension ClientStateMachineTests {
         #expect(throws: Never.self) { try stateMachine.sendCommand(.tagged(.init(tag: "A3", command: .noop))) }
     }
 
-    @Test("idle ended by the server's tagged response returns to normal operation")
-    func idleEndedByTaggedResponse() throws {
+    @Test("a tagged response after the IDLE confirmation is an error")
+    func taggedResponseWhileIdlingIsAnError() {
         var stateMachine = makeStateMachine()
         #expect(throws: Never.self) { try stateMachine.sendCommand(.tagged(.init(tag: "A1", command: .idleStart))) }
         #expect(throws: Never.self) {
-            try stateMachine.receiveContinuationRequest(.responseText(.init(text: "IDLE started")))
+            try stateMachine.receiveContinuationRequest(.responseText(.init(text: "idling")))
         }
 
-        // The server ends IDLE without a DONE from the client.
+        // After its `+`, the server must wait for DONE (RFC 2177 §3).
+        #expect(throws: UnexpectedResponse.self) {
+            try stateMachine.receiveResponse(.tagged(.init(tag: "A1", state: .ok(.init(text: "IDLE terminated")))))
+        }
+        #expect(stateMachine.state == .error)
+    }
+
+    @Test("a fatal response during IDLE is an error")
+    func fatalWhileIdlingIsAnError() {
+        var stateMachine = makeStateMachine()
+        #expect(throws: Never.self) { try stateMachine.sendCommand(.tagged(.init(tag: "A1", command: .idleStart))) }
+        #expect(throws: Never.self) {
+            try stateMachine.receiveContinuationRequest(.responseText(.init(text: "idling")))
+        }
+
+        #expect(throws: UnexpectedResponse.self) { try stateMachine.receiveResponse(.fatal(.init(text: "Autologout"))) }
+        #expect(stateMachine.state == .error)
+    }
+
+    @Test(
+        "a rejected IDLE absorbs one DONE",
+        arguments: [
+            TaggedResponse.State.no(.init(text: "IDLE not permitted")),
+            .bad(.init(text: "IDLE not permitted")),
+        ]
+    )
+    func rejectedIdleAbsorbsOneDone(rejection: TaggedResponse.State) throws {
+        var stateMachine = makeStateMachine()
+        #expect(throws: Never.self) { try stateMachine.sendCommand(.tagged(.init(tag: "A1", command: .idleStart))) }
+
+        #expect(try stateMachine.receiveResponse(.tagged(.init(tag: "A1", state: rejection))) == [])
+        #expect(stateMachine.state == .idleRejected)
+
+        // The server never sent `+`, so it isn't waiting for DONE: nothing to write.
+        let loop = EmbeddedEventLoop()
+        let done = loop.makePromise(of: Void.self)
+        #expect(try stateMachine.sendCommand(.idleDone, promise: done) == .succeed(done))
+        #expect(stateMachine.state == .expectingNormalResponse)
+        done.succeed()
+
+        #expect(throws: InvalidCommandForState.self) { try stateMachine.sendCommand(.idleDone) }
+    }
+
+    @Test(
+        "a command after a rejected IDLE ends the tolerance for a late DONE",
+        arguments: [
+            CommandStreamPart.tagged(.init(tag: "A2", command: .noop)),
+            .append(.start(tag: "A2", appendingTo: .inbox)),
+        ]
+    )
+    func commandAfterRejectedIdleEndsDoneTolerance(command: CommandStreamPart) throws {
+        var stateMachine = makeStateMachine()
+        #expect(throws: Never.self) { try stateMachine.sendCommand(.tagged(.init(tag: "A1", command: .idleStart))) }
+        _ = try stateMachine.receiveResponse(.tagged(.init(tag: "A1", state: .no(.init(text: "IDLE not permitted")))))
+        #expect(stateMachine.state == .idleRejected)
+
+        #expect(try stateMachine.sendCommand(command)?.chunk != nil)
+        #expect(stateMachine.state != .idleRejected)
+    }
+
+    @Test("a continuation request after a rejected IDLE is an error")
+    func continuationAfterRejectedIdleIsAnError() throws {
+        var stateMachine = makeStateMachine()
+        #expect(throws: Never.self) { try stateMachine.sendCommand(.tagged(.init(tag: "A1", command: .idleStart))) }
+        _ = try stateMachine.receiveResponse(.tagged(.init(tag: "A1", state: .no(.init(text: "IDLE not permitted")))))
+
+        #expect(throws: UnexpectedContinuationRequest.self) {
+            try stateMachine.receiveContinuationRequest(.responseText(.init(text: "idling")))
+        }
+        #expect(stateMachine.state == .error)
+    }
+
+    @Test("DONE sent before the IDLE confirmation is held until it arrives")
+    func doneBeforeConfirmationIsHeld() throws {
+        var stateMachine = makeStateMachine()
+        let loop = EmbeddedEventLoop()
+        let done = loop.makePromise(of: Void.self)
+        let noop = loop.makePromise(of: Void.self)
+        #expect(throws: Never.self) { try stateMachine.sendCommand(.tagged(.init(tag: "A1", command: .idleStart))) }
+
+        // DONE answers the server's `+`, so it — and anything behind it — has to wait.
+        #expect(try stateMachine.sendCommand(.idleDone, promise: done) == nil)
+        #expect(try stateMachine.sendCommand(.tagged(.init(tag: "A2", command: .noop)), promise: noop) == nil)
+        #expect(try stateMachine.flush() == [])
+
+        #expect(
+            try stateMachine.receiveContinuationRequest(.responseText(.init(text: "idling")))
+                == .fireIdleStarted([
+                    .init(bytes: "DONE\r\n", promise: done, shouldSucceedPromise: true),
+                    .init(bytes: "A2 NOOP\r\n", promise: noop, shouldSucceedPromise: true),
+                ])
+        )
+        #expect(stateMachine.state == .expectingNormalResponse)
+        done.succeed()
+        noop.succeed()
+
         #expect(throws: Never.self) {
             try stateMachine.receiveResponse(.tagged(.init(tag: "A1", state: .ok(.init(text: "IDLE terminated")))))
         }
-
-        // A DONE the client had already decided to send is accepted as an empty write; a
-        // second one is out of context. Normal commands are accepted again.
-        let done = try stateMachine.sendCommand(.idleDone)
-        #expect(done?.bytes.readableBytes == 0)
-        #expect(done?.shouldSucceedPromise == true)
-        #expect(throws: InvalidCommandForState.self) { try stateMachine.sendCommand(.idleDone) }
-        #expect(throws: Never.self) { try stateMachine.sendCommand(.tagged(.init(tag: "A2", command: .noop))) }
         #expect(throws: Never.self) {
-            try stateMachine.receiveResponse(.tagged(.init(tag: "A2", state: .ok(.init(text: "OK")))))
+            try stateMachine.receiveResponse(.tagged(.init(tag: "A2", state: .ok(.init(text: "NOOP completed")))))
         }
     }
 
-    @Test("a command after a server-ended idle clears the tolerance for a late DONE")
-    func commandAfterServerEndedIdleClearsLateDoneTolerance() throws {
+    @Test("DONE held for an IDLE that is then rejected is dropped")
+    func heldDoneForRejectedIdleIsDropped() throws {
         var stateMachine = makeStateMachine()
+        let loop = EmbeddedEventLoop()
+        let done = loop.makePromise(of: Void.self)
+        let noop = loop.makePromise(of: Void.self)
         #expect(throws: Never.self) { try stateMachine.sendCommand(.tagged(.init(tag: "A1", command: .idleStart))) }
-        #expect(throws: Never.self) {
-            try stateMachine.receiveContinuationRequest(.responseText(.init(text: "IDLE started")))
-        }
-        #expect(throws: Never.self) {
-            try stateMachine.receiveResponse(.tagged(.init(tag: "A1", state: .ok(.init(text: "IDLE terminated")))))
-        }
+        #expect(try stateMachine.sendCommand(.idleDone, promise: done) == nil)
+        #expect(try stateMachine.sendCommand(.tagged(.init(tag: "A2", command: .noop)), promise: noop) == nil)
+        #expect(try stateMachine.flush() == [])
 
-        #expect(throws: Never.self) { try stateMachine.sendCommand(.tagged(.init(tag: "A2", command: .noop))) }
-        #expect(throws: Never.self) {
-            try stateMachine.receiveResponse(.tagged(.init(tag: "A2", state: .ok(.init(text: "OK")))))
-        }
+        // The held DONE is done with; the command behind it goes out.
+        #expect(
+            try stateMachine.receiveResponse(.tagged(.init(tag: "A1", state: .no(.init(text: "IDLE not permitted")))))
+                == [
+                    .succeed(done),
+                    .write(.init(bytes: "A2 NOOP\r\n", promise: noop, shouldSucceedPromise: true)),
+                ]
+        )
+        #expect(stateMachine.state == .expectingNormalResponse)
+        done.succeed()
+        noop.succeed()
+
+        // The held DONE was the one DONE a rejected IDLE absorbs.
         #expect(throws: InvalidCommandForState.self) { try stateMachine.sendCommand(.idleDone) }
-    }
-
-    @Test("idle rejected before confirmation returns to normal operation")
-    func idleRejectedBeforeConfirmation() throws {
-        var stateMachine = makeStateMachine()
-        #expect(throws: Never.self) { try stateMachine.sendCommand(.tagged(.init(tag: "A1", command: .idleStart))) }
-
-        // The server refuses IDLE with a tagged NO instead of the continuation.
-        #expect(throws: Never.self) {
-            try stateMachine.receiveResponse(.tagged(.init(tag: "A1", state: .no(.init(text: "IDLE unavailable")))))
-        }
-
-        let done = try stateMachine.sendCommand(.idleDone)
-        #expect(done?.bytes.readableBytes == 0)
-        #expect(done?.shouldSucceedPromise == true)
-        #expect(throws: InvalidCommandForState.self) { try stateMachine.sendCommand(.idleDone) }
-        #expect(throws: Never.self) { try stateMachine.sendCommand(.tagged(.init(tag: "A2", command: .noop))) }
     }
 
     @Test("a second DONE after a client-ended idle is still out of context")
@@ -366,7 +445,7 @@ extension ClientStateMachineTests {
             try stateMachine.receiveResponse(.tagged(.init(tag: "A1", state: .ok(.init(text: "IDLE terminated")))))
         }
 
-        // The tolerance exists only for a server-ended IDLE.
+        // Only a rejected IDLE absorbs a DONE.
         #expect(throws: InvalidCommandForState.self) { try stateMachine.sendCommand(.idleDone) }
     }
 
@@ -379,6 +458,7 @@ extension ClientStateMachineTests {
             try stateMachine.receiveContinuationRequest(.responseText(.init(text: "IDLE started")))
         }
         #expect(throws: Never.self) { try stateMachine.sendCommand(.idleDone) }
+        #expect(stateMachine.state == .expectingNormalResponse)
         #expect(throws: Never.self) {
             try stateMachine.receiveResponse(.tagged(.init(tag: "A1", state: .ok(.init(text: "IDLE terminated")))))
         }
@@ -513,11 +593,11 @@ extension ClientStateMachineTests {
 
 private func expectOutgoingChunk(
     _ expected: OutgoingChunk,
-    _ closure: @autoclosure () throws -> OutgoingChunk?,
+    _ closure: @autoclosure () throws -> OutboundAction?,
     sourceLocation: SourceLocation = #_sourceLocation
 ) {
     var result: OutgoingChunk?
-    #expect(throws: Never.self) { result = try closure() }
+    #expect(throws: Never.self) { result = try closure()?.chunk }
 
     #expect(expected.promise?.futureResult === result?.promise?.futureResult, sourceLocation: sourceLocation)
     #expect(expected.bytes == result?.bytes, sourceLocation: sourceLocation)
@@ -639,7 +719,7 @@ extension ClientStateMachineTests {
         )
 
         // Send an untagged EXISTS:
-        try stateMachine.receiveResponse(.untagged(.mailboxData(.exists(5_732))))
+        _ = try stateMachine.receiveResponse(.untagged(.mailboxData(.exists(5_732))))
 
         // Finish the append command, and then send another different command
         expectOutgoingChunk(
@@ -648,7 +728,7 @@ extension ClientStateMachineTests {
         )
 
         // Send an untagged RECENT:
-        try stateMachine.receiveResponse(.untagged(.mailboxData(.recent(0))))
+        _ = try stateMachine.receiveResponse(.untagged(.mailboxData(.recent(0))))
 
         #expect(throws: Never.self) {
             try stateMachine.receiveResponse(.tagged(.init(tag: "A1", state: .ok(.init(code: nil, text: "OK")))))
@@ -660,38 +740,38 @@ extension ClientStateMachineTests {
     }
 
     @Test("append preloading")
-    func appendPreloading() {
+    func appendPreloading() throws {
         var stateMachine = makeStateMachine()
         var result: OutgoingChunk?
         #expect(throws: Never.self) {
-            result = try stateMachine.sendCommand(.append(.start(tag: "A1", appendingTo: .inbox)))
+            result = try stateMachine.sendCommand(.append(.start(tag: "A1", appendingTo: .inbox)))?.chunk
         }
         #expect(result == .init(bytes: "A1 APPEND \"INBOX\"", promise: nil, shouldSucceedPromise: true))
 
         #expect(throws: Never.self) {
             result = try stateMachine.sendCommand(
                 .append(.beginMessage(message: .init(options: .none, data: .init(byteCount: 5))))
-            )
+            )?.chunk
         }
         #expect(result == .init(bytes: " {5}\r\n", promise: nil, shouldSucceedPromise: true))
 
         // We'll now enqueue a lot of CommandStreamPart that can't be sent onto the wire, yet,
         // because we're still waiting for the Continuation Request from the server:
-        #expect(throws: Never.self) { result = try stateMachine.sendCommand(.append(.messageBytes("0"))) }
+        #expect(throws: Never.self) { result = try stateMachine.sendCommand(.append(.messageBytes("0")))?.chunk }
         #expect(result == nil)
-        #expect(throws: Never.self) { result = try stateMachine.sendCommand(.append(.messageBytes("1"))) }
+        #expect(throws: Never.self) { result = try stateMachine.sendCommand(.append(.messageBytes("1")))?.chunk }
         #expect(result == nil)
-        #expect(throws: Never.self) { result = try stateMachine.sendCommand(.append(.messageBytes("2"))) }
+        #expect(throws: Never.self) { result = try stateMachine.sendCommand(.append(.messageBytes("2")))?.chunk }
         #expect(result == nil)
-        #expect(throws: Never.self) { result = try stateMachine.sendCommand(.append(.messageBytes("3"))) }
+        #expect(throws: Never.self) { result = try stateMachine.sendCommand(.append(.messageBytes("3")))?.chunk }
         #expect(result == nil)
-        #expect(throws: Never.self) { result = try stateMachine.sendCommand(.append(.messageBytes("4"))) }
+        #expect(throws: Never.self) { result = try stateMachine.sendCommand(.append(.messageBytes("4")))?.chunk }
         #expect(result == nil)
-        #expect(throws: Never.self) { result = try stateMachine.sendCommand(.append(.endMessage)) }
+        #expect(throws: Never.self) { result = try stateMachine.sendCommand(.append(.endMessage))?.chunk }
         #expect(result == nil)
-        #expect(throws: Never.self) { result = try stateMachine.sendCommand(.append(.finish)) }
+        #expect(throws: Never.self) { result = try stateMachine.sendCommand(.append(.finish))?.chunk }
         #expect(result == nil)
-        stateMachine.flush()
+        #expect(try stateMachine.flush() == [])
 
         // Now the Continuation Request comes in:
         var resultAction: ClientStateMachine.ContinuationRequestAction!
@@ -729,14 +809,14 @@ extension ClientStateMachineTests {
         var stateMachine = makeStateMachine()
         var result: OutgoingChunk?
         #expect(throws: Never.self) {
-            result = try stateMachine.sendCommand(.append(.start(tag: "A1", appendingTo: .inbox)))
+            result = try stateMachine.sendCommand(.append(.start(tag: "A1", appendingTo: .inbox)))?.chunk
         }
         #expect(result == .init(bytes: "A1 APPEND \"INBOX\"", promise: nil, shouldSucceedPromise: true))
 
         #expect(throws: Never.self) {
             result = try stateMachine.sendCommand(
                 .append(.beginMessage(message: .init(options: .none, data: .init(byteCount: 6))))
-            )
+            )?.chunk
         }
         #expect(result == .init(bytes: " {6}\r\n", promise: nil, shouldSucceedPromise: true))
 
@@ -758,13 +838,13 @@ extension ClientStateMachineTests {
         }
         #expect(resultAction == .sendChunks([]))
 
-        #expect(throws: Never.self) { result = try stateMachine.sendCommand(.append(.messageBytes("foobar"))) }
+        #expect(throws: Never.self) { result = try stateMachine.sendCommand(.append(.messageBytes("foobar")))?.chunk }
         #expect(result == .init(bytes: "foobar", promise: nil, shouldSucceedPromise: true))
 
-        #expect(throws: Never.self) { result = try stateMachine.sendCommand(.append(.endMessage)) }
+        #expect(throws: Never.self) { result = try stateMachine.sendCommand(.append(.endMessage))?.chunk }
         #expect(result == .init(bytes: "", promise: nil, shouldSucceedPromise: true))
 
-        #expect(throws: Never.self) { result = try stateMachine.sendCommand(.append(.finish)) }
+        #expect(throws: Never.self) { result = try stateMachine.sendCommand(.append(.finish))?.chunk }
         #expect(result == .init(bytes: "\r\n", promise: nil, shouldSucceedPromise: true))
 
         // Complete the APPEND command:
@@ -787,20 +867,20 @@ extension ClientStateMachineTests {
 
         // Send a command that we can complete later:
         #expect(throws: Never.self) {
-            result = try stateMachine.sendCommand(.tagged(.init(tag: "B2", command: .expunge)))
+            result = try stateMachine.sendCommand(.tagged(.init(tag: "B2", command: .expunge)))?.chunk
         }
         #expect(result!.bytes == "B2 EXPUNGE\r\n")
 
         // Now send the APPEND:
         #expect(throws: Never.self) {
-            result = try stateMachine.sendCommand(.append(.start(tag: "A1", appendingTo: .inbox)))
+            result = try stateMachine.sendCommand(.append(.start(tag: "A1", appendingTo: .inbox)))?.chunk
         }
         #expect(result == .init(bytes: "A1 APPEND \"INBOX\"", promise: nil, shouldSucceedPromise: true))
 
         #expect(throws: Never.self) {
             result = try stateMachine.sendCommand(
                 .append(.beginMessage(message: .init(options: .none, data: .init(byteCount: 6))))
-            )
+            )?.chunk
         }
         #expect(result == .init(bytes: " {6}\r\n", promise: nil, shouldSucceedPromise: true))
 
@@ -824,13 +904,13 @@ extension ClientStateMachineTests {
         }
         #expect(resultAction == .sendChunks([]))
 
-        #expect(throws: Never.self) { result = try stateMachine.sendCommand(.append(.messageBytes("foobar"))) }
+        #expect(throws: Never.self) { result = try stateMachine.sendCommand(.append(.messageBytes("foobar")))?.chunk }
         #expect(result == .init(bytes: "foobar", promise: nil, shouldSucceedPromise: true))
 
-        #expect(throws: Never.self) { result = try stateMachine.sendCommand(.append(.endMessage)) }
+        #expect(throws: Never.self) { result = try stateMachine.sendCommand(.append(.endMessage))?.chunk }
         #expect(result == .init(bytes: "", promise: nil, shouldSucceedPromise: true))
 
-        #expect(throws: Never.self) { result = try stateMachine.sendCommand(.append(.finish)) }
+        #expect(throws: Never.self) { result = try stateMachine.sendCommand(.append(.finish))?.chunk }
         #expect(result == .init(bytes: "\r\n", promise: nil, shouldSucceedPromise: true))
 
         // Complete the APPEND command:

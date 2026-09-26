@@ -213,10 +213,12 @@ public final class IMAPConnection: Sendable {
     /// Sends an `IDLE` command to the server.
     ///
     /// The handler receives the `Response` values the server produces while idling. Returning
-    /// from the handler ends the `IDLE`: `sendIdle(_:)` then sends `DONE`.
+    /// from the handler ends the `IDLE`: `sendIdle(_:)` then sends `DONE`, held until the server's
+    /// `+` if the handler returns earlier. If the server rejects the `IDLE` instead, its tagged
+    /// response ends the stream, and no `DONE` is sent.
     ///
-    /// - Important: The command’s `TaggedResponse` only arrives _after_ `DONE`, so the handler
-    ///   must not wait for the command to complete — use the stream to observe untagged
+    /// - Important: Otherwise, the command’s `TaggedResponse` only arrives _after_ `DONE`, so the
+    ///   handler must not wait for the command to complete — use the stream to observe untagged
     ///   responses and return once you want to stop idling.
     /// - Throws: ``IMAPConnection/Error`` if the connection fails or is closed. Rethrows
     ///   whatever `handler` throws, unchanged; `DONE` is still sent first, on a best-effort basis.

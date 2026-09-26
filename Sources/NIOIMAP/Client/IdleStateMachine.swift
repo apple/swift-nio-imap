@@ -19,13 +19,35 @@ public struct InvalidIdleState: Error, Hashable {
 }
 
 extension ClientStateMachine {
+    /// The `IDLE` command (RFC 2177), from `IDLE` until `DONE` or the server's rejection.
+    ///
+    /// ```
+    /// C: A1 IDLE
+    /// S: * 3 EXISTS           ← untagged data, allowed throughout
+    /// S: + idling             ← confirmation; the server now waits for DONE
+    /// C: DONE
+    /// ```
+    ///
+    /// Instead of `+`, the server may reject `IDLE` with its tagged response (`A1 NO …`). After
+    /// `+`, it must wait for `DONE`, so a tagged response is a protocol violation.
     struct Idle: Hashable {
         enum State: Hashable {
             case waitingForConfirmation
             case idling
         }
 
-        private var state: State = .waitingForConfirmation
+        /// The tag of the IDLE command.
+        let tag: String
+        private(set) var state: State = .waitingForConfirmation
+
+        init(tag: String) {
+            self.tag = tag
+        }
+
+        /// `DONE` answers the server's `+`, so it has to wait for it.
+        var isWaitingForContinuationRequest: Bool {
+            self.state == .waitingForConfirmation
+        }
 
         mutating func sendCommand(_ command: CommandStreamPart) {
             switch self.state {
@@ -43,20 +65,22 @@ extension ClientStateMachine {
             }
         }
 
-        /// Untagged data is accepted both before and after the server's continuation: a server
-        /// flushes pending mailbox notifications when it processes `IDLE`, and some send them
-        /// ahead of the `+`. Anything else is out of place in either state.
-        mutating func receiveResponse(_ response: Response) throws {
-            switch response {
-            case .untagged, .fetch:
-                break
-            case .tagged, .fatal, .authenticationChallenge, .idleStarted:
-                switch self.state {
-                case .waitingForConfirmation:
-                    throw UnexpectedResponse(kind: .idleWaitingForConfirmation)
-                case .idling:
-                    throw UnexpectedResponse(kind: .idleRunning)
-                }
+        enum ReceiveResponseResult: Equatable {
+            case continueIdling
+            /// The server rejected IDLE with its tagged response instead of confirming it.
+            case rejected
+        }
+
+        func receiveResponse(_ response: Response) throws -> ReceiveResponseResult {
+            switch (response, self.state) {
+            case (.untagged, _), (.fetch, _):
+                return .continueIdling
+            case (.tagged(let tagged), .waitingForConfirmation) where tagged.tag == self.tag:
+                return .rejected
+            case (_, .waitingForConfirmation):
+                throw UnexpectedResponse(kind: .idleWaitingForConfirmation)
+            case (_, .idling):
+                throw UnexpectedResponse(kind: .idleRunning)
             }
         }
 
