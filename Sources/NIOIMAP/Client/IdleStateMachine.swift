@@ -49,6 +49,7 @@ extension ClientStateMachine {
             self.state == .waitingForConfirmation
         }
 
+        // Traps on commands other than DONE, instead of failing the connection; see #858.
         mutating func sendCommand(_ command: CommandStreamPart) {
             switch self.state {
             case .idling:

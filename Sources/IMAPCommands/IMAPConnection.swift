@@ -220,6 +220,8 @@ public final class IMAPConnection: Sendable {
     /// - Important: Otherwise, the command’s `TaggedResponse` only arrives _after_ `DONE`, so the
     ///   handler must not wait for the command to complete — use the stream to observe untagged
     ///   responses and return once you want to stop idling.
+    /// - Note: Other commands, including a previous `IDLE` still awaiting its tagged response,
+    ///   must not be pending when `sendIdle(_:)` starts, or be sent while it runs (see #858).
     /// - Throws: ``IMAPConnection/Error`` if the connection fails or is closed. Rethrows
     ///   whatever `handler` throws, unchanged; `DONE` is still sent first, on a best-effort basis.
     /// - Parameter handler: Receives the command's ``Tag`` and the responses that arrive while

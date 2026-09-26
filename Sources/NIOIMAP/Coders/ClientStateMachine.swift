@@ -379,6 +379,7 @@ struct ClientStateMachine {
         }
         self.queuedCommands.append((command, promise))
 
+        // Sends the oldest queued command; its promise is never completed if that throws. See #858.
         if let result = try self.sendNextCommand() {
             // There can only be one chunk
             // 1. if first has a continuation then we will be in the continuation state
@@ -402,6 +403,7 @@ struct ClientStateMachine {
             return []
         }
         do {
+            // Promises dequeued before a throw are never completed; see #858.
             return try self.extractSendableChunks().chunks
         } catch {
             self.state = .error
@@ -457,6 +459,7 @@ extension ClientStateMachine {
         }
 
         self.state = .expectingNormalResponse
+        // Promises dequeued before a throw are never completed; see #858.
         let result = try self.extractSendableChunks(currentContext: context)
 
         // safe to bang as if we've successfully received a
@@ -499,6 +502,7 @@ extension ClientStateMachine {
         try idleStateMachine.receiveContinuationRequest(request)
         self.state = .idle(idleStateMachine)
         // A DONE held back for the confirmation, and what was queued behind it, can go out now.
+        // Promises dequeued before a throw are never completed; see #858.
         return try .fireIdleStarted(self.extractSendableChunks().chunks)
     }
 
@@ -513,6 +517,7 @@ extension ClientStateMachine {
         } else {
             self.state = .idleRejected
         }
+        // Promises dequeued before a throw are never completed; see #858.
         return try actions + self.extractSendableChunks().chunks.map(OutboundAction.write)
     }
 }
@@ -533,6 +538,8 @@ extension ClientStateMachine {
 
         switch command.command {
         case .idleStart:
+            // Traps if another command, e.g. the previous IDLE, still awaits its tagged response,
+            // instead of failing the connection; see #858.
             self.guardAgainstMultipleRunningCommands()
             self.state = .idle(Idle(tag: command.tag))
             return .init(chunks: [context.nextChunk()], nextContext: nil)
@@ -699,6 +706,7 @@ extension ClientStateMachine {
         guard case .idle(var idleStateMachine) = self.state else {
             preconditionFailure("Invalid state: \(self.state)")
         }
+        // Traps instead of failing the connection; see #858.
         guard command == .idleDone else {
             preconditionFailure("Invalid command when idle \(command)")
         }
