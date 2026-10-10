@@ -26,6 +26,11 @@ struct ListTests {
     @Test(
         "parse list mailbox",
         arguments: [
+            ParseFixture.listMailbox("abc", " ", expected: .success("abc")),
+            ParseFixture.listMailbox("a*b%c", " ", expected: .success("a*b%c")),
+            ParseFixture.listMailbox("a]b", " ", expected: .success("a]b")),
+            ParseFixture.listMailbox(#""a b""#, " ", expected: .success("a b")),
+            ParseFixture.listMailbox(" ", "", expected: .failureIgnoringBufferModifications),
             // RFC 3501: list-mailbox = 1*list-char / string; list-char inherits
             // the CTL exclusion via ATOM-CHAR, and RFC 5234 has
             // CTL = %x00-1F / %x7F, so a bare list-mailbox stops at DEL and
