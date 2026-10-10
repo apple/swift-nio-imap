@@ -406,6 +406,46 @@ extension ClientStateMachineTests {
         }
     }
 
+    @Test("an unflushed DONE queued behind an IDLE that is then rejected is dropped")
+    func unflushedDoneForRejectedIdleIsDropped() throws {
+        var stateMachine = makeStateMachine()
+        let loop = EmbeddedEventLoop()
+        let done = loop.makePromise(of: Void.self)
+        #expect(throws: Never.self) { try stateMachine.sendCommand(.tagged(.init(tag: "A1", command: .idleStart))) }
+
+        // No `flush()`: the DONE sits behind the mark.
+        #expect(try stateMachine.sendCommand(.idleDone, promise: done) == nil)
+
+        // Dropped all the same: its promise succeeds and nothing is written.
+        #expect(
+            try stateMachine.receiveResponse(.tagged(.init(tag: "A1", state: .no(.init(text: "IDLE not permitted")))))
+                == [.succeed(done)]
+        )
+        #expect(stateMachine.state == .expectingNormalResponse)
+        done.succeed()
+        #expect(try stateMachine.flush() == [])
+    }
+
+    @Test("channelInactive after a rejected IDLE returns the pending promises")
+    func channelInactiveAfterRejectedIdleReturnsPendingPromises() throws {
+        var stateMachine = makeStateMachine()
+        let loop = EmbeddedEventLoop()
+        let noop = loop.makePromise(of: Void.self)
+        #expect(throws: Never.self) { try stateMachine.sendCommand(.tagged(.init(tag: "A1", command: .idleStart))) }
+
+        // Unflushed, so it is still queued when the rejection arrives.
+        #expect(try stateMachine.sendCommand(.tagged(.init(tag: "A2", command: .noop)), promise: noop) == nil)
+        #expect(
+            try stateMachine.receiveResponse(.tagged(.init(tag: "A1", state: .no(.init(text: "IDLE not permitted")))))
+                == []
+        )
+        #expect(stateMachine.state == .idleRejected)
+
+        #expect(stateMachine.channelInactive() == [noop])
+        #expect(stateMachine.state == .error)
+        noop.succeed()
+    }
+
     @Test("DONE held for an IDLE that is then rejected is dropped")
     func heldDoneForRejectedIdleIsDropped() throws {
         var stateMachine = makeStateMachine()

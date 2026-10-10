@@ -706,6 +706,49 @@ struct IMAPClientHandlerTests {
         helper.expectInbound(.tagged(.init(tag: "A2", state: .ok(.init(code: nil, text: "")))))
     }
 
+    @Test("an unflushed DONE for an IDLE that is then rejected succeeds without being written")
+    func unflushedDoneForRejectedIdleIsNotWritten() {
+        var helper = Helper()
+        defer {
+            helper.check()
+        }
+
+        helper.writeOutbound(.tagged(.init(tag: "A1", command: .idleStart)), wait: false)
+        helper.expectOutboundString("A1 IDLE\r\n")
+        let done = helper.channel.write(IMAPClientHandler.Message.part(.idleDone))
+
+        helper.writeInbound("A1 NO IDLE not permitted\r\n")
+        helper.expectInbound(.tagged(.init(tag: "A1", state: .no(.init(code: nil, text: "IDLE not permitted")))))
+        helper.expectSucceeded(done)
+        helper.expectNoOutboundString()
+    }
+
+    @Test("KNOWN HAZARD: a late DONE for a rejected IDLE ends a newer IDLE")
+    func lateDoneForRejectedIdleEndsNewerIdle() {
+        var helper = Helper()
+        defer {
+            helper.check()
+        }
+
+        helper.writeOutbound(.tagged(.init(tag: "A1", command: .idleStart)), wait: false)
+        helper.expectOutboundString("A1 IDLE\r\n")
+        helper.writeInbound("A1 NO IDLE not permitted\r\n")
+        helper.expectInbound(.tagged(.init(tag: "A1", state: .no(.init(code: nil, text: "IDLE not permitted")))))
+
+        // A second IDLE ends the tolerance for the first one's DONE...
+        helper.writeOutbound(.tagged(.init(tag: "A2", command: .idleStart)), wait: false)
+        helper.expectOutboundString("A2 IDLE\r\n")
+
+        // ...so that late DONE is taken to be IDLE #2's: held until `+`, then sent, ending IDLE #2 at once.
+        // Misuse: callers must not send a DONE for an IDLE that was rejected.
+        let done = helper.writeOutbound(.idleDone, wait: false)
+        helper.expectNoOutboundString()
+        helper.writeInbound("+ idling\r\n")
+        helper.expectInbound(.idleStarted)
+        helper.expectOutboundString("DONE\r\n")
+        helper.expectSucceeded(done)
+    }
+
     @Test(
         "a command written in reaction to a response goes out after the commands it released",
         arguments: [
