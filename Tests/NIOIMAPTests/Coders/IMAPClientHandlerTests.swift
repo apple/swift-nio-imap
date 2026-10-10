@@ -602,6 +602,248 @@ struct IMAPClientHandlerTests {
         helper.expectInbound(.tagged(.init(tag: "A2", state: .ok(.init(code: nil, text: "")))))
     }
 
+    @Test("a tagged response after the IDLE confirmation is an error")
+    func taggedResponseWhileIdlingIsAnError() {
+        var helper = Helper()
+        defer {
+            helper.check()
+        }
+
+        helper.writeOutbound(.tagged(.init(tag: "A1", command: .idleStart)), wait: false)
+        helper.expectOutboundString("A1 IDLE\r\n")
+        helper.writeInbound("+ idling\r\n")
+        helper.expectInbound(.idleStarted)
+
+        // After its `+`, the server must wait for DONE (RFC 2177 §3).
+        #expect(throws: UnexpectedResponse.self) {
+            try helper.channel.writeInbound(ByteBuffer("A1 OK IDLE terminated\r\n"))
+        }
+    }
+
+    @Test("DONE written before the IDLE confirmation is held until it arrives")
+    func doneBeforeConfirmationIsHeld() {
+        var helper = Helper()
+        defer {
+            helper.check()
+        }
+
+        helper.writeOutbound(.tagged(.init(tag: "A1", command: .idleStart)), wait: false)
+        helper.expectOutboundString("A1 IDLE\r\n")
+
+        // DONE answers the server's `+`, so it can't precede it.
+        let done = helper.writeOutbound(.idleDone, wait: false)
+        let noop = helper.writeOutbound(.tagged(.init(tag: "A2", command: .noop)), wait: false)
+        helper.expectNoOutboundString()
+        #expect(helper.outcome(of: done) == nil)
+        #expect(helper.outcome(of: noop) == nil)
+
+        helper.writeInbound("+ idling\r\n")
+        helper.expectInbound(.idleStarted)
+        helper.expectOutboundString("DONE\r\n")
+        helper.expectOutboundString("A2 NOOP\r\n")
+        helper.expectSucceeded(done)
+        helper.expectSucceeded(noop)
+
+        helper.writeInbound("A1 OK IDLE terminated\r\n")
+        helper.expectInbound(.tagged(.init(tag: "A1", state: .ok(.init(code: nil, text: "IDLE terminated")))))
+        helper.writeInbound("A2 OK\r\n")
+        helper.expectInbound(.tagged(.init(tag: "A2", state: .ok(.init(code: nil, text: "")))))
+    }
+
+    @Test(
+        "DONE for a rejected IDLE succeeds without being written",
+        arguments: zip(
+            ["NO", "BAD"],
+            [
+                TaggedResponse.State.no(.init(code: nil, text: "IDLE not permitted")),
+                .bad(.init(code: nil, text: "IDLE not permitted")),
+            ]
+        )
+    )
+    func doneForRejectedIdleIsNotWritten(status: String, state: TaggedResponse.State) {
+        var helper = Helper()
+        defer {
+            helper.check()
+        }
+
+        helper.writeOutbound(.tagged(.init(tag: "A1", command: .idleStart)), wait: false)
+        helper.expectOutboundString("A1 IDLE\r\n")
+        helper.writeInbound("A1 \(status) IDLE not permitted\r\n")
+        helper.expectInbound(.tagged(.init(tag: "A1", state: state)))
+
+        // The server never sent `+`, so it isn't waiting for DONE.
+        let done = helper.writeOutbound(.idleDone, wait: false)
+        helper.expectSucceeded(done)
+        helper.expectNoOutboundString()
+
+        helper.writeOutbound(.tagged(.init(tag: "A2", command: .noop)))
+        helper.expectOutboundString("A2 NOOP\r\n")
+        helper.writeInbound("A2 OK\r\n")
+        helper.expectInbound(.tagged(.init(tag: "A2", state: .ok(.init(code: nil, text: "")))))
+    }
+
+    @Test("DONE held for an IDLE that is then rejected succeeds without being written")
+    func heldDoneForRejectedIdleIsNotWritten() {
+        var helper = Helper()
+        defer {
+            helper.check()
+        }
+
+        helper.writeOutbound(.tagged(.init(tag: "A1", command: .idleStart)), wait: false)
+        helper.expectOutboundString("A1 IDLE\r\n")
+        let done = helper.writeOutbound(.idleDone, wait: false)
+        let noop = helper.writeOutbound(.tagged(.init(tag: "A2", command: .noop)), wait: false)
+        helper.expectNoOutboundString()
+
+        // The rejection drops the held DONE and releases the command queued behind it.
+        helper.writeInbound("A1 NO IDLE not permitted\r\n")
+        helper.expectInbound(.tagged(.init(tag: "A1", state: .no(.init(code: nil, text: "IDLE not permitted")))))
+        helper.expectSucceeded(done)
+        helper.expectOutboundString("A2 NOOP\r\n")
+        helper.expectSucceeded(noop)
+
+        helper.writeInbound("A2 OK\r\n")
+        helper.expectInbound(.tagged(.init(tag: "A2", state: .ok(.init(code: nil, text: "")))))
+    }
+
+    @Test("an unflushed DONE for an IDLE that is then rejected succeeds without being written")
+    func unflushedDoneForRejectedIdleIsNotWritten() {
+        var helper = Helper()
+        defer {
+            helper.check()
+        }
+
+        helper.writeOutbound(.tagged(.init(tag: "A1", command: .idleStart)), wait: false)
+        helper.expectOutboundString("A1 IDLE\r\n")
+        let done = helper.channel.write(IMAPClientHandler.Message.part(.idleDone))
+
+        helper.writeInbound("A1 NO IDLE not permitted\r\n")
+        helper.expectInbound(.tagged(.init(tag: "A1", state: .no(.init(code: nil, text: "IDLE not permitted")))))
+        helper.expectSucceeded(done)
+        helper.expectNoOutboundString()
+    }
+
+    @Test("KNOWN HAZARD: a late DONE for a rejected IDLE ends a newer IDLE")
+    func lateDoneForRejectedIdleEndsNewerIdle() {
+        var helper = Helper()
+        defer {
+            helper.check()
+        }
+
+        helper.writeOutbound(.tagged(.init(tag: "A1", command: .idleStart)), wait: false)
+        helper.expectOutboundString("A1 IDLE\r\n")
+        helper.writeInbound("A1 NO IDLE not permitted\r\n")
+        helper.expectInbound(.tagged(.init(tag: "A1", state: .no(.init(code: nil, text: "IDLE not permitted")))))
+
+        // A second IDLE ends the tolerance for the first one's DONE...
+        helper.writeOutbound(.tagged(.init(tag: "A2", command: .idleStart)), wait: false)
+        helper.expectOutboundString("A2 IDLE\r\n")
+
+        // ...so that late DONE is taken to be IDLE #2's: held until `+`, then sent, ending IDLE #2 at once.
+        // Misuse: callers must not send a DONE for an IDLE that was rejected.
+        let done = helper.writeOutbound(.idleDone, wait: false)
+        helper.expectNoOutboundString()
+        helper.writeInbound("+ idling\r\n")
+        helper.expectInbound(.idleStarted)
+        helper.expectOutboundString("DONE\r\n")
+        helper.expectSucceeded(done)
+    }
+
+    @Test(
+        "a command written in reaction to a response goes out after the commands it released",
+        arguments: [
+            ("+ idling\r\n", Response.idleStarted, ["DONE\r\n", "A2 NOOP\r\n"]),
+            (
+                "A1 NO IDLE not permitted\r\n",
+                Response.tagged(.init(tag: "A1", state: .no(.init(code: nil, text: "IDLE not permitted")))),
+                ["A2 NOOP\r\n"]
+            ),
+        ]
+    )
+    func reactionGoesOutAfterReleasedCommands(response: String, trigger: Response, released: [String]) {
+        var helper = Helper()
+        defer {
+            helper.check()
+        }
+        #expect(throws: Never.self) {
+            try helper.channel.pipeline.syncOperations.addHandler(
+                WriteOnRead(trigger: trigger, command: .tagged(.init(tag: "A3", command: .noop)))
+            )
+        }
+
+        helper.writeOutbound(.tagged(.init(tag: "A1", command: .idleStart)), wait: false)
+        helper.expectOutboundString("A1 IDLE\r\n")
+        helper.writeOutbound(.idleDone, wait: false)
+        helper.writeOutbound(.tagged(.init(tag: "A2", command: .noop)), wait: false)
+
+        helper.writeInbound(helper.buffer(string: response))
+        helper.expectInbound(trigger)
+        for line in released {
+            helper.expectOutboundString(line)
+        }
+        helper.expectOutboundString("A3 NOOP\r\n")
+    }
+
+    @Test("a command written when a dropped DONE succeeds goes out after the commands it released")
+    func reactionToDroppedDoneGoesOutAfterReleasedCommands() {
+        var helper = Helper()
+        defer {
+            helper.check()
+        }
+
+        helper.writeOutbound(.tagged(.init(tag: "A1", command: .idleStart)), wait: false)
+        helper.expectOutboundString("A1 IDLE\r\n")
+        let channel = helper.channel
+        helper.writeOutbound(.idleDone, wait: false).whenSuccess {
+            channel.writeAndFlush(
+                IMAPClientHandler.Message.part(.tagged(.init(tag: "A3", command: .noop))),
+                promise: nil
+            )
+        }
+        helper.writeOutbound(.tagged(.init(tag: "A2", command: .noop)), wait: false)
+
+        helper.writeInbound("A1 NO IDLE not permitted\r\n")
+        helper.expectInbound(.tagged(.init(tag: "A1", state: .no(.init(code: nil, text: "IDLE not permitted")))))
+        helper.expectOutboundString("A2 NOOP\r\n")
+        helper.expectOutboundString("A3 NOOP\r\n")
+    }
+
+    @Test("DONE held for the IDLE confirmation goes out when flushed after it")
+    func heldDoneGoesOutWhenFlushedAfterConfirmation() {
+        var helper = Helper()
+        defer {
+            helper.check()
+        }
+
+        helper.writeOutbound(.tagged(.init(tag: "A1", command: .idleStart)), wait: false)
+        helper.expectOutboundString("A1 IDLE\r\n")
+
+        // Written, but not flushed until after the `+` — e.g. `write` and `flush` issued separately.
+        let done = helper.channel.write(IMAPClientHandler.Message.part(.idleDone))
+        helper.writeInbound("+ idling\r\n")
+        helper.expectInbound(.idleStarted)
+        helper.expectNoOutboundString()
+
+        helper.channel.flush()
+        helper.expectOutboundString("DONE\r\n")
+        helper.expectSucceeded(done)
+    }
+
+    @Test("DONE held for the IDLE confirmation fails when the channel closes")
+    func heldDoneFailsOnChannelClose() {
+        var helper = Helper()
+
+        helper.writeOutbound(.tagged(.init(tag: "A1", command: .idleStart)), wait: false)
+        helper.expectOutboundString("A1 IDLE\r\n")
+        let done = helper.writeOutbound(.idleDone, wait: false)
+
+        #expect(throws: Never.self) { try helper.channel.close().wait() }
+        guard case .failure = helper.outcome(of: done) else {
+            Issue.record("DONE should fail, not \(String(describing: helper.outcome(of: done)))")
+            return
+        }
+    }
+
     @Test("promises are failed on channel close")
     func promisesAreFailedOnChannelClose() {
         var helper = Helper()
@@ -1204,6 +1446,27 @@ struct IMAPClientHandlerTests {
 
 // MARK: - Helper
 
+/// Writes `command` when it reads `trigger`, as a user reacting to that response would.
+private final class WriteOnRead: ChannelInboundHandler {
+    typealias InboundIn = Response
+    typealias OutboundOut = IMAPClientHandler.Message
+
+    let trigger: Response
+    let command: CommandStreamPart
+
+    init(trigger: Response, command: CommandStreamPart) {
+        self.trigger = trigger
+        self.command = command
+    }
+
+    func channelRead(context: ChannelHandlerContext, data: NIOAny) {
+        if self.unwrapInboundIn(data) == self.trigger {
+            context.writeAndFlush(self.wrapOutboundOut(.part(self.command)), promise: nil)
+        }
+        context.fireChannelRead(data)
+    }
+}
+
 extension IMAPClientHandlerTests {
     struct Helper {
         var channel: EmbeddedChannel
@@ -1297,11 +1560,30 @@ extension IMAPClientHandlerTests.Helper {
     ) -> EventLoopFuture<Void> {
         let result = self.channel.writeAndFlush(outboundIn)
         if wait {
-            #expect(throws: Never.self, sourceLocation: sourceLocation) {
-                try result.wait()
-            }
+            self.expectSucceeded(result, sourceLocation: sourceLocation)
         }
         return result
+    }
+
+    /// The outcome of a write, or `nil` while it is pending.
+    ///
+    /// `EmbeddedChannel` completes writes synchronously, so there is nothing to wait for: a write
+    /// still pending here would block `wait()` forever instead of failing the test.
+    func outcome(of future: EventLoopFuture<Void>) -> Result<Void, any Error>? {
+        let outcome = NIOLoopBoundBox<Result<Void, any Error>?>(nil, eventLoop: self.channel.eventLoop)
+        future.whenComplete { outcome.value = $0 }
+        return outcome.value
+    }
+
+    func expectSucceeded(_ future: EventLoopFuture<Void>, sourceLocation: SourceLocation = #_sourceLocation) {
+        switch self.outcome(of: future) {
+        case .success:
+            break
+        case .failure(let error):
+            Issue.record(error, "Write failed", sourceLocation: sourceLocation)
+        case nil:
+            Issue.record("Write is still pending", sourceLocation: sourceLocation)
+        }
     }
 
     func buffer(string: String) -> ByteBuffer {

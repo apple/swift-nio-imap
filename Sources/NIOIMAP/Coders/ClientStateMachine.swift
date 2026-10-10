@@ -120,6 +120,32 @@ struct OutgoingChunk: Equatable {
     }
 }
 
+/// What the handler does for a command part the state machine released.
+enum OutboundAction: Equatable {
+    /// Write the chunk.
+    case write(OutgoingChunk)
+    /// Succeed the promise without writing anything: the part has nothing left to do on the wire,
+    /// e.g. `DONE` for an `IDLE` the server rejected.
+    case succeed(EventLoopPromise<Void>?)
+
+    static func == (lhs: OutboundAction, rhs: OutboundAction) -> Bool {
+        switch (lhs, rhs) {
+        case (.write(let lhs), .write(let rhs)):
+            lhs == rhs
+        case (.succeed(let lhs), .succeed(let rhs)):
+            lhs?.futureResult === rhs?.futureResult
+        case (.write, _), (.succeed, _):
+            false
+        }
+    }
+
+    /// The chunk to write, or `nil` if this is not a write.
+    var chunk: OutgoingChunk? {
+        guard case .write(let chunk) = self else { return nil }
+        return chunk
+    }
+}
+
 // TODO: See note below.
 // This state machine could potentially be improved by
 // splitting into 2. One that manages command logic
@@ -160,7 +186,9 @@ struct ClientStateMachine {
 
     enum ContinuationRequestAction: Equatable {
         case sendChunks([OutgoingChunk])
-        case fireIdleStarted
+        /// Write the chunks — a `DONE` held back for the confirmation, and what was queued
+        /// behind it — then forward `.idleStarted`.
+        case fireIdleStarted([OutgoingChunk])
         case fireAuthenticationChallenge
     }
 
@@ -170,6 +198,11 @@ struct ClientStateMachine {
 
         /// We're in some part of the idle flow
         case idle(ClientStateMachine.Idle)
+
+        /// The server rejected IDLE instead of confirming it. Like `.expectingNormalResponse`,
+        /// except that the `DONE` the client may still send for that IDLE is absorbed: it has
+        /// nothing to end. The next command sent leaves this state.
+        case idleRejected
 
         /// We're in some part of the authentication flow
         case authenticating(ClientStateMachine.Authentication)
@@ -231,14 +264,15 @@ struct ClientStateMachine {
             return try self.receiveContinuationRequest_authenticating(request: req)
         case .idle:
             return try self.receiveContinuationRequest_idle(request: req)
-        case .expectingNormalResponse, .error:
+        case .expectingNormalResponse, .idleRejected, .error:
             throw UnexpectedContinuationRequest(kind: .normal)
         }
     }
 
-    /// Tells the state machine that some response has been received. Note that receiving a response
-    /// will never result in the client having to perform some action.
-    mutating func receiveResponse(_ response: Response) throws {
+    /// Tells the state machine that some response has been received. Returns what to do for the
+    /// command parts the response released, e.g. those queued behind a `DONE` for an IDLE the
+    /// server rejected.
+    mutating func receiveResponse(_ response: Response) throws -> [OutboundAction] {
         do {
             return try self._receiveResponse(response)
         } catch {
@@ -247,7 +281,7 @@ struct ClientStateMachine {
         }
     }
 
-    mutating func _receiveResponse(_ response: Response) throws {
+    mutating func _receiveResponse(_ response: Response) throws -> [OutboundAction] {
         if let tag = response.tag {
             guard self.activeCommandTags.remove(tag) != nil else {
                 throw UnexpectedResponse(
@@ -257,9 +291,13 @@ struct ClientStateMachine {
         }
 
         switch self.state {
-        case .idle(var idleStateMachine):
-            try idleStateMachine.receiveResponse(response)
-            self.state = .idle(idleStateMachine)
+        case .idle(let idleStateMachine):
+            switch try idleStateMachine.receiveResponse(response) {
+            case .continueIdling:
+                break
+            case .rejected:
+                return try self.idleWasRejected()
+            }
         case .authenticating(var authStateMachine):
             try authStateMachine.receiveResponse(response)
             self.state = .expectingNormalResponse
@@ -274,7 +312,7 @@ struct ClientStateMachine {
             throw UnexpectedResponse(
                 kind: .errorState
             )
-        case .expectingNormalResponse, .expectingLiteralContinuationRequest:
+        case .expectingNormalResponse, .idleRejected, .expectingLiteralContinuationRequest:
             // If we’re expecting a Continuation Request, we should still
             // allow all normal responses. They may arrive due to timing.
             // The server may have sent these before we sent the data that
@@ -314,6 +352,7 @@ struct ClientStateMachine {
                 )
             }
         }
+        return []
     }
 
     /// Tells the state machine that the client would like to send a command.
@@ -321,10 +360,16 @@ struct ClientStateMachine {
     mutating func sendCommand(
         _ command: CommandStreamPart,
         promise: EventLoopPromise<Void>? = nil
-    ) throws -> OutgoingChunk? {
+    ) throws -> OutboundAction? {
         guard
             self.state != .error
         else { throw InvalidClientState() }
+
+        // The server rejected the IDLE this DONE would end, so there's nothing to write.
+        if self.state == .idleRejected, command == .idleDone {
+            self.state = .expectingNormalResponse
+            return .succeed(promise)
+        }
 
         if let tag = command.tag {
             let (inserted, _) = self.activeCommandTags.insert(tag)
@@ -334,12 +379,13 @@ struct ClientStateMachine {
         }
         self.queuedCommands.append((command, promise))
 
+        // Sends the oldest queued command; its promise is never completed if that throws. See #858.
         if let result = try self.sendNextCommand() {
             // There can only be one chunk
             // 1. if first has a continuation then we will be in the continuation state
             // 2. if first doesn't have a continuation then there won't be a next chunk
             precondition(result.chunks.count == 1)
-            return result.chunks.first!
+            return .write(result.chunks.first!)
         }
         return nil
     }
@@ -348,8 +394,21 @@ struct ClientStateMachine {
     /// this point next time we receive a continuation request or send a command.
     /// Note that we might not actually reach the mark as we may encounter a command
     /// that requires a continuation request.
-    mutating func flush() {
+    ///
+    /// Returns what can be written right away: commands a continuation request released before
+    /// they were flushed, e.g. a `DONE` written before the server's `+`, but flushed after it.
+    mutating func flush() throws -> [OutgoingChunk] {
         self.queuedCommands.mark()
+        guard self.state != .error, !self.isWaitingForContinuationRequest, !self.queuedCommands.isEmpty else {
+            return []
+        }
+        do {
+            // Promises dequeued before a throw are never completed; see #858.
+            return try self.extractSendableChunks().chunks
+        } catch {
+            self.state = .error
+            throw error
+        }
     }
 
     /// Returns all of the promises for the writes that have not yet completed.
@@ -357,7 +416,7 @@ struct ClientStateMachine {
     mutating func channelInactive() -> [EventLoopPromise<Void>] {
         var activeEncodeContext: ActiveEncodeContext?
         switch self.state {
-        case .expectingNormalResponse, .error, .appending, .authenticating, .idle:
+        case .expectingNormalResponse, .idleRejected, .error, .appending, .authenticating, .idle:
             break
         case .expectingLiteralContinuationRequest(let _activeEncodeContext):
             activeEncodeContext = _activeEncodeContext
@@ -400,6 +459,7 @@ extension ClientStateMachine {
         }
 
         self.state = .expectingNormalResponse
+        // Promises dequeued before a throw are never completed; see #858.
         let result = try self.extractSendableChunks(currentContext: context)
 
         // safe to bang as if we've successfully received a
@@ -441,7 +501,24 @@ extension ClientStateMachine {
         // A continuation when in idle state means it's been confirmed
         try idleStateMachine.receiveContinuationRequest(request)
         self.state = .idle(idleStateMachine)
-        return .fireIdleStarted
+        // A DONE held back for the confirmation, and what was queued behind it, can go out now.
+        // Promises dequeued before a throw are never completed; see #858.
+        return try .fireIdleStarted(self.extractSendableChunks().chunks)
+    }
+
+    /// The server rejected IDLE, so a `DONE` for it has nothing to end: drop a held one, and send
+    /// what was queued behind it.
+    private mutating func idleWasRejected() throws -> [OutboundAction] {
+        var actions: [OutboundAction] = []
+        if self.queuedCommands.first?.0 == .idleDone {
+            let (_, promise) = self.queuedCommands.popFirst()!
+            actions.append(.succeed(promise))
+            self.state = .expectingNormalResponse
+        } else {
+            self.state = .idleRejected
+        }
+        // Promises dequeued before a throw are never completed; see #858.
+        return try actions + self.extractSendableChunks().chunks.map(OutboundAction.write)
     }
 }
 
@@ -461,8 +538,10 @@ extension ClientStateMachine {
 
         switch command.command {
         case .idleStart:
+            // Traps if another command, e.g. the previous IDLE, still awaits its tagged response,
+            // instead of failing the connection; see #858.
             self.guardAgainstMultipleRunningCommands()
-            self.state = .idle(Idle())
+            self.state = .idle(Idle(tag: command.tag))
             return .init(chunks: [context.nextChunk()], nextContext: nil)
         case .authenticate:
             self.guardAgainstMultipleRunningCommands()
@@ -554,9 +633,11 @@ extension ClientStateMachine {
         switch self.state {
         case .appending(let sub):
             sub.isWaitingForContinuationRequest
+        case .idle(let sub):
+            sub.isWaitingForContinuationRequest
         case .expectingLiteralContinuationRequest:
             true
-        case .expectingNormalResponse, .idle, .authenticating, .error:
+        case .expectingNormalResponse, .idleRejected, .authenticating, .error:
             false
         }
     }
@@ -570,6 +651,10 @@ extension ClientStateMachine {
 
         switch self.state {
         case .expectingNormalResponse:
+            return try self.sendNextCommand_expectingNormalResponse(command: command, promise: promise)
+        case .idleRejected:
+            // The next command ends the tolerance for a late DONE; a DONE behind it is out of context.
+            self.state = .expectingNormalResponse
             return try self.sendNextCommand_expectingNormalResponse(command: command, promise: promise)
         case .idle:
             return self.sendNextCommand_idle(command: command, promise: promise)
@@ -621,6 +706,7 @@ extension ClientStateMachine {
         guard case .idle(var idleStateMachine) = self.state else {
             preconditionFailure("Invalid state: \(self.state)")
         }
+        // Traps instead of failing the connection; see #858.
         guard command == .idleDone else {
             preconditionFailure("Invalid command when idle \(command)")
         }
