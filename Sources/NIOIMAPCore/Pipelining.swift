@@ -633,7 +633,10 @@ extension SearchKey {
             .undraft,
             .younger,
             .emailID,
-            .threadID:
+            .threadID,
+            .gmailMessageID,
+            .gmailThreadID,
+            .gmailRaw:
             return false
         case .filter,  // Have to assume yes, since we can't know
             .sequenceNumbers:
@@ -686,7 +689,10 @@ extension SearchKey {
             .undraft,
             .younger,
             .emailID,
-            .threadID:
+            .threadID,
+            .gmailMessageID,
+            .gmailThreadID,
+            .gmailRaw:
             return false
         case .filter,  // Have to assume yes, since we can't know
             .uid,
@@ -731,7 +737,9 @@ extension SearchKey {
             .uidBefore,
             .younger,
             .emailID,
-            .threadID:
+            .threadID,
+            .gmailMessageID,
+            .gmailThreadID:
             return false
         case .answered,
             .deleted,
@@ -745,7 +753,8 @@ extension SearchKey {
             .seen,
             .unseen,
             .draft,
-            .undraft:
+            .undraft,
+            .gmailRaw:  // Can express flag state, e.g. "is:unread" or "is:starred"
             return true
         case .and(let keys):
             return keys.contains(where: \.referencesFlags)
