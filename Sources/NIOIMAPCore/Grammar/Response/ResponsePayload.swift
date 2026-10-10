@@ -14,8 +14,6 @@
 
 #if canImport(FoundationEssentials)
 import FoundationEssentials
-#elseif swift(<6.0)
-@preconcurrency import Foundation
 #else
 import Foundation
 #endif
