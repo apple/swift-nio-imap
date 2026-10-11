@@ -78,8 +78,9 @@ struct CharacterSetNameTests {
 
     @Test("valid names round-trip in ESEARCH", arguments: validNameStrings)
     func extendedSearchRoundTrip(_ string: String) throws {
+        let charset = try #require(CharacterSetName(string))
         TestUtilities.expectRoundTrip(
-            ExtendedSearchOptions(key: .subject("x"), charset: try #require(CharacterSetName(string))),
+            ExtendedSearchOptions(key: .subject("x"), charset: charset),
             terminator: "\r",
             encoder: { $0.writeExtendedSearchOptions($1) },
             parser: GrammarParser().parseExtendedSearchOptions
