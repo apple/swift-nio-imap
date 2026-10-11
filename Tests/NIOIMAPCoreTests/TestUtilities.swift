@@ -221,3 +221,26 @@ extension TestUtilities {
         }
     }
 }
+
+// MARK: - Exit tests
+
+#if !os(iOS) && !os(watchOS) && !os(tvOS) && !os(visionOS) && !os(Android)
+extension TestUtilities {
+    /// Expects an exit test to have trapped with `message` on standard error.
+    ///
+    /// The exit status alone can't show which check trapped: in debug, the `assert` in
+    /// `init(unchecked:)` traps too, so a missing `precondition` in `init(stringLiteral:)` would
+    /// pass unnoticed. Release builds drop both the `assert` and `precondition` messages, so the
+    /// message is only checked in debug.
+    static func expectTrapMessage(
+        _ result: ExitTest.Result?,
+        _ message: String,
+        sourceLocation: SourceLocation = #_sourceLocation
+    ) {
+        #if DEBUG
+        let standardError = String(decoding: result?.standardErrorContent ?? [], as: UTF8.self)
+        #expect(standardError.contains(message), "\(standardError)", sourceLocation: sourceLocation)
+        #endif
+    }
+}
+#endif

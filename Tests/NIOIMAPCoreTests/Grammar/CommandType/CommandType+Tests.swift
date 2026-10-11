@@ -97,7 +97,7 @@ struct CommandTypeTests {
             "RESETKEY \"INBOX\" INTERNAL"
         ),
         CommandEncodeFixture.command(
-            .resetKey(mailbox: .inbox, mechanisms: [.internal, .init("test")]),
+            .resetKey(mailbox: .inbox, mechanisms: [.internal, "test"]),
             "RESETKEY \"INBOX\" INTERNAL test"
         ),
 
@@ -107,7 +107,7 @@ struct CommandTypeTests {
         ),
         CommandEncodeFixture.command(
             .generateAuthorizedURL([
-                .init(urlRump: "rump2", mechanism: .internal), .init(urlRump: "rump3", mechanism: .init("test")),
+                .init(urlRump: "rump2", mechanism: .internal), .init(urlRump: "rump3", mechanism: "test"),
             ]),
             "GENURLAUTH \"rump2\" INTERNAL \"rump3\" test"
         ),
@@ -590,7 +590,7 @@ struct CommandTypeTests {
             ),
             ParseFixture.resetKeySuffix(
                 " INBOX INTERNAL test",
-                expected: .success(.resetKey(mailbox: .inbox, mechanisms: [.internal, .init("test")]))
+                expected: .success(.resetKey(mailbox: .inbox, mechanisms: [.internal, "test"]))
             ),
             ParseFixture.resetKeySuffix(" INBOX", "", expected: .incompleteMessage),
             ParseFixture.resetKeySuffix(" INBOX INTERNAL", "", expected: .incompleteMessage),

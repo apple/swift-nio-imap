@@ -2782,24 +2782,10 @@ extension GrammarParser {
         }
     }
 
+    // mechanism = "INTERNAL" / 1*(ALPHA / DIGIT / "-" / ".")
     func parseUAuthMechanism(buffer: inout ParseBuffer, tracker: StackTracker) throws -> URLAuthenticationMechanism {
-        let parsed = try PL.parseOneOrMoreCharacters(
-            buffer: &buffer,
-            tracker: tracker,
-            where: { char in
-                switch char {
-                case UInt8(ascii: "a")...UInt8(ascii: "z"),
-                    UInt8(ascii: "A")...UInt8(ascii: "Z"),
-                    UInt8(ascii: "0")...UInt8(ascii: "9"),
-                    UInt8(ascii: "-"),
-                    UInt8(ascii: "."):
-                    return true
-                default:
-                    return false
-                }
-            }
-        )
-        return URLAuthenticationMechanism(try ParserLibrary.parseBufferAsUTF8(parsed))
+        let parsed = try PL.parseOneOrMoreCharacters(buffer: &buffer, tracker: tracker) { $0.isMechanismChar }
+        return URLAuthenticationMechanism(unchecked: try ParserLibrary.parseBufferAsUTF8(parsed))
     }
 
     // userid          = astring

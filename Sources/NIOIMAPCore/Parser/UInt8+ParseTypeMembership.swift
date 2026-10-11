@@ -116,6 +116,11 @@ extension UInt8 {
         (UInt8(ascii: "0")...UInt8(ascii: "9")).contains(self)
     }
 
+    /// RFC 4467 `mechanism` character: `ALPHA / DIGIT / "-" / "."`
+    var isMechanismChar: Bool {
+        self.isAlphaNum || self == UInt8(ascii: "-") || self == UInt8(ascii: ".")
+    }
+
     /// tagged-label-fchar  = ALPHA / "-" / "_" / "."
     var isTaggedLabelFchar: Bool {
         switch self {
