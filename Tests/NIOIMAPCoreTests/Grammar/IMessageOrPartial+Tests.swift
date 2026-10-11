@@ -150,6 +150,37 @@ struct URLFetchTypeTests {
     func parseRefCases2(_ fixture: ParseFixture<URLFetchType>) {
         fixture.checkParsing()
     }
+
+    /// A trailing `/` belongs to the section unless a `;PARTIAL=` follows it.
+    @Test(
+        "parse - section with trailing slash",
+        arguments: [
+            ParseFixture.urlFetchType(
+                ";SECTION=test/",
+                expected: .success(.sectionPartial(section: .init(encodedSection: "test/"), partial: nil))
+            ),
+            ParseFixture.urlFetchType(
+                ";UID=123/;SECTION=test/",
+                expected: .success(
+                    .uidSectionPartial(uid: .init(uid: 123), section: .init(encodedSection: "test/"), partial: nil)
+                )
+            ),
+            ParseFixture.urlFetchType(
+                "test;UID=123/;SECTION=section/",
+                expected: .success(
+                    .refUidSectionPartial(
+                        ref: .init(encodeMailbox: "test"),
+                        uid: .init(uid: 123),
+                        section: .init(encodedSection: "section/"),
+                        partial: nil
+                    )
+                )
+            ),
+        ]
+    )
+    func parseSectionTrailingSlash(_ fixture: ParseFixture<URLFetchType>) {
+        fixture.checkParsing()
+    }
 }
 
 // MARK: -
