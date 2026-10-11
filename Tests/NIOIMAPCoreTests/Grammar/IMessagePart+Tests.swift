@@ -120,6 +120,49 @@ struct MessagePathTests {
     func parse(_ fixture: ParseFixture<MessagePath>) {
         fixture.checkParsing()
     }
+
+    @Test(arguments: [
+        // A single `/` is the mailbox, not a separator before `;UID=`.
+        ParseFixture.messagePath("/;UID=1", expected: .failure),
+        ParseFixture.messagePath(
+            "test/;UID=1/;SECTION=/",
+            expected: .success(
+                .init(
+                    mailboxReference: .init(encodeMailbox: "test"),
+                    iUID: .init(uid: 1),
+                    section: .init(encodedSection: "/")
+                )
+            )
+        ),
+    ])
+    func parseSlashOnly(_ fixture: ParseFixture<MessagePath>) {
+        fixture.checkParsing()
+    }
+
+    /// A trailing `/` belongs to the section unless a `;PARTIAL=` follows it.
+    @Test("round-trip", arguments: ["1", "1/", "1//", "/"])
+    func roundTrip(_ section: String) throws {
+        TestUtilities.expectRoundTrip(
+            MessagePath(
+                mailboxReference: .init(encodeMailbox: "test"),
+                iUID: .init(uid: 1),
+                section: .init(encodedSection: try #require(EncodedSection(section))),
+                range: nil
+            ),
+            encoder: { $0.writeMessagePath($1) },
+            parser: GrammarParser().parseMessagePath
+        )
+        TestUtilities.expectRoundTrip(
+            MessagePath(
+                mailboxReference: .init(encodeMailbox: "test"),
+                iUID: .init(uid: 1),
+                section: .init(encodedSection: try #require(EncodedSection(section))),
+                range: .init(range: .init(offset: 1, length: 2))
+            ),
+            encoder: { $0.writeMessagePath($1) },
+            parser: GrammarParser().parseMessagePath
+        )
+    }
 }
 
 // MARK: -

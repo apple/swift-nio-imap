@@ -1168,16 +1168,16 @@ extension GrammarParser {
 
             var section = try PL.parseOptional(buffer: &buffer, tracker: tracker, parser: self.parseIMAPURLSection)
             var byteRange: MessagePath.ByteRange?
-            if let trimmed = section?.encodedSection.removingTrailingSlash() {
-                try PL.composite(buffer: &buffer, tracker: tracker) { buffer, tracker in
-                    section = URLMessageSection(encodedSection: trimmed)
-
-                    byteRange = try PL.parseOptional(
-                        buffer: &buffer,
-                        tracker: tracker,
-                        parser: self.parseMessagePathByteRangeOnly
-                    )
-                }
+            // The section's trailing `/` may be the separator before `;PARTIAL=`: `1.2/;PARTIAL=1`.
+            if let trimmed = section?.encodedSection.removingTrailingSlash(),
+                let range = try PL.parseOptional(
+                    buffer: &buffer,
+                    tracker: tracker,
+                    parser: self.parseMessagePathByteRangeOnly
+                )
+            {
+                section = URLMessageSection(encodedSection: trimmed)
+                byteRange = range
             } else {
                 byteRange = try PL.parseOptional(
                     buffer: &buffer,
@@ -1197,17 +1197,14 @@ extension GrammarParser {
 
         func parseURLFetchType_sectionPartial(buffer: inout ParseBuffer, tracker: StackTracker) throws -> URLFetchType {
             let section = try self.parseIMAPURLSectionOnly(buffer: &buffer, tracker: tracker)
-            if let trimmed = section.encodedSection.removingTrailingSlash() {
-                do {
-                    let partial = try PL.parseOptional(
-                        buffer: &buffer,
-                        tracker: tracker,
-                        parser: self.parseMessagePathByteRangeOnly
-                    )
-                    return .sectionPartial(section: URLMessageSection(encodedSection: trimmed), partial: partial)
-                } catch is ParserError {
-                    return .sectionPartial(section: section, partial: nil)
-                }
+            if let trimmed = section.encodedSection.removingTrailingSlash(),
+                let partial = try PL.parseOptional(
+                    buffer: &buffer,
+                    tracker: tracker,
+                    parser: self.parseMessagePathByteRangeOnly
+                )
+            {
+                return .sectionPartial(section: URLMessageSection(encodedSection: trimmed), partial: partial)
             }
             let partial = try PL.parseOptional(
                 buffer: &buffer,
@@ -1233,21 +1230,18 @@ extension GrammarParser {
                     return try self.parseIMAPURLSectionOnly(buffer: &buffer, tracker: tracker)
                 }
             )
-            if let trimmed = section?.encodedSection.removingTrailingSlash() {
-                do {
-                    let partial = try PL.parseOptional(
-                        buffer: &buffer,
-                        tracker: tracker,
-                        parser: self.parseMessagePathByteRangeOnly
-                    )
-                    return .uidSectionPartial(
-                        uid: uid,
-                        section: URLMessageSection(encodedSection: trimmed),
-                        partial: partial
-                    )
-                } catch is ParserError {
-                    return .uidSectionPartial(uid: uid, section: section, partial: nil)
-                }
+            if let trimmed = section?.encodedSection.removingTrailingSlash(),
+                let partial = try PL.parseOptional(
+                    buffer: &buffer,
+                    tracker: tracker,
+                    parser: self.parseMessagePathByteRangeOnly
+                )
+            {
+                return .uidSectionPartial(
+                    uid: uid,
+                    section: URLMessageSection(encodedSection: trimmed),
+                    partial: partial
+                )
             }
             let partial = try PL.parseOptional(
                 buffer: &buffer,
@@ -1274,22 +1268,19 @@ extension GrammarParser {
                     return try self.parseIMAPURLSectionOnly(buffer: &buffer, tracker: tracker)
                 }
             )
-            if let trimmed = section?.encodedSection.removingTrailingSlash() {
-                do {
-                    let partial = try PL.parseOptional(
-                        buffer: &buffer,
-                        tracker: tracker,
-                        parser: self.parseMessagePathByteRangeOnly
-                    )
-                    return .refUidSectionPartial(
-                        ref: ref,
-                        uid: uid,
-                        section: URLMessageSection(encodedSection: trimmed),
-                        partial: partial
-                    )
-                } catch is ParserError {
-                    return .refUidSectionPartial(ref: ref, uid: uid, section: section, partial: nil)
-                }
+            if let trimmed = section?.encodedSection.removingTrailingSlash(),
+                let partial = try PL.parseOptional(
+                    buffer: &buffer,
+                    tracker: tracker,
+                    parser: self.parseMessagePathByteRangeOnly
+                )
+            {
+                return .refUidSectionPartial(
+                    ref: ref,
+                    uid: uid,
+                    section: URLMessageSection(encodedSection: trimmed),
+                    partial: partial
+                )
             }
             let partial = try PL.parseOptional(
                 buffer: &buffer,
