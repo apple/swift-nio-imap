@@ -20,12 +20,12 @@ import Testing
 struct AuthenticatedURLVerifierTests {
     @Test(arguments: [
         EncodeFixture.authenticatedURLVerifier(
-            .init(urlAuthMechanism: .internal, encodedAuthenticationURL: .init(data: "test")),
-            ":INTERNAL:test"
+            .init(urlAuthMechanism: .internal, encodedAuthenticationURL: "0123456789abcdef0123456789abcdef"),
+            ":INTERNAL:0123456789abcdef0123456789abcdef"
         ),
         EncodeFixture.authenticatedURLVerifier(
-            .init(urlAuthMechanism: .internal, encodedAuthenticationURL: .init(data: "verifier123")),
-            ":INTERNAL:verifier123"
+            .init(urlAuthMechanism: .internal, encodedAuthenticationURL: "0123456789ABCDEF0123456789ABCDEF"),
+            ":INTERNAL:0123456789ABCDEF0123456789ABCDEF"
         ),
     ])
     func encode(_ fixture: EncodeFixture<AuthenticatedURLVerifier>) {
@@ -39,7 +39,7 @@ struct AuthenticatedURLVerifierTests {
             expected: .success(
                 .init(
                     urlAuthMechanism: .internal,
-                    encodedAuthenticationURL: .init(data: "01234567890123456789012345678901")
+                    encodedAuthenticationURL: "01234567890123456789012345678901"
                 )
             )
         )

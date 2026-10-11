@@ -43,7 +43,7 @@
 /// ```
 /// AuthenticatedURLVerifier(
 ///   urlAuthenticationMechanism: URLAuthenticationMechanism("INTERNAL"),
-///   encodedAuthenticationURL: EncodedAuthenticatedURL(data: "91354a473744909de610943775f92038")
+///   encodedAuthenticationURL: "91354a473744909de610943775f92038"
 /// )
 /// // Represents: :internal:91354a473744909de610943775f92038
 /// ```
