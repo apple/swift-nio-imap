@@ -15,21 +15,20 @@
 /// A complete date and time value in RFC 3339 format with an optional fraction-of-second.
 ///
 /// Represents a full date-time specification as defined in RFC 3339, combining
-/// a ``FullDate`` and ``FullTime`` into a single value. RFC 3339 is used in IMAP extensions
-/// such as MULTIMAILBOX SEARCH (RFC 7377) and METADATA (RFC 5464) for precise timestamp representation.
+/// a ``FullDate`` and ``FullTime`` into a single value. Used by URLAUTH's `;EXPIRE=` (RFC 4467).
 ///
-/// The format when encoded is `YYYY-MM-DDTHH:MM:SS[.FRACTION]` where the `T` separates the
-/// date and time components.
+/// The format when encoded is `YYYY-MM-DDTHH:MM:SS[.FRACTION]OFFSET` where the `T` separates the
+/// date and time components, and `OFFSET` is `Z` or `±HH:MM`.
 ///
 /// ### Example
 ///
 /// ```
-/// "2026-03-15T10:30:45"
-/// "2026-03-15T10:30:45.123"
+/// "2026-03-15T10:30:45Z"
+/// "2026-03-15T10:30:45.123+01:00"
 /// ```
 ///
 /// These examples correspond to ``FullDateTime`` values combining a ``FullDate``
-/// (2026-03-15) with ``FullTime`` values (10:30:45 with optional fraction).
+/// (2026-03-15) with ``FullTime`` values (10:30:45 with optional fraction, and an offset).
 ///
 /// - SeeAlso: [RFC 3339](https://datatracker.ietf.org/doc/html/rfc3339)
 public struct FullDateTime: Hashable, Sendable {
@@ -97,10 +96,10 @@ public struct FullDate: Hashable, Sendable {
     }
 }
 
-/// A time of day in RFC 3339 format (`HH:MM:SS[.FRACTION]`).
+/// A time of day in RFC 3339 format (`HH:MM:SS[.FRACTION]OFFSET`).
 ///
-/// Represents a time value as defined in RFC 3339, containing hour, minute, second,
-/// and an optional fractional-second component. It is used in combination with ``FullDate``
+/// Represents a `full-time` value as defined in RFC 3339, containing hour, minute, second,
+/// an optional fractional-second component, and an offset from UTC. It is used in combination with ``FullDate``
 /// to form a complete ``FullDateTime``.
 public struct FullTime: Hashable, Sendable {
     /// The hour of the day, 0-based in the range `0...23`.
@@ -119,6 +118,9 @@ public struct FullTime: Hashable, Sendable {
     /// For example, `"05"` encodes as `HH:MM:SS.05`, and `nil` as `HH:MM:SS`.
     public var fraction: Fraction?
 
+    /// The offset from UTC.
+    public var offset: Offset
+
     /// Creates a new `FullTime`.
     ///
     /// Currently no validation of the component values is performed. The caller is responsible
@@ -129,11 +131,13 @@ public struct FullTime: Hashable, Sendable {
     ///   - minute: The minute. 0-based in the range `0...59`.
     ///   - second: The second. 0-based in the range `0...59`.
     ///   - fraction: The fractional-second component (optional).
-    public init(hour: Int, minute: Int, second: Int, fraction: Fraction? = nil) {
+    ///   - offset: The offset from UTC.
+    public init(hour: Int, minute: Int, second: Int, fraction: Fraction? = nil, offset: Offset) {
         self.hour = hour
         self.minute = minute
         self.second = second
         self.fraction = fraction
+        self.offset = offset
     }
 }
 
@@ -177,6 +181,27 @@ extension FullTime {
         static func isValidFraction(_ string: String) -> Bool {
             !string.isEmpty && string.utf8.allSatisfy(\.isNum)
         }
+    }
+}
+
+extension FullTime {
+    /// An offset from UTC: RFC 3339 `time-offset`.
+    ///
+    /// ```
+    /// time-offset    = "Z" / time-numoffset
+    /// time-numoffset = ("+" / "-") time-hour ":" time-minute
+    /// ```
+    ///
+    /// - SeeAlso: [RFC 3339 Section 5.6](https://datatracker.ietf.org/doc/html/rfc3339#section-5.6)
+    public enum Offset: Hashable, Sendable {
+        /// `Z`: UTC.
+        case utc
+        /// `+HH:MM`: ahead of UTC. `hour` is `0...23`, `minute` `0...59`.
+        case plus(hour: Int, minute: Int)
+        /// `-HH:MM`: behind UTC. `hour` is `0...23`, `minute` `0...59`.
+        ///
+        /// `-00:00` is UTC with an unknown local offset (RFC 3339 Section 4.3).
+        case minus(hour: Int, minute: Int)
     }
 }
 
@@ -224,7 +249,25 @@ extension EncodeBuffer {
         return self.writeString("\(hour):\(minute):\(second)")
             + self.writeIfExists(data.fraction) { fraction in
                 self.writeString(".\(fraction.stringValue)")
-            }
+            } + self.writeTimeOffset(data.offset)
+    }
+
+    @discardableResult mutating func writeTimeOffset(_ offset: FullTime.Offset) -> Int {
+        // `time-hour ":" time-minute`: anything else can't be parsed back.
+        func assertInRange(hour: Int, minute: Int) {
+            assert((0...23).contains(hour) && (0...59).contains(minute), "Invalid time offset: \(offset)")
+        }
+
+        switch offset {
+        case .utc:
+            return self.writeString("Z")
+        case .plus(let hour, let minute):
+            assertInRange(hour: hour, minute: minute)
+            return self.writeString("+\(self.padInteger(hour, minimum: 2)):\(self.padInteger(minute, minimum: 2))")
+        case .minus(let hour, let minute):
+            assertInRange(hour: hour, minute: minute)
+            return self.writeString("-\(self.padInteger(hour, minimum: 2)):\(self.padInteger(minute, minimum: 2))")
+        }
     }
 
     func padInteger(_ int: Int, minimum: Int) -> String {
