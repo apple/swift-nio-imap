@@ -14,46 +14,47 @@
 
 import struct NIO.ByteBuffer
 
-/// Describes the metadata item type returned by the server in metadata responses (RFC 5464).
+/// The metadata item type of a flag's modification sequence (RFC 7162 `entry-type-resp`).
 ///
-/// **Requires server capability:** ``Capability/metadata`` or ``Capability/metadataServer``
+/// **Requires server capability:** ``Capability/condStore``
 ///
-/// Entry kind response indicates whether a metadata entry belongs to the private namespace
-/// (visible only to the authenticated user) or the shared namespace (visible to all users).
-/// The server returns this information when responding to metadata queries.
-/// See [RFC 5464 Section 3.3](https://datatracker.ietf.org/doc/html/rfc5464#section-3.3).
+/// A flag's modification sequence can be tracked separately for private (per-user) and shared
+/// metadata items. This names one of the two:
+/// ```
+/// entry-type-resp = "priv" / "shared"
+/// ```
+///
+/// It is not sent on its own. It is the `priv` / `shared` part of an ``EntryKindRequest``,
+/// which adds `all`.
 ///
 /// ### Example
 ///
 /// ```
-/// C: A001 GETMETADATA "INBOX" ("/flags/\\Seen")
-/// S: * METADATA "INBOX" (priv "/flags/\\Seen" "12345")
-/// S: A001 OK GETMETADATA completed
+/// C: a SEARCH MODSEQ "/flags/\\draft" priv 620162338
+/// S: * SEARCH 2 5 6 7 11 12 18 19 20 23 (MODSEQ 917162500)
+/// S: a OK Search complete
 /// ```
 ///
-/// The response includes the entry type `priv` to indicate that the `/flags/\Seen` modification
-/// sequence metadata is private to the authenticated user.
+/// The `priv` after the entry name is ``EntryKindResponse/private``.
 ///
 /// ## Related types
 ///
-/// - See ``EntryKindRequest`` for client-side entry type specification
-/// - See ``MetadataResponse`` for complete metadata responses
-/// - See ``EntryFlagName`` for flag entry names
+/// - See ``EntryKindRequest``, which adds `all`
+/// - See ``EntryFlagName`` for the `"/flags/…"` entry name
+/// - See ``SearchModificationSequence`` for the `MODSEQ` criterion
 ///
-/// - SeeAlso: [RFC 5464 Section 3.3](https://datatracker.ietf.org/doc/html/rfc5464#section-3.3)
+/// - SeeAlso: [RFC 7162 Section 3.1.5](https://datatracker.ietf.org/doc/html/rfc7162#section-3.1.5)
 public struct EntryKindResponse: Hashable, Sendable {
     fileprivate var backing: String
 
-    /// Private metadata item type (visible only to the authenticated user).
+    /// `priv`: private metadata items (visible only to the authenticated user).
     ///
-    /// Indicates that the metadata entry is in the `/private/` namespace and is not visible
-    /// to other users. From [RFC 5464 Section 3.3](https://datatracker.ietf.org/doc/html/rfc5464#section-3.3).
+    /// Modification sequences tracked per user.
     public static let `private` = Self(backing: "priv")
 
-    /// Shared metadata item type (visible to all users).
+    /// `shared`: shared metadata items (visible to all users).
     ///
-    /// Indicates that the metadata entry is in the `/shared/` namespace and is visible
-    /// to any user with access to the mailbox. From [RFC 5464 Section 3.3](https://datatracker.ietf.org/doc/html/rfc5464#section-3.3).
+    /// Modification sequences tracked for everyone with access to the mailbox.
     public static let shared = Self(backing: "shared")
 }
 
