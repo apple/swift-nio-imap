@@ -152,6 +152,14 @@ struct UInt8ParseTypeMembershipTests {
         #expect(invalid.allSatisfy { !$0.isTextChar })
     }
 
+    @Test("UTF-8 text byte")
+    func utf8TextByte() {
+        let invalid: Set<UInt8> = [UInt8(ascii: "\r"), .init(ascii: "\n"), 0]
+        let valid = allChars.subtracting(invalid)
+        #expect(valid.allSatisfy { $0.isUTF8TextByte })
+        #expect(invalid.allSatisfy { !$0.isUTF8TextByte })
+    }
+
     @Test("hex character")
     func hexCharacter() {
         var valid = Set<UInt8>()

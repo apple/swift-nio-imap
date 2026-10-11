@@ -71,6 +71,12 @@ extension UInt8 {
         }
     }
 
+    /// `TEXT-CHAR`, or a byte of a UTF8-2/3/4 sequence: RFC 9051 `text`. Callers check that the
+    /// bytes are well-formed UTF-8.
+    var isUTF8TextByte: Bool {
+        self.isTextChar || self > 0x7F
+    }
+
     var isAStringChar: Bool {
         switch self {
         case _ where self.isResponseSpecial, _ where isAtomChar:
