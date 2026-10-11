@@ -104,7 +104,7 @@ public enum SearchReturnData: Hashable, Sendable {
     ///
     /// Captures future ESEARCH result data defined by extensions, allowing
     /// forward compatibility with new IMAP capabilities without requiring library updates.
-    case dataExtension(KeyValue<String, ParameterValue>)
+    case dataExtension(KeyValue<ExtensionKey<SearchReturnData>, ParameterValue>)
 }
 
 // MARK: - Encoding

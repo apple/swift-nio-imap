@@ -229,7 +229,8 @@ extension GrammarParser {
             let from = try self.parseMailbox(buffer: &buffer, tracker: tracker)
             try PL.parseFixedString(" ", caseSensitive: false, buffer: &buffer, tracker: tracker)
             let to = try self.parseMailbox(buffer: &buffer, tracker: tracker)
-            let params = try PL.parseOptional(buffer: &buffer, tracker: tracker, parser: self.parseParameters) ?? [:]
+            let params: OrderedDictionary<ExtensionKey<Command>, ParameterValue?> =
+                try PL.parseOptional(buffer: &buffer, tracker: tracker, parser: self.parseParameters) ?? [:]
             return .rename(from: from, to: to, parameters: params)
         }
     }

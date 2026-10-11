@@ -21,7 +21,7 @@ struct SearchReturnDataExtensionTests {
     @Test(arguments: [
         EncodeFixture.searchReturnDataExtension(.init(key: "modifier", value: .sequence(.set([123]))), "modifier 123")
     ])
-    func encode(_ fixture: EncodeFixture<KeyValue<String, ParameterValue>>) {
+    func encode(_ fixture: EncodeFixture<KeyValue<ExtensionKey<SearchReturnData>, ParameterValue>>) {
         fixture.checkEncoding()
     }
 
@@ -31,16 +31,16 @@ struct SearchReturnDataExtensionTests {
             expected: .success(.init(key: "modifier", value: .sequence(.set([64]))))
         )
     ])
-    func parse(_ fixture: ParseFixture<KeyValue<String, ParameterValue>>) {
+    func parse(_ fixture: ParseFixture<KeyValue<ExtensionKey<SearchReturnData>, ParameterValue>>) {
         fixture.checkParsing()
     }
 }
 
 // MARK: -
 
-extension EncodeFixture<KeyValue<String, ParameterValue>> {
+extension EncodeFixture<KeyValue<ExtensionKey<SearchReturnData>, ParameterValue>> {
     fileprivate static func searchReturnDataExtension(
-        _ input: KeyValue<String, ParameterValue>,
+        _ input: KeyValue<ExtensionKey<SearchReturnData>, ParameterValue>,
         _ expectedString: String
     ) -> Self {
         EncodeFixture(
@@ -52,7 +52,7 @@ extension EncodeFixture<KeyValue<String, ParameterValue>> {
     }
 }
 
-extension ParseFixture<KeyValue<String, ParameterValue>> {
+extension ParseFixture<KeyValue<ExtensionKey<SearchReturnData>, ParameterValue>> {
     fileprivate static func searchReturnDataExtension(
         _ input: String,
         expected: Expected
