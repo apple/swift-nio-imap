@@ -37,7 +37,7 @@ struct URLCommandTests {
                     authenticatedURL: .init(access: .anonymous),
                     verifier: .init(
                         urlAuthMechanism: .internal,
-                        encodedAuthenticationURL: .init(data: "01234567890123456789012345678901")
+                        encodedAuthenticationURL: "01234567890123456789012345678901"
                     )
                 )
             ),
@@ -82,7 +82,7 @@ struct URLCommandTests {
                         authenticatedURL: .init(access: .anonymous),
                         verifier: .init(
                             urlAuthMechanism: .internal,
-                            encodedAuthenticationURL: .init(data: "01234567890123456789012345678901")
+                            encodedAuthenticationURL: "01234567890123456789012345678901"
                         )
                     )
                 )

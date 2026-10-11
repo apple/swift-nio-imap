@@ -569,13 +569,12 @@ extension GrammarParser {
 
     func parseEncodedURLAuth(buffer: inout ParseBuffer, tracker: StackTracker) throws -> EncodedAuthenticatedURL {
         try PL.composite(buffer: &buffer, tracker: tracker) { buffer, tracker -> EncodedAuthenticatedURL in
-            let bytes = try PL.parseBytes(buffer: &buffer, tracker: tracker, length: 32)
-            guard bytes.readableBytesView.allSatisfy(\.isHexCharacter) else {
-                throw ParserError(hint: "Found invalid character in \(String(buffer: bytes))")
+            // `32*HEXDIG`
+            let bytes = try PL.parseOneOrMoreCharacters(buffer: &buffer, tracker: tracker, where: \.isHexCharacter)
+            guard bytes.readableBytes >= EncodedAuthenticatedURL.minimumLength else {
+                throw ParserError(hint: "Expected at least 32 hex digits, got \(String(buffer: bytes))")
             }
-
-            // can used the unsafe String.init here as we've already validated everything is valid hex
-            return .init(data: String(buffer: bytes))
+            return .init(unchecked: String(buffer: bytes))
         }
     }
 

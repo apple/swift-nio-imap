@@ -30,10 +30,13 @@ struct FullAuthenticatedURLTests {
                 ),
                 authenticatedURL: .init(
                     authenticatedURL: .init(access: .anonymous),
-                    verifier: .init(urlAuthMechanism: .internal, encodedAuthenticationURL: .init(data: "data"))
+                    verifier: .init(
+                        urlAuthMechanism: .internal,
+                        encodedAuthenticationURL: "ffffffffffffffffffffffffffffffff"
+                    )
                 )
             ),
-            "imap://localhost/test/;UID=123;URLAUTH=anonymous:INTERNAL:data"
+            "imap://localhost/test/;UID=123;URLAUTH=anonymous:INTERNAL:ffffffffffffffffffffffffffffffff"
         ),
         EncodeFixture.fullAuthenticatedURL(
             .init(
@@ -46,10 +49,13 @@ struct FullAuthenticatedURLTests {
                 ),
                 authenticatedURL: .init(
                     authenticatedURL: .init(access: .user("alice")),
-                    verifier: .init(urlAuthMechanism: .internal, encodedAuthenticationURL: .init(data: "verifier123"))
+                    verifier: .init(
+                        urlAuthMechanism: .internal,
+                        encodedAuthenticationURL: "0123456789ABCDEF0123456789ABCDEF"
+                    )
                 )
             ),
-            "imap://mail.example.com/INBOX/;UID=789;URLAUTH=user+alice:INTERNAL:verifier123"
+            "imap://mail.example.com/INBOX/;UID=789;URLAUTH=user+alice:INTERNAL:0123456789ABCDEF0123456789ABCDEF"
         ),
     ])
     func encode(_ fixture: EncodeFixture<FullAuthenticatedURL>) {
@@ -73,7 +79,7 @@ struct FullAuthenticatedURLTests {
                         authenticatedURL: .init(access: .anonymous),
                         verifier: .init(
                             urlAuthMechanism: .internal,
-                            encodedAuthenticationURL: .init(data: "01234567890123456789012345678901")
+                            encodedAuthenticationURL: "01234567890123456789012345678901"
                         )
                     )
                 )
