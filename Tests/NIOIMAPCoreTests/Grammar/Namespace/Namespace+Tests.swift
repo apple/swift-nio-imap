@@ -22,13 +22,13 @@ struct NamespaceTests {
     @Test(arguments: [
         EncodeFixture.namespace([], "NIL"),
         EncodeFixture.namespace(
-            [.init(string: "str1", char: nil, responseExtensions: [:])],
+            [try! .init(string: "str1", delimiter: nil, responseExtensions: [:])],
             "((\"str1\" NIL))"
         ),
         EncodeFixture.namespace(
             [
-                .init(string: "str1", char: nil, responseExtensions: [:]),
-                .init(string: "str2", char: nil, responseExtensions: [:]),
+                try! .init(string: "str1", delimiter: nil, responseExtensions: [:]),
+                try! .init(string: "str2", delimiter: nil, responseExtensions: [:]),
             ],
             "((\"str1\" NIL)(\"str2\" NIL))"
         ),

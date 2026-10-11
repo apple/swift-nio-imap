@@ -48,7 +48,12 @@ public struct NamespaceDescription: Hashable, Sendable {
     /// The delimiter separates components of a mailbox name in this namespace. Common delimiters
     /// include `/` and `.`. If `nil`, the namespace does not use a hierarchy delimiter,
     /// meaning mailbox names are not hierarchical within this namespace.
-    public var delimiter: Character?
+    public var delimiter: Character? {
+        self.delimiterByte.map { Character(Unicode.Scalar($0)) }
+    }
+
+    /// A `QUOTED-CHAR` (unescaped), or `nil`.
+    let delimiterByte: UInt8?
 
     /// Response extensions for this namespace, supporting future protocol enhancements.
     ///
@@ -62,16 +67,53 @@ public struct NamespaceDescription: Hashable, Sendable {
     ///
     /// - Parameters:
     ///   - string: The namespace prefix string.
-    ///   - char: The hierarchy delimiter for this namespace, or `nil` if not used.
+    ///   - delimiter: The hierarchy delimiter for this namespace, or `nil` if not used.
     ///   - responseExtensions: Response extensions for this namespace.
+    /// - Throws: ``InvalidDelimiterError`` if `delimiter` is not an ASCII character, or is CR, LF, or
+    ///   NUL (which can't be written as a `QUOTED-CHAR`).
     public init(
         string: ByteBuffer,
-        char: Character? = nil,
+        delimiter: Character? = nil,
+        responseExtensions: OrderedDictionary<ByteBuffer, [ByteBuffer]>
+    ) throws {
+        var delimiterByte: UInt8?
+        if let delimiter {
+            // `Character("\r\n").asciiValue` is LF, so CRLF is rejected too.
+            guard let byte = delimiter.asciiValue, Self.isValidDelimiter(byte) else {
+                throw InvalidDelimiterError(delimiter: delimiter)
+            }
+            delimiterByte = byte
+        }
+        self.init(string: string, delimiterByte: delimiterByte, responseExtensions: responseExtensions)
+    }
+
+    init(
+        string: ByteBuffer,
+        delimiterByte: UInt8?,
         responseExtensions: OrderedDictionary<ByteBuffer, [ByteBuffer]>
     ) {
+        assert(delimiterByte.map(Self.isValidDelimiter) ?? true)
         self.string = string
-        self.delimiter = char
+        self.delimiterByte = delimiterByte
         self.responseExtensions = responseExtensions
+    }
+
+    /// Whether the given byte can be written as a `QUOTED-CHAR`
+    /// ([RFC 2342 Section 6](https://datatracker.ietf.org/doc/html/rfc2342#section-6)), escaping
+    /// quoted-specials:
+    /// ```
+    /// QUOTED-CHAR = <any TEXT-CHAR except quoted-specials> / "\" quoted-specials
+    /// ```
+    static func isValidDelimiter(_ byte: UInt8) -> Bool {
+        byte.isTextChar
+    }
+}
+
+extension NamespaceDescription {
+    /// The error thrown when a namespace delimiter can't be written as a `QUOTED-CHAR`.
+    public struct InvalidDelimiterError: Error, Hashable {
+        /// The rejected delimiter.
+        public var delimiter: Character
     }
 }
 
@@ -84,8 +126,14 @@ extension EncodeBuffer {
         size += self.writeIMAPString(description.string)
         size += self.writeSpace()
 
-        if let char = description.delimiter {
-            size += self.writeString("\"\(char)\"")
+        if let byte = description.delimiterByte {
+            // DQUOTE QUOTED-CHAR DQUOTE, QUOTED-CHAR = ... / "\" quoted-specials
+            size += self.writeString("\"")
+            if byte.isQuotedSpecial {
+                size += self.writeString("\\")
+            }
+            size += self.writeString(String(UnicodeScalar(byte)))
+            size += self.writeString("\"")
         } else {
             size += self.writeNil()
         }
