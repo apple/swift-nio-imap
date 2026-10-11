@@ -727,10 +727,18 @@ extension CommandEncodeBuffer {
         }
     }
 
+    /// RFC 4467: `urlfetch = "URLFETCH" 1*(SP url-full)`, `url-full = astring`.
+    ///
+    /// Typical URLAUTH URLs are `1*ASTRING-CHAR` but longer than a quoted string may be, so write
+    /// those bare to avoid a literal round-trip; anything else as a `string`.
     private mutating func writeCommandKind_urlFetch(urls: [ByteBuffer]) -> Int {
         self.buffer.writeString("URLFETCH")
             + self.buffer.writeArray(urls, prefix: " ", parenthesis: false) { url, buffer in
-                buffer.writeBytes(url.readableBytesView)
+                let bytes = url.readableBytesView
+                guard !bytes.isEmpty, bytes.allSatisfy(\.isAStringChar) else {
+                    return buffer.writeIMAPString(url)
+                }
+                return buffer.writeBytes(bytes)
             }
     }
 
