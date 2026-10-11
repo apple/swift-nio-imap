@@ -18,10 +18,10 @@
 /// ### Example
 ///
 /// ```
-/// C: A001 SELECT INBOX (CONDSTORE)
+/// C: A001 SEARCH RETURN (RELEVANCY ALL) FUZZY TEXT "Helo"
 /// ```
 ///
-/// `CONDSTORE` is a label.
+/// `RELEVANCY` (RFC 6203) is a label.
 ///
 /// ## Validity
 ///
@@ -44,7 +44,7 @@ public struct TaggedExtensionLabel: Hashable, Sendable {
     /// A string literal resolves to ``init(stringLiteral:)`` instead, which traps rather than
     /// returning `nil`.
     ///
-    /// - parameter stringValue: The label, for example `CONDSTORE`.
+    /// - parameter stringValue: The label, for example `RELEVANCY`.
     /// - returns: A new label, or `nil` if `stringValue` is not a valid `tagged-ext-label`.
     public init?(_ stringValue: String) {
         guard Self.isValidLabel(stringValue) else { return nil }
