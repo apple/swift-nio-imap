@@ -36,9 +36,16 @@ struct OptionValueCompTests {
     @Test(
         "parse",
         arguments: [
-            ParseFixture.optionValueComp(#""test""#, expected: .success(.string("test"))),
+            ParseFixture.optionValueComp(#""test""#, ")", expected: .success(.string("test"))),
             ParseFixture.optionValueComp("atom", ")", expected: .success(.string("atom"))),
-            ParseFixture.optionValueComp(#"("val")"#, " ", expected: .success(.array([.string("val")]))),
+            ParseFixture.optionValueComp(#"("val")"#, ")", expected: .success(.array([.string("val")]))),
+            ParseFixture.optionValueComp(
+                #""a" ("E" "F") b"#,
+                ")",
+                expected: .success(.array([.string("a"), .array([.string("E"), .string("F")]), .string("b")]))
+            ),
+            // More elements may follow a space.
+            ParseFixture.optionValueComp("a", " ", expected: .incompleteMessage),
             ParseFixture.optionValueComp("", "", expected: .incompleteMessage),
         ]
     )
