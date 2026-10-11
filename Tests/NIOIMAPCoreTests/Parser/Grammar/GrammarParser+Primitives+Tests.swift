@@ -43,7 +43,7 @@ private struct GrammarParserPrimitivesTests {
             ParseFixture.charset("\"UTF8\"", " ", expected: .success("UTF8")),
         ]
     )
-    func parseCharset(_ fixture: ParseFixture<String>) {
+    func parseCharset(_ fixture: ParseFixture<CharacterSetName>) {
         fixture.checkParsing()
     }
 
@@ -383,19 +383,6 @@ extension ParseFixture<String> {
         )
     }
 
-    fileprivate static func charset(
-        _ input: String,
-        _ terminator: String,
-        expected: Expected
-    ) -> Self {
-        ParseFixture(
-            input: input,
-            terminator: terminator,
-            expected: expected,
-            parser: GrammarParser().parseCharset
-        )
-    }
-
     fileprivate static func text(
         _ input: String,
         _ terminator: String,
@@ -451,6 +438,21 @@ extension ParseFixture<String> {
             terminator: terminator,
             expected: expected,
             parser: GrammarParser().parseVendorToken
+        )
+    }
+}
+
+extension ParseFixture<CharacterSetName> {
+    fileprivate static func charset(
+        _ input: String,
+        _ terminator: String,
+        expected: Expected
+    ) -> Self {
+        ParseFixture(
+            input: input,
+            terminator: terminator,
+            expected: expected,
+            parser: GrammarParser().parseCharset
         )
     }
 }

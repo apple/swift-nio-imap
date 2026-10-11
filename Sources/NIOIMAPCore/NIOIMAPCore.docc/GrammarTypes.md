@@ -168,6 +168,7 @@ Message section and byte range specifications.
 
 Advanced search and notification filtering types.
 
+- ``CharacterSetName``
 - ``SearchKey/FilterName``
 - ``MailboxFilter``
 - ``Mailboxes``

@@ -258,11 +258,11 @@ extension GrammarParser {
 
         func parseSuffix_badCharset(buffer: inout ParseBuffer, tracker: StackTracker) throws -> ResponseTextCode {
             let charsets =
-                try PL.parseOptional(buffer: &buffer, tracker: tracker) { (buffer, tracker) -> [String] in
+                try PL.parseOptional(buffer: &buffer, tracker: tracker) { (buffer, tracker) -> [CharacterSetName] in
                     try PL.parseFixedString(" (", buffer: &buffer, tracker: tracker)
                     var array = [try self.parseCharset(buffer: &buffer, tracker: tracker)]
                     try PL.parseZeroOrMore(buffer: &buffer, into: &array, tracker: tracker) {
-                        (buffer, tracker) -> String in
+                        (buffer, tracker) -> CharacterSetName in
                         try PL.parseSpaces(buffer: &buffer, tracker: tracker)
                         return try self.parseCharset(buffer: &buffer, tracker: tracker)
                     }

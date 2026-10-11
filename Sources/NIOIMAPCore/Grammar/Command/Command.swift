@@ -413,7 +413,7 @@ public enum Command: Hashable, Sendable {
     ///
     /// * `SEARCH ANSWERED` is `.search(key:. answered, returnOptions: [])`
     /// * `SEARCH RETURN () ANSWERED` is `.search(key:. answered, returnOptions: [.all])`
-    case search(key: SearchKey, charset: String? = nil, returnOptions: [SearchReturnOption] = [])
+    case search(key: SearchKey, charset: CharacterSetName? = nil, returnOptions: [SearchReturnOption] = [])
 
     /// `MOVE` – Moves each message in the given sequence number set to the destination mailbox.
     ///
@@ -472,12 +472,17 @@ public enum Command: Hashable, Sendable {
     /// - Parameters:
     ///   - criteria: One or more ``SortCriterion`` values defining the sort order. Later criteria
     ///     are used as tie-breakers when earlier criteria produce equal values.
-    ///   - charset: The character set for string comparisons (for example, `"UTF-8"` or `"US-ASCII"`). Required.
+    ///   - charset: The character set for string comparisons (for example, `UTF-8` or `US-ASCII`). Required.
     ///   - key: The ``SearchKey`` filtering which messages to include in the result.
     ///   - returnOptions: Optional ``SearchReturnOption`` values controlling the response format.
     ///
     /// - SeeAlso: [RFC 5256](https://datatracker.ietf.org/doc/html/rfc5256), [RFC 5267](https://datatracker.ietf.org/doc/html/rfc5267)
-    case sort(criteria: [SortCriterion], charset: String, key: SearchKey, returnOptions: [SearchReturnOption] = [])
+    case sort(
+        criteria: [SortCriterion],
+        charset: CharacterSetName,
+        key: SearchKey,
+        returnOptions: [SearchReturnOption] = []
+    )
 
     /// `UID SORT` – Returns UIDs of messages matching a search key, sorted by the given criteria.
     ///
@@ -485,12 +490,17 @@ public enum Command: Hashable, Sendable {
     /// instead of message sequence numbers.
     ///
     /// - SeeAlso: [RFC 5256](https://datatracker.ietf.org/doc/html/rfc5256)
-    case uidSort(criteria: [SortCriterion], charset: String, key: SearchKey, returnOptions: [SearchReturnOption] = [])
+    case uidSort(
+        criteria: [SortCriterion],
+        charset: CharacterSetName,
+        key: SearchKey,
+        returnOptions: [SearchReturnOption] = []
+    )
 
     /// `UID SEARCH` – Similar to ``search(key:charset:returnOptions:)``, but uses unique identifier instead of sequence numbers to identify messages.
     ///
     /// - SeeAlso: [RFC 3501 Section 6.4.8](https://datatracker.ietf.org/doc/html/rfc3501#section-6.4.8)
-    case uidSearch(key: SearchKey, charset: String? = nil, returnOptions: [SearchReturnOption] = [])
+    case uidSearch(key: SearchKey, charset: CharacterSetName? = nil, returnOptions: [SearchReturnOption] = [])
 
     /// `UID STORE` – Similar to ``store(_:_:_:)``, but uses unique identifier instead of sequence numbers to identify messages.
     ///
@@ -1024,7 +1034,7 @@ extension CommandEncodeBuffer {
 
     private mutating func writeCommandKind_search(
         key: SearchKey,
-        charset: String? = nil,
+        charset: CharacterSetName? = nil,
         returnOptions: [SearchReturnOption] = []
     ) -> Int {
         self.buffer.writeString("SEARCH")
@@ -1033,14 +1043,15 @@ extension CommandEncodeBuffer {
             } + self.buffer.writeSpace()
             + self.buffer.write(if: key.usesString && options.useSearchCharset) {
                 self.buffer.writeIfExists(charset) { (charset) -> Int in
-                    self.buffer.writeString("CHARSET \(charset) ")
+                    self.buffer.writeString("CHARSET ") + self.buffer.writeCharacterSetName(charset)
+                        + self.buffer.writeSpace()
                 }
             } + self.buffer.writeSearchKey(key)
     }
 
     private mutating func writeCommandKind_uidSearch(
         key: SearchKey,
-        charset: String? = nil,
+        charset: CharacterSetName? = nil,
         returnOptions: [SearchReturnOption] = []
     ) -> Int {
         self.buffer.writeString("UID ")
@@ -1049,7 +1060,7 @@ extension CommandEncodeBuffer {
 
     private mutating func writeCommandKind_sort(
         criteria: [SortCriterion],
-        charset: String,
+        charset: CharacterSetName,
         key: SearchKey,
         returnOptions: [SearchReturnOption] = []
     ) -> Int {
@@ -1059,14 +1070,14 @@ extension CommandEncodeBuffer {
             } + self.buffer.writeSpace()
             + self.buffer.writeSortCriteria(criteria)
             + self.buffer.writeSpace()
-            + self.buffer.writeString(charset)
+            + self.buffer.writeCharacterSetName(charset)
             + self.buffer.writeSpace()
             + self.buffer.writeSearchKey(key)
     }
 
     private mutating func writeCommandKind_uidSort(
         criteria: [SortCriterion],
-        charset: String,
+        charset: CharacterSetName,
         key: SearchKey,
         returnOptions: [SearchReturnOption] = []
     ) -> Int {

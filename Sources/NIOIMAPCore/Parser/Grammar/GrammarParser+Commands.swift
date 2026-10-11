@@ -104,7 +104,7 @@ extension GrammarParser {
 extension GrammarParser {
     struct SortCommandSuffix {
         var criteria: [SortCriterion]
-        var charset: String
+        var charset: CharacterSetName
         var key: SearchKey
         var returnOptions: [SearchReturnOption]
     }
