@@ -298,9 +298,30 @@ extension EncodeBuffer {
                 self.writeMailboxListFlags(flags)
             } + self.writeString(") ") + self.writeMailboxPathSeparator(list.path.pathSeparator) + self.writeSpace()
             + self.writeMailbox(list.path.name)
-            + self.writeIfExists(list.objectID) { (compound) -> Int in
-                self.writeString(" (\"OBJECTID\" ") + self.writeCompoundObjectID(compound) + self.writeString(")")
+            + self.write(if: list.objectID != nil || !list.extensions.isEmpty) {
+                self.writeSpace() + self.writeMailboxListExtended(objectID: list.objectID, extensions: list.extensions)
             }
+    }
+
+    // mbox-list-extended      = "(" [mbox-list-extended-item *(SP mbox-list-extended-item)] ")"
+    // mbox-list-extended-item = mbox-list-extended-item-tag SP tagged-ext-val
+    // mbox-list-extended-item-tag = astring
+    // The modeled `OBJECTID` item is written first, followed by the remaining items.
+    @discardableResult mutating func writeMailboxListExtended(
+        objectID: CompoundObjectID?,
+        extensions: OrderedDictionary<ByteBuffer, ParameterValue>
+    ) -> Int {
+        var written = self.writeString("(")
+        if let objectID {
+            written += self.writeString("\"OBJECTID\" ") + self.writeCompoundObjectID(objectID)
+        }
+        for (index, element) in extensions.elements.enumerated() {
+            if index > 0 || objectID != nil {
+                written += self.writeSpace()
+            }
+            written += self.writeIMAPString(element.key) + self.writeSpace() + self.writeParameterValue(element.value)
+        }
+        return written + self.writeString(")")
     }
 
     @discardableResult mutating func writeMailboxListFlags(_ flags: [MailboxInfo.Attribute]) -> Int {
