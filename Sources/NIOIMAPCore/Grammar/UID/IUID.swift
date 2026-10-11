@@ -61,8 +61,4 @@ extension EncodeBuffer {
     @discardableResult mutating func writeIUID(_ data: IUID) -> Int {
         self.writeString("/;UID=\(data.uid)")
     }
-
-    @discardableResult mutating func writeIUIDOnly(_ data: IUID) -> Int {
-        self.writeString(";UID=\(data.uid)")
-    }
 }
