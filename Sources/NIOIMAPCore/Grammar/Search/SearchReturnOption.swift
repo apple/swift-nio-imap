@@ -91,7 +91,7 @@ public enum SearchReturnOption: Hashable, Sendable {
     ///
     /// Captures future ESEARCH result options defined by extensions, allowing
     /// forward compatibility with new IMAP capabilities without requiring library updates.
-    case optionExtension(KeyValue<String, ParameterValue?>)
+    case optionExtension(KeyValue<TaggedExtensionLabel, ParameterValue?>)
 }
 
 // MARK: - Encoding

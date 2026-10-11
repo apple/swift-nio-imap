@@ -35,13 +35,13 @@ public struct ExtendedSearchScopeOptions: Hashable, Sendable {
     ///
     /// The array must contain at least one key-value pair and is never empty. This provides
     /// a flexible mechanism for supporting scope parameters not yet defined in the base specification.
-    public let content: OrderedDictionary<String, ParameterValue?>
+    public let content: OrderedDictionary<TaggedExtensionLabel, ParameterValue?>
 
     /// Creates a new `ExtendedSearchScopeOptions` from one or more scope options.
     ///
     /// - parameter options: One or more key-value scope option pairs. Must not be empty.
     /// - returns: A new `ExtendedSearchScopeOptions` if `options` is non-empty, otherwise `nil`.
-    init?(_ options: OrderedDictionary<String, ParameterValue?>) {
+    init?(_ options: OrderedDictionary<TaggedExtensionLabel, ParameterValue?>) {
         guard options.count >= 1 else {
             return nil
         }

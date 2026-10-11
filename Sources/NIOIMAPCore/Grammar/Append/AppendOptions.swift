@@ -62,7 +62,7 @@ public struct AppendOptions: Hashable, Sendable {
     /// Implemented as a catch-all to support new extension parameters that may be added
     /// to `APPEND` in the future without requiring code changes. Extensions that don't
     /// match standard options are stored here as key-value pairs.
-    public var extensions: OrderedDictionary<String, ParameterValue>
+    public var extensions: OrderedDictionary<TaggedExtensionLabel, ParameterValue>
 
     /// Empty options with no flags, date, or extensions.
     ///
@@ -77,7 +77,7 @@ public struct AppendOptions: Hashable, Sendable {
     public init(
         flagList: [Flag] = [],
         internalDate: ServerMessageDate? = nil,
-        extensions: OrderedDictionary<String, ParameterValue> = [:]
+        extensions: OrderedDictionary<TaggedExtensionLabel, ParameterValue> = [:]
     ) {
         self.flagList = flagList
         self.internalDate = internalDate

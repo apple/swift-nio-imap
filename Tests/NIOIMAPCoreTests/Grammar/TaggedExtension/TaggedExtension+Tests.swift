@@ -24,7 +24,7 @@ struct TaggedExtensionTests {
             "label 1"
         )
     ])
-    func encode(_ fixture: EncodeFixture<KeyValue<String, ParameterValue>>) {
+    func encode(_ fixture: EncodeFixture<KeyValue<TaggedExtensionLabel, ParameterValue>>) {
         fixture.checkEncoding()
     }
 
@@ -34,7 +34,7 @@ struct TaggedExtensionTests {
             expected: .success(.init(key: "label", value: .sequence(.set([1]))))
         )
     ])
-    func parse(_ fixture: ParseFixture<KeyValue<String, ParameterValue>>) {
+    func parse(_ fixture: ParseFixture<KeyValue<TaggedExtensionLabel, ParameterValue>>) {
         fixture.checkParsing()
     }
 
@@ -58,9 +58,9 @@ struct TaggedExtensionTests {
 
 // MARK: -
 
-extension EncodeFixture<KeyValue<String, ParameterValue>> {
+extension EncodeFixture<KeyValue<TaggedExtensionLabel, ParameterValue>> {
     fileprivate static func taggedExtension(
-        _ input: KeyValue<String, ParameterValue>,
+        _ input: KeyValue<TaggedExtensionLabel, ParameterValue>,
         _ expectedString: String
     ) -> Self {
         EncodeFixture(
@@ -72,7 +72,7 @@ extension EncodeFixture<KeyValue<String, ParameterValue>> {
     }
 }
 
-extension ParseFixture<KeyValue<String, ParameterValue>> {
+extension ParseFixture<KeyValue<TaggedExtensionLabel, ParameterValue>> {
     fileprivate static func taggedExtension(
         _ input: String,
         _ terminator: String = "\r\n",

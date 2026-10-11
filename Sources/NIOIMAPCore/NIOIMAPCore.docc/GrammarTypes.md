@@ -202,6 +202,7 @@ Additional specialized types for protocol extensions.
 - ``OptionExtensionKind``
 - ``OptionValueComp``
 - ``ParameterValue``
+- ``TaggedExtensionLabel``
 - ``Access``
 
 ### Errors & Exceptions

@@ -18,11 +18,15 @@ import struct OrderedCollections.OrderedDictionary
 // MARK: - Encoding
 
 extension EncodeBuffer {
-    @discardableResult mutating func writeTaggedExtension(_ ext: KeyValue<String, ParameterValue>) -> Int {
-        self.writeString(ext.key) + self.writeSpace() + self.writeParameterValue(ext.value)
+    @discardableResult mutating func writeTaggedExtension(
+        _ ext: KeyValue<TaggedExtensionLabel, ParameterValue>
+    ) -> Int {
+        self.writeTaggedExtensionLabel(ext.key) + self.writeSpace() + self.writeParameterValue(ext.value)
     }
 
-    @discardableResult mutating func writeParameters(_ params: OrderedDictionary<String, ParameterValue?>) -> Int {
+    @discardableResult mutating func writeParameters(
+        _ params: OrderedDictionary<TaggedExtensionLabel, ParameterValue?>
+    ) -> Int {
         if params.isEmpty {
             return 0
         }
@@ -34,8 +38,8 @@ extension EncodeBuffer {
             }
     }
 
-    @discardableResult mutating func writeParameter(_ param: KeyValue<String, ParameterValue?>) -> Int {
-        self.writeString(param.key)
+    @discardableResult mutating func writeParameter(_ param: KeyValue<TaggedExtensionLabel, ParameterValue?>) -> Int {
+        self.writeTaggedExtensionLabel(param.key)
             + self.writeIfExists(param.value) { (value) -> Int in
                 self.writeSpace() + self.writeParameterValue(value)
             }
