@@ -282,17 +282,21 @@ extension GrammarParser {
     }
 
     // charset          = atom / quoted
-    func parseCharset(buffer: inout ParseBuffer, tracker: StackTracker) throws -> String {
-        func parseCharset_atom(buffer: inout ParseBuffer, tracker: StackTracker) throws -> String {
-            try parseAtom(buffer: &buffer, tracker: tracker)
+    func parseCharset(buffer: inout ParseBuffer, tracker: StackTracker) throws -> CharacterSetName {
+        func parseCharset_atom(buffer: inout ParseBuffer, tracker: StackTracker) throws -> CharacterSetName {
+            CharacterSetName(unchecked: try parseAtom(buffer: &buffer, tracker: tracker))
         }
 
-        func parseCharset_quoted(buffer: inout ParseBuffer, tracker: StackTracker) throws -> String {
+        func parseCharset_quoted(buffer: inout ParseBuffer, tracker: StackTracker) throws -> CharacterSetName {
             var buffer = try parseQuoted(buffer: &buffer, tracker: tracker)
             guard let string = buffer.readString(length: buffer.readableBytes) else {
                 throw ParserError(hint: "Couldn't read string from buffer")
             }
-            return string
+            // `parseQuoted` is lenient (CR, LF, 8-bit, empty); reject what can't be written back.
+            guard let name = CharacterSetName(string) else {
+                throw ParserError(hint: "Invalid charset \(String(reflecting: string))")
+            }
+            return name
         }
 
         return try PL.parseOneOf(
