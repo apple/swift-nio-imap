@@ -564,15 +564,12 @@ public enum Command: Hashable, Sendable {
     /// target multiple mailboxes via the ``MailboxFilter`` and ``Mailboxes`` filters.
     case extendedSearch(ExtendedSearchOptions)
 
-    /// When sent with no arguments: removes all mailbox access keys
-    /// in the user's mailbox access key table, revoking all URLs currently
-    /// authorized using URLAUTH by the user.
-    /// When sent with arguments: generates a
-    /// new mailbox access key for the given mailbox in the user's mailbox
-    /// access key table, replacing any previous mailbox access key (and
-    /// revoking any URLs that were authorized with a URLAUTH using that key)
-    /// in that table.
-    case resetKey(mailbox: MailboxName?, mechanisms: [URLAuthenticationMechanism])
+    /// `RESETKEY` – Resets mailbox access keys, revoking URLAUTH-authorized URLs.
+    ///
+    /// See ``ResetKeyScope`` for what is reset.
+    ///
+    /// - SeeAlso: [RFC 4467 Section 7](https://datatracker.ietf.org/doc/html/rfc4467#section-7)
+    case resetKey(ResetKeyScope)
 
     /// Requests that the server generate a URLAUTH-
     /// authorized URL for each of the given URLs using the given URL
@@ -601,6 +598,27 @@ public enum Command: Hashable, Sendable {
     /// If `payload` contains multiple elements, no spaces or other separators will be output
     /// between them. A `.verbatim` element must be used to output spaces if desired.
     case custom(name: String, payloads: [CustomCommandPayload])
+}
+
+extension Command {
+    /// The mailbox access keys a `RESETKEY` command resets
+    /// ([RFC 4467 Section 7](https://datatracker.ietf.org/doc/html/rfc4467#section-7)):
+    /// ```
+    /// resetkey = "RESETKEY" [SP mailbox *(SP mechanism)]
+    /// ```
+    /// Mechanisms only follow a mailbox, so only ``mailbox(_:mechanisms:)`` has them.
+    public enum ResetKeyScope: Hashable, Sendable {
+        /// `RESETKEY`: removes all mailbox access keys in the user's mailbox access key table,
+        /// revoking all URLs currently authorized using URLAUTH by the user.
+        case allMailboxes
+
+        /// `RESETKEY mailbox *(SP mechanism)`: generates a new mailbox access key for the mailbox,
+        /// replacing any previous one and revoking the URLs authorized with it.
+        ///
+        /// `mechanisms` are the URL authorization mechanisms to generate the key for; empty means
+        /// the server default, `INTERNAL`.
+        case mailbox(MailboxName, mechanisms: [URLAuthenticationMechanism] = [])
+    }
 }
 
 extension Command: CustomDebugStringConvertible {
@@ -724,8 +742,8 @@ extension CommandEncodeBuffer {
             return self.writeCommandKind_setMetadata(mailbox: mailbox, entries: entries)
         case .extendedSearch(let options):
             return self.writeCommandKind_extendedSearch(options: options)
-        case .resetKey(mailbox: let mailbox, mechanisms: let mechanisms):
-            return self.writeCommandKind_resetKey(mailbox: mailbox, mechanisms: mechanisms)
+        case .resetKey(let scope):
+            return self.writeCommandKind_resetKey(scope: scope)
         case .generateAuthorizedURL(let mechanisms):
             return self.writeCommandKind_generateAuthorizedURL(mechanisms: mechanisms)
         case .urlFetch(let urls):
@@ -763,18 +781,13 @@ extension CommandEncodeBuffer {
             }
     }
 
-    private mutating func writeCommandKind_resetKey(
-        mailbox: MailboxName?,
-        mechanisms: [URLAuthenticationMechanism]
-    ) -> Int {
-        self.buffer.writeString("RESETKEY")
-            + self.buffer.writeIfExists(mailbox) { mailbox in
-                self.buffer.writeSpace() + self.buffer.writeMailbox(mailbox)
-                    +
-
-                    self.buffer.writeArray(mechanisms, prefix: " ", parenthesis: false) { mechanism, buffer in
-                        buffer.writeURLAuthenticationMechanism(mechanism)
-                    }
+    // resetkey = "RESETKEY" [SP mailbox *(SP mechanism)]
+    private mutating func writeCommandKind_resetKey(scope: Command.ResetKeyScope) -> Int {
+        let size = self.buffer.writeString("RESETKEY")
+        guard case .mailbox(let mailbox, let mechanisms) = scope else { return size }
+        return size + self.buffer.writeSpace() + self.buffer.writeMailbox(mailbox)
+            + self.buffer.writeArray(mechanisms, prefix: " ", parenthesis: false) { mechanism, buffer in
+                buffer.writeURLAuthenticationMechanism(mechanism)
             }
     }
 
