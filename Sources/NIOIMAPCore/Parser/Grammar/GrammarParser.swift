@@ -500,7 +500,7 @@ extension GrammarParser {
         func parseUseAttribute_other(buffer: inout ParseBuffer, tracker: StackTracker) throws -> UseAttribute {
             try PL.parseFixedString("\\", buffer: &buffer, tracker: tracker)
             let att = try self.parseAtom(buffer: &buffer, tracker: tracker)
-            return .init("\\" + att)
+            return .init(unchecked: "\\" + att)
         }
 
         return try PL.parseOneOf(
