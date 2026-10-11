@@ -164,12 +164,12 @@ extension GrammarParser {
         func parseAttributeFlag_slashed(buffer: inout ParseBuffer, tracker: StackTracker) throws -> AttributeFlag {
             try PL.parseFixedString("\\\\", buffer: &buffer, tracker: tracker)
             let atom = try self.parseAtom(buffer: &buffer, tracker: tracker)
-            return .init("\\\\\(atom)")
+            return .init(unchecked: "\\\\\(atom)")
         }
 
         func parseAttributeFlag_unslashed(buffer: inout ParseBuffer, tracker: StackTracker) throws -> AttributeFlag {
             let atom = try self.parseAtom(buffer: &buffer, tracker: tracker)
-            return .init(atom)
+            return .init(unchecked: atom)
         }
 
         return try PL.parseOneOf(

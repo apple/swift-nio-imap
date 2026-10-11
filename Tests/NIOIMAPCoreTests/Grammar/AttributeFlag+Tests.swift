@@ -18,6 +18,66 @@ import Testing
 
 @Suite("AttributeFlag")
 struct AttributeFlagTests {
+    /// An attribute flag is written verbatim inside `"/flags/…"`, so ``AttributeFlag/init(_:)`` is
+    /// the only thing between a caller that builds flags from untrusted input and an injected
+    /// command.
+    @Test(
+        "invalid flags are rejected",
+        arguments: [
+            "",  // `atom` is `1*ATOM-CHAR`.
+            #"\\"#,  // `"\\" atom`, and the atom may not be empty.
+            #"\seen"#,  // A lone backslash escapes the next byte of the quoted entry name.
+            #"\\\seen"#,
+            #"a\b"#,
+            #"a"b"#,
+            "a b",
+            "a(b",
+            "a]b",
+            "grüezi",
+            "a\u{7F}b",
+            "x\" all 1\r\nA2 DELETE INBOX\r\nA3 NOOP \"",  // Would inject a whole command.
+        ]
+    )
+    func invalidFlags(_ string: String) {
+        #expect(AttributeFlag(string) == nil)
+    }
+
+    @Test("valid flags", arguments: validFlagStrings)
+    func validFlags(_ string: String) {
+        #expect(AttributeFlag(string).map { String($0) } == string.lowercased())
+    }
+
+    /// Written verbatim, so every flag we accept has to parse back unchanged.
+    @Test("valid flags round-trip", arguments: validFlagStrings)
+    func validFlagsRoundTrip(_ string: String) throws {
+        ParseFixture.attributeFlag(string, expected: .success(try #require(AttributeFlag(string)))).checkParsing()
+    }
+
+    /// `entry-flag-name = DQUOTE "/flags/" attr-flag DQUOTE`: the stored form is already escaped.
+    @Test("valid flags round-trip as entry flag names", arguments: validFlagStrings)
+    func validFlagsRoundTripAsEntryFlagName(_ string: String) throws {
+        TestUtilities.expectRoundTrip(
+            EntryFlagName(flag: try #require(AttributeFlag(string))),
+            terminator: " ",
+            encoder: { $0.writeEntryFlagName($1) },
+            parser: GrammarParser().parseEntryFlagName
+        )
+    }
+
+    #if !os(iOS) && !os(watchOS) && !os(tvOS) && !os(visionOS) && !os(Android)
+    @Test("an invalid string literal traps") func stringLiteralPreconditionFailure() async {
+        let result = await #expect(
+            processExitsWith: ExitTest.Condition.failure,
+            observing: [\.standardErrorContent],
+            performing: {
+                let flag: AttributeFlag = #"\seen"#
+                _ = flag
+            }
+        )
+        TestUtilities.expectTrapMessage(result, "Invalid attribute flag")
+    }
+    #endif
+
     @Test(
         "encode",
         arguments: [
@@ -26,7 +86,7 @@ struct AttributeFlagTests {
             EncodeFixture.attributeFlag(.draft, "\\\\draft"),
             EncodeFixture.attributeFlag(.flagged, "\\\\flagged"),
             EncodeFixture.attributeFlag(.seen, "\\\\seen"),
-            EncodeFixture.attributeFlag(.init("test"), "test"),
+            EncodeFixture.attributeFlag("test", "test"),
         ]
     )
     func encode(_ fixture: EncodeFixture<AttributeFlag>) {
@@ -55,7 +115,7 @@ struct AttributeFlagTests {
         "parse",
         arguments: [
             ParseFixture.attributeFlag(#"\\Answered"#, expected: .success(.answered)),
-            ParseFixture.attributeFlag("some", expected: .success(.init("some"))),
+            ParseFixture.attributeFlag("some", expected: .success("some")),
         ]
     )
     func parse(_ fixture: ParseFixture<AttributeFlag>) {
@@ -64,6 +124,14 @@ struct AttributeFlagTests {
 }
 
 // MARK: -
+
+private let validFlagStrings = [
+    #"\\Seen"#,
+    #"\\answered"#,
+    #"\\X-Vendor"#,
+    "$Forwarded",
+    "custom",
+]
 
 extension EncodeFixture<AttributeFlag> {
     fileprivate static func attributeFlag(_ input: T, _ expectedString: String) -> Self {
