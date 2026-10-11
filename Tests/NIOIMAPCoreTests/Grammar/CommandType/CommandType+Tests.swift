@@ -90,14 +90,14 @@ struct CommandTypeTests {
             "FETCH 77 (UID BODY.PEEK[HEADER]) (CHANGEDSINCE 707484939116871680)"
         ),
 
-        CommandEncodeFixture.command(.resetKey(mailbox: nil, mechanisms: []), "RESETKEY"),
-        CommandEncodeFixture.command(.resetKey(mailbox: nil, mechanisms: [.internal]), "RESETKEY"),
+        CommandEncodeFixture.command(.resetKey(.allMailboxes), "RESETKEY"),
+        CommandEncodeFixture.command(.resetKey(.mailbox(.inbox, mechanisms: [])), "RESETKEY \"INBOX\""),
         CommandEncodeFixture.command(
-            .resetKey(mailbox: .inbox, mechanisms: [.internal]),
+            .resetKey(.mailbox(.inbox, mechanisms: [.internal])),
             "RESETKEY \"INBOX\" INTERNAL"
         ),
         CommandEncodeFixture.command(
-            .resetKey(mailbox: .inbox, mechanisms: [.internal, "test"]),
+            .resetKey(.mailbox(.inbox, mechanisms: [.internal, "test"])),
             "RESETKEY \"INBOX\" INTERNAL test"
         ),
 
@@ -360,7 +360,7 @@ struct CommandTypeTests {
         ),
         ParseFixture.command(
             "RESETKEY INBOX INTERNAL",
-            expected: .success(.resetKey(mailbox: .inbox, mechanisms: [.internal]))
+            expected: .success(.resetKey(.mailbox(.inbox, mechanisms: [.internal])))
         ),
         ParseFixture.command(
             "GENURLAUTH rump INTERNAL",
@@ -582,15 +582,15 @@ struct CommandTypeTests {
     @Test(
         "parse RESETKEY suffix",
         arguments: [
-            ParseFixture.resetKeySuffix("", expected: .success(.resetKey(mailbox: nil, mechanisms: []))),
-            ParseFixture.resetKeySuffix(" INBOX", expected: .success(.resetKey(mailbox: .inbox, mechanisms: []))),
+            ParseFixture.resetKeySuffix("", expected: .success(.resetKey(.allMailboxes))),
+            ParseFixture.resetKeySuffix(" INBOX", expected: .success(.resetKey(.mailbox(.inbox, mechanisms: [])))),
             ParseFixture.resetKeySuffix(
                 " INBOX INTERNAL",
-                expected: .success(.resetKey(mailbox: .inbox, mechanisms: [.internal]))
+                expected: .success(.resetKey(.mailbox(.inbox, mechanisms: [.internal])))
             ),
             ParseFixture.resetKeySuffix(
                 " INBOX INTERNAL test",
-                expected: .success(.resetKey(mailbox: .inbox, mechanisms: [.internal, "test"]))
+                expected: .success(.resetKey(.mailbox(.inbox, mechanisms: [.internal, "test"])))
             ),
             ParseFixture.resetKeySuffix(" INBOX", "", expected: .incompleteMessage),
             ParseFixture.resetKeySuffix(" INBOX INTERNAL", "", expected: .incompleteMessage),

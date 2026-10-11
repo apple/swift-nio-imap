@@ -386,7 +386,7 @@ extension GrammarParser {
 
             // don't bother parsing mechanisms if there's no mailbox
             guard let mailbox = _mailbox else {
-                return .resetKey(mailbox: nil, mechanisms: [])
+                return .resetKey(.allMailboxes)
             }
 
             let mechanisms = try PL.parseZeroOrMore(
@@ -397,7 +397,7 @@ extension GrammarParser {
                     return try self.parseUAuthMechanism(buffer: &buffer, tracker: tracker)
                 }
             )
-            return .resetKey(mailbox: mailbox, mechanisms: mechanisms)
+            return .resetKey(.mailbox(mailbox, mechanisms: mechanisms))
         }
     }
 
