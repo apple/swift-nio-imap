@@ -769,8 +769,8 @@ extension GrammarParser {
     }
 
     // resp-jmapaccess = "JMAPACCESS" SP quoted
-    func parseJMAPAccess(buffer: inout ParseBuffer, tracker: StackTracker) throws -> URL {
-        try PL.composite(buffer: &buffer, tracker: tracker) { buffer, tracker -> URL in
+    func parseJMAPAccess(buffer: inout ParseBuffer, tracker: StackTracker) throws -> ResponsePayload.JMAPAccessURL {
+        try PL.composite(buffer: &buffer, tracker: tracker) { buffer, tracker -> ResponsePayload.JMAPAccessURL in
             try PL.parseFixedString("JMAPACCESS", buffer: &buffer, tracker: tracker)
             try PL.parseSpaces(buffer: &buffer, tracker: tracker)
             var buffer = try parseQuoted(buffer: &buffer, tracker: tracker)
@@ -781,12 +781,12 @@ extension GrammarParser {
                 throw ParserError(hint: "Couldn't parse JMAPACCESS URL")
             }
             guard
-                components.scheme?.lowercased() == "https",
-                let url = components.url
+                let url = components.url,
+                let jmapAccessURL = ResponsePayload.JMAPAccessURL(url)
             else {
                 throw ParserError(hint: "Invalid JMAPACCESS URL")
             }
-            return url
+            return jmapAccessURL
         }
     }
 
