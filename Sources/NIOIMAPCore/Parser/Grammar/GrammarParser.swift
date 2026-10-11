@@ -2042,35 +2042,48 @@ extension GrammarParser {
     // option-val-comp =  astring /
     //                    option-val-comp *(SP option-val-comp) /
     //                    "(" option-val-comp ")"
+    //
+    // Left-recursive, so read as a sequence of `astring` / `"(" option-val-comp ")"`: one
+    // element is itself, several are an `.array`. A parenthesized one is always an `.array`.
     func parseOptionValueComp(buffer: inout ParseBuffer, tracker: StackTracker) throws -> OptionValueComp {
-        func parseOptionValueComp_string(buffer: inout ParseBuffer, tracker: StackTracker) throws -> OptionValueComp {
+        let elements = try self.parseOptionValueCompSequence(buffer: &buffer, tracker: tracker)
+        guard elements.count == 1 else { return .array(elements) }
+        return elements[0]
+    }
+
+    private func parseOptionValueCompSequence(
+        buffer: inout ParseBuffer,
+        tracker: StackTracker
+    ) throws -> [OptionValueComp] {
+        func parseElement_string(buffer: inout ParseBuffer, tracker: StackTracker) throws -> OptionValueComp {
             .string(try self.parseAString(buffer: &buffer, tracker: tracker))
         }
 
-        func parseOptionValueComp_single(buffer: inout ParseBuffer, tracker: StackTracker) throws -> OptionValueComp {
+        func parseElement_parenthesized(buffer: inout ParseBuffer, tracker: StackTracker) throws -> OptionValueComp {
             try PL.parseFixedString("(", buffer: &buffer, tracker: tracker)
-            let comp = try self.parseOptionValueComp(buffer: &buffer, tracker: tracker)
+            let elements = try self.parseOptionValueCompSequence(buffer: &buffer, tracker: tracker)
             try PL.parseFixedString(")", buffer: &buffer, tracker: tracker)
-            return .array([comp])
+            return .array(elements)
         }
 
-        func parseOptionValueComp_array(buffer: inout ParseBuffer, tracker: StackTracker) throws -> OptionValueComp {
-            var array = [try self.parseOptionValueComp(buffer: &buffer, tracker: tracker)]
-            try PL.parseZeroOrMore(buffer: &buffer, into: &array, tracker: tracker) {
+        func parseElement(buffer: inout ParseBuffer, tracker: StackTracker) throws -> OptionValueComp {
+            try PL.parseOneOf(
+                parseElement_string,
+                parseElement_parenthesized,
+                buffer: &buffer,
+                tracker: tracker
+            )
+        }
+
+        return try PL.composite(buffer: &buffer, tracker: tracker) { buffer, tracker in
+            var elements = [try parseElement(buffer: &buffer, tracker: tracker)]
+            try PL.parseZeroOrMore(buffer: &buffer, into: &elements, tracker: tracker) {
                 (buffer, tracker) -> OptionValueComp in
                 try PL.parseSpaces(buffer: &buffer, tracker: tracker)
-                return try self.parseOptionValueComp(buffer: &buffer, tracker: tracker)
+                return try parseElement(buffer: &buffer, tracker: tracker)
             }
-            return .array(array)
+            return elements
         }
-
-        return try PL.parseOneOf(
-            parseOptionValueComp_string,
-            parseOptionValueComp_single,
-            parseOptionValueComp_array,
-            buffer: &buffer,
-            tracker: tracker
-        )
     }
 
     // option-value =  "(" option-val-comp ")"

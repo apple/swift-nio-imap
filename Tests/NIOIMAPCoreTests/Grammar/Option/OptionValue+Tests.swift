@@ -22,10 +22,10 @@ struct OptionValueTests {
         "encode",
         arguments: [
             EncodeFixture.optionValue(.string("test"), #"("test")"#),
-            EncodeFixture.optionValue(.array([.string("a"), .string("b")]), #"(("a" "b"))"#),
+            EncodeFixture.optionValue(.array([.string("a"), .string("b")]), #"("a" "b")"#),
             EncodeFixture.optionValue(
                 .array([.string("a"), .array([.string("E"), .string("F")]), .string("b")]),
-                #"(("a" ("E" "F") "b"))"#
+                #"("a" ("E" "F") "b")"#
             ),
         ]
     )
@@ -43,6 +43,27 @@ struct OptionValueTests {
     )
     func parse(_ fixture: ParseFixture<OptionValueComp>) {
         fixture.checkParsing()
+    }
+
+    /// RFC 5258: `option-value = "(" option-val-comp ")"`, with
+    /// `option-val-comp = astring / option-val-comp *(SP option-val-comp) / "(" option-val-comp ")"`.
+    @Test(
+        "round-trip",
+        arguments: [
+            .string("a"),
+            .array([.string("a"), .string("b")]),
+            .array([.string("a")]),
+            .array([.array([.string("a"), .string("b")])]),
+            .array([.string("a"), .array([.string("E"), .string("F")]), .string("b")]),
+            .array([.array([.string("a")]), .string("b")]),
+        ] as [OptionValueComp]
+    )
+    func roundTrip(_ value: OptionValueComp) {
+        TestUtilities.expectRoundTrip(
+            value,
+            encoder: { $0.writeOptionValue($1) },
+            parser: GrammarParser().parseOptionValue
+        )
     }
 }
 
