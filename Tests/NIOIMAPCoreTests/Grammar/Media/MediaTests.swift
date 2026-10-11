@@ -71,6 +71,8 @@ struct MediaTests {
             EncodeFixture.topLevelType(.message, #""MESSAGE""#),
             EncodeFixture.topLevelType(.font, #""FONT""#),
             EncodeFixture.topLevelType(.init("other"), #""OTHER""#),
+            EncodeFixture.topLevelType(.init(#"x" y"#), #""X\" Y""#),
+            EncodeFixture.topLevelType(.init("x\r\n* bye"), "{8}\r\nX\r\n* BYE"),
         ]
     )
     func encodeTopLevelType(_ fixture: EncodeFixture<Media.TopLevelType>) {
@@ -85,10 +87,29 @@ struct MediaTests {
             EncodeFixture.subtype(.alternative, #""ALTERNATIVE""#),
             EncodeFixture.subtype(.init("other"), #""OTHER""#),
             EncodeFixture.subtype(.init("html"), #""HTML""#),
+            EncodeFixture.subtype(.init(#"a\b"#), #""A\\B""#),
+            EncodeFixture.subtype(.init("x\"\r\n* 1 EXPUNGE"), "{15}\r\nX\"\r\n* 1 EXPUNGE"),
         ]
     )
     func encodeSubtype(_ fixture: EncodeFixture<Media.Subtype>) {
         fixture.checkEncoding()
+    }
+
+    @Test(
+        "encode/parse round-trip",
+        arguments: [
+            Media.MediaType(topLevel: "text", sub: "html"),
+            Media.MediaType(topLevel: "x-foo", sub: "bar"),
+            Media.MediaType(topLevel: #"x" y"#, sub: #"a\b"#),
+            Media.MediaType(topLevel: "x\r\n* bye", sub: "x\"\r\n* 1 expunge"),
+        ]
+    )
+    func roundTrip(_ value: Media.MediaType) {
+        TestUtilities.expectRoundTrip(
+            value,
+            encoder: { $0.writeMediaType($1) },
+            parser: GrammarParser().parseMediaType
+        )
     }
 
     @Test(
