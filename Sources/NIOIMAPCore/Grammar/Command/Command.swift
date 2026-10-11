@@ -853,9 +853,10 @@ extension CommandEncodeBuffer {
     ) -> Int {
         self.buffer.writeString("LIST")
             + self.buffer.write(if: selectOptions.count >= 1) {
-                self.buffer.writeArray(selectOptions) { element, buffer in
-                    buffer.writeListSelectIndependentOption(element)
-                }
+                self.buffer.writeSpace()
+                    + self.buffer.writeArray(selectOptions) { element, buffer in
+                        buffer.writeListSelectIndependentOption(element)
+                    }
             } + self.buffer.writeSpace() + self.buffer.writeMailbox(mailbox) + self.buffer.writeSpace()
             + self.buffer.writeMailboxPatterns(mailboxPatterns)
             + self.buffer.write(if: returnOptions.count >= 1) {
