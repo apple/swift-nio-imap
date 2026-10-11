@@ -35,8 +35,8 @@ extension GrammarParser {
     //                         search-key *(SP search-key)
     //                         ;; CHARSET argument to SEARCH MUST be
     //                         ;; registered with IANA.
-    func parseSearchProgram(buffer: inout ParseBuffer, tracker: StackTracker) throws -> (String?, SearchKey) {
-        let charset = try PL.parseOptional(buffer: &buffer, tracker: tracker) { (buffer, tracker) -> String in
+    func parseSearchProgram(buffer: inout ParseBuffer, tracker: StackTracker) throws -> (CharacterSetName?, SearchKey) {
+        let charset = try PL.parseOptional(buffer: &buffer, tracker: tracker) { (buffer, tracker) -> CharacterSetName in
             try PL.parseFixedString("CHARSET ", buffer: &buffer, tracker: tracker)
             let charset = try self.parseCharset(buffer: &buffer, tracker: tracker)
             try PL.parseSpaces(buffer: &buffer, tracker: tracker)

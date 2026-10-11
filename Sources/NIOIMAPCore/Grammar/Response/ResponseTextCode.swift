@@ -66,7 +66,7 @@ public indirect enum ResponseTextCode: Hashable, Sendable {
     /// allowing the client to retry with a supported charset.
     /// See [RFC 3501](https://datatracker.ietf.org/doc/html/rfc3501) and
     /// [RFC 9051](https://datatracker.ietf.org/doc/html/rfc9051) for details.
-    case badCharset([String])
+    case badCharset([CharacterSetName])
 
     /// Followed by a list of supported capabilities.
     ///
@@ -570,12 +570,12 @@ extension EncodeBuffer {
         }
     }
 
-    private mutating func writeResponseTextCode_badCharsets(_ charsets: [String]) -> Int {
+    private mutating func writeResponseTextCode_badCharsets(_ charsets: [CharacterSetName]) -> Int {
         self.writeString("BADCHARSET")
             + self.write(if: charsets.count >= 1) {
                 self.writeSpace()
                     + self.writeArray(charsets) { (charset, self) in
-                        self.writeString(charset)
+                        self.writeCharacterSetName(charset)
                     }
             }
     }
