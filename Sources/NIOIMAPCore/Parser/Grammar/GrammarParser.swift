@@ -2715,7 +2715,7 @@ extension GrammarParser {
 
             let fchar = try PL.parseByte(buffer: &buffer, tracker: tracker)
             guard fchar.isTaggedLabelFchar else {
-                throw ParserError(hint: "\(fchar) is not a valid fchar’")
+                throw ParserError(hint: "\(fchar) is not a valid fchar")
             }
 
             let parsed = try PL.parseZeroOrMoreCharacters(buffer: &buffer, tracker: tracker) { char -> Bool in

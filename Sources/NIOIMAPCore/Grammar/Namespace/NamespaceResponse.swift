@@ -33,8 +33,8 @@ import struct NIO.ByteBuffer
 /// ```
 ///
 /// The response is wrapped as ``NamespaceResponse`` where:
-/// - `userNamespace` is `[NamespaceDescription(string: "", delimiter: "/")]`
-/// - `otherUserNamespace` is `[NamespaceDescription(string: "~", delimiter: "/")]`
+/// - `userNamespace` is `[try NamespaceDescription(string: "", delimiter: "/", responseExtensions: [:])]`
+/// - `otherUserNamespace` is `[try NamespaceDescription(string: "~", delimiter: "/", responseExtensions: [:])]`
 /// - `sharedNamespace` is `[]` (NIL indicates no shared namespace available)
 ///
 /// - SeeAlso: [RFC 2342](https://datatracker.ietf.org/doc/html/rfc2342)
