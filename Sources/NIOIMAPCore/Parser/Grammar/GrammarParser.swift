@@ -1505,9 +1505,10 @@ extension GrammarParser {
         let fraction = try PL.parseOptional(
             buffer: &buffer,
             tracker: tracker,
-            parser: { buffer, tracker -> Int in
+            parser: { buffer, tracker -> FullTime.Fraction in
                 try PL.parseFixedString(".", buffer: &buffer, tracker: tracker)
-                return try self.parseNumber(buffer: &buffer, tracker: tracker)
+                let digits = try PL.parseOneOrMoreCharacters(buffer: &buffer, tracker: tracker, where: \.isNum)
+                return .init(unchecked: String(buffer: digits))
             }
         )
         return .init(hour: hour, minute: minute, second: second, fraction: fraction)
