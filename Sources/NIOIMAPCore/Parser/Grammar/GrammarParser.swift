@@ -261,7 +261,7 @@ extension GrammarParser {
     // capability      = ("AUTH=" auth-type) / atom / "MOVE" / "ENABLE" / "FILTERS"
     func parseCapability(buffer: inout ParseBuffer, tracker: StackTracker) throws -> Capability {
         let string = try self.parseAtom(buffer: &buffer, tracker: tracker)
-        return Capability(string)
+        return Capability(unchecked: string)
     }
 
     // capability-data = "CAPABILITY" *(SP capability) SP "IMAP4rev1"
