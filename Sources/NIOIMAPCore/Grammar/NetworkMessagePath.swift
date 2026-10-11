@@ -78,12 +78,3 @@ public struct NetworkMessagePath: Hashable, Sendable {
         self.messagePath = messagePath
     }
 }
-
-// MARK: - Encoding
-
-extension EncodeBuffer {
-    @discardableResult mutating func writeAuthenticatedURL(_ data: NetworkMessagePath) -> Int {
-        self.writeString("imap://") + self.writeIMAPServer(data.server) + self.writeString("/")
-            + self.writeMessagePath(data.messagePath)
-    }
-}

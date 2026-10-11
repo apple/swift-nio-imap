@@ -19,32 +19,6 @@ import Testing
 @Suite("AuthImapUrl")
 struct AuthImapUrlTests {
     @Test(arguments: [
-        EncodeFixture.authenticatedURL(
-            .init(
-                server: .init(host: "localhost"),
-                messagePath: .init(
-                    mailboxReference: .init(encodeMailbox: "test"),
-                    iUID: .init(uid: 123)
-                )
-            ),
-            "imap://localhost/test/;UID=123"
-        ),
-        EncodeFixture.authenticatedURL(
-            .init(
-                server: .init(host: "mail.example.com", port: 993),
-                messagePath: .init(
-                    mailboxReference: .init(encodeMailbox: "INBOX"),
-                    iUID: .init(uid: 999)
-                )
-            ),
-            "imap://mail.example.com:993/INBOX/;UID=999"
-        ),
-    ])
-    func encode(_ fixture: EncodeFixture<NetworkMessagePath>) {
-        fixture.checkEncoding()
-    }
-
-    @Test(arguments: [
         ParseFixture.authenticatedURL(
             "imap://localhost/test/;UID=123",
             " ",
@@ -65,17 +39,6 @@ struct AuthImapUrlTests {
 }
 
 // MARK: -
-
-extension EncodeFixture<NetworkMessagePath> {
-    fileprivate static func authenticatedURL(_ input: T, _ expectedString: String) -> Self {
-        Self(
-            input: input,
-            bufferKind: .defaultServer,
-            expectedString: expectedString,
-            encoder: { $0.writeAuthenticatedURL($1) }
-        )
-    }
-}
 
 extension ParseFixture<NetworkMessagePath> {
     fileprivate static func authenticatedURL(

@@ -86,8 +86,4 @@ extension EncodeBuffer {
     @discardableResult mutating func writeURLMessageSection(_ section: URLMessageSection) -> Int {
         self.writeString("/;SECTION=") + self.writeEncodedSection(section.encodedSection)
     }
-
-    @discardableResult mutating func writeURLMessageSectionOnly(_ section: URLMessageSection) -> Int {
-        self.writeString(";SECTION=") + self.writeEncodedSection(section.encodedSection)
-    }
 }

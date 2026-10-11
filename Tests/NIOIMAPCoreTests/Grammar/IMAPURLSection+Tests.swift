@@ -29,16 +29,6 @@ struct URLMessageSectionTests {
     }
 
     @Test(
-        "encode URL message section only",
-        arguments: [
-            EncodeFixture.urlMessageSectionOnly(.init(encodedSection: "test"), ";SECTION=test")
-        ]
-    )
-    func encodeURLMessageSectionOnly(_ fixture: EncodeFixture<URLMessageSection>) {
-        fixture.checkEncoding()
-    }
-
-    @Test(
         "parse with slash",
         arguments: [
             ParseFixture.urlMessageSectionWithSlash(
@@ -109,18 +99,6 @@ extension EncodeFixture<URLMessageSection> {
             bufferKind: .defaultServer,
             expectedString: expectedString,
             encoder: { $0.writeURLMessageSection($1) }
-        )
-    }
-
-    fileprivate static func urlMessageSectionOnly(
-        _ input: URLMessageSection,
-        _ expectedString: String
-    ) -> Self {
-        EncodeFixture(
-            input: input,
-            bufferKind: .defaultServer,
-            expectedString: expectedString,
-            encoder: { $0.writeURLMessageSectionOnly($1) }
         )
     }
 }

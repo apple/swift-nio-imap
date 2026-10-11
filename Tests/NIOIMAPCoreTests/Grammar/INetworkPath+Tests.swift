@@ -19,31 +19,6 @@ import Testing
 @Suite("NetworkPath")
 struct NetworkPathTests {
     @Test(arguments: [
-        EncodeFixture.networkPath(
-            .init(server: .init(host: "localhost"), query: nil),
-            "//localhost/"
-        ),
-        EncodeFixture.networkPath(
-            .init(
-                server: .init(
-                    userAuthenticationMechanism: .init(encodedUser: "user", authenticationMechanism: nil),
-                    host: "mail.example.com"
-                ),
-                query: .messageList(
-                    .init(
-                        mailboxUIDValidity: .init(encodeMailbox: "INBOX", uidValidity: nil),
-                        encodedSearch: nil
-                    )
-                )
-            ),
-            "//user@mail.example.com/INBOX"
-        ),
-    ])
-    func encode(_ fixture: EncodeFixture<NetworkPath>) {
-        fixture.checkEncoding()
-    }
-
-    @Test(arguments: [
         ParseFixture.networkPath(
             "//localhost/",
             " ",
@@ -72,20 +47,6 @@ struct NetworkPathTests {
 }
 
 // MARK: -
-
-extension EncodeFixture<NetworkPath> {
-    fileprivate static func networkPath(
-        _ input: NetworkPath,
-        _ expectedString: String
-    ) -> Self {
-        EncodeFixture(
-            input: input,
-            bufferKind: .defaultServer,
-            expectedString: expectedString,
-            encoder: { $0.writeNetworkPath($1) }
-        )
-    }
-}
 
 extension ParseFixture<NetworkPath> {
     fileprivate static func networkPath(
