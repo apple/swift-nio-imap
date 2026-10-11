@@ -35,12 +35,12 @@ import struct NIO.ByteBuffer
 /// - SeeAlso: [RFC 3501 Section 2.2.1](https://datatracker.ietf.org/doc/html/rfc3501#section-2.2.1) (Command Syntax)
 /// - SeeAlso: ``Command``, ``CommandStreamPart/tagged(_:)``
 public struct TaggedCommand: Hashable, Sendable {
-    /// The tag string used to correlate this command with its response.
+    /// The tag used to correlate this command with its response.
     ///
     /// Tags are typically alphanumeric identifiers assigned by the client. The server
     /// will include this tag in its response to allow the client to match responses to
     /// requests, especially when using pipelined commands.
-    public var tag: String
+    public var tag: Command.Tag
 
     /// The command to send with this tag.
     ///
@@ -49,9 +49,9 @@ public struct TaggedCommand: Hashable, Sendable {
 
     /// Creates a new tagged command.
     ///
-    /// - parameter tag: The tag string, typically a mixture of alphanumeric characters
+    /// - parameter tag: The tag, typically a mixture of alphanumeric characters
     /// - parameter command: The command to associate with the tag
-    public init(tag: String, command: Command) {
+    public init(tag: Command.Tag, command: Command) {
         self.tag = tag
         self.command = command
     }
@@ -71,7 +71,8 @@ extension CommandEncodeBuffer {
     /// - returns: The number of bytes written.
     @discardableResult public mutating func writeCommand(_ command: TaggedCommand) -> Int {
         var size = 0
-        size += self.buffer.writeString("\(command.tag) ")
+        size += self.buffer.writeTag(command.tag)
+        size += self.buffer.writeSpace()
         size += self.writeCommand(command.command)
         size += self.buffer.writeString("\r\n")
         return size

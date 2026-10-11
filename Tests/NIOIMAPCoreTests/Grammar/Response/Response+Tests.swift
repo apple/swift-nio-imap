@@ -299,9 +299,9 @@ private struct PIIFixture: Sendable, CustomTestStringConvertible {
 
 private struct ResponseTagFixture: Sendable, CustomTestStringConvertible {
     let response: Response
-    let expectedTag: String?
+    let expectedTag: Command.Tag?
 
-    var testDescription: String { expectedTag ?? "(nil)" }
+    var testDescription: String { expectedTag.map { String($0) } ?? "(nil)" }
 }
 
 private struct StreamingKindSectionSpecifierFixture: Sendable, CustomTestStringConvertible {

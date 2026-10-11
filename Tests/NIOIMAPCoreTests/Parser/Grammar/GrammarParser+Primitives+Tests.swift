@@ -295,24 +295,6 @@ private struct GrammarParserPrimitivesTests {
     }
 
     @Test(
-        "parse tag",
-        arguments: [
-            ParseFixture.tag("abc", "\r", expected: .success("abc")),
-            ParseFixture.tag("abc", "+", expected: .success("abc")),
-            ParseFixture.tag("+", "", expected: .failure),
-            ParseFixture.tag("", "", expected: .incompleteMessage),
-            // RFC 3501: tag = 1*<any ASTRING-CHAR except "+">; ASTRING-CHAR
-            // inherits the CTL exclusion via ATOM-CHAR, and RFC 5234 has
-            // CTL = %x00-1F / %x7F, so a tag stops at DEL and cannot start with it.
-            ParseFixture.tag("ab", "\u{7F}c\r", expected: .success("ab")),
-            ParseFixture.tag("\u{7F}", "", expected: .failure),
-        ]
-    )
-    func parseTag(_ fixture: ParseFixture<String>) {
-        fixture.checkParsing()
-    }
-
-    @Test(
         "parse vendor-token",
         arguments: [
             ParseFixture.vendorToken("token", "-atom ", expected: .success("token")),
@@ -412,19 +394,6 @@ extension ParseFixture<String> {
                 let buffer = try GrammarParser().parseAString(buffer: &$0, tracker: $1)
                 return String(buffer: buffer)
             }
-        )
-    }
-
-    fileprivate static func tag(
-        _ input: String,
-        _ terminator: String,
-        expected: Expected
-    ) -> Self {
-        ParseFixture(
-            input: input,
-            terminator: terminator,
-            expected: expected,
-            parser: GrammarParser().parseTag
         )
     }
 

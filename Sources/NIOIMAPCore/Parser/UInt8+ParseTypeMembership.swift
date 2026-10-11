@@ -86,6 +86,11 @@ extension UInt8 {
         }
     }
 
+    /// tag = 1*<any ASTRING-CHAR except "+">
+    var isTagChar: Bool {
+        self.isAStringChar && self != UInt8(ascii: "+")
+    }
+
     /// ATOM-CHAR           = <any CHAR except atom-specials>
     /// CHAR                = %x01-7F   ; RFC 5234
     var isAtomChar: Bool {

@@ -171,12 +171,12 @@ public enum Response: Hashable, Sendable {
 
     /// The command tag associated with this response, if any.
     ///
-    /// Returns the tag string for ``tagged(_:)`` responses, which matches the original command tag
+    /// Returns the tag for ``tagged(_:)`` responses, which matches the original command tag
     /// to correlate the response with its request. Returns `nil` for untagged responses, fatal responses,
     /// continuation requests, and other response types that are not associated with a specific command.
     ///
-    /// - Returns: The tag string for tagged responses, or `nil` otherwise.
-    public var tag: String? {
+    /// - Returns: The tag for tagged responses, or `nil` otherwise.
+    public var tag: Command.Tag? {
         switch self {
         case .untagged, .fetch, .fatal, .authenticationChallenge, .idleStarted:
             return nil

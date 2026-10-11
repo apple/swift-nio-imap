@@ -13,6 +13,7 @@
 //===----------------------------------------------------------------------===//
 
 import Logging
+import NIOIMAP
 
 extension IMAPConnection {
     /// A command tag that uniquely identifies an in-flight IMAP command.
@@ -75,5 +76,22 @@ extension IMAPConnection.Tag {
             let value = UInt64(remainder)
         else { return nil }
         self.init(rawValue: value)
+    }
+}
+
+extension Command.Tag {
+    /// Creates the wire tag for a connection tag, for example `A1`.
+    init(_ tag: IMAPConnection.Tag) {
+        guard let tag = Command.Tag(String(tag)) else {
+            preconditionFailure("Invalid command tag: \(String(reflecting: String(tag)))")
+        }
+        self = tag
+    }
+}
+
+extension IMAPConnection.Tag {
+    /// Creates a connection tag from a wire tag; `nil` if this connection didn't generate it.
+    init?(_ tag: Command.Tag) {
+        self.init(String(tag))
     }
 }

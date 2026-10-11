@@ -2647,11 +2647,9 @@ extension GrammarParser {
     }
 
     // tag             = 1*<any ASTRING-CHAR except "+">
-    func parseTag(buffer: inout ParseBuffer, tracker: StackTracker) throws -> String {
-        let parsed = try PL.parseOneOrMoreCharacters(buffer: &buffer, tracker: tracker) { char -> Bool in
-            char.isAStringChar && char != UInt8(ascii: "+")
-        }
-        return try ParserLibrary.parseBufferAsUTF8(parsed)
+    func parseTag(buffer: inout ParseBuffer, tracker: StackTracker) throws -> Command.Tag {
+        let parsed = try PL.parseOneOrMoreCharacters(buffer: &buffer, tracker: tracker) { $0.isTagChar }
+        return Command.Tag(unchecked: try ParserLibrary.parseBufferAsUTF8(parsed))
     }
 
     // tagged-ext = tagged-ext-label SP tagged-ext-val
