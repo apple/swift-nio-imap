@@ -26,12 +26,12 @@ struct NetworkPathTests {
         EncodeFixture.networkPath(
             .init(
                 server: .init(
-                    userAuthenticationMechanism: .init(encodedUser: .init(data: "user"), authenticationMechanism: nil),
+                    userAuthenticationMechanism: .init(encodedUser: "user", authenticationMechanism: nil),
                     host: "mail.example.com"
                 ),
                 query: .messageList(
                     .init(
-                        mailboxUIDValidity: .init(encodeMailbox: .init(mailbox: "INBOX"), uidValidity: nil),
+                        mailboxUIDValidity: .init(encodeMailbox: "INBOX", uidValidity: nil),
                         encodedSearch: nil
                     )
                 )
@@ -57,7 +57,7 @@ struct NetworkPathTests {
                     server: .init(host: "localhost"),
                     query: .fetch(
                         path: .init(
-                            mailboxReference: .init(encodeMailbox: .init(mailbox: "test")),
+                            mailboxReference: .init(encodeMailbox: "test"),
                             iUID: .init(uid: 123)
                         ),
                         authenticatedURL: nil

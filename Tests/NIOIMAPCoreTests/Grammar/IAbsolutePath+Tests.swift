@@ -20,11 +20,11 @@ import Testing
 struct AbsoluteMessagePathTests {
     @Test(arguments: [
         EncodeFixture.absoluteMessagePath(
-            .init(command: .messageList(.init(mailboxUIDValidity: .init(encodeMailbox: .init(mailbox: "test"))))),
+            .init(command: .messageList(.init(mailboxUIDValidity: .init(encodeMailbox: "test")))),
             "/test"
         ),
         EncodeFixture.absoluteMessagePath(
-            .init(command: .messageList(.init(mailboxUIDValidity: .init(encodeMailbox: .init(mailbox: "INBOX"))))),
+            .init(command: .messageList(.init(mailboxUIDValidity: .init(encodeMailbox: "INBOX")))),
             "/INBOX"
         ),
     ])
@@ -39,7 +39,7 @@ struct AbsoluteMessagePathTests {
             " ",
             expected: .success(
                 .init(
-                    command: .messageList(.init(mailboxUIDValidity: .init(encodeMailbox: .init(mailbox: "test"))))
+                    command: .messageList(.init(mailboxUIDValidity: .init(encodeMailbox: "test")))
                 )
             )
         ),

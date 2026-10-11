@@ -76,7 +76,7 @@ extension RealWorldTests {
                                                     query: URLCommand.fetch(
                                                         path: MessagePath(
                                                             mailboxReference: MailboxUIDValidity(
-                                                                encodeMailbox: EncodedMailbox(mailbox: "foo/bar"),
+                                                                encodeMailbox: "foo/bar",
                                                                 uidValidity: nil
                                                             ),
                                                             iUID: IUID(uid: 1234),

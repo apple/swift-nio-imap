@@ -175,6 +175,16 @@ extension UInt8 {
         }
     }
 
+    /// RFC 3986 `sub-delims`: `sub-delims-sh` plus `"&" / ";" / "="`.
+    var isSubDelims: Bool {
+        switch self {
+        case UInt8(ascii: "&"), UInt8(ascii: ";"), UInt8(ascii: "="):
+            return true
+        default:
+            return self.isSubDelimsSh
+        }
+    }
+
     /// RFC 3986
     var isUnreserved: Bool {
         switch self {

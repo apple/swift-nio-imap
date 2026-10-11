@@ -21,7 +21,7 @@ struct URLMessageSectionTests {
     @Test(
         "encode URL message section",
         arguments: [
-            EncodeFixture.urlMessageSection(.init(encodedSection: .init(section: "test")), "/;SECTION=test")
+            EncodeFixture.urlMessageSection(.init(encodedSection: "test"), "/;SECTION=test")
         ]
     )
     func encodeURLMessageSection(_ fixture: EncodeFixture<URLMessageSection>) {
@@ -31,7 +31,7 @@ struct URLMessageSectionTests {
     @Test(
         "encode URL message section only",
         arguments: [
-            EncodeFixture.urlMessageSectionOnly(.init(encodedSection: .init(section: "test")), ";SECTION=test")
+            EncodeFixture.urlMessageSectionOnly(.init(encodedSection: "test"), ";SECTION=test")
         ]
     )
     func encodeURLMessageSectionOnly(_ fixture: EncodeFixture<URLMessageSection>) {
@@ -44,12 +44,12 @@ struct URLMessageSectionTests {
             ParseFixture.urlMessageSectionWithSlash(
                 "/;SECTION=a",
                 " ",
-                expected: .success(.init(encodedSection: .init(section: "a")))
+                expected: .success(.init(encodedSection: "a"))
             ),
             ParseFixture.urlMessageSectionWithSlash(
                 "/;SECTION=abc",
                 " ",
-                expected: .success(.init(encodedSection: .init(section: "abc")))
+                expected: .success(.init(encodedSection: "abc"))
             ),
             ParseFixture.urlMessageSectionWithSlash(
                 "SECTION=a",
@@ -73,12 +73,12 @@ struct URLMessageSectionTests {
             ParseFixture.urlMessageSectionWithoutSlash(
                 ";SECTION=a",
                 " ",
-                expected: .success(.init(encodedSection: .init(section: "a")))
+                expected: .success(.init(encodedSection: "a"))
             ),
             ParseFixture.urlMessageSectionWithoutSlash(
                 ";SECTION=abc",
                 " ",
-                expected: .success(.init(encodedSection: .init(section: "abc")))
+                expected: .success(.init(encodedSection: "abc"))
             ),
             ParseFixture.urlMessageSectionWithoutSlash(
                 "SECTION=a",

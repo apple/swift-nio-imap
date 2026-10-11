@@ -24,7 +24,7 @@ struct RumpAuthenticatedURLTests {
                 authenticatedURL: .init(
                     server: .init(host: "localhost"),
                     messagePath: .init(
-                        mailboxReference: .init(encodeMailbox: .init(mailbox: "test")),
+                        mailboxReference: .init(encodeMailbox: "test"),
                         iUID: .init(uid: 123)
                     )
                 ),
@@ -37,11 +37,11 @@ struct RumpAuthenticatedURLTests {
                 authenticatedURL: .init(
                     server: .init(host: "mail.example.com"),
                     messagePath: .init(
-                        mailboxReference: .init(encodeMailbox: .init(mailbox: "INBOX")),
+                        mailboxReference: .init(encodeMailbox: "INBOX"),
                         iUID: .init(uid: 456)
                     )
                 ),
-                authenticatedURLRump: .init(access: .user(.init(data: "testuser")))
+                authenticatedURLRump: .init(access: .user("testuser"))
             ),
             "imap://mail.example.com/INBOX/;UID=456;URLAUTH=user+testuser"
         ),
@@ -59,7 +59,7 @@ struct RumpAuthenticatedURLTests {
                     authenticatedURL: .init(
                         server: .init(host: "localhost"),
                         messagePath: .init(
-                            mailboxReference: .init(encodeMailbox: .init(mailbox: "test")),
+                            mailboxReference: .init(encodeMailbox: "test"),
                             iUID: .init(uid: 123)
                         )
                     ),
