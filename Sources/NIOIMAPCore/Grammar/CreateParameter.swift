@@ -41,7 +41,7 @@ public enum CreateParameter: Hashable, Sendable {
     /// extensions to add new CREATE parameters without requiring code changes.
     ///
     /// - parameter KeyValue: A key-value pair representing the parameter
-    case labelled(KeyValue<String, ParameterValue?>)
+    case labelled(KeyValue<ExtensionKey<CreateParameter>, ParameterValue?>)
 
     /// Special-use attributes for the newly-created mailbox (RFC 6154).
     ///

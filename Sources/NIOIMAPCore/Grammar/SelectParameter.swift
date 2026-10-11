@@ -110,7 +110,7 @@ public enum SelectParameter: Hashable, Sendable {
     /// future extensions to add new parameters without requiring code changes.
     ///
     /// - parameter KeyValue: A key-value pair representing the parameter
-    case basic(KeyValue<String, ParameterValue?>)
+    case basic(KeyValue<ExtensionKey<SelectParameter>, ParameterValue?>)
 
     /// Perform a quick resynchronization of the mailbox (RFC 7162 `QRESYNC` extension).
     ///
