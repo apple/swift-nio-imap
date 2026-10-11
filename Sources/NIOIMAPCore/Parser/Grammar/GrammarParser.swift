@@ -646,11 +646,11 @@ extension GrammarParser {
     }
 
     // filter-name = 1*<any ATOM-CHAR except "/">
-    func parseFilterName(buffer: inout ParseBuffer, tracker: StackTracker) throws -> String {
+    func parseFilterName(buffer: inout ParseBuffer, tracker: StackTracker) throws -> FilterName {
         let parsed = try PL.parseOneOrMoreCharacters(buffer: &buffer, tracker: tracker) { char -> Bool in
             char.isAtomChar && char != UInt8(ascii: "/")
         }
-        return try ParserLibrary.parseBufferAsUTF8(parsed)
+        return FilterName(unchecked: try ParserLibrary.parseBufferAsUTF8(parsed))
     }
 
     // flag            = "\Answered" / "\Flagged" / "\Deleted" /
