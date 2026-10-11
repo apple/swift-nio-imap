@@ -171,11 +171,22 @@ extension GrammarParser {
             try PL.composite(buffer: &buffer, tracker: tracker) { (buffer, tracker) -> Character? in
                 try PL.parseFixedString("\"", buffer: &buffer, tracker: tracker)
 
-                let character = try PL.parseByte(buffer: &buffer, tracker: tracker)
-                guard character.isQuotedChar else {
-                    throw ParserError(
-                        hint: "Expected quoted char found \(String(decoding: [character], as: Unicode.UTF8.self))"
-                    )
+                // QUOTED-CHAR = <any TEXT-CHAR except quoted-specials> / "\" quoted-specials
+                var character = try PL.parseByte(buffer: &buffer, tracker: tracker)
+                if character == UInt8(ascii: "\\") {
+                    character = try PL.parseByte(buffer: &buffer, tracker: tracker)
+                    guard character.isQuotedSpecial else {
+                        throw ParserError(
+                            hint:
+                                "Expected quoted special found \(String(decoding: [character], as: Unicode.UTF8.self))"
+                        )
+                    }
+                } else {
+                    guard character.isQuotedChar else {
+                        throw ParserError(
+                            hint: "Expected quoted char found \(String(decoding: [character], as: Unicode.UTF8.self))"
+                        )
+                    }
                 }
 
                 try PL.parseFixedString("\"", buffer: &buffer, tracker: tracker)
