@@ -12,12 +12,6 @@
 //
 //===----------------------------------------------------------------------===//
 
-#if canImport(FoundationEssentials)
-import FoundationEssentials
-#else
-import Foundation
-#endif
-
 import struct NIO.ByteBuffer
 import struct OrderedCollections.OrderedDictionary
 
@@ -115,7 +109,7 @@ public enum ResponsePayload: Hashable, Sendable {
     /// Provides a URL that allows clients to access mailbox data via JMAP (JSON Mail
     /// Access Protocol). See [RFC 9698](https://datatracker.ietf.org/doc/html/rfc9698) (JMAPACCESS Extension)
     /// for details.
-    case jmapAccess(URL)
+    case jmapAccess(JMAPAccessURL)
 }
 
 // MARK: - Encoding
@@ -142,7 +136,7 @@ extension EncodeBuffer {
         case .metadata(let response):
             return self.writeMetadataResponse(response)
         case .jmapAccess(let url):
-            return self.writeString("JMAPACCESS \"\(url)\"")
+            return self.writeString("JMAPACCESS ") + self.writeJMAPAccessURL(url)
         }
     }
 }

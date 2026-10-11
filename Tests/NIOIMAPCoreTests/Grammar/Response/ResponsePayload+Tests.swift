@@ -39,7 +39,11 @@ struct ResponsePayloadTests {
         ),
         EncodeFixture.responsePayload(.metadata(.list(list: ["a"], mailbox: .inbox)), "METADATA \"INBOX\" \"a\""),
         EncodeFixture.responsePayload(
-            .jmapAccess(URL(string: "https://example.com/.well-known/jmap")!),
+            .jmapAccess(.init(URL(string: "https://example.com/.well-known/jmap")!)!),
+            #"JMAPACCESS "https://example.com/.well-known/jmap""#
+        ),
+        EncodeFixture.responsePayload(
+            .jmapAccess(.init(URL(string: "jmap", relativeTo: URL(string: "https://example.com/.well-known/")!)!)!),
             #"JMAPACCESS "https://example.com/.well-known/jmap""#
         ),
     ])
@@ -67,7 +71,7 @@ struct ResponsePayloadTests {
         ),
         ParseFixture.responsePayload(
             #"JMAPACCESS "https://example.com/.well-known/jmap""#,
-            expected: .success(.jmapAccess(URL(string: "https://example.com/.well-known/jmap")!))
+            expected: .success(.jmapAccess(.init(URL(string: "https://example.com/.well-known/jmap")!)!))
         ),
         ParseFixture.responsePayload(
             #"JMAPACCESS "http://example.com/.well-known/jmap""#,
@@ -111,6 +115,50 @@ struct ResponsePayloadTests {
     ])
     func parse(_ fixture: ParseFixture<ResponsePayload>) {
         fixture.checkParsing()
+    }
+
+    @Test("relative JMAP access URL round-trips resolved")
+    func relativeJMAPAccessURLRoundTrip() throws {
+        let base = try #require(URL(string: "https://example.com/.well-known/"))
+        let relative = try #require(URL(string: "jmap", relativeTo: base))
+        let url = try #require(ResponsePayload.JMAPAccessURL(relative))
+        TestUtilities.expectRoundTrip(
+            ResponsePayload.jmapAccess(url),
+            terminator: "\r",
+            encoder: { $0.writeResponsePayload($1) },
+            parser: GrammarParser().parseResponsePayload
+        )
+    }
+
+    @Test(
+        "invalid JMAP access URL is rejected",
+        arguments: [
+            "http://example.com/.well-known/jmap",
+            "imap://example.com/",
+            "example.com",
+            "/.well-known/jmap",
+            "https:jmap",
+        ]
+    )
+    func invalidJMAPAccessURL(_ string: String) throws {
+        let url = try #require(URL(string: string))
+        #expect(ResponsePayload.JMAPAccessURL(url) == nil)
+    }
+
+    @Test(
+        "JMAP access URL round-trips",
+        arguments: ["https://example.com/.well-known/jmap", "HTTPS://example.com/", "https://[::1]:8443/jmap?a=b"]
+    )
+    func jmapAccessURLRoundTrip(_ string: String) throws {
+        let foundationURL = try #require(URL(string: string))
+        let url = try #require(ResponsePayload.JMAPAccessURL(foundationURL))
+        #expect(URL(url).absoluteString == string)
+        TestUtilities.expectRoundTrip(
+            ResponsePayload.jmapAccess(url),
+            terminator: "\r",
+            encoder: { $0.writeResponsePayload($1) },
+            parser: GrammarParser().parseResponsePayload
+        )
     }
 }
 
