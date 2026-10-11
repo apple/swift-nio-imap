@@ -42,9 +42,9 @@
 /// ```
 /// IMAPServer(
 ///   userAuthenticationMechanism: UserAuthenticationMechanism(
-///     encodedUser: EncodedUser(data: "user"),
+///     encodedUser: "user",
 ///     authenticationMechanism: IMAPURLAuthenticationMechanism.type(
-///       EncodedAuthenticationType(authenticationType: "PLAIN")
+///       "PLAIN"
 ///     )
 ///   ),
 ///   host: "example.com"

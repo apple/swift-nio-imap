@@ -21,15 +21,15 @@ struct EncodedSearchQueryTests {
     @Test(arguments: [
         EncodeFixture.encodedSearchQuery(
             .init(
-                mailboxUIDValidity: .init(encodeMailbox: .init(mailbox: "box"), uidValidity: nil),
+                mailboxUIDValidity: .init(encodeMailbox: "box", uidValidity: nil),
                 encodedSearch: nil
             ),
             "box"
         ),
         EncodeFixture.encodedSearchQuery(
             .init(
-                mailboxUIDValidity: .init(encodeMailbox: .init(mailbox: "box"), uidValidity: nil),
-                encodedSearch: .init(query: "search")
+                mailboxUIDValidity: .init(encodeMailbox: "box", uidValidity: nil),
+                encodedSearch: "search"
             ),
             "box?search"
         ),
@@ -43,7 +43,7 @@ struct EncodedSearchQueryTests {
             "test",
             " ",
             expected: .success(
-                .init(mailboxUIDValidity: .init(encodeMailbox: .init(mailbox: "test"), uidValidity: nil))
+                .init(mailboxUIDValidity: .init(encodeMailbox: "test", uidValidity: nil))
             )
         ),
         ParseFixture.encodedSearchQuery(
@@ -51,8 +51,8 @@ struct EncodedSearchQueryTests {
             " ",
             expected: .success(
                 .init(
-                    mailboxUIDValidity: .init(encodeMailbox: .init(mailbox: "test"), uidValidity: nil),
-                    encodedSearch: .init(query: "query")
+                    mailboxUIDValidity: .init(encodeMailbox: "test", uidValidity: nil),
+                    encodedSearch: "query"
                 )
             )
         ),

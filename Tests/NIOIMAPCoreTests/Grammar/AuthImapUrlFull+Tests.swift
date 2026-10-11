@@ -24,7 +24,7 @@ struct FullAuthenticatedURLTests {
                 networkMessagePath: .init(
                     server: .init(host: "localhost"),
                     messagePath: .init(
-                        mailboxReference: .init(encodeMailbox: .init(mailbox: "test")),
+                        mailboxReference: .init(encodeMailbox: "test"),
                         iUID: .init(uid: 123)
                     )
                 ),
@@ -40,12 +40,12 @@ struct FullAuthenticatedURLTests {
                 networkMessagePath: .init(
                     server: .init(host: "mail.example.com"),
                     messagePath: .init(
-                        mailboxReference: .init(encodeMailbox: .init(mailbox: "INBOX")),
+                        mailboxReference: .init(encodeMailbox: "INBOX"),
                         iUID: .init(uid: 789)
                     )
                 ),
                 authenticatedURL: .init(
-                    authenticatedURL: .init(access: .user(.init(data: "alice"))),
+                    authenticatedURL: .init(access: .user("alice")),
                     verifier: .init(urlAuthMechanism: .internal, encodedAuthenticationURL: .init(data: "verifier123"))
                 )
             ),
@@ -65,7 +65,7 @@ struct FullAuthenticatedURLTests {
                     networkMessagePath: .init(
                         server: .init(host: "localhost"),
                         messagePath: .init(
-                            mailboxReference: .init(encodeMailbox: .init(mailbox: "test")),
+                            mailboxReference: .init(encodeMailbox: "test"),
                             iUID: .init(uid: 123)
                         )
                     ),

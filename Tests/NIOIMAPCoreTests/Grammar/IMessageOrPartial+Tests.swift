@@ -24,12 +24,12 @@ struct URLFetchTypeTests {
             ";PARTIAL=1.2"
         ),
         EncodeFixture.urlFetchType(
-            .sectionPartial(section: .init(encodedSection: .init(section: "section")), partial: nil),
+            .sectionPartial(section: .init(encodedSection: "section"), partial: nil),
             ";SECTION=section"
         ),
         EncodeFixture.urlFetchType(
             .sectionPartial(
-                section: .init(encodedSection: .init(section: "section")),
+                section: .init(encodedSection: "section"),
                 partial: .init(range: .init(offset: 1, length: 2))
             ),
             ";SECTION=section/;PARTIAL=1.2"
@@ -41,7 +41,7 @@ struct URLFetchTypeTests {
         EncodeFixture.urlFetchType(
             .uidSectionPartial(
                 uid: .init(uid: 123),
-                section: .init(encodedSection: .init(section: "test")),
+                section: .init(encodedSection: "test"),
                 partial: nil
             ),
             ";UID=123/;SECTION=test"
@@ -57,14 +57,14 @@ struct URLFetchTypeTests {
         EncodeFixture.urlFetchType(
             .uidSectionPartial(
                 uid: .init(uid: 123),
-                section: .init(encodedSection: .init(section: "test")),
+                section: .init(encodedSection: "test"),
                 partial: .init(range: .init(offset: 1, length: 2))
             ),
             ";UID=123/;SECTION=test/;PARTIAL=1.2"
         ),
         EncodeFixture.urlFetchType(
             .refUidSectionPartial(
-                ref: .init(encodeMailbox: .init(mailbox: "test")),
+                ref: .init(encodeMailbox: "test"),
                 uid: .init(uid: 123),
                 section: nil,
                 partial: nil
@@ -73,16 +73,16 @@ struct URLFetchTypeTests {
         ),
         EncodeFixture.urlFetchType(
             .refUidSectionPartial(
-                ref: .init(encodeMailbox: .init(mailbox: "test")),
+                ref: .init(encodeMailbox: "test"),
                 uid: .init(uid: 123),
-                section: .init(encodedSection: .init(section: "box")),
+                section: .init(encodedSection: "box"),
                 partial: nil
             ),
             "test;UID=123/;SECTION=box"
         ),
         EncodeFixture.urlFetchType(
             .refUidSectionPartial(
-                ref: .init(encodeMailbox: .init(mailbox: "test")),
+                ref: .init(encodeMailbox: "test"),
                 uid: .init(uid: 123),
                 section: nil,
                 partial: .init(range: .init(offset: 1, length: 2))
@@ -91,9 +91,9 @@ struct URLFetchTypeTests {
         ),
         EncodeFixture.urlFetchType(
             .refUidSectionPartial(
-                ref: .init(encodeMailbox: .init(mailbox: "test")),
+                ref: .init(encodeMailbox: "test"),
                 uid: .init(uid: 123),
-                section: .init(encodedSection: .init(section: "box")),
+                section: .init(encodedSection: "box"),
                 partial: .init(range: .init(offset: 1, length: 2))
             ),
             "test;UID=123/;SECTION=box/;PARTIAL=1.2"
@@ -113,14 +113,14 @@ struct URLFetchTypeTests {
             ParseFixture.urlFetchType(
                 ";SECTION=test",
                 expected: .success(
-                    .sectionPartial(section: .init(encodedSection: .init(section: "test")), partial: nil)
+                    .sectionPartial(section: .init(encodedSection: "test"), partial: nil)
                 )
             ),
             ParseFixture.urlFetchType(
                 ";SECTION=test/;PARTIAL=1.2",
                 expected: .success(
                     .sectionPartial(
-                        section: .init(encodedSection: .init(section: "test")),
+                        section: .init(encodedSection: "test"),
                         partial: .init(range: .init(offset: 1, length: 2))
                     )
                 )
@@ -143,7 +143,7 @@ struct URLFetchTypeTests {
                 expected: .success(
                     .uidSectionPartial(
                         uid: .init(uid: 123),
-                        section: .init(encodedSection: .init(section: "test")),
+                        section: .init(encodedSection: "test"),
                         partial: nil
                     )
                 )
@@ -163,7 +163,7 @@ struct URLFetchTypeTests {
                 expected: .success(
                     .uidSectionPartial(
                         uid: .init(uid: 123),
-                        section: .init(encodedSection: .init(section: "test")),
+                        section: .init(encodedSection: "test"),
                         partial: .init(range: .init(offset: 1, length: 2))
                     )
                 )
@@ -181,7 +181,7 @@ struct URLFetchTypeTests {
                 "test;UID=123",
                 expected: .success(
                     .refUidSectionPartial(
-                        ref: .init(encodeMailbox: .init(mailbox: "test")),
+                        ref: .init(encodeMailbox: "test"),
                         uid: .init(uid: 123),
                         section: nil,
                         partial: nil
@@ -192,9 +192,9 @@ struct URLFetchTypeTests {
                 "test;UID=123/;SECTION=section",
                 expected: .success(
                     .refUidSectionPartial(
-                        ref: .init(encodeMailbox: .init(mailbox: "test")),
+                        ref: .init(encodeMailbox: "test"),
                         uid: .init(uid: 123),
-                        section: .init(encodedSection: .init(section: "section")),
+                        section: .init(encodedSection: "section"),
                         partial: nil
                     )
                 )
@@ -212,7 +212,7 @@ struct URLFetchTypeTests {
                 "test;UID=123/;PARTIAL=1.2",
                 expected: .success(
                     .refUidSectionPartial(
-                        ref: .init(encodeMailbox: .init(mailbox: "test")),
+                        ref: .init(encodeMailbox: "test"),
                         uid: .init(uid: 123),
                         section: nil,
                         partial: .init(range: .init(offset: 1, length: 2))
@@ -223,9 +223,9 @@ struct URLFetchTypeTests {
                 "test;UID=123/;SECTION=section/;PARTIAL=1.2",
                 expected: .success(
                     .refUidSectionPartial(
-                        ref: .init(encodeMailbox: .init(mailbox: "test")),
+                        ref: .init(encodeMailbox: "test"),
                         uid: .init(uid: 123),
-                        section: .init(encodedSection: .init(section: "section")),
+                        section: .init(encodedSection: "section"),
                         partial: .init(range: .init(offset: 1, length: 2))
                     )
                 )

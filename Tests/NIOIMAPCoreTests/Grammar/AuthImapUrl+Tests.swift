@@ -23,7 +23,7 @@ struct AuthImapUrlTests {
             .init(
                 server: .init(host: "localhost"),
                 messagePath: .init(
-                    mailboxReference: .init(encodeMailbox: .init(mailbox: "test")),
+                    mailboxReference: .init(encodeMailbox: "test"),
                     iUID: .init(uid: 123)
                 )
             ),
@@ -33,7 +33,7 @@ struct AuthImapUrlTests {
             .init(
                 server: .init(host: "mail.example.com", port: 993),
                 messagePath: .init(
-                    mailboxReference: .init(encodeMailbox: .init(mailbox: "INBOX")),
+                    mailboxReference: .init(encodeMailbox: "INBOX"),
                     iUID: .init(uid: 999)
                 )
             ),
@@ -52,7 +52,7 @@ struct AuthImapUrlTests {
                 .init(
                     server: .init(host: "localhost"),
                     messagePath: .init(
-                        mailboxReference: .init(encodeMailbox: .init(mailbox: "test")),
+                        mailboxReference: .init(encodeMailbox: "test"),
                         iUID: .init(uid: 123)
                     )
                 )

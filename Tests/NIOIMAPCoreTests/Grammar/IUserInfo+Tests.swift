@@ -20,11 +20,11 @@ import Testing
 struct UserAuthenticationMechanismTests {
     @Test(arguments: [
         EncodeFixture.userAuthenticationMechanism(
-            .init(encodedUser: .init(data: "test"), authenticationMechanism: .any),
+            .init(encodedUser: "test", authenticationMechanism: .any),
             "test;AUTH=*"
         ),
         EncodeFixture.userAuthenticationMechanism(
-            .init(encodedUser: .init(data: "test"), authenticationMechanism: nil),
+            .init(encodedUser: "test", authenticationMechanism: nil),
             "test"
         ),
         EncodeFixture.userAuthenticationMechanism(
@@ -45,12 +45,12 @@ struct UserAuthenticationMechanismTests {
         ParseFixture.userAuthenticationMechanism(
             "test",
             " ",
-            expected: .success(.init(encodedUser: .init(data: "test"), authenticationMechanism: nil))
+            expected: .success(.init(encodedUser: "test", authenticationMechanism: nil))
         ),
         ParseFixture.userAuthenticationMechanism(
             "test;AUTH=*",
             " ",
-            expected: .success(.init(encodedUser: .init(data: "test"), authenticationMechanism: .any))
+            expected: .success(.init(encodedUser: "test", authenticationMechanism: .any))
         ),
         ParseFixture.userAuthenticationMechanism(
             "@localhost",

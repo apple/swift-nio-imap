@@ -20,11 +20,11 @@ import Testing
 struct EncodedMailboxUIDValidityTests {
     @Test(arguments: [
         EncodeFixture.mailboxUIDValidity(
-            .init(encodeMailbox: .init(mailbox: "mailbox"), uidValidity: nil),
+            .init(encodeMailbox: "mailbox", uidValidity: nil),
             "mailbox"
         ),
         EncodeFixture.mailboxUIDValidity(
-            .init(encodeMailbox: .init(mailbox: "mailbox"), uidValidity: 123),
+            .init(encodeMailbox: "mailbox", uidValidity: 123),
             "mailbox;UIDVALIDITY=123"
         ),
     ])
@@ -36,12 +36,12 @@ struct EncodedMailboxUIDValidityTests {
         ParseFixture.mailboxUIDValidity(
             "abc",
             " ",
-            expected: .success(.init(encodeMailbox: .init(mailbox: "abc"), uidValidity: nil))
+            expected: .success(.init(encodeMailbox: "abc", uidValidity: nil))
         ),
         ParseFixture.mailboxUIDValidity(
             "abc;UIDVALIDITY=123",
             " ",
-            expected: .success(.init(encodeMailbox: .init(mailbox: "abc"), uidValidity: 123))
+            expected: .success(.init(encodeMailbox: "abc", uidValidity: 123))
         ),
         ParseFixture.mailboxUIDValidity(
             "¢",

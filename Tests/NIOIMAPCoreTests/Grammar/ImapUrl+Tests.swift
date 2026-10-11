@@ -32,7 +32,7 @@ struct IMAPURLTests {
                 server: .init(host: "localhost"),
                 query: .fetch(
                     path: .init(
-                        mailboxReference: .init(encodeMailbox: .init(mailbox: "test")),
+                        mailboxReference: .init(encodeMailbox: "test"),
                         iUID: .init(uid: 123)
                     ),
                     authenticatedURL: nil
@@ -59,7 +59,7 @@ struct IMAPURLTests {
                     server: .init(host: "localhost"),
                     query: .fetch(
                         path: .init(
-                            mailboxReference: .init(encodeMailbox: .init(mailbox: "test")),
+                            mailboxReference: .init(encodeMailbox: "test"),
                             iUID: .init(uid: 123)
                         ),
                         authenticatedURL: nil

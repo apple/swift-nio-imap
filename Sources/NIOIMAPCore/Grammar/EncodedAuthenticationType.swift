@@ -39,9 +39,9 @@ import struct NIO.ByteBuffer
 /// ```
 /// IMAPServer(
 ///   userAuthenticationMechanism: UserAuthenticationMechanism(
-///     encodedUser: EncodedUser(data: "user"),
+///     encodedUser: "user",
 ///     authenticationMechanism: IMAPURLAuthenticationMechanism.type(
-///       EncodedAuthenticationType(authenticationType: "PLAIN")
+///       "PLAIN"
 ///     )
 ///   ),
 ///   host: "example.com"
@@ -54,24 +54,76 @@ import struct NIO.ByteBuffer
 /// ``UserAuthenticationMechanism`` for how mechanisms are combined with user identifiers,
 /// and ``IMAPServer`` for the complete server specification.
 ///
+/// ## Validity
+///
+/// The value is written to the wire verbatim, so anything that isn't an `enc-auth-type` is rejected:
+///
+/// - ``init(_:)`` returns `nil`. Use it for a value derived from input.
+/// - ``init(stringLiteral:)`` traps. A literal is written by the programmer, so an invalid one is a
+///   bug to be caught on first run rather than handled.
+///
 /// - SeeAlso: [RFC 2192](https://datatracker.ietf.org/doc/html/rfc2192) - IMAP URL Scheme
 /// - SeeAlso: [RFC 3986](https://datatracker.ietf.org/doc/html/rfc3986) - URI Generic Syntax (percent-encoding)
 public struct EncodedAuthenticationType: Hashable, Sendable {
-    /// The percent-encoded SASL mechanism name.
-    ///
-    /// Contains only URL-safe ASCII characters. Mechanism names with non-ASCII or special
-    /// characters are percent-encoded according to RFC 3986 using UTF-8.
-    public var authenticationType: String
+    let stringValue: String
 
-    /// Creates a new percent-encoded authentication mechanism name.
-    /// - parameter authenticationType: The percent-encoded mechanism name string.
-    public init(authenticationType: String) {
-        self.authenticationType = authenticationType
+    /// Creates a value from a percent-encoded string, if the string is a valid `enc-auth-type`.
+    ///
+    /// Hex digits in `pct-encoded` triplets are uppercased, for example `%c3` becomes `%C3`.
+    ///
+    /// A string literal resolves to ``init(stringLiteral:)`` instead, which traps rather than
+    /// returning `nil`.
+    ///
+    /// - parameter stringValue: The percent-encoded string, for example `PLAIN`.
+    /// - returns: A new value, or `nil` if `stringValue` is not a valid `enc-auth-type`.
+    public init?(_ stringValue: String) {
+        guard let normalized = Self.normalized(stringValue) else { return nil }
+        self.stringValue = normalized
+    }
+
+    init(unchecked stringValue: String) {
+        assert(Self.normalized(stringValue) == stringValue)
+        self.stringValue = stringValue
+    }
+
+    /// The given string with uppercased `pct-encoded` hex digits, if it is an `enc-auth-type`
+    /// ([RFC 5092 Section 11](https://datatracker.ietf.org/doc/html/rfc5092#section-11)):
+    /// ```
+    /// enc-auth-type = 1*achar
+    /// ```
+    /// See ``URLCharacterClass/achar``.
+    static func normalized(_ string: String) -> String? {
+        string.validatedAndNormalizedURLComponent(.achar)
+    }
+}
+
+extension String {
+    /// Creates a `String` from an ``EncodedAuthenticationType``, still percent-encoded.
+    ///
+    /// - parameter other: The value to convert.
+    public init(_ other: EncodedAuthenticationType) {
+        self = other.stringValue
+    }
+}
+
+extension EncodedAuthenticationType: ExpressibleByStringLiteral {
+    /// Creates a value from a percent-encoded string literal.
+    ///
+    /// A literal is written by the programmer, so an invalid one is a bug to be caught on first
+    /// run rather than handled. Use ``init(_:)`` for anything else.
+    ///
+    /// - parameter value: The string literal.
+    /// - Precondition: `value` is a valid `enc-auth-type`; this traps if it isn't.
+    public init(stringLiteral value: String) {
+        guard let normalized = Self.normalized(value) else {
+            preconditionFailure("Invalid encoded authentication type: \(String(reflecting: value))")
+        }
+        self.init(unchecked: normalized)
     }
 }
 
 extension EncodeBuffer {
     @discardableResult mutating func writeEncodedAuthenticationType(_ type: EncodedAuthenticationType) -> Int {
-        self.writeString(type.authenticationType)
+        self.writeString(type.stringValue)
     }
 }
