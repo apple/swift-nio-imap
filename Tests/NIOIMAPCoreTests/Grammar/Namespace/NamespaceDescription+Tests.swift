@@ -21,15 +21,15 @@ import Testing
 struct NamespaceDescriptionTests {
     @Test(arguments: [
         EncodeFixture.namespaceDescription(
-            .init(string: "string", char: nil, responseExtensions: [:]),
+            try! .init(string: "string", delimiter: nil, responseExtensions: [:]),
             "(\"string\" NIL)"
         ),
         EncodeFixture.namespaceDescription(
-            .init(string: "string", char: "a", responseExtensions: [:]),
+            try! .init(string: "string", delimiter: "a", responseExtensions: [:]),
             "(\"string\" \"a\")"
         ),
         EncodeFixture.namespaceDescription(
-            .init(string: "string", char: nil, responseExtensions: ["str2": ["str3"]]),
+            try! .init(string: "string", delimiter: nil, responseExtensions: ["str2": ["str3"]]),
             "(\"string\" NIL \"str2\" (\"str3\"))"
         ),
     ])
@@ -37,29 +37,97 @@ struct NamespaceDescriptionTests {
         fixture.checkEncoding()
     }
 
+    @Test(
+        "encode escapes quoted-specials",
+        arguments: [
+            ("\\", #"("x" "\\")"#),
+            ("\"", #"("x" "\"")"#),
+        ] as [(Character, String)]
+    )
+    func encodeQuotedSpecial(_ delimiter: Character, _ expected: String) throws {
+        EncodeFixture(
+            input: try NamespaceDescription(string: "x", delimiter: delimiter, responseExtensions: [:]),
+            bufferKind: .defaultServer,
+            expectedString: expected,
+            encoder: { $0.writeNamespaceDescription($1) }
+        ).checkEncoding()
+    }
+
+    /// The delimiter isn't PII, so logging shows it.
+    @Test("logging mode shows the delimiter")
+    func loggingMode() throws {
+        var buffer = EncodeBuffer.serverEncodeBuffer(
+            buffer: ByteBuffer(),
+            options: ResponseEncodingOptions(),
+            loggingMode: true
+        )
+        buffer.writeNamespaceDescription(
+            try NamespaceDescription(string: "x", delimiter: "/", responseExtensions: [:])
+        )
+        #expect(String(buffer: buffer.nextChunk().bytes).hasSuffix(#" "/")"#))
+    }
+
+    /// `DQUOTE QUOTED-CHAR DQUOTE`: CR, LF, NUL, and non-ASCII can't be written.
+    @Test(
+        "invalid delimiter throws",
+        arguments: ["\r", "\n", "\r\n", "\0", "ü", "🇨🇭"] as [Character]
+    )
+    func invalidDelimiter(_ delimiter: Character) {
+        #expect(throws: NamespaceDescription.InvalidDelimiterError(delimiter: delimiter)) {
+            try NamespaceDescription(string: "x", delimiter: delimiter, responseExtensions: [:])
+        }
+    }
+
+    /// Every delimiter we accept has to parse back unchanged.
+    @Test(
+        "delimiter round-trips",
+        arguments: [nil, "/", ".", "\\", "\"", "~", "\t", " ", "\u{7F}"] as [Character?]
+    )
+    func delimiterRoundTrip(_ delimiter: Character?) throws {
+        let description = try NamespaceDescription(string: "x", delimiter: delimiter, responseExtensions: [:])
+        #expect(description.delimiter == delimiter)
+        TestUtilities.expectRoundTrip(
+            description,
+            encoder: { $0.writeNamespaceDescription($1) },
+            parser: GrammarParser().parseNamespaceDescription
+        )
+    }
+
     @Test(arguments: [
         ParseFixture.namespaceDescription(
             "(\"str1\" NIL)",
             " ",
-            expected: .success(.init(string: "str1", char: nil, responseExtensions: [:]))
+            expected: .success(try! .init(string: "str1", delimiter: nil, responseExtensions: [:]))
         ),
         ParseFixture.namespaceDescription(
             "(\"str\" \"a\")",
             " ",
-            expected: .success(.init(string: "str", char: "a", responseExtensions: [:]))
+            expected: .success(try! .init(string: "str", delimiter: "a", responseExtensions: [:]))
         ),
         ParseFixture.namespaceDescription(
             "(\"str\" \"\r\")",
             " ",
             expected: .failureIgnoringBufferModifications
         ),
+        // Escaped quoted-specials: `"\\"` is a backslash, `"\""` a double quote.
+        ParseFixture.namespaceDescription(
+            #"("str" "\\")"#,
+            " ",
+            expected: .success(try! .init(string: "str", delimiter: "\\", responseExtensions: [:]))
+        ),
+        ParseFixture.namespaceDescription(
+            #"("str" "\"")"#,
+            " ",
+            expected: .success(try! .init(string: "str", delimiter: "\"", responseExtensions: [:]))
+        ),
+        ParseFixture.namespaceDescription(#"("str" "\a")"#, " ", expected: .failureIgnoringBufferModifications),
         ParseFixture.namespaceDescription(
             "(\"str\" NIL \"ext-key\" (\"val1\" \"val2\"))",
             " ",
             expected: .success(
-                .init(
+                try! .init(
                     string: "str",
-                    char: nil,
+                    delimiter: nil,
                     responseExtensions: ["ext-key": ["val1", "val2"]]
                 )
             )
@@ -78,13 +146,13 @@ struct NamespaceDescriptionTests {
             ),
             ParseFixture.namespace(
                 "((\"#mh/\" \"/\"))",
-                expected: .success([.init(string: "#mh/", char: "/", responseExtensions: [:])])
+                expected: .success([try! .init(string: "#mh/", delimiter: "/", responseExtensions: [:])])
             ),
             ParseFixture.namespace(
                 "((\"\" \"/\")(\"#mh/\" \"/\"))",
                 expected: .success([
-                    .init(string: "", char: "/", responseExtensions: [:]),
-                    .init(string: "#mh/", char: "/", responseExtensions: [:]),
+                    try! .init(string: "", delimiter: "/", responseExtensions: [:]),
+                    try! .init(string: "#mh/", delimiter: "/", responseExtensions: [:]),
                 ])
             ),
             ParseFixture.namespace("", "", expected: .incompleteMessage),
