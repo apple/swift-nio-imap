@@ -1511,7 +1511,43 @@ extension GrammarParser {
                 return .init(unchecked: String(buffer: digits))
             }
         )
-        return .init(hour: hour, minute: minute, second: second, fraction: fraction)
+        let offset = try self.parseTimeOffset(buffer: &buffer, tracker: tracker)
+        return .init(hour: hour, minute: minute, second: second, fraction: fraction, offset: offset)
+    }
+
+    // time-offset    = "Z" / time-numoffset
+    // time-numoffset = ("+" / "-") time-hour ":" time-minute
+    func parseTimeOffset(buffer: inout ParseBuffer, tracker: StackTracker) throws -> FullTime.Offset {
+        func parseNumericOffset(buffer: inout ParseBuffer, tracker: StackTracker) throws -> (hour: Int, minute: Int) {
+            let hour = try self.parse2Digit(buffer: &buffer, tracker: tracker)
+            try PL.parseFixedString(":", buffer: &buffer, tracker: tracker)
+            let minute = try self.parse2Digit(buffer: &buffer, tracker: tracker)
+            // time-hour = 00-23, time-minute = 00-59
+            guard (0...23).contains(hour), (0...59).contains(minute) else {
+                throw ParserError(hint: "Invalid time offset \(hour):\(minute)")
+            }
+            return (hour, minute)
+        }
+
+        return try PL.parseOneOf(
+            { buffer, tracker -> FullTime.Offset in
+                // RFC 3339 Section 5.6: `Z` may be lowercase.
+                try PL.parseFixedString("Z", buffer: &buffer, tracker: tracker)
+                return .utc
+            },
+            { buffer, tracker -> FullTime.Offset in
+                try PL.parseFixedString("+", buffer: &buffer, tracker: tracker)
+                let (hour, minute) = try parseNumericOffset(buffer: &buffer, tracker: tracker)
+                return .plus(hour: hour, minute: minute)
+            },
+            { buffer, tracker -> FullTime.Offset in
+                try PL.parseFixedString("-", buffer: &buffer, tracker: tracker)
+                let (hour, minute) = try parseNumericOffset(buffer: &buffer, tracker: tracker)
+                return .minus(hour: hour, minute: minute)
+            },
+            buffer: &buffer,
+            tracker: tracker
+        )
     }
 
     func parseLiteralSize(buffer: inout ParseBuffer, tracker: StackTracker) throws -> Int {

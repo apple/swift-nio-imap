@@ -28,12 +28,12 @@ struct AuthenticatedURLRumpTests {
                 expire: .init(
                     dateTime: .init(
                         date: .init(year: 1234, month: 12, day: 23),
-                        time: .init(hour: 12, minute: 34, second: 56)
+                        time: .init(hour: 12, minute: 34, second: 56, offset: .utc)
                     )
                 ),
                 access: .authenticateUser
             ),
-            ";EXPIRE=1234-12-23T12:34:56;URLAUTH=authuser"
+            ";EXPIRE=1234-12-23T12:34:56Z;URLAUTH=authuser"
         ),
     ])
     func encode(_ fixture: EncodeFixture<AuthenticatedURLRump>) {
@@ -47,14 +47,14 @@ struct AuthenticatedURLRumpTests {
             expected: .success(.init(access: .anonymous))
         ),
         ParseFixture.authenticatedURLRump(
-            ";EXPIRE=1234-12-23T12:34:56;URLAUTH=anonymous",
+            ";EXPIRE=1234-12-23T12:34:56Z;URLAUTH=anonymous",
             " ",
             expected: .success(
                 .init(
                     expire: .init(
                         dateTime: .init(
                             date: .init(year: 1234, month: 12, day: 23),
-                            time: .init(hour: 12, minute: 34, second: 56)
+                            time: .init(hour: 12, minute: 34, second: 56, offset: .utc)
                         )
                     ),
                     access: .anonymous
