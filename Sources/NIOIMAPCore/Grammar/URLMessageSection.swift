@@ -31,7 +31,7 @@ import struct NIO.ByteBuffer
 /// - `"1.2.MIME"` - MIME headers of a specific part
 /// - `"TEXT"` - Message body text
 /// - `"HEADER"` - Full message headers
-/// - `"HEADER.FIELDS (From To Date)"` - Specific header fields
+/// - `"HEADER.FIELDS%20(From%20To%20Date)"` - Specific header fields, percent-encoded
 ///
 /// ### Examples
 ///
@@ -84,10 +84,10 @@ public struct URLMessageSection: Hashable, Sendable {
 
 extension EncodeBuffer {
     @discardableResult mutating func writeURLMessageSection(_ section: URLMessageSection) -> Int {
-        self.writeString("/;SECTION=\(section.encodedSection.section)")
+        self.writeString("/;SECTION=") + self.writeEncodedSection(section.encodedSection)
     }
 
     @discardableResult mutating func writeURLMessageSectionOnly(_ section: URLMessageSection) -> Int {
-        self.writeString(";SECTION=\(section.encodedSection.section)")
+        self.writeString(";SECTION=") + self.writeEncodedSection(section.encodedSection)
     }
 }

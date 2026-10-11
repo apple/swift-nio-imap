@@ -22,7 +22,7 @@ struct RelativeIMAPURLTests {
         EncodeFixture.relativeIMAPURL(
             .absolutePath(
                 .init(
-                    command: .messageList(.init(mailboxUIDValidity: .init(encodeMailbox: .init(mailbox: "test"))))
+                    command: .messageList(.init(mailboxUIDValidity: .init(encodeMailbox: "test")))
                 )
             ),
             "/test"
@@ -48,7 +48,7 @@ struct RelativeIMAPURLTests {
                 .absolutePath(
                     .init(
                         command: .messageList(
-                            .init(mailboxUIDValidity: .init(encodeMailbox: .init(mailbox: "test")))
+                            .init(mailboxUIDValidity: .init(encodeMailbox: "test"))
                         )
                     )
                 )

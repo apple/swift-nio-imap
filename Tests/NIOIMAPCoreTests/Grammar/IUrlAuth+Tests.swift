@@ -28,7 +28,7 @@ struct AuthenticatedURLTests {
         ),
         EncodeFixture.authenticatedURL(
             .init(
-                authenticatedURL: .init(access: .user(.init(data: "alice"))),
+                authenticatedURL: .init(access: .user("alice")),
                 verifier: .init(urlAuthMechanism: .internal, encodedAuthenticationURL: .init(data: "verifier456"))
             ),
             ";URLAUTH=user+alice:INTERNAL:verifier456"
