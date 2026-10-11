@@ -48,6 +48,11 @@
 /// // Represents: :internal:91354a473744909de610943775f92038
 /// ```
 ///
+/// ## Validity
+///
+/// A mechanism is written to the wire verbatim, so anything that isn't a `mechanism` is
+/// rejected: ``init(_:)`` returns `nil`, ``init(stringLiteral:)`` traps.
+///
 /// ## Related types
 ///
 /// - ``AuthenticatedURLVerifier`` pairs the mechanism with a verification token
@@ -65,7 +70,7 @@ public struct URLAuthenticationMechanism: Hashable, Sendable {
     /// recommended and most commonly used mechanism.
     ///
     /// - SeeAlso: [RFC 4467 Section 2.4.1](https://datatracker.ietf.org/doc/html/rfc4467#section-2.4.1)
-    public static let `internal` = Self("INTERNAL")
+    public static let `internal`: Self = "INTERNAL"
 
     /// The mechanism name as a string.
     ///
@@ -74,10 +79,44 @@ public struct URLAuthenticationMechanism: Hashable, Sendable {
     /// other mechanisms.
     internal let stringValue: String
 
-    /// Creates a new mechanism by name.
+    /// Creates a mechanism by name, if the name is a valid `mechanism`.
+    ///
+    /// A string literal resolves to ``init(stringLiteral:)`` instead, which traps rather than
+    /// returning `nil`.
+    ///
     /// - parameter stringValue: The mechanism name (for example, "INTERNAL").
-    public init(_ stringValue: String) {
+    /// - returns: A new mechanism, or `nil` if `stringValue` is not a valid `mechanism`.
+    public init?(_ stringValue: String) {
+        guard Self.isValidMechanism(stringValue) else { return nil }
         self.stringValue = stringValue
+    }
+
+    init(unchecked stringValue: String) {
+        assert(Self.isValidMechanism(stringValue))
+        self.stringValue = stringValue
+    }
+
+    /// Whether the given string is a `mechanism`, per
+    /// [RFC 4467 Section 9](https://datatracker.ietf.org/doc/html/rfc4467#section-9):
+    /// ```
+    /// mechanism = "INTERNAL" / 1*(ALPHA / DIGIT / "-" / ".")
+    /// ```
+    static func isValidMechanism(_ string: String) -> Bool {
+        !string.isEmpty && string.utf8.allSatisfy(\.isMechanismChar)
+    }
+}
+
+extension URLAuthenticationMechanism: ExpressibleByStringLiteral {
+    /// Creates a mechanism from a string literal.
+    ///
+    /// A literal is written by the programmer, so an invalid one is a bug to be caught on first
+    /// run rather than handled. Use ``init(_:)`` for anything else.
+    ///
+    /// - parameter value: The string literal.
+    /// - Precondition: `value` is a valid `mechanism`; this traps if it isn't.
+    public init(stringLiteral value: String) {
+        precondition(Self.isValidMechanism(value), "Invalid URLAUTH mechanism: \(String(reflecting: value))")
+        self.init(unchecked: value)
     }
 }
 
@@ -91,6 +130,6 @@ extension String {
 
 extension EncodeBuffer {
     @discardableResult mutating func writeURLAuthenticationMechanism(_ data: URLAuthenticationMechanism) -> Int {
-        self.writeString(data.stringValue)
+        self.writeAtom(data.stringValue)
     }
 }
