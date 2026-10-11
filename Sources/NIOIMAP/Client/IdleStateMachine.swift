@@ -37,10 +37,10 @@ extension ClientStateMachine {
         }
 
         /// The tag of the IDLE command.
-        let tag: String
+        let tag: Command.Tag
         private(set) var state: State = .waitingForConfirmation
 
-        init(tag: String) {
+        init(tag: Command.Tag) {
             self.tag = tag
         }
 

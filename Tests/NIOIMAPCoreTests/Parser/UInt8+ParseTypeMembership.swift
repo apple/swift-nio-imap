@@ -115,6 +115,14 @@ struct UInt8ParseTypeMembershipTests {
         #expect(invalid.allSatisfy { !$0.isAStringChar })
     }
 
+    @Test("tag char")
+    func tagChar() {
+        let valid = atomChars.union([UInt8(ascii: "]")]).subtracting([UInt8(ascii: "+")])
+        let invalid = allChars.subtracting(valid)
+        #expect(valid.allSatisfy { $0.isTagChar })
+        #expect(invalid.allSatisfy { !$0.isTagChar })
+    }
+
     /// `list-char = ATOM-CHAR / list-wildcards / resp-specials`
     @Test("list char")
     func listChar() {

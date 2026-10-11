@@ -32,7 +32,7 @@ class CommandTester: Benchmark {
     @discardableResult func run() throws -> Int {
         for i in 1...self.iterations {
             var commandBuffer = CommandEncodeBuffer(buffer: ByteBuffer(), options: .init(), loggingMode: false)
-            commandBuffer.writeCommand(.init(tag: "\(i)", command: self.command))
+            commandBuffer.writeCommand(.init(tag: Command.Tag("\(i)")!, command: self.command))
 
             var buffer = ByteBuffer()
             var chunk = commandBuffer.buffer.nextChunk()
