@@ -25,7 +25,20 @@ struct MechanismBase64Tests {
         ),
         EncodeFixture.mechanismBase64(
             .init(mechanism: .internal, base64: "base64"),
-            "INTERNAL=base64"
+            "INTERNAL=YmFzZTY0"
+        ),
+        // Stored decoded (as parsed), so it must be base64-encoded on write:
+        EncodeFixture.mechanismBase64(
+            .init(mechanism: .internal, base64: "a"),
+            "INTERNAL=YQ=="
+        ),
+        EncodeFixture.mechanismBase64(
+            .init(mechanism: .internal, base64: "\r\n* BYE"),
+            "INTERNAL=DQoqIEJZRQ=="
+        ),
+        EncodeFixture.mechanismBase64(
+            .init(mechanism: .internal, base64: ""),
+            "INTERNAL="
         ),
     ])
     func encode(_ fixture: EncodeFixture<MechanismBase64>) {
@@ -42,6 +55,18 @@ struct MechanismBase64Tests {
     ])
     func parse(_ fixture: ParseFixture<MechanismBase64>) {
         fixture.checkParsing()
+    }
+
+    @Test(
+        "encode/parse round-trip",
+        arguments: [nil, "", "a", "base64", "\r\n* BYE"] as [String?]
+    )
+    func roundTrip(_ base64: String?) {
+        TestUtilities.expectRoundTrip(
+            MechanismBase64(mechanism: .internal, base64: base64.map { ByteBuffer(string: $0) }),
+            encoder: { $0.writeMechanismBase64($1) },
+            parser: GrammarParser().parseMechanismBase64
+        )
     }
 }
 
