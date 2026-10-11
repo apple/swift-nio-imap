@@ -46,8 +46,15 @@ extension OptionValueComp: ExpressibleByArrayLiteral {
 // MARK: - Encoding
 
 extension EncodeBuffer {
+    /// `option-value = "(" option-val-comp ")"`. Its parentheses enclose a sequence, so several
+    /// values aren't parenthesized again: `.array(["a", "b"])` is `("a" "b")`, not `(("a" "b"))`.
     @discardableResult mutating func writeOptionValue(_ value: OptionValueComp) -> Int {
-        self.writeString("(") + self.writeOptionValueComp(value) + self.writeString(")")
+        guard case .array(let array) = value, array.count > 1 else {
+            return self.writeString("(") + self.writeOptionValueComp(value) + self.writeString(")")
+        }
+        return self.writeArray(array) { (option, self) in
+            self.writeOptionValueComp(option)
+        }
     }
 
     @discardableResult mutating func writeOptionValueComp(_ option: OptionValueComp) -> Int {
