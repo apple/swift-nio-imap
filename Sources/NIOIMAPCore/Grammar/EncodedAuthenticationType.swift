@@ -75,7 +75,7 @@ public struct EncodedAuthenticationType: Hashable, Sendable {
     /// returning `nil`.
     ///
     /// - parameter stringValue: The percent-encoded string, for example `PLAIN`.
-    /// - returns: A new value, or `nil` if `stringValue` is not a valid `enc-auth-type`.
+    /// - returns: A new value, or `nil` if `stringValue` is `*` or not a valid `enc-auth-type`.
     public init?(_ stringValue: String) {
         guard let normalized = Self.normalized(stringValue) else { return nil }
         self.stringValue = normalized
@@ -91,10 +91,15 @@ public struct EncodedAuthenticationType: Hashable, Sendable {
     /// ```
     /// enc-auth-type = 1*achar
     /// ```
-    /// See ``URLCharacterClass/achar``.
+    /// See ``URLCharacterClass/achar``. Not allowed: `*`, since `;AUTH=*` means any mechanism
+    /// (``IMAPURLAuthenticationMechanism/any``).
     static func normalized(_ string: String) -> String? {
-        string.normalizedURLComponent(.achar)
+        guard string != Self.anyMechanism else { return nil }
+        return string.normalizedURLComponent(.achar)
     }
+
+    /// What `;AUTH=` is followed by to mean any mechanism.
+    static let anyMechanism = "*"
 }
 
 extension String {
