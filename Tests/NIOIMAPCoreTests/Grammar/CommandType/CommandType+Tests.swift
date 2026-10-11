@@ -216,15 +216,15 @@ struct CommandTypeTests {
         // listIndependent: select options and return options combinations
         CommandEncodeFixture.command(
             .listIndependent([.remote], reference: .inbox, .mailbox("*"), [.children]),
-            #"LIST(REMOTE) "INBOX" "*" RETURN (CHILDREN)"#
+            #"LIST (REMOTE) "INBOX" "*" RETURN (CHILDREN)"#
         ),
         CommandEncodeFixture.command(
             .listIndependent([.specialUse], reference: .inbox, .mailbox("*"), []),
-            #"LIST(SPECIAL-USE) "INBOX" "*""#
+            #"LIST (SPECIAL-USE) "INBOX" "*""#
         ),
         CommandEncodeFixture.command(
             .listIndependent([.remote, .specialUse], reference: .inbox, .mailbox("*"), [.children]),
-            #"LIST(REMOTE SPECIAL-USE) "INBOX" "*" RETURN (CHILDREN)"#
+            #"LIST (REMOTE SPECIAL-USE) "INBOX" "*" RETURN (CHILDREN)"#
         ),
         CommandEncodeFixture.command(
             .listIndependent([], reference: .inbox, .mailbox("*"), [.children]),
