@@ -1982,7 +1982,7 @@ extension GrammarParser {
             buffer: inout ParseBuffer,
             tracker: StackTracker
         ) throws -> OptionExtensionKind {
-            .standard(try self.parseAtom(buffer: &buffer, tracker: tracker))
+            .standard(.init(unchecked: try self.parseAtom(buffer: &buffer, tracker: tracker)))
         }
 
         func parseOptionExtensionKind_vendor(
@@ -2055,12 +2055,12 @@ extension GrammarParser {
     }
 
     // option-vendor-tag =  vendor-token "-" atom
-    func parseOptionVendorTag(buffer: inout ParseBuffer, tracker: StackTracker) throws -> KeyValue<String, String> {
-        try PL.composite(buffer: &buffer, tracker: tracker) { buffer, tracker -> KeyValue<String, String> in
+    func parseOptionVendorTag(buffer: inout ParseBuffer, tracker: StackTracker) throws -> OptionExtensionKind.Vendor {
+        try PL.composite(buffer: &buffer, tracker: tracker) { buffer, tracker -> OptionExtensionKind.Vendor in
             let token = try self.parseVendorToken(buffer: &buffer, tracker: tracker)
             try PL.parseFixedString("-", buffer: &buffer, tracker: tracker)
             let atom = try self.parseAtom(buffer: &buffer, tracker: tracker)
-            return .init(key: token, value: atom)
+            return .init(unchecked: "\(token)-\(atom)")
         }
     }
 
