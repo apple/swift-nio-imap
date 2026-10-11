@@ -28,6 +28,25 @@ struct EncodedURLComponentTests {
         #expect(EncodedAuthenticationType(string) == nil)
     }
 
+    /// `;AUTH=*` means any mechanism, so `*` can't be a mechanism name.
+    @Test("* is not an authentication type")
+    func asteriskAuthenticationType() {
+        #expect(EncodedAuthenticationType("*" as String) == nil)
+        #expect(EncodedAuthenticationType("**" as String) != nil)
+    }
+
+    @Test(
+        "URL authentication mechanisms round-trip",
+        arguments: [IMAPURLAuthenticationMechanism.any, .type("**"), .type("*x")]
+    )
+    func authenticationMechanismRoundTrip(_ mechanism: IMAPURLAuthenticationMechanism) {
+        TestUtilities.expectRoundTrip(
+            mechanism,
+            encoder: { $0.writeIMAPURLAuthenticationMechanism($1) },
+            parser: GrammarParser().parseIMAPURLAuthenticationMechanism
+        )
+    }
+
     @Test("invalid bchar components are rejected", arguments: invalidBcharStrings)
     func invalidBchar(_ string: String) {
         #expect(EncodedMailbox(string) == nil)

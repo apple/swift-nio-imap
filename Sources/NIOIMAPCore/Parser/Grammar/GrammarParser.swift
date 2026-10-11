@@ -535,7 +535,11 @@ extension GrammarParser {
     ) throws -> EncodedAuthenticationType {
         try PL.composite(buffer: &buffer, tracker: tracker) { buffer, tracker -> EncodedAuthenticationType in
             let array = try PL.parseOneOrMore(buffer: &buffer, tracker: tracker, parser: self.parseAChar).reduce([], +)
-            return .init(unchecked: String(decoding: array, as: Unicode.UTF8.self))
+            let string = String(decoding: array, as: Unicode.UTF8.self)
+            guard string != EncodedAuthenticationType.anyMechanism else {
+                throw ParserError(hint: "`*` is any mechanism, not an enc-auth-type")
+            }
+            return .init(unchecked: string)
         }
     }
 
@@ -898,9 +902,10 @@ extension GrammarParser {
 
         return try PL.composite(buffer: &buffer, tracker: tracker) { (buffer, tracker) in
             try PL.parseFixedString(";AUTH=", buffer: &buffer, tracker: tracker)
+            // Longest match first: `;AUTH=*x` is the type `*x`, not any mechanism.
             return try PL.parseOneOf(
-                parseIMAPURLAuthenticationMechanism_any,
                 parseIMAPURLAuthenticationMechanism_encoded,
+                parseIMAPURLAuthenticationMechanism_any,
                 buffer: &buffer,
                 tracker: tracker
             )
