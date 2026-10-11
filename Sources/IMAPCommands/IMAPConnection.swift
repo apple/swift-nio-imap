@@ -200,7 +200,7 @@ public final class IMAPConnection: Sendable {
 
         try await outboundWriter.write(
             TaggedCommand(
-                tag: "\(tag)",
+                tag: Command.Tag(tag),
                 command: command
             )
         )
@@ -232,7 +232,7 @@ public final class IMAPConnection: Sendable {
 
         try await outboundWriter.write(
             TaggedCommand(
-                tag: "\(tag)",
+                tag: Command.Tag(tag),
                 command: .idleStart
             )
         )
@@ -278,7 +278,7 @@ public final class IMAPConnection: Sendable {
 
         try await outboundWriter.write(
             TaggedCommand(
-                tag: "\(tag)",
+                tag: Command.Tag(tag),
                 command: .authenticate(
                     mechanism: mechanism,
                     initialResponse: initialResponse
@@ -390,7 +390,7 @@ public final class IMAPConnection: Sendable {
                 try await outboundWriter.withAppendWriter {
                     (writer: consuming OutboundQueue.AppendQueueWriter) in
                     try await AppendWriter.withAppendWriter(
-                        tag: "\(tag)",
+                        tag: Command.Tag(tag),
                         appendingTo: mailbox,
                         underlying: writer,
                         didCompleteCommand: &didCompleteCommand
@@ -836,7 +836,7 @@ extension IMAPConnection.PerCommandResponseStream {
             guard
                 let tag = IMAPConnection.Tag(response.tag),
                 let continuation = continuations.removeValue(forKey: tag)
-            else { return .unknownTag(response.tag) }
+            else { return .unknownTag(String(response.tag)) }
             self = .streams(nextTag, continuations)
             return .finishContinuation(continuation, response)
         case .connectionClosed:

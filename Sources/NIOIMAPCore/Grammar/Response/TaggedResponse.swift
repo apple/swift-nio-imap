@@ -55,7 +55,7 @@ public struct TaggedResponse: Hashable, Sendable {
     /// The same tag that appeared in the original client command, allowing the client
     /// to correlate the response with its request. The tag uniquely identifies the command within
     /// the connection session.
-    public var tag: String
+    public var tag: Command.Tag
 
     /// The outcome status of the command execution.
     ///
@@ -67,7 +67,7 @@ public struct TaggedResponse: Hashable, Sendable {
     /// Creates a new `TaggedResponse`.
     /// - parameter tag: The tag of the command that led to this response.
     /// - parameter state: Signals if the command was successfully executed.
-    public init(tag: String, state: State) {
+    public init(tag: Command.Tag, state: State) {
         self.tag = tag
         self.state = state
     }
@@ -77,6 +77,9 @@ public struct TaggedResponse: Hashable, Sendable {
 
 extension EncodeBuffer {
     @discardableResult mutating func writeTaggedResponse(_ response: TaggedResponse) -> Int {
-        self.writeString("\(response.tag) ") + self.writeTaggedResponseState(response.state) + self.writeString("\r\n")
+        self.writeTag(response.tag)
+            + self.writeSpace()
+            + self.writeTaggedResponseState(response.state)
+            + self.writeString("\r\n")
     }
 }

@@ -300,9 +300,9 @@ private struct CommandStreamTests {
             (AppendCommand.catenateData(.end), nil),
             (AppendCommand.endCatenate, nil),
             (AppendCommand.finish, nil),
-        ] as [(AppendCommand, String?)]
+        ] as [(AppendCommand, Command.Tag?)]
     )
-    func appendCommandTag(_ fixture: (AppendCommand, String?)) {
+    func appendCommandTag(_ fixture: (AppendCommand, Command.Tag?)) {
         #expect(fixture.0.tag == fixture.1)
     }
 
@@ -314,9 +314,9 @@ private struct CommandStreamTests {
             (CommandStreamPart.append(.start(tag: "C3", appendingTo: .inbox)), "C3"),
             (CommandStreamPart.append(.finish), nil),
             (CommandStreamPart.continuationResponse("data"), nil),
-        ] as [(CommandStreamPart, String?)]
+        ] as [(CommandStreamPart, Command.Tag?)]
     )
-    func commandStreamPartTag(_ fixture: (CommandStreamPart, String?)) {
+    func commandStreamPartTag(_ fixture: (CommandStreamPart, Command.Tag?)) {
         #expect(fixture.0.tag == fixture.1)
     }
 

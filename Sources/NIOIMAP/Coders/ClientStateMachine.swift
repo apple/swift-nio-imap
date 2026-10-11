@@ -37,7 +37,7 @@ public struct UnexpectedResponse: Error {
 
     /// Used to give more context about where the unexpected response was encountered.
     public enum Kind: Equatable, Sendable {
-        case commandCompletionWithUnknownTag(tag: String)
+        case commandCompletionWithUnknownTag(tag: Command.Tag)
         case appendNotWaitingForTaggedResponse
         case appendWaitingForTaggedResponse
         case appendWithPendingContinuation
@@ -78,9 +78,9 @@ public struct UnexpectedContinuationRequest: Error {
 }
 
 public struct DuplicateCommandTag: Error {
-    public var tag: String
+    public var tag: Command.Tag
 
-    public init(tag: String) {
+    public init(tag: Command.Tag) {
         self.tag = tag
     }
 }
@@ -191,7 +191,7 @@ struct ClientStateMachine {
     var encodingOptions: ClientEncodingOptions
 
     var state: State = .expectingNormalResponse
-    private var activeCommandTags: Set<String> = []
+    private var activeCommandTags: Set<Command.Tag> = []
     private var allocator: ByteBufferAllocator!
 
     // We mark where we should write up to at the next opportunity

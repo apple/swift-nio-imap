@@ -50,7 +50,7 @@ extension IMAPConnection {
         }
 
         static func withAppendWriter<R>(
-            tag: String,
+            tag: Command.Tag,
             appendingTo mailbox: MailboxName,
             underlying: consuming OutboundQueue.AppendQueueWriter,
             didCompleteCommand: inout Bool,

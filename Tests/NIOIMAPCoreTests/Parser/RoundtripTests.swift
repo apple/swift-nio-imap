@@ -186,7 +186,7 @@ private enum RoundtripTests {
     )
     static func commandRoundtrip(_ fixture: RoundtripFixture) throws {
         var encodeBuffer = CommandEncodeBuffer(buffer: ByteBuffer(), options: .init(), loggingMode: false)
-        let tag = "1"
+        let tag: Command.Tag = "1"
         let taggedCommand = TaggedCommand(tag: tag, command: fixture.command)
         encodeBuffer.writeCommand(taggedCommand)
         // required for commands that might terminate with a literal (e.g. append)
