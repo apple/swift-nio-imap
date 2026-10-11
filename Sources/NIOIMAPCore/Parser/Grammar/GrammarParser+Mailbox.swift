@@ -298,12 +298,13 @@ extension GrammarParser {
     //                   *(SP mbx-list-oflag) /
     //                   mbx-list-oflag *(SP mbx-list-oflag)
     func parseMailboxListFlags(buffer: inout ParseBuffer, tracker: StackTracker) throws -> [MailboxInfo.Attribute] {
-        var results = [MailboxInfo.Attribute(try self.parseFlagExtension(buffer: &buffer, tracker: tracker))]
+        // `flag-extension` is `"\" atom`, the same production `Attribute` validates.
+        var results = [MailboxInfo.Attribute(unchecked: try self.parseFlagExtension(buffer: &buffer, tracker: tracker))]
         do {
             while true {
                 try PL.parseSpaces(buffer: &buffer, tracker: tracker)
                 let att = try self.parseFlagExtension(buffer: &buffer, tracker: tracker)
-                results.append(.init(att))
+                results.append(.init(unchecked: att))
             }
         } catch {
             // do nothing

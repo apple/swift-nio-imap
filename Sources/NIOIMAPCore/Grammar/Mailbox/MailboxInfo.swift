@@ -108,71 +108,93 @@ extension MailboxInfo {
         /// Indicates that the mailbox exists but is not selectable.
         /// A common example is a mailbox used only to contain child mailboxes.
         /// See [RFC 3501 Section 7.2.2](https://datatracker.ietf.org/doc/html/rfc3501#section-7.2.2).
-        public static var noSelect: Self { Self(#"\Noselect"#) }
+        public static let noSelect: Self = #"\Noselect"#
 
         /// The mailbox has been marked as interesting by the server.
         ///
         /// The `\Marked` attribute indicates that the mailbox probably contains new messages
         /// since it was last accessed. See [RFC 3501 Section 7.2.2](https://datatracker.ietf.org/doc/html/rfc3501#section-7.2.2).
-        public static var marked: Self { Self(#"\Marked"#) }
+        public static let marked: Self = #"\Marked"#
 
         /// The mailbox does not have new messages since last access.
         ///
         /// The `\Unmarked` attribute is the counterpart to `\Marked`, indicating that the server
         /// has no indication of new messages in the mailbox. See [RFC 3501 Section 7.2.2](https://datatracker.ietf.org/doc/html/rfc3501#section-7.2.2).
-        public static var unmarked: Self { Self(#"\Unmarked"#) }
+        public static let unmarked: Self = #"\Unmarked"#
 
         /// The mailbox does not refer to any existing mailbox.
         ///
         /// The `\Nonexistent` attribute indicates that the mailbox name is reported by the server
         /// as a reference only (not an actual mailbox). Per [RFC 9051 Section 6.3.9](https://datatracker.ietf.org/doc/html/rfc9051#section-6.3.9),
         /// this attribute implies `\NoSelect`. See [RFC 3501 Section 7.2.2](https://datatracker.ietf.org/doc/html/rfc3501#section-7.2.2).
-        public static var nonExistent: Self { Self(#"\Nonexistent"#) }
+        public static let nonExistent: Self = #"\Nonexistent"#
 
         /// The mailbox cannot have any child mailboxes.
         ///
         /// The `\Noinferiors` attribute indicates that the mailbox cannot contain child mailboxes
         /// in a hierarchical namespace. Per [RFC 9051 Section 6.3.9](https://datatracker.ietf.org/doc/html/rfc9051#section-6.3.9),
         /// this attribute implies `\HasNoChildren`. See [RFC 3501 Section 7.2.2](https://datatracker.ietf.org/doc/html/rfc3501#section-7.2.2).
-        public static var noInferiors: Self { Self(#"\Noinferiors"#) }
+        public static let noInferiors: Self = #"\Noinferiors"#
 
         /// The mailbox has been subscribed to by the user.
         ///
         /// The `\Subscribed` attribute is reported in response to `LSUB` commands, indicating
         /// that the user has explicitly subscribed to this mailbox for display in the client UI.
         /// See [RFC 3501 Section 6.3.9](https://datatracker.ietf.org/doc/html/rfc3501#section-6.3.9).
-        public static var subscribed: Self { Self(#"\Subscribed"#) }
+        public static let subscribed: Self = #"\Subscribed"#
 
         /// The mailbox is located on a remote server.
         ///
         /// The `\Remote` attribute indicates that the mailbox exists on a different IMAP server
         /// than the one handling the connection. See [RFC 3501 Section 7.2.2](https://datatracker.ietf.org/doc/html/rfc3501#section-7.2.2).
-        public static var remote: Self { Self(#"\Remote"#) }
+        public static let remote: Self = #"\Remote"#
 
         /// The mailbox has child mailboxes in the hierarchy.
         ///
         /// The `\HasChildren` attribute indicates that the mailbox has one or more child mailboxes
         /// in the hierarchical namespace. See [RFC 3501 Section 7.2.2](https://datatracker.ietf.org/doc/html/rfc3501#section-7.2.2).
-        public static var hasChildren: Self { Self(#"\HasChildren"#) }
+        public static let hasChildren: Self = #"\HasChildren"#
 
         /// The mailbox does not have any child mailboxes.
         ///
         /// The `\HasNoChildren` attribute indicates that, at the time of the `LIST` response,
         /// the mailbox has no child mailboxes. Note that this does not guarantee the mailbox
         /// cannot have children in the future. See [RFC 3501 Section 7.2.2](https://datatracker.ietf.org/doc/html/rfc3501#section-7.2.2).
-        public static var hasNoChildren: Self { Self(#"\HasNoChildren"#) }
+        public static let hasNoChildren: Self = #"\HasNoChildren"#
 
-        fileprivate var backing: String
+        fileprivate let backing: String
 
-        /// Creates a new attribute with the specified name.
+        /// Creates an attribute from a string, if the string is a valid attribute.
         ///
         /// Use the static properties (``noSelect``, ``marked``, etc.) for standard attributes
         /// or create custom attributes for extension or server-specific attributes.
         /// Attribute names are case-insensitive per the IMAP specification.
         ///
-        /// - Parameter str: The attribute name, typically starting with backslash (for example, "\\Noselect")
-        public init(_ str: String) {
+        /// A string literal resolves to ``init(stringLiteral:)`` instead, which traps rather than
+        /// returning `nil`.
+        ///
+        /// - Parameter str: The attribute, a backslash followed by an `atom` (for example, `\Noselect`).
+        /// - Returns: A new attribute, or `nil` if `str` is not a valid attribute.
+        public init?(_ str: String) {
+            guard Self.isValidAttribute(str) else { return nil }
             self.backing = str
+        }
+
+        init(unchecked str: String) {
+            assert(Self.isValidAttribute(str))
+            self.backing = str
+        }
+
+        /// Whether the given string is a `mbx-list-flag`
+        /// ([RFC 3501 Section 9](https://datatracker.ietf.org/doc/html/rfc3501#section-9)):
+        /// ```
+        /// mbx-list-oflag  = "\Noinferiors" / flag-extension
+        /// mbx-list-sflag  = "\Noselect" / "\Marked" / "\Unmarked"
+        /// flag-extension  = "\" atom
+        /// ```
+        /// Every branch is a `"\" atom`.
+        static func isValidAttribute(_ string: String) -> Bool {
+            string.hasPrefix("\\") && string.dropFirst().isIMAPAtom
         }
 
         public static func == (lhs: Self, rhs: Self) -> Bool {
@@ -203,12 +225,23 @@ extension MailboxInfo {
 }
 
 extension String {
-    /// The raw attribute name as a string.
-    ///
-    /// Returns the attribute name in its original format. The backing storage is always lowercase
-    /// for consistency with IMAP's case-insensitive attribute names.
+    /// The raw attribute name as a string, in its original casing.
     public init(_ other: MailboxInfo.Attribute) {
         self = other.backing
+    }
+}
+
+extension MailboxInfo.Attribute: ExpressibleByStringLiteral {
+    /// Creates an attribute from a string literal.
+    ///
+    /// A literal is written by the programmer, so an invalid one is a bug to be caught on first
+    /// run rather than handled. Use ``init(_:)`` for anything else.
+    ///
+    /// - parameter value: The string literal.
+    /// - Precondition: `value` is a `"\" atom`; this traps if it isn't.
+    public init(stringLiteral value: String) {
+        precondition(Self.isValidAttribute(value), "Invalid mailbox attribute: \(String(reflecting: value))")
+        self.init(unchecked: value)
     }
 }
 
@@ -272,7 +305,9 @@ extension EncodeBuffer {
 
     @discardableResult mutating func writeMailboxListFlags(_ flags: [MailboxInfo.Attribute]) -> Int {
         self.writeArray(flags, parenthesis: false) { (element, self) in
-            self.writeString(element.backing)
+            // Verbatim: `"\" atom` needs no quoting.
+            assert(MailboxInfo.Attribute.isValidAttribute(element.backing))
+            return self.writeString(element.backing)
         }
     }
 }
