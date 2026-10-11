@@ -27,6 +27,10 @@ struct BodyFieldEncodingTests {
             EncodeFixture.bodyEncoding(.base64, #""BASE64""#),
             EncodeFixture.bodyEncoding(.quotedPrintable, #""QUOTED-PRINTABLE""#),
             EncodeFixture.bodyEncoding(.init("some"), "\"SOME\""),
+            // Must be escaped / a literal, not spliced into `"…"`:
+            EncodeFixture.bodyEncoding(.init(#"x" 0 0) UID 9 ("#), #""X\" 0 0) UID 9 (""#),
+            EncodeFixture.bodyEncoding(.init(#"a\b"#), #""A\\B""#),
+            EncodeFixture.bodyEncoding(.init("x\r\n* BYE"), "{8}\r\nX\r\n* BYE"),
         ]
     )
     func encoding(_ fixture: EncodeFixture<BodyStructure.Encoding>) {
@@ -46,6 +50,18 @@ struct BodyFieldEncodingTests {
     )
     func parse(_ fixture: ParseFixture<BodyStructure.Encoding?>) {
         fixture.checkParsing()
+    }
+
+    @Test(
+        "encode/parse round-trip",
+        arguments: ["7BIT", "QUOTED-PRINTABLE", "SOME", #"X" 0 0) UID 9 ("#, #"A\B"#, "X\r\n* BYE"]
+    )
+    func roundTrip(_ value: String) {
+        TestUtilities.expectRoundTrip(
+            BodyStructure.Encoding(value),
+            encoder: { $0.writeBodyEncoding($1) },
+            parser: GrammarParser().parseBodyEncoding
+        )
     }
 
     @Test("nil encoding encodes as NIL")
