@@ -255,22 +255,31 @@ extension Capability {
     /// - SeeAlso: [RFC 4978 IMAP Compression](https://datatracker.ietf.org/doc/html/rfc4978)
     public struct CompressionKind: Hashable, Sendable {
         /// DEFLATE compression algorithm (RFC 1951).
-        public static let deflate = Self(unchecked: "DEFLATE")
+        public static let deflate: Self = "DEFLATE"
 
         /// The raw string value of the compression kind.
-        var rawValue: String
+        let rawValue: String
 
-        /// Creates a new compression kind from a string.
+        /// Creates a compression kind from a string, if the uppercased string is an `atom`.
         ///
         /// The provided value is uppercased for consistency with IMAP protocol conventions.
         ///
+        /// A string literal resolves to ``init(stringLiteral:)`` instead, which traps rather than
+        /// returning `nil`.
+        ///
         /// - parameter value: The compression kind as a string (for example, DEFLATE).
-        public init(_ value: String) {
-            self.rawValue = value.uppercased()
+        /// - returns: A new kind, or `nil` if the uppercased `value` is not an `atom`.
+        public init?(_ value: String) {
+            let normalized = value.uppercased()
+            guard normalized.isIMAPAtom else { return nil }
+            self.rawValue = normalized
         }
 
-        fileprivate init(unchecked: String) {
-            self.rawValue = unchecked
+        /// Uppercases, like ``init(_:)``.
+        init(unchecked value: String) {
+            let normalized = value.uppercased()
+            assert(normalized.isIMAPAtom)
+            self.rawValue = normalized
         }
     }
 
@@ -618,9 +627,28 @@ extension Capability {
 
 // MARK: - Capability to String conversion
 
+extension Capability.CompressionKind: ExpressibleByStringLiteral {
+    /// Creates a compression kind from a string literal, uppercased.
+    ///
+    /// A literal is written by the programmer, so an invalid one is a bug to be caught on first
+    /// run rather than handled. Use ``init(_:)`` for anything else.
+    ///
+    /// - parameter value: The string literal.
+    /// - Precondition: the uppercased `value` is an `atom`; this traps if it isn't.
+    public init(stringLiteral value: String) {
+        precondition(value.uppercased().isIMAPAtom, "Invalid compression kind: \(String(reflecting: value))")
+        self.init(unchecked: value)
+    }
+}
+
 extension String {
     public init(_ capability: Capability) {
         self = capability.rawValue
+    }
+
+    /// Creates a `String` from a ``Capability/CompressionKind``, for example `DEFLATE`.
+    public init(_ other: Capability.CompressionKind) {
+        self = other.rawValue
     }
 }
 
