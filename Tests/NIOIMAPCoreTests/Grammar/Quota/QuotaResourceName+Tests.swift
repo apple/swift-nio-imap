@@ -78,7 +78,7 @@ struct QuotaResourceNameTests {
         #expect(String(lowercase) == "storage")
     }
 
-    #if !os(iOS) && !os(watchOS) && !os(tvOS) && !os(visionOS)
+    #if !os(iOS) && !os(watchOS) && !os(tvOS) && !os(visionOS) && !os(Android)
     @Test("an invalid string literal traps") func stringLiteralPreconditionFailure() async {
         await #expect(
             processExitsWith: ExitTest.Condition.failure,

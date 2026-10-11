@@ -62,7 +62,7 @@ struct UserAuthenticationMechanismTests {
         fixture.checkParsing()
     }
 
-    #if !os(iOS) && !os(watchOS) && !os(tvOS) && !os(visionOS)
+    #if !os(iOS) && !os(watchOS) && !os(tvOS) && !os(visionOS) && !os(Android)
     @Test("both nil arguments triggers precondition failure") func bothNilPreconditionFailure() async {
         await #expect(
             processExitsWith: ExitTest.Condition.failure,
