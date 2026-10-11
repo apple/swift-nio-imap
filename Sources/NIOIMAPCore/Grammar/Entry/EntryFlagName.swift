@@ -12,33 +12,32 @@
 //
 //===----------------------------------------------------------------------===//
 
-/// A metadata entry name for a system flag used with metadata operations (RFC 5464).
+/// The flag whose modification sequence a `SEARCH MODSEQ` criterion tests (RFC 7162 `entry-flag-name`).
 ///
-/// **Requires server capability:** ``Capability/metadata`` or ``Capability/metadataServer``
+/// **Requires server capability:** ``Capability/condStore``
 ///
-/// Wraps an ``AttributeFlag`` to represent it as a metadata entry name in the special
-/// `/flags/` namespace. Flag entries allow metadata operations on flag modification sequences
-/// through the entry name format `/flags/flagname`. See [RFC 5464](https://datatracker.ietf.org/doc/html/rfc5464)
-/// for details on metadata entry organization.
+/// Wraps an ``AttributeFlag`` as an entry name in the `/flags/` namespace:
+/// ```
+/// entry-flag-name = DQUOTE "/flags/" attr-flag DQUOTE
+/// ```
 ///
 /// ### Example
 ///
 /// ```
-/// C: A001 GETMETADATA "INBOX" DEPTH 0 ("/flags/\\Seen")
-/// S: * METADATA "INBOX" ("/flags/\\Seen" "12345")
-/// S: A001 OK GETMETADATA completed
+/// C: a SEARCH MODSEQ "/flags/\\draft" all 620162338
+/// S: * SEARCH 2 5 6 7 11 12 18 19 20 23 (MODSEQ 917162500)
+/// S: a OK Search complete
 /// ```
 ///
-/// The entry name `/flags/\Seen` is represented using ``EntryFlagName`` wrapping the
-/// ``AttributeFlag`` for `\Seen`. The value `12345` is the modification sequence for that flag.
+/// The entry name `"/flags/\\draft"` is an ``EntryFlagName`` wrapping the ``AttributeFlag`` `\draft`.
 ///
 /// ## Related types
 ///
-/// - See ``AttributeFlag`` for system flag representation
-/// - See ``MetadataEntryName`` for general metadata entry names
-/// - See ``SearchModificationSequence`` for flag modification sequences in search operations
+/// - See ``AttributeFlag`` for the flag
+/// - See ``EntryKindRequest`` for the `priv` / `shared` / `all` that follows
+/// - See ``SearchModificationSequence`` for the `MODSEQ` criterion
 ///
-/// - SeeAlso: [RFC 5464](https://datatracker.ietf.org/doc/html/rfc5464)
+/// - SeeAlso: [RFC 7162 Section 3.1.5](https://datatracker.ietf.org/doc/html/rfc7162#section-3.1.5)
 public struct EntryFlagName: Hashable, Sendable {
     /// The flag wrapped as a metadata entry.
     ///

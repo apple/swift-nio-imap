@@ -14,49 +14,43 @@
 
 import struct NIO.ByteBuffer
 
-/// Specifies which type of metadata entries to query in `GETMETADATA` commands (RFC 5464).
+/// Which metadata items a `SEARCH MODSEQ` criterion considers (RFC 7162 `entry-type-req`).
 ///
-/// **Requires server capability:** ``Capability/metadata`` or ``Capability/metadataServer``
+/// **Requires server capability:** ``Capability/condStore``
 ///
-/// Entry kind options determine whether metadata operations target private entries (visible only
-/// to the authenticated user), shared entries (visible to all users), or both. This allows clients
-/// to restrict metadata queries to specific visibility scopes. See [RFC 5464 Section 3.3](https://datatracker.ietf.org/doc/html/rfc5464#section-3.3).
+/// A flag's modification sequence can be tracked separately for private (per-user) and shared
+/// metadata items. This selects which of them the `MODSEQ` criterion compares against:
+/// ```
+/// entry-type-req  = entry-type-resp / "all"
+/// entry-type-resp = "priv" / "shared"
+/// ```
 ///
 /// ### Example
 ///
 /// ```
-/// C: A001 GETMETADATA (DEPTH 0) "INBOX" ALL ("/flags/\\Seen")
-/// S: * METADATA "INBOX" ("/flags/\\Seen" "12345")
-/// S: A001 OK GETMETADATA completed
+/// C: a SEARCH MODSEQ "/flags/\\draft" all 620162338
+/// S: * SEARCH 2 5 6 7 11 12 18 19 20 23 (MODSEQ 917162500)
+/// S: a OK Search complete
 /// ```
 ///
-/// The `ALL` option in the command queries modification sequences for the specified flags,
-/// considering both private and shared metadata sources.
+/// `all` is ``EntryKindRequest/all``: the larger of the private and shared modification sequences.
 ///
 /// ## Related types
 ///
-/// - See ``EntryKindResponse`` for server-returned entry type information
-/// - See ``MetadataOption`` for other metadata query options
-/// - See ``EntryFlagName`` for flag entry names
+/// - See ``EntryFlagName`` for the `"/flags/…"` entry name
+/// - See ``SearchModificationSequence`` for the `MODSEQ` criterion
 ///
-/// - SeeAlso: [RFC 5464 Section 3.3](https://datatracker.ietf.org/doc/html/rfc5464#section-3.3)
+/// - SeeAlso: [RFC 7162 Section 3.1.5](https://datatracker.ietf.org/doc/html/rfc7162#section-3.1.5)
 public struct EntryKindRequest: Hashable, Sendable {
     fileprivate var backing: String
 
-    /// Search or retrieve private metadata items (visible only to the authenticated user).
-    ///
-    /// Targets entries in the `/private/` namespace. From [RFC 5464 Section 3.3](https://datatracker.ietf.org/doc/html/rfc5464#section-3.3).
+    /// `priv`: private metadata items (visible only to the authenticated user).
     public static let `private` = Self(backing: "priv")
 
-    /// Search or retrieve shared metadata items (visible to all users).
-    ///
-    /// Targets entries in the `/shared/` namespace. From [RFC 5464 Section 3.3](https://datatracker.ietf.org/doc/html/rfc5464#section-3.3).
+    /// `shared`: shared metadata items (visible to all users).
     public static let shared = Self(backing: "shared")
 
-    /// Search or retrieve both private and shared metadata items.
-    ///
-    /// For modification sequence tracking, returns the largest modification sequence value
-    /// across both private and shared entry types. From [RFC 5464 Section 3.3](https://datatracker.ietf.org/doc/html/rfc5464#section-3.3).
+    /// `all`: both; the larger of the two modification sequences is used.
     public static let all = Self(backing: "all")
 }
 
