@@ -885,7 +885,7 @@ extension CommandEncodeBuffer {
     }
 
     private mutating func writeCommandKind_compress(kind: Capability.CompressionKind) -> Int {
-        self.buffer.writeString("COMPRESS \(kind.rawValue)")
+        self.buffer.writeString("COMPRESS ") + self.buffer.writeAtom(kind.rawValue)
     }
 
     private mutating func writeCommandKind_uidBatches(batchSize: Int, batchRange: ClosedRange<Int>?) -> Int {

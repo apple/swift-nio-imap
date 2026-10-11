@@ -18,6 +18,40 @@ import Testing
 
 @Suite("Capability")
 struct CapabilityTests {
+    /// A compression kind is written verbatim in COMPRESS, so ``Capability/CompressionKind/init(_:)``
+    /// is the only thing between a caller that builds kinds from untrusted input and an injected
+    /// command.
+    @Test("invalid compression kinds are rejected", arguments: invalidKindStrings)
+    func invalidCompressionKinds(_ string: String) {
+        #expect(Capability.CompressionKind(string) == nil)
+    }
+
+    @Test("valid compression kinds round-trip", arguments: ["DEFLATE", "deflate", "X-FOO"])
+    func validCompressionKindsRoundTrip(_ string: String) throws {
+        let kind = try #require(Capability.CompressionKind(string))
+        #expect(String(kind) == string.uppercased())
+        ParseFixture(
+            input: "COMPRESS \(string)",
+            terminator: "\r",
+            expected: .success(Command.compress(kind)),
+            parser: GrammarParser().parseCommand
+        ).checkParsing()
+    }
+
+    #if !os(iOS) && !os(watchOS) && !os(tvOS) && !os(visionOS) && !os(Android)
+    @Test("an invalid compression kind literal traps") func compressionKindLiteralPreconditionFailure() async {
+        let result = await #expect(
+            processExitsWith: ExitTest.Condition.failure,
+            observing: [\.standardErrorContent],
+            performing: {
+                let kind: Capability.CompressionKind = "not an atom"
+                _ = kind
+            }
+        )
+        TestUtilities.expectTrapMessage(result, "Invalid compression kind")
+    }
+    #endif
+
     @Test(
         "name and value properties",
         arguments: [
@@ -259,6 +293,20 @@ struct CapabilityTests {
 }
 
 // MARK: -
+
+private let invalidKindStrings = [
+    "",  // `atom` is `1*ATOM-CHAR`.
+    "a b",
+    "a(b",
+    "a]b",
+    #"a"b"#,
+    #"a\b"#,
+    "a%b",
+    "a*b",
+    "grüezi",
+    "a\u{7F}b",
+    "DEFLATE\r\nA2 DELETE INBOX",  // Would inject a whole command.
+]
 
 struct CapabilityFixture: Sendable, CustomTestStringConvertible {
     var name: String
