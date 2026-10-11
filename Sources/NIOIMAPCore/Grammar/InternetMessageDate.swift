@@ -70,11 +70,3 @@ extension InternetMessageDate: ExpressibleByStringLiteral {
         self.value = value
     }
 }
-
-// MARK: - Encoding
-
-extension EncodeBuffer {
-    @discardableResult mutating func writeInternetMessageDate(_ date: InternetMessageDate) -> Int {
-        self.writeString(date.value)
-    }
-}

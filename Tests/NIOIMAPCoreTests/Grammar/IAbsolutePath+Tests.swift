@@ -19,20 +19,6 @@ import Testing
 @Suite("AbsoluteMessagePath")
 struct AbsoluteMessagePathTests {
     @Test(arguments: [
-        EncodeFixture.absoluteMessagePath(
-            .init(command: .messageList(.init(mailboxUIDValidity: .init(encodeMailbox: "test")))),
-            "/test"
-        ),
-        EncodeFixture.absoluteMessagePath(
-            .init(command: .messageList(.init(mailboxUIDValidity: .init(encodeMailbox: "INBOX")))),
-            "/INBOX"
-        ),
-    ])
-    func encode(_ fixture: EncodeFixture<AbsoluteMessagePath>) {
-        fixture.checkEncoding()
-    }
-
-    @Test(arguments: [
         ParseFixture.absoluteMessagePath("/", " ", expected: .success(.init(command: nil))),
         ParseFixture.absoluteMessagePath(
             "/test",
@@ -46,17 +32,6 @@ struct AbsoluteMessagePathTests {
     ])
     func parse(_ fixture: ParseFixture<AbsoluteMessagePath>) {
         fixture.checkParsing()
-    }
-}
-
-extension EncodeFixture<AbsoluteMessagePath> {
-    fileprivate static func absoluteMessagePath(_ input: T, _ expectedString: String) -> Self {
-        .init(
-            input: input,
-            bufferKind: .defaultServer,
-            expectedStrings: [expectedString],
-            encoder: { $0.writeAbsoluteMessagePath($1) }
-        )
     }
 }
 

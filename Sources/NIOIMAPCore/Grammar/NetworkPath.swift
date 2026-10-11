@@ -69,14 +69,3 @@ public struct NetworkPath: Hashable, Sendable {
         self.command = query
     }
 }
-
-// MARK: - Encoding
-
-extension EncodeBuffer {
-    @discardableResult mutating func writeNetworkPath(_ path: NetworkPath) -> Int {
-        self.writeString("//") + self.writeIMAPServer(path.server) + self.writeString("/")
-            + self.writeIfExists(path.command) { command in
-                self.writeURLCommand(command)
-            }
-    }
-}

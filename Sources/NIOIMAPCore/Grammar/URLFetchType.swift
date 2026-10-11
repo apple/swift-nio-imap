@@ -89,35 +89,3 @@ public enum URLFetchType: Hashable, Sendable {
     /// for specifying portions of an already-identified message section.
     case partialOnly(MessagePath.ByteRange)
 }
-
-// MARK: - Encoding
-
-extension EncodeBuffer {
-    @discardableResult mutating func writeURLFetchType(_ data: URLFetchType) -> Int {
-        switch data {
-        case .refUidSectionPartial(ref: let ref, uid: let uid, section: let section, partial: let range):
-            return self.writeEncodedMailboxUIDValidity(ref) + self.writeIUIDOnly(uid)
-                + self.writeIfExists(section) { section in
-                    self.writeString("/") + self.writeURLMessageSectionOnly(section)
-                }
-                + self.writeIfExists(range) { range in
-                    self.writeString("/") + self.writeMessagePathByteRangeOnly(range)
-                }
-        case .uidSectionPartial(uid: let uid, section: let section, partial: let range):
-            return self.writeIUIDOnly(uid)
-                + self.writeIfExists(section) { section in
-                    self.writeString("/") + self.writeURLMessageSectionOnly(section)
-                }
-                + self.writeIfExists(range) { range in
-                    self.writeString("/") + self.writeMessagePathByteRangeOnly(range)
-                }
-        case .sectionPartial(section: let section, partial: let partial):
-            return self.writeURLMessageSectionOnly(section)
-                + self.writeIfExists(partial) { partial in
-                    self.writeString("/") + self.writeMessagePathByteRangeOnly(partial)
-                }
-        case .partialOnly(let partial):
-            return self.writeMessagePathByteRangeOnly(partial)
-        }
-    }
-}
