@@ -23,7 +23,7 @@ struct ExpireTests {
             .init(
                 dateTime: .init(
                     date: .init(year: 1234, month: 12, day: 20),
-                    time: .init(hour: 12, minute: 34, second: 56, fraction: 123456)
+                    time: .init(hour: 12, minute: 34, second: 56, fraction: "123456")
                 )
             ),
             ";EXPIRE=1234-12-20T12:34:56.123456"
@@ -32,7 +32,7 @@ struct ExpireTests {
             .init(
                 dateTime: .init(
                     date: .init(year: 2025, month: 1, day: 1),
-                    time: .init(hour: 0, minute: 0, second: 0, fraction: 0)
+                    time: .init(hour: 0, minute: 0, second: 0, fraction: "0")
                 )
             ),
             ";EXPIRE=2025-01-01T00:00:00.0"
@@ -41,7 +41,7 @@ struct ExpireTests {
             .init(
                 dateTime: .init(
                     date: .init(year: 2099, month: 12, day: 31),
-                    time: .init(hour: 23, minute: 59, second: 59, fraction: 999999)
+                    time: .init(hour: 23, minute: 59, second: 59, fraction: "999999")
                 )
             ),
             ";EXPIRE=2099-12-31T23:59:59.999999"

@@ -102,10 +102,6 @@ public struct FullDate: Hashable, Sendable {
 /// Represents a time value as defined in RFC 3339, containing hour, minute, second,
 /// and an optional fractional-second component. It is used in combination with ``FullDate``
 /// to form a complete ``FullDateTime``.
-///
-/// The fractional-second field is partially dynamic: the integer value you provide is written
-/// directly to the output. For example, providing `123` writes `.123` and providing `1234`
-/// writes `.1234`.
 public struct FullTime: Hashable, Sendable {
     /// The hour of the day, 0-based in the range `0...23`.
     ///
@@ -120,13 +116,8 @@ public struct FullTime: Hashable, Sendable {
 
     /// The fractional-second component, or `nil` if not included.
     ///
-    /// A partially-dynamic field that does not directly represent milliseconds,
-    /// microseconds, or any specific fractional unit. The number you provide is the number
-    /// that will be written directly to the output. For example:
-    /// - `123` encodes as `HH:MM:SS.123`
-    /// - `1234` encodes as `HH:MM:SS.1234`
-    /// - `nil` encodes as `HH:MM:SS` (no fraction)
-    public var fraction: Int?
+    /// For example, `"05"` encodes as `HH:MM:SS.05`, and `nil` as `HH:MM:SS`.
+    public var fraction: Fraction?
 
     /// Creates a new `FullTime`.
     ///
@@ -137,12 +128,78 @@ public struct FullTime: Hashable, Sendable {
     ///   - hour: The hour. 0-based in the range `0...23`.
     ///   - minute: The minute. 0-based in the range `0...59`.
     ///   - second: The second. 0-based in the range `0...59`.
-    ///   - fraction: The fractional-second component (optional). Written directly as provided.
-    public init(hour: Int, minute: Int, second: Int, fraction: Int? = nil) {
+    ///   - fraction: The fractional-second component (optional).
+    public init(hour: Int, minute: Int, second: Int, fraction: Fraction? = nil) {
         self.hour = hour
         self.minute = minute
         self.second = second
         self.fraction = fraction
+    }
+}
+
+extension FullTime {
+    /// The digits of a fractional second, without the leading `.`.
+    ///
+    /// Digits, not a number: `"05"` (0.05 s) and `"5"` (0.5 s) differ.
+    ///
+    /// ## Validity
+    ///
+    /// The digits are written to the wire verbatim, so anything that isn't `1*DIGIT` is rejected:
+    ///
+    /// - ``init(_:)`` returns `nil`. Use it for digits derived from input.
+    /// - ``init(stringLiteral:)`` traps. A literal is written by the programmer, so an invalid one is a
+    ///   bug to be caught on first run rather than handled.
+    public struct Fraction: Hashable, Sendable {
+        let stringValue: String
+
+        /// Creates a fraction from its digits, if the string is `1*DIGIT`.
+        ///
+        /// A string literal resolves to ``init(stringLiteral:)`` instead, which traps rather than
+        /// returning `nil`.
+        ///
+        /// - parameter stringValue: The digits after the `.`, for example `05`.
+        /// - returns: A new fraction, or `nil` if `stringValue` is not one or more ASCII digits.
+        public init?(_ stringValue: String) {
+            guard Self.isValidFraction(stringValue) else { return nil }
+            self.stringValue = stringValue
+        }
+
+        init(unchecked stringValue: String) {
+            assert(Self.isValidFraction(stringValue))
+            self.stringValue = stringValue
+        }
+
+        /// Whether the given string is the digits of a `time-secfrac`
+        /// ([RFC 3339 Section 5.6](https://datatracker.ietf.org/doc/html/rfc3339#section-5.6)):
+        /// ```
+        /// time-secfrac = "." 1*DIGIT
+        /// ```
+        static func isValidFraction(_ string: String) -> Bool {
+            !string.isEmpty && string.utf8.allSatisfy(\.isNum)
+        }
+    }
+}
+
+extension String {
+    /// Creates a `String` from a ``FullTime/Fraction``: its digits, without the leading `.`.
+    ///
+    /// - parameter other: The fraction to convert.
+    public init(_ other: FullTime.Fraction) {
+        self = other.stringValue
+    }
+}
+
+extension FullTime.Fraction: ExpressibleByStringLiteral {
+    /// Creates a fraction from a string literal.
+    ///
+    /// A literal is written by the programmer, so an invalid one is a bug to be caught on first
+    /// run rather than handled. Use ``init(_:)`` for anything else.
+    ///
+    /// - parameter value: The string literal.
+    /// - Precondition: `value` is one or more ASCII digits; this traps if it isn't.
+    public init(stringLiteral value: String) {
+        precondition(Self.isValidFraction(value), "Invalid fraction: \(String(reflecting: value))")
+        self.init(unchecked: value)
     }
 }
 
@@ -166,7 +223,7 @@ extension EncodeBuffer {
         let second = self.padInteger(data.second, minimum: 2)
         return self.writeString("\(hour):\(minute):\(second)")
             + self.writeIfExists(data.fraction) { fraction in
-                self.writeString(".\(fraction)")
+                self.writeString(".\(fraction.stringValue)")
             }
     }
 

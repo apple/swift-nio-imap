@@ -69,9 +69,9 @@ struct FullDateTimeTests {
             EncodeFixture.fullTime(.init(hour: 1, minute: 2, second: 3), "01:02:03"),
             EncodeFixture.fullTime(.init(hour: 12, minute: 30, second: 45), "12:30:45"),
             EncodeFixture.fullTime(.init(hour: 23, minute: 59, second: 59), "23:59:59"),
-            EncodeFixture.fullTime(.init(hour: 1, minute: 2, second: 3, fraction: 4), "01:02:03.4"),
-            EncodeFixture.fullTime(.init(hour: 12, minute: 30, second: 45, fraction: 123), "12:30:45.123"),
-            EncodeFixture.fullTime(.init(hour: 0, minute: 0, second: 0, fraction: 1), "00:00:00.1"),
+            EncodeFixture.fullTime(.init(hour: 1, minute: 2, second: 3, fraction: "4"), "01:02:03.4"),
+            EncodeFixture.fullTime(.init(hour: 12, minute: 30, second: 45, fraction: "123"), "12:30:45.123"),
+            EncodeFixture.fullTime(.init(hour: 0, minute: 0, second: 0, fraction: "1"), "00:00:00.1"),
         ]
     )
     func encodeFullTime(_ fixture: EncodeFixture<FullTime>) {
@@ -116,7 +116,7 @@ struct FullDateTimeTests {
             ParseFixture.fullTime(
                 "12:34:56.123456",
                 " ",
-                expected: .success(.init(hour: 12, minute: 34, second: 56, fraction: 123456))
+                expected: .success(.init(hour: 12, minute: 34, second: 56, fraction: "123456"))
             ),
             ParseFixture.fullTime("a", "", expected: .failure),
             ParseFixture.fullTime("1234:56:12", "", expected: .failure),
@@ -125,6 +125,32 @@ struct FullDateTimeTests {
     )
     func parseFullTime(_ fixture: ParseFixture<FullTime>) {
         fixture.checkParsing()
+    }
+
+    @Test(
+        "parse then encode reproduces the input",
+        arguments: ["12:34:56", "12:34:56.5", "12:34:56.05", "12:34:56.000", "12:34:56.123456"]
+    )
+    func parseThenEncode(_ input: String) throws {
+        var parseBuffer = ParseBuffer(ByteBuffer(string: input + " "))
+        let parsed = try GrammarParser().parseFullTime(buffer: &parseBuffer, tracker: .testTracker)
+        var encodeBuffer = EncodeBuffer.serverEncodeBuffer(
+            buffer: ByteBuffer(),
+            options: ResponseEncodingOptions(),
+            loggingMode: false
+        )
+        encodeBuffer.writeFullTime(parsed)
+        #expect(String(buffer: encodeBuffer.nextChunk().bytes) == input)
+    }
+
+    @Test("invalid fraction is rejected", arguments: ["", " 1", "1a", "-1", "1.5", "\u{0663}"])
+    func invalidFraction(_ digits: String) {
+        #expect(FullTime.Fraction(digits) == nil)
+    }
+
+    @Test("valid fraction is accepted", arguments: ["0", "05", "000", "123456"])
+    func validFraction(_ digits: String) {
+        #expect(FullTime.Fraction(digits).map { String($0) } == digits)
     }
 
     #if !os(iOS) && !os(watchOS) && !os(tvOS) && !os(visionOS) && !os(Android)
@@ -144,6 +170,18 @@ struct FullDateTimeTests {
                 _ = FullDate(year: 2024, month: 1, day: 0)
             }
         )
+    }
+
+    @Test("an invalid fraction literal traps") func fractionLiteralPreconditionFailure() async {
+        let result = await #expect(
+            processExitsWith: .failure,
+            observing: [\.standardErrorContent],
+            performing: {
+                let fraction: FullTime.Fraction = "1a"
+                _ = fraction
+            }
+        )
+        TestUtilities.expectTrapMessage(result, "Invalid fraction")
     }
     #endif
 }
