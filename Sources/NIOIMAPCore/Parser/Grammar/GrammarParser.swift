@@ -1044,68 +1044,47 @@ extension GrammarParser {
                     return try self.parseNumber(buffer: &buffer, tracker: tracker)
                 }
             )
-            return .init(userAuthenticationMechanism: info, host: host, port: port)
+            guard let port else {
+                return .init(userAuthenticationMechanism: info, host: host, port: nil)
+            }
+            guard let validPort = UInt16(exactly: port) else {
+                throw ParserError(hint: "Port \(port) out of range")
+            }
+            return .init(userAuthenticationMechanism: info, host: host, port: validPort)
         }
     }
 
-    func parseHost(buffer: inout ParseBuffer, tracker: StackTracker) throws -> String {
-        // TODO: Enforce IPv6 rules RFC 3986 URI-GEN
-        func parseHost_ipv6(buffer: inout ParseBuffer, tracker: StackTracker) throws -> String {
-            try self.parseAtom(buffer: &buffer, tracker: tracker)
-        }
-
-        // TODO: Enforce IPv6 rules RFC 3986 URI-GEN
-        func parseHost_future(buffer: inout ParseBuffer, tracker: StackTracker) throws -> String {
-            try self.parseAtom(buffer: &buffer, tracker: tracker)
-        }
-
-        func parseHost_literal(buffer: inout ParseBuffer, tracker: StackTracker) throws -> String {
+    /// Reads the longest run of `host` characters, then validates it as a whole: `[::1]`,
+    /// `192.0.2.1`, `imap.example.com`.
+    func parseHost(buffer: inout ParseBuffer, tracker: StackTracker) throws -> IMAPServer.Host {
+        func parseHost_ipLiteral(buffer: inout ParseBuffer, tracker: StackTracker) throws -> String {
             try PL.parseFixedString("[", buffer: &buffer, tracker: tracker)
-            let address = try PL.parseOneOf(
-                parseHost_ipv6,
-                parseHost_future,
+            let address = try PL.parseOneOrMoreCharacters(buffer: &buffer, tracker: tracker) {
+                $0.isUnreserved || $0.isSubDelims || $0 == UInt8(ascii: ":")
+            }
+            try PL.parseFixedString("]", buffer: &buffer, tracker: tracker)
+            return "[\(String(buffer: address))]"
+        }
+
+        func parseHost_registeredName(buffer: inout ParseBuffer, tracker: StackTracker) throws -> String {
+            let name = try PL.parseZeroOrMoreCharacters(buffer: &buffer, tracker: tracker) {
+                URLCharacterClass.registeredName.contains($0) || $0 == UInt8(ascii: "%")
+            }
+            return String(buffer: name)
+        }
+
+        return try PL.composite(buffer: &buffer, tracker: tracker) { buffer, tracker in
+            let string = try PL.parseOneOf(
+                parseHost_ipLiteral,
+                parseHost_registeredName,
                 buffer: &buffer,
                 tracker: tracker
             )
-            try PL.parseFixedString("]", buffer: &buffer, tracker: tracker)
-            return address
-        }
-
-        func parseHost_regularName(buffer: inout ParseBuffer, tracker: StackTracker) throws -> String {
-            var newBuffer = ByteBuffer()
-            while true {
-                do {
-                    // FIXME: This is very inefficient
-                    let chars = try self.parseUChar(buffer: &buffer, tracker: tracker)
-                    newBuffer.writeBytes(chars)
-                } catch is ParserError {
-                    break
-                }
+            guard let host = IMAPServer.Host(string) else {
+                throw ParserError(hint: "Invalid host \(string)")
             }
-
-            let hostName = try ParserLibrary.parseBufferAsUTF8(newBuffer)
-            return hostName
+            return host
         }
-
-        // TODO: This isn't great, but it is functional. Perhaps make it actually enforce IPv4 rules
-        func parseHost_ipv4(buffer: inout ParseBuffer, tracker: StackTracker) throws -> String {
-            let num1 = try self.parseNumber(buffer: &buffer, tracker: tracker)
-            try PL.parseFixedString(".", buffer: &buffer, tracker: tracker)
-            let num2 = try self.parseNumber(buffer: &buffer, tracker: tracker)
-            try PL.parseFixedString(".", buffer: &buffer, tracker: tracker)
-            let num3 = try self.parseNumber(buffer: &buffer, tracker: tracker)
-            try PL.parseFixedString(".", buffer: &buffer, tracker: tracker)
-            let num4 = try self.parseNumber(buffer: &buffer, tracker: tracker)
-            return "\(num1).\(num2).\(num3).\(num4)"
-        }
-
-        return try PL.parseOneOf(
-            parseHost_literal,
-            parseHost_regularName,
-            parseHost_ipv4,
-            buffer: &buffer,
-            tracker: tracker
-        )
     }
 
     func parseEncodedMailboxUIDValidity(buffer: inout ParseBuffer, tracker: StackTracker) throws -> MailboxUIDValidity {
