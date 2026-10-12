@@ -88,7 +88,7 @@ struct UIDTests {
         #expect(unknown.rawValue == 99)
     }
 
-    #if !os(iOS) && !os(watchOS) && !os(tvOS) && !os(visionOS)
+    #if !os(iOS) && !os(watchOS) && !os(tvOS) && !os(visionOS) && !os(Android)
     @Test("advanced(by:) overflow triggers precondition failure") func advancedByOverflowPreconditionFailure() async {
         await #expect(
             processExitsWith: ExitTest.Condition.failure,

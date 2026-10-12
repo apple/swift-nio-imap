@@ -392,4 +392,36 @@ enum IMAPConnectionLifecycleTests {
             "Connection diagnostics should identify their connection: \(record.metadata)"
         )
     }
+
+    /// Handlers added after `connect` can miss the greeting, stalling `withConnection`.
+    @Test(.timeLimit(.minutes(3)))
+    static func handlersAreInstalledBeforeTheChannelIsRegistered() async throws {
+        let server = try await LoopbackServer.greetThenStayOpen()
+        defer { server.shutdown() }
+
+        let connection = IMAPConnection(
+            configuration: IMAPConnection.Configuration(
+                hostname: "127.0.0.1",
+                port: server.port,
+                useTLS: false,
+                logging: .noLogging
+            )
+        )
+        // Runs before `makeChannel`'s initializer, so the probe sees the pipeline at registration.
+        let probe = RegistrationProbe()
+        let bootstrap = ClientBootstrap(group: MultiThreadedEventLoopGroup.sharedEventLoopGroup)
+            .channelInitializer { channel in
+                channel.eventLoop.makeCompletedFuture {
+                    try channel.pipeline.syncOperations.addHandler(probe.handler)
+                }
+            }
+
+        let channel = try await connection.makeChannel(logging: .noLogging, bootstrap: bootstrap)
+        try await channel.executeThenClose { _, _ in }
+
+        #expect(
+            probe.hadIMAPClientHandlerAtRegistration == true,
+            "IMAPClientHandler must be in the pipeline before the channel registers."
+        )
+    }
 }

@@ -372,6 +372,23 @@ extension GrammarParser {
             return .threadID(ThreadID(objectID))
         }
 
+        func parseSearchKey_gmailMessageID(buffer: inout ParseBuffer, tracker: StackTracker) throws -> SearchKey {
+            try PL.parseFixedString("X-GM-MSGID ", buffer: &buffer, tracker: tracker)
+            let (id, _) = try PL.parseUnsignedInt64(buffer: &buffer, tracker: tracker)
+            return .gmailMessageID(id)
+        }
+
+        func parseSearchKey_gmailThreadID(buffer: inout ParseBuffer, tracker: StackTracker) throws -> SearchKey {
+            try PL.parseFixedString("X-GM-THRID ", buffer: &buffer, tracker: tracker)
+            let (id, _) = try PL.parseUnsignedInt64(buffer: &buffer, tracker: tracker)
+            return .gmailThreadID(id)
+        }
+
+        func parseSearchKey_gmailRaw(buffer: inout ParseBuffer, tracker: StackTracker) throws -> SearchKey {
+            try PL.parseFixedString("X-GM-RAW ", buffer: &buffer, tracker: tracker)
+            return .gmailRaw(try self.parseAString(buffer: &buffer, tracker: tracker))
+        }
+
         return try PL.parseOneOf(
             [
                 parseSearchKey_older,
@@ -406,6 +423,9 @@ extension GrammarParser {
                 parseSearchKey_modificationSequence,
                 parseSearchKey_emailID,
                 parseSearchKey_threadID,
+                parseSearchKey_gmailMessageID,
+                parseSearchKey_gmailThreadID,
+                parseSearchKey_gmailRaw,
             ],
             buffer: &buffer,
             tracker: tracker

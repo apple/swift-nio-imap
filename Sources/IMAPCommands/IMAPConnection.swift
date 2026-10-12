@@ -43,7 +43,7 @@ import Synchronization
 ///   untagged `Response` is delivered to _all_ in-flight command handlers (see
 ///   ``send(_:_:)``). Handlers must act only on the responses they care about.
 public final class IMAPConnection: Sendable {
-    private init(
+    init(
         configuration: Configuration
     ) {
         self.configuration = configuration
@@ -498,38 +498,46 @@ public final class IMAPConnection: Sendable {
 // MARK: -
 
 extension IMAPConnection {
-    private func makeChannel(
-        logging: Configuration.Logging
-    ) async throws -> NIOAsyncChannel<Response, IMAPClientHandler.OutboundIn> {
+    typealias AsyncChannel = NIOAsyncChannel<Response, IMAPClientHandler.OutboundIn>
+
+    /// - Parameter bootstrap: For testing.
+    func makeChannel(
+        logging: Configuration.Logging,
+        bootstrap: sending ClientBootstrap = ClientBootstrap(group: MultiThreadedEventLoopGroup.sharedEventLoopGroup)
+    ) async throws -> AsyncChannel {
         let configuration = self.configuration
-        return try await ClientBootstrap(group: MultiThreadedEventLoopGroup.sharedEventLoopGroup)
-            .connect(endpoint: configuration.endpoint)
-            .flatMap { [configuration, logger] channel in
-                channel.eventLoop.makeCompletedFuture {
-                    var handlers: [ChannelHandler] = []
-                    if configuration.useTLS {
-                        handlers.append(
-                            try NIOSSLClientHandler(
-                                context: NIOSSLContext(configuration: .clientDefault),
-                                serverHostname: configuration.endpoint.hostname
-                            )
+        // Install handlers before registration. Added after `connect`, they can miss the greeting.
+        let initializer: @Sendable (Channel) -> EventLoopFuture<AsyncChannel> = { [logger] channel in
+            channel.eventLoop.makeCompletedFuture {
+                var handlers: [ChannelHandler] = []
+                if configuration.useTLS {
+                    handlers.append(
+                        try NIOSSLClientHandler(
+                            context: NIOSSLContext(configuration: .clientDefault),
+                            serverHostname: configuration.endpoint.hostname
                         )
-                    }
-                    switch logging {
-                    case .noLogging:
-                        break
-                    case .logging:
-                        handlers.append(makeInboundDebugHandler(logger: logger))
-                        handlers.append(makeOutboundDebugHandler(logger: logger))
-                    }
-                    handlers.append(IMAPClientHandler())
-                    try channel.pipeline.syncOperations.addHandlers(handlers)
-                    return try NIOAsyncChannel<Response, IMAPClientHandler.OutboundIn>(
-                        wrappingChannelSynchronously: channel
                     )
                 }
+                switch logging {
+                case .noLogging:
+                    break
+                case .logging:
+                    handlers.append(makeInboundDebugHandler(logger: logger))
+                    handlers.append(makeOutboundDebugHandler(logger: logger))
+                }
+                handlers.append(IMAPClientHandler())
+                try channel.pipeline.syncOperations.addHandlers(handlers)
+                return try AsyncChannel(
+                    wrappingChannelSynchronously: channel
+                )
             }
-            .get()
+        }
+        switch configuration.endpoint {
+        case .hostname(let host, port: let port):
+            return try await bootstrap.connect(host: host, port: Int(port), channelInitializer: initializer)
+        case .unixDomainSocket(path: let path):
+            return try await bootstrap.connect(unixDomainSocketPath: path, channelInitializer: initializer)
+        }
     }
 
     private func run(
@@ -658,18 +666,6 @@ extension IMAPConnection {
         }
         for c in all {
             c.yield(response)
-        }
-    }
-}
-
-extension ClientBootstrap {
-    /// Connects to the given configuration endpoint.
-    public func connect(endpoint: IMAPConnection.Configuration.Endpoint) -> EventLoopFuture<Channel> {
-        switch endpoint {
-        case .hostname(let host, port: let port):
-            connect(host: host, port: Int(port))
-        case .unixDomainSocket(path: let path):
-            connect(unixDomainSocketPath: path)
         }
     }
 }

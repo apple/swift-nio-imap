@@ -74,8 +74,7 @@ import NIOIMAP
 // Connect and wrap the channel so the handler's decoded `Response`s and the
 // commands we write flow through async sequences.
 let channel = try await ClientBootstrap(group: MultiThreadedEventLoopGroup.singleton)
-    .connect(host: "mail.example.com", port: 143)
-    .flatMap { channel in
+    .connect(host: "mail.example.com", port: 143) { channel in
         channel.eventLoop.makeCompletedFuture {
             try channel.pipeline.syncOperations.addHandler(IMAPClientHandler())
             return try NIOAsyncChannel<Response, IMAPClientHandler.OutboundIn>(
@@ -83,7 +82,6 @@ let channel = try await ClientBootstrap(group: MultiThreadedEventLoopGroup.singl
             )
         }
     }
-    .get()
 
 try await channel.executeThenClose { inbound, outbound in
     // Send a command.
@@ -180,7 +178,7 @@ See [`Examples/README.md`](Examples/README.md) for details on building and runni
 
 ## Contributing
 
-Contributions are welcome! Please read [CONTRIBUTING.md](CONTRIBUTING.md) and the [Code of Conduct](CODE_OF_CONDUCT.md) before opening a pull request. Security issues should be reported as described in [SECURITY.md](SECURITY.md).
+Contributions are welcome! Please read [CONTRIBUTING.md](CONTRIBUTING.md) and the [Code of Conduct](https://github.com/apple/.github/blob/main/CODE_OF_CONDUCT.md) before opening a pull request. Security issues should be reported as described in [SECURITY.md](SECURITY.md).
 
 ## License
 
