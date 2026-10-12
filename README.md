@@ -74,8 +74,7 @@ import NIOIMAP
 // Connect and wrap the channel so the handler's decoded `Response`s and the
 // commands we write flow through async sequences.
 let channel = try await ClientBootstrap(group: MultiThreadedEventLoopGroup.singleton)
-    .connect(host: "mail.example.com", port: 143)
-    .flatMap { channel in
+    .connect(host: "mail.example.com", port: 143) { channel in
         channel.eventLoop.makeCompletedFuture {
             try channel.pipeline.syncOperations.addHandler(IMAPClientHandler())
             return try NIOAsyncChannel<Response, IMAPClientHandler.OutboundIn>(
@@ -83,7 +82,6 @@ let channel = try await ClientBootstrap(group: MultiThreadedEventLoopGroup.singl
             )
         }
     }
-    .get()
 
 try await channel.executeThenClose { inbound, outbound in
     // Send a command.
