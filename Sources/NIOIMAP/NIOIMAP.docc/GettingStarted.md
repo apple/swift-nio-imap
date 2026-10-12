@@ -14,8 +14,7 @@ Connect to the server, add ``IMAPClientHandler`` to the pipeline, and wrap the c
 import NIOIMAP
 
 let channel = try await ClientBootstrap(group: MultiThreadedEventLoopGroup.singleton)
-    .connect(host: "mail.example.com", port: 143)
-    .flatMap { channel in
+    .connect(host: "mail.example.com", port: 143) { channel in
         channel.eventLoop.makeCompletedFuture {
             try channel.pipeline.syncOperations.addHandler(IMAPClientHandler())
             return try NIOAsyncChannel<Response, IMAPClientHandler.OutboundIn>(
@@ -23,7 +22,6 @@ let channel = try await ClientBootstrap(group: MultiThreadedEventLoopGroup.singl
             )
         }
     }
-    .get()
 ```
 
 For a TLS connection (typically port 993), insert an `NIOSSLClientHandler` ahead of ``IMAPClientHandler`` in the pipeline.

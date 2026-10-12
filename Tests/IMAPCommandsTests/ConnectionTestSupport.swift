@@ -14,6 +14,7 @@
 
 import Logging
 import NIO
+import NIOIMAP
 import Synchronization
 
 // MARK: - Shared state
@@ -213,6 +214,37 @@ private final class GreetAndStayOpenHandler: ChannelInboundHandler {
 
     func channelRead(context: ChannelHandlerContext, data: NIOAny) {
         // Ignore everything the client sends; stay open until the client disconnects.
+    }
+}
+
+// MARK: - Pipeline probe
+
+/// Whether `IMAPClientHandler` was in the pipeline at registration.
+final class RegistrationProbe: Sendable {
+    private let storage = Mutex<Bool?>(nil)
+
+    /// `nil` until registration.
+    var hadIMAPClientHandlerAtRegistration: Bool? {
+        storage.withLock { $0 }
+    }
+
+    var handler: some ChannelInboundHandler {
+        Handler(probe: self)
+    }
+
+    private final class Handler: ChannelInboundHandler {
+        typealias InboundIn = Any
+        let probe: RegistrationProbe
+
+        init(probe: RegistrationProbe) {
+            self.probe = probe
+        }
+
+        func channelRegistered(context: ChannelHandlerContext) {
+            let found = (try? context.pipeline.syncOperations.handler(type: IMAPClientHandler.self)) != nil
+            probe.storage.withLock { $0 = found }
+            context.fireChannelRegistered()
+        }
     }
 }
 
