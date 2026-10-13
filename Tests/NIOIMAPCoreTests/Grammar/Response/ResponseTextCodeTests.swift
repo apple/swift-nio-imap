@@ -93,11 +93,11 @@ struct ResponseTextCodeTests {
         EncodeFixture.responseTextCode(.unseen(345), "UNSEEN 345"),
         EncodeFixture.responseTextCode(
             .urlMechanisms([.init(mechanism: .init("m1"), base64: "b1"), .init(mechanism: .init("m2"), base64: "b2")]),
-            "URLMECH INTERNAL m1=b1 m2=b2"
+            "URLMECH INTERNAL m1=YjE= m2=YjI="
         ),
         EncodeFixture.responseTextCode(
             .urlMechanisms([.init(mechanism: .internal, base64: "test")]),
-            "URLMECH INTERNAL INTERNAL=test"
+            "URLMECH INTERNAL INTERNAL=dGVzdA=="
         ),
         EncodeFixture.responseTextCode(
             .urlMechanisms([.init(mechanism: .internal, base64: nil)]),
