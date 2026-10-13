@@ -504,9 +504,11 @@ extension GrammarParser {
         try PL.composite(buffer: &buffer, tracker: tracker) { buffer, tracker in
             try PL.parseFixedString("QUOTAROOT ", buffer: &buffer, tracker: tracker)
             let mailbox = try parseMailbox(buffer: &buffer, tracker: tracker)
-            try PL.parseSpaces(buffer: &buffer, tracker: tracker)
-            let quotaRoot = try parseAString(buffer: &buffer, tracker: tracker)
-            return .quotaRoot(mailbox, .init(quotaRoot))
+            let quotaRoots = try PL.parseZeroOrMore(buffer: &buffer, tracker: tracker) { buffer, tracker in
+                try PL.parseSpaces(buffer: &buffer, tracker: tracker)
+                return try parseQuotaRoot(buffer: &buffer, tracker: tracker)
+            }
+            return .quotaRoot(mailbox, quotaRoots)
         }
     }
 }
