@@ -195,7 +195,7 @@ enum DownloadTests {
                         .streamingEnd,
                         .finish,
                     ],
-                    completion: .ok(.init(text: "Done \(uid)"))
+                    completion: .ok(.init(text: ResponseText.Text("Done \(uid)")!))
                 )
             }
 

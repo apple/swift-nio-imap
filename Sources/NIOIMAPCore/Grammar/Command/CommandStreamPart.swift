@@ -61,7 +61,7 @@ public enum AppendCommand: Hashable, Sendable {
     ///
     /// - parameter tag: An identifier for the command, typically alphanumeric characters
     /// - parameter appendingTo: The destination mailbox name
-    case start(tag: String, appendingTo: MailboxName)
+    case start(tag: Command.Tag, appendingTo: MailboxName)
 
     /// Metadata for a message to be appended to the mailbox.
     ///
@@ -122,7 +122,7 @@ public enum AppendCommand: Hashable, Sendable {
     /// `\r\n` to complete the command.
     case finish
 
-    public var tag: String? {
+    public var tag: Command.Tag? {
         switch self {
         case .start(let tag, _):
             return tag
@@ -265,8 +265,8 @@ public enum CommandStreamPart: Hashable, Sendable {
     /// command tag to correlate client requests with server responses. Returns `nil` for
     /// ``idleDone`` and ``continuationResponse(_:)`` cases, which are not tagged commands.
     ///
-    /// - Returns: The tag string for tagged commands, or `nil` for untagged operations.
-    public var tag: String? {
+    /// - Returns: The tag for tagged commands, or `nil` for untagged operations.
+    public var tag: Command.Tag? {
         switch self {
         case .idleDone, .continuationResponse:
             return nil
@@ -325,7 +325,7 @@ extension CommandEncodeBuffer {
         switch command {
         case .start(tag: let tag, appendingTo: let mailbox):
             return
-                self.buffer.writeString("\(tag) APPEND ") + self.buffer.writeMailbox(mailbox)
+                self.buffer.writeTag(tag) + self.buffer.writeString(" APPEND ") + self.buffer.writeMailbox(mailbox)
         case .beginMessage(message: let message):
             return self.buffer.writeAppendMessage(message)
         case .messageBytes(var bytes):

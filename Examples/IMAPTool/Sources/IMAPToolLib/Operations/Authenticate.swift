@@ -75,7 +75,7 @@ extension IMAPConnection {
         }
 
         let text = try authResult.getOK()
-        writeStatus("Did authenticate: \(text.text)")
+        writeStatus("Did authenticate: \(String(text.text))")
 
         let postAuthCapabilities = try await capabilitiesFromCodeOrSendCommand(
             text: text
@@ -85,7 +85,7 @@ extension IMAPConnection {
         )
 
         return AuthenticationResult(
-            responseText: text.text,
+            responseText: String(text.text),
             capabilities: postAuthCapabilities
         )
     }

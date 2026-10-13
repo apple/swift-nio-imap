@@ -74,8 +74,8 @@ extension CommandFailed: CustomStringConvertible {
             text = t
         }
         guard let code = text.code else {
-            return "Command \(self.completedCommand.tag) failed: \(s) \(text.text)"
+            return "Command \(self.completedCommand.tag) failed: \(s) \(String(text.text))"
         }
-        return "Command \(self.completedCommand.tag) failed: \(s) \(String(reflecting: code)) \(text.text)"
+        return "Command \(self.completedCommand.tag) failed: \(s) \(String(reflecting: code)) \(String(text.text))"
     }
 }

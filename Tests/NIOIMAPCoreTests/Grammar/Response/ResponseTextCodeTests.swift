@@ -176,9 +176,9 @@ struct ResponseTextCodeTests {
             expected: .success(
                 .namespace(
                     .init(
-                        userNamespace: [.init(string: "Foo", responseExtensions: [:])],
+                        userNamespace: [try! .init(string: "Foo", responseExtensions: [:])],
                         otherUserNamespace: [],
-                        sharedNamespace: [.init(string: "Bar", char: nil, responseExtensions: [:])]
+                        sharedNamespace: [try! .init(string: "Bar", delimiter: nil, responseExtensions: [:])]
                     )
                 )
             )

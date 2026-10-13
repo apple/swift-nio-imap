@@ -114,7 +114,7 @@ extension Output.StringInterpolation {
             self.appendInterpolation(code)
             self.appendLiteral(" ")
         }
-        self.text.append(value.text)
+        self.text.append(String(value.text))
     }
 
     public mutating func appendInterpolation(_ range: NIOIMAP.PartialRange) {
