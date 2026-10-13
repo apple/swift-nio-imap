@@ -164,12 +164,12 @@ extension GrammarParser {
         func parseAttributeFlag_slashed(buffer: inout ParseBuffer, tracker: StackTracker) throws -> AttributeFlag {
             try PL.parseFixedString("\\\\", buffer: &buffer, tracker: tracker)
             let atom = try self.parseAtom(buffer: &buffer, tracker: tracker)
-            return .init("\\\\\(atom)")
+            return .init(unchecked: "\\\\\(atom)")
         }
 
         func parseAttributeFlag_unslashed(buffer: inout ParseBuffer, tracker: StackTracker) throws -> AttributeFlag {
             let atom = try self.parseAtom(buffer: &buffer, tracker: tracker)
-            return .init(atom)
+            return .init(unchecked: atom)
         }
 
         return try PL.parseOneOf(
@@ -261,7 +261,7 @@ extension GrammarParser {
     // capability      = ("AUTH=" auth-type) / atom / "MOVE" / "ENABLE" / "FILTERS"
     func parseCapability(buffer: inout ParseBuffer, tracker: StackTracker) throws -> Capability {
         let string = try self.parseAtom(buffer: &buffer, tracker: tracker)
-        return Capability(string)
+        return Capability(unchecked: string)
     }
 
     // capability-data = "CAPABILITY" *(SP capability) SP "IMAP4rev1"
@@ -282,17 +282,21 @@ extension GrammarParser {
     }
 
     // charset          = atom / quoted
-    func parseCharset(buffer: inout ParseBuffer, tracker: StackTracker) throws -> String {
-        func parseCharset_atom(buffer: inout ParseBuffer, tracker: StackTracker) throws -> String {
-            try parseAtom(buffer: &buffer, tracker: tracker)
+    func parseCharset(buffer: inout ParseBuffer, tracker: StackTracker) throws -> CharacterSetName {
+        func parseCharset_atom(buffer: inout ParseBuffer, tracker: StackTracker) throws -> CharacterSetName {
+            CharacterSetName(unchecked: try parseAtom(buffer: &buffer, tracker: tracker))
         }
 
-        func parseCharset_quoted(buffer: inout ParseBuffer, tracker: StackTracker) throws -> String {
+        func parseCharset_quoted(buffer: inout ParseBuffer, tracker: StackTracker) throws -> CharacterSetName {
             var buffer = try parseQuoted(buffer: &buffer, tracker: tracker)
             guard let string = buffer.readString(length: buffer.readableBytes) else {
                 throw ParserError(hint: "Couldn't read string from buffer")
             }
-            return string
+            // `parseQuoted` is lenient (CR, LF, 8-bit, empty); reject what can't be written back.
+            guard let name = CharacterSetName(string) else {
+                throw ParserError(hint: "Invalid charset \(String(reflecting: string))")
+            }
+            return name
         }
 
         return try PL.parseOneOf(
@@ -500,7 +504,7 @@ extension GrammarParser {
         func parseUseAttribute_other(buffer: inout ParseBuffer, tracker: StackTracker) throws -> UseAttribute {
             try PL.parseFixedString("\\", buffer: &buffer, tracker: tracker)
             let att = try self.parseAtom(buffer: &buffer, tracker: tracker)
-            return .init("\\" + att)
+            return .init(unchecked: "\\" + att)
         }
 
         return try PL.parseOneOf(
@@ -646,11 +650,11 @@ extension GrammarParser {
     }
 
     // filter-name = 1*<any ATOM-CHAR except "/">
-    func parseFilterName(buffer: inout ParseBuffer, tracker: StackTracker) throws -> String {
+    func parseFilterName(buffer: inout ParseBuffer, tracker: StackTracker) throws -> FilterName {
         let parsed = try PL.parseOneOrMoreCharacters(buffer: &buffer, tracker: tracker) { char -> Bool in
             char.isAtomChar && char != UInt8(ascii: "/")
         }
-        return try ParserLibrary.parseBufferAsUTF8(parsed)
+        return FilterName(unchecked: try ParserLibrary.parseBufferAsUTF8(parsed))
     }
 
     // flag            = "\Answered" / "\Flagged" / "\Deleted" /
@@ -1982,7 +1986,7 @@ extension GrammarParser {
             buffer: inout ParseBuffer,
             tracker: StackTracker
         ) throws -> OptionExtensionKind {
-            .standard(try self.parseAtom(buffer: &buffer, tracker: tracker))
+            .standard(.init(unchecked: try self.parseAtom(buffer: &buffer, tracker: tracker)))
         }
 
         func parseOptionExtensionKind_vendor(
@@ -2055,12 +2059,12 @@ extension GrammarParser {
     }
 
     // option-vendor-tag =  vendor-token "-" atom
-    func parseOptionVendorTag(buffer: inout ParseBuffer, tracker: StackTracker) throws -> KeyValue<String, String> {
-        try PL.composite(buffer: &buffer, tracker: tracker) { buffer, tracker -> KeyValue<String, String> in
+    func parseOptionVendorTag(buffer: inout ParseBuffer, tracker: StackTracker) throws -> OptionExtensionKind.Vendor {
+        try PL.composite(buffer: &buffer, tracker: tracker) { buffer, tracker -> OptionExtensionKind.Vendor in
             let token = try self.parseVendorToken(buffer: &buffer, tracker: tracker)
             try PL.parseFixedString("-", buffer: &buffer, tracker: tracker)
             let atom = try self.parseAtom(buffer: &buffer, tracker: tracker)
-            return .init(key: token, value: atom)
+            return .init(unchecked: "\(token)-\(atom)")
         }
     }
 
@@ -2763,24 +2767,10 @@ extension GrammarParser {
         }
     }
 
+    // mechanism = "INTERNAL" / 1*(ALPHA / DIGIT / "-" / ".")
     func parseUAuthMechanism(buffer: inout ParseBuffer, tracker: StackTracker) throws -> URLAuthenticationMechanism {
-        let parsed = try PL.parseOneOrMoreCharacters(
-            buffer: &buffer,
-            tracker: tracker,
-            where: { char in
-                switch char {
-                case UInt8(ascii: "a")...UInt8(ascii: "z"),
-                    UInt8(ascii: "A")...UInt8(ascii: "Z"),
-                    UInt8(ascii: "0")...UInt8(ascii: "9"),
-                    UInt8(ascii: "-"),
-                    UInt8(ascii: "."):
-                    return true
-                default:
-                    return false
-                }
-            }
-        )
-        return URLAuthenticationMechanism(try ParserLibrary.parseBufferAsUTF8(parsed))
+        let parsed = try PL.parseOneOrMoreCharacters(buffer: &buffer, tracker: tracker) { $0.isMechanismChar }
+        return URLAuthenticationMechanism(unchecked: try ParserLibrary.parseBufferAsUTF8(parsed))
     }
 
     // userid          = astring
