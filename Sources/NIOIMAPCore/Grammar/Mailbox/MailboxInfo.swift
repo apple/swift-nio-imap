@@ -285,6 +285,20 @@ extension EncodeBuffer {
                 self.writeMailboxListFlags(flags)
             } + self.writeString(") ") + self.writeMailboxPathSeparator(list.path.pathSeparator) + self.writeSpace()
             + self.writeMailbox(list.path.name)
+            + self.write(if: !list.extensions.isEmpty) {
+                self.writeSpace() + self.writeMailboxListExtended(list.extensions)
+            }
+    }
+
+    // mbox-list-extended      = "(" [mbox-list-extended-item *(SP mbox-list-extended-item)] ")"
+    // mbox-list-extended-item = mbox-list-extended-item-tag SP tagged-ext-val
+    // mbox-list-extended-item-tag = astring
+    @discardableResult mutating func writeMailboxListExtended(
+        _ extensions: OrderedDictionary<ByteBuffer, ParameterValue>
+    ) -> Int {
+        self.writeOrderedDictionary(extensions) { (element, self) in
+            self.writeIMAPString(element.key) + self.writeSpace() + self.writeParameterValue(element.value)
+        }
     }
 
     @discardableResult mutating func writeMailboxListFlags(_ flags: [MailboxInfo.Attribute]) -> Int {

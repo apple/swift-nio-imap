@@ -33,7 +33,7 @@ import struct OrderedCollections.OrderedDictionary
 public struct ExtendedSearchScopeOptions: Hashable, Sendable {
     /// An ordered dictionary of scope option key-value pairs.
     ///
-    /// The array must contain at least one key-value pair and is never empty. This provides
+    /// The dictionary must contain at least one key-value pair and is never empty. This provides
     /// a flexible mechanism for supporting scope parameters not yet defined in the base specification.
     public let content: OrderedDictionary<TaggedExtensionLabel, ParameterValue?>
 

@@ -769,8 +769,8 @@ extension GrammarParser {
     }
 
     // resp-jmapaccess = "JMAPACCESS" SP quoted
-    func parseJMAPAccess(buffer: inout ParseBuffer, tracker: StackTracker) throws -> URL {
-        try PL.composite(buffer: &buffer, tracker: tracker) { buffer, tracker -> URL in
+    func parseJMAPAccess(buffer: inout ParseBuffer, tracker: StackTracker) throws -> ResponsePayload.JMAPAccessURL {
+        try PL.composite(buffer: &buffer, tracker: tracker) { buffer, tracker -> ResponsePayload.JMAPAccessURL in
             try PL.parseFixedString("JMAPACCESS", buffer: &buffer, tracker: tracker)
             try PL.parseSpaces(buffer: &buffer, tracker: tracker)
             var buffer = try parseQuoted(buffer: &buffer, tracker: tracker)
@@ -781,12 +781,12 @@ extension GrammarParser {
                 throw ParserError(hint: "Couldn't parse JMAPACCESS URL")
             }
             guard
-                components.scheme?.lowercased() == "https",
-                let url = components.url
+                let url = components.url,
+                let jmapAccessURL = ResponsePayload.JMAPAccessURL(url)
             else {
                 throw ParserError(hint: "Invalid JMAPACCESS URL")
             }
-            return url
+            return jmapAccessURL
         }
     }
 
@@ -1505,12 +1505,49 @@ extension GrammarParser {
         let fraction = try PL.parseOptional(
             buffer: &buffer,
             tracker: tracker,
-            parser: { buffer, tracker -> Int in
+            parser: { buffer, tracker -> FullTime.Fraction in
                 try PL.parseFixedString(".", buffer: &buffer, tracker: tracker)
-                return try self.parseNumber(buffer: &buffer, tracker: tracker)
+                let digits = try PL.parseOneOrMoreCharacters(buffer: &buffer, tracker: tracker, where: \.isNum)
+                return .init(unchecked: String(buffer: digits))
             }
         )
-        return .init(hour: hour, minute: minute, second: second, fraction: fraction)
+        let offset = try self.parseTimeOffset(buffer: &buffer, tracker: tracker)
+        return .init(hour: hour, minute: minute, second: second, fraction: fraction, offset: offset)
+    }
+
+    // time-offset    = "Z" / time-numoffset
+    // time-numoffset = ("+" / "-") time-hour ":" time-minute
+    func parseTimeOffset(buffer: inout ParseBuffer, tracker: StackTracker) throws -> FullTime.Offset {
+        func parseNumericOffset(buffer: inout ParseBuffer, tracker: StackTracker) throws -> (hour: Int, minute: Int) {
+            let hour = try self.parse2Digit(buffer: &buffer, tracker: tracker)
+            try PL.parseFixedString(":", buffer: &buffer, tracker: tracker)
+            let minute = try self.parse2Digit(buffer: &buffer, tracker: tracker)
+            // time-hour = 00-23, time-minute = 00-59
+            guard (0...23).contains(hour), (0...59).contains(minute) else {
+                throw ParserError(hint: "Invalid time offset \(hour):\(minute)")
+            }
+            return (hour, minute)
+        }
+
+        return try PL.parseOneOf(
+            { buffer, tracker -> FullTime.Offset in
+                // RFC 3339 Section 5.6: `Z` may be lowercase.
+                try PL.parseFixedString("Z", buffer: &buffer, tracker: tracker)
+                return .utc
+            },
+            { buffer, tracker -> FullTime.Offset in
+                try PL.parseFixedString("+", buffer: &buffer, tracker: tracker)
+                let (hour, minute) = try parseNumericOffset(buffer: &buffer, tracker: tracker)
+                return .plus(hour: hour, minute: minute)
+            },
+            { buffer, tracker -> FullTime.Offset in
+                try PL.parseFixedString("-", buffer: &buffer, tracker: tracker)
+                let (hour, minute) = try parseNumericOffset(buffer: &buffer, tracker: tracker)
+                return .minus(hour: hour, minute: minute)
+            },
+            buffer: &buffer,
+            tracker: tracker
+        )
     }
 
     func parseLiteralSize(buffer: inout ParseBuffer, tracker: StackTracker) throws -> Int {
@@ -2005,35 +2042,48 @@ extension GrammarParser {
     // option-val-comp =  astring /
     //                    option-val-comp *(SP option-val-comp) /
     //                    "(" option-val-comp ")"
+    //
+    // Left-recursive, so read as a sequence of `astring` / `"(" option-val-comp ")"`: one
+    // element is itself, several are an `.array`. A parenthesized one is always an `.array`.
     func parseOptionValueComp(buffer: inout ParseBuffer, tracker: StackTracker) throws -> OptionValueComp {
-        func parseOptionValueComp_string(buffer: inout ParseBuffer, tracker: StackTracker) throws -> OptionValueComp {
+        let elements = try self.parseOptionValueCompSequence(buffer: &buffer, tracker: tracker)
+        guard elements.count == 1 else { return .array(elements) }
+        return elements[0]
+    }
+
+    private func parseOptionValueCompSequence(
+        buffer: inout ParseBuffer,
+        tracker: StackTracker
+    ) throws -> [OptionValueComp] {
+        func parseElement_string(buffer: inout ParseBuffer, tracker: StackTracker) throws -> OptionValueComp {
             .string(try self.parseAString(buffer: &buffer, tracker: tracker))
         }
 
-        func parseOptionValueComp_single(buffer: inout ParseBuffer, tracker: StackTracker) throws -> OptionValueComp {
+        func parseElement_parenthesized(buffer: inout ParseBuffer, tracker: StackTracker) throws -> OptionValueComp {
             try PL.parseFixedString("(", buffer: &buffer, tracker: tracker)
-            let comp = try self.parseOptionValueComp(buffer: &buffer, tracker: tracker)
+            let elements = try self.parseOptionValueCompSequence(buffer: &buffer, tracker: tracker)
             try PL.parseFixedString(")", buffer: &buffer, tracker: tracker)
-            return .array([comp])
+            return .array(elements)
         }
 
-        func parseOptionValueComp_array(buffer: inout ParseBuffer, tracker: StackTracker) throws -> OptionValueComp {
-            var array = [try self.parseOptionValueComp(buffer: &buffer, tracker: tracker)]
-            try PL.parseZeroOrMore(buffer: &buffer, into: &array, tracker: tracker) {
+        func parseElement(buffer: inout ParseBuffer, tracker: StackTracker) throws -> OptionValueComp {
+            try PL.parseOneOf(
+                parseElement_string,
+                parseElement_parenthesized,
+                buffer: &buffer,
+                tracker: tracker
+            )
+        }
+
+        return try PL.composite(buffer: &buffer, tracker: tracker) { buffer, tracker in
+            var elements = [try parseElement(buffer: &buffer, tracker: tracker)]
+            try PL.parseZeroOrMore(buffer: &buffer, into: &elements, tracker: tracker) {
                 (buffer, tracker) -> OptionValueComp in
                 try PL.parseSpaces(buffer: &buffer, tracker: tracker)
-                return try self.parseOptionValueComp(buffer: &buffer, tracker: tracker)
+                return try parseElement(buffer: &buffer, tracker: tracker)
             }
-            return .array(array)
+            return elements
         }
-
-        return try PL.parseOneOf(
-            parseOptionValueComp_string,
-            parseOptionValueComp_single,
-            parseOptionValueComp_array,
-            buffer: &buffer,
-            tracker: tracker
-        )
     }
 
     // option-value =  "(" option-val-comp ")"
@@ -2645,7 +2695,7 @@ extension GrammarParser {
 
             let fchar = try PL.parseByte(buffer: &buffer, tracker: tracker)
             guard fchar.isTaggedLabelFchar else {
-                throw ParserError(hint: "\(fchar) is not a valid fchar’")
+                throw ParserError(hint: "\(fchar) is not a valid fchar")
             }
 
             let parsed = try PL.parseZeroOrMoreCharacters(buffer: &buffer, tracker: tracker) { char -> Bool in

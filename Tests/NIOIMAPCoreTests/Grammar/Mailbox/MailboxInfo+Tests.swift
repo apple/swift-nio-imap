@@ -217,6 +217,28 @@ struct MailboxInfoTests {
         )
     }
 
+    /// RFC 5258: `mailbox-list = … mailbox [SP mbox-list-extended]`.
+    @Test(
+        "extensions round-trip",
+        arguments: [
+            [:],
+            ["CHILDINFO": .comp(["SUBSCRIBED"])],
+            ["OLDNAME": .comp(["Old Name"]), "X-FOO": .sequence(.lastCommand)],
+        ] as [OrderedDictionary<ByteBuffer, ParameterValue>]
+    )
+    func extensionsRoundTrip(_ extensions: OrderedDictionary<ByteBuffer, ParameterValue>) throws {
+        TestUtilities.expectRoundTrip(
+            MailboxInfo(
+                attributes: [.marked],
+                path: try MailboxPath(name: .inbox, pathSeparator: "/"),
+                extensions: extensions
+            ),
+            terminator: "\r",
+            encoder: { $0.writeMailboxInfo($1) },
+            parser: GrammarParser().parseMailboxList
+        )
+    }
+
     /// `(DQUOTE QUOTED-CHAR DQUOTE / nil)`: CR, LF, and NUL can't be written.
     @Test("invalid path separator throws", arguments: ["\r", "\n", "\r\n", "\0"] as [Character])
     func invalidPathSeparator(_ separator: Character) {
