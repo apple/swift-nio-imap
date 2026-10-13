@@ -20,9 +20,6 @@ import Testing
 ///
 /// Each seed generates `casesPerSeed` lists; the first failing case per seed is reported with
 /// seed, case index and input, so it can be rerun alone.
-///
-/// Inputs are at most `maximumLength` long, so trees stay shallow: deep trees crash on release
-/// until the fold is fixed. Depth is measured iteratively.
 @Suite("Envelope grouping properties")
 struct EnvelopeGroupingPropertyTests {
     static let seeds: [UInt64] = (1...20).map { UInt64($0) &* 0x2545_F491_4F6C_DD1D }
@@ -30,13 +27,8 @@ struct EnvelopeGroupingPropertyTests {
     static let maximumLength = 64
     /// Wire form affects classification only; idempotence and the oracle are fold-level.
     fileprivate static let endToEndProperties: [GroupingProperty] = [
-        .depthAtMostOne, .lossless, .noInvention, .noEndMarkerLeaks,
+        .lossless, .noInvention, .noEndMarkerLeaks,
     ]
-
-    @Test("groups never nest", arguments: seeds)
-    func depthAtMostOne(seed: UInt64) {
-        Self.check(.depthAtMostOne, seed: seed)
-    }
 
     @Test("no address lost", arguments: seeds)
     func lossless(seed: UInt64) {
@@ -63,7 +55,7 @@ struct EnvelopeGroupingPropertyTests {
         Self.check(.matchesLegacy, seed: seed, shapes: .wellFormedOnly)
     }
 
-    /// Properties 1–4 through `parseEnvelope`: classification depends on the wire form.
+    /// Properties 1–3 through `parseEnvelope`: classification depends on the wire form.
     @Test("end to end through parseEnvelope", arguments: seeds)
     func endToEnd(seed: UInt64) {
         var generator = AddressListGenerator(seed: seed)
@@ -100,7 +92,6 @@ extension EnvelopeGroupingPropertyTests {
         let output = GrammarParser().parseEnvelopeEmailAddressGroups(input)
         #expect(output.count == Self.emptyGroupCount)
         #expect(output == names.map { .group(.init(groupName: $0, sourceRoot: nil, children: [])) })
-        #expect(maximumGroupDepth(output) <= 1)
     }
 
     @Test("many addresses")
@@ -111,7 +102,6 @@ extension EnvelopeGroupingPropertyTests {
         let output = GrammarParser().parseEnvelopeEmailAddressGroups(input)
         #expect(output.count == Self.addressCount)
         #expect(output == input.map { .singleAddress($0) })
-        #expect(maximumGroupDepth(output) <= 1)
     }
 
     /// Exercises the append-to-open-group path.
@@ -122,9 +112,7 @@ extension EnvelopeGroupingPropertyTests {
         }
         let input = [EmailAddress.groupStart("g")] + members + [.groupEnd()]
         let output = GrammarParser().parseEnvelopeEmailAddressGroups(input)
-        let expected = EmailAddressGroup(groupName: "g", sourceRoot: nil, children: members.map { .singleAddress($0) })
-        #expect(output == [.group(expected)])
-        #expect(maximumGroupDepth(output) <= 1)
+        #expect(output == [.group(EmailAddressGroup(groupName: "g", sourceRoot: nil, children: members))])
     }
 }
 
@@ -161,7 +149,6 @@ extension EnvelopeGroupingPropertyTests {
 // MARK: - Properties
 
 private enum GroupingProperty: CustomStringConvertible {
-    case depthAtMostOne
     case lossless
     case noInvention
     case noEndMarkerLeaks
@@ -170,7 +157,6 @@ private enum GroupingProperty: CustomStringConvertible {
 
     var description: String {
         switch self {
-        case .depthAtMostOne: "depth ≤ 1"
         case .lossless: "lossless"
         case .noInvention: "no invention"
         case .noEndMarkerLeaks: "no end marker leaks"
@@ -182,9 +168,6 @@ private enum GroupingProperty: CustomStringConvertible {
     /// `nil` if the property holds, else a description of the violation.
     func violation(input: [EmailAddress], output: [EmailAddressListElement]) -> String? {
         switch self {
-        case .depthAtMostOne:
-            let depth = maximumGroupDepth(output)
-            return depth <= 1 ? nil : "depth \(depth)"
         case .lossless:
             let expected = input.filter { !$0.isGroupEnd }
             let actual = flatten(output, markers: .startsOnly)
@@ -197,39 +180,22 @@ private enum GroupingProperty: CustomStringConvertible {
             let refolded = GrammarParser().parseEnvelopeEmailAddressGroups(flatten(output, markers: .startsAndEnds))
             return refolded == output ? nil : "refolded differs"
         case .matchesLegacy:
-            return output == legacyParseEnvelopeEmailAddressGroups(input) ? nil : "differs from legacy"
+            guard let legacy = legacyParseEnvelopeEmailAddressGroups(input) else { return "legacy nested" }
+            return output == legacy ? nil : "differs from legacy"
         }
     }
 }
 
-// MARK: - Tree helpers (iterative: pre-fix trees may be deep)
+// MARK: - List helpers
 
-/// Group nesting: 0 for a flat list, 1 if groups contain only addresses.
-private func maximumGroupDepth(_ elements: [EmailAddressListElement]) -> Int {
-    var pending: [(elements: [EmailAddressListElement], depth: Int)] = [(elements, 0)]
-    var maximum = 0
-    while let (list, depth) = pending.popLast() {
-        maximum = max(maximum, depth)
-        for case .group(let group) in list {
-            pending.append((group.children, depth + 1))
-        }
-    }
-    return maximum
-}
-
-/// Every `.singleAddress`, at any depth.
+/// Every `.singleAddress`, top level and group members.
 private func allAddresses(_ elements: [EmailAddressListElement]) -> [EmailAddress] {
-    var pending = elements
-    var result: [EmailAddress] = []
-    while let element = pending.popLast() {
+    elements.flatMap { element -> [EmailAddress] in
         switch element {
-        case .singleAddress(let address):
-            result.append(address)
-        case .group(let group):
-            pending.append(contentsOf: group.children)
+        case .singleAddress(let address): [address]
+        case .group(let group): group.children
         }
     }
-    return result
 }
 
 private enum MarkerFlattening {
@@ -239,34 +205,24 @@ private enum MarkerFlattening {
     case startsAndEnds
 }
 
-/// Pre-order flattening back into the wire sequence.
+/// Flattens back into the wire sequence.
 private func flatten(_ elements: [EmailAddressListElement], markers: MarkerFlattening) -> [EmailAddress] {
-    enum Pending {
-        case element(EmailAddressListElement)
-        case address(EmailAddress)
-    }
-    var pending: [Pending] = elements.reversed().map { .element($0) }
-    var result: [EmailAddress] = []
-    while let next = pending.popLast() {
-        switch next {
-        case .address(let address), .element(.singleAddress(let address)):
-            result.append(address)
-        case .element(.group(let group)):
-            result.append(.groupStart(group.groupName, sourceRoot: group.sourceRoot))
-            if markers == .startsAndEnds {
-                pending.append(.address(.groupEnd(sourceRoot: group.sourceRoot)))
-            }
-            pending.append(contentsOf: group.children.reversed().map { .element($0) })
+    elements.flatMap { element -> [EmailAddress] in
+        switch element {
+        case .singleAddress(let address):
+            return [address]
+        case .group(let group):
+            let start = EmailAddress.groupStart(group.groupName, sourceRoot: group.sourceRoot)
+            let end: [EmailAddress] = markers == .startsAndEnds ? [.groupEnd(sourceRoot: group.sourceRoot)] : []
+            return [start] + group.children + end
         }
     }
-    return result
 }
 
 /// First output group not backed by an input run `start, address…, end`.
 ///
 /// Groups are matched in output order against a forward-only input cursor, so each run backs at
-/// most one group and groups cannot be reordered. A nested group never matches (members must be
-/// addresses).
+/// most one group and groups cannot be reordered. A member that is a marker never matches.
 private func firstInventedGroup(input: [EmailAddress], output: [EmailAddressListElement]) -> String? {
     var cursor = input.startIndex
     for case .group(let group) in output {
@@ -280,11 +236,8 @@ private func firstInventedGroup(input: [EmailAddress], output: [EmailAddressList
 
 /// Index just past the first run at or after `cursor` that brackets exactly `group`, or `nil`.
 private func bracketedRunEnd(for group: EmailAddressGroup, in input: [EmailAddress], from cursor: Int) -> Int? {
-    var members: [EmailAddress] = []
-    for child in group.children {
-        guard case .singleAddress(let address) = child, !address.isGroupMarker else { return nil }
-        members.append(address)
-    }
+    let members = group.children
+    guard !members.contains(where: \.isGroupMarker) else { return nil }
     let runLength = members.count + 2
     guard input.count - cursor >= runLength else { return nil }
     for startIndex in cursor...(input.count - runLength) {
@@ -328,16 +281,17 @@ extension EmailAddress {
 
 // MARK: - Legacy oracle
 
-/// Pre-#859 fold, copied verbatim. Correct on well-formed input only.
-private func legacyParseEnvelopeEmailAddressGroups(_ addresses: [EmailAddress]) -> [EmailAddressListElement] {
-    var results: [EmailAddressListElement] = []
-    var stack: [EmailAddressGroup] = []
+/// Pre-#859 fold, verbatim except its nestable group type, now private. Correct on well-formed input only.
+/// `nil` if it nested, which well-formed input cannot.
+private func legacyParseEnvelopeEmailAddressGroups(_ addresses: [EmailAddress]) -> [EmailAddressListElement]? {
+    var results: [LegacyElement] = []
+    var stack: [LegacyGroup] = []
 
     for address in addresses {
         // RFC 2822 Syntaxt: If the host is nil then the group has started
         // if the mailbox is also nil, then the group has finished.
         if address.host == nil, let name = address.mailbox {  // start of group
-            stack.append(EmailAddressGroup(groupName: name, sourceRoot: address.sourceRoot, children: []))
+            stack.append(LegacyGroup(groupName: name, sourceRoot: address.sourceRoot, children: []))
         } else if address.host == nil, let group = stack.popLast() {  // end of group
             if stack.last == nil {
                 results.append(.group(group))
@@ -353,7 +307,36 @@ private func legacyParseEnvelopeEmailAddressGroups(_ addresses: [EmailAddress]) 
         }
     }
 
-    return results
+    let flattened = results.compactMap(\.flattened)
+    return flattened.count == results.count ? flattened : nil
+}
+
+/// Pre-#859 `EmailAddressGroup`: children could be groups.
+private struct LegacyGroup {
+    var groupName: ByteBuffer
+    var sourceRoot: ByteBuffer?
+    var children: [LegacyElement]
+}
+
+/// Pre-#859 `EmailAddressListElement`.
+private indirect enum LegacyElement {
+    case singleAddress(EmailAddress)
+    case group(LegacyGroup)
+
+    /// The current type, or `nil` if the group nests.
+    var flattened: EmailAddressListElement? {
+        switch self {
+        case .singleAddress(let address):
+            return .singleAddress(address)
+        case .group(let group):
+            let members = group.children.compactMap { child -> EmailAddress? in
+                guard case .singleAddress(let address) = child else { return nil }
+                return address
+            }
+            guard members.count == group.children.count else { return nil }
+            return .group(.init(groupName: group.groupName, sourceRoot: group.sourceRoot, children: members))
+        }
+    }
 }
 
 // MARK: - Generator
@@ -474,7 +457,7 @@ private struct AddressListGenerator {
         case .uniform:
             result = (0..<self.int(0...limit)).map { _ in self.anyElement() }
         case .wellFormed:
-            // Built directly, not filtered: balanced, depth ≤ 1.
+            // Built directly, not filtered: balanced, no start inside a group.
             while result.count < limit - Self.maximumGroupMembers - 2, self.int(0...7) != 0 {
                 guard self.bool() else {
                     result.append(self.address())

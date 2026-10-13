@@ -157,10 +157,10 @@ struct EnvelopeTests {
                     Envelope(
                         date: "date",
                         subject: "subject",
-                        from: [.group(.init(groupName: "Team", sourceRoot: nil, children: [.singleAddress(.alice)]))],
+                        from: [.group(.init(groupName: "Team", sourceRoot: nil, children: [.alice]))],
                         sender: [],
                         reply: [],
-                        to: [.group(.init(groupName: "Team", sourceRoot: nil, children: [.singleAddress(.alice)]))],
+                        to: [.group(.init(groupName: "Team", sourceRoot: nil, children: [.alice]))],
                         cc: [],
                         bcc: [],
                         inReplyTo: nil,
@@ -177,7 +177,7 @@ struct EnvelopeTests {
                         from: [.singleAddress(.groupStart("Team")), .singleAddress(.alice)],
                         sender: [],
                         reply: [],
-                        to: [.group(.init(groupName: "Team", sourceRoot: nil, children: [.singleAddress(.alice)]))],
+                        to: [.group(.init(groupName: "Team", sourceRoot: nil, children: [.alice]))],
                         cc: [],
                         bcc: [],
                         inReplyTo: nil,
@@ -251,7 +251,7 @@ struct EnvelopeTests {
                 " ",
                 expected: .success([
                     .singleAddress(.groupStart("A")),
-                    .group(.init(groupName: "B", sourceRoot: nil, children: [.singleAddress(.alice)])),
+                    .group(.init(groupName: "B", sourceRoot: nil, children: [.alice])),
                 ])
             ),
             // Malicious server: unqualified addresses.

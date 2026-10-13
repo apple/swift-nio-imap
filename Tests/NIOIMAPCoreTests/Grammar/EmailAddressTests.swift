@@ -122,7 +122,7 @@ struct EmailAddressTestsSuite {
                         .init(
                             groupName: "group",
                             sourceRoot: nil,
-                            children: [.singleAddress(.init(personName: "a", sourceRoot: "a", mailbox: "a", host: "a"))]
+                            children: [.init(personName: "a", sourceRoot: "a", mailbox: "a", host: "a")]
                         )
                     )
                 ]
@@ -141,9 +141,9 @@ struct EmailAddressTestsSuite {
                             groupName: "group",
                             sourceRoot: nil,
                             children: [
-                                .singleAddress(.init(personName: "a", sourceRoot: "a", mailbox: "a", host: "a")),
-                                .singleAddress(.init(personName: "b", sourceRoot: "b", mailbox: "b", host: "b")),
-                                .singleAddress(.init(personName: "c", sourceRoot: "c", mailbox: "c", host: "c")),
+                                .init(personName: "a", sourceRoot: "a", mailbox: "a", host: "a"),
+                                .init(personName: "b", sourceRoot: "b", mailbox: "b", host: "b"),
+                                .init(personName: "c", sourceRoot: "c", mailbox: "c", host: "c"),
                             ]
                         )
                     )
@@ -163,7 +163,7 @@ struct EmailAddressTestsSuite {
                     .singleAddress(.address("a")),
                     .singleAddress(.groupStart("group2")),
                     .singleAddress(.address("b")),
-                    .group(.init(groupName: "group3", sourceRoot: nil, children: [.singleAddress(.address("c"))])),
+                    .group(.init(groupName: "group3", sourceRoot: nil, children: [.address("c")])),
                 ]
             ),
             // Issue #859 case 2: unclosed group is demoted, not lost.
@@ -187,7 +187,7 @@ struct EmailAddressTestsSuite {
                 name: "double end after group",
                 addresses: [.groupStart("Team"), .address("alice"), .groupEnd(), .groupEnd()],
                 expected: [
-                    .group(.init(groupName: "Team", sourceRoot: nil, children: [.singleAddress(.address("alice"))]))
+                    .group(.init(groupName: "Team", sourceRoot: nil, children: [.address("alice")]))
                 ]
             ),
             EnvelopeGroupingFixture(
@@ -218,14 +218,14 @@ struct EmailAddressTestsSuite {
                 expected: [
                     .singleAddress(.groupStart("A")),
                     .singleAddress(.address("x")),
-                    .group(.init(groupName: "B", sourceRoot: nil, children: [.singleAddress(.address("y"))])),
+                    .group(.init(groupName: "B", sourceRoot: nil, children: [.address("y")])),
                 ]
             ),
             // `To: : alice@example.com;` (Dovecot/Cyrus 20).
             EnvelopeGroupingFixture(
                 name: "empty group name",
                 addresses: [.groupStart(""), .address("alice"), .groupEnd()],
-                expected: [.group(.init(groupName: "", sourceRoot: nil, children: [.singleAddress(.address("alice"))]))]
+                expected: [.group(.init(groupName: "", sourceRoot: nil, children: [.address("alice")]))]
             ),
             EnvelopeGroupingFixture(
                 name: "host set, mailbox NIL",
@@ -242,7 +242,7 @@ struct EmailAddressTestsSuite {
                 addresses: [.groupStart("Team", sourceRoot: "@relay"), .address("alice"), .groupEnd()],
                 expected: [
                     .group(
-                        .init(groupName: "Team", sourceRoot: "@relay", children: [.singleAddress(.address("alice"))])
+                        .init(groupName: "Team", sourceRoot: "@relay", children: [.address("alice")])
                     )
                 ]
             ),
@@ -267,7 +267,7 @@ struct EmailAddressTestsSuite {
                 name: "end marker with person name and source root",
                 addresses: [.groupStart("Team"), .address("alice"), .groupEnd(personName: "E", sourceRoot: "@relay")],
                 expected: [
-                    .group(.init(groupName: "Team", sourceRoot: nil, children: [.singleAddress(.address("alice"))]))
+                    .group(.init(groupName: "Team", sourceRoot: nil, children: [.address("alice")]))
                 ]
             ),
             // Existing loss, kept: bracketed start's person name is dropped.
@@ -275,7 +275,7 @@ struct EmailAddressTestsSuite {
                 name: "bracketed start with person name",
                 addresses: [.groupStart("Team", personName: "T"), .address("alice"), .groupEnd()],
                 expected: [
-                    .group(.init(groupName: "Team", sourceRoot: nil, children: [.singleAddress(.address("alice"))]))
+                    .group(.init(groupName: "Team", sourceRoot: nil, children: [.address("alice")]))
                 ]
             ),
         ]

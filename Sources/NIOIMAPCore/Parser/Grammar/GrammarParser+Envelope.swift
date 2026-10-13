@@ -49,7 +49,7 @@ private enum AddressListToken {
     }
 }
 
-/// Group awaiting its end marker. Members are `EmailAddress`, so nesting is unrepresentable here.
+/// Group awaiting its end marker.
 private struct OpenGroup {
     var start: EmailAddress
     var name: ByteBuffer
@@ -101,7 +101,7 @@ extension GrammarParser {
             EmailAddressGroup(
                 groupName: group.name,
                 sourceRoot: group.start.sourceRoot,
-                children: group.members.map { .singleAddress($0) }
+                children: group.members
             )
         )
     }

@@ -1181,7 +1181,7 @@ extension ResponseParserTests {
     }
     #endif
 
-    /// In-process on every platform: exercises each recursive path the issue names, on a 512 KiB stack.
+    /// In-process on every platform: exercises each path the issue names, on a 512 KiB stack.
     /// A regression kills the runner, so this lands with the fix only.
     @Test("deep ENVELOPE groups: compare, hash, encode, describe, release on a small stack")
     func deepEnvelopeGroupsInProcess() async throws {
@@ -1306,38 +1306,30 @@ private enum DeepEnvelope {
     }
 
     /// Normalized: `depth - 1` demoted starts, then the innermost group with its member.
-    static let expectedSummary = Summary(fromCount: depth, maximumGroupDepth: 1, responseCount: 4, unconsumedBytes: 0)
+    static let expectedSummary = Summary(fromCount: depth, groupCount: 1, responseCount: 4, unconsumedBytes: 0)
 
     /// Encoder output for the normalized From list: every start (demoted or bracketing), member, one end.
     static let expectedEncodedByteCount = depth * start.utf8.count + member.utf8.count + end.utf8.count
 
-    /// Computed iteratively, so it is safe on any tree.
     struct Summary: Equatable, Sendable {
         var fromCount: Int
-        var maximumGroupDepth: Int
+        var groupCount: Int
         var responseCount: Int
         var unconsumedBytes: Int
 
-        init(fromCount: Int, maximumGroupDepth: Int, responseCount: Int, unconsumedBytes: Int) {
+        init(fromCount: Int, groupCount: Int, responseCount: Int, unconsumedBytes: Int) {
             self.fromCount = fromCount
-            self.maximumGroupDepth = maximumGroupDepth
+            self.groupCount = groupCount
             self.responseCount = responseCount
             self.unconsumedBytes = unconsumedBytes
         }
 
         init(_ parsed: ParsedStream) {
             let from = ResponseParserTests.envelopes(in: parsed.responses).first?.from ?? []
-            var pending: [(elements: [EmailAddressListElement], depth: Int)] = [(from, 0)]
-            var maximum = 0
-            while let (list, depth) = pending.popLast() {
-                maximum = max(maximum, depth)
-                for case .group(let group) in list {
-                    pending.append((group.children, depth + 1))
-                }
-            }
+            let groupCount = from.count { if case .group = $0 { true } else { false } }
             self.init(
                 fromCount: from.count,
-                maximumGroupDepth: maximum,
+                groupCount: groupCount,
                 responseCount: parsed.responses.count,
                 unconsumedBytes: parsed.unconsumedBytes
             )
@@ -1372,7 +1364,7 @@ private enum DeepEnvelope {
                 parsesEqual: first == second,
                 hashesEqual: firstFrom.hashValue == secondFrom.hashValue,
                 encodedByteCount: encodedByteCount,
-                // From list: Mirror (recursive); response: `debugDescription` (encoder).
+                // From list: Mirror; response: `debugDescription` (encoder).
                 describedNonEmpty: !String(describing: firstFrom).isEmpty && !String(describing: first).isEmpty
             )
         }
@@ -1445,7 +1437,7 @@ extension EnvelopeStreamFixture {
             expectedEnvelopes: [
                 .captured(
                     "03-nested",
-                    to: [.group(.init(groupName: "A", sourceRoot: nil, children: [.singleAddress(.address("B", "MISSING_DOMAIN"))]))]
+                    to: [.group(.init(groupName: "A", sourceRoot: nil, children: [.address("B", "MISSING_DOMAIN")]))]
                 )
             ]
         ),
@@ -1464,8 +1456,8 @@ extension EnvelopeStreamFixture {
                                 groupName: "Team",
                                 sourceRoot: nil,
                                 children: [
-                                    .singleAddress(.address("alice", "example.com")),
-                                    .singleAddress(.address("bob", "example.com")),
+                                    .address("alice", "example.com"),
+                                    .address("bob", "example.com"),
                                 ]
                             )
                         )
@@ -1488,7 +1480,9 @@ extension EnvelopeStreamFixture {
                     sender: [.singleAddress(.address("inner", "example.com"))],
                     reply: [.singleAddress(.address("inner", "example.com"))],
                     to: .cyrusNested,
-                    cc: [.group(.init(groupName: "Team", sourceRoot: nil, children: [.singleAddress(.address("alice", "example.com"))]))],
+                    cc: [
+                        .group(.init(groupName: "Team", sourceRoot: nil, children: [.address("alice", "example.com")]))
+                    ],
                     bcc: [],
                     inReplyTo: nil,
                     messageID: "<inner-18@example.com>"
@@ -1504,7 +1498,7 @@ extension EnvelopeStreamFixture {
             expectedEnvelopes: [
                 .fromOnly([
                     .singleAddress(.groupStart("A")),
-                    .group(.init(groupName: "B", sourceRoot: nil, children: [.singleAddress(.address("x", "example.com"))])),
+                    .group(.init(groupName: "B", sourceRoot: nil, children: [.address("x", "example.com")])),
                 ])
             ]
         ),
@@ -1533,7 +1527,7 @@ extension EnvelopeStreamFixture {
             expectedEnvelopes: [
                 .fromOnly([
                     .singleAddress(.groupStart("A")),
-                    .group(.init(groupName: "B", sourceRoot: nil, children: [.singleAddress(.address("x", "example.com"))])),
+                    .group(.init(groupName: "B", sourceRoot: nil, children: [.address("x", "example.com")])),
                 ])
             ]
         ),
@@ -1543,7 +1537,7 @@ extension EnvelopeStreamFixture {
 extension Array where Element == EmailAddressListElement {
     /// What Cyrus sends for `To: A: B: x@example.com;;` (msgs 03, 18).
     fileprivate static let cyrusNested: Self = [
-        .group(.init(groupName: "A", sourceRoot: nil, children: [.singleAddress(.address("B: x", "example.com"))])),
+        .group(.init(groupName: "A", sourceRoot: nil, children: [.address("B: x", "example.com")])),
         .singleAddress(.address(";", "unspecified-domain")),
     ]
 }
