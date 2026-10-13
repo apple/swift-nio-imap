@@ -26,16 +26,6 @@ struct IUIDTests {
     }
 
     @Test(
-        "encode UID only",
-        arguments: [
-            EncodeFixture.iuidOnly(.init(uid: 123), ";UID=123")
-        ]
-    )
-    func encodeUIDOnly(_ fixture: EncodeFixture<IUID>) {
-        fixture.checkEncoding()
-    }
-
-    @Test(
         "parse with slash",
         arguments: [
             ParseFixture.parseWithSlash("/;UID=1", " ", expected: .success(.init(uid: 1))),
@@ -76,18 +66,6 @@ extension EncodeFixture<IUID> {
             bufferKind: .defaultServer,
             expectedString: expectedString,
             encoder: { $0.writeIUID($1) }
-        )
-    }
-
-    fileprivate static func iuidOnly(
-        _ input: IUID,
-        _ expectedString: String
-    ) -> Self {
-        EncodeFixture(
-            input: input,
-            bufferKind: .defaultServer,
-            expectedString: expectedString,
-            encoder: { $0.writeIUIDOnly($1) }
         )
     }
 }

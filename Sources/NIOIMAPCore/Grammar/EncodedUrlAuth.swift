@@ -39,7 +39,7 @@ import struct NIO.ByteBuffer
 /// The final hexadecimal string `91354a473744909de610943775f92038` is the token,
 /// wrapped as:
 /// ```
-/// EncodedAuthenticatedURL(data: "91354a473744909de610943775f92038")
+/// EncodedAuthenticatedURL("91354a473744909de610943775f92038")
 /// ```
 ///
 /// When a client later uses this URL with URLFETCH, the server re-calculates the token
@@ -51,26 +51,75 @@ import struct NIO.ByteBuffer
 /// for the complete mechanism and token pair, and ``AuthenticatedURL`` for the full
 /// authorization structure.
 ///
+/// ## Validity
+///
+/// The token is written to the wire verbatim, so anything that isn't an `enc-urlauth` is rejected:
+///
+/// - ``init(_:)`` returns `nil`. Use it for a token derived from input.
+/// - ``init(stringLiteral:)`` traps. A literal is written by the programmer, so an invalid one is a
+///   bug to be caught on first run rather than handled.
+///
 /// - SeeAlso: [RFC 4467 Section 2.5](https://datatracker.ietf.org/doc/html/rfc4467#section-2.5) - Authorization Token
 /// - SeeAlso: [RFC 4467 Section 5](https://datatracker.ietf.org/doc/html/rfc4467#section-5) - Generation of URLAUTH-Authorized URLs
 /// - SeeAlso: [RFC 4467 Section 6](https://datatracker.ietf.org/doc/html/rfc4467#section-6) - Validation of URLAUTH-authorized URLs
 public struct EncodedAuthenticatedURL: Hashable, Sendable {
-    /// The hexadecimal-encoded authorization token string.
-    ///
-    /// An ASCII-encoded hexadecimal representation of the token bytes. The RFC 4467
-    /// specification recommends using hexadecimal instead of Base64 to avoid URL-problematic
-    /// padding characters.
-    public var data: String
+    let stringValue: String
 
-    /// Creates a new hexadecimal-encoded URLAUTH verification token.
-    /// - parameter data: The hexadecimal-encoded token string.
-    public init(data: String) {
-        self.data = data
+    /// Creates a token from a hexadecimal string, if the string is a valid `enc-urlauth`.
+    ///
+    /// A string literal resolves to ``init(stringLiteral:)`` instead, which traps rather than
+    /// returning `nil`.
+    ///
+    /// - parameter stringValue: The token, for example `91354a473744909de610943775f92038`.
+    /// - returns: A new token, or `nil` if `stringValue` is not 32 or more hexadecimal digits.
+    public init?(_ stringValue: String) {
+        guard Self.isValidToken(stringValue) else { return nil }
+        self.stringValue = stringValue
+    }
+
+    init(unchecked stringValue: String) {
+        assert(Self.isValidToken(stringValue))
+        self.stringValue = stringValue
+    }
+
+    /// The minimum token length: 128 bits.
+    static let minimumLength = 32
+
+    /// Whether the given string is an `enc-urlauth`
+    /// ([RFC 4467 Section 9](https://datatracker.ietf.org/doc/html/rfc4467#section-9)):
+    /// ```
+    /// enc-urlauth = 32*HEXDIG
+    /// ```
+    static func isValidToken(_ string: String) -> Bool {
+        string.utf8.count >= Self.minimumLength && string.utf8.allSatisfy(\.isHexCharacter)
+    }
+}
+
+extension String {
+    /// Creates a `String` from an ``EncodedAuthenticatedURL``.
+    ///
+    /// - parameter other: The token to convert.
+    public init(_ other: EncodedAuthenticatedURL) {
+        self = other.stringValue
+    }
+}
+
+extension EncodedAuthenticatedURL: ExpressibleByStringLiteral {
+    /// Creates a token from a string literal.
+    ///
+    /// A literal is written by the programmer, so an invalid one is a bug to be caught on first
+    /// run rather than handled. Use ``init(_:)`` for anything else.
+    ///
+    /// - parameter value: The string literal.
+    /// - Precondition: `value` is a valid `enc-urlauth`; this traps if it isn't.
+    public init(stringLiteral value: String) {
+        precondition(Self.isValidToken(value), "Invalid URLAUTH token: \(String(reflecting: value))")
+        self.init(unchecked: value)
     }
 }
 
 extension EncodeBuffer {
     @discardableResult mutating func writeEncodedAuthenticationURL(_ data: EncodedAuthenticatedURL) -> Int {
-        self.writeString(data.data)
+        self.writeString(data.stringValue)
     }
 }
