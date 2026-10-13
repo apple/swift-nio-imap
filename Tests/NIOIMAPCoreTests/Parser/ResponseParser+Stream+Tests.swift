@@ -14,7 +14,7 @@
 
 import Foundation
 import NIO
-@testable import NIOIMAPCore
+@_spi(NIOIMAPInternal) @testable import NIOIMAPCore
 import OrderedCollections
 import Testing
 
@@ -1180,6 +1180,21 @@ extension ResponseParserTests {
         }
     }
     #endif
+
+    /// In-process on every platform: exercises each recursive path the issue names, on a 512 KiB stack.
+    /// A regression kills the runner, so this lands with the fix only.
+    @Test("deep ENVELOPE groups: compare, hash, encode, describe, release on a small stack")
+    func deepEnvelopeGroupsInProcess() async throws {
+        let outcome = await DeepEnvelope.onPinnedStack {
+            Result { try DeepEnvelope.Exercised.run() }
+        }
+        let exercised = try outcome.get()
+        #expect(exercised.summary == DeepEnvelope.expectedSummary)
+        #expect(exercised.parsesEqual)
+        #expect(exercised.hashesEqual)
+        #expect(exercised.encodedByteCount == DeepEnvelope.expectedEncodedByteCount)
+        #expect(exercised.describedNonEmpty)
+    }
 }
 
 // MARK: - Helpers
@@ -1281,16 +1296,20 @@ private enum DeepEnvelope {
     static let chunkSeed: UInt64 = 859
     static let chunkSizes = 1024...8192
 
+    static let start = #"(NIL NIL "g" NIL)"#
+    static let member = #"(NIL NIL "x" "example.com")"#
+    static let end = "(NIL NIL NIL NIL)"
+
     static var response: ByteBuffer {
-        let start = #"(NIL NIL "g" NIL)"#
-        let member = #"(NIL NIL "x" "example.com")"#
-        let end = "(NIL NIL NIL NIL)"
         let from = String(repeating: start, count: depth) + member + String(repeating: end, count: depth)
         return ByteBuffer(string: "* 1 FETCH (ENVELOPE (NIL NIL (\(from)) NIL NIL NIL NIL NIL NIL NIL))\r\nA1 OK done\r\n")
     }
 
     /// Normalized: `depth - 1` demoted starts, then the innermost group with its member.
     static let expectedSummary = Summary(fromCount: depth, maximumGroupDepth: 1, responseCount: 4, unconsumedBytes: 0)
+
+    /// Encoder output for the normalized From list: every start (demoted or bracketing), member, one end.
+    static let expectedEncodedByteCount = depth * start.utf8.count + member.utf8.count + end.utf8.count
 
     /// Computed iteratively, so it is safe on any tree.
     struct Summary: Equatable, Sendable {
@@ -1321,6 +1340,40 @@ private enum DeepEnvelope {
                 maximumGroupDepth: maximum,
                 responseCount: parsed.responses.count,
                 unconsumedBytes: parsed.unconsumedBytes
+            )
+        }
+    }
+
+    /// Results of `==`, `hashValue`, encode and `String(describing:)` on two independent parses.
+    struct Exercised: Sendable {
+        var summary: Summary
+        var parsesEqual: Bool
+        var hashesEqual: Bool
+        var encodedByteCount: Int
+        var describedNonEmpty: Bool
+
+        /// Call on the pinned stack: both trees are built and released there.
+        static func run() throws -> Exercised {
+            // Two parses, so `==` can't short-circuit on shared storage.
+            let first = try ResponseParserTests.parseStream(response, delivery: .singleShot, options: parserOptions)
+            let second = try ResponseParserTests.parseStream(response, delivery: .singleShot, options: parserOptions)
+            let firstFrom = ResponseParserTests.envelopes(in: first.responses).first?.from ?? []
+            let secondFrom = ResponseParserTests.envelopes(in: second.responses).first?.from ?? []
+
+            var encoder = EncodeBuffer.serverEncodeBuffer(
+                buffer: ByteBufferAllocator().buffer(capacity: 1 << 20),
+                options: ResponseEncodingOptions(),
+                loggingMode: false
+            )
+            let encodedByteCount = firstFrom.reduce(0) { $0 + encoder.writeEmailAddressOrGroup($1) }
+
+            return Exercised(
+                summary: Summary(first),
+                parsesEqual: first == second,
+                hashesEqual: firstFrom.hashValue == secondFrom.hashValue,
+                encodedByteCount: encodedByteCount,
+                // From list: Mirror (recursive); response: `debugDescription` (encoder).
+                describedNonEmpty: !String(describing: firstFrom).isEmpty && !String(describing: first).isEmpty
             )
         }
     }

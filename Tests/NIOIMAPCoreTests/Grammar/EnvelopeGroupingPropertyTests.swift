@@ -86,6 +86,48 @@ struct EnvelopeGroupingPropertyTests {
     }
 }
 
+// MARK: - Width
+
+/// Correctness at scale only: no timing assertion.
+extension EnvelopeGroupingPropertyTests {
+    static let emptyGroupCount = 3_000
+    static let addressCount = 6_000
+
+    @Test("many empty groups")
+    func manyEmptyGroups() {
+        let names = (0..<Self.emptyGroupCount).map { ByteBuffer(string: "g\($0)") }
+        let input = names.flatMap { [EmailAddress.groupStart($0), .groupEnd()] }
+        let output = GrammarParser().parseEnvelopeEmailAddressGroups(input)
+        #expect(output.count == Self.emptyGroupCount)
+        #expect(output == names.map { .group(.init(groupName: $0, sourceRoot: nil, children: [])) })
+        #expect(maximumGroupDepth(output) <= 1)
+    }
+
+    @Test("many addresses")
+    func manyAddresses() {
+        let input = (0..<Self.addressCount).map {
+            EmailAddress(personName: nil, sourceRoot: nil, mailbox: ByteBuffer(string: "a\($0)"), host: "example.com")
+        }
+        let output = GrammarParser().parseEnvelopeEmailAddressGroups(input)
+        #expect(output.count == Self.addressCount)
+        #expect(output == input.map { .singleAddress($0) })
+        #expect(maximumGroupDepth(output) <= 1)
+    }
+
+    /// Exercises the append-to-open-group path.
+    @Test("many members in one group")
+    func manyGroupMembers() {
+        let members = (0..<Self.addressCount).map {
+            EmailAddress(personName: nil, sourceRoot: nil, mailbox: ByteBuffer(string: "a\($0)"), host: "example.com")
+        }
+        let input = [EmailAddress.groupStart("g")] + members + [.groupEnd()]
+        let output = GrammarParser().parseEnvelopeEmailAddressGroups(input)
+        let expected = EmailAddressGroup(groupName: "g", sourceRoot: nil, children: members.map { .singleAddress($0) })
+        #expect(output == [.group(expected)])
+        #expect(maximumGroupDepth(output) <= 1)
+    }
+}
+
 // MARK: - Driver
 
 extension EnvelopeGroupingPropertyTests {
