@@ -23,7 +23,8 @@ extension EncodeBuffer {
     }
 
     mutating func writeQuotaResources(_ resources: [QuotaResource]) -> Int {
-        self.writeString("(") + resources.map { resource in self.writeQuotaResource(resource) }.reduce(0, +)
-            + self.writeString(")")
+        self.writeArray(resources) { resource, buffer in
+            buffer.writeQuotaResource(resource)
+        }
     }
 }

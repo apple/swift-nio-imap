@@ -32,7 +32,7 @@ struct ResponsePayloadTests {
         EncodeFixture.responsePayload(.messageData(.expunge(2)), "2 EXPUNGE"),
         EncodeFixture.responsePayload(.enableData([.enable]), "ENABLED ENABLE"),
         EncodeFixture.responsePayload(.id(["key": nil]), "ID (\"key\" NIL)"),
-        EncodeFixture.responsePayload(.quotaRoot(.init("INBOX"), .init("Root")), "QUOTAROOT \"INBOX\" \"Root\""),
+        EncodeFixture.responsePayload(.quotaRoot(.init("INBOX"), [.init("Root")]), "QUOTAROOT \"INBOX\" \"Root\""),
         EncodeFixture.responsePayload(
             .quota(.init("Root"), [.init(resourceName: "STORAGE", usage: 10, limit: 512)]),
             "QUOTA \"Root\" (STORAGE 10 512)"
@@ -79,10 +79,17 @@ struct ResponsePayloadTests {
         ),
         ParseFixture.responsePayload(
             "QUOTAROOT INBOX \"Root\"",
-            expected: .success(.quotaRoot(.init("INBOX"), .init("Root")))
+            expected: .success(.quotaRoot(.init("INBOX"), [.init("Root")]))
+        ),
+        ParseFixture.responsePayload(
+            "QUOTAROOT comp.mail.mime",
+            expected: .success(.quotaRoot(.init("comp.mail.mime"), []))
+        ),
+        ParseFixture.responsePayload(
+            "QUOTAROOT INBOX \"\" \"Other\"",
+            expected: .success(.quotaRoot(.init("INBOX"), [.init(""), .init("Other")]))
         ),
         ParseFixture.responsePayload("QUOTAROOT", expected: .failure),
-        ParseFixture.responsePayload("QUOTAROOT INBOX", expected: .failure),
         ParseFixture.responsePayload(
             "QUOTA \"Root\" (STORAGE 10 512)",
             expected: .success(.quota(.init("Root"), [QuotaResource(resourceName: "STORAGE", usage: 10, limit: 512)]))
