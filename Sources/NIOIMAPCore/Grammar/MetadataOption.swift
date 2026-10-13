@@ -56,7 +56,7 @@ public enum MetadataOption: Hashable, Sendable {
     /// Extension option for future metadata extensions.
     ///
     /// Serves as a catch-all for additional options defined in future IMAP extensions related to metadata.
-    case other(KeyValue<String, ParameterValue?>)
+    case other(KeyValue<TaggedExtensionLabel, ParameterValue?>)
 }
 
 // MARK: - Encoding

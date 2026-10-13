@@ -469,8 +469,10 @@ extension GrammarParser {
     func parseSearchReturnDataExtension(
         buffer: inout ParseBuffer,
         tracker: StackTracker
-    ) throws -> KeyValue<String, ParameterValue> {
-        try PL.composite(buffer: &buffer, tracker: tracker) { buffer, tracker -> KeyValue<String, ParameterValue> in
+    ) throws -> KeyValue<TaggedExtensionLabel, ParameterValue> {
+        try PL.composite(buffer: &buffer, tracker: tracker) {
+            buffer,
+            tracker -> KeyValue<TaggedExtensionLabel, ParameterValue> in
             let modifier = try self.parseParameterName(buffer: &buffer, tracker: tracker)
             try PL.parseSpaces(buffer: &buffer, tracker: tracker)
             let value = try self.parseParameterValue(buffer: &buffer, tracker: tracker)
@@ -660,8 +662,10 @@ extension GrammarParser {
     func parseSearchReturnOptionExtension(
         buffer: inout ParseBuffer,
         tracker: StackTracker
-    ) throws -> KeyValue<String, ParameterValue?> {
-        try PL.composite(buffer: &buffer, tracker: tracker) { buffer, tracker -> KeyValue<String, ParameterValue?> in
+    ) throws -> KeyValue<TaggedExtensionLabel, ParameterValue?> {
+        try PL.composite(buffer: &buffer, tracker: tracker) {
+            buffer,
+            tracker -> KeyValue<TaggedExtensionLabel, ParameterValue?> in
             let name = try self.parseParameterName(buffer: &buffer, tracker: tracker)
             let params = try PL.parseOptional(buffer: &buffer, tracker: tracker) {
                 (buffer, tracker) -> ParameterValue in

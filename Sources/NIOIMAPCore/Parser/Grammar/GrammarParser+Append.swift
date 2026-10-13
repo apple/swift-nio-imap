@@ -118,9 +118,9 @@ extension GrammarParser {
                 try PL.parseSpaces(buffer: &buffer, tracker: tracker)
                 return try self.parseInternalDate(buffer: &buffer, tracker: tracker)
             }
-            var kvs = OrderedDictionary<String, ParameterValue>()
+            var kvs = OrderedDictionary<TaggedExtensionLabel, ParameterValue>()
             try PL.parseZeroOrMore(buffer: &buffer, into: &kvs, tracker: tracker) {
-                (buffer, tracker) -> KeyValue<String, ParameterValue> in
+                (buffer, tracker) -> KeyValue<TaggedExtensionLabel, ParameterValue> in
                 try PL.parseSpaces(buffer: &buffer, tracker: tracker)
                 return try self.parseTaggedExtension(buffer: &buffer, tracker: tracker)
             }

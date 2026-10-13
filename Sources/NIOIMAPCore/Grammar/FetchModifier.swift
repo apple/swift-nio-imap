@@ -59,7 +59,7 @@ public enum FetchModifier: Hashable, Sendable {
     ///
     /// Captures future `FETCH` modifiers defined by extensions, allowing forward compatibility
     /// with new IMAP capabilities without requiring library updates.
-    case other(KeyValue<String, ParameterValue?>)
+    case other(KeyValue<TaggedExtensionLabel, ParameterValue?>)
 }
 
 // MARK: - Encoding
