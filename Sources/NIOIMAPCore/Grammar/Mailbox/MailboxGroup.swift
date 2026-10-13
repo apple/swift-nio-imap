@@ -52,18 +52,16 @@ public struct EmailAddressGroup: Hashable, Sendable {
     /// Per [RFC 5322](https://datatracker.ietf.org/doc/html/rfc5322), this is typically `nil`.
     public var sourceRoot: ByteBuffer?
 
-    /// The nested addresses and groups within this group.
+    /// The addresses within this group.
     ///
-    /// Can contain both individual addresses (``EmailAddressListElement/singleAddress(_:)``)
-    /// and nested address groups (``EmailAddressListElement/group(_:)``), allowing for arbitrarily
-    /// deep hierarchies.
+    /// Parsed groups contain only ``EmailAddressListElement/singleAddress(_:)``. Nesting: see ``EmailAddressListElement``.
     public var children: [EmailAddressListElement]
 
     /// Creates a new address group.
     ///
     /// - Parameter groupName: The name of the group
     /// - Parameter sourceRoot: Optional source root for routing information
-    /// - Parameter children: The nested addresses and groups
+    /// - Parameter children: The addresses within this group
     public init(groupName: ByteBuffer, sourceRoot: ByteBuffer?, children: [EmailAddressListElement]) {
         self.groupName = groupName
         self.sourceRoot = sourceRoot
@@ -78,7 +76,13 @@ public struct EmailAddressGroup: Hashable, Sendable {
 /// the ENVELOPE structure includes address lists (such as `To:`, `From:`, `Cc:`) that may contain
 /// both individual email addresses and named address groups.
 ///
-/// An indirect enum, allowing arbitrarily deep nesting of groups within groups.
+/// The parser never nests groups. It emits a group only when a start and an end marker bracket it.
+/// An unclosed start marker surfaces as ``EmailAddressListElement/singleAddress(_:)`` with
+/// ``EmailAddress/host`` `nil`, followed by its members. Such an address is not a deliverable recipient.
+/// A stray end marker is dropped.
+///
+/// The type is indirect and permits nesting for hand-built values. Equality, hashing, encoding and
+/// release recurse per level; bounding depth is the caller's responsibility.
 ///
 /// ### Example
 ///
@@ -94,8 +98,7 @@ public struct EmailAddressGroup: Hashable, Sendable {
 /// ```
 ///
 /// Single addresses map to ``EmailAddressListElement/singleAddress(_:)`` cases,
-/// and groups map to ``EmailAddressListElement/group(_:)`` cases containing the group name
-/// and nested ``EmailAddressListElement`` children.
+/// and groups map to ``EmailAddressListElement/group(_:)`` cases containing the group name and members.
 ///
 /// - SeeAlso: ``EmailAddress``, ``EmailAddressGroup``, ``Envelope``
 public indirect enum EmailAddressListElement: Hashable, Sendable {
@@ -106,8 +109,7 @@ public indirect enum EmailAddressListElement: Hashable, Sendable {
 
     /// A collection of addresses organized under a group name.
     ///
-    /// Wraps an ``EmailAddressGroup`` containing a group name and nested
-    /// ``EmailAddressListElement`` children (which can themselves be addresses or groups).
+    /// Wraps an ``EmailAddressGroup``: a group name and its member addresses.
     case group(EmailAddressGroup)
 }
 
