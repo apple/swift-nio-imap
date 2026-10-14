@@ -26,13 +26,11 @@ struct MailboxGroupTests {
                     groupName: ByteBuffer(string: "Team"),
                     sourceRoot: ByteBuffer(string: "root"),
                     children: [
-                        .singleAddress(
-                            EmailAddress(
-                                personName: "Alice",
-                                sourceRoot: nil,
-                                mailbox: "alice",
-                                host: "example.com"
-                            )
+                        EmailAddress(
+                            personName: "Alice",
+                            sourceRoot: nil,
+                            mailbox: "alice",
+                            host: "example.com"
                         )
                     ]
                 ),
