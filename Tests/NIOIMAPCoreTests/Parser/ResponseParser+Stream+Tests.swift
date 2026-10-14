@@ -1302,7 +1302,9 @@ private enum DeepEnvelope {
 
     static var response: ByteBuffer {
         let from = String(repeating: start, count: depth) + member + String(repeating: end, count: depth)
-        return ByteBuffer(string: "* 1 FETCH (ENVELOPE (NIL NIL (\(from)) NIL NIL NIL NIL NIL NIL NIL))\r\nA1 OK done\r\n")
+        return ByteBuffer(
+            string: "* 1 FETCH (ENVELOPE (NIL NIL (\(from)) NIL NIL NIL NIL NIL NIL NIL))\r\nA1 OK done\r\n"
+        )
     }
 
     /// Normalized: `depth - 1` demoted starts, then the innermost group with its member.
