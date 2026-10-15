@@ -427,7 +427,7 @@ public indirect enum ResponseTextCode: Hashable, Sendable {
     ///
     /// The value is `nil` if the server sent an invalid identifier.
     /// E.g. https://github.com/cyrusimap/cyrus-imapd/issues/4944
-    /// 
+    ///
     /// Part of the OBJECTID extension.
     /// See [RFC 8474](https://datatracker.ietf.org/doc/html/rfc8474) (OBJECTID Extension) for details.
     case mailboxID(MailboxID?)
