@@ -3060,14 +3060,19 @@ extension GrammarParser {
         return objectID
     }
 
-    /// Parses an object ID leniently: any run of non-delimiter characters is consumed, and `nil` is returned
-    /// if it isn't a valid ``ObjectID`` rather than failing the parse.
+    /// Parses an object ID leniently: any run of bytes up to a delimiter (space, `)`, `]`, CR, LF) is consumed,
+    /// and `nil` is returned if it isn't a valid ``ObjectID`` rather than failing the parse.
     func parseObjectIDLeniently(buffer: inout ParseBuffer, tracker: StackTracker) throws -> ObjectID? {
         let parsed = try PL.parseZeroOrMoreCharacters(buffer: &buffer, tracker: tracker) { char -> Bool in
-            char.isTextChar && char != UInt8(ascii: ")") && char != UInt8(ascii: "]") && char != UInt8(ascii: " ")
+            switch char {
+            case UInt8(ascii: " "), UInt8(ascii: ")"), UInt8(ascii: "]"), UInt8(ascii: "\r"), UInt8(ascii: "\n"):
+                return false
+            default:
+                return true
+            }
         }
-        let string = try PL.parseBufferAsUTF8(parsed)
-        return ObjectID(string)
+        // Non-UTF-8 bytes become U+FFFD, which isn't a valid object ID character.
+        return ObjectID(String(decoding: parsed.readableBytesView, as: UTF8.self))
     }
 }
 
