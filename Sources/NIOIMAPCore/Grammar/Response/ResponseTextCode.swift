@@ -424,9 +424,12 @@ public indirect enum ResponseTextCode: Hashable, Sendable {
     ///
     /// Contains the MAILBOXID value for the selected mailbox. The client should remember
     /// this value to track mailboxes across sessions.
+    ///
+    /// The value is `nil` if the server sent an invalid identifier.
+    /// 
     /// Part of the OBJECTID extension.
     /// See [RFC 8474](https://datatracker.ietf.org/doc/html/rfc8474) (OBJECTID Extension) for details.
-    case mailboxID(MailboxID)
+    case mailboxID(MailboxID?)
 
     /// The client must not use message sequence numbers.
     ///
@@ -549,7 +552,7 @@ extension EncodeBuffer {
             return self.writeString("COMPRESSIONACTIVE")
         case .mailboxID(let mailboxID):
             return self.writeString("MAILBOXID (")
-                + self.writeMailboxID(mailboxID)
+                + self.writeIfExists(mailboxID) { self.writeMailboxID($0) }
                 + self.writeString(")")
         case .uidRequired:
             return self.writeString("UIDREQUIRED")

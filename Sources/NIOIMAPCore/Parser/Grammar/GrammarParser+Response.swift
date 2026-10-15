@@ -377,7 +377,7 @@ extension GrammarParser {
         func parseSuffix_mailboxID(buffer: inout ParseBuffer, tracker: StackTracker) throws -> ResponseTextCode {
             try PL.parseSpaces(buffer: &buffer, tracker: tracker)
             try PL.parseFixedString("(", buffer: &buffer, tracker: tracker)
-            let mailboxID = try parseMailboxID(buffer: &buffer, tracker: tracker)
+            let mailboxID = try parseMailboxIDLeniently(buffer: &buffer, tracker: tracker)
             try PL.parseFixedString(")", buffer: &buffer, tracker: tracker)
             return .mailboxID(mailboxID)
         }

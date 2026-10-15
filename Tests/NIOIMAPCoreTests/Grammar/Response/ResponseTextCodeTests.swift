@@ -162,6 +162,10 @@ struct ResponseTextCodeTests {
             "MAILBOXID (F2212ea87-6097-4256-9d51-71338625)",
             expected: .success(.mailboxID("F2212ea87-6097-4256-9d51-71338625"))
         ),
+        ParseFixture.responseTextCode(
+            "MAILBOXID (bad!id)",
+            expected: .success(.mailboxID(nil))
+        ),
         ParseFixture.responseTextCode("METADATA LONGENTRIES 456", expected: .success(.metadataLongEntries(456))),
         ParseFixture.responseTextCode("METADATA MAXSIZE 123", expected: .success(.metadataMaxsize(123))),
         ParseFixture.responseTextCode("METADATA NOPRIVATE", expected: .success(.metadataNoPrivate)),
