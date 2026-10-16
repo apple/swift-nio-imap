@@ -162,6 +162,10 @@ struct ResponseTextCodeTests {
             "MAILBOXID (F2212ea87-6097-4256-9d51-71338625)",
             expected: .success(.mailboxID("F2212ea87-6097-4256-9d51-71338625"))
         ),
+        ParseFixture.responseTextCode(
+            "MAILBOXID (bad!id)",
+            expected: .success(.mailboxID(nil))
+        ),
         ParseFixture.responseTextCode("METADATA LONGENTRIES 456", expected: .success(.metadataLongEntries(456))),
         ParseFixture.responseTextCode("METADATA MAXSIZE 123", expected: .success(.metadataMaxsize(123))),
         ParseFixture.responseTextCode("METADATA NOPRIVATE", expected: .success(.metadataNoPrivate)),
@@ -229,6 +233,16 @@ struct ResponseTextCodeTests {
     ])
     func parse(_ fixture: ParseFixture<ResponseTextCode>) {
         fixture.checkParsing()
+    }
+
+    @Test("invalid non-UTF-8 MAILBOXID is parsed as nil")
+    func parseMailboxIDWithNonUTF8Bytes() throws {
+        var buffer = ByteBuffer(string: "MAILBOXID (")
+        buffer.writeBytes([0x30, 0x10, 0x50, 0x87, 0x6d, 0x55])
+        buffer.writeString(")\r")
+        var parseBuffer = ParseBuffer(buffer)
+        let code = try GrammarParser().parseResponseTextCode(buffer: &parseBuffer, tracker: .testTracker)
+        #expect(code == .mailboxID(nil))
     }
 
     @Test(
