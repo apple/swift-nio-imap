@@ -113,19 +113,34 @@ extension EncodeBuffer {
         guard !loggingMode else {
             return self.writeRedactedByteCount(bytes.count)
         }
-        var c = writeString(#"""#)
-        for byte in bytes {
-            switch byte {
-            case 0x5c:
-                c += self.buffer.writeBytes([0x5c, 0x5c])
-            case 0x22:
-                c += self.buffer.writeBytes([0x5c, 0x22])
-            default:
-                c += self.buffer.writeBytes(CollectionOfOne(byte))
+        // Escape into a stack buffer, then copy once: a write per byte would dominate the cost of
+        // encoding a quoted mailbox name.
+        //
+        // Every byte grows to at most two, plus the two surrounding quotes. `shouldUseQuotedString`
+        // caps the input at 70 bytes, so this is a small allocation, but the bound above holds
+        // whatever it decides.
+        let quote = UInt8(ascii: "\"")
+        let escape = UInt8(ascii: "\\")
+        let count = bytes.count
+        return withUnsafeTemporaryAllocation(of: UInt8.self, capacity: 2 * count + 2) { quoted in
+            var index = quoted.startIndex
+            quoted[index] = quote
+            index += 1
+            for byte in bytes {
+                if byte == escape || byte == quote {
+                    quoted[index] = escape
+                    index += 1
+                }
+                quoted[index] = byte
+                index += 1
             }
+            quoted[index] = quote
+            index += 1
+            // `appendBytes` rather than `writeBytes`: redaction has already been decided. In logging
+            // mode `writeIMAPString` diverts to `writeIMAPStringLoggingMode` before choosing an
+            // encoding, so this function is never reached — the guard above is belt and braces.
+            return self.appendBytes(UnsafeRawBufferPointer(UnsafeBufferPointer(rebasing: quoted[..<index])))
         }
-        c += writeString(#"""#)
-        return c
     }
 
     private mutating func writeIMAPStringLoggingMode<T: Collection>(_ bytes: T) -> Int where T.Element == UInt8 {
