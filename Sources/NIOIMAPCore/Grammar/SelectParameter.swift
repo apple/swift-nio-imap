@@ -180,7 +180,7 @@ extension EncodeBuffer {
             return self.writeString("CONDSTORE")
         case .objectID(let compound):
             return self.writeString("OBJECTID")
-                + self.writeIfExists(compound) { (compound) -> Int in
+                + writeIfExists(compound) { (compound) -> Int in
                     self.writeSpace() + self.writeCompoundObjectID(compound)
                 }
         }
@@ -189,10 +189,10 @@ extension EncodeBuffer {
     @discardableResult mutating func writeQResyncParameter(param: QResyncParameter) -> Int {
         self.writeString("QRESYNC (\(param.uidValidity.rawValue) ")
             + self.writeModificationSequenceValue(param.modificationSequenceValue)
-            + self.writeIfExists(param.knownUIDs) { (set) -> Int in
+            + writeIfExists(param.knownUIDs) { (set) -> Int in
                 self.writeSpace() + self.writeUIDSet(set)
             }
-            + self.writeIfExists(param.sequenceMatchData) { (data) -> Int in
+            + writeIfExists(param.sequenceMatchData) { (data) -> Int in
                 self.writeSpace() + self.writeSequenceMatchData(data)
             } + self.writeString(")")
     }

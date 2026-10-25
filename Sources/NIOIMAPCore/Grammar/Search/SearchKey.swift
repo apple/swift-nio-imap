@@ -640,7 +640,7 @@ extension EncodeBuffer {
                     let (i, key) = row
                     return
                         size + self.writeSearchKey(key, encloseInParenthesisIfNeeded: true)
-                        + self.write(if: i < keys.count - 1) { () -> Int in
+                        + write(if: i < keys.count - 1) { () -> Int in
                             self.writeString(" ")
                         }
                 }

@@ -208,7 +208,7 @@ extension EncodeBuffer {
 
     @discardableResult mutating func writeBodyExtensionSinglePart(_ ext: BodyStructure.Singlepart.Extension) -> Int {
         self.writeNString(ext.digest)
-            + self.writeIfExists(ext.dispositionAndLanguage) { (dsp) -> Int in
+            + writeIfExists(ext.dispositionAndLanguage) { (dsp) -> Int in
                 self.writeBodyDispositionAndLanguage(dsp)
             }
     }

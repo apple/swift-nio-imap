@@ -88,7 +88,7 @@ public struct IMAPURL: Hashable, Sendable {
 extension EncodeBuffer {
     @discardableResult mutating func writeIMAPURL(_ url: IMAPURL) -> Int {
         self.writeString("imap://") + self.writeIMAPServer(url.server) + self.writeString("/")
-            + self.writeIfExists(url.command) { command in
+            + writeIfExists(url.command) { command in
                 self.writeURLCommand(command)
             }
     }

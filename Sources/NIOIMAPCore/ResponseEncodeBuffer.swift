@@ -195,7 +195,7 @@ extension EncodeBuffer {
             return self.writeString("BINARY")
         case .body(let section, let offset):
             return self.writeString("BODY") + self.writeSection(section)
-                + self.writeIfExists(offset) { offset in
+                + writeIfExists(offset) { offset in
                     self.writeString("<\(offset)>")
                 }
         case .rfc822:

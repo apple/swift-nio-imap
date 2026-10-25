@@ -70,7 +70,7 @@ public struct ResponseText: Hashable, Sendable {
 
 extension EncodeBuffer {
     @discardableResult mutating func writeResponseText(_ text: ResponseText) -> Int {
-        self.writeIfExists(text.code) { (code) -> Int in
+        writeIfExists(text.code) { (code) -> Int in
             self.writeString("[") + self.writeResponseTextCode(code) + self.writeString("] ")
         }
 

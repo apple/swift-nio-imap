@@ -218,7 +218,7 @@ extension EncodeBuffer {
             + self.writeArray(list, prefix: " ", separator: " ", parenthesis: false) { (id, buffer) -> Int in
                 buffer.writeMessageIdentifier(id)
             }
-            + self.writeIfExists(modificationSequence) { value -> Int in
+            + writeIfExists(modificationSequence) { value -> Int in
                 self.writeString(" (MODSEQ ") + self.writeModificationSequenceValue(value) + self.writeString(")")
             }
     }
@@ -231,7 +231,7 @@ extension EncodeBuffer {
             + self.writeArray(list, prefix: " ", separator: " ", parenthesis: false) { (id, buffer) -> Int in
                 buffer.writeMessageIdentifier(id)
             }
-            + self.writeIfExists(modificationSequence) { value -> Int in
+            + writeIfExists(modificationSequence) { value -> Int in
                 self.writeString(" (MODSEQ ") + self.writeModificationSequenceValue(value) + self.writeString(")")
             }
     }

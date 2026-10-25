@@ -76,7 +76,7 @@ public struct MailboxUIDValidity: Hashable, Sendable {
 extension EncodeBuffer {
     @discardableResult mutating func writeEncodedMailboxUIDValidity(_ ref: MailboxUIDValidity) -> Int {
         self.writeEncodedMailbox(ref.encodedMailbox)
-            + self.writeIfExists(ref.uidValidity) { value in
+            + writeIfExists(ref.uidValidity) { value in
                 self.writeString(";UIDVALIDITY=") + self.writeUIDValidity(value)
             }
     }

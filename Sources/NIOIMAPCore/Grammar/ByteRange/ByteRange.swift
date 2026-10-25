@@ -50,7 +50,7 @@ extension EncodeBuffer {
 
     @discardableResult mutating func writeByteRange(_ data: ByteRange) -> Int {
         self.writeString("\(data.offset)")
-            + self.writeIfExists(data.length) { length in
+            + writeIfExists(data.length) { length in
                 self.writeString(".\(length)")
             }
     }

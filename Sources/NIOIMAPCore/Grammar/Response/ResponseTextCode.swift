@@ -592,7 +592,7 @@ extension EncodeBuffer {
 
     private mutating func writeResponseTextCode_badCharsets(_ charsets: [CharacterSetName]) -> Int {
         self.writeString("BADCHARSET")
-            + self.write(if: charsets.count >= 1) {
+            + write(if: charsets.count >= 1) {
                 self.writeSpace()
                     + self.writeArray(charsets) { (charset, self) in
                         self.writeCharacterSetName(charset)
@@ -602,7 +602,7 @@ extension EncodeBuffer {
 
     private mutating func writeResponseTextCode_other(atom: String, string: String?) -> Int {
         self.writeString(atom)
-            + self.writeIfExists(string) { (string) -> Int in
+            + writeIfExists(string) { (string) -> Int in
                 self.writeString(" \(string)")
             }
     }

@@ -197,24 +197,24 @@ extension EncodeBuffer {
         // TODO: This should probably check
         //   collection.count != 0
         // such that an empty collection gets encoded as "()".
-        self.write(if: collection.count > 0) {
+        write(if: collection.count > 0) {
             self.writeString(prefix)
         }
-            + self.write(if: parenthesis) { () -> Int in
+            + write(if: parenthesis) { () -> Int in
                 self.writeString("(")
             }
             + collection.enumerated().reduce(0) { (size, row) in
                 let (i, element) = row
                 return
                     size + writer(element, &self)
-                    + self.write(if: i < collection.count - 1) { () -> Int in
+                    + write(if: i < collection.count - 1) { () -> Int in
                         self.writeString(separator)
                     }
             }
-            + self.write(if: parenthesis) { () -> Int in
+            + write(if: parenthesis) { () -> Int in
                 self.writeString(")")
             }
-            + self.write(if: collection.count > 0) {
+            + write(if: collection.count > 0) {
                 self.writeString(suffix)
             }
     }
@@ -239,52 +239,58 @@ extension EncodeBuffer {
         // TODO: This should probably check
         //   collection.count != 0
         // such that an empty collection gets encoded as "()".
-        self.write(if: values.count > 0) {
+        write(if: values.count > 0) {
             self.writeString(prefix)
         }
-            + self.write(if: parenthesis) { () -> Int in
+            + write(if: parenthesis) { () -> Int in
                 self.writeString("(")
             }
             + values.enumerated().reduce(0) { (size, row) in
                 let (i, element) = row
                 return
                     size + writer(.init(key: element.0, value: element.1), &self)
-                    + self.write(if: i < values.count - 1) { () -> Int in
+                    + write(if: i < values.count - 1) { () -> Int in
                         self.writeString(separator)
                     }
             }
-            + self.write(if: parenthesis) { () -> Int in
+            + write(if: parenthesis) { () -> Int in
                 self.writeString(")")
             }
-            + self.write(if: values.count > 0) {
+            + write(if: values.count > 0) {
                 self.writeString(suffix)
             }
     }
+}
 
-    /// Writes to self using a closure if the given `value` is non-`nil`. This allows for chaining together writes
-    /// when attempting to perform composite writes and return the total number of bytes written.
-    /// - parameters:
-    ///     - value: The optional field to evaluate.
-    ///     - writer: The closure to invoke if `value` is non-`nil`. If `value` exists then it is passed as
-    ///     the only argument to this closure.
-    /// - returns: The number of bytes written.
-    @discardableResult func writeIfExists<T>(_ value: T?, _ writer: (inout T) -> Int) -> Int {
-        guard var value = value else {
-            return 0
-        }
-        return writer(&value)
-    }
+// MARK: - Conditional writes
 
-    /// Writes to self using a closure if a condition is met. This allows for chaining together writes
-    /// when attempting to perform composite writes and return the total number of bytes written.
-    /// - parameters:
-    ///     - condition: The condition to evaluate, if `true` then `writer` will be invoked.
-    ///     - writer: The closure to invoke if `condition` is met.
-    /// - returns: The number of bytes written.
-    @discardableResult func write(if condition: Bool, _ writer: () -> Int) -> Int {
-        guard condition else {
-            return 0
-        }
-        return writer()
+// Free functions, not `EncodeBuffer` methods: a method call `self.write(if: …) { self.write… }`
+// borrows `self` while the closure mutates it, so the compiler copies the buffer and the first write
+// inside the closure pays for copy-on-write.
+
+/// Writes using a closure if the given `value` is non-`nil`. This allows for chaining together writes
+/// when attempting to perform composite writes and return the total number of bytes written.
+/// - parameters:
+///     - value: The optional field to evaluate.
+///     - writer: The closure to invoke if `value` is non-`nil`. If `value` exists then it is passed as
+///     the only argument to this closure.
+/// - returns: The number of bytes written.
+@discardableResult func writeIfExists<T>(_ value: T?, _ writer: (inout T) -> Int) -> Int {
+    guard var value = value else {
+        return 0
     }
+    return writer(&value)
+}
+
+/// Writes using a closure if a condition is met. This allows for chaining together writes
+/// when attempting to perform composite writes and return the total number of bytes written.
+/// - parameters:
+///     - condition: The condition to evaluate, if `true` then `writer` will be invoked.
+///     - writer: The closure to invoke if `condition` is met.
+/// - returns: The number of bytes written.
+@discardableResult func write(if condition: Bool, _ writer: () -> Int) -> Int {
+    guard condition else {
+        return 0
+    }
+    return writer()
 }
