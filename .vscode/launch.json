@@ -23,24 +23,6 @@
             "request": "launch",
             "args": [],
             "cwd": "${workspaceFolder:swift-nio-imap}",
-            "name": "Debug NIOIMAPPerformanceTester",
-            "program": "${workspaceFolder:swift-nio-imap}/.build/debug/NIOIMAPPerformanceTester",
-            "preLaunchTask": "swift: Build Debug NIOIMAPPerformanceTester"
-        },
-        {
-            "type": "lldb",
-            "request": "launch",
-            "args": [],
-            "cwd": "${workspaceFolder:swift-nio-imap}",
-            "name": "Release NIOIMAPPerformanceTester",
-            "program": "${workspaceFolder:swift-nio-imap}/.build/release/NIOIMAPPerformanceTester",
-            "preLaunchTask": "swift: Build Release NIOIMAPPerformanceTester"
-        },
-        {
-            "type": "lldb",
-            "request": "launch",
-            "args": [],
-            "cwd": "${workspaceFolder:swift-nio-imap}",
             "name": "Debug NIOIMAPFuzzer",
             "program": "${workspaceFolder:swift-nio-imap}/.build/debug/NIOIMAPFuzzer",
             "preLaunchTask": "swift: Build Debug NIOIMAPFuzzer"
