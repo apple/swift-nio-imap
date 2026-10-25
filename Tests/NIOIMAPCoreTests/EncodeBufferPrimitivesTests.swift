@@ -119,6 +119,25 @@ struct EncodeBufferPrimitivesTests {
         #expect(encoded { $0.writeRedactedByteCount(0) }.string == "[0 bytes]")
         #expect(encoded { $0.writeRedactedByteCount(1_048_576) }.string == "[1048576 bytes]")
     }
+
+    /// `writeQuotedIMAPString` stages the escaped form in a fixed-size buffer sized from the input, so
+    /// the boundary cases are worth pinning: nothing to escape, everything to escape, and the largest
+    /// input `shouldUseQuotedString` will accept.
+    @Test("quoted strings are escaped in one write")
+    func quotedStringEscaping() {
+        #expect(encoded { $0.writeIMAPString("") }.string == #""""#)
+        #expect(encoded { $0.writeIMAPString("abc") }.string == #""abc""#)
+        #expect(encoded { $0.writeIMAPString(#"a"b"#) }.string == #""a\"b""#)
+        #expect(encoded { $0.writeIMAPString(#"a\b"#) }.string == #""a\\b""#)
+        // Five escapes is the most `shouldUseQuotedString` allows before falling back to a literal.
+        let fiveQuotes = String(repeating: #"""#, count: 5)
+        #expect(
+            encoded { $0.writeIMAPString(fiveQuotes) }.string
+                == #"""# + String(repeating: #"\""#, count: 5) + #"""#
+        )
+        let longest = String(repeating: "x", count: 70)
+        #expect(encoded { $0.writeIMAPString(longest) }.string == "\"\(longest)\"")
+    }
 }
 
 /// What `loggingMode` substitutes for payload bytes, at each site that substitutes something
