@@ -127,6 +127,6 @@ extension ModificationSequenceValue: Strideable {
 
 extension EncodeBuffer {
     @discardableResult mutating func writeModificationSequenceValue(_ value: ModificationSequenceValue) -> Int {
-        self.writeString("\(value.value)")
+        self.writeDecimal(value.value)
     }
 }

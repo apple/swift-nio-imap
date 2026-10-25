@@ -200,9 +200,9 @@ extension EncodeBuffer {
         case .status(let mailbox, let status):
             return self.writeMailboxData_status(mailbox: mailbox, status: status)
         case .exists(let num):
-            return self.writeString("\(num) EXISTS")
+            return self.writeDecimal(num) + self.writeString(" EXISTS")
         case .recent(let num):
-            return self.writeString("\(num) RECENT")
+            return self.writeDecimal(num) + self.writeString(" RECENT")
         case .namespace(let namespaceResponse):
             return self.writeNamespaceResponse(namespaceResponse)
         case .uidBatches(let response):

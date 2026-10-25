@@ -351,9 +351,9 @@ extension CommandEncodeBuffer {
                 + self.buffer.writeString("TEXT ")
 
             if self.options.useNonSynchronizingLiteralPlus {
-                written += self.buffer.writeString("{\(size)+}\r\n")
+                written += self.buffer.writeLiteralHeader(byteCount: size, synchronization: .nonSynchronizing)
             } else {
-                written += self.buffer.writeString("{\(size)}\r\n")
+                written += self.buffer.writeLiteralHeader(byteCount: size)
                 self.buffer.markStopPoint()
             }
             return written

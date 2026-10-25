@@ -280,7 +280,7 @@ extension EncodeBuffer {
             self.writeUserAuthenticationMechanism(authMechanism) + self.writeString("@")
         } + self.writeString(server.host.stringValue)
             + writeIfExists(server.port) { port in
-                self.writeString(":\(port)")
+                self.writeByte(UInt8(ascii: ":")) + self.writeDecimal(port)
             }
     }
 }

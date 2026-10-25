@@ -88,6 +88,18 @@ struct MailboxAttributeTests {
                 .init(messageCount: 1, mailboxID: .valid("abc123"), objectID: CompoundObjectID(mailboxID: "abc123")),
                 "MESSAGES 1 MAILBOXID (abc123) OBJECTID (MAILBOXID abc123)"
             ),
+            EncodeFixture.mailboxStatus(
+                .init(
+                    messageCount: 0,
+                    nextUID: 4_294_967_295,
+                    uidValidity: 4_294_967_295,
+                    size: Int.max,
+                    highestModificationSequence: 9_223_372_036_854_775_807,
+                    mailboxID: .valid("abc123"),
+                    objectID: CompoundObjectID(mailboxID: "abc123")
+                ),
+                "MESSAGES 0 UIDNEXT 4294967295 UIDVALIDITY 4294967295 SIZE 9223372036854775807 HIGHESTMODSEQ 9223372036854775807 MAILBOXID (abc123) OBJECTID (MAILBOXID abc123)"
+            ),
         ]
     )
     func encodeStatus(_ fixture: EncodeFixture<MailboxStatus>) {

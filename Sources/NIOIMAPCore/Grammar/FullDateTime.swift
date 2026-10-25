@@ -236,19 +236,19 @@ extension EncodeBuffer {
     }
 
     @discardableResult mutating func writeFullDate(_ data: FullDate) -> Int {
-        let year = self.padInteger(data.year, minimum: 4)
-        let month = self.padInteger(data.month, minimum: 2)
-        let day = self.padInteger(data.day, minimum: 2)
-        return self.writeString("\(year)-\(month)-\(day)")
+        let hyphen = UInt8(ascii: "-")
+        return self.writeDecimal(data.year, minimumDigits: 4) + self.writeByte(hyphen)
+            + self.writeDecimal(data.month, minimumDigits: 2) + self.writeByte(hyphen)
+            + self.writeDecimal(data.day, minimumDigits: 2)
     }
 
     @discardableResult mutating func writeFullTime(_ data: FullTime) -> Int {
-        let hour = self.padInteger(data.hour, minimum: 2)
-        let minute = self.padInteger(data.minute, minimum: 2)
-        let second = self.padInteger(data.second, minimum: 2)
-        return self.writeString("\(hour):\(minute):\(second)")
+        let colon = UInt8(ascii: ":")
+        return self.writeDecimal(data.hour, minimumDigits: 2) + self.writeByte(colon)
+            + self.writeDecimal(data.minute, minimumDigits: 2) + self.writeByte(colon)
+            + self.writeDecimal(data.second, minimumDigits: 2)
             + writeIfExists(data.fraction) { fraction in
-                self.writeString(".\(fraction.stringValue)")
+                self.writeByte(UInt8(ascii: ".")) + self.writeString(fraction.stringValue)
             } + self.writeTimeOffset(data.offset)
     }
 
@@ -260,21 +260,19 @@ extension EncodeBuffer {
 
         switch offset {
         case .utc:
-            return self.writeString("Z")
+            return self.writeByte(UInt8(ascii: "Z"))
         case .plus(let hour, let minute):
             assertInRange(hour: hour, minute: minute)
-            return self.writeString("+\(self.padInteger(hour, minimum: 2)):\(self.padInteger(minute, minimum: 2))")
+            return self.writeByte(UInt8(ascii: "+")) + self.writeHourMinute(hour: hour, minute: minute)
         case .minus(let hour, let minute):
             assertInRange(hour: hour, minute: minute)
-            return self.writeString("-\(self.padInteger(hour, minimum: 2)):\(self.padInteger(minute, minimum: 2))")
+            return self.writeByte(UInt8(ascii: "-")) + self.writeHourMinute(hour: hour, minute: minute)
         }
     }
 
-    func padInteger(_ int: Int, minimum: Int) -> String {
-        let short = "\(int)"
-        guard short.count < minimum else {
-            return short
-        }
-        return String(repeating: "0", count: (minimum - short.count)) + short
+    /// Writes `HH:MM`.
+    private mutating func writeHourMinute(hour: Int, minute: Int) -> Int {
+        self.writeDecimal(hour, minimumDigits: 2) + self.writeByte(UInt8(ascii: ":"))
+            + self.writeDecimal(minute, minimumDigits: 2)
     }
 }

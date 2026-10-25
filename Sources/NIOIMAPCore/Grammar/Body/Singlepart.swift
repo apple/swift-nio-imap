@@ -187,7 +187,7 @@ extension EncodeBuffer {
         fields: BodyStructure.Fields
     ) -> Int {
         self.writeString(#""TEXT" "#) + self.writeMediaSubtype(body.mediaSubtype) + self.writeSpace()
-            + self.writeBodyFields(fields) + self.writeString(" \(body.lineCount)")
+            + self.writeBodyFields(fields) + self.writeSpace() + self.writeDecimal(body.lineCount)
     }
 
     @discardableResult private mutating func writeBodyKindMessage(
@@ -196,7 +196,8 @@ extension EncodeBuffer {
     ) -> Int {
         self.writeString(#""MESSAGE" "#) + self.writeMediaSubtype(message.message) + self.writeSpace()
             + self.writeBodyFields(fields) + self.writeSpace() + self.writeEnvelope(message.envelope)
-            + self.writeSpace() + self.writeBody(message.body) + self.writeString(" \(message.lineCount)")
+            + self.writeSpace() + self.writeBody(message.body) + self.writeSpace()
+            + self.writeDecimal(message.lineCount)
     }
 
     @discardableResult private mutating func writeBodyKindBasic(

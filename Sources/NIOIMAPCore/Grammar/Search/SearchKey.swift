@@ -601,7 +601,7 @@ extension EncodeBuffer {
                 + self.writeIMAPString(value)
 
         case .messageSizeLarger(let n):
-            return self.writeString("LARGER \(n)")
+            return self.writeString("LARGER ") + self.writeDecimal(n)
 
         case .not(let key):
             return
@@ -613,7 +613,7 @@ extension EncodeBuffer {
                 + self.writeSpace() + self.writeSearchKey(k2, encloseInParenthesisIfNeeded: true)
 
         case .messageSizeSmaller(let n):
-            return self.writeString("SMALLER \(n)")
+            return self.writeString("SMALLER ") + self.writeDecimal(n)
 
         case .uid(let set):
             return
@@ -646,9 +646,9 @@ extension EncodeBuffer {
                 }
             }
         case .younger(let seconds):
-            return self.writeString("YOUNGER \(seconds)")
+            return self.writeString("YOUNGER ") + self.writeDecimal(seconds)
         case .older(let seconds):
-            return self.writeString("OLDER \(seconds)")
+            return self.writeString("OLDER ") + self.writeDecimal(seconds)
         case .filter(let filterName):
             return
                 self.writeString("FILTER ") + self.writeFilterName(filterName)
@@ -672,10 +672,10 @@ extension EncodeBuffer {
             return self.writeString("THREADID ") + self.writeThreadID(id)
 
         case .gmailMessageID(let id):
-            return self.writeString("X-GM-MSGID \(id)")
+            return self.writeString("X-GM-MSGID ") + self.writeDecimal(id)
 
         case .gmailThreadID(let id):
-            return self.writeString("X-GM-THRID \(id)")
+            return self.writeString("X-GM-THRID ") + self.writeDecimal(id)
 
         case .gmailRaw(let query):
             return self.writeString("X-GM-RAW ") + self.writeIMAPString(query)

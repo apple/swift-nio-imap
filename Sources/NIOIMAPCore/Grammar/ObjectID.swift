@@ -55,6 +55,6 @@ extension String {
 
 extension EncodeBuffer {
     @discardableResult mutating func writeObjectID(_ id: ObjectID) -> Int {
-        self.writeString("\(id.rawValue)")
+        self.writeString(id.rawValue)
     }
 }

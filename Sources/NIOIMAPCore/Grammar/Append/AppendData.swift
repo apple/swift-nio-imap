@@ -88,15 +88,19 @@ extension EncodeBuffer {
         }
         switch (options.useNonSynchronizingLiteralPlus, data.withoutContentTransferEncoding) {
         case (true, true):
-            return self.writeString("~{\(data.byteCount)+}\r\n")
+            return self.writeLiteralHeader(
+                byteCount: data.byteCount,
+                synchronization: .nonSynchronizing,
+                kind: .literal8
+            )
         case (_, true):
-            let size = self.writeString("~{\(data.byteCount)}\r\n")
+            let size = self.writeLiteralHeader(byteCount: data.byteCount, kind: .literal8)
             self.markStopPoint()
             return size
         case (true, _):
-            return self.writeString("{\(data.byteCount)+}\r\n")
+            return self.writeLiteralHeader(byteCount: data.byteCount, synchronization: .nonSynchronizing)
         default:
-            let size = self.writeString("{\(data.byteCount)}\r\n")
+            let size = self.writeLiteralHeader(byteCount: data.byteCount)
             self.markStopPoint()
             return size
         }
