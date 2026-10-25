@@ -20,6 +20,10 @@ import PackageDescription
 // `ByteBuffer`-based half of the `IMAPDispatchClient` drivers. That is how one set of benchmark cases
 // produces before-and-after numbers for the same client: same case names, same corpora, two
 // libraries.
+//
+// Only `IMAPCorpus` and `IMAPDispatchClient` are declared in that configuration. The rest of the
+// suite names the post-migration model, which does not exist on `main`, so it cannot compile there
+// and there is nothing to gain by trying.
 let legacyImplementation = Context.environment["IMAP_IMPL"] == "main"
 let libraryPath =
     legacyImplementation
@@ -28,7 +32,7 @@ let libraryPath =
 
 // Corpora, as wire bytes and wire text. Portable across both library versions on purpose: it names
 // no type the migration changed, so the two configurations are fed byte-identical input.
-let targets: [Target] = [
+var targets: [Target] = [
     .target(
         name: "IMAPCorpus",
         dependencies: [
@@ -52,6 +56,34 @@ let targets: [Target] = [
         ]
     ),
 ]
+
+if !legacyImplementation {
+    targets += [
+        // Corpora and drivers shared by the benchmark targets. Deliberately has no dependency
+        // on `Benchmark`, so the same code can be driven from a plain executable or a test.
+        .target(
+            name: "IMAPBenchmarkSupport",
+            dependencies: [
+                "IMAPCorpus",
+                .product(name: "NIOIMAP", package: "swift-nio-imap"),
+                .product(name: "NIO", package: "swift-nio"),
+            ]
+        ),
+        .executableTarget(
+            name: "IMAPParsing",
+            dependencies: [
+                "IMAPBenchmarkSupport",
+                .product(name: "NIOIMAP", package: "swift-nio-imap"),
+                .product(name: "NIO", package: "swift-nio"),
+                .product(name: "Benchmark", package: "benchmark"),
+            ],
+            path: "Benchmarks/IMAPParsing",
+            plugins: [
+                .plugin(name: "BenchmarkPlugin", package: "benchmark")
+            ]
+        ),
+    ]
+}
 
 let package = Package(
     name: "imap-performance-tester-example",
