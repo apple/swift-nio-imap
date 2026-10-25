@@ -18,10 +18,15 @@ import NIO
 ///
 /// Why these sizes:
 ///
+/// - `1` is the pathological case: a byte-at-a-time feed measures the per-read overhead (an append
+///   plus a parse attempt) in isolation.
 /// - `1448` is an Ethernet MTU minus TCP/IP headers, i.e. the smallest realistic size a socket
-///   read delivers.
-/// - the rest span larger socket reads, up to 64 KiB.
+///   read delivers. The `copyThreshold` of 1024 is deliberately below it.
+/// - the rest bracket the sizes at which pinning a whole received buffer to extract a few bytes
+///   from it starts to waste footprint.
 public enum ReadSize {
+    /// One byte at a time. See ``ReadSize``.
+    public static let single = 1
     /// An Ethernet MTU minus TCP/IP headers.
     public static let mtu = 1_448
     /// Every read size the parser benchmarks sweep, smallest first.
