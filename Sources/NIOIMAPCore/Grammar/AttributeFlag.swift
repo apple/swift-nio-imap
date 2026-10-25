@@ -12,8 +12,6 @@
 //
 //===----------------------------------------------------------------------===//
 
-import struct NIO.ByteBuffer
-
 /// A flag used in `MODSEQ` search operations.
 ///
 /// Attribute flags represent message flags in the context of the `MODSEQ` conditional STORE extension

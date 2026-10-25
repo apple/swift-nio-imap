@@ -12,8 +12,6 @@
 //
 //===----------------------------------------------------------------------===//
 
-import struct NIO.ByteBuffer
-
 /// Return options that specify what additional data a `LIST` command should include for each matched mailbox (RFC 5819).
 ///
 /// **Requires server capability:** ``Capability/listExtended``

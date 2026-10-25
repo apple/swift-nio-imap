@@ -12,8 +12,6 @@
 //
 //===----------------------------------------------------------------------===//
 
-import struct NIO.ByteBuffer
-
 extension UInt8 {
     var isCR: Bool {
         self == UInt8(ascii: "\r")

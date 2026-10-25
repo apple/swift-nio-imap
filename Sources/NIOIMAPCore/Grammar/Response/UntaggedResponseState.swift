@@ -12,8 +12,6 @@
 //
 //===----------------------------------------------------------------------===//
 
-import struct NIO.ByteBuffer
-
 /// Untagged status responses from the server.
 ///
 /// The base protocol (RFC 3501) defines four untagged status response types that servers can send

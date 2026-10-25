@@ -12,8 +12,6 @@
 //
 //===----------------------------------------------------------------------===//
 
-import struct NIO.ByteBuffer
-
 extension MessageAttribute {
     /// A helper type for parsing `BODY` responses which may contain invalid or malformed body structures.
     ///

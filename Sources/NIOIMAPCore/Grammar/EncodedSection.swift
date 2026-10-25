@@ -12,8 +12,6 @@
 //
 //===----------------------------------------------------------------------===//
 
-import struct NIO.ByteBuffer
-
 /// A percent-encoded message section reference for use in IMAP URLs.
 ///
 /// IMAP message sections (as defined in RFC 3501) specify parts of message structures

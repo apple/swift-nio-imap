@@ -12,8 +12,6 @@
 //
 //===----------------------------------------------------------------------===//
 
-import struct NIO.ByteBuffer
-
 /// The metadata item type of a flag's modification sequence (RFC 7162 `entry-type-resp`).
 ///
 /// **Requires server capability:** ``Capability/condStore``

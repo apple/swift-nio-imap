@@ -12,8 +12,6 @@
 //
 //===----------------------------------------------------------------------===//
 
-import struct NIO.ByteBuffer
-
 extension QuotaResource {
     /// The name of a quota resource, such as `STORAGE` or `MESSAGE`.
     ///

@@ -12,8 +12,6 @@
 //
 //===----------------------------------------------------------------------===//
 
-import struct NIO.ByteBuffer
-
 /// A non-empty collection of mailbox names for use with RFC 7377 MULTIMAILBOX SEARCH.
 ///
 /// **Requires server capability:** ``Capability/multiSearch``

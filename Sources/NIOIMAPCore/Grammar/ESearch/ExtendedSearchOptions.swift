@@ -12,8 +12,6 @@
 //
 //===----------------------------------------------------------------------===//
 
-import struct NIO.ByteBuffer
-
 /// Options for performing a multi-mailbox extended search (RFC 7377 MULTIMAILBOX SEARCH).
 ///
 /// **Requires server capability:** ``Capability/multiSearch``
