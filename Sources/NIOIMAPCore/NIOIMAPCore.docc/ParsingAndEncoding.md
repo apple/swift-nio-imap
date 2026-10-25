@@ -25,6 +25,23 @@ Buffers for encoding protocol elements back to wire format.
 - ``CommandEncodingOptions``
 - ``ResponseEncodingOptions``
 
+### Bytes
+
+Types for carrying raw message payloads without copying them.
+
+- ``IMAPBuffer``
+- ``IMAPBufferList``
+- ``IMAPByteStorage``
+- ``ByteRegion``
+- ``StableAddressByteRegion``
+
+### Encoder output
+
+Where encoded bytes go.
+
+- ``EncoderOutputBuffer``
+- ``IMAPOutputBuffer``
+
 ### Pipelining
 
 Types related to command pipelining behavior.
