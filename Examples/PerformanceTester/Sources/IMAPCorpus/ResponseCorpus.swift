@@ -215,7 +215,8 @@ public enum ResponseCorpus {
     /// One FETCH response whose `BODY[TEXT]` is a literal of `byteCount` bytes.
     ///
     /// This is the streaming path: the parser reports the literal as a `streamingBegin`, a run of
-    /// `streamingBytes` and a `streamingEnd`, never holding the whole payload in one piece.
+    /// `streamingBytes` and a `streamingEnd`, never holding the whole payload in one piece. It is
+    /// the case that has to stay zero-copy through the migration.
     ///
     /// - Parameter byteCount: The size of the literal payload.
     /// - Returns: The complete server output, ready to feed to a `ResponseParser`.
