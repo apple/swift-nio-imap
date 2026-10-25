@@ -53,7 +53,7 @@ public struct BadCommand: Error {
 ///
 /// - SeeAlso: [RFC 3501 Section 4](https://datatracker.ietf.org/doc/html/rfc3501#section-4) (grammar)
 public struct ParserError: Error {
-    static func invalidUTF8(file: String = (#fileID), line: Int = #line) -> Self {
+    static func invalidUTF8(file: StaticString = (#fileID), line: Int = #line) -> Self {
         ParserError(hint: "Invalid UTF8", file: file, line: line)
     }
 
@@ -63,10 +63,12 @@ public struct ParserError: Error {
     /// "Invalid UTF8", "Missing CRLF", "Unexpected character", etc. It's intended
     /// for logging and debugging purposes.
     public var hint: String
-    var file: String
+    /// `StaticString` rather than `String`: `#fileID` is longer than the 15-byte small-string limit,
+    /// so a `String` here would heap-allocate and retain on *every* throw, hint or no hint.
+    var file: StaticString
     var line: Int
 
-    init(hint: String = "Unknown", file: String = (#fileID), line: Int = #line) {
+    init(hint: String = "Unknown", file: StaticString = (#fileID), line: Int = #line) {
         self.hint = hint
         self.file = file
         self.line = line

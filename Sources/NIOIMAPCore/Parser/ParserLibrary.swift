@@ -79,7 +79,11 @@ extension ParseBuffer {
 extension ParserLibrary {
     /// Throws `ParserError.invalidUTF8` if the given `ByteBuffer` doesn't
     /// contain a valid UTF8 sequence.
-    static func parseBufferAsUTF8(_ buffer: ByteBuffer, file: String = (#fileID), line: Int = #line) throws -> String {
+    static func parseBufferAsUTF8(
+        _ buffer: ByteBuffer,
+        file: StaticString = (#fileID),
+        line: Int = #line
+    ) throws -> String {
         guard let string = String(validatingUTF8Bytes: buffer.readableBytesView) else {
             throw ParserError.invalidUTF8(file: file, line: line)
         }
@@ -304,7 +308,7 @@ extension ParserLibrary {
         _ subParsers: [SubParser<T>],
         buffer: inout ParseBuffer,
         tracker: StackTracker,
-        file: String = (#fileID),
+        file: StaticString = (#fileID),
         line: Int = #line
     ) throws -> T {
         for parser in subParsers {
@@ -324,7 +328,7 @@ extension ParserLibrary {
         _ parser2: SubParser<T>,
         buffer: inout ParseBuffer,
         tracker: StackTracker,
-        file: String = (#fileID),
+        file: StaticString = (#fileID),
         line: Int = #line
     ) throws -> T {
         do {
@@ -349,7 +353,7 @@ extension ParserLibrary {
         _ parser3: SubParser<T>,
         buffer: inout ParseBuffer,
         tracker: StackTracker,
-        file: String = (#fileID),
+        file: StaticString = (#fileID),
         line: Int = #line
     ) throws -> T {
         do {
