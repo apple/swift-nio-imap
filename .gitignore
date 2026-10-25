@@ -12,3 +12,6 @@ Package.resolved
 DerivedData
 .swiftpm
 .*.sw?
+# Benchmark baselines embed the host they were measured on, so they are local-only. The committed
+# performance record is Examples/PerformanceTester/Thresholds/.
+.benchmarkBaselines
