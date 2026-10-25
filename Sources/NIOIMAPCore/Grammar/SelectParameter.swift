@@ -187,7 +187,7 @@ extension EncodeBuffer {
     }
 
     @discardableResult mutating func writeQResyncParameter(param: QResyncParameter) -> Int {
-        self.writeString("QRESYNC (\(param.uidValidity.rawValue) ")
+        self.writeString("QRESYNC (") + self.writeDecimal(param.uidValidity.rawValue) + self.writeSpace()
             + self.writeModificationSequenceValue(param.modificationSequenceValue)
             + writeIfExists(param.knownUIDs) { (set) -> Int in
                 self.writeSpace() + self.writeUIDSet(set)

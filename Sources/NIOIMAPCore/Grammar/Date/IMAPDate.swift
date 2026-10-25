@@ -81,7 +81,9 @@ public struct IMAPCalendarDay: Hashable, Sendable {
 
 extension EncodeBuffer {
     @discardableResult mutating func writeDate(_ date: IMAPCalendarDay) -> Int {
-        self.writeString("\(date.day)-\(date.monthString)-\(date.year)")
+        let hyphen = UInt8(ascii: "-")
+        return self.writeDecimal(date.day) + self.writeByte(hyphen) + self.writeString(date.monthString)
+            + self.writeByte(hyphen) + self.writeDecimal(date.year)
     }
 }
 

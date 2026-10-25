@@ -79,6 +79,6 @@ public struct ScopeOption: Hashable, Sendable {
 
 extension EncodeBuffer {
     @discardableResult mutating func writeScopeOption(_ opt: ScopeOption) -> Int {
-        self.writeString("DEPTH \(opt._backing.rawValue)")
+        self.writeString("DEPTH ") + self.writeString(opt._backing.rawValue)
     }
 }

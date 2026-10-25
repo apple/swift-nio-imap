@@ -76,7 +76,7 @@ public struct QuotaResource: Hashable, Sendable {
 
 extension EncodeBuffer {
     @discardableResult mutating func writeQuotaResource(_ quotaDetails: QuotaResource) -> Int {
-        self.writeQuotaResourceName(quotaDetails.resourceName)
-            + self.writeString(" \(quotaDetails.usage) \(quotaDetails.limit)")
+        self.writeQuotaResourceName(quotaDetails.resourceName) + self.writeSpace()
+            + self.writeDecimal(quotaDetails.usage) + self.writeSpace() + self.writeDecimal(quotaDetails.limit)
     }
 }

@@ -372,7 +372,7 @@ extension EncodeBuffer {
 
     @discardableResult mutating func writeSectionPart(_ part: SectionSpecifier.Part) -> Int {
         self.writeArray(part.array, separator: ".", parenthesis: false) { (element, self) in
-            self.writeString("\(UInt32(element))")
+            self.writeDecimal(UInt32(element))
         }
     }
 

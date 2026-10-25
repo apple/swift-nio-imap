@@ -95,6 +95,6 @@ extension EncodeBuffer {
     @discardableResult mutating func writeBodyFields(_ fields: BodyStructure.Fields) -> Int {
         self.writeBodyParameterPairs(fields.parameters) + self.writeSpace() + self.writeNString(fields.id)
             + self.writeSpace() + self.writeNString(fields.contentDescription) + self.writeSpace()
-            + self.writeBodyEncoding(fields.encoding) + self.writeString(" \(fields.octetCount)")
+            + self.writeBodyEncoding(fields.encoding) + self.writeSpace() + self.writeDecimal(fields.octetCount)
     }
 }

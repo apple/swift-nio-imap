@@ -281,39 +281,45 @@ extension EncodeBuffer {
     }
 
     @discardableResult mutating func writeMailboxStatus(_ status: MailboxStatus) -> Int {
-        var array: [(String, String)] = []
-
-        func append<A>(_ keypath: KeyPath<MailboxStatus, A?>, _ string: String) {
-            guard let value = status[keyPath: keypath] else { return }
-            array.append((string, "\(value)"))
+        // Space-separated `NAME value` pairs in fixed order; absent attributes are skipped.
+        // E.g. `MESSAGES 3 UIDNEXT 4 MAILBOXID (F22) OBJECTID (MAILBOXID F22)`.
+        var size = 0
+        size += self.writeStatusAttribute("MESSAGES", status.messageCount, after: size)
+        size += self.writeStatusAttribute("RECENT", status.recentCount, after: size)
+        size += self.writeStatusAttribute("UIDNEXT", status.nextUID?.rawValue, after: size)
+        size += self.writeStatusAttribute("UIDVALIDITY", status.uidValidity?.rawValue, after: size)
+        size += self.writeStatusAttribute("UNSEEN", status.unseenCount, after: size)
+        size += self.writeStatusAttribute("SIZE", status.size, after: size)
+        if let modificationSequence = status.highestModificationSequence {
+            size +=
+                self.writeStatusAttributeName("HIGHESTMODSEQ", after: size)
+                + self.writeModificationSequenceValue(modificationSequence)
         }
-
-        append(\.messageCount, "MESSAGES")
-        append(\.recentCount, "RECENT")
-        append(\.nextUID?.rawValue, "UIDNEXT")
-        append(\.uidValidity?.rawValue, "UIDVALIDITY")
-        append(\.unseenCount, "UNSEEN")
-        append(\.size, "SIZE")
-        append(\.highestModificationSequence, "HIGHESTMODSEQ")
-        append(\.appendLimit, "APPENDLIMIT")
-
-        var size = self.writeArray(array, parenthesis: false) { (element, self) -> Int in
-            self.writeString("\(element.0) \(element.1)")
-        }
-        // MAILBOXID is written separately: its value comes from `writeMailboxID`, not string interpolation.
+        size += self.writeStatusAttribute("APPENDLIMIT", status.appendLimit, after: size)
         if let mailboxID = status.mailboxID {
-            if !array.isEmpty {
-                size += self.writeSpace()
-            }
-            size += self.writeString("MAILBOXID (") + self.writeMailboxID(mailboxID) + self.writeString(")")
+            size +=
+                self.writeStatusAttributeName("MAILBOXID", after: size)
+                + self.writeString("(") + self.writeMailboxID(mailboxID) + self.writeString(")")
         }
-        if let compound = status.objectID {
-            if !array.isEmpty || status.mailboxID != nil {
-                size += self.writeSpace()
-            }
-            size += self.writeString("OBJECTID ") + self.writeCompoundObjectID(compound)
+        if let objectID = status.objectID {
+            size += self.writeStatusAttributeName("OBJECTID", after: size) + self.writeCompoundObjectID(objectID)
         }
         return size
+    }
+
+    /// Writes `NAME number`, see ``writeStatusAttributeName(_:after:)``. Writes nothing if `number` is `nil`.
+    private mutating func writeStatusAttribute<Number: FixedWidthInteger>(
+        _ name: String,
+        _ number: Number?,
+        after bytesWritten: Int
+    ) -> Int {
+        guard let number else { return 0 }
+        return self.writeStatusAttributeName(name, after: bytesWritten) + self.writeDecimal(number)
+    }
+
+    /// Writes `NAME `, preceded by a separating space unless it's the first attribute (`bytesWritten == 0`).
+    private mutating func writeStatusAttributeName(_ name: String, after bytesWritten: Int) -> Int {
+        (bytesWritten > 0 ? self.writeSpace() : 0) + self.writeString(name) + self.writeSpace()
     }
 }
 
