@@ -121,18 +121,23 @@ extension GrammarParser {
                 .uidBatches(try self.parseUIDBatchesResponse(buffer: &buffer, tracker: tracker))
             }
 
-            let commandParsers: [String: (inout ParseBuffer, StackTracker) throws -> MailboxData] = [
-                "FLAGS": parseMailboxData_flags,
-                "LIST": parseMailboxData_list,
-                "LSUB": parseMailboxData_lsub,
-                "ESEARCH": parseMailboxData_extendedSearch,
-                "SEARCH": parseMailboxData_search,
-                "SORT": parseMailboxData_sort,
-                "STATUS": parseMailboxData_status,
-                "NAMESPACE": parseMailboxData_namespace,
-                "UIDBATCHES": parseMailboxData_uidBatchesResponse,
-            ]
-            return try parseFromLookupTable(buffer: &buffer, tracker: tracker, parsers: commandParsers)
+            return try self.selectingKeyword(buffer: &buffer) { keyword, buffer in
+                switch keyword {
+                case "FLAGS": return try parseMailboxData_flags(buffer: &buffer, tracker: tracker)
+                case "LIST": return try parseMailboxData_list(buffer: &buffer, tracker: tracker)
+                case "LSUB": return try parseMailboxData_lsub(buffer: &buffer, tracker: tracker)
+                case "ESEARCH":
+                    return try parseMailboxData_extendedSearch(buffer: &buffer, tracker: tracker)
+                case "SEARCH": return try parseMailboxData_search(buffer: &buffer, tracker: tracker)
+                case "SORT": return try parseMailboxData_sort(buffer: &buffer, tracker: tracker)
+                case "STATUS": return try parseMailboxData_status(buffer: &buffer, tracker: tracker)
+                case "NAMESPACE":
+                    return try parseMailboxData_namespace(buffer: &buffer, tracker: tracker)
+                case "UIDBATCHES":
+                    return try parseMailboxData_uidBatchesResponse(buffer: &buffer, tracker: tracker)
+                default: throw ParserError(hint: "Not a mailbox-data keyword")
+                }
+            }
         }
 
         func parseMailboxData_exists(buffer: inout ParseBuffer, tracker: StackTracker) throws -> MailboxData {
