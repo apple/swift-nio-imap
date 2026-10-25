@@ -392,7 +392,7 @@ extension EncodeBuffer {
         partial: ClosedRange<UInt32>?
     ) -> Int {
         self.writeString(peek ? "BODY.PEEK" : "BODY") + self.writeSection(section)
-            + self.writeIfExists(partial) { (partial) -> Int in
+            + writeIfExists(partial) { (partial) -> Int in
                 self.writeByteRange(partial)
             }
     }
@@ -407,10 +407,10 @@ extension EncodeBuffer {
         partial: ClosedRange<UInt32>?
     ) -> Int {
         self.writeString("BINARY")
-            + self.write(if: peek) {
+            + write(if: peek) {
                 self.writeString(".PEEK")
             } + self.writeSectionBinary(section)
-            + self.writeIfExists(partial) { (partial) -> Int in
+            + writeIfExists(partial) { (partial) -> Int in
                 self.writeByteRange(partial)
             }
     }

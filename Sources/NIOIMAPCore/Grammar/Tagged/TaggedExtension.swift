@@ -42,7 +42,7 @@ extension EncodeBuffer {
         _ param: KeyValue<ExtensionKey<Kind>, ParameterValue?>
     ) -> Int {
         self.writeExtensionKey(param.key)
-            + self.writeIfExists(param.value) { (value) -> Int in
+            + writeIfExists(param.value) { (value) -> Int in
                 self.writeSpace() + self.writeParameterValue(value)
             }
     }

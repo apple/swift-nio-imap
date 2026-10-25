@@ -241,13 +241,13 @@ extension ExtendedSearchResponse {
 extension EncodeBuffer {
     @discardableResult mutating func writeExtendedSearchResponse(_ response: ExtendedSearchResponse) -> Int {
         self.writeString("ESEARCH")
-            + self.writeIfExists(response.correlator) { (correlator) -> Int in
+            + writeIfExists(response.correlator) { (correlator) -> Int in
                 self.writeSearchCorrelator(correlator)
             }
-            + self.write(if: response.kind == .uid) {
+            + write(if: response.kind == .uid) {
                 self.writeString(" UID")
             }
-            + self.write(if: response.returnData.count > 0) {
+            + write(if: response.returnData.count > 0) {
                 self.writeSpace()
             }
             + self.writeArray(response.returnData, parenthesis: false) { (data, self) in

@@ -93,13 +93,13 @@ public struct ExtendedSearchOptions: Hashable, Sendable {
 
 extension EncodeBuffer {
     @discardableResult mutating func writeExtendedSearchOptions(_ options: ExtendedSearchOptions) -> Int {
-        self.writeIfExists(options.sourceOptions) { (options) -> Int in
+        writeIfExists(options.sourceOptions) { (options) -> Int in
             self.writeSpace() + self.writeExtendedSearchSourceOptions(options)
         }
-            + self.writeIfExists(options.returnOptions) { (options) -> Int in
+            + writeIfExists(options.returnOptions) { (options) -> Int in
                 self.writeSearchReturnOptions(options)
             } + self.writeSpace()
-            + self.writeIfExists(options.charset) { (charset) -> Int in
+            + writeIfExists(options.charset) { (charset) -> Int in
                 self.writeString("CHARSET ") + self.writeCharacterSetName(charset) + self.writeSpace()
             } + self.writeSearchKey(options.key)
     }

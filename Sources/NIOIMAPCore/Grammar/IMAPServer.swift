@@ -276,10 +276,10 @@ extension IMAPServer.Host: ExpressibleByStringLiteral {
 
 extension EncodeBuffer {
     @discardableResult mutating func writeIMAPServer(_ server: IMAPServer) -> Int {
-        self.writeIfExists(server.userAuthenticationMechanism) { authMechanism in
+        writeIfExists(server.userAuthenticationMechanism) { authMechanism in
             self.writeUserAuthenticationMechanism(authMechanism) + self.writeString("@")
         } + self.writeString(server.host.stringValue)
-            + self.writeIfExists(server.port) { port in
+            + writeIfExists(server.port) { port in
                 self.writeString(":\(port)")
             }
     }

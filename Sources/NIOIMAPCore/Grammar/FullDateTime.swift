@@ -247,7 +247,7 @@ extension EncodeBuffer {
         let minute = self.padInteger(data.minute, minimum: 2)
         let second = self.padInteger(data.second, minimum: 2)
         return self.writeString("\(hour):\(minute):\(second)")
-            + self.writeIfExists(data.fraction) { fraction in
+            + writeIfExists(data.fraction) { fraction in
                 self.writeString(".\(fraction.stringValue)")
             } + self.writeTimeOffset(data.offset)
     }

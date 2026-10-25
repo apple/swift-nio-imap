@@ -346,7 +346,7 @@ extension EncodeBuffer {
         hasExtensionData: Bool
     ) -> Int {
         self.writeString("BODY")
-            + self.write(if: hasExtensionData) { () -> Int in
+            + write(if: hasExtensionData) { () -> Int in
                 self.writeString("STRUCTURE")
             } + self.writeSpace() + self.writeBody(body)
     }
@@ -357,14 +357,14 @@ extension EncodeBuffer {
         string: ByteBuffer?
     ) -> Int {
         self.writeString("BODY") + self.writeSection(section)
-            + self.writeIfExists(number) { (number) -> Int in
+            + writeIfExists(number) { (number) -> Int in
                 self.writeString("<\(number)>")
             } + self.writeSpace() + self.writeNString(string)
     }
 
     @discardableResult mutating func writeMessageAttribute_bodySectionText(number: Int?, size: Int) -> Int {
         self.writeString("BODY[TEXT]")
-            + self.writeIfExists(number) { (number) -> Int in
+            + writeIfExists(number) { (number) -> Int in
                 self.writeString("<\(number)>")
             } + self.writeString(" {\(size)}\r\n")
     }

@@ -69,7 +69,7 @@ extension EncodeBuffer {
         _ locationExtension: BodyStructure.LocationAndExtensions
     ) -> Int {
         self.writeSpace() + self.writeNString(locationExtension.location)
-            + self.write(if: !locationExtension.extensions.isEmpty) {
+            + write(if: !locationExtension.extensions.isEmpty) {
                 self.writeSpace() + self.writeBodyExtensions(locationExtension.extensions)
             }
     }

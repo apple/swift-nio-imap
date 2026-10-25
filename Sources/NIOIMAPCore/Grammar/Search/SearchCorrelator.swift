@@ -78,10 +78,10 @@ extension EncodeBuffer {
     @discardableResult mutating func writeSearchCorrelator(_ correlator: SearchCorrelator) -> Int {
         // search-correlator = SP "(" "TAG" SP tag-string ")", tag-string = string
         self.writeString(" (TAG ") + self.writeIMAPString(correlator.tag)
-            + self.writeIfExists(correlator.mailbox) { mailbox in
+            + writeIfExists(correlator.mailbox) { mailbox in
                 self.writeString(" MAILBOX ") + self.writeMailbox(mailbox)
             }
-            + self.writeIfExists(correlator.uidValidity) { uidValidity in
+            + writeIfExists(correlator.uidValidity) { uidValidity in
                 self.writeString(" UIDVALIDITY ") + self.writeUIDValidity(uidValidity)
             } + self.writeString(")")
     }

@@ -354,7 +354,7 @@ extension EncodeBuffer {
 
     @discardableResult mutating func writeSection(_ section: SectionSpecifier?) -> Int {
         self.writeString("[")
-            + self.writeIfExists(section) { (spec) -> Int in
+            + writeIfExists(section) { (spec) -> Int in
                 self.writeSectionSpecifier(spec)
             } + self.writeString("]")
     }
@@ -365,7 +365,7 @@ extension EncodeBuffer {
         }
 
         return self.writeSectionPart(spec.part)
-            + self.writeIfExists(spec.kind) { (kind) -> Int in
+            + writeIfExists(spec.kind) { (kind) -> Int in
                 self.writeSectionKind(kind, dot: spec.part.array.count > 0 && spec.kind != .complete)
             }
     }
