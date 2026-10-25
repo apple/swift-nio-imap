@@ -76,7 +76,7 @@ extension EncodeBuffer {
             pairs.append(("THREADID", String(threadID)))
         }
         return self.writeArray(pairs, parenthesis: true) { (pair, buffer) in
-            buffer.writeString("\(pair.0) \(pair.1)")
+            buffer.writeString(pair.0) + buffer.writeSpace() + buffer.writeString(pair.1)
         }
     }
 }

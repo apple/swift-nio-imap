@@ -113,14 +113,14 @@ extension EncodeBuffer {
     @discardableResult mutating func writeSearchReturnData(_ data: SearchReturnData) -> Int {
         switch data {
         case .min(let num):
-            return self.writeString("MIN \(num)")
+            return self.writeString("MIN ") + self.writeMessageIdentifier(num)
         case .max(let num):
-            return self.writeString("MAX \(num)")
+            return self.writeString("MAX ") + self.writeMessageIdentifier(num)
         case .all(let set):
             return
                 self.writeString("ALL ") + self.writeLastCommandSet(set)
         case .count(let num):
-            return self.writeString("COUNT \(num)")
+            return self.writeString("COUNT ") + self.writeDecimal(num)
         case .partial(let range, let set):
             var count = self.writeString("PARTIAL (") + self.writePartialRange(range) + self.writeString(" ")
             if set.isEmpty {
@@ -132,7 +132,7 @@ extension EncodeBuffer {
         case .dataExtension(let optionExt):
             return self.writeSearchReturnDataExtension(optionExt)
         case .modificationSequence(let seq):
-            return self.writeString("MODSEQ \(seq)")
+            return self.writeString("MODSEQ ") + self.writeModificationSequenceValue(seq)
         }
     }
 }

@@ -45,13 +45,14 @@ public struct ByteRange: Hashable, Sendable {
 
 extension EncodeBuffer {
     @discardableResult mutating func writeByteRange(_ num: ClosedRange<UInt32>) -> Int {
-        self.writeString("<\(num.lowerBound).\(num.count)>")
+        self.writeByte(UInt8(ascii: "<")) + self.writeDecimal(num.lowerBound) + self.writeByte(UInt8(ascii: "."))
+            + self.writeDecimal(num.count) + self.writeByte(UInt8(ascii: ">"))
     }
 
     @discardableResult mutating func writeByteRange(_ data: ByteRange) -> Int {
-        self.writeString("\(data.offset)")
+        self.writeDecimal(data.offset)
             + writeIfExists(data.length) { length in
-                self.writeString(".\(length)")
+                self.writeByte(UInt8(ascii: ".")) + self.writeDecimal(length)
             }
     }
 }

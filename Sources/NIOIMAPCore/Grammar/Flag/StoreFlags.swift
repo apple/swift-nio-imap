@@ -176,9 +176,9 @@ public struct StoreFlags: Hashable, Sendable {
 
 extension EncodeBuffer {
     @discardableResult mutating func writeStoreAttributeFlags(_ flags: StoreFlags) -> Int {
-        let silentString = flags.silent ? ".SILENT" : ""
-        return
-            self.writeString("\(flags.operation.rawValue)FLAGS\(silentString) ") + self.writeFlags(flags.flags)
+        self.writeString(flags.operation.rawValue) + self.writeString("FLAGS")
+            + write(if: flags.silent) { self.writeString(".SILENT") } + self.writeSpace()
+            + self.writeFlags(flags.flags)
     }
 
     @discardableResult mutating func writeStoreData(_ data: StoreData) -> Int {
@@ -191,9 +191,8 @@ extension EncodeBuffer {
     }
 
     @discardableResult mutating func writeStoreGmailLabels(_ labels: StoreGmailLabels) -> Int {
-        let silentString = labels.silent ? ".SILENT" : ""
-        return
-            self.writeString("\(labels.operation.rawValue)X-GM-LABELS\(silentString) ")
+        self.writeString(labels.operation.rawValue) + self.writeString("X-GM-LABELS")
+            + write(if: labels.silent) { self.writeString(".SILENT") } + self.writeSpace()
             + self.writeGmailLabels(labels.gmailLabels)
     }
 }

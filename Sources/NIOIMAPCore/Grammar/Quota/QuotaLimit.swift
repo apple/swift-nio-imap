@@ -68,7 +68,6 @@ public struct QuotaLimit: Hashable, Sendable {
 
 extension EncodeBuffer {
     @discardableResult mutating func writeQuotaLimit(_ quotaLimit: QuotaLimit) -> Int {
-        self.writeQuotaResourceName(quotaLimit.resourceName) + self.writeSpace()
-            + self.writeString("\(quotaLimit.limit)")
+        self.writeQuotaResourceName(quotaLimit.resourceName) + self.writeSpace() + self.writeDecimal(quotaLimit.limit)
     }
 }
