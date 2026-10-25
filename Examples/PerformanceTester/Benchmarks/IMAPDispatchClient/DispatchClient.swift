@@ -17,22 +17,49 @@ import IMAPCorpus
 import NIO
 import NIOIMAP
 
-/// A client whose transport is `DispatchData` in both directions — a `DispatchIO` or
-/// Network.framework caller.
+/// A client whose transport is `DispatchData` in both directions, written twice.
 ///
-/// | | |
-/// |---|---|
-/// | read | copy every received region into one `ByteBuffer`, compact when the read prefix passes half |
-/// | payload | copy it out of the accumulator |
-/// | write | encode into the encoder's `ByteBuffer`, then `DispatchData(bytes:)` |
+/// This is the before-and-after measurement for the buffer migration as a `DispatchIO` or
+/// Network.framework caller experiences it. The same cases run against two libraries — this working
+/// tree, and a worktree of the pre-migration library, pinned by commit — selected by `IMAP_IMPL` in
+/// `Package.swift`, which also defines `IMAP_LEGACY_BUFFERS` to pick the matching half of this driver:
 ///
-/// **This is the best client the `ByteBuffer` API allows, not the client anybody wrote.** It reserves
+/// | | before (`DispatchClient+Legacy.swift`) | after (`DispatchClient+Current.swift`) |
+/// |---|---|---|
+/// | read | copy every received region into one `ByteBuffer`, compact when the read prefix passes half | append every region to an ``IMAPInputBuffer``, parse where it landed |
+/// | payload | copy it out of the accumulator | keep the `IMAPBuffer` the parser handed over |
+/// | write | encode into the encoder's `ByteBuffer`, then `DispatchData(bytes:)` | encode into `IMAPOutputBuffer`, then `makeDispatchData()`, which donates large regions and copies short ones |
+///
+/// Two things about the shape of this comparison are worth stating, because they bound what the
+/// numbers mean.
+///
+/// **The `main` side is the best client that API allows, not the client anybody wrote.** It reserves
 /// capacity up front so appending never reallocates in steady state, it compacts amortised rather than
 /// after every parse, and it copies each payload *out* of the accumulator rather than holding a slice
 /// of it. That last one costs a copy per payload, and it is the deliberate choice: holding a slice
 /// instead leaves the accumulator's storage multiply-referenced, so the next append copies the whole
-/// thing on write — unpredictably, and usually for more bytes. See `DispatchClient+Legacy.swift`.
+/// thing on write — unpredictably, and usually for more bytes. A careful engineer on `main` pays the
+/// payload copy to avoid that, so that is what is measured. The consequence is that every number here
+/// is a **floor** on what the migration is worth: a less careful `main` client does worse.
+///
+/// **The `IMAPInputBuffer` side is the shape the library recommends, not the only one available.** A
+/// client can hand a `DispatchData` to the parser directly — `DispatchData` conforms to
+/// `ConsumableParserInputBuffer` — and that costs less code and more time: the gather walks every live
+/// region twice per parse call, and extraction always copies, because `withStableRegions` passes no
+/// owner. The existing `parse.dispatch.*` cases measure that path; these cases measure the recommended
+/// one, where each received region is boxed once per read and payloads are delivered by reference.
 public enum DispatchClient {
+    /// Which library this build measures. For logging only — **never** part of a benchmark's name,
+    /// because the two configurations have to register identical case names for
+    /// `benchmark baseline compare` to pair them up.
+    public static var implementation: String {
+        #if IMAP_LEGACY_BUFFERS
+        return "main (ByteBuffer)"
+        #else
+        return "branch (IMAPInputBuffer + IMAPOutputBuffer)"
+        #endif
+    }
+
     /// Splits `bytes` into socket-sized reads, one `DispatchData` per read.
     ///
     /// The conversion happens here, at registration time, so no measured region contains it. Each read
@@ -63,9 +90,9 @@ public enum DispatchClient {
 
     /// Parses `bytes` into response model values, for the encode cases to encode.
     ///
-    /// Runs at registration time. Deliberately written against a plain `ByteBuffer` rather than
-    /// through ``receiveResponses(_:options:sink:)``, so the corpus does not depend on the driver under
-    /// measurement.
+    /// Runs at registration time. Deliberately written against a `ByteBuffer` accumulator rather than
+    /// through ``receiveResponses(_:options:sink:)``: both library versions accept a `ByteBuffer` here,
+    /// so this one function serves both configurations and the corpus cannot differ between them.
     ///
     /// - Parameter bytes: One of the wire corpora in ``ResponseCorpus``.
     /// - Returns: The parsed responses, in order. Continuation requests are dropped — they are not
