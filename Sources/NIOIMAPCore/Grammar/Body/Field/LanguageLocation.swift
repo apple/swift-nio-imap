@@ -12,8 +12,6 @@
 //
 //===----------------------------------------------------------------------===//
 
-import struct NIO.ByteBuffer
-
 extension BodyStructure {
     /// Language and content location information for a message part.
     ///

@@ -12,8 +12,6 @@
 //
 //===----------------------------------------------------------------------===//
 
-import struct NIO.ByteBuffer
-
 /// A message flag.
 ///
 /// Flags are attributes attached to messages that indicate message state or special properties.

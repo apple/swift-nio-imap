@@ -12,8 +12,6 @@
 //
 //===----------------------------------------------------------------------===//
 
-import struct NIO.ByteBuffer
-
 // TODO: Convert to struct
 /// Structured status codes sent with server responses.
 ///

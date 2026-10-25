@@ -12,8 +12,6 @@
 //
 //===----------------------------------------------------------------------===//
 
-import struct NIO.ByteBuffer
-
 /// A calendar day formatted as `dd-MMM-yyyy` as defined in RFC 3501.
 ///
 /// This type represents a date in the IMAP date format, where the month is represented

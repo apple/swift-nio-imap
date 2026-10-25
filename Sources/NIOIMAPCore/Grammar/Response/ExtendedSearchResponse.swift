@@ -12,8 +12,6 @@
 //
 //===----------------------------------------------------------------------===//
 
-import struct NIO.ByteBuffer
-
 /// A server response to an extended SEARCH command.
 ///
 /// The ESEARCH extension (see [RFC 4731](https://datatracker.ietf.org/doc/html/rfc4731)) enhances

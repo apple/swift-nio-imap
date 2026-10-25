@@ -12,8 +12,6 @@
 //
 //===----------------------------------------------------------------------===//
 
-import struct NIO.ByteBuffer
-
 /// A resource usage report showing current usage and maximum limit (RFC 2087).
 ///
 /// **Requires server capability:** ``Capability/quota``

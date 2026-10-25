@@ -12,8 +12,6 @@
 //
 //===----------------------------------------------------------------------===//
 
-import struct NIO.ByteBuffer
-
 /// How a `STORE` command modifies message flags.
 ///
 /// Three modes are supported: adding flags to a message's existing set, removing flags from it,

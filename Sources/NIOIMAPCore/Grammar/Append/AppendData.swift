@@ -12,8 +12,6 @@
 //
 //===----------------------------------------------------------------------===//
 
-import struct NIO.ByteBuffer
-
 /// Message data metadata for an `APPEND` command.
 ///
 /// An `AppendData` specifies the size and encoding of message bytes being appended to

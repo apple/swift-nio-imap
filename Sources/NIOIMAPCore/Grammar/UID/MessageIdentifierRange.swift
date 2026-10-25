@@ -12,8 +12,6 @@
 //
 //===----------------------------------------------------------------------===//
 
-import struct NIO.ByteBuffer
-
 /// A closed range of message identifiers (either UIDs or sequence numbers).
 ///
 /// A `MessageIdentifierRange` represents a contiguous sequence of message identifiers using

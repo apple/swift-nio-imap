@@ -12,8 +12,6 @@
 //
 //===----------------------------------------------------------------------===//
 
-import struct NIO.ByteBuffer
-
 /// Response containing a batch of UIDs from an extended SEARCH command.
 ///
 /// The UIDBATCHES return option allows servers to return search results as a series of batches

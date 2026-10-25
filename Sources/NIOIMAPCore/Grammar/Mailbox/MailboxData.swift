@@ -12,8 +12,6 @@
 //
 //===----------------------------------------------------------------------===//
 
-import struct NIO.ByteBuffer
-
 /// Untagged response data from the server about mailboxes, messages, or search results.
 ///
 /// Servers send untagged responses (prefixed with `*`) that convey information about mailboxes, messages, and operation results.

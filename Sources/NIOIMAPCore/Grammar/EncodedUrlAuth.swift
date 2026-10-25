@@ -12,8 +12,6 @@
 //
 //===----------------------------------------------------------------------===//
 
-import struct NIO.ByteBuffer
-
 /// A hexadecimal-encoded URLAUTH verification token for IMAP URL authorization.
 ///
 /// In URLAUTH-authorized URLs (RFC 4467), the authorization token is an ASCII-encoded

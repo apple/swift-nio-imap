@@ -12,8 +12,6 @@
 //
 //===----------------------------------------------------------------------===//
 
-import struct NIO.ByteBuffer
-
 /// A network-accessible message URL with URLAUTH authorization information.
 ///
 /// A ``RumpAuthenticatedURL`` combines a complete message URL on a network-accessible server

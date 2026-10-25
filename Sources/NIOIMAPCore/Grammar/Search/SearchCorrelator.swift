@@ -12,8 +12,6 @@
 //
 //===----------------------------------------------------------------------===//
 
-import struct NIO.ByteBuffer
-
 /// Identifies a search operation in responses when multiple searches are pipelined (RFC 7377 MULTIMAILBOX SEARCH extension).
 ///
 /// When performing multiple concurrent searches across different mailboxes, clients need a way to correlate

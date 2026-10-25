@@ -12,8 +12,6 @@
 //
 //===----------------------------------------------------------------------===//
 
-import struct NIO.ByteBuffer
-
 /// Response data returned from a search command using the ESEARCH extension (RFC 4731).
 ///
 /// When a client specifies one or more result options in the `RETURN` clause of a `SEARCH` or `UID SEARCH` command,

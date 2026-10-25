@@ -12,8 +12,6 @@
 //
 //===----------------------------------------------------------------------===//
 
-import struct NIO.ByteBuffer
-
 /// Server connection information for an IMAP URL, including optional user and authentication details.
 ///
 /// The server component of an IMAP URL specifies how to connect to the IMAP server.

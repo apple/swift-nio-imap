@@ -12,8 +12,6 @@
 //
 //===----------------------------------------------------------------------===//
 
-import struct NIO.ByteBuffer
-
 extension BodyStructure {
     /// A single-part MIME message body as defined in RFC 3501.
     ///

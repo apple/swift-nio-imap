@@ -12,7 +12,6 @@
 //
 //===----------------------------------------------------------------------===//
 
-import struct NIO.ByteBuffer
 import struct OrderedCollections.OrderedDictionary
 
 /// Optional metadata to attach to a message in an `APPEND` command.

@@ -12,8 +12,6 @@
 //
 //===----------------------------------------------------------------------===//
 
-import struct NIO.ByteBuffer
-
 /// A set of message identifiers represented as an array of ranges.
 ///
 /// A `MessageIdentifierSet` represents a potentially non-contiguous collection of message

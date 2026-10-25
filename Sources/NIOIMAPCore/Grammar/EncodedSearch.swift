@@ -12,8 +12,6 @@
 //
 //===----------------------------------------------------------------------===//
 
-import struct NIO.ByteBuffer
-
 /// A percent-encoded search query for use in IMAP URLs.
 ///
 /// Search queries in IMAP URLs (RFC 5092) must be percent-encoded to avoid conflicts with
