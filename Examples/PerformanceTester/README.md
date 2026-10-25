@@ -122,7 +122,11 @@ measured on, so they are only meaningful locally.
 Hold the filter set and the `--metric` selection fixed between `update` and `compare`. Counters are only
 comparable between runs that agree on both: the same binary and case reported 5 retains under the full
 metric set and 3 under `--metric mallocCountTotal --metric retainCount`. Two ad-hoc runs with different
-flags are not a before and after. Counts are per benchmark, not per symbol.
+flags are not a before and after. Counts are per benchmark, not per symbol; to find *where*, see
+[Profiling](#profiling).
+
+`baseline compare` prints a percentile table per metric per case (~16,000 lines for the full suite).
+Summarise it with `dev/summarize-comparison.py`, see [Summarizing a comparison](#summarizing-a-comparison).
 
 #### Getting an exact absolute number
 
@@ -133,6 +137,52 @@ single case standalone:
 
 ```sh
 .build/release/IMAPParsing --filter 'parse\.responses\.bodystructure\.200$'
+```
+
+## Profiling
+
+The suite says *what* costs, not *where*. Attributing by ablation (remove a thing, re-measure) only finds
+what you thought to remove.
+
+### Attributing allocations
+
+`IMAPProfile` is a plain executable that runs one corpus a chosen number of times. The benchmark runners
+are the wrong thing to trace: they choose their iteration count from a time budget, and they run inside
+the malloc interposer, which attributes every allocation to itself. Under `Allocations` the budget is
+badly wrong too: the body-structure case allocates ~110,000 times per iteration, so the runner would
+record millions of events.
+
+```sh
+swift build -c release --disable-sandbox --product IMAPProfile
+.build/release/IMAPProfile                     # lists the scenarios
+xcrun xctrace record --template Allocations --output /tmp/a.trace \
+  --launch -- .build/release/IMAPProfile bodystructure 3
+open /tmp/a.trace
+```
+
+In Instruments, select the Allocations track, set the allocation lifespan to *All Allocations*, switch
+the detail view from *Statistics* to *Call Trees*, and turn on *Invert Call Tree* and *Hide System
+Libraries*: each root of the call tree is then the library frame that asked for the memory, with its
+allocation count. Divide by the messages parsed (here 200 x 3) for a
+per-message rate. Use one scenario per trace. `Allocations` is more useful than `Time Profiler` here
+because the parser is allocation-bound. `IMAPProfile` runs faster than the same work under the
+interposer, so its wall clock is not comparable with the suite's.
+
+### Summarizing a comparison
+
+```sh
+swift package --disable-sandbox benchmark baseline compare before 2>&1 | tr '\r' '\n' > /tmp/cmp.txt
+./dev/summarize-comparison.py /tmp/cmp.txt --filter 'parse.'
+```
+
+Prints one row per case: p90 of each gated counter on both sides and the percentage change. It
+deliberately neither rescales nor sums anything, because the header suffixes are unreliable (see
+[Known hazards](#known-hazards)); a per-case ratio is exact. `--filter` is a substring match;
+`--min-delta` hides changes below a threshold (default 0.5). Comparing two *stored* baselines labels
+the rows after them, so pass the labels:
+
+```sh
+./dev/summarize-comparison.py /tmp/cmp.txt --before main --after branch
 ```
 
 ## How the corpora were chosen
@@ -342,7 +392,8 @@ Nine things this baseline says that are worth knowing before optimising anything
    model*, which is what this list previously asserted. Profiled under `Allocations`, three mechanisms
    unrelated to the model were 74% of the allocations the parser made: a hand-rolled UTF-8 decode that
    regrew a `String` once per scalar, `[String: SubParser]` lookup tables rebuilt on every call, and heap
-   closure contexts from passing `GrammarParser` methods as function values. All three are fixed. The model's per-field `[UInt8]` is real —
+   closure contexts from passing `GrammarParser` methods as function values. All three are fixed; find the next ones with
+   [Profiling](#profiling). The model's per-field `[UInt8]` is real —
    `extractBytes` is 106 allocations per body-structure message — but it is a minority of the remainder.
 2. **Encoding is ~8× cheaper than parsing** on the same traffic: 48 µs against 299 µs for the command
    corpus, 1.3 ms against 10 ms for the body structures. The parser is still where the work is. The gap
@@ -400,6 +451,9 @@ iteration.
 Prefer defining a response corpus as wire bytes and deriving the model values with
 `ResponseCorpus.responses(parsing:)` over hand-writing model literals. The parse happens at
 registration time, and it means the encode and parse sides describe the same traffic by construction.
+
+If the case is one you will want to profile, add a matching entry to the `scenarios` dictionary in
+`Sources/IMAPProfile/main.swift` too; see [Profiling](#profiling).
 
 ### Known hazards
 
