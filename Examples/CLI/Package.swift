@@ -7,7 +7,8 @@ import PackageDescription
 let package = Package(
     name: "imap-cli-example",
     platforms: [
-        .macOS(.v15)
+        // Matches the library, which pins macOS 26 for the stdlib accessors that produce a `Span`.
+        .macOS(.v26)
     ],
     dependencies: [
         .package(name: "swift-nio-imap", path: "../.."),
