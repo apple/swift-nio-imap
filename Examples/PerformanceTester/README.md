@@ -35,7 +35,7 @@ Benchmarks always build in release mode, regardless of how you invoke them.
 | `Sources/IMAPBenchmarkSupport` | Drivers, and the model-value helpers that name post-migration types. No dependency on `Benchmark`, so it can also be driven from a plain executable or a test. |
 | `Benchmarks/IMAPParsing` | Parser benchmarks — commands (what a server parses) and responses (what a client parses). |
 | `Benchmarks/IMAPEncoding` | Encoder benchmarks, same two directions. |
-| `Benchmarks/IMAPDispatchClient` | A client whose transport is `DispatchData` in both directions — `DispatchIO` or Network.framework — parsing responses and encoding commands and responses. |
+| `Benchmarks/IMAPDispatchClient` | One client, measured against two libraries: this tree and a worktree of the pre-migration library. See [Before and after: a `DispatchData` client](#before-and-after-a-dispatchdata-client). |
 | `Thresholds/` | Committed p90 ceilings for the deterministic metrics. See below. |
 
 ## Toolchain
@@ -435,6 +435,127 @@ Nine things this baseline says that are worth knowing before optimising anything
    bytes*, because clearing a `ByteBuffer` whose storage was no longer uniquely referenced reallocated it
    once per response. The sink keeps the segment it is writing into instead.
 
+## Before and after: a `DispatchData` client
+
+Everything above measures the current library against itself. This section measures it against
+**`main`** — the library before the `ByteBuffer` migration — from the point of view of one caller: a
+client whose transport is `DispatchData` in both directions, i.e. `DispatchIO` or Network.framework.
+That is the second backing the whole output abstraction exists for, and the one that had no
+before-and-after number at all.
+
+```sh
+cd Examples/PerformanceTester
+./dev/compare-dispatch-client.sh                       # ~10 minutes, most of it building two libraries
+
+# Then collapse the ~16,000 lines of percentile tables into one row per case:
+swift package --disable-sandbox --scratch-path .build-branch \
+  benchmark baseline compare main branch --target IMAPDispatchClient 2>&1 | tr '\r' '\n' > /tmp/cmp.txt
+./dev/summarize-comparison.py /tmp/cmp.txt --before main --after branch
+```
+
+The script checks out the pre-migration library under `.worktrees/pre-migration` — pinned to commit
+`f5fa7d36`, not to the branch name, so that it keeps meaning "before" after this branch merges — points
+this package's path dependency at it via `IMAP_IMPL=main`, records a baseline, then does the same for
+this tree and compares. One set of case names, two libraries.
+
+### What each side does
+
+| | before (`main`) | after (this tree) |
+| --- | --- | --- |
+| read | copy every received region into one `ByteBuffer`; compact when the parsed prefix passes half | append every region to an `IMAPInputBuffer`; parse where it landed |
+| payload | copy it out of the accumulator | keep the `IMAPBuffer` the parser handed over |
+| write | encode into the encoder's `ByteBuffer`, then `DispatchData(bytes:)` | encode into `IMAPOutputBuffer`, then `makeDispatchData()`, which donates large regions and copies short ones |
+
+Two things bound what the numbers mean, and both are deliberate:
+
+- **The `main` side is the best client that API allows, not the client anybody wrote.** Capacity
+  reserved up front, amortised compaction rather than a `discardReadBytes()` per read, and payloads
+  copied *out* of the accumulator rather than held as slices of it — holding a slice leaves the
+  accumulator multiply-referenced, so the next append copies the whole storage, which for a 1 MB
+  literal at MTU reads works out at roughly 45 MB of copy-on-write against 1 MB for copying the payload
+  out. So every figure below is a **floor** on what the migration is worth.
+- **The comparison is of the whole branch**, not of the buffer types alone: the parser's 74% allocation
+  cut and the model's move off `ByteBuffer` are in the same number. Nothing here attributes the win
+  between them.
+
+### Results
+
+Measured against `4b83b70e`, before the pin moved to `17929ed4` and then `f5fa7d36`. Mean of 1,000 iterations, arm64 (Apple Swift 6.4, malloc-interposer backend). Counters are
+deterministic; wall clock drifts ~7% run to run. The read cases are measured with ARC counting on, which
+taxes both sides — re-measured with it off, their time ratios move by ≤3 points (the sweep goes from
+−75.7% to −73.3%), i.e. within that noise. The write cases do not measure ARC counters at all; see
+below.
+
+| Case | wall clock | mallocs | malloc bytes | retains |
+| --- | --- | --- | --- | --- |
+| `parse.session` | 524 → 201 µs | 8,062 → 2,541 | 465 K → 145 K | 6,134 → 1,527 |
+| `parse.sweep.1000.read-1448` | 36.3 → 8.7 ms | 571 K → 102 K | 29.5 M → 5.9 M | 501 K → 68 K |
+| `parse.bodystructure.200.read-1448` | 43.8 → 14.2 ms | 614 K → 146 K | 32.3 M → 10.7 M | 680 K → 113 K |
+| `parse.literal-1MB.read-1448` | 420 → 483 µs | 4,642 → 4,434 | 1.81 M → 313 K | 4,638 → 5,850 |
+| `parse.literal-1MB.read-65536` | 79.6 → 21.2 µs | 387 → 181 | 1.14 M → 10.8 K | 390 → 184 |
+| `parse.literal-4MB.read-65536` | 233 → 56 µs | 676 → 471 | 4.29 M → 29.4 K | 678 → 568 |
+| `encode.commands.all` | 22.8 → 22.0 µs | 214 → 197 | 15.6 K → 17.8 K | not measured |
+| `encode.responses.session` | 24.5 → 29.9 µs | 202 → 174 | 21.8 K → 14.7 K | not measured |
+| `encode.responses.bodystructure.200` | 2.98 → 2.10 ms | 7,014 → 5,318 | 2.16 M → 643 K | not measured |
+| `encode.append.1MB` | 29.7 → 3.6 µs | 26 → 29 | 2.10 M → 2,393 | not measured |
+| `encode.append.4MB` | 129 → 3.7 µs | 26 → 29 | 8.39 M → 2,393 | not measured |
+
+Five things this says:
+
+1. **The read side wins everywhere, and by a factor rather than a percentage.** Ordinary traffic — the
+   session preamble, a thousand-message flag sweep, two hundred body structures — costs **3.2–5.6× fewer
+   allocations, 3–5× fewer allocated bytes and 2.6–4× less time**. None of that is the buffer plumbing
+   alone; it is the migration plus the allocation work that followed it, which is the honest scope of
+   the question "what is this branch worth".
+2. **The payload path becomes O(1) in the payload, in bytes *and* in time.** A 1 MB literal at 64 K reads
+   allocates 1.14 MB before and 10.8 KB after; at 4 MB it is 4.29 MB against 29.4 KB. The write side is
+   the cleaner demonstration: an `APPEND` allocates **2,393 bytes and takes ~3.6 µs whether the message
+   is 1 MB or 4 MB**, against 2.10 MB / 29.7 µs and 8.39 MB / 129 µs. Flat against proportional — the
+   4 MB case is **35× faster** — which is what "the payload is never copied" looks like in a counter.
+3. **At MTU reads a large literal is a wash, and slightly slower.** `parse.literal-1MB.read-1448` is
+   483 µs against 420 µs, with 26% more retains, because a 1 MB literal arriving in 1448-byte pieces is
+   ~700 extractions, each boxing a region and taking a reference, where `main` does one `memcpy` per read
+   into a buffer it already owns. The allocated bytes still fall 5.8×. This is the documented trade —
+   per-region bookkeeping against copies — and the one shape where the migration buys footprint rather
+   than time.
+4. **Small-message encoding is between a wash and ~20% slower.** `encode.commands.all` measured 22.0 µs
+   against 22.8 µs run standalone and 22% *slower* than `main` through the plugin; `encode.responses.session`
+   was ~20% slower both ways. A 25-point spread on a 22 µs case is what these two cases are worth — read
+   the direction, not the number. The mechanism is that every chunk is now donated (`bytesNoCopy` plus a
+   custom deallocator block holding the owner) where `main` copied ~30 bytes into a `DispatchData` and was
+   done; it is corroborated in-tree, within one library, by `encode.dispatch.responses.1000.imap-sink`
+   costing 2,484 µs against 1,382 µs for the same sweep handed out as `ByteBuffer`s. Donation is the right
+   default for payload traffic and the wrong one for a `NOOP`. The fix is symmetric with the read side:
+   `makeDispatchData()` could copy a region below `copyThreshold` rather than donate it, the way
+   extraction already does. Not attempted here — this was a measurement exercise — and it is the one queue
+   item these numbers generate.
+5. **Encoding heavy responses wins on every axis it is measured on.**
+   `encode.responses.bodystructure.200` is 29% faster with 3.4× fewer allocated bytes and 24% fewer
+   allocations, which is the traffic the segment sink was chosen for — hundreds of small writes into
+   memory the encoder owns, handed over without a copy.
+
+### The ARC counters, and a crash worth knowing about
+
+The write cases **do not measure ARC metrics**, and the omission is load-bearing twice over. Both
+reasons are the ones `encode.dispatch.*` already carries, arrived at again from the other direction:
+
+- Large regions are donated to a `DispatchData`, which frees the memory it adopted on a background queue,
+  so how many of a chunk's releases land inside the measured region depends on how far that queue has
+  got. `encode.responses.session` reported retain deltas of 38 and 58 across two runs of the same binary
+  with byte-identical allocation counters.
+- *Asking* for an ARC metric makes the harness install a `swift_retain` hook whose teardown restores the
+  original function pointer before clearing the hook data it still dereferences, so a thread already
+  inside the hook calls through NULL. This target hit it once in ~6 runs — `EXC_BAD_ACCESS` at `0x0` on
+  `com.apple.root.default-qos` — while its encode cases still requested ARC metrics, and never since.
+  Upstream race, `ordo-one/benchmark` 1.36.2.
+
+**A `--metric` on the command line overrides the per-case opt-out and puts the hook back.** So
+`thresholds check --metric retainCount …` over a filter that includes these cases both gates noise and
+can crash, which is why `dev/compare-dispatch-client.sh` runs the read and write halves as two phases
+with different metric sets, and why the committed thresholds for the write cases hold `mallocCountTotal`
+and `mallocBytesCount` only. Read those cases' ratios in allocations and bytes; the wall clock is
+directional and the ARC counters are not measured at all.
+
 ## Adding a case
 
 Benchmark names must not contain spaces or slashes. `thresholds update` replaces both with `_` when
@@ -465,7 +586,7 @@ If the case is one you will want to profile, add a matching entry to the `scenar
 - **`thresholds update` writes every `--metric` you pass to every case, including ones that opted out.**
   The six-metric set above adds ARC counters to the `encode.dispatch.*` and
   `dispatch-client.encode.*` threshold files, which must not be gated (see
-  [What is gated](#what-is-gated-and-what-is-only-recorded)). After any update, revert them;
+  [the ARC counters](#the-arc-counters-and-a-crash-worth-knowing-about)). After any update, revert them;
   the grep must print nothing:
 
   ```sh
@@ -478,7 +599,7 @@ If the case is one you will want to profile, add a matching entry to the `scenar
   The same override applies to `thresholds check` and `baseline update`.
 - **`EXC_BAD_ACCESS` at address 0 on `com.apple.root.default-qos`** is the upstream ARC-hook race, not a
   `DispatchData` use-after-free. Details in
-  [What is gated](#what-is-gated-and-what-is-only-recorded). The stack is not always
+  [the ARC counters](#the-arc-counters-and-a-crash-worth-knowing-about). The stack is not always
   symbolicated; the only sign may be `frame #0: 0x0000000000000000` on that queue.
 - **Occasional "1 benchmark job(s) failed during runtime" on full-suite runs.** Re-running the case alone
   has always succeeded. Afterwards, check every registered case got a threshold file: compare
