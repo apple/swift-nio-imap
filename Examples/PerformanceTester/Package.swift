@@ -69,6 +69,18 @@ if !legacyImplementation {
                 .product(name: "NIO", package: "swift-nio"),
             ]
         ),
+        // A plain executable that runs one corpus a chosen number of times, for profiling under
+        // Instruments. Not a benchmark target: it has no `Benchmark` dependency, so it runs outside
+        // the malloc interposer and takes its iteration count as an argument rather than from a time
+        // budget — both of which matter under the `Allocations` template.
+        .executableTarget(
+            name: "IMAPProfile",
+            dependencies: [
+                "IMAPBenchmarkSupport",
+                .product(name: "NIOIMAP", package: "swift-nio-imap"),
+                .product(name: "NIO", package: "swift-nio"),
+            ]
+        ),
         .executableTarget(
             name: "IMAPParsing",
             dependencies: [
