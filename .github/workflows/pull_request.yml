@@ -72,7 +72,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        example: [IMAPTool, CLI, Proxy, Fuzzer, PerformanceTester]
+        # PerformanceTester is not here: it requires Swift 6.3 or later and has its own job below.
+        example: [IMAPTool, CLI, Proxy, Fuzzer]
     container:
       image: swift:6.2
     steps:
@@ -85,3 +86,20 @@ jobs:
       - name: Test
         if: matrix.example == 'CLI' || matrix.example == 'IMAPTool'
         run: swift test --package-path "Examples/${{ matrix.example }}"
+
+  benchmarks:
+    name: Build benchmarks
+    runs-on: ubuntu-latest
+    container:
+      # The benchmark package requires Swift 6.3 or later, and says so in its
+      # `swift-tools-version`. From 6.3 ordo-one/benchmark counts allocations with
+      # ordo-one/malloc-interposer rather than jemalloc, so this job needs no system library, and
+      # the committed thresholds are measured on the same backend a developer measures on locally.
+      image: swift:6.3
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Build
+        run: swift build --package-path Examples/PerformanceTester
