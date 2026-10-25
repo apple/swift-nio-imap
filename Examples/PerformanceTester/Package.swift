@@ -19,7 +19,7 @@ import PackageDescription
 // of the pre-migration library instead and defines `IMAP_LEGACY_BUFFERS`, which selects the
 // `ByteBuffer`-based half of the `IMAPDispatchClient` drivers. That is how one set of benchmark cases
 // produces before-and-after numbers for the same client: same case names, same corpora, two
-// libraries.
+// libraries. See `dev/compare-dispatch-client.sh`.
 //
 // Only `IMAPCorpus` and `IMAPDispatchClient` are declared in that configuration. The rest of the
 // suite names `IMAPOutputBuffer`, `IMAPBufferList` and the post-migration model, none of which exist

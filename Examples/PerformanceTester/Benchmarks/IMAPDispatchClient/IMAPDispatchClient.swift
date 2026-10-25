@@ -28,7 +28,7 @@ import NIOIMAP
 //                    swift package … benchmark baseline update branch --filter 'dispatch-client.*'
 //                    swift package … benchmark baseline compare main branch --filter 'dispatch-client.*'
 //
-// See `DispatchClient.swift` for what each side
+// `dev/compare-dispatch-client.sh` runs exactly that. See `DispatchClient.swift` for what each side
 // does and for the two caveats that bound the result — chiefly that the `main` side is the best client
 // that API allows, which makes every difference a floor rather than an estimate.
 //
