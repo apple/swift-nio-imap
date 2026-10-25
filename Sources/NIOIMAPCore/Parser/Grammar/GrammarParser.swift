@@ -2605,12 +2605,25 @@ extension GrammarParser {
     }
 
     // string          = quoted / literal
+    //
+    // Spelled out rather than `buffer.parseOneOf(self.parseQuoted, self.parseLiteral, ...)`, because
+    // `self.parseQuoted` as a *value* is a partial application that heap-allocates a context holding a
+    // copy of the `GrammarParser`. Two per call, on one of the most-called productions in the grammar:
+    // 142 allocations per `BODYSTRUCTURE` message. Calling the two alternatives directly forms no
+    // closure at all.
     func parseString(buffer: inout ParseInput, tracker: StackTracker) throws -> [UInt8] {
-        try buffer.parseOneOf(
-            self.parseQuoted,
-            self.parseLiteral,
-            tracker: tracker
-        )
+        do {
+            return try buffer.composite(tracker: tracker) { buffer, tracker in
+                try self.parseQuoted(buffer: &buffer, tracker: tracker)
+            }
+        } catch is ParserError {
+            // Try the literal form.
+        } catch is BadCommand {
+            // Try the literal form.
+        }
+        return try buffer.composite(tracker: tracker) { buffer, tracker in
+            try self.parseLiteral(buffer: &buffer, tracker: tracker)
+        }
     }
 
     /// Variant of `parseString()` allowing non-ASCII inside quoted strings.
@@ -2618,11 +2631,7 @@ extension GrammarParser {
     /// Not allowed by RFC 3501, but some emails have non-ASCII headers, and some servers
     /// end up copying the non-ASCII values into, for example, `BODYSTRUCTURE` parameters.
     func parseStringAllowingNonASCII(buffer: inout ParseInput, tracker: StackTracker) throws -> [UInt8] {
-        try buffer.parseOneOf(
-            self.parseQuoted,
-            self.parseLiteral,
-            tracker: tracker
-        )
+        try self.parseString(buffer: &buffer, tracker: tracker)
     }
 
     // tag             = 1*<any ASTRING-CHAR except "+">
