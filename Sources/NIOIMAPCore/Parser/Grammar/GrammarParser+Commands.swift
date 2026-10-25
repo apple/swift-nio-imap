@@ -50,52 +50,54 @@ extension GrammarParser {
     // command         = tag SP (command-any / command-auth / command-nonauth /
     //                   command-select) CRLF
     func parseCommand(buffer: inout ParseBuffer, tracker: StackTracker) throws -> Command {
-        let commandParsers: [String: (inout ParseBuffer, StackTracker) throws -> Command] = [
-            "CAPABILITY": { _, _ in .capability },
-            "LOGOUT": { _, _ in .logout },
-            "NOOP": { _, _ in .noop },
-            "STARTTLS": { _, _ in .startTLS },
-            "CHECK": { _, _ in .check },
-            "CLOSE": { _, _ in .close },
-            "EXPUNGE": { _, _ in .expunge },
-            "UNSELECT": { _, _ in .unselect },
-            "IDLE": { _, _ in .idleStart },
-            "NAMESPACE": { _, _ in .namespace },
-            "ID": self.parseCommandSuffix_id,
-            "ENABLE": self.parseCommandSuffix_enable,
-            "GETMETADATA": self.parseCommandSuffix_getMetadata,
-            "SETMETADATA": self.parseCommandSuffix_setMetadata,
-            "RESETKEY": self.parseCommandSuffix_resetKey,
-            "GENURLAUTH": self.parseCommandSuffix_genURLAuth,
-            "URLFETCH": self.parseCommandSuffix_urlFetch,
-            "COPY": self.parseCommandSuffix_copy,
-            "DELETE": self.parseCommandSuffix_delete,
-            "MOVE": self.parseCommandSuffix_move,
-            "SEARCH": self.parseCommandSuffix_search,
-            "SORT": self.parseCommandSuffix_sort,
-            "ESEARCH": self.parseCommandSuffix_esearch,
-            "STORE": self.parseCommandSuffix_store,
-            "EXAMINE": self.parseCommandSuffix_examine,
-            "LIST": self.parseCommandSuffix_list,
-            "LSUB": self.parseCommandSuffix_LSUB,
-            "RENAME": self.parseCommandSuffix_rename,
-            "SELECT": self.parseCommandSuffix_select,
-            "STATUS": self.parseCommandSuffix_status,
-            "SUBSCRIBE": self.parseCommandSuffix_subscribe,
-            "UNSUBSCRIBE": self.parseCommandSuffix_unsubscribe,
-            "UID": self.parseCommandSuffix_uid,
-            "FETCH": self.parseCommandSuffix_fetch,
-            "LOGIN": self.parseCommandSuffix_login,
-            "AUTHENTICATE": self.parseCommandSuffix_authenticate,
-            "CREATE": self.parseCommandSuffix_create,
-            "GETQUOTA": self.parseCommandSuffix_getQuota,
-            "SETQUOTA": self.parseCommandSuffix_setQuota,
-            "GETQUOTAROOT": self.parseCommandSuffix_getQuotaRoot,
-            "COMPRESS": self.parseCommandSuffix_compress,
-            "UIDBATCHES": self.parseCommandSuffix_uidBatched,
-            "GETJMAPACCESS": { _, _ in .getJMAPAccess },
-        ]
-        return try parseFromLookupTable(buffer: &buffer, tracker: tracker, parsers: commandParsers)
+        return try self.selectingKeyword(buffer: &buffer) { keyword, buffer in
+            switch keyword {
+            case "CAPABILITY": return .capability
+            case "LOGOUT": return .logout
+            case "NOOP": return .noop
+            case "STARTTLS": return .startTLS
+            case "CHECK": return .check
+            case "CLOSE": return .close
+            case "EXPUNGE": return .expunge
+            case "UNSELECT": return .unselect
+            case "IDLE": return .idleStart
+            case "NAMESPACE": return .namespace
+            case "ID": return try self.parseCommandSuffix_id(buffer: &buffer, tracker: tracker)
+            case "ENABLE": return try self.parseCommandSuffix_enable(buffer: &buffer, tracker: tracker)
+            case "GETMETADATA": return try self.parseCommandSuffix_getMetadata(buffer: &buffer, tracker: tracker)
+            case "SETMETADATA": return try self.parseCommandSuffix_setMetadata(buffer: &buffer, tracker: tracker)
+            case "RESETKEY": return try self.parseCommandSuffix_resetKey(buffer: &buffer, tracker: tracker)
+            case "GENURLAUTH": return try self.parseCommandSuffix_genURLAuth(buffer: &buffer, tracker: tracker)
+            case "URLFETCH": return try self.parseCommandSuffix_urlFetch(buffer: &buffer, tracker: tracker)
+            case "COPY": return try self.parseCommandSuffix_copy(buffer: &buffer, tracker: tracker)
+            case "DELETE": return try self.parseCommandSuffix_delete(buffer: &buffer, tracker: tracker)
+            case "MOVE": return try self.parseCommandSuffix_move(buffer: &buffer, tracker: tracker)
+            case "SEARCH": return try self.parseCommandSuffix_search(buffer: &buffer, tracker: tracker)
+            case "SORT": return try self.parseCommandSuffix_sort(buffer: &buffer, tracker: tracker)
+            case "ESEARCH": return try self.parseCommandSuffix_esearch(buffer: &buffer, tracker: tracker)
+            case "STORE": return try self.parseCommandSuffix_store(buffer: &buffer, tracker: tracker)
+            case "EXAMINE": return try self.parseCommandSuffix_examine(buffer: &buffer, tracker: tracker)
+            case "LIST": return try self.parseCommandSuffix_list(buffer: &buffer, tracker: tracker)
+            case "LSUB": return try self.parseCommandSuffix_LSUB(buffer: &buffer, tracker: tracker)
+            case "RENAME": return try self.parseCommandSuffix_rename(buffer: &buffer, tracker: tracker)
+            case "SELECT": return try self.parseCommandSuffix_select(buffer: &buffer, tracker: tracker)
+            case "STATUS": return try self.parseCommandSuffix_status(buffer: &buffer, tracker: tracker)
+            case "SUBSCRIBE": return try self.parseCommandSuffix_subscribe(buffer: &buffer, tracker: tracker)
+            case "UNSUBSCRIBE": return try self.parseCommandSuffix_unsubscribe(buffer: &buffer, tracker: tracker)
+            case "UID": return try self.parseCommandSuffix_uid(buffer: &buffer, tracker: tracker)
+            case "FETCH": return try self.parseCommandSuffix_fetch(buffer: &buffer, tracker: tracker)
+            case "LOGIN": return try self.parseCommandSuffix_login(buffer: &buffer, tracker: tracker)
+            case "AUTHENTICATE": return try self.parseCommandSuffix_authenticate(buffer: &buffer, tracker: tracker)
+            case "CREATE": return try self.parseCommandSuffix_create(buffer: &buffer, tracker: tracker)
+            case "GETQUOTA": return try self.parseCommandSuffix_getQuota(buffer: &buffer, tracker: tracker)
+            case "SETQUOTA": return try self.parseCommandSuffix_setQuota(buffer: &buffer, tracker: tracker)
+            case "GETQUOTAROOT": return try self.parseCommandSuffix_getQuotaRoot(buffer: &buffer, tracker: tracker)
+            case "COMPRESS": return try self.parseCommandSuffix_compress(buffer: &buffer, tracker: tracker)
+            case "UIDBATCHES": return try self.parseCommandSuffix_uidBatched(buffer: &buffer, tracker: tracker)
+            case "GETJMAPACCESS": return .getJMAPAccess
+            default: throw ParserError(hint: "Not a command keyword")
+            }
+        }
     }
 }
 
