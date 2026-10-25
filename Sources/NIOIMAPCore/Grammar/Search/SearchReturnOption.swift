@@ -12,8 +12,6 @@
 //
 //===----------------------------------------------------------------------===//
 
-import struct NIO.ByteBuffer
-
 /// A result option for the `SEARCH` command's extended `RETURN` clause (RFC 4731 ESEARCH extension).
 ///
 /// The ESEARCH extension allows clients to control what kind of information is returned from a search operation,

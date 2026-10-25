@@ -12,8 +12,6 @@
 //
 //===----------------------------------------------------------------------===//
 
-import struct NIO.ByteBuffer
-
 /// A complete URLAUTH-authorized IMAP URL with all authorization and verification information.
 ///
 /// A ``FullAuthenticatedURL`` represents a fully-formed URLAUTH-authorized IMAP URL ready for use

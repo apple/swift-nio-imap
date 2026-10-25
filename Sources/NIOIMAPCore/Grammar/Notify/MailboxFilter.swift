@@ -12,8 +12,6 @@
 //
 //===----------------------------------------------------------------------===//
 
-import struct NIO.ByteBuffer
-
 /// Filters to select mailboxes for the MULTIMAILBOX SEARCH extension (RFC 7377).
 ///
 /// **Requires server capability:** ``Capability/multiSearch``

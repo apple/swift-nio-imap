@@ -12,8 +12,6 @@
 //
 //===----------------------------------------------------------------------===//
 
-import struct NIO.ByteBuffer
-
 /// Status attributes that can be requested and returned by a `STATUS` command.
 ///
 /// The `STATUS` command returns information about a mailbox without selecting it.

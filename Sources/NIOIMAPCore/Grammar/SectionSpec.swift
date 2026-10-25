@@ -12,8 +12,6 @@
 //
 //===----------------------------------------------------------------------===//
 
-import struct NIO.ByteBuffer
-
 /// Specifies which part or section of a message body to fetch.
 ///
 /// Section specifiers identify specific portions of message bodies in FETCH commands. They work with

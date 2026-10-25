@@ -12,8 +12,6 @@
 //
 //===----------------------------------------------------------------------===//
 
-import struct NIO.ByteBuffer
-
 extension SearchReturnData {
     /// Partial search results with a specified range.
     ///

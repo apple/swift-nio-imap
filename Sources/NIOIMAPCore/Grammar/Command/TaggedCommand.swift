@@ -12,8 +12,6 @@
 //
 //===----------------------------------------------------------------------===//
 
-import struct NIO.ByteBuffer
-
 /// A command tagged with an identifier for request/response correlation.
 ///
 /// In the IMAP protocol (RFC 3501), clients send tagged commands to the server, and the

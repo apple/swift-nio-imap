@@ -12,8 +12,6 @@
 //
 //===----------------------------------------------------------------------===//
 
-import struct NIO.ByteBuffer
-
 /// A byte range specifying an offset and optional length within a message or section.
 ///
 /// Byte ranges are used with `PARTIAL` fetch modifiers (RFC 9394) to retrieve only a portion of

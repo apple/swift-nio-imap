@@ -12,8 +12,6 @@
 //
 //===----------------------------------------------------------------------===//
 
-import struct NIO.ByteBuffer
-
 /// Text and optional status code returned by the server in a response.
 ///
 /// Response text is always included with tagged responses and some untagged responses to provide

@@ -12,8 +12,6 @@
 //
 //===----------------------------------------------------------------------===//
 
-import struct NIO.ByteBuffer
-
 /// Helper type for the `CONDSTORE` parameter in RFC 7162 Conditional Store extension.
 ///
 /// **Requires server capability:** ``Capability/condStore``

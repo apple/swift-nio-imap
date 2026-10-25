@@ -12,8 +12,6 @@
 //
 //===----------------------------------------------------------------------===//
 
-import struct NIO.ByteBuffer
-
 /// A tagged response sent by a server to signal that a command has finished processing.
 ///
 /// Every client command receives exactly one tagged response from the server. The response contains

@@ -12,8 +12,6 @@
 //
 //===----------------------------------------------------------------------===//
 
-import struct NIO.ByteBuffer
-
 /// A message attribute that can be retrieved using the `FETCH` command (RFC 3501 and extensions).
 ///
 /// The `FETCH` command allows clients to retrieve specific attributes of messages from the server.
