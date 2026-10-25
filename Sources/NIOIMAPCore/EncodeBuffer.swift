@@ -96,7 +96,8 @@ extension EncodeBuffer {
 
     /// Creates a new `EncodeBuffer` suitable for a client to write commands.
     /// - parameter buffer: An initial `ByteBuffer` to write to. Note that this is copied and not taken as `inout`.
-    /// - parameter options: Configuration to use when writing.
+    /// - parameter capabilities: The capabilities the server advertised, which decide the encoding
+    ///     options.
     /// - returns: A new `EncodeBuffer` configured for client use.
     static func clientEncodeBuffer(buffer: ByteBuffer, capabilities: [Capability], loggingMode: Bool) -> EncodeBuffer {
         clientEncodeBuffer(
@@ -106,7 +107,7 @@ extension EncodeBuffer {
         )
     }
 
-    /// Creates a new `EncodeBuffer` suitable for a client to write commands.
+    /// Creates a new `EncodeBuffer` suitable for a server to write responses.
     /// - parameter buffer: An initial `ByteBuffer` to write to. Note that this is copied and not taken as `inout`.
     /// - parameter options: Configuration to use when writing.
     /// - returns: A new `EncodeBuffer` configured for server use.
@@ -118,9 +119,10 @@ extension EncodeBuffer {
         EncodeBuffer(buffer, mode: .server(streamingAttributes: false, options: options), loggingMode: loggingMode)
     }
 
-    /// Creates a new `EncodeBuffer` suitable for a client to write commands.
+    /// Creates a new `EncodeBuffer` suitable for a server to write responses.
     /// - parameter buffer: An initial `ByteBuffer` to write to. Note that this is copied and not taken as `inout`.
-    /// - parameter options: Configuration to use when writing.
+    /// - parameter capabilities: The capabilities the server advertises, which decide the encoding
+    ///     options.
     /// - returns: A new `EncodeBuffer` configured for server use.
     static func serverEncodeBuffer(buffer: ByteBuffer, capabilities: [Capability], loggingMode: Bool) -> EncodeBuffer {
         serverEncodeBuffer(
@@ -179,11 +181,11 @@ extension EncodeBuffer {
     /// Retrieves the next chunk of encoded data ready to transmit.
     ///
     /// In client mode with synchronizing literals, this may return multiple chunks with
-    /// ``Chunk.waitForContinuation`` set to `true` between chunks, requiring the caller
+    /// ``Chunk/waitForContinuation`` set to `true` between chunks, requiring the caller
     /// to pause and wait for the server's `+` continuation request.
     ///
     /// In server mode, this always returns all remaining data in a single chunk with
-    /// ``Chunk.waitForContinuation`` set to `false`.
+    /// ``Chunk/waitForContinuation`` set to `false`.
     ///
     /// - Returns: The next ``Chunk`` of data to transmit.
     public mutating func nextChunk() -> Chunk {
