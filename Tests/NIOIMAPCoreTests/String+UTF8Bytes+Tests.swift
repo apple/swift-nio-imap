@@ -15,8 +15,8 @@
 @testable import NIOIMAPCore
 import Testing
 
-@Suite("String + ByteBuffer")
-struct StringByteBufferTests {
+@Suite("String + UTF-8 bytes")
+struct StringUTF8BytesTests {
     @Test("validating UTF-8 returns nil for overflow bytes")
     func validatingUtf8ReturnsNilForOverflowBytes() {
         let bytes: [UInt8] = [0, 1, 2, 3, 255]
@@ -41,6 +41,12 @@ struct StringByteBufferTests {
 
         let test2: [UInt8] = [0xE2, 0x9A, 0xA1, 0xE2, 0x9A, 0xA2, 0xE2, 0x9A, 0xA3, 0xE2, 0x9A, 0xA4]
         #expect(String(validatingUTF8Bytes: test2) == "⚡⚢⚣⚤")
+    }
+
+    @Test("validating UTF-8 accepts NUL")
+    func validatingUtf8AcceptsNUL() {
+        let bytes: [UInt8] = [0x41, 0x00, 0x42]
+        #expect(String(validatingUTF8Bytes: bytes) == "A\0B")
     }
 
     @Test("best effort decoding correctly decodes valid string")
