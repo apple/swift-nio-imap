@@ -7,11 +7,11 @@ import PackageDescription
 let package = Package(
     name: "swift-nio-imap",
     platforms: [
-        .macOS(.v15),
-        .iOS(.v18),
-        .watchOS(.v11),
-        .tvOS(.v18),
-        .visionOS(.v2),
+        .macOS(.v26),
+        .iOS(.v26),
+        .tvOS(.v26),
+        .watchOS(.v26),
+        .visionOS(.v26),
     ],
     products: [
         .library(name: "NIOIMAP", targets: ["NIOIMAP"]),
@@ -56,12 +56,15 @@ let package = Package(
             dependencies: [
                 .product(name: "NIO", package: "swift-nio"),
                 .product(name: "OrderedCollections", package: "swift-collections"),
+                .product(name: "DequeModule", package: "swift-collections"),
             ],
             // The documentation is built out-of-band, not by SwiftPM: excluding the catalog
             // keeps it out of the build product instead of being copied in as a resource.
             exclude: ["NIOIMAPCore.docc"],
             swiftSettings: [
-                .enableUpcomingFeature("MemberImportVisibility")
+                .enableUpcomingFeature("MemberImportVisibility"),
+                // For `@_lifetime` and non-escapable parse cursors.
+                .enableExperimentalFeature("Lifetimes"),
             ]
         ),
         .testTarget(
@@ -73,7 +76,8 @@ let package = Package(
                 .product(name: "OrderedCollections", package: "swift-collections"),
             ],
             swiftSettings: [
-                .enableUpcomingFeature("MemberImportVisibility")
+                .enableUpcomingFeature("MemberImportVisibility"),
+                .enableExperimentalFeature("Lifetimes"),
             ]
         ),
 
