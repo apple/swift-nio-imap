@@ -190,7 +190,12 @@ public struct CommandParser: Parser, Sendable {
         }
 
         let save = buffer
-        let framingResult = try self.synchronisingLiteralParser.parseContinuationsNecessary(buffer)
+        // Temporary: frames over a cursor on the ByteBuffer's bytes until this function takes a
+        // ParserInputBuffer. Removed in "Parse from ParseInput instead of ByteBuffer".
+        let framingResult = try buffer.withUnsafeReadableBytes { bytes in
+            let input = ParseInput(_span(bytes.bindMemory(to: UInt8.self)))
+            return try self.synchronisingLiteralParser.parseContinuationsNecessary(input)
+        }
         var actuallyVisible = ParseBuffer(
             buffer.getSlice(at: buffer.readerIndex, length: framingResult.maximumValidBytes)!
         )
