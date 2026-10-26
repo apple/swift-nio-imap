@@ -121,7 +121,7 @@ import Testing
         ),
         Rule(
             "authentication challenge",
-            .authenticationChallenge(ByteBuffer()),
+            .authenticationChallenge([]),
             before: .throws(.idleWaitingForConfirmation),
             after: .throws(.idleRunning)
         ),

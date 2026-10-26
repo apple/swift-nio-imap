@@ -114,7 +114,7 @@ extension GrammarParser {
     func parseCommandSuffix_urlFetch(buffer: inout ParseBuffer, tracker: StackTracker) throws -> Command {
         let array = try buffer.parseOneOrMore(
             tracker: tracker,
-            parser: { buffer, tracker -> ByteBuffer in
+            parser: { buffer, tracker -> [UInt8] in
                 try buffer.parseSpaces()
                 return try self.parseAString(buffer: &buffer, tracker: tracker)
             }

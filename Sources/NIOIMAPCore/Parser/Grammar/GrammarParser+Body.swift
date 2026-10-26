@@ -105,7 +105,7 @@ extension GrammarParser {
                             where: {
                                 $0 != 0x7B && $0 != 0x28 && $0 != 0x29 && $0 != 0x22
                             }
-                        ).readableBytes + 1
+                        ).count + 1
                     let byte = try buffer.readByte()
                     switch byte {
                     case 0x7B:
@@ -146,7 +146,7 @@ extension GrammarParser {
                             where: {
                                 $0 != 0x5C && $0 != 0x22
                             }
-                        ).readableBytes + 1
+                        ).count + 1
                     let byte = try buffer.readByte()
                     switch byte {
                     case 0x5C:
@@ -232,7 +232,7 @@ extension GrammarParser {
     ) throws -> BodyStructure.Singlepart.Extension {
         try buffer.composite(tracker: tracker) { buffer, tracker -> BodyStructure.Singlepart.Extension in
             let md5 = try self.parseNString(buffer: &buffer, tracker: tracker).flatMap {
-                (buffer: ByteBuffer) -> String in
+                (buffer: [UInt8]) -> String in
                 try decodeUTF8(buffer)
             }
             let dsp = try buffer.parseOptional(tracker: tracker) {
@@ -265,12 +265,12 @@ extension GrammarParser {
             let fieldParam = try self.parseBodyFieldParam(buffer: &buffer, tracker: tracker)
             try buffer.parseSpaces()
             let fieldID = try self.parseNString(buffer: &buffer, tracker: tracker).flatMap {
-                (buffer: ByteBuffer) -> String in
+                (buffer: [UInt8]) -> String in
                 try decodeUTF8(buffer)
             }
             try buffer.parseSpaces()
             let fieldDescription = try self.parseNString(buffer: &buffer, tracker: tracker).flatMap {
-                (buffer: ByteBuffer) -> String in
+                (buffer: [UInt8]) -> String in
                 try decodeUTF8(buffer)
             }
             try buffer.parseSpaces()
@@ -447,7 +447,7 @@ extension GrammarParser {
             let field = try decodeUTF8(parsedField)
             try buffer.parseSpaces()
             let parsedValue = try parseStringAllowingNonASCII(buffer: &buffer, tracker: tracker)
-            let value = String(bestEffortDecodingUTF8Bytes: parsedValue.readableBytesView)
+            let value = String(bestEffortDecodingUTF8Bytes: parsedValue)
             return (field, value)
         }
 
@@ -568,7 +568,7 @@ extension GrammarParser {
         tracker: StackTracker
     ) throws -> BodyStructure.LocationAndExtensions {
         let fieldLocation = try self.parseNString(buffer: &buffer, tracker: tracker).flatMap {
-            (buffer: ByteBuffer) -> String in
+            (buffer: [UInt8]) -> String in
             try decodeUTF8(buffer)
         }
         let extensions = try buffer.parseZeroOrMore(tracker: tracker) {

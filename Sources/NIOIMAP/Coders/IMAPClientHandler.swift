@@ -118,12 +118,10 @@ public final class IMAPClientHandler: ChannelDuplexHandler {
         case .fireAuthenticationChallenge:
             switch request {
             case .responseText:
-                // No valid base64, so forward on an empty BB
-                context.fireChannelRead(
-                    self.wrapInboundOut(.authenticationChallenge(context.channel.allocator.buffer(capacity: 0)))
-                )
-            case .data(let byteBuffer):
-                context.fireChannelRead(self.wrapInboundOut(.authenticationChallenge(byteBuffer)))
+                // No valid base64, so forward on an empty challenge
+                context.fireChannelRead(self.wrapInboundOut(.authenticationChallenge([])))
+            case .data(let bytes):
+                context.fireChannelRead(self.wrapInboundOut(.authenticationChallenge(bytes)))
             }
         }
     }

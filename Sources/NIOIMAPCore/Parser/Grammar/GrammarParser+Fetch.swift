@@ -357,7 +357,7 @@ extension GrammarParser {
             let save = buffer
             let quoted = try self.parseQuoted(buffer: &buffer, tracker: tracker)
             buffer = save
-            return .quotedStreamingBegin(kind: type, byteCount: quoted.readableBytes)
+            return .quotedStreamingBegin(kind: type, byteCount: quoted.count)
         }
 
         func parseFetchResponse_finish(buffer: inout ParseBuffer, tracker: StackTracker) throws -> _FetchResponse {

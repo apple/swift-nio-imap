@@ -351,7 +351,7 @@ public struct CommandParser: Parser, Sendable {
             let authenticationChallengeResponse = try self.parser.parseBase64(buffer: &buffer, tracker: tracker)
             try buffer.matchNewline()
             // Stay in `.expectingAuthenticationResponse` to support multi-round SASL exchanges.
-            return .continuationResponse(authenticationChallengeResponse)
+            return .continuationResponse(ByteBuffer(bytes: authenticationChallengeResponse))
         }
 
         switch context {

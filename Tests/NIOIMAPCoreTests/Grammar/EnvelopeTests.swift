@@ -330,7 +330,7 @@ extension EmailAddress {
     fileprivate static let alice = EmailAddress(personName: nil, sourceRoot: nil, mailbox: "alice", host: "example.com")
 
     /// RFC 3501 §7.4.2 group start marker (host NIL).
-    fileprivate static func groupStart(_ name: ByteBuffer) -> EmailAddress {
+    fileprivate static func groupStart(_ name: [UInt8]) -> EmailAddress {
         .init(personName: nil, sourceRoot: nil, mailbox: name, host: nil)
     }
 }

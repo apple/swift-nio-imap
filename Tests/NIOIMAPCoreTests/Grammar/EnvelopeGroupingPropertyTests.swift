@@ -87,7 +87,7 @@ extension EnvelopeGroupingPropertyTests {
 
     @Test("many empty groups")
     func manyEmptyGroups() {
-        let names = (0..<Self.emptyGroupCount).map { ByteBuffer(string: "g\($0)") }
+        let names = (0..<Self.emptyGroupCount).map { Array("g\($0)".utf8) }
         let input = names.flatMap { [EmailAddress.groupStart($0), .groupEnd()] }
         let output = GrammarParser().parseEnvelopeEmailAddressGroups(input)
         #expect(output.count == Self.emptyGroupCount)
@@ -97,7 +97,7 @@ extension EnvelopeGroupingPropertyTests {
     @Test("many addresses")
     func manyAddresses() {
         let input = (0..<Self.addressCount).map {
-            EmailAddress(personName: nil, sourceRoot: nil, mailbox: ByteBuffer(string: "a\($0)"), host: "example.com")
+            EmailAddress(personName: nil, sourceRoot: nil, mailbox: Array("a\($0)".utf8), host: "example.com")
         }
         let output = GrammarParser().parseEnvelopeEmailAddressGroups(input)
         #expect(output.count == Self.addressCount)
@@ -108,7 +108,7 @@ extension EnvelopeGroupingPropertyTests {
     @Test("many members in one group")
     func manyGroupMembers() {
         let members = (0..<Self.addressCount).map {
-            EmailAddress(personName: nil, sourceRoot: nil, mailbox: ByteBuffer(string: "a\($0)"), host: "example.com")
+            EmailAddress(personName: nil, sourceRoot: nil, mailbox: Array("a\($0)".utf8), host: "example.com")
         }
         let input = [EmailAddress.groupStart("g")] + members + [.groupEnd()]
         let output = GrammarParser().parseEnvelopeEmailAddressGroups(input)
@@ -227,7 +227,7 @@ private func firstInventedGroup(input: [EmailAddress], output: [EmailAddressList
     var cursor = input.startIndex
     for case .group(let group) in output {
         guard let runEnd = bracketedRunEnd(for: group, in: input, from: cursor) else {
-            return "group \(String(buffer: group.groupName)) with \(group.children.count) children"
+            return "group \(String(decoding: group.groupName, as: UTF8.self)) with \(group.children.count) children"
         }
         cursor = runEnd
     }
@@ -253,8 +253,8 @@ private func bracketedRunEnd(for group: EmailAddressGroup, in input: [EmailAddre
 }
 
 private func describe(_ addresses: [EmailAddress]) -> String {
-    func field(_ value: ByteBuffer?) -> String {
-        value.map { "\"\(String(buffer: $0))\"" } ?? "NIL"
+    func field(_ value: [UInt8]?) -> String {
+        value.map { "\"\(String(decoding: $0, as: UTF8.self))\"" } ?? "NIL"
     }
     let items = addresses.map {
         "(\(field($0.personName)) \(field($0.sourceRoot)) \(field($0.mailbox)) \(field($0.host)))"
@@ -270,11 +270,11 @@ extension EmailAddress {
     fileprivate var isGroupStart: Bool { host == nil && mailbox != nil }
     fileprivate var isGroupEnd: Bool { host == nil && mailbox == nil }
 
-    fileprivate static func groupStart(_ name: ByteBuffer, sourceRoot: ByteBuffer? = nil) -> EmailAddress {
+    fileprivate static func groupStart(_ name: [UInt8], sourceRoot: [UInt8]? = nil) -> EmailAddress {
         .init(personName: nil, sourceRoot: sourceRoot, mailbox: name, host: nil)
     }
 
-    fileprivate static func groupEnd(sourceRoot: ByteBuffer? = nil) -> EmailAddress {
+    fileprivate static func groupEnd(sourceRoot: [UInt8]? = nil) -> EmailAddress {
         .init(personName: nil, sourceRoot: sourceRoot, mailbox: nil, host: nil)
     }
 }
@@ -313,8 +313,8 @@ private func legacyParseEnvelopeEmailAddressGroups(_ addresses: [EmailAddress]) 
 
 /// Pre-#859 `EmailAddressGroup`: children could be groups.
 private struct LegacyGroup {
-    var groupName: ByteBuffer
-    var sourceRoot: ByteBuffer?
+    var groupName: [UInt8]
+    var sourceRoot: [UInt8]?
     var children: [LegacyElement]
 }
 
@@ -399,12 +399,12 @@ private enum Shape: CaseIterable, CustomStringConvertible {
 }
 
 private struct AddressListGenerator {
-    private static let groupNames: [ByteBuffer] = ["Team", "A", "B", "", "undisclosed-recipients"]
-    private static let personNames: [ByteBuffer?] = [nil, "", "Alice"]
-    private static let mailboxes: [ByteBuffer?] = [nil, "", "alice", "bob"]
+    private static let groupNames: [[UInt8]] = ["Team", "A", "B", "", "undisclosed-recipients"]
+    private static let personNames: [[UInt8]?] = [nil, "", "Alice"]
+    private static let mailboxes: [[UInt8]?] = [nil, "", "alice", "bob"]
     /// Never NIL: a NIL host is a marker.
-    private static let hosts: [ByteBuffer] = ["example.com", ""]
-    private static let sourceRoots: [ByteBuffer?] = [nil, nil, nil, "@relay"]
+    private static let hosts: [[UInt8]] = ["example.com", ""]
+    private static let sourceRoots: [[UInt8]?] = [nil, nil, nil, "@relay"]
     private static let maximumGroupMembers = 5
 
     private var rng: SplitMix64
@@ -515,11 +515,11 @@ private struct AddressListGenerator {
     }
 
     /// Varies the encoding of the same value: NIL / nil, quoted, literal.
-    private mutating func wireNString(_ value: ByteBuffer?) -> String {
+    private mutating func wireNString(_ value: [UInt8]?) -> String {
         guard let value else { return self.bool() ? "NIL" : "nil" }
-        let string = String(buffer: value)
+        let string = String(decoding: value, as: UTF8.self)
         guard self.bool() else { return "\"\(string)\"" }
-        return "{\(value.readableBytes)}\r\n\(string)"
+        return "{\(value.count)}\r\n\(string)"
     }
 
     // MARK: Randomness

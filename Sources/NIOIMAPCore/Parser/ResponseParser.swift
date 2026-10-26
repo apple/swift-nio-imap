@@ -495,7 +495,7 @@ extension ResponseParser {
         return self.moveStateMachine(
             expected: .streamingQuoted(attributeCount: attributeCount),
             next: .attributeBytes(0, attributeCount: attributeCount),
-            returnValue: .fetch(.streamingBytes(quoted))
+            returnValue: .fetch(.streamingBytes(ByteBuffer(bytes: quoted)))
         )
     }
 }

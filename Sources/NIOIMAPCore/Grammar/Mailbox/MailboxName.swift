@@ -127,8 +127,8 @@ public struct MailboxPath: Hashable, Sendable {
 extension MailboxPath {
     static let maximumMailboxSize = 1_000
 
-    func validateUTF8String(_ buffer: ByteBuffer) -> String? {
-        var bytesIterator = buffer.readableBytesView.makeIterator()
+    func validateUTF8String(_ buffer: [UInt8]) -> String? {
+        var bytesIterator = buffer.makeIterator()
         var scalars: [Unicode.Scalar] = []
         var utf8Decoder = UTF8()
         while true {
@@ -143,11 +143,11 @@ extension MailboxPath {
         }
     }
 
-    func decodeBufferToString(_ buffer: ByteBuffer) -> String {
+    func decodeBufferToString(_ buffer: [UInt8]) -> String {
         do {
             return try ModifiedUTF7.decode(buffer)
         } catch {
-            return String(bestEffortDecodingUTF8Bytes: buffer.readableBytesView)
+            return String(bestEffortDecodingUTF8Bytes: buffer)
         }
     }
 
@@ -166,14 +166,14 @@ extension MailboxPath {
     /// - Returns: An array of display strings for each mailbox component in the path
     public func displayStringComponents(omittingEmptySubsequences: Bool = true) -> [String] {
         guard let pathSeparator = self.pathSeparator else {
-            return [self.decodeBufferToString(ByteBuffer(bytes: self.name.bytes))]
+            return [self.decodeBufferToString(self.name.bytes)]
         }
 
         assert(pathSeparator.isASCII)
         return self.name.bytes
             .split(separator: pathSeparator.asciiValue!, omittingEmptySubsequences: omittingEmptySubsequences)
             .map { bytes in
-                self.decodeBufferToString(ByteBuffer(ByteBufferView(bytes)))
+                self.decodeBufferToString(Array(bytes))
             }
     }
 
@@ -234,14 +234,12 @@ extension MailboxPath {
         }
 
         // if a separator exists, write it after the root mailbox
-        var newStorage = ByteBuffer(bytes: self.name.bytes)
-        newStorage.writeBytes(separator.utf8)
+        var newStorage = self.name.bytes
+        newStorage.append(contentsOf: separator.utf8)
+        newStorage.append(contentsOf: ModifiedUTF7.encode(displayName))
 
-        var encodedNewName = ModifiedUTF7.encode(displayName)
-        newStorage.writeBuffer(&encodedNewName)
-
-        guard newStorage.readableBytes <= Self.maximumMailboxSize else {
-            throw MailboxTooBigError(maximumSize: Self.maximumMailboxSize, actualSize: newStorage.readableBytes)
+        guard newStorage.count <= Self.maximumMailboxSize else {
+            throw MailboxTooBigError(maximumSize: Self.maximumMailboxSize, actualSize: newStorage.count)
         }
 
         return try MailboxPath(name: .init(newStorage), pathSeparator: separator)
@@ -273,7 +271,7 @@ public struct MailboxName: Sendable {
     /// INBOX is the default mailbox that all IMAP clients must be able to access.
     /// Per [RFC 3501 Section 5.1](https://datatracker.ietf.org/doc/html/rfc3501#section-5.1),
     /// the name "INBOX" is case-insensitive and is always normalized to uppercase.
-    public static let inbox = Self(ByteBuffer(string: "INBOX"))
+    public static let inbox = Self(Array("INBOX".utf8))
 
     /// The raw bytes of the mailbox name, typically in Modified UTF-7 encoding.
     ///
@@ -423,14 +421,6 @@ private func murmur(_ bytes: UnsafeBufferPointer<UInt8>) -> UInt32 {
 
     let a = h1 ^ h2
     return UInt32(truncatingIfNeeded: a ^ (a >> 32))
-}
-
-extension MailboxName {
-    public init(_ bytes: ByteBuffer) {
-        self = bytes.withUnsafeReadableBytes { buffer in
-            MailboxName(Array(buffer.bindMemory(to: UInt8.self)))
-        }
-    }
 }
 
 // MARK: - Hashable

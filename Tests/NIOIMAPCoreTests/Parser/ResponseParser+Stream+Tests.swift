@@ -1598,7 +1598,7 @@ extension Envelope {
         let sender: [EmailAddressListElement] = [.singleAddress(.address("sender", "example.com"))]
         return Envelope(
             date: .capturedDate,
-            subject: ByteBuffer(string: subject),
+            subject: Array(subject.utf8),
             from: sender,
             sender: sender,
             reply: sender,
@@ -1627,12 +1627,12 @@ extension Envelope {
 }
 
 extension EmailAddress {
-    fileprivate static func address(_ mailbox: ByteBuffer, _ host: ByteBuffer) -> EmailAddress {
+    fileprivate static func address(_ mailbox: [UInt8], _ host: [UInt8]) -> EmailAddress {
         .init(personName: nil, sourceRoot: nil, mailbox: mailbox, host: host)
     }
 
     /// RFC 3501 §7.4.2 group start marker (host NIL).
-    fileprivate static func groupStart(_ name: ByteBuffer) -> EmailAddress {
+    fileprivate static func groupStart(_ name: [UInt8]) -> EmailAddress {
         .init(personName: nil, sourceRoot: nil, mailbox: name, host: nil)
     }
 }

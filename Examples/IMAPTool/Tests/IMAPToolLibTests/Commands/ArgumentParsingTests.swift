@@ -260,7 +260,7 @@ enum ArgumentParsingTests {
         )
         #expect(sut.connectionInfo.username == "foo:bar")
         #expect(sut.connectionInfo.server == "bar.example.com")
-        #expect(sut.mailbox == MailboxName(ByteBuffer(string: "A")))
+        #expect(sut.mailbox == MailboxName(Array("A".utf8)))
         #expect(sut.appendOptions == [.skipErrors, .sort])
         #expect(sut.input == ["a", "b"])
     }

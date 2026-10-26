@@ -339,7 +339,7 @@ private struct GrammarParserPrimitivesTests {
         // Non-synchronizing ~{N+}\r\n — covers the + optional branch (line 1508)
         var b1 = ParseBuffer("~{3+}\r\nabc")
         let result = try parser.parseLiteral8(buffer: &b1, tracker: .makeNewDefault)
-        #expect(String(buffer: result) == "abc")
+        #expect(String(decoding: result, as: UTF8.self) == "abc")
 
         // Literal8 containing a NUL byte — covers line 1513
         var b2 = ParseBuffer("~{3}\r\na\0b")
@@ -376,7 +376,7 @@ extension ParseFixture<String> {
             expected: expected,
             parser: {
                 let buffer = try GrammarParser().parseText(buffer: &$0, tracker: $1)
-                return String(buffer: buffer)
+                return String(decoding: buffer, as: UTF8.self)
             }
         )
     }
@@ -392,7 +392,7 @@ extension ParseFixture<String> {
             expected: expected,
             parser: {
                 let buffer = try GrammarParser().parseAString(buffer: &$0, tracker: $1)
-                return String(buffer: buffer)
+                return String(decoding: buffer, as: UTF8.self)
             }
         )
     }
@@ -438,7 +438,7 @@ extension ParseFixture<String?> {
             expected: expected,
             parser: {
                 let buffer = try GrammarParser().parseNString(buffer: &$0, tracker: $1)
-                return buffer.map { String(buffer: $0) }
+                return buffer.map { String(decoding: $0, as: UTF8.self) }
             }
         )
     }
