@@ -207,7 +207,7 @@ public enum Command: Hashable, Sendable {
     /// The server responds with ``MailboxData/lsub(_:)`` responses for each matching mailbox.
     ///
     /// - SeeAlso: [RFC 3501 Section 6.3.9](https://datatracker.ietf.org/doc/html/rfc3501#section-6.3.9)
-    case lsub(reference: MailboxName, pattern: ByteBuffer)
+    case lsub(reference: MailboxName, pattern: [UInt8])
 
     /// `RENAME` – Changes the name of a mailbox and all its children.
     ///
@@ -581,7 +581,7 @@ public enum Command: Hashable, Sendable {
     /// Requests that the server return the text data associated with the specified IMAP URLs.
     ///
     /// - SeeAlso: [RFC 4467](https://datatracker.ietf.org/doc/html/rfc4467)
-    case urlFetch([ByteBuffer])
+    case urlFetch([[UInt8]])
 
     /// Instructs the server to use the specified compression mechanism.
     ///
@@ -763,14 +763,13 @@ extension CommandEncodeBuffer {
     ///
     /// Typical URLAUTH URLs are `1*ASTRING-CHAR` but longer than a quoted string may be, so write
     /// those bare to avoid a literal round-trip; anything else as a `string`.
-    private mutating func writeCommandKind_urlFetch(urls: [ByteBuffer]) -> Int {
+    private mutating func writeCommandKind_urlFetch(urls: [[UInt8]]) -> Int {
         self.buffer.writeString("URLFETCH")
             + self.buffer.writeArray(urls, prefix: " ", parenthesis: false) { url, buffer in
-                let bytes = url.readableBytesView
-                guard !bytes.isEmpty, bytes.allSatisfy(\.isAStringChar) else {
+                guard !url.isEmpty, url.allSatisfy(\.isAStringChar) else {
                     return buffer.writeIMAPString(url)
                 }
-                return buffer.writeBytes(bytes)
+                return buffer.writeBytes(url)
             }
     }
 
@@ -877,7 +876,7 @@ extension CommandEncodeBuffer {
             }
     }
 
-    private mutating func writeCommandKind_lsub(mailbox: MailboxName, listMailbox: ByteBuffer) -> Int {
+    private mutating func writeCommandKind_lsub(mailbox: MailboxName, listMailbox: [UInt8]) -> Int {
         self.buffer.writeString("LSUB ") + self.buffer.writeMailbox(mailbox) + self.buffer.writeSpace()
             + self.buffer.writeIMAPString(listMailbox)
     }

@@ -233,9 +233,9 @@ struct MailboxInfoTests {
             [:],
             ["CHILDINFO": .comp(["SUBSCRIBED"])],
             ["OLDNAME": .comp(["Old Name"]), "X-FOO": .sequence(.lastCommand)],
-        ] as [OrderedDictionary<ByteBuffer, ParameterValue>]
+        ] as [OrderedDictionary<[UInt8], ParameterValue>]
     )
-    func extensionsRoundTrip(_ extensions: OrderedDictionary<ByteBuffer, ParameterValue>) throws {
+    func extensionsRoundTrip(_ extensions: OrderedDictionary<[UInt8], ParameterValue>) throws {
         TestUtilities.expectRoundTrip(
             MailboxInfo(
                 attributes: [.marked],
@@ -323,7 +323,7 @@ struct MailboxInfoTests {
                 .init(
                     attributes: [],
                     path: try! .init(name: .inbox),
-                    extensions: [ByteBuffer(string: "CHILDINFO"): .comp(["SUBSCRIBED"])]
+                    extensions: ["CHILDINFO": .comp(["SUBSCRIBED"])]
                 )
             )
         ),
@@ -336,7 +336,7 @@ struct MailboxInfoTests {
                     attributes: [],
                     path: try! .init(name: .inbox, pathSeparator: "."),
                     objectID: CompoundObjectID(mailboxID: "F1", accountID: "u1"),
-                    extensions: [ByteBuffer(string: "KEY"): .comp(["VAL"])]
+                    extensions: ["KEY": .comp(["VAL"])]
                 )
             )
         ),
@@ -356,8 +356,8 @@ struct MailboxInfoTests {
                     attributes: [],
                     path: try! .init(name: .inbox),
                     extensions: [
-                        ByteBuffer(string: "KEY1"): .comp(["VAL1"]),
-                        ByteBuffer(string: "KEY2"): .comp(["VAL2"]),
+                        "KEY1": .comp(["VAL1"]),
+                        "KEY2": .comp(["VAL2"]),
                     ]
                 )
             )

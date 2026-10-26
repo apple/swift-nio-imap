@@ -59,7 +59,7 @@ public struct RumpURLAndMechanism: Hashable, Sendable {
     /// The complete URL including all components except the final `:mechanism:token` portion.
     /// It includes the server, mailbox, UID, optional section, optional byte range, expiration,
     /// and access identifier.
-    public var urlRump: ByteBuffer
+    public var urlRump: [UInt8]
 
     /// The authentication mechanism that should be used to generate the URLAUTH token.
     ///
@@ -70,7 +70,7 @@ public struct RumpURLAndMechanism: Hashable, Sendable {
     /// Creates a new rump URL and mechanism pair.
     /// - parameter urlRump: The URL rump (without mechanism and token).
     /// - parameter mechanism: The mechanism for token generation.
-    public init(urlRump: ByteBuffer, mechanism: URLAuthenticationMechanism) {
+    public init(urlRump: [UInt8], mechanism: URLAuthenticationMechanism) {
         self.urlRump = urlRump
         self.mechanism = mechanism
     }

@@ -150,7 +150,7 @@ public enum Response: Hashable, Sendable {
     /// that challenge (not a separate response type).
     ///
     /// - SeeAlso: [RFC 4959](https://datatracker.ietf.org/doc/html/rfc4959) - IMAP Extension for SASL Initial Client Response
-    case authenticationChallenge(ByteBuffer)
+    case authenticationChallenge([UInt8])
 
     /// Signals that the IDLE command has been successfully started.
     ///

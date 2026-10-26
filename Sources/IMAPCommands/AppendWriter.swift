@@ -254,7 +254,7 @@ extension IMAPConnection.AppendWriter {
             _ bytes: ByteBuffer
         ) async throws {
             try state.checkCanWrite()
-            try await underlying.write([.catenateURL(bytes)])
+            try await underlying.write([.catenateURL(Array(bytes.readableBytesView))])
             state = .complete
         }
 

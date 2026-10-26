@@ -55,7 +55,7 @@ extension GrammarParser {
             try buffer.matchFixed("GENURLAUTH")
             let array = try buffer.parseOneOrMore(
                 tracker: tracker,
-                parser: { buffer, tracker -> ByteBuffer in
+                parser: { buffer, tracker -> [UInt8] in
                     try buffer.parseSpaces()
                     return try self.parseAString(buffer: &buffer, tracker: tracker)
                 }
@@ -276,7 +276,7 @@ extension GrammarParser {
             ) throws -> MessageAttribute {
                 try buffer.parseSpaces()
                 let raw = try self.parseLiteral(buffer: &buffer, tracker: tracker)
-                return .preview(PreviewText(String(buffer: raw)))
+                return .preview(PreviewText(String(decoding: raw, as: UTF8.self)))
             }
 
             func parseMessageAttribute_preview_inline(
@@ -285,7 +285,7 @@ extension GrammarParser {
             ) throws -> MessageAttribute {
                 try buffer.parseSpaces()
                 let raw = try self.parseQuoted(buffer: &buffer, tracker: tracker)
-                return .preview(PreviewText(String(buffer: raw)))
+                return .preview(PreviewText(String(decoding: raw, as: UTF8.self)))
             }
 
             func parseMessageAttribute_preview_nil(

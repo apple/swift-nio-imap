@@ -87,7 +87,7 @@ enum FetchTests {
                                 .envelope(
                                     Envelope(
                                         date: InternetMessageDate("Mon, 10 Feb 2025 12:14:53 -0700 (MST)"),
-                                        subject: ByteBuffer(string: "Fwd: iOS email"),
+                                        subject: Array("Fwd: iOS email".utf8),
                                         from: [.a],
                                         sender: [.b],
                                         reply: [.c],
@@ -109,7 +109,7 @@ enum FetchTests {
                                 .envelope(
                                     Envelope(
                                         date: InternetMessageDate("Sat, 29 Jun 2024 22:25:38 +0900"),
-                                        subject: ByteBuffer(string: "Fotowelt"),
+                                        subject: Array("Fotowelt".utf8),
                                         from: [.f],
                                         sender: [.e],
                                         reply: [],
@@ -173,7 +173,7 @@ enum FetchTests {
                                 .envelope(
                                     Envelope(
                                         date: InternetMessageDate("Wed, 15 Jan 2025 08:00:00 +0000"),
-                                        subject: ByteBuffer(string: "Test Subject"),
+                                        subject: Array("Test Subject".utf8),
                                         from: [.a],
                                         sender: [.a],
                                         reply: [.a],
@@ -195,7 +195,7 @@ enum FetchTests {
                                 .envelope(
                                     Envelope(
                                         date: InternetMessageDate("Thu, 16 Jan 2025 09:30:00 +0000"),
-                                        subject: ByteBuffer(string: "Another Test"),
+                                        subject: Array("Another Test".utf8),
                                         from: [.b],
                                         sender: [.b],
                                         reply: [.b],
@@ -375,8 +375,8 @@ extension EmailAddressListElement {
             EmailAddress(
                 personName: nil,
                 sourceRoot: nil,
-                mailbox: ByteBuffer(string: name),
-                host: ByteBuffer(string: "example.apple.com")
+                mailbox: Array(name.utf8),
+                host: Array("example.apple.com".utf8)
             )
         )
     }

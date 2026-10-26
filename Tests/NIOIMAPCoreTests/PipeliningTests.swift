@@ -18,11 +18,11 @@ import OrderedCollections
 import Testing
 
 extension MailboxName {
-    fileprivate static let food = MailboxName(ByteBuffer(string: "Food"))
+    fileprivate static let food = MailboxName("Food")
 }
 
 extension MailboxPatterns {
-    fileprivate static let food = MailboxPatterns.mailbox(ByteBuffer(string: "Food"))
+    fileprivate static let food = MailboxPatterns.mailbox("Food")
 }
 
 extension RumpURLAndMechanism {
@@ -32,10 +32,9 @@ extension RumpURLAndMechanism {
     )
 }
 
-extension ByteBuffer {
-    fileprivate static let joeURLFetch = ByteBuffer(
-        "imap://joe@example.com/INBOX/;uid=20/;section=1.2;urlauth=submit+fred:internal:91354a473744909de610943775f92038"
-    )
+extension [UInt8] {
+    fileprivate static let joeURLFetch: [UInt8] =
+        ("imap://joe@example.com/INBOX/;uid=20/;section=1.2;urlauth=submit+fred:internal:91354a473744909de610943775f92038")
 }
 
 extension SearchKey {

@@ -152,7 +152,7 @@ enum ListStatusTests {
                     command: .listIndependent(
                         [],
                         reference: MailboxName([]),
-                        .mailbox(ByteBuffer(string: "*")),
+                        .mailbox(Array("*".utf8)),
                         []
                     ),
                     untagged: [
@@ -305,7 +305,7 @@ enum ListStatusTests {
                     command: .listIndependent(
                         [],
                         reference: MailboxName([]),
-                        .mailbox(ByteBuffer(string: "*")),
+                        .mailbox(Array("*".utf8)),
                         [
                             .statusOption([
                                 .messageCount,

@@ -141,7 +141,7 @@ extension ResponseEncodeBuffer {
         case .responseText(let text):
             size += self.buffer.writeResponseText(text)
         case .data(let base64):
-            size += self.buffer.writeBufferAsBase64(base64)
+            size += self.buffer.writeBytesAsBase64(base64)
         }
         size += self.buffer.writeString("\r\n")
         return size
@@ -171,8 +171,8 @@ extension ResponseEncodeBuffer {
         }
     }
 
-    @discardableResult mutating func writeAuthenticationChallenge(_ bytes: ByteBuffer) -> Int {
-        let base64 = Base64.encodeBytes(bytes: bytes.readableBytesView)
+    @discardableResult mutating func writeAuthenticationChallenge(_ bytes: [UInt8]) -> Int {
+        let base64 = Base64.encodeBytes(bytes: bytes)
         return self.buffer.writeString("+ ") + self.buffer.writeBytes(base64) + self.buffer.writeString("\r\n")
     }
 

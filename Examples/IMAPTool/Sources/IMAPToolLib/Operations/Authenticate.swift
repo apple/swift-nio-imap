@@ -211,7 +211,7 @@ extension IMAPCredential {
             mechanism = m
             data = response
         }
-        return (mechanism, InitialResponse(ByteBuffer(data)))
+        return (mechanism, InitialResponse(Array(data)))
     }
 
     func makeLoginCommand() -> Command? {

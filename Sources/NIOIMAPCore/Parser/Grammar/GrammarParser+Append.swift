@@ -128,7 +128,7 @@ extension GrammarParser {
     }
 
     enum CatenatePart {
-        case url(ByteBuffer)
+        case url([UInt8])
         case text(Int)
         case end
     }

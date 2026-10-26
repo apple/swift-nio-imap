@@ -102,8 +102,8 @@ public enum AppendCommand: Hashable, Sendable {
     /// The URL is included in the catenation and refers to an existing message or
     /// message part on the server.
     ///
-    /// - parameter ByteBuffer: The URL to catenate as raw bytes
-    case catenateURL(ByteBuffer)
+    /// - parameter urlBytes: The URL to catenate as raw bytes
+    case catenateURL([UInt8])
 
     /// Catenates inline data using the `CATENATE` extension (RFC 4469).
     ///
@@ -318,7 +318,7 @@ extension CommandEncodeBuffer {
     }
 
     @discardableResult private mutating func writeAuthenticationChallengeResponse(_ bytes: ByteBuffer) -> Int {
-        self.buffer.writeBufferAsBase64(bytes) + self.buffer.writeString("\r\n")
+        self.buffer.writeBytesAsBase64(bytes.readableBytesView) + self.buffer.writeString("\r\n")
     }
 
     @discardableResult private mutating func writeAppendCommand(_ command: AppendCommand) -> Int {

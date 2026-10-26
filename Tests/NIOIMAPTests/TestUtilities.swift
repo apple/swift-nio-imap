@@ -79,11 +79,19 @@ extension TestUtilities {
     }
 }
 
+// Model fields that used to be `ByteBuffer` are now `[UInt8]`, and the test suite spells hundreds of
+// them as string literals. `IMAPBuffer` ships its own literal conformances; a byte array does not, so
+// this is the test-only stand-in for the retroactive `ByteBuffer` conformance it replaces.
+extension Array: @retroactive ExpressibleByUnicodeScalarLiteral where Element == UInt8 {}
+extension Array: @retroactive ExpressibleByExtendedGraphemeClusterLiteral where Element == UInt8 {}
+extension Array: @retroactive ExpressibleByStringLiteral where Element == UInt8 {
+    public init(stringLiteral value: String) {
+        self = Array(value.utf8)
+    }
+}
 extension ByteBuffer: @retroactive ExpressibleByStringLiteral {
     public init(stringLiteral value: String) {
-        let allocator = ByteBufferAllocator()
-        self = allocator.buffer(capacity: 0)
-        self.writeString(value)
+        self = ByteBuffer(string: value)
     }
 }
 

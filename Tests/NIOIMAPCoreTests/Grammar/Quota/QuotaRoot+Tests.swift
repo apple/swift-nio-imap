@@ -47,7 +47,7 @@ struct QuotaRootTests {
         arguments: [
             (QuotaRoot("MassivePool"), "MassivePool" as String?),
             (QuotaRoot(""), "" as String?),
-            (QuotaRoot(ByteBuffer(bytes: [0xFF, 0xFE])), nil as String?),
+            (QuotaRoot([0xFF, 0xFE]), nil as String?),
         ] as [(QuotaRoot, String?)]
     )
     func stringConversion(_ fixture: (QuotaRoot, String?)) {
@@ -66,7 +66,7 @@ struct QuotaRootTests {
 
     @Test("debug description falls back for invalid UTF-8") func debugDescriptionInvalidUTF8() {
         // Invalid UTF-8 falls back to String(buffer:), which produces a non-nil description.
-        let root = QuotaRoot(ByteBuffer(bytes: [0xFF, 0xFE]))
+        let root = QuotaRoot([0xFF, 0xFE])
         // String(self) returns nil, so debugDescription uses the fallback path.
         #expect(String(root) == nil)
         #expect(root.debugDescription.isEmpty == false)

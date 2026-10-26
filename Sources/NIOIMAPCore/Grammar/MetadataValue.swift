@@ -32,7 +32,7 @@ import struct NIO.ByteBuffer
 /// ```
 ///
 /// The values in the response are ``MetadataValue`` instances:
-/// - `MetadataValue(ByteBuffer("Team folder"))` for `/shared/comment`
+/// - `MetadataValue(Array("Team folder".utf8))` for `/shared/comment`
 /// - `MetadataValue(nil)` for `/private/notes` (not set or deleted)
 ///
 /// ## Related types
@@ -47,12 +47,12 @@ public struct MetadataValue: Hashable, Sendable {
     ///
     /// Contains the raw octet sequence representing the metadata value. When `nil`, the entry
     /// either does not exist or has been explicitly deleted via `SETMETADATA`.
-    public let bytes: ByteBuffer?
+    public let bytes: [UInt8]?
 
     /// Creates a new `MetadataValue` with optional raw bytes.
     ///
     /// - parameter bytes: The raw value bytes, or `nil` for non-existent/deleted entries.
-    public init(_ bytes: ByteBuffer?) {
+    public init(_ bytes: [UInt8]?) {
         self.bytes = bytes
     }
 }
@@ -70,6 +70,6 @@ extension EncodeBuffer {
         guard let bytes = value.bytes else {
             return self.writeNil()
         }
-        return self.writeLiteral8(bytes.readableBytesView)
+        return self.writeLiteral8(bytes)
     }
 }

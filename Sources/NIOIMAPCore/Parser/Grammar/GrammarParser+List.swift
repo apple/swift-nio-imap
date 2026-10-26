@@ -192,12 +192,12 @@ extension GrammarParser {
     }
 
     // list-mailbox    = 1*list-char / string
-    func parseListMailbox(buffer: inout ParseBuffer, tracker: StackTracker) throws -> ByteBuffer {
-        func parseListMailbox_string(buffer: inout ParseBuffer, tracker: StackTracker) throws -> ByteBuffer {
+    func parseListMailbox(buffer: inout ParseBuffer, tracker: StackTracker) throws -> [UInt8] {
+        func parseListMailbox_string(buffer: inout ParseBuffer, tracker: StackTracker) throws -> [UInt8] {
             try self.parseString(buffer: &buffer, tracker: tracker)
         }
 
-        func parseListMailbox_chars(buffer: inout ParseBuffer, tracker: StackTracker) throws -> ByteBuffer {
+        func parseListMailbox_chars(buffer: inout ParseBuffer, tracker: StackTracker) throws -> [UInt8] {
             try buffer.parseOneOrMoreCharacters { char -> Bool in
                 char.isListChar
             }
