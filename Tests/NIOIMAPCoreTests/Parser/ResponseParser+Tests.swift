@@ -264,11 +264,11 @@ extension ResponseParserTests {
                     Issue.record("Unexpected continuation request: \(next)")
                     continue
                 }
-                if case .fetch(.streamingBytes(var bytes)) = response,
-                    case .fetch(.streamingBytes(var merged)) = result.last
+                if case .fetch(.streamingBytes(let bytes)) = response,
+                    case .fetch(.streamingBytes(let merged)) = result.last
                 {
-                    merged.writeBuffer(&bytes)
-                    result[result.count - 1] = .fetch(.streamingBytes(merged))
+                    let combined = IMAPBuffer(merged.copiedBytes() + bytes.copiedBytes())
+                    result[result.count - 1] = .fetch(.streamingBytes(combined))
                 } else {
                     result.append(response)
                 }
@@ -278,10 +278,10 @@ extension ResponseParserTests {
         return result
     }
 
-    private func fetch(_ bytes: ByteBuffer) -> [Response] {
+    private func fetch(_ bytes: IMAPBuffer) -> [Response] {
         [
             .fetch(.start(1)),
-            .fetch(.streamingBegin(kind: .body(section: .init(), offset: nil), byteCount: bytes.readableBytes)),
+            .fetch(.streamingBegin(kind: .body(section: .init(), offset: nil), byteCount: bytes.count)),
             .fetch(.streamingBytes(bytes)),
             .fetch(.streamingEnd),
             .fetch(.finish),
@@ -295,7 +295,7 @@ extension ResponseParserTests {
         let message = "Subject: Hi\r\n\r\nBody\r\n"
         #expect(
             try self.parse(["* 1 FETCH (BODY[] {\(message.utf8.count)}\r", "\n\(message))\r\n"])
-                == self.fetch(ByteBuffer(string: message))
+                == self.fetch(IMAPBuffer(Array(message.utf8)))
         )
     }
 
@@ -318,7 +318,7 @@ extension ResponseParserTests {
         let rest = "\n\(content) UID 7)\r\n"
 
         let expected = try self.parse([header + rest])
-        #expect(expected.contains(.fetch(.streamingBytes(ByteBuffer(string: content)))))
+        #expect(expected.contains(.fetch(.streamingBytes(IMAPBuffer(Array(content.utf8))))))
         #expect(try self.parse([header, rest]) == expected)
         #expect(try self.parse(Array((header + rest).utf8).map { [$0] }) == expected)
     }
@@ -329,7 +329,7 @@ extension ResponseParserTests {
         let wire = Array("* 1 FETCH (BODY[] {\(content.utf8.count)}\r\n\(content) UID 7)\r\n* 2 EXISTS\r\n".utf8)
 
         let expected = try self.parse([wire])
-        #expect(expected.contains(.fetch(.streamingBytes(ByteBuffer(string: content)))))
+        #expect(expected.contains(.fetch(.streamingBytes(IMAPBuffer(Array(content.utf8))))))
         #expect(expected.last == .untagged(.mailboxData(.exists(2))))
 
         for cut in 1..<wire.count {

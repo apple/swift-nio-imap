@@ -473,7 +473,7 @@ extension ResponseParser {
             let bytes = try buffer.extractBuffer(
                 upTo: remaining
             )
-            let leftToRead = remaining - bytes.readableBytes
+            let leftToRead = remaining - bytes.count
             assert(leftToRead >= 0, "\(leftToRead) is negative")
 
             return self.moveStateMachine(
@@ -495,7 +495,9 @@ extension ResponseParser {
         return self.moveStateMachine(
             expected: .streamingQuoted(attributeCount: attributeCount),
             next: .attributeBytes(0, attributeCount: attributeCount),
-            returnValue: .fetch(.streamingBytes(ByteBuffer(bytes: quoted)))
+            // `parseQuoted` unescapes into a fresh array when the string contains escapes, and it is
+            // bounded by `lineLengthLimit` either way, so these bytes are owned rather than referenced.
+            returnValue: .fetch(.streamingBytes(IMAPBuffer(quoted)))
         )
     }
 }

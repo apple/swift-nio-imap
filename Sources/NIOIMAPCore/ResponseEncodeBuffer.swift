@@ -202,8 +202,8 @@ extension ResponseEncodeBuffer {
                 return self.writeStreamingKind(type, size: size)
             }
             return self.buffer.writeSpace() + self.writeStreamingKind(type, size: size)
-        case .streamingBytes(var bytes):
-            return self.buffer.writeBuffer(&bytes)
+        case .streamingBytes(let bytes):
+            return self.buffer.writeBytes(bytes)
         case .streamingEnd:
             return 0  // do nothing, this is a "fake" event
         case .finish:

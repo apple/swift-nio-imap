@@ -199,6 +199,15 @@ extension EncodeBuffer {
         return self.writeBytes(encoded)
     }
 
+    /// Encodes the given raw message bytes as Base64, and then writes them to `self`.
+    /// - parameters:
+    ///     - region: The bytes to encode and write.
+    /// - returns: The number of bytes written.
+    @discardableResult mutating func writeBytesAsBase64(_ region: IMAPBuffer) -> Int {
+        let encoded = region.withUnsafeBytes { Base64.encodeBytes(bytes: $0.bindMemory(to: UInt8.self)) }
+        return self.writeBytes(encoded)
+    }
+
     /// Writes a collection of bytes in the `literal8` syntax defined in RFC 3516.
     /// Allows the `null` byte `\0` to be written.
     /// - parameters:

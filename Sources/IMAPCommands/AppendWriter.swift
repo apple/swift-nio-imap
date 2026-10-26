@@ -205,7 +205,7 @@ extension IMAPConnection.AppendWriter {
         ///
         /// - Throws: ``IMAPConnection/Error`` if the connection fails or is closed.
         public mutating func write(messageBytes: ByteBuffer) async throws(IMAPConnection.Error) {
-            try await underlying.write([.messageBytes(messageBytes)])
+            try await underlying.write([.messageBytes(IMAPBuffer(messageBytes))])
         }
     }
 }
@@ -296,7 +296,7 @@ extension IMAPConnection.AppendWriter {
         public mutating func write(
             _ bytes: ByteBuffer
         ) async throws(IMAPConnection.Error) {
-            try await underlying.write([.catenateData(.bytes(bytes))])
+            try await underlying.write([.catenateData(.bytes(IMAPBuffer(bytes)))])
         }
     }
 }

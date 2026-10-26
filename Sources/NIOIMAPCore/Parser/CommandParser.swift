@@ -282,11 +282,11 @@ public struct CommandParser: Parser, Sendable {
         assert(self.mode.isStreamingAppend)
         let bytes = try buffer.extractBuffer(upTo: remaining)
 
-        assert(bytes.readableBytes <= remaining)
-        if bytes.readableBytes == remaining {
+        assert(bytes.count <= remaining)
+        if bytes.count == remaining {
             self.mode = .streamingEnd
         } else {
-            self.mode = .streamingBytes(remaining - bytes.readableBytes)
+            self.mode = .streamingBytes(remaining - bytes.count)
         }
         return .append(.messageBytes(bytes))
     }
@@ -351,7 +351,8 @@ public struct CommandParser: Parser, Sendable {
             let authenticationChallengeResponse = try self.parser.parseBase64(buffer: &buffer, tracker: tracker)
             try buffer.matchNewline()
             // Stay in `.expectingAuthenticationResponse` to support multi-round SASL exchanges.
-            return .continuationResponse(ByteBuffer(bytes: authenticationChallengeResponse))
+            // A bounded base64 blob, so this owns its bytes outright rather than pinning the input.
+            return .continuationResponse(IMAPBuffer(authenticationChallengeResponse))
         }
 
         switch context {
@@ -443,11 +444,11 @@ public struct CommandParser: Parser, Sendable {
     ) throws -> CommandStreamPart {
         let bytes = try buffer.extractBuffer(upTo: remaining)
 
-        assert(bytes.readableBytes <= remaining)
-        if bytes.readableBytes == remaining {
+        assert(bytes.count <= remaining)
+        if bytes.count == remaining {
             self.mode = .streamingCatenateEnd
         } else {
-            self.mode = .streamingCatenateBytes(remaining - bytes.readableBytes)
+            self.mode = .streamingCatenateBytes(remaining - bytes.count)
         }
 
         return .append(.catenateData(.bytes(bytes)))

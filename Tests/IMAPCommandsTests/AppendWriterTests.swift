@@ -45,7 +45,7 @@ enum AppendWriterTests {
             result.parts == [
                 .part(.append(.start(tag: "A1", appendingTo: mailbox))),
                 .part(.append(.beginMessage(message: message))),
-                .part(.append(.messageBytes(ByteBuffer(string: "abc")))),
+                .part(.append(.messageBytes("abc"))),
                 .part(.append(.endMessage)),
                 .part(.append(.finish)),
             ]
@@ -179,7 +179,7 @@ enum AppendWriterTests {
                 .part(.append(.beginCatenate(options: AppendOptions()))),
                 .part(.append(.catenateURL(Array("/INBOX;UID=1".utf8)))),
                 .part(.append(.catenateData(.begin(size: 3)))),
-                .part(.append(.catenateData(.bytes(ByteBuffer(string: "abc"))))),
+                .part(.append(.catenateData(.bytes("abc")))),
                 .part(.append(.catenateData(.end))),
                 .part(.append(.endCatenate)),
                 .part(.append(.finish)),
