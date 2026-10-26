@@ -121,3 +121,32 @@ public struct TooMuchRecursion: Error {
         self.limit = limit
     }
 }
+
+/// Signals that parsing stopped consuming input while it would otherwise have kept going.
+///
+/// Parsing that produces results without consuming bytes would produce them forever. Rather than spin,
+/// the parser throws this, and the connection should be closed: no valid input causes it, so it means
+/// either a parser bug or input crafted to find one.
+///
+/// Unlike ``ParserError`` it is never taken to mean "this alternative did not match", so no
+/// backtracking point absorbs it.
+public struct NoForwardProgress: Error {
+    /// `StaticString`: `#fileID` exceeds the small-string limit, so a `String` would allocate on the throw.
+    var file: StaticString
+    var line: Int
+
+    /// Creates the error, recording where the check that fired is.
+    ///
+    /// - Parameters:
+    ///   - file: The file of the check. Defaults to the caller's.
+    ///   - line: The line of the check. Defaults to the caller's.
+    public init(file: StaticString = #fileID, line: Int = #line) {
+        self.file = file
+        self.line = line
+    }
+}
+
+extension NoForwardProgress: CustomStringConvertible {
+    /// Names the check that fired, which is what a log of this error is for.
+    public var description: String { "NoForwardProgress at \(file):\(line)" }
+}

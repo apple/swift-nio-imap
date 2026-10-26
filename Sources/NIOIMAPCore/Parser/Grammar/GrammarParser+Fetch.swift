@@ -85,7 +85,15 @@ extension GrammarParser {
             // (with extensions is sent as `BODYSTRUCTURE`).
             // This is one of the few cases where we need to explicitly catch the "incompleteMessage" case and *NOT*
             // propogate it forward.
-            if let section = try? self.parseSection(buffer: &buffer, tracker: tracker) {
+            let section: SectionSpecifier?
+            do {
+                section = try self.parseSection(buffer: &buffer, tracker: tracker)
+            } catch let error as NoForwardProgress {
+                throw error
+            } catch {
+                section = nil
+            }
+            if let section {
                 let chevronNumber = try buffer.parseOptional(tracker: tracker) {
                     (buffer, tracker) -> ClosedRange<UInt32> in
                     try self.parsePartial(buffer: &buffer, tracker: tracker)
