@@ -224,7 +224,7 @@ private struct AuthenticationTests {
                 ),
                 .init(
                     part: .continuationResponse(
-                        ByteBuffer(bytes: [
+                        IMAPBuffer([
                             0x0, 0x6a, 0x6f, 0x68, 0x6e, 0x0, 0x73, 0x65, 0x63, 0x72, 0x65, 0x74,
                         ])
                     ),

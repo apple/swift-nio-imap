@@ -53,7 +53,7 @@ private struct AppendTests {
                             data: AppendData(byteCount: message.utf8.count)
                         )
                     ),
-                    .messageBytes(ByteBuffer(string: message)),
+                    .messageBytes(IMAPBuffer(Array(message.utf8))),
                     .endMessage,
                     .finish,
                 ]
@@ -258,7 +258,7 @@ private struct AppendTests {
                             data: AppendData(byteCount: message.utf8.count)
                         )
                     ),
-                    .messageBytes(ByteBuffer(string: message)),
+                    .messageBytes(IMAPBuffer(Array(message.utf8))),
                     .endMessage,
                     .finish,
                 ]

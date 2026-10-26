@@ -320,13 +320,13 @@ struct SynchronizedCommandTests {
 
         // Only 5 bytes available — should enter the else branch and leave 5 remaining
         let c3 = try parser.parseCommandStream(buffer: &buf)
-        #expect(c3 == SynchronizedCommand(.append(.messageBytes(ByteBuffer(string: "Hello")))))
+        #expect(c3 == SynchronizedCommand(.append(.messageBytes("Hello"))))
         #expect(parser.mode == .streamingBytes(5))
 
         // Provide the remaining 5 bytes
         buf.writeString("World")
         let c4 = try parser.parseCommandStream(buffer: &buf)
-        #expect(c4 == SynchronizedCommand(.append(.messageBytes(ByteBuffer(string: "World")))))
+        #expect(c4 == SynchronizedCommand(.append(.messageBytes("World"))))
         #expect(parser.mode == .streamingEnd)
 
         buf.writeString("\r\n")
@@ -354,13 +354,13 @@ struct SynchronizedCommandTests {
 
         // Only 3 of 5 bytes available — enters the else branch
         let c4 = try parser.parseCommandStream(buffer: &buf)
-        #expect(c4 == SynchronizedCommand(.append(.catenateData(.bytes(ByteBuffer(string: "hel"))))))
+        #expect(c4 == SynchronizedCommand(.append(.catenateData(.bytes("hel")))))
         #expect(parser.mode == .streamingCatenateBytes(2))
 
         // Provide the remaining 2 bytes
         buf.writeString("lo")
         let c5 = try parser.parseCommandStream(buffer: &buf)
-        #expect(c5 == SynchronizedCommand(.append(.catenateData(.bytes(ByteBuffer(string: "lo"))))))
+        #expect(c5 == SynchronizedCommand(.append(.catenateData(.bytes("lo")))))
         #expect(parser.mode == .streamingCatenateEnd)
 
         buf.writeString(")\r\n")
@@ -522,7 +522,7 @@ struct SynchronizedCommandTests {
         )
 
         let c3 = try parser.parseCommandStream(buffer: &buf)  // .messageBytes(empty) — 0-byte literal
-        #expect(c3 == SynchronizedCommand(.append(.messageBytes(ByteBuffer()))))
+        #expect(c3 == SynchronizedCommand(.append(.messageBytes(IMAPBuffer()))))
 
         let c4 = try parser.parseCommandStream(buffer: &buf)  // .endMessage, mode = .waitingForMessage
         #expect(c4 == SynchronizedCommand(.append(.endMessage)))

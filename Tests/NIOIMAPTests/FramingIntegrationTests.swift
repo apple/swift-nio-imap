@@ -335,12 +335,10 @@ extension FramingIntegrationTests {
         var result: [CommandStreamPart] = []
         for part in parts {
             switch (result.last, part) {
-            case (.append(.messageBytes(var merged)), .append(.messageBytes(var bytes))):
-                merged.writeBuffer(&bytes)
-                result[result.count - 1] = .append(.messageBytes(merged))
-            case (.append(.catenateData(.bytes(var merged))), .append(.catenateData(.bytes(var bytes)))):
-                merged.writeBuffer(&bytes)
-                result[result.count - 1] = .append(.catenateData(.bytes(merged)))
+            case (.append(.messageBytes(let merged)), .append(.messageBytes(let bytes))):
+                result[result.count - 1] = .append(.messageBytes(IMAPBuffer(merged.copiedBytes() + bytes.copiedBytes())))
+            case (.append(.catenateData(.bytes(let merged))), .append(.catenateData(.bytes(let bytes)))):
+                result[result.count - 1] = .append(.catenateData(.bytes(IMAPBuffer(merged.copiedBytes() + bytes.copiedBytes()))))
             default:
                 result.append(part)
             }

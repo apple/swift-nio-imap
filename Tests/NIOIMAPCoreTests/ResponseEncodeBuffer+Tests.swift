@@ -37,7 +37,7 @@ struct ResponseEncodeBufferTests {
         var buffer = ResponseEncodeBuffer(options: .rfc3501, loggingMode: false)
         buffer.writeFetchResponse(.start(1))
         buffer.writeFetchResponse(.streamingBegin(kind: .body(section: .complete, offset: nil), byteCount: 10))
-        buffer.writeFetchResponse(.streamingBytes(ByteBuffer(string: "0123456789")))
+        buffer.writeFetchResponse(.streamingBytes("0123456789"))
         buffer.writeFetchResponse(.streamingEnd)
         buffer.writeFetchResponse(.finish)
 
@@ -59,7 +59,7 @@ struct ResponseEncodeBufferTests {
         var buffer = ResponseEncodeBuffer(options: .rfc3501, loggingMode: false)
         buffer.writeFetchResponse(.start(1))
         buffer.writeFetchResponse(.streamingBegin(kind: .binary(section: [], offset: nil), byteCount: 5))
-        buffer.writeFetchResponse(.streamingBytes(ByteBuffer(string: "hello")))
+        buffer.writeFetchResponse(.streamingBytes("hello"))
         buffer.writeFetchResponse(.streamingEnd)
         buffer.writeFetchResponse(.finish)
         let outputString = String(buffer: buffer.readBytes())

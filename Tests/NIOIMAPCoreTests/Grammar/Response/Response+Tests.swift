@@ -140,7 +140,7 @@ private struct ResponseTests {
                 sut: Response.fetch(.streamingBegin(kind: .rfc822Text, byteCount: 0)),
                 expected: "RFC822.TEXT {0}\r\n"
             ),
-            ReflectionFixture(sut: Response.fetch(.streamingBytes(ByteBuffer(string: "hello"))), expected: "hello"),
+            ReflectionFixture(sut: Response.fetch(.streamingBytes("hello")), expected: "hello"),
             ReflectionFixture(sut: Response.fetch(.finish), expected: ")\r\n"),
         ]
     )
@@ -165,7 +165,7 @@ private struct ResponseTests {
                 input: .fetch(.streamingBegin(kind: .rfc822Text, byteCount: 0)),
                 expected: "RFC822.TEXT {0}\r\n"
             ),
-            PIIFixture(input: .fetch(.streamingBytes(ByteBuffer(string: "hello"))), expected: "[5 bytes]"),
+            PIIFixture(input: .fetch(.streamingBytes("hello")), expected: "[5 bytes]"),
             PIIFixture(input: .fetch(.finish), expected: ")\r\n"),
         ]
     )

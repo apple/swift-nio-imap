@@ -1620,7 +1620,7 @@ struct PipeliningTests {
         // idleDone has no requirements
         #expect(CommandStreamPart.idleDone.pipeliningRequirements == [])
         // continuationResponse has no requirements
-        #expect(CommandStreamPart.continuationResponse(ByteBuffer(string: "")).pipeliningRequirements == [])
+        #expect(CommandStreamPart.continuationResponse("").pipeliningRequirements == [])
 
         // idleDone has specific behaviors
         #expect(CommandStreamPart.idleDone.pipeliningBehavior.contains(.barrier))
@@ -1634,7 +1634,7 @@ struct PipeliningTests {
         #expect(CommandStreamPart.append(.endMessage).pipeliningBehavior == [])
 
         // continuationResponse has no behavior
-        #expect(CommandStreamPart.continuationResponse(ByteBuffer(string: "")).pipeliningBehavior == [])
+        #expect(CommandStreamPart.continuationResponse("").pipeliningBehavior == [])
     }
 
     // MARK: Gmail-label store pipelining
