@@ -23,7 +23,7 @@ import struct NIO.ByteBuffer
 /// - SeeAlso: [RFC 4466 IMAP4 Extensions](https://datatracker.ietf.org/doc/html/rfc4466)
 public enum OptionValueComp: Hashable, Sendable {
     /// A single value
-    case string(ByteBuffer)
+    case string([UInt8])
 
     /// An array of values
     case array([OptionValueComp])

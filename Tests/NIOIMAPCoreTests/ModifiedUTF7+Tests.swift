@@ -45,7 +45,7 @@ struct ModifiedUTF7Tests {
     )
     func encodeConvertsStringsToModifiedUTF7(input: String, expected: String) {
         let actual = ModifiedUTF7.encode(input)
-        #expect(String(buffer: actual) == expected)
+        #expect(String(decoding: actual, as: UTF8.self) == expected)
     }
 
     @Test(
@@ -73,14 +73,14 @@ struct ModifiedUTF7Tests {
         ]
     )
     func decodeConvertsModifiedUTF7ToStrings(input: String, expected: String) throws {
-        let actual = try ModifiedUTF7.decode(ByteBuffer(string: input))
+        let actual = try ModifiedUTF7.decode(Array(input.utf8))
         #expect(actual == expected)
     }
 
     @Test("decode throws error for invalid Modified UTF-7")
     func decodeThrowsErrorForInvalidModifiedUTF7() {
         #expect(throws: ModifiedUTF7.OddByteCountError.self) {
-            try ModifiedUTF7.decode(ByteBuffer(string: "&aa==-"))
+            try ModifiedUTF7.decode(Array("&aa==-".utf8))
         }
     }
 
@@ -94,7 +94,7 @@ struct ModifiedUTF7Tests {
         ]
     )
     func validateAcceptsValidModifiedUTF7Strings(input: String) throws {
-        try ModifiedUTF7.validate(ByteBuffer(string: input))
+        try ModifiedUTF7.validate(Array(input.utf8))
     }
 
     @Test(
@@ -106,7 +106,7 @@ struct ModifiedUTF7Tests {
     )
     func validateRejectsInvalidModifiedUTF7Strings(input: String) {
         #expect(throws: Error.self) {
-            try ModifiedUTF7.validate(ByteBuffer(string: input))
+            try ModifiedUTF7.validate(Array(input.utf8))
         }
     }
 }

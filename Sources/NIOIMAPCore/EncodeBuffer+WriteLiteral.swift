@@ -29,16 +29,6 @@ extension EncodeBuffer {
 
     /// Writes an IMAP `string` type as defined by the grammar in RFC 3501.
     /// The function will decide to use either `quoted` or `literal` syntax based
-    /// upon what bytes `buffer` contains, and what encoding types are supported.
-    /// - parameters:
-    ///     - buffer: The buffer to write.
-    /// - returns: The number of bytes written.
-    @discardableResult mutating func writeIMAPString(_ buffer: ByteBuffer) -> Int {
-        self.writeIMAPString(buffer.readableBytesView)
-    }
-
-    /// Writes an IMAP `string` type as defined by the grammar in RFC 3501.
-    /// The function will decide to use either `quoted` or `literal` syntax based
     /// upon what `bytes` contains, and what encoding types are supported.
     /// - parameters:
     ///     - bytes: The bytes to write.
@@ -200,12 +190,12 @@ extension EncodeBuffer {
         }
     }
 
-    /// Encodes the given bytes as a Base64 collection, and then writes to `self.`
+    /// Encodes the given bytes as Base64, and then writes them to `self`.
     /// - parameters:
-    ///     - buffer: The `ByteBuffer` to encoded and write.
+    ///     - bytes: The bytes to encode and write.
     /// - returns: The number of bytes written.
-    @discardableResult mutating func writeBufferAsBase64(_ buffer: ByteBuffer) -> Int {
-        let encoded = Base64.encodeBytes(bytes: buffer.readableBytesView)
+    @discardableResult mutating func writeBytesAsBase64(_ bytes: some Collection<UInt8>) -> Int {
+        let encoded = Base64.encodeBytes(bytes: bytes)
         return self.writeBytes(encoded)
     }
 

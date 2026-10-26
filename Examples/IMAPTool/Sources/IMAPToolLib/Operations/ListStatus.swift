@@ -236,7 +236,7 @@ extension Command {
         Command.listIndependent(
             [],
             reference: MailboxName([]),
-            .mailbox(ByteBuffer(string: "*")),
+            .mailbox(Array("*".utf8)),
             returnOptions
         )
     }
@@ -248,7 +248,7 @@ extension Command {
         Command.listIndependent(
             [],
             reference: MailboxName([]),
-            .mailbox(ByteBuffer(bytes: mailbox.bytes)),
+            .mailbox(Array(mailbox.bytes)),
             returnOptions
         )
     }

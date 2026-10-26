@@ -240,7 +240,7 @@ extension ParseFixture<String> {
             expected: expected,
             parser: {
                 let buffer = try GrammarParser().parseBase64(buffer: &$0, tracker: $1)
-                return String(buffer: buffer)
+                return String(decoding: buffer, as: UTF8.self)
             }
         )
     }

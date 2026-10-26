@@ -151,8 +151,8 @@ extension GrammarParser {
     }
 
     // astring         = 1*ASTRING-CHAR / string
-    func parseAString(buffer: inout ParseBuffer, tracker: StackTracker) throws -> ByteBuffer {
-        func parseOneOrMoreASTRINGCHAR(buffer: inout ParseBuffer, tracker: StackTracker) throws -> ByteBuffer {
+    func parseAString(buffer: inout ParseBuffer, tracker: StackTracker) throws -> [UInt8] {
+        func parseOneOrMoreASTRINGCHAR(buffer: inout ParseBuffer, tracker: StackTracker) throws -> [UInt8] {
             try buffer.parseOneOrMoreCharacters { char -> Bool in
                 char.isAStringChar
             }
@@ -258,14 +258,13 @@ extension GrammarParser {
     }
 
     // base64          = *(4base64-char) [base64-terminal]
-    func parseBase64(buffer: inout ParseBuffer, tracker: StackTracker) throws -> ByteBuffer {
-        try buffer.composite(tracker: tracker) { buffer, tracker -> ByteBuffer in
+    func parseBase64(buffer: inout ParseBuffer, tracker: StackTracker) throws -> [UInt8] {
+        try buffer.composite(tracker: tracker) { buffer, tracker -> [UInt8] in
             let bytes = try buffer.parseZeroOrMoreCharacters {
                 $0.isBase64Char || $0 == UInt8(ascii: "=")
             }
             do {
-                let decoded = try Base64.decode(bytes: bytes.readableBytesView)
-                return ByteBuffer(bytes: decoded)
+                return try Base64.decode(bytes: bytes)
             } catch {
                 throw ParserError(hint: "Invalid base64 \(error)")
             }
@@ -302,10 +301,8 @@ extension GrammarParser {
         }
 
         func parseCharset_quoted(buffer: inout ParseBuffer, tracker: StackTracker) throws -> CharacterSetName {
-            var buffer = try parseQuoted(buffer: &buffer, tracker: tracker)
-            guard let string = buffer.readString(length: buffer.readableBytes) else {
-                throw ParserError(hint: "Couldn't read string from buffer")
-            }
+            let bytes = try parseQuoted(buffer: &buffer, tracker: tracker)
+            let string = String(decoding: bytes, as: UTF8.self)
             // `parseQuoted` is lenient (CR, LF, 8-bit, empty); reject what can't be written back.
             guard let name = CharacterSetName(string) else {
                 throw ParserError(hint: "Invalid charset \(String(reflecting: string))")
@@ -369,7 +366,7 @@ extension GrammarParser {
             let base64 = try self.parseBase64(buffer: &buffer, tracker: tracker)
             try buffer.matchNewline()
 
-            guard base64.readableBytes > 0 else {
+            guard !base64.isEmpty else {
                 throw ParserError()
             }
 
@@ -585,10 +582,10 @@ extension GrammarParser {
         try buffer.composite(tracker: tracker) { buffer, tracker -> EncodedAuthenticatedURL in
             // `32*HEXDIG`
             let bytes = try buffer.parseOneOrMoreCharacters(where: \.isHexCharacter)
-            guard bytes.readableBytes >= EncodedAuthenticatedURL.minimumLength else {
-                throw ParserError(hint: "Expected at least 32 hex digits, got \(String(buffer: bytes))")
+            guard bytes.count >= EncodedAuthenticatedURL.minimumLength else {
+                throw ParserError(hint: "Expected at least 32 hex digits, got \(String(decoding: bytes, as: UTF8.self))")
             }
-            return .init(unchecked: String(buffer: bytes))
+            return .init(unchecked: String(decoding: bytes, as: UTF8.self))
         }
     }
 
@@ -757,8 +754,8 @@ extension GrammarParser {
 
     // header-fld-name = astring
     func parseHeaderFieldName(buffer: inout ParseBuffer, tracker: StackTracker) throws -> String {
-        var buffer = try self.parseAString(buffer: &buffer, tracker: tracker)
-        return buffer.readString(length: buffer.readableBytes)!
+        let bytes = try self.parseAString(buffer: &buffer, tracker: tracker)
+        return String(decoding: bytes, as: UTF8.self)
     }
 
     // header-list     = "(" header-fld-name *(SP header-fld-name) ")"
@@ -780,10 +777,8 @@ extension GrammarParser {
         try buffer.composite(tracker: tracker) { buffer, tracker -> ResponsePayload.JMAPAccessURL in
             try buffer.matchFixed("JMAPACCESS")
             try buffer.parseSpaces()
-            var buffer = try parseQuoted(buffer: &buffer, tracker: tracker)
-            guard let string = buffer.readString(length: buffer.readableBytes) else {
-                throw ParserError(hint: "Couldn't read string from buffer")
-            }
+            let bytes = try parseQuoted(buffer: &buffer, tracker: tracker)
+            let string = String(decoding: bytes, as: UTF8.self)
             guard let components = URLComponents(string: string) else {
                 throw ParserError(hint: "Couldn't parse JMAPACCESS URL")
             }
@@ -1068,14 +1063,14 @@ extension GrammarParser {
                 $0.isUnreserved || $0.isSubDelims || $0 == UInt8(ascii: ":")
             }
             try buffer.matchFixed("]")
-            return "[\(String(buffer: address))]"
+            return "[\(String(decoding: address, as: UTF8.self))]"
         }
 
         func parseHost_registeredName(buffer: inout ParseBuffer, tracker: StackTracker) throws -> String {
             let name = try buffer.parseZeroOrMoreCharacters {
                 URLCharacterClass.registeredName.contains($0) || $0 == UInt8(ascii: "%")
             }
-            return String(buffer: name)
+            return String(decoding: name, as: UTF8.self)
         }
 
         return try buffer.composite(tracker: tracker) { buffer, tracker in
@@ -1488,7 +1483,7 @@ extension GrammarParser {
             parser: { buffer, tracker -> FullTime.Fraction in
                 try buffer.matchFixed(".")
                 let digits = try buffer.parseOneOrMoreCharacters(where: \.isNum)
-                return .init(unchecked: String(buffer: digits))
+                return .init(unchecked: String(decoding: digits, as: UTF8.self))
             }
         )
         let offset = try self.parseTimeOffset(buffer: &buffer, tracker: tracker)
@@ -1547,8 +1542,8 @@ extension GrammarParser {
     }
 
     // literal         = "{" number ["+"] "}" CRLF *CHAR8
-    func parseLiteral(buffer: inout ParseBuffer, tracker: StackTracker) throws -> ByteBuffer {
-        try buffer.composite(tracker: tracker) { buffer, tracker -> ByteBuffer in
+    func parseLiteral(buffer: inout ParseBuffer, tracker: StackTracker) throws -> [UInt8] {
+        try buffer.composite(tracker: tracker) { buffer, tracker -> [UInt8] in
             try buffer.matchFixed("{")
             let length = try self.parseLiteralLength(buffer: &buffer, tracker: tracker)
             try buffer.parseOptional(tracker: tracker) { (buffer, tracker) in
@@ -1557,7 +1552,7 @@ extension GrammarParser {
             try buffer.matchFixed("}")
             try buffer.matchNewline()
             let bytes = try buffer.extractBytes(length: length)
-            if bytes.readableBytesView.contains(0) {
+            if bytes.contains(0) {
                 throw ParserError(hint: "Found NUL byte in literal")
             }
             return bytes
@@ -1565,8 +1560,8 @@ extension GrammarParser {
     }
 
     // literal8         = "~{" number ["+"] "}" CRLF *CHAR8
-    func parseLiteral8(buffer: inout ParseBuffer, tracker: StackTracker) throws -> ByteBuffer {
-        try buffer.composite(tracker: tracker) { buffer, tracker -> ByteBuffer in
+    func parseLiteral8(buffer: inout ParseBuffer, tracker: StackTracker) throws -> [UInt8] {
+        try buffer.composite(tracker: tracker) { buffer, tracker -> [UInt8] in
             try buffer.matchFixed("~{")
             let length = try self.parseLiteralLength(buffer: &buffer, tracker: tracker)
             try buffer.parseOptional(tracker: tracker) { (buffer, tracker) in
@@ -1575,7 +1570,7 @@ extension GrammarParser {
             try buffer.matchFixed("}")
             try buffer.matchNewline()
             let bytes = try buffer.extractBytes(length: length)
-            if bytes.readableBytesView.contains(0) {
+            if bytes.contains(0) {
                 throw ParserError(hint: "Found NUL byte in literal")
             }
             return bytes
@@ -1782,7 +1777,7 @@ extension GrammarParser {
     func parseMechanismBase64(buffer: inout ParseBuffer, tracker: StackTracker) throws -> MechanismBase64 {
         try buffer.composite(tracker: tracker) { buffer, tracker -> MechanismBase64 in
             let mechanism = try self.parseUAuthMechanism(buffer: &buffer, tracker: tracker)
-            let base64 = try buffer.parseOptional(tracker: tracker) { buffer, tracker -> ByteBuffer in
+            let base64 = try buffer.parseOptional(tracker: tracker) { buffer, tracker -> [UInt8] in
                 try buffer.matchFixed("=")
                 return try self.parseBase64(buffer: &buffer, tracker: tracker)
             }
@@ -1794,7 +1789,7 @@ extension GrammarParser {
         func parseGmailLabel_backslash(buffer: inout ParseBuffer, tracker: StackTracker) throws -> GmailLabel {
             try buffer.matchFixed("\\")
             let att = try self.parseAtom(buffer: &buffer, tracker: tracker)
-            return .init(ByteBuffer(string: "\\\(att)"))
+            return .init(Array("\\\(att)".utf8))
         }
 
         func parseGmailLabel_string(buffer: inout ParseBuffer, tracker: StackTracker) throws -> GmailLabel {
@@ -1879,10 +1874,10 @@ extension GrammarParser {
     func parseNamespaceResponseExtensions(
         buffer: inout ParseBuffer,
         tracker: StackTracker
-    ) throws -> OrderedDictionary<ByteBuffer, [ByteBuffer]> {
-        var kvs = OrderedDictionary<ByteBuffer, [ByteBuffer]>()
+    ) throws -> OrderedDictionary<[UInt8], [[UInt8]]> {
+        var kvs = OrderedDictionary<[UInt8], [[UInt8]]>()
         try buffer.parseZeroOrMore(into: &kvs, tracker: tracker) {
-            (buffer, tracker) -> KeyValue<ByteBuffer, [ByteBuffer]> in
+            (buffer, tracker) -> KeyValue<[UInt8], [[UInt8]]> in
             try self.parseNamespaceResponseExtension(buffer: &buffer, tracker: tracker)
         }
         return kvs
@@ -1893,14 +1888,14 @@ extension GrammarParser {
     func parseNamespaceResponseExtension(
         buffer: inout ParseBuffer,
         tracker: StackTracker
-    ) throws -> KeyValue<ByteBuffer, [ByteBuffer]> {
-        try buffer.composite(tracker: tracker) { buffer, tracker -> KeyValue<ByteBuffer, [ByteBuffer]> in
+    ) throws -> KeyValue<[UInt8], [[UInt8]]> {
+        try buffer.composite(tracker: tracker) { buffer, tracker -> KeyValue<[UInt8], [[UInt8]]> in
             try buffer.parseSpaces()
             let s1 = try self.parseString(buffer: &buffer, tracker: tracker)
             try buffer.parseSpaces()
             try buffer.matchFixed("(")
             var array = [try self.parseString(buffer: &buffer, tracker: tracker)]
-            try buffer.parseZeroOrMore(into: &array, tracker: tracker) { (buffer, tracker) -> ByteBuffer in
+            try buffer.parseZeroOrMore(into: &array, tracker: tracker) { (buffer, tracker) -> [UInt8] in
                 try buffer.parseSpaces()
                 return try self.parseString(buffer: &buffer, tracker: tracker)
             }
@@ -1942,13 +1937,13 @@ extension GrammarParser {
     }
 
     // nstring         = string / nil
-    func parseNString(buffer: inout ParseBuffer, tracker: StackTracker) throws -> ByteBuffer? {
-        func parseNString_nil(buffer: inout ParseBuffer, tracker: StackTracker) throws -> ByteBuffer? {
+    func parseNString(buffer: inout ParseBuffer, tracker: StackTracker) throws -> [UInt8]? {
+        func parseNString_nil(buffer: inout ParseBuffer, tracker: StackTracker) throws -> [UInt8]? {
             try buffer.matchFixed("NIL")
             return nil
         }
 
-        func parseNString_some(buffer: inout ParseBuffer, tracker: StackTracker) throws -> ByteBuffer? {
+        func parseNString_some(buffer: inout ParseBuffer, tracker: StackTracker) throws -> [UInt8]? {
             try self.parseString(buffer: &buffer, tracker: tracker)
         }
 
@@ -2111,16 +2106,16 @@ extension GrammarParser {
 
     // password        = astring
     func parsePassword(buffer: inout ParseBuffer, tracker: StackTracker) throws -> String {
-        var buffer = try self.parseAString(buffer: &buffer, tracker: tracker)
-        return buffer.readString(length: buffer.readableBytes)!
+        let bytes = try self.parseAString(buffer: &buffer, tracker: tracker)
+        return String(decoding: bytes, as: UTF8.self)
     }
 
     // patterns        = "(" list-mailbox *(SP list-mailbox) ")"
-    func parsePatterns(buffer: inout ParseBuffer, tracker: StackTracker) throws -> [ByteBuffer] {
-        try buffer.composite(tracker: tracker) { buffer, tracker -> [ByteBuffer] in
+    func parsePatterns(buffer: inout ParseBuffer, tracker: StackTracker) throws -> [[UInt8]] {
+        try buffer.composite(tracker: tracker) { buffer, tracker -> [[UInt8]] in
             try buffer.matchFixed("(")
             var array = [try self.parseListMailbox(buffer: &buffer, tracker: tracker)]
-            try buffer.parseZeroOrMore(into: &array, tracker: tracker) { (buffer, tracker) -> ByteBuffer in
+            try buffer.parseZeroOrMore(into: &array, tracker: tracker) { (buffer, tracker) -> [UInt8] in
                 try buffer.parseSpaces()
                 return try self.parseListMailbox(buffer: &buffer, tracker: tracker)
             }
@@ -2133,8 +2128,8 @@ extension GrammarParser {
     // QUOTED-CHAR     = <any TEXT-CHAR except quoted-specials> /
     //                   "\" quoted-specials
     // quoted-specials = DQUOTE / "\"
-    func parseQuoted(buffer: inout ParseBuffer, tracker: StackTracker) throws -> ByteBuffer {
-        try buffer.composite(tracker: tracker) { buffer, tracker -> ByteBuffer in
+    func parseQuoted(buffer: inout ParseBuffer, tracker: StackTracker) throws -> [UInt8] {
+        try buffer.composite(tracker: tracker) { buffer, tracker -> [UInt8] in
             try buffer.matchByte("\"")
             var hasQuotedSpecial = false
             var lastIsEscape = false
@@ -2155,23 +2150,24 @@ extension GrammarParser {
             try buffer.matchByte("\"")
             guard hasQuotedSpecial else { return data }
             // Replace '\\' with '\' and '\"' with '"':
-            var escaped = data
-            var unescaped = ByteBuffer()
-            while let next = escaped.readBytes(length: 1)?.first {
-                if next == UInt8(ascii: "\\") {
-                    guard
-                        let special = escaped.readBytes(length: 1)?.first,
-                        special.isQuotedSpecial
-                    else {
-                        throw ParserError(
-                            hint:
-                                "Invalid escape in quoted string '\(String(decoding: data.readableBytesView, as: Unicode.UTF8.self))'"
-                        )
-                    }
-                    unescaped.writeBytes([special])
-                } else {
-                    unescaped.writeBytes([next])
+            var unescaped: [UInt8] = []
+            unescaped.reserveCapacity(data.count)
+            var index = data.startIndex
+            while index < data.endIndex {
+                let next = data[index]
+                index += 1
+                guard next == UInt8(ascii: "\\") else {
+                    unescaped.append(next)
+                    continue
                 }
+                guard index < data.endIndex, data[index].isQuotedSpecial else {
+                    throw ParserError(
+                        hint:
+                            "Invalid escape in quoted string '\(String(decoding: data, as: Unicode.UTF8.self))'"
+                    )
+                }
+                unescaped.append(data[index])
+                index += 1
             }
             return unescaped
         }
@@ -2615,7 +2611,7 @@ extension GrammarParser {
     }
 
     // string          = quoted / literal
-    func parseString(buffer: inout ParseBuffer, tracker: StackTracker) throws -> ByteBuffer {
+    func parseString(buffer: inout ParseBuffer, tracker: StackTracker) throws -> [UInt8] {
         try buffer.parseOneOf(
             self.parseQuoted,
             self.parseLiteral,
@@ -2627,7 +2623,7 @@ extension GrammarParser {
     ///
     /// Not allowed by RFC 3501, but some emails have non-ASCII headers, and some servers
     /// end up copying the non-ASCII values into, for example, `BODYSTRUCTURE` parameters.
-    func parseStringAllowingNonASCII(buffer: inout ParseBuffer, tracker: StackTracker) throws -> ByteBuffer {
+    func parseStringAllowingNonASCII(buffer: inout ParseBuffer, tracker: StackTracker) throws -> [UInt8] {
         try buffer.parseOneOf(
             self.parseQuoted,
             self.parseLiteral,
@@ -2770,7 +2766,7 @@ extension GrammarParser {
     }
 
     // text            = 1*TEXT-CHAR
-    func parseText(buffer: inout ParseBuffer, tracker: StackTracker) throws -> ByteBuffer {
+    func parseText(buffer: inout ParseBuffer, tracker: StackTracker) throws -> [UInt8] {
         try buffer.parseOneOrMoreCharacters { char -> Bool in
             char.isTextChar
         }
@@ -2784,9 +2780,8 @@ extension GrammarParser {
 
     // userid          = astring
     func parseUserId(buffer: inout ParseBuffer, tracker: StackTracker) throws -> String {
-        var astring = try self.parseAString(buffer: &buffer, tracker: tracker)
-        // if this fails, something has gone very, very wrong
-        return astring.readString(length: astring.readableBytes)!
+        let astring = try self.parseAString(buffer: &buffer, tracker: tracker)
+        return String(decoding: astring, as: UTF8.self)
     }
 
     // vendor-token     = atom (maybe?!?!?!)
@@ -3158,7 +3153,7 @@ extension GrammarParser {
             }
         }
         // Non-UTF-8 bytes become U+FFFD, which isn't a valid object ID character.
-        return ObjectID(String(decoding: parsed.readableBytesView, as: UTF8.self))
+        return ObjectID(String(decoding: parsed, as: UTF8.self))
     }
 }
 

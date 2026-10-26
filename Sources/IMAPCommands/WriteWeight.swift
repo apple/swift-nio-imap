@@ -56,9 +56,10 @@ extension IMAPClientHandler.OutboundIn {
                 .append(.finish):
                 WriteWeight(100)
             case .append(.messageBytes(let buffer)),
-                .append(.catenateData(.bytes(let buffer))),
-                .append(.catenateURL(let buffer)):
+                .append(.catenateData(.bytes(let buffer))):
                 WriteWeight(100 + buffer.readableBytes)
+            case .append(.catenateURL(let bytes)):
+                WriteWeight(100 + bytes.count)
             case .continuationResponse(let b):
                 WriteWeight(b.readableBytes * 2)
             }

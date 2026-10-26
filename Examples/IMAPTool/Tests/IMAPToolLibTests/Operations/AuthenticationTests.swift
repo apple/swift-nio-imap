@@ -77,9 +77,9 @@ private struct AuthenticationTests {
                     command: .authenticate(
                         mechanism: .plain,
                         initialResponse: InitialResponse(
-                            ByteBuffer(bytes: [
+                            [
                                 0x0, 0x6a, 0x6f, 0x68, 0x6e, 0x0, 0x73, 0x65, 0x63, 0x72, 0x65, 0x74,
-                            ])
+                            ]
                         )
                     ),
                     completion: .ok(.init(text: "Welcome to the test server"))
@@ -123,9 +123,9 @@ private struct AuthenticationTests {
                     command: .authenticate(
                         mechanism: .plain,
                         initialResponse: InitialResponse(
-                            ByteBuffer(bytes: [
+                            [
                                 0x0, 0x6a, 0x6f, 0x68, 0x6e, 0x0, 0x73, 0x65, 0x63, 0x72, 0x65, 0x74,
-                            ])
+                            ]
                         )
                     ),
                     completion: .ok(
@@ -167,9 +167,9 @@ private struct AuthenticationTests {
                     command: .authenticate(
                         mechanism: .plain,
                         initialResponse: InitialResponse(
-                            ByteBuffer(bytes: [
+                            [
                                 0x0, 0x6a, 0x6f, 0x68, 0x6e, 0x0, 0x73, 0x65, 0x63, 0x72, 0x65, 0x74,
-                            ])
+                            ]
                         )
                     ),
                     completion: .ok(
@@ -218,7 +218,7 @@ private struct AuthenticationTests {
                         )
                     ),
                     responses: [
-                        .authenticationChallenge(ByteBuffer(string: "Go ahead"))
+                        .authenticationChallenge(Array("Go ahead".utf8))
                     ],
                     completion: nil
                 ),
@@ -439,9 +439,9 @@ private struct AuthenticationTests {
                     command: .authenticate(
                         mechanism: .plain,
                         initialResponse: InitialResponse(
-                            ByteBuffer(bytes: [
+                            [
                                 0x0, 0x6a, 0x6f, 0x68, 0x6e, 0x0, 0x73, 0x65, 0x63, 0x72, 0x65, 0x74,
-                            ])
+                            ]
                         )
                     ),
                     completion: .ok(

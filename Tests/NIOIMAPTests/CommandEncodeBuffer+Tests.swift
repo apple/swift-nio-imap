@@ -143,7 +143,7 @@ struct CommandEncodeBuffer_Tests {
                         tag: "B23",
                         command: .authenticate(
                             mechanism: AuthenticationMechanism.plain,
-                            initialResponse: .init(ByteBuffer(string: "foobar"))
+                            initialResponse: .init("foobar")
                         )
                     )
                 ), "B23 AUTHENTICATE PLAIN ∅\r\n", #line
@@ -175,7 +175,7 @@ struct CommandEncodeBuffer_Tests {
                             .set([42]),
                             [.unchangedSince(.init(modificationSequence: .init(361_656)))],
                             .gmailLabels(
-                                .remove(silent: false, gmailLabels: [GmailLabel(ByteBuffer(string: "foobar"))])
+                                .remove(silent: false, gmailLabels: [GmailLabel("foobar")])
                             )
                         )
                     )

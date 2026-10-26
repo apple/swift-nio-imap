@@ -141,7 +141,7 @@ public indirect enum SearchKey: Hashable, Sendable {
     ///
     /// The search string is performed on the envelope structure’s BCC field.
     /// From [RFC 3501 Section 6.4.4](https://datatracker.ietf.org/doc/html/rfc3501#section-6.4.4).
-    case bcc(ByteBuffer)
+    case bcc([UInt8])
 
     /// Matches messages whose internal date (disregarding time and timezone) is earlier than the specified date.
     ///
@@ -153,19 +153,19 @@ public indirect enum SearchKey: Hashable, Sendable {
     ///
     /// The search is performed on the complete message body, including both text and encoded parts.
     /// From [RFC 3501 Section 6.4.4](https://datatracker.ietf.org/doc/html/rfc3501#section-6.4.4).
-    case body(ByteBuffer)
+    case body([UInt8])
 
     /// Matches messages containing the specified string in the CC (carbon copy) field.
     ///
     /// The search string is performed on the envelope structure’s CC field.
     /// From [RFC 3501 Section 6.4.4](https://datatracker.ietf.org/doc/html/rfc3501#section-6.4.4).
-    case cc(ByteBuffer)
+    case cc([UInt8])
 
     /// Matches messages containing the specified string in the FROM field.
     ///
     /// The search string is performed on the envelope structure’s FROM field.
     /// From [RFC 3501 Section 6.4.4](https://datatracker.ietf.org/doc/html/rfc3501#section-6.4.4).
-    case from(ByteBuffer)
+    case from([UInt8])
 
     /// Matches messages with the specified keyword flag set.
     ///
@@ -189,19 +189,19 @@ public indirect enum SearchKey: Hashable, Sendable {
     ///
     /// The search string is performed on the envelope structure’s SUBJECT field.
     /// From [RFC 3501 Section 6.4.4](https://datatracker.ietf.org/doc/html/rfc3501#section-6.4.4).
-    case subject(ByteBuffer)
+    case subject([UInt8])
 
     /// Matches messages containing the specified string in either the header or body of the message.
     ///
     /// Performs a broad search across the entire message content.
     /// From [RFC 3501 Section 6.4.4](https://datatracker.ietf.org/doc/html/rfc3501#section-6.4.4).
-    case text(ByteBuffer)
+    case text([UInt8])
 
     /// Matches messages containing the specified string in the TO field.
     ///
     /// The search string is performed on the envelope structure’s TO field.
     /// From [RFC 3501 Section 6.4.4](https://datatracker.ietf.org/doc/html/rfc3501#section-6.4.4).
-    case to(ByteBuffer)
+    case to([UInt8])
 
     /// Matches messages without the specified keyword flag set.
     ///
@@ -214,7 +214,7 @@ public indirect enum SearchKey: Hashable, Sendable {
     /// The header field name and text value are both searched for. If the text value is empty,
     /// this matches all messages that contain the specified header field, regardless of its value.
     /// From [RFC 3501 Section 6.4.4](https://datatracker.ietf.org/doc/html/rfc3501#section-6.4.4).
-    case header(String, ByteBuffer)
+    case header(String, [UInt8])
 
     /// Matches messages larger than the specified number of octets.
     ///
@@ -363,7 +363,7 @@ public indirect enum SearchKey: Hashable, Sendable {
     /// **Requires server capability:** ``Capability/gmailExtensions``
     ///
     /// - SeeAlso: [Gmail IMAP Extensions](https://developers.google.com/gmail/imap/imap-extensions)
-    case gmailRaw(ByteBuffer)
+    case gmailRaw([UInt8])
 }
 
 extension SearchKey {

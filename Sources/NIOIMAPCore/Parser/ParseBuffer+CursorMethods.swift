@@ -105,12 +105,17 @@ extension ParseBuffer {
         try PL.parseUnsignedInt64(buffer: &self, tracker: tracker, allowLeadingZeros: leadingZeros == .allowed)
     }
 
-    mutating func parseZeroOrMoreCharacters(where predicate: (UInt8) -> Bool) throws -> ByteBuffer {
-        try PL.parseZeroOrMoreCharacters(buffer: &self, tracker: .makeNewDefault, where: predicate)
+    mutating func parseZeroOrMoreCharacters(where predicate: (UInt8) -> Bool) throws -> [UInt8] {
+        Array(
+            try PL.parseZeroOrMoreCharacters(buffer: &self, tracker: .makeNewDefault, where: predicate)
+                .readableBytesView
+        )
     }
 
-    mutating func parseOneOrMoreCharacters(where predicate: (UInt8) -> Bool) throws -> ByteBuffer {
-        try PL.parseOneOrMoreCharacters(buffer: &self, tracker: .makeNewDefault, where: predicate)
+    mutating func parseOneOrMoreCharacters(where predicate: (UInt8) -> Bool) throws -> [UInt8] {
+        Array(
+            try PL.parseOneOrMoreCharacters(buffer: &self, tracker: .makeNewDefault, where: predicate).readableBytesView
+        )
     }
 
     mutating func parseSpaces() throws {
@@ -144,16 +149,11 @@ extension ParseBuffer {
         try PL.parseByte(buffer: &self, tracker: .makeNewDefault)
     }
 
-    mutating func extractBytes(length: Int) throws -> ByteBuffer {
-        try PL.parseBytes(buffer: &self, tracker: .makeNewDefault, length: length)
+    mutating func extractBytes(length: Int) throws -> [UInt8] {
+        Array(try PL.parseBytes(buffer: &self, tracker: .makeNewDefault, length: length).readableBytesView)
     }
 
     mutating func extractBuffer(upTo maxLength: Int) throws -> ByteBuffer {
         try PL.parseBytes(buffer: &self, tracker: .makeNewDefault, upTo: maxLength)
     }
-}
-
-// Temporary, with the above: `decodeUTF8` over what the grammar still gets back, a `ByteBuffer`.
-func decodeUTF8(_ buffer: ByteBuffer, file: StaticString = (#fileID), line: Int = #line) throws -> String {
-    try decodeUTF8(buffer.readableBytesView, file: file, line: line)
 }

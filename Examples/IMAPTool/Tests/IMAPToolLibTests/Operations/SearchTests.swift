@@ -104,7 +104,7 @@ private enum SearchTests {
     @Test(arguments: [
         MessageIDKeyFixture(
             input: ["<a@foo.example.com>"],
-            expected: SearchKey.header("message-id", ByteBuffer(string: "<a@foo.example.com>"))
+            expected: SearchKey.header("message-id", Array("<a@foo.example.com>".utf8))
         ),
         MessageIDKeyFixture(
             input: [],
@@ -112,23 +112,23 @@ private enum SearchTests {
         ),
         MessageIDKeyFixture(
             input: ["<a@foo.example.com>"],
-            expected: SearchKey.header("message-id", ByteBuffer(string: "<a@foo.example.com>"))
+            expected: SearchKey.header("message-id", Array("<a@foo.example.com>".utf8))
         ),
         MessageIDKeyFixture(
             input: ["<a@foo.example.com>", "<b@foo.example.com>"],
             expected: SearchKey.or(
-                SearchKey.header("message-id", ByteBuffer(string: "<a@foo.example.com>")),
-                SearchKey.header("message-id", ByteBuffer(string: "<b@foo.example.com>"))
+                SearchKey.header("message-id", Array("<a@foo.example.com>".utf8)),
+                SearchKey.header("message-id", Array("<b@foo.example.com>".utf8))
             )
         ),
         MessageIDKeyFixture(
             input: ["<a@foo.example.com>", "<b@foo.example.com>", "<c@foo.example.com>"],
             expected: SearchKey.or(
                 SearchKey.or(
-                    SearchKey.header("message-id", ByteBuffer(string: "<a@foo.example.com>")),
-                    SearchKey.header("message-id", ByteBuffer(string: "<b@foo.example.com>"))
+                    SearchKey.header("message-id", Array("<a@foo.example.com>".utf8)),
+                    SearchKey.header("message-id", Array("<b@foo.example.com>".utf8))
                 ),
-                SearchKey.header("message-id", ByteBuffer(string: "<c@foo.example.com>"))
+                SearchKey.header("message-id", Array("<c@foo.example.com>".utf8))
             )
         ),
     ])

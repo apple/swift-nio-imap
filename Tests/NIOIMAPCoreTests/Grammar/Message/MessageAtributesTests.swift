@@ -531,11 +531,11 @@ extension MessageAttributeTests {
         "encode rfc822 helpers",
         arguments: [
             Rfc822Fixture(method: .rfc822, string: nil, expected: "RFC822 NIL"),
-            Rfc822Fixture(method: .rfc822, string: ByteBuffer(string: "hi"), expected: "RFC822 \"hi\""),
+            Rfc822Fixture(method: .rfc822, string: "hi", expected: "RFC822 \"hi\""),
             Rfc822Fixture(method: .rfc822Text, string: nil, expected: "RFC822.TEXT NIL"),
-            Rfc822Fixture(method: .rfc822Text, string: ByteBuffer(string: "body"), expected: "RFC822.TEXT \"body\""),
+            Rfc822Fixture(method: .rfc822Text, string: "body", expected: "RFC822.TEXT \"body\""),
             Rfc822Fixture(method: .rfc822Header, string: nil, expected: "RFC822.HEADER NIL"),
-            Rfc822Fixture(method: .rfc822Header, string: ByteBuffer(string: "hdr"), expected: "RFC822.HEADER \"hdr\""),
+            Rfc822Fixture(method: .rfc822Header, string: "hdr", expected: "RFC822.HEADER \"hdr\""),
         ]
     )
     func encodeRfc822Helpers(_ fixture: Rfc822Fixture) {
@@ -578,7 +578,7 @@ enum Rfc822Method: Sendable { case rfc822, rfc822Text, rfc822Header }
 
 struct Rfc822Fixture: Sendable, CustomTestStringConvertible {
     var method: Rfc822Method
-    var string: ByteBuffer?
+    var string: [UInt8]?
     var expected: String
 
     var testDescription: String { expected }
@@ -625,10 +625,10 @@ extension MessageAttributeTests {
 struct BodySectionFixture: Sendable, CustomTestStringConvertible {
     var section: SectionSpecifier?
     var number: Int?
-    var string: ByteBuffer?
+    var string: [UInt8]?
     var expected: String
 
-    init(section: SectionSpecifier?, number: Int?, string: ByteBuffer?, expected: String) {
+    init(section: SectionSpecifier?, number: Int?, string: [UInt8]?, expected: String) {
         self.section = section
         self.number = number
         self.string = string

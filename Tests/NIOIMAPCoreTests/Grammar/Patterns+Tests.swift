@@ -22,14 +22,14 @@ struct PatternsTests {
         EncodeFixture.patterns(["Mailbox1", "Mailbox2"], "(\"Mailbox1\" \"Mailbox2\")"),
         EncodeFixture.patterns(["*"], "(\"*\")"),
     ])
-    func encode(_ fixture: EncodeFixture<[ByteBuffer]>) {
+    func encode(_ fixture: EncodeFixture<[[UInt8]]>) {
         fixture.checkEncoding()
     }
 }
 
 // MARK: -
 
-extension EncodeFixture<[ByteBuffer]> {
+extension EncodeFixture<[[UInt8]]> {
     fileprivate static func patterns(_ input: T, _ expectedString: String) -> Self {
         Self(
             input: input,
