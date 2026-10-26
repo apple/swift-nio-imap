@@ -37,8 +37,9 @@ public class CommandRoundtripHandler: ChannelOutboundHandler {
     public func write(context: ChannelHandlerContext, data: NIOAny, promise: EventLoopPromise<Void>?) {
         var originalBuffer = self.unwrapOutboundIn(data)
         do {
-            var originalBufferCopy = originalBuffer
-            guard let commandStream = try parser.parseCommandStream(buffer: &originalBufferCopy),
+            var input = IMAPInputBuffer()
+            input.append(originalBuffer)
+            guard let commandStream = try parser.parseCommandStream(buffer: &input),
                 let command = commandStream.commandPart
             else {
                 // this is fine because the command is input by the user, so *should* be valid

@@ -25,19 +25,12 @@ import DequeModule
 /// while let response = try parser.parseResponseStream(buffer: &buffer) { … }
 /// ```
 ///
-/// ## How this relates to `ParserInputBuffer`
+/// This is the parser's only input. To parse bytes held in a `ByteBuffer`, a `DispatchData`, an array
+/// or a `Data`, append them here: a large `ByteBuffer` or array is kept by reference, and
+/// ``append(contentsOf:)`` keeps a `DispatchData`'s large regions, so appending copies only small reads
+/// (and a `Data`; see below).
 ///
-/// ``ParserInputBuffer`` is the protocol the parser reads through; this is the conformer to use for a
-/// connection, and the one ``CommandParser/parseCommandStream(buffer:)`` and
-/// ``ResponseParser/parseResponseStream(buffer:)`` are written for. Other types conform too, but only
-/// some of them can be passed to those entry points, which need a ``ConsumableParserInputBuffer``:
-/// `DispatchData` and `NIOIMAP`'s `ByteBuffer` can, while `Data` and the array types deliberately
-/// cannot, because trimming them moves the remaining bytes. Bytes held in one of those reach the parser
-/// by being appended here, which copies an array only if it is small (a `Data` always; see below) — so
-/// this is both the streaming answer and the one-shot answer, and the alternatives are for a caller
-/// that already has a `ByteBuffer` or a `DispatchData` in hand.
-///
-/// Two properties are the reason to use this rather than an array or a `Data`:
+/// Two properties are the reason to accumulate into this:
 ///
 /// - **Appending never moves appended bytes, and never copies a large read at a fixed address.** Such
 ///   a read, of at least ``IMAPBuffer/copyThreshold`` bytes, is kept as-is, so a message that straddles
@@ -229,7 +222,7 @@ public struct IMAPInputBuffer: Sendable {
     /// nothing is moved.
     ///
     /// - Parameter k: How many bytes to discard. Must not exceed ``count``.
-    public mutating func discardFirst(_ k: Int) {
+    internal mutating func discardFirst(_ k: Int) {
         precondition(k >= 0, "cannot discard \(k) bytes")
         precondition(k <= count, "cannot discard \(k) bytes from a buffer holding \(count)")
         var remaining = k
@@ -338,6 +331,19 @@ extension IMAPInputBuffer: ConsumableParserInputBuffer, StableRegionParserInputB
     /// - Returns: Whatever `body` returns.
     public func withParseInput<R>(limit: Int, _ body: (inout ParseInput) throws -> R) rethrows -> R {
         try _stableWithParseInput(limit: limit, body)
+    }
+}
+
+extension IMAPInputBuffer {
+    /// Calls `body` with each run of bytes waiting to be parsed, in order.
+    ///
+    /// For `NIOIMAP`'s error path, which copies the unparsed bytes into an `IMAPDecoderError`.
+    ///
+    /// - Parameter body: A closure that reads one run. The pointer is valid only for the call.
+    @_spi(NIOIMAPInternal) public func forEachRegion(_ body: (UnsafeRawBufferPointer) throws -> Void) rethrows {
+        for region in byteRegions {
+            try region.withUnsafeBytes(body)
+        }
     }
 }
 

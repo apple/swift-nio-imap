@@ -14,54 +14,16 @@
 
 /// Bytes the parser can read from, in one or more contiguous runs.
 ///
-/// This is the library's input seam. A caller hands over whatever it already holds — a `Data`, a
-/// `DispatchData`, an array of bytes, an ``IMAPInputBuffer`` of network reads, or a type of its own —
-/// and the parser reads through it without asking for the bytes to be flattened into one buffer
-/// first.
-///
-/// ```swift
-/// var buffer = IMAPInputBuffer()
-/// buffer.append(bytesFromTheNetwork)
-/// while let response = try parser.parseResponseStream(buffer: &buffer) { … }
-/// ```
-///
-/// ## Which type to use
-///
-/// - **A connection accumulating received bytes: ``IMAPInputBuffer``.** That is what the parser entry
-///   points are written for. Appending a read copies it only if it is small or has no fixed address
-///   (a `Data`), discarding what has been parsed is O(1), and it is the only input a large literal can
-///   be delivered out of without being copied.
-/// - **Bytes you already hold: hand them over if they are consumable, otherwise append them to an
-///   ``IMAPInputBuffer``.** ``CommandParser/parseCommandStream(buffer:)`` and
-///   ``ResponseParser/parseResponseStream(buffer:)`` take a ``ConsumableParserInputBuffer``, because
-///   they discard whatever they parsed; `DispatchData` and — in `NIOIMAP` — `ByteBuffer` are that, so
-///   they can be passed directly. `Data`, `[UInt8]`, `ArraySlice<UInt8>` and `ContiguousArray<UInt8>`
-///   conform to *this* protocol but deliberately not to that one, because trimming them moves the
-///   remaining bytes. Appending an array to an ``IMAPInputBuffer`` costs one small object and no copy
-///   (below 1 KiB, a copy into a shared tail), appending a `Data` one copy, and either is the way to
-///   parse out of it.
-/// - **Bytes in a shape of your own: conform.** Two members, ``byteRegions`` and ``count``, and the
-///   library does the rest. See *Conforming*, below.
-///
-/// Conforming does not mean writing anything that reads bytes. Reading happens through a
-/// ``ParseInput``, whose surface is internal: the cursor appears in this protocol's signatures because
-/// the default implementation of ``withParseInput(limit:_:)`` builds one and hands it to the parser,
-/// and a conformer never has to look inside it.
-///
-/// ## Conforming
+/// Internal: ``IMAPInputBuffer`` is the only public parse input. This protocol is what the parser's
+/// gather is written against, so that the library's own input buffer and the package's tests (which
+/// parse out of arrays) share one code path.
 ///
 /// A conformer describes its bytes as an ordered collection of ``ByteRegion``s and says how many
 /// bytes there are in total. Everything else has a default implementation.
-///
-/// Two refinements are worth knowing about before writing one. ``ConsumableParserInputBuffer`` adds
-/// "the parser may discard what it consumed", which the entry points above require, and
-/// ``StableRegionParserInputBuffer`` adds "my region pointers stay valid for a borrow of me", which buys
-/// a single-pass gather and copy-free extraction of large payloads. ``IMAPInputBuffer`` is all three,
-/// and is the worked example of each.
-///
-/// A conformance to this protocol alone is still worth having: it is what
-/// ``SynchronizingLiteralParser/parseContinuationsNecessary(_:)`` takes, and it is how the package's own
-/// tests parse out of arrays.
+/// ``ConsumableParserInputBuffer`` adds "the parser may discard what it consumed", which the stream
+/// parsers rely on, and ``StableRegionParserInputBuffer`` adds "my region pointers stay valid for a
+/// borrow of me", which buys a single-pass gather and copy-free extraction of large payloads.
+/// ``IMAPInputBuffer`` is all three.
 ///
 /// - Important: ``byteRegions`` must begin at the read position, and its regions must add up to
 ///   ``count``. A conformer that keeps a read head as an offset has to *slice* its first region
@@ -74,8 +36,8 @@
 /// The parser's per-region overhead is small but not free — each move from one region to
 /// the next costs something, and bulk scans restart at every boundary. That is invisible for
 /// network-sized reads and dominant for pathologically small ones: one-byte regions parse far slower
-/// per byte than contiguous bytes do. Callers that can hand over larger regions should.
-public protocol ParserInputBuffer {
+/// per byte than contiguous bytes do.
+internal protocol ParserInputBuffer {
     /// The collection of contiguous byte runs this buffer is made of.
     associatedtype Regions: Collection where Regions.Element: ByteRegion
 
@@ -118,10 +80,10 @@ public protocol ParserInputBuffer {
 ///
 /// - Important: ``discardFirst(_:)`` must be O(1) amortised in the number of bytes discarded. A
 ///   conformer that moves the remaining bytes down instead makes a caller that trims after every
-///   message quadratic over the life of a connection. That is why `Data` and `Array` are deliberately
+///   message quadratic over the life of a connection. That is why the array types are deliberately
 ///   *not* consumable here, even though removing a prefix from them is one line: the one line is the slow
-///   one. Callers that want to consume a `Data` can conform it themselves and know what it costs.
-public protocol ConsumableParserInputBuffer: ParserInputBuffer {
+///   one.
+internal protocol ConsumableParserInputBuffer: ParserInputBuffer {
     /// Discards the first `k` bytes.
     ///
     /// - Parameter k: How many bytes to discard. Must not exceed ``ParserInputBuffer/count``.
@@ -145,7 +107,7 @@ public protocol ConsumableParserInputBuffer: ParserInputBuffer {
 /// that region is then handed to the caller as a reference to the input rather than as a copy — if it
 /// is at least a third of what the storage keeps alive (see ``StableAddressByteRegion/pinnedByteCount``).
 /// Passing `nil` is always correct and means such an extraction copies.
-public protocol StableRegionParserInputBuffer: ParserInputBuffer {
+internal protocol StableRegionParserInputBuffer: ParserInputBuffer {
     /// Pushes every region, in order, into `sink`.
     ///
     /// - Parameter sink: The table to fill. The only thing that can be done with it is appending.
@@ -236,9 +198,9 @@ extension ParserInputBuffer {
     /// ``StableRegionParserInputBuffer`` and never come here — that path has no recursion and no cap.
     internal static var maximumGatherDepth: Int { 64 }
 
-    public var regionCount: Int { byteRegions.count }
+    internal var regionCount: Int { byteRegions.count }
 
-    public func withParseInput<R>(limit: Int, _ body: (inout ParseInput) throws -> R) rethrows -> R {
+    internal func withParseInput<R>(limit: Int, _ body: (inout ParseInput) throws -> R) rethrows -> R {
         let regions = byteRegions
         assertRegionsAddUp(regions)
         // One entry per region up to the cap, plus one for a coalesced tail.
@@ -346,7 +308,7 @@ extension StableRegionParserInputBuffer {
     /// Conformers forward to this from their own ``ParserInputBuffer/withParseInput(limit:_:)``:
     ///
     /// ```swift
-    /// public func withParseInput<R>(limit: Int, _ body: (inout ParseInput) throws -> R) rethrows -> R {
+    /// func withParseInput<R>(limit: Int, _ body: (inout ParseInput) throws -> R) rethrows -> R {
     ///     try _stableWithParseInput(limit: limit, body)
     /// }
     /// ```
@@ -360,7 +322,7 @@ extension StableRegionParserInputBuffer {
     ///   - limit: The most bytes the parser may consume.
     ///   - body: A closure that reads through the cursor.
     /// - Returns: Whatever `body` returns.
-    public func _stableWithParseInput<R>(
+    internal func _stableWithParseInput<R>(
         limit: Int,
         _ body: (inout ParseInput) throws -> R
     ) rethrows -> R {
@@ -415,16 +377,16 @@ extension ConsumableParserInputBuffer {
 
 // MARK: - Stdlib conformances
 
-// Read-only on purpose: removing a prefix from an array moves the rest of it, so these are the
-// "parse all of this" sources — tests, fuzzing, one-shot callers — and not connection buffers.
+// For the package's tests, which parse out of arrays. Read-only on purpose: removing a prefix from an
+// array moves the rest of it.
 extension Array: ParserInputBuffer where Element == UInt8 {
-    public var byteRegions: CollectionOfOne<[UInt8]> { CollectionOfOne(self) }
+    var byteRegions: CollectionOfOne<[UInt8]> { CollectionOfOne(self) }
 }
 
 extension ArraySlice: ParserInputBuffer where Element == UInt8 {
-    public var byteRegions: CollectionOfOne<ArraySlice<UInt8>> { CollectionOfOne(self) }
+    var byteRegions: CollectionOfOne<ArraySlice<UInt8>> { CollectionOfOne(self) }
 }
 
 extension ContiguousArray: ParserInputBuffer where Element == UInt8 {
-    public var byteRegions: CollectionOfOne<ContiguousArray<UInt8>> { CollectionOfOne(self) }
+    var byteRegions: CollectionOfOne<ContiguousArray<UInt8>> { CollectionOfOne(self) }
 }

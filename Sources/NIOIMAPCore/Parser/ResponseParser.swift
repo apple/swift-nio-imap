@@ -213,9 +213,7 @@ public struct ResponseParser: Parser, Sendable {
     /// - UTF-8 validation fails
     ///
     /// - Parameter inputBytes: The received bytes. Whatever the parser consumes is discarded from the
-    ///   front, so the same buffer is passed again as more arrives. An ``IMAPInputBuffer`` is what a
-    ///   connection should hand over: it keeps each read where it landed, and it is the only input a
-    ///   large literal can be delivered out of without being copied.
+    ///   front, so the same buffer is passed again as more arrives.
     ///
     /// - Returns: A ``ResponseOrContinuationRequest`` if a complete response element is parsed,
     ///   or `nil` if more data is needed.
@@ -226,8 +224,8 @@ public struct ResponseParser: Parser, Sendable {
     ///
     /// - SeeAlso: ``ResponseOrContinuationRequest``, ``Options``,
     ///   [RFC 3501 Section 7](https://datatracker.ietf.org/doc/html/rfc3501#section-7)
-    public mutating func parseResponseStream<Input: ConsumableParserInputBuffer>(
-        buffer inputBytes: inout Input
+    public mutating func parseResponseStream(
+        buffer inputBytes: inout IMAPInputBuffer
     ) throws -> ResponseOrContinuationRequest? {
         let tracker = StackTracker.makeNewDefault
         do {

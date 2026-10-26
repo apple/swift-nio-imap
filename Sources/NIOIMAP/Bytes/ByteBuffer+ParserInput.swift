@@ -15,9 +15,9 @@
 import NIO
 import NIOIMAPCore
 
-// This file is what lets a caller holding a `ByteBuffer` hand it to the parser. `NIOIMAPCore` does not
-// know about NIO, so the conformances live here; `NIOIMAP` re-exports `NIOIMAPCore`, so which of the two
-// modules declares them is invisible to anyone importing `NIOIMAP`.
+// This file is what lets a caller holding a `ByteBuffer` append it to an `IMAPInputBuffer` without
+// copying it. `NIOIMAPCore` does not know about NIO, so the conformances live here; `NIOIMAP` re-exports
+// `NIOIMAPCore`, so which of the two modules declares them is invisible to anyone importing `NIOIMAP`.
 //
 // They need no `@retroactive`: the protocols are declared in this package, so this is not a conformance
 // two other modules could also add.
@@ -39,32 +39,6 @@ extension ByteBuffer: StableAddressByteRegion {
     /// The capacity of the storage, which every copy and slice of this buffer keeps alive: a 1 KiB
     /// slice of a 64 KiB read pins 64 KiB.
     public var pinnedByteCount: Int { storageCapacity }
-}
-
-extension ByteBuffer: ParserInputBuffer {
-    /// The buffer's readable bytes, as the one region they are.
-    public var byteRegions: CollectionOfOne<ByteBuffer> { CollectionOfOne(self) }
-
-    /// The number of readable bytes.
-    ///
-    /// This is ``ParserInputBuffer/count`` — bytes the parser can see — which for a `ByteBuffer` means
-    /// its readable bytes and not its capacity.
-    public var count: Int { readableBytes }
-
-    /// One, always: a `ByteBuffer`'s bytes are contiguous by construction.
-    public var regionCount: Int { 1 }
-}
-
-extension ByteBuffer: ConsumableParserInputBuffer {
-    /// Moves the reader index forward by `k`.
-    ///
-    /// O(1), and it satisfies ``ConsumableParserInputBuffer``'s requirement that discarding a prefix
-    /// must not move the remaining bytes — a `ByteBuffer` keeps its read head as an index.
-    ///
-    /// - Parameter k: How many bytes to discard. Must not exceed ``count``.
-    public mutating func discardFirst(_ k: Int) {
-        moveReaderIndex(forwardBy: k)
-    }
 }
 
 // A `ByteBuffer` deliberately does *not* conform to `StableRegionParserInputBuffer`, so a payload
