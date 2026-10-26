@@ -50,8 +50,149 @@ private final class StarvingDecoder: IMAPMessageDecoder {
     }
 }
 
+/// Returns one message per entry of `steps`, consuming that many bytes for it, then `nil`.
+private struct ScriptedDecoder: IMAPMessageDecoder {
+    var steps: [Int]
+
+    mutating func decode(input: inout IMAPInputBuffer) throws -> Int? {
+        guard let bytes = steps.first, input.count >= bytes else { return nil }
+        steps.removeFirst()
+        input.discardFirst(bytes)
+        return bytes
+    }
+}
+
+/// Wraps a real decoder and records the longest run of messages it returned without consuming.
+private struct ProgressRecorder<Wrapped: IMAPMessageDecoder>: IMAPMessageDecoder {
+    var wrapped: Wrapped
+    var run = 0
+    var longestRun = 0
+
+    mutating func decode(input: inout IMAPInputBuffer) throws -> Wrapped.InboundOut? {
+        let before = input.count
+        guard let message = try wrapped.decode(input: &input) else { return nil }
+        run = input.count < before ? 0 : run + 1
+        longestRun = max(longestRun, run)
+        return message
+    }
+}
+
+private typealias Scripted = IMAPInputProcessor<ScriptedDecoder>
+private let limit = Scripted.maximumMessagesWithoutProgress
+
+/// How a test splits its input into reads. Internal, not private: test arguments need it.
+enum ReadSplit: CaseIterable, Sendable {
+    /// Everything in one read.
+    case whole
+    /// One read per line, the way `FramingParser` hands commands to the server's decoder.
+    case perLine
+    /// One byte per read, which the client side has to cope with: it has no framing.
+    case perByte
+
+    func reads(of text: String) -> [[UInt8]] {
+        let bytes = Array(text.utf8)
+        switch self {
+        case .whole:
+            return [bytes]
+        case .perLine:
+            return bytes.split(separator: UInt8(ascii: "\n"), omittingEmptySubsequences: false)
+                .dropLast()
+                .map { Array($0) + [UInt8(ascii: "\n")] }
+        case .perByte:
+            return bytes.map { [$0] }
+        }
+    }
+}
+
+/// Feeds `text` through a processor wrapping `decoder` and returns the longest run of messages
+/// without progress.
+private func longestRunWithoutProgress<D: IMAPMessageDecoder>(
+    _ decoder: D,
+    _ text: String,
+    split: ReadSplit
+) throws -> Int {
+    let reads = split.reads(of: text)
+    var recorder = ProgressRecorder(wrapped: decoder)
+    var input = IMAPInputBuffer()
+    for read in reads {
+        input.append(ByteBuffer(bytes: read))
+        while try recorder.decode(input: &input) != nil {}
+    }
+    #expect(input.count == 0, "everything should parse")
+    return recorder.longestRun
+}
+
 @Suite("IMAPInputProcessor")
 struct IMAPInputProcessorTests {
+    @Test("a decoder that keeps returning messages without consuming is an error, not a hang")
+    func noProgressThrows() {
+        // Far more than the limit, but finite: without the guard this ends instead of hanging.
+        let processor = Scripted(ScriptedDecoder(steps: Array(repeating: 0, count: 100 * limit)))
+        var received = 0
+        #expect {
+            try processor.process(buffer: ByteBuffer(string: "x")) { _ in received += 1 }
+        } throws: { error in
+            (error as? IMAPDecoderError)?.parserError is NoForwardProgress
+        }
+        #expect(received == limit)
+        #expect(processor.bufferedByteCount == 0)
+    }
+
+    @Test("up to the limit of messages without progress in a row is allowed")
+    func messagesWithoutProgressUpToTheLimit() throws {
+        let processor = Scripted(ScriptedDecoder(steps: Array(repeating: 0, count: limit)))
+        var received = 0
+        try processor.process(buffer: ByteBuffer(string: "x")) { _ in received += 1 }
+        #expect(received == limit)
+    }
+
+    @Test("one past the limit in a row is an error")
+    func onePastTheLimitThrows() {
+        let processor = Scripted(ScriptedDecoder(steps: Array(repeating: 0, count: limit + 1)))
+        #expect(throws: IMAPDecoderError.self) {
+            try processor.process(buffer: ByteBuffer(string: "x")) { _ in }
+        }
+    }
+
+    @Test("consuming a byte resets the count")
+    func progressResetsTheCount() throws {
+        // Runs of `limit` messages without progress, each followed by one that consumes a byte.
+        let rounds = 3
+        let steps = Array(repeating: Array(repeating: 0, count: limit) + [1], count: rounds).flatMap { $0 }
+        let processor = Scripted(ScriptedDecoder(steps: steps))
+        var received = 0
+        try processor.process(buffer: ByteBuffer(repeating: 0, count: rounds)) { _ in received += 1 }
+        #expect(received == steps.count)
+    }
+
+    /// The limit is only safe while the real parsers stay well under it. These are the longest chains
+    /// of results without progress the state machines allow; a change that lengthens one fails here.
+    @Test(
+        "the command parser returns at most two results in a row without progress",
+        arguments: [
+            // MULTIAPPEND of empty messages: `messageBytes` (empty), then `endMessage`, per message.
+            "A APPEND box {0+}\r\n {0+}\r\n ~{0+}\r\n\r\n",
+            // CATENATE with empty TEXT parts: `catenateData(.bytes)` (empty), then `.end`, per part.
+            "B APPEND box CATENATE (TEXT {0+}\r\n TEXT {0+}\r\n URL \"/a\" TEXT {0+}\r\n)\r\n",
+        ],
+        [ReadSplit.whole, .perLine]
+    )
+    func commandRun(text: String, split: ReadSplit) throws {
+        #expect(try longestRunWithoutProgress(CommandDecoder(), text, split: split) == 2)
+    }
+
+    @Test(
+        "the response parser returns at most one result in a row without progress",
+        arguments: [
+            // Every streamed attribute ends in `streamingEnd`, which consumes nothing.
+            "* 1 FETCH (BODY[1] {0}\r\n BODY[2] {0}\r\n BODY[3] \"\" BINARY[4] ~{0}\r\n BODY[5] {0}\r\n)\r\n"
+        ],
+        ReadSplit.allCases
+    )
+    func responseRun(text: String, split: ReadSplit) throws {
+        #expect(try longestRunWithoutProgress(ResponseDecoder(), text, split: split) == 1)
+    }
+
     @Test("after a decoder error, every later read fails with it and nothing is decoded or buffered")
     func decoderErrorIsSticky() {
         let decoder = FailingDecoder()

@@ -182,7 +182,13 @@ public struct CommandParser: Parser, Sendable {
     ///   if more data is needed.
     ///
     /// - Throws: ``ParserError`` for syntax errors, ``BadCommand`` for tagged command
-    ///   parse failures, ``TooMuchRecursion`` for overly nested structures.
+    ///   parse failures, ``TooMuchRecursion`` for overly nested structures, ``NoForwardProgress`` if
+    ///   parsing stopped consuming input.
+    ///
+    /// - Important: Some results consume no bytes — e.g. `.append(.endMessage)` — but never more than
+    ///   two in a row. A caller driving this in its own loop, rather than through `IMAPServerHandler`,
+    ///   should stop when results keep coming without the buffer shrinking: that is what
+    ///   `IMAPServerHandler` does, and it is the guard against a parser bug spinning forever.
     ///
     /// - SeeAlso: ``SynchronizedCommand``, [RFC 3501 Section 5](https://datatracker.ietf.org/doc/html/rfc3501#section-5)
     public mutating func parseCommandStream<Input: ConsumableParserInputBuffer>(
