@@ -316,4 +316,23 @@ struct StableAddressByteRegionTests {
         #expect(address(of: payload) == foreign.baseAddress)
         #expect(payload.backingRegion(as: ForeignBuffer.self)?.region.storage === foreign.storage)
     }
+
+    @Test("a literal filling it is delivered by reference, with pinnedByteCount left to its default")
+    func literalIsKeptWithDefaultPinnedByteCount() throws {
+        let foreign = ForeignBuffer(storage: ForeignStorage(repeating: UInt8(ascii: "f"), count: Self.byteCount))
+        var input = IMAPInputBuffer()
+        input.append(Array("* 1 FETCH (RFC822.TEXT {\(Self.byteCount)}\r\n".utf8))
+        input.append(foreign)
+        input.append(Array(")\r\n".utf8))
+
+        var parser = ResponseParser()
+        var payload: IMAPBuffer?
+        while payload == nil, let response = try parser.parseResponseStream(buffer: &input) {
+            guard case .response(.fetch(.streamingBytes(let bytes))) = response else { continue }
+            payload = bytes
+        }
+        let literal = try #require(payload)
+        #expect(literal.count == Self.byteCount)
+        #expect(address(of: literal) == foreign.baseAddress)
+    }
 }

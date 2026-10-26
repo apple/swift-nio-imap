@@ -31,7 +31,7 @@ extension ParseInputTests {
     @Test("The cursor stays a small trivial value")
     func layout() {
         // Backtracking copies this value constantly, so its size and its triviality are the whole reason
-        // `composite` is cheap. `lastParsedNewline` shares a word with the region index to keep it here.
+        // `composite` is cheap. `terminatingNewline` shares a word with the region index to keep it here.
         #expect(MemoryLayout<ParseInput>.size == 56)
         #expect(MemoryLayout<ParseInput>.stride == 56)
         #expect(MemoryLayout<RegionEntry>.size == 32)
@@ -487,7 +487,7 @@ extension ParseInputTests {
         ParseInputHarness.withSpan("\r\nx") { input in
             #expect(try! input.matchNewline() == .crlf)
             #expect(input.consumed == 2)
-            #expect(input.lastParsedNewline == .crlf)
+            #expect(input.terminatingNewline == .crlf)
         }
         ParseInputHarness.withSpan("\nx") { input in
             #expect(try! input.matchNewline() == .lf)
@@ -497,10 +497,28 @@ extension ParseInputTests {
         ParseInputHarness.withSpan("\r") { input in
             #expect(try! input.matchNewline() == .cr)
             #expect(input.consumed == 1)
-            #expect(input.lastParsedNewline == .cr)
+            #expect(input.terminatingNewline == .cr)
         }
         ParseInputHarness.withSpan("\rx") { input in
             #expect(try! input.matchNewline() == .cr)
+        }
+    }
+
+    @Test("A line ending is terminating only until something is consumed after it")
+    func terminatingNewlineClearsOnConsume() {
+        // E.g. a literal header's CRLF inside an ENVELOPE doesn't end the response.
+        ParseInputHarness.withSpan("\r\nxy") { input in
+            try! input.matchNewline()
+            input.advance(by: 0)
+            #expect(input.terminatingNewline == .crlf)
+            input.advance(by: 1)
+            #expect(input.terminatingNewline == nil)
+        }
+        // Advancing an exhausted cursor consumes nothing.
+        ParseInputHarness.withSpan("\r") { input in
+            try! input.matchNewline()
+            input.advance(by: 1)
+            #expect(input.terminatingNewline == .cr)
         }
     }
 
@@ -569,7 +587,7 @@ extension ParseInputTests {
         ParseInputHarness.withSpan(" x") { input in
             #expect(errorThrown(by: { try input.matchNewline() }) is ParserError)
             #expect(input.consumed == 0)
-            #expect(input.lastParsedNewline == nil)
+            #expect(input.terminatingNewline == nil)
         }
         ParseInputHarness.withInput([]) { input in
             #expect(errorThrown(by: { try input.matchNewline() }) is IncompleteMessage)
@@ -603,7 +621,7 @@ extension ParseInputTests {
             }
             #expect(error is ParserError)
             #expect(input.consumed == 0)
-            #expect(input.lastParsedNewline == nil)
+            #expect(input.terminatingNewline == nil)
             #expect(input.peek(at: 0) == UInt8(ascii: "a"))
         }
     }
