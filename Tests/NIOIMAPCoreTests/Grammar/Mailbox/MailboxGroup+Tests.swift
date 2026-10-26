@@ -23,8 +23,8 @@ struct MailboxGroupTests {
         arguments: [
             EncodeFixture.emailAddressGroup(
                 EmailAddressGroup(
-                    groupName: ByteBuffer(string: "Team"),
-                    sourceRoot: ByteBuffer(string: "root"),
+                    groupName: "Team",
+                    sourceRoot: "root",
                     children: [
                         EmailAddress(
                             personName: "Alice",
@@ -48,7 +48,7 @@ struct MailboxGroupTests {
             EncodeFixture.emailAddressOrGroup(
                 .group(
                     EmailAddressGroup(
-                        groupName: ByteBuffer(string: "Mgmt"),
+                        groupName: "Mgmt",
                         sourceRoot: nil,
                         children: []
                     )

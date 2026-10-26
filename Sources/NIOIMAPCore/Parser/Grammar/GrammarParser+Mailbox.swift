@@ -236,7 +236,7 @@ extension GrammarParser {
 
     struct ListExtended {
         var objectID: CompoundObjectID?
-        var extensions = OrderedDictionary<ByteBuffer, ParameterValue>()
+        var extensions = OrderedDictionary<[UInt8], ParameterValue>()
     }
 
     // mbox-list-extended =  "(" [mbox-list-extended-item
@@ -273,7 +273,7 @@ extension GrammarParser {
 
     enum MailboxListExtendedItem {
         case objectID(CompoundObjectID)
-        case other(KeyValue<ByteBuffer, ParameterValue>)
+        case other(KeyValue<[UInt8], ParameterValue>)
     }
 
     // mbox-list-extended-item =  mbox-list-extended-item-tag SP
@@ -287,7 +287,7 @@ extension GrammarParser {
         try buffer.composite(tracker: tracker) { buffer, tracker -> MailboxListExtendedItem in
             let tag = try self.parseAString(buffer: &buffer, tracker: tracker)
             try buffer.parseSpaces()
-            if String(buffer: tag).uppercased() == "OBJECTID" {
+            if String(decoding: tag, as: UTF8.self).uppercased() == "OBJECTID" {
                 return .objectID(try self.parseCompoundObjectID(buffer: &buffer, tracker: tracker))
             }
             let val = try self.parseParameterValue(buffer: &buffer, tracker: tracker)

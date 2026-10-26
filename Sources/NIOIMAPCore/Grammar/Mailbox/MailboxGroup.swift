@@ -44,13 +44,13 @@ public struct EmailAddressGroup: Hashable, Sendable {
     /// The name of the address group.
     ///
     /// The human-readable name for the collection of addresses, such as "Family" or "Work Team".
-    public var groupName: ByteBuffer
+    public var groupName: [UInt8]
 
     /// The optional source root for the address group.
     ///
     /// May contain additional routing information for the group.
     /// Per [RFC 5322](https://datatracker.ietf.org/doc/html/rfc5322), this is typically `nil`.
-    public var sourceRoot: ByteBuffer?
+    public var sourceRoot: [UInt8]?
 
     /// The member addresses.
     public var children: [EmailAddress]
@@ -60,7 +60,7 @@ public struct EmailAddressGroup: Hashable, Sendable {
     /// - Parameter groupName: The name of the group
     /// - Parameter sourceRoot: Optional source root for routing information
     /// - Parameter children: The addresses within this group
-    public init(groupName: ByteBuffer, sourceRoot: ByteBuffer?, children: [EmailAddress]) {
+    public init(groupName: [UInt8], sourceRoot: [UInt8]?, children: [EmailAddress]) {
         self.groupName = groupName
         self.sourceRoot = sourceRoot
         self.children = children

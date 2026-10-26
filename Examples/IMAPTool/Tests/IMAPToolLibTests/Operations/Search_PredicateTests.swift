@@ -56,23 +56,23 @@ private enum SearchPredicateTests {
         ),
         CreateSearchKeyFixture(
             input: SearchKey.Predicate(subject: "test"),
-            expected: .subject(ByteBuffer(string: "test"))
+            expected: .subject(Array("test".utf8))
         ),
         CreateSearchKeyFixture(
             input: SearchKey.Predicate(from: "alice@example.com"),
-            expected: .from(ByteBuffer(string: "alice@example.com"))
+            expected: .from(Array("alice@example.com".utf8))
         ),
         CreateSearchKeyFixture(
             input: SearchKey.Predicate(to: "bob@example.com"),
-            expected: .to(ByteBuffer(string: "bob@example.com"))
+            expected: .to(Array("bob@example.com".utf8))
         ),
         CreateSearchKeyFixture(
             input: SearchKey.Predicate(cc: "charlie@example.com"),
-            expected: .cc(ByteBuffer(string: "charlie@example.com"))
+            expected: .cc(Array("charlie@example.com".utf8))
         ),
         CreateSearchKeyFixture(
             input: SearchKey.Predicate(text: "important"),
-            expected: .text(ByteBuffer(string: "important"))
+            expected: .text(Array("important".utf8))
         ),
         CreateSearchKeyFixture(
             input: SearchKey.Predicate(
@@ -119,7 +119,7 @@ private enum SearchPredicateTests {
                         day: 7
                     )!
                 ),
-                .subject(ByteBuffer(string: "test")),
+                .subject(Array("test".utf8)),
             ])
         ),
         CreateSearchKeyFixture(
@@ -128,7 +128,7 @@ private enum SearchPredicateTests {
                 flagsSet: [.flagged]
             ),
             expected: .and([
-                .from(ByteBuffer(string: "alice@example.com")),
+                .from(Array("alice@example.com".utf8)),
                 .flagged,
             ])
         ),

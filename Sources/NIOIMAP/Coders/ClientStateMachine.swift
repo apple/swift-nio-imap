@@ -547,10 +547,10 @@ extension ClientStateMachine {
         switch request {
         case .responseText:
             // no valid base 64, so we can assume it was empty
-            try authenticatingStateMachine.receiveContinuationRequest(.data(ByteBuffer()))
+            try authenticatingStateMachine.receiveContinuationRequest(.data([]))
             self.state = .authenticating(authenticatingStateMachine)
-        case .data(let byteBuffer):
-            try authenticatingStateMachine.receiveContinuationRequest(.data(byteBuffer))
+        case .data(let bytes):
+            try authenticatingStateMachine.receiveContinuationRequest(.data(bytes))
             self.state = .authenticating(authenticatingStateMachine)
         }
         return .fireAuthenticationChallenge

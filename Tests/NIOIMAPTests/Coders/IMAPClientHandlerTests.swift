@@ -359,7 +359,7 @@ struct IMAPClientHandlerTests {
         // server sends challenge
         let challengeBytes1 = ""
         helper.writeInbound("+ \(challengeBytes1)\r\n")
-        helper.expectInbound(.authenticationChallenge(ByteBuffer()))
+        helper.expectInbound(.authenticationChallenge([]))
 
         // client responds
         let responseBytes1 =
@@ -439,7 +439,7 @@ struct IMAPClientHandlerTests {
         helper.writeInbound("+ \(challengeBytes2)\r\n")
         helper.expectInbound(
             .authenticationChallenge(
-                ByteBuffer(bytes: [
+                [UInt8]([
                     0x60, 0x68, 0x06, 0x09, 0x2A, 0x86, 0x48, 0x86, 0xF7, 0x12, 0x01, 0x02, 0x02, 0x02, 0x00, 0x6F,
                     0x59,
                     0x30, 0x57, 0xA0, 0x03, 0x02, 0x01, 0x05, 0xA1, 0x03, 0x02, 0x01, 0x0F, 0xA2, 0x4B, 0x30, 0x49,

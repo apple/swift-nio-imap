@@ -71,7 +71,7 @@ struct AppendLiteralTests {
         helper.writeOutbound(.append(.beginCatenate(options: .init())))
         #expect(helper.drainOutbound() == "A1 APPEND \"INBOX\" CATENATE (")
 
-        let urlPart = helper.writeOutbound(.append(.catenateURL(ByteBuffer(string: url))), wait: false)
+        let urlPart = helper.writeOutbound(.append(.catenateURL(Array(url.utf8))), wait: false)
         #expect(helper.drainOutbound() == "URL {90}\r\n")
 
         let endCatenate = helper.writeOutbound(.append(.endCatenate), wait: false)

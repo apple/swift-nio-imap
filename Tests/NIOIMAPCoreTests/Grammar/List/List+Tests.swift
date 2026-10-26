@@ -74,7 +74,7 @@ extension ParseFixture<String> {
             expected: expected,
             parser: {
                 let buffer = try GrammarParser().parseListMailbox(buffer: &$0, tracker: $1)
-                return String(buffer: buffer)
+                return String(decoding: buffer, as: UTF8.self)
             }
         )
     }
