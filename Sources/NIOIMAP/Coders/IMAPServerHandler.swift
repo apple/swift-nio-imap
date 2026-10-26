@@ -48,7 +48,8 @@ public final class IMAPServerHandler: ChannelDuplexHandler {
         }
     }
 
-    private let decoder: NIOSingleStepByteToMessageProcessor<CommandDecoder>
+    /// Received bytes, parsed where they landed rather than coalesced into one buffer first.
+    private let decoder: IMAPInputProcessor<CommandDecoder>
     private var numberOfOutstandingContinuationRequests = 0
 
     /// The encoded continuation request, written once per outstanding request.
@@ -73,7 +74,7 @@ public final class IMAPServerHandler: ChannelDuplexHandler {
         continuationRequest: ContinuationRequest = .responseText(ResponseText(text: "OK")),
         literalSizeLimit: Int = IMAPDefaults.literalSizeLimit
     ) {
-        self.decoder = NIOSingleStepByteToMessageProcessor(
+        self.decoder = IMAPInputProcessor(
             CommandDecoder(literalSizeLimit: literalSizeLimit),
             maximumBufferSize: IMAPDefaults.lineLengthLimit
         )
