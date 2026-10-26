@@ -990,7 +990,7 @@ extension ClientStateMachineTests {
     func invalidCommandForStateRedactsContinuationResponsePII() {
         // A continuation response can carry credentials (e.g. a SASL exchange), so neither the
         // raw bytes nor a plain rendering of them may appear in the error's description.
-        let error = InvalidCommandForState(.continuationResponse(ByteBuffer(string: "topsecretcredentials")))
+        let error = InvalidCommandForState(.continuationResponse("topsecretcredentials"))
 
         #expect("\(error)" == "InvalidCommandForState([28 bytes]\r\n)")
         #expect(String(reflecting: error) == "InvalidCommandForState([28 bytes]\r\n)")

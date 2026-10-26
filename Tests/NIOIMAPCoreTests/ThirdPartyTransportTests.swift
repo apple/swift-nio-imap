@@ -47,6 +47,76 @@ private struct OneRegionPerByteSink: EncoderOutputBuffer {
     }
 }
 
+/// Memory a third-party buffer type allocated, written once and never moved.
+private final class ForeignStorage: @unchecked Sendable {
+    let bytes: UnsafeMutableRawBufferPointer
+
+    init(repeating byte: UInt8, count: Int) {
+        bytes = .allocate(byteCount: count, alignment: 1)
+        bytes.initializeMemory(as: UInt8.self, repeating: byte)
+    }
+
+    deinit { bytes.deallocate() }
+}
+
+/// A third-party byte-buffer type, e.g. a message read from disk, that opts in to zero-copy hand-off.
+private struct ForeignBuffer: StableAddressByteRegion, Sendable {
+    let storage: ForeignStorage
+
+    var baseAddress: UnsafeRawPointer? { UnsafeRawPointer(storage.bytes.baseAddress) }
+
+    func withUnsafeBytes<R>(_ body: (UnsafeRawBufferPointer) throws -> R) rethrows -> R {
+        try body(UnsafeRawBufferPointer(storage.bytes))
+    }
+}
+
+/// A third-party sink that keeps a region of at least ``IMAPBuffer/copyThreshold`` by reference and
+/// copies everything else.
+private struct ReferenceKeepingSink: EncoderOutputBuffer {
+    private var regions: [IMAPBuffer] = []
+    private(set) var byteCount = 0
+
+    mutating func append(_ bytes: UnsafeRawBufferPointer) {
+        regions.append(IMAPBuffer(Array(bytes)))
+        byteCount += bytes.count
+    }
+
+    mutating func append(_ region: IMAPBuffer) {
+        guard region.count >= IMAPBuffer.copyThreshold else {
+            region.withUnsafeBytes { append($0) }
+            return
+        }
+        regions.append(region)
+        byteCount += region.count
+    }
+
+    mutating func takeFirst(_ byteCount: Int) -> IMAPBufferList {
+        var taken: [IMAPBuffer] = []
+        var remaining = byteCount
+        while remaining > 0 {
+            let first = regions[0]
+            guard first.count <= remaining else {
+                taken.append(first.prefix(remaining))
+                regions[0] = first.dropFirst(remaining)
+                break
+            }
+            taken.append(regions.removeFirst())
+            remaining -= first.count
+        }
+        self.byteCount -= byteCount
+        return IMAPBufferList(taken)
+    }
+
+    func withPendingRegions<R>(_ body: (Span<IMAPBuffer>) -> R) -> R {
+        body(ContiguousArray(regions).span)
+    }
+
+    mutating func removeAll() {
+        regions = []
+        byteCount = 0
+    }
+}
+
 /// Drains `encoder` the way a client with its own transport does.
 private func drain(_ encoder: inout CommandEncodeBuffer) -> [(wire: String, nextStep: CommandEncodeBuffer.NextStep)] {
     var chunks: [(wire: String, nextStep: CommandEncodeBuffer.NextStep)] = []
@@ -106,6 +176,24 @@ struct ThirdPartyTransportTests {
     @Test("an empty encoder has no chunk")
     func emptyEncoder() {
         var encoder = CommandEncodeBuffer(options: .rfc3501, loggingMode: false)
+        #expect(encoder.nextChunk() == nil)
+    }
+
+    @Test("a sink of your own keeps a large APPEND payload by reference through the encoder")
+    func foreignSinkKeepsPayload() throws {
+        let byteCount = IMAPBuffer.copyThreshold
+        let foreign = ForeignBuffer(storage: ForeignStorage(repeating: UInt8(ascii: "f"), count: byteCount))
+        var encoder = CommandEncodeBuffer(sink: ReferenceKeepingSink(), options: .rfc3501, loggingMode: false)
+        encoder.writeCommandStream(.append(.messageBytes(IMAPBuffer(IMAPByteStorage(foreign)))))
+
+        let next = encoder.nextChunk()
+        let chunk = try #require(next)
+        #expect(chunk.nextStep == .proceed)
+        let payload = try #require(chunk.bytes.regions.first)
+        #expect(chunk.bytes.regionCount == 1)
+        #expect(payload.backingRegion(as: ForeignBuffer.self)?.region.storage === foreign.storage)
+        let address = payload.withUnsafeBytesAndOwner { bytes, _ in UnsafeRawPointer(bytes.baseAddress) }
+        #expect(address == foreign.baseAddress)
         #expect(encoder.nextChunk() == nil)
     }
 

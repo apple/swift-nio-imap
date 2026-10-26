@@ -284,7 +284,7 @@ public enum FetchResponse: Hashable, Sendable {
     /// preceding ``streamingBegin(kind:byteCount:)`` event.
     ///
     /// - SeeAlso: ``streamingBegin(kind:byteCount:)``
-    case streamingBytes(ByteBuffer)
+    case streamingBytes(IMAPBuffer)
 
     /// The end of the currently streaming section.
     ///
