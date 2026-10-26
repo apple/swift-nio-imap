@@ -249,11 +249,10 @@ struct ResponseTextCodeTests {
 
     @Test("invalid non-UTF-8 MAILBOXID is parsed as invalid")
     func parseMailboxIDWithNonUTF8Bytes() throws {
-        var buffer = ByteBuffer(string: "MAILBOXID (")
-        buffer.writeBytes([0x30, 0x10, 0x50, 0x87, 0x6d, 0x55])
-        buffer.writeString(")\r")
-        var parseBuffer = ParseBuffer(buffer)
-        let code = try GrammarParser().parseResponseTextCode(buffer: &parseBuffer, tracker: .testTracker)
+        let bytes = Array("MAILBOXID (".utf8) + [0x30, 0x10, 0x50, 0x87, 0x6d, 0x55] + Array(")\r".utf8)
+        let code = try bytes.withParseInput(limit: .max) { input in
+            try GrammarParser().parseResponseTextCode(buffer: &input, tracker: .testTracker)
+        }
         #expect(code == .mailboxID(.invalid))
     }
 

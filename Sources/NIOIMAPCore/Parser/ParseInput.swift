@@ -197,18 +197,21 @@ public struct ParseInput: ~Escapable {
 
     /// Which entry of `table` `head` came from.
     ///
-    /// `Int32` rather than `Int` so that ``lastParsedNewline`` fits in the same word and the cursor stays
+    /// `Int32` rather than `Int` so that ``terminatingNewline`` fits in the same word and the cursor stays
     /// compact. A table of more than two billion regions is not a thing that happens;
     /// the gather bounds it far below that.
     private var regionIndex: Int32
 
-    /// The line ending of the most recent ``matchNewline()``.
+    /// The line ending of the most recent ``matchNewline()``, if nothing has been consumed after it.
+    ///
+    /// That is, the line ending that ends what has been parsed so far. One in the middle, for example
+    /// a literal header inside an `ENVELOPE`, is cleared by ``advance(by:)``.
     ///
     /// It lives on the cursor because the caller that needs it — a response parser deciding whether a
     /// bare CR was a split CRLF — is several grammar frames above the primitive that knows the answer,
     /// and because ``composite(tracker:_:)``'s whole-value restore then rewinds it for free along with
     /// the read position.
-    internal private(set) var lastParsedNewline: Newline?
+    internal private(set) var terminatingNewline: Newline?
 
     /// How many bytes have been consumed since this cursor was built.
     ///
@@ -231,7 +234,7 @@ public struct ParseInput: ~Escapable {
         self.table = table
         self.head = table.isEmpty ? _span(UnsafeBufferPointer(start: nil, count: 0)) : _span(table[0].bytes)
         self.regionIndex = 0
-        self.lastParsedNewline = nil
+        self.terminatingNewline = nil
         self.consumed = 0
         self.limit = limit
         self.normalizeHead()
@@ -244,7 +247,7 @@ public struct ParseInput: ~Escapable {
         self.table = ChunkTable(start: nil, count: 0)
         self.head = bytes
         self.regionIndex = 0
-        self.lastParsedNewline = nil
+        self.terminatingNewline = nil
         self.consumed = 0
         self.limit = limit
     }
@@ -299,6 +302,9 @@ extension ParseInput {
             let take = Swift.min(wanted, headAvailable)
             head = head.extracting(droppingFirst: take)
             consumed += take
+            if take > 0 {
+                terminatingNewline = nil
+            }
             wanted -= take
             guard normalizeHead() else { return }  // exhausted; `wanted` may still be positive
             if wanted == 0 || headAvailable == 0 { return }
@@ -577,7 +583,7 @@ extension ParseInput {
         return true
     }
 
-    /// Consumes a line ending, and records which kind it was in ``lastParsedNewline``.
+    /// Consumes a line ending, and records which kind it was in ``terminatingNewline``.
     ///
     /// Some servers send a stray space before the line ending, so spaces are skipped first, up to
     /// ``maximumStraySpaces``. Spaces within the cap with nothing after them report
@@ -587,7 +593,7 @@ extension ParseInput {
     internal mutating func matchNewline() throws -> Newline {
         let (newline, length) = try newlineAhead()
         advance(by: length)
-        lastParsedNewline = newline
+        terminatingNewline = newline
         return newline
     }
 

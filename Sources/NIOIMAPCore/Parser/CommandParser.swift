@@ -75,7 +75,8 @@ public struct SynchronizedCommand: Hashable, Sendable {
 ///
 /// ```swift
 /// var parser = CommandParser()
-/// var buffer = ByteBuffer(bytes: clientData)
+/// var buffer = IMAPInputBuffer()
+/// buffer.append(bytesFromTheNetwork)
 /// while let syncedCommand = try parser.parseCommandStream(buffer: &buffer) {
 ///     if syncedCommand.numberOfSynchronisingLiterals > 0 {
 ///         // Wait for continuation requests and responses
@@ -161,7 +162,7 @@ public struct CommandParser: Parser, Sendable {
         self.parser = GrammarParser(literalSizeLimit: literalSizeLimit)
     }
 
-    /// Parses a given `ByteBuffer` into command stream parts.
+    /// Parses incoming bytes into command stream parts.
     ///
     /// Incrementally consumes bytes from the buffer and returns parsed command parts.
     /// The parser maintains state across calls, so a command may arrive in multiple
@@ -174,8 +175,10 @@ public struct CommandParser: Parser, Sendable {
     /// - The input violates IMAP command syntax
     /// - UTF-8 validation fails
     ///
-    /// - Parameter buffer: A `ByteBuffer` with incoming data. The parser consumes
-    ///   bytes from the front as it parses them.
+    /// - Parameter buffer: The received bytes. Whatever the parser consumes is discarded from the
+    ///   front, so the same buffer is passed again as more arrives. An ``IMAPInputBuffer`` is what a
+    ///   connection should hand over: it keeps each read where it landed, and it is the only input an
+    ///   `APPEND` payload can be delivered out of without being copied.
     ///
     /// - Returns: A ``SynchronizedCommand`` if a complete element is parsed, or `nil`
     ///   if more data is needed.
@@ -184,67 +187,60 @@ public struct CommandParser: Parser, Sendable {
     ///   parse failures, ``TooMuchRecursion`` for overly nested structures.
     ///
     /// - SeeAlso: ``SynchronizedCommand``, [RFC 3501 Section 5](https://datatracker.ietf.org/doc/html/rfc3501#section-5)
-    public mutating func parseCommandStream(buffer: inout ByteBuffer) throws -> SynchronizedCommand? {
-        guard buffer.readableBytes > 0 else {
+    public mutating func parseCommandStream<Input: ConsumableParserInputBuffer>(
+        buffer: inout Input
+    ) throws -> SynchronizedCommand? {
+        guard buffer.count > 0 else {
             return nil
         }
 
-        let save = buffer
-        // Temporary: frames over a cursor on the ByteBuffer's bytes until this function takes a
-        // ParserInputBuffer. Removed in "Parse from ParseInput instead of ByteBuffer".
-        let framingResult = try buffer.withUnsafeReadableBytes { bytes in
-            let input = ParseInput(_span(bytes.bindMemory(to: UInt8.self)))
-            return try self.synchronisingLiteralParser.parseContinuationsNecessary(input)
-        }
-        var actuallyVisible = ParseBuffer(
-            buffer.getSlice(at: buffer.readerIndex, length: framingResult.maximumValidBytes)!
-        )
-
-        func parseCommand() throws -> CommandStreamPart? {
-            do {
-                guard
-                    let command = try self.parseCommandStream0(
-                        buffer: &actuallyVisible,
-                        tracker: .makeNewDefault
-                    )
-                else {
-                    assert(
-                        framingResult.maximumValidBytes == actuallyVisible.readableBytes,
-                        "parser consumed bytes on nil: readableBytes before parse: \(framingResult.maximumValidBytes), buffer: \(actuallyVisible)"
-                    )
-                    return nil
-                }
-                // We need to discard the bytes we consumed from the real buffer.
-                let consumedBytes = framingResult.maximumValidBytes - actuallyVisible.readableBytes
-                buffer.moveReaderIndex(forwardBy: consumedBytes)
-
-                assert(
-                    buffer.writerIndex == save.writerIndex,
-                    "the writer index of the buffer moved whilst parsing which is not supported: \(buffer), \(save)"
-                )
-                assert(
-                    consumedBytes >= 0,
-                    "allegedly, we consumed a negative amount of bytes: \(consumedBytes)"
-                )
-                self.synchronisingLiteralParser.consumed(consumedBytes)
-                assert(
-                    consumedBytes <= framingResult.maximumValidBytes,
-                    "We consumed \(consumedBytes) which is more than the framing parser thought are maximally "
-                        + "valid: \(framingResult), \(self.synchronisingLiteralParser)"
-                )
-                return command
-            } catch is IncompleteMessage {
-                return nil
+        // Both passes below share one gather. Framing has to run first — it decides how much of what
+        // has arrived may be parsed at all — and it consumes nothing, so the cursor it hands back is
+        // still at the read position.
+        var framingResult: SynchronizingLiteralParser.FramingResult?
+        var consumedBytes = 0
+        let command: CommandStreamPart?
+        do {
+            command = try buffer.withParseInput(limit: .max) { input in
+                let framing = try self.synchronisingLiteralParser.parseContinuationsNecessary(input)
+                framingResult = framing
+                // `narrowLimit` is what keeps the parser from seeing past what the framing pass deemed
+                // valid. It used to be a `getSlice` of exactly those bytes, which the cursor makes
+                // unnecessary: bytes past the limit are invisible to every primitive.
+                input.narrowLimit(toNext: framing.maximumValidBytes)
+                defer { consumedBytes = input.consumed }
+                return try self.parseCommandStream0(buffer: &input, tracker: .makeNewDefault)
             }
+        } catch is IncompleteMessage {
+            command = nil
         }
 
-        if let command = try parseCommand() {
-            return SynchronizedCommand(command, numberOfSynchronisingLiterals: framingResult.synchronizingLiteralCount)
-        } else if framingResult.synchronizingLiteralCount > 0 {
-            return SynchronizedCommand(numberOfSynchronisingLiterals: framingResult.synchronizingLiteralCount)
-        } else {
-            return nil
+        // Framing ran before anything could throw `IncompleteMessage`, so its literal count is known
+        // even when no command came out of this call.
+        guard let framingResult else {
+            preconditionFailure("framing did not run")
         }
+
+        guard let command else {
+            assert(
+                consumedBytes == 0,
+                "parser consumed \(consumedBytes) bytes on nil, out of \(framingResult.maximumValidBytes)"
+            )
+            guard framingResult.synchronizingLiteralCount > 0 else { return nil }
+            return SynchronizedCommand(numberOfSynchronisingLiterals: framingResult.synchronizingLiteralCount)
+        }
+
+        assert(consumedBytes >= 0, "allegedly, we consumed a negative amount of bytes: \(consumedBytes)")
+        assert(
+            consumedBytes <= framingResult.maximumValidBytes,
+            "We consumed \(consumedBytes) which is more than the framing parser thought are maximally "
+                + "valid: \(framingResult), \(self.synchronisingLiteralParser)"
+        )
+        // Only now are the bytes gone from the caller's buffer: a call that produced nothing consumes
+        // nothing, so the same bytes are parsed again once the rest of the command arrives.
+        buffer.discardFirst(consumedBytes)
+        self.synchronisingLiteralParser.consumed(consumedBytes)
+        return SynchronizedCommand(command, numberOfSynchronisingLiterals: framingResult.synchronizingLiteralCount)
     }
 
     private mutating func parseCommandStream0(

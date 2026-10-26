@@ -33,7 +33,7 @@ struct ResponseParserTests {
     @Test("attempt to stream bytes from empty buffer")
     func attemptToStreamBytesFromEmptyBuffer() throws {
         var parser = ResponseParser()
-        var buffer: ByteBuffer = ""
+        var buffer: IMAPInputBuffer = ""
 
         // set up getting ready to stream a response
         buffer = "* 1 FETCH (BODY[TEXT]<4> {10}\r\n"
@@ -62,15 +62,15 @@ struct ResponseParserTests {
         // IncompleteMessage error. This needs to _not_ fail the parsing, but instead
         // bubble up to parseResponseStream() which will then wait for more data.
         //
-        var buffer = ByteBuffer(
-            string: #"""
-                * 61785 FETCH (UID 127139 BODYSTRUCTURE (("TEXT" "PLAIN" ("CHARSET" "utf-8") NIL NIL "QUOTED-PRINTABLE" 71399 1519 NIL NIL NIL NIL)(("TEXT" "HTML" ("CHARSET" "utf-8") NIL NIL "QUOTED-PRINTABLE" 659725 9831 NIL NIL NIL NIL)("IMAGE" "PNG" ("X-UNIX-MODE" "0666" "NAME" "H9eubHenuyTiQAAAABJRU5ErkJggg==.png") "<5079C210-D42C-49F4-A942-2BA779C88A96>" NIL "BASE64" 104028 NIL ("INLINE" ("FILENAME" "H9eubHenuyTiQAAAABJRU5ErkJggg==.png")) NIL NIL)("IMAGE" "PNG" ("X-UNIX-MODE" "0666" "NAME" "IAEJCABCUhAAhKQgAQkIAEJSEACEpCABCQgAQlIQAISkIAEJNAKAQMdW8HsSSQgAQlIQAISkIAEJCABCUhAAhKQgAQkIAEJSEACEpCABCQgAQlIQAISkIAEJCABCUhAA") "<23E8CC74-836D-4B45-8B1E-1CF023182729>" NIL "BASE64" 55168 NIL ("INLINE" ("FILENAME" {4138}\#r\#naaaaaaaa
-                """#
+        var buffer = IMAPInputBuffer(
+            #"""
+            * 61785 FETCH (UID 127139 BODYSTRUCTURE (("TEXT" "PLAIN" ("CHARSET" "utf-8") NIL NIL "QUOTED-PRINTABLE" 71399 1519 NIL NIL NIL NIL)(("TEXT" "HTML" ("CHARSET" "utf-8") NIL NIL "QUOTED-PRINTABLE" 659725 9831 NIL NIL NIL NIL)("IMAGE" "PNG" ("X-UNIX-MODE" "0666" "NAME" "H9eubHenuyTiQAAAABJRU5ErkJggg==.png") "<5079C210-D42C-49F4-A942-2BA779C88A96>" NIL "BASE64" 104028 NIL ("INLINE" ("FILENAME" "H9eubHenuyTiQAAAABJRU5ErkJggg==.png")) NIL NIL)("IMAGE" "PNG" ("X-UNIX-MODE" "0666" "NAME" "IAEJCABCUhAAhKQgAQkIAEJSEACEpCABCQgAQlIQAISkIAEJNAKAQMdW8HsSSQgAQlIQAISkIAEJCABCUhAAhKQgAQkIAEJSEACEpCABCQgAQlIQAISkIAEJCABCUhAA") "<23E8CC74-836D-4B45-8B1E-1CF023182729>" NIL "BASE64" 55168 NIL ("INLINE" ("FILENAME" {4138}\#r\#naaaaaaaa
+            """#
         )
         var parser = ResponseParser()
         let results = try {
             var results: [ResponseOrContinuationRequest] = []
-            while buffer.readableBytes > 0 {
+            while buffer.count > 0 {
                 guard let resp = try parser.parseResponseStream(buffer: &buffer) else { break }
                 results.append(resp)
             }
@@ -92,7 +92,7 @@ struct ResponseParserTests {
                 messageAttributeLimit: 3
             )
         )
-        var buffer: ByteBuffer = "* 999 FETCH (FLAGS (\\Seen) UID 1 RFC822.SIZE 123 RFC822.TEXT {3}\r\n "
+        var buffer: IMAPInputBuffer = "* 999 FETCH (FLAGS (\\Seen) UID 1 RFC822.SIZE 123 RFC822.TEXT {3}\r\n "
 
         // limit is 3, so let's parse the first 3
         #expect(try parser.parseResponseStream(buffer: &buffer) == .response(.fetch(.start(999))))
@@ -118,7 +118,7 @@ struct ResponseParserTests {
                 messageAttributeLimit: 3
             )
         )
-        var buffer: ByteBuffer = "* 999 FETCH (FLAGS (\\Seen) UID 1 RFC822.SIZE 123 UID 2 "
+        var buffer: IMAPInputBuffer = "* 999 FETCH (FLAGS (\\Seen) UID 1 RFC822.SIZE 123 UID 2 "
 
         // limit is 3, so let's parse the first 3
         #expect(try parser.parseResponseStream(buffer: &buffer) == .response(.fetch(.start(999))))
@@ -144,7 +144,7 @@ struct ResponseParserTests {
                 bodySizeLimit: 10
             )
         )
-        var buffer: ByteBuffer = "* 999 FETCH (RFC822.TEXT {3}\r\n123 RFC822.HEADER {11}\r\n "
+        var buffer: IMAPInputBuffer = "* 999 FETCH (RFC822.TEXT {3}\r\n123 RFC822.HEADER {11}\r\n "
         #expect(try parser.parseResponseStream(buffer: &buffer) == .response(.fetch(.start(999))))
         #expect(
             try parser.parseResponseStream(buffer: &buffer)
@@ -168,7 +168,7 @@ struct ResponseParserTests {
                 bodySizeLimit: 10
             )
         )
-        var buffer: ByteBuffer = "* 999 FETCH (FLAGS (\\Seen))\r\n"
+        var buffer: IMAPInputBuffer = "* 999 FETCH (FLAGS (\\Seen))\r\n"
         #expect(try parser.parseResponseStream(buffer: &buffer) == .response(.fetch(.start(999))))
         #expect(
             try parser.parseResponseStream(buffer: &buffer) == .response(.fetch(.simpleAttribute(.flags([.seen]))))
@@ -190,7 +190,7 @@ struct ResponseParserTests {
                 }
             )
         )
-        var buffer: ByteBuffer = "* 999 FETCH (FLAGS (\\Seen))\r\n"
+        var buffer: IMAPInputBuffer = "* 999 FETCH (FLAGS (\\Seen))\r\n"
         #expect(try parser.parseResponseStream(buffer: &buffer) == .response(.fetch(.start(999))))
         #expect(
             try parser.parseResponseStream(buffer: &buffer)
@@ -211,7 +211,7 @@ struct ResponseParserTests {
                 literalSizeLimit: 1
             )
         )
-        var buffer: ByteBuffer = "* 999 FETCH (RFC822.TEXT {3}\r\n123 RFC822.HEADER {11}\r\n "
+        var buffer: IMAPInputBuffer = "* 999 FETCH (RFC822.TEXT {3}\r\n123 RFC822.HEADER {11}\r\n "
         #expect(try parser.parseResponseStream(buffer: &buffer) == .response(.fetch(.start(999))))
         #expect(
             try parser.parseResponseStream(buffer: &buffer)
@@ -224,7 +224,7 @@ struct ResponseParserTests {
     @Test("state is enforced")
     func stateIsEnforced() throws {
         var parser = ResponseParser()
-        var input = ByteBuffer(string: "* 1 FETCH (* 2 FETCH \n")
+        var input = IMAPInputBuffer("* 1 FETCH (* 2 FETCH \n")
 
         #expect(try parser.parseResponseStream(buffer: &input) == .response(.fetch(.start(1))))
         #expect(throws: (any Error).self) {
@@ -237,7 +237,7 @@ struct ResponseParserTests {
         // An EXISTS response is not a FETCH, so parseResponse_fetch fails and
         // parseResponse_normal succeeds, exercising the .untaggedResponse branch.
         var parser = ResponseParser()
-        var buffer: ByteBuffer = "* 5 EXISTS\r\n"
+        var buffer: IMAPInputBuffer = "* 5 EXISTS\r\n"
         let result = try parser.parseResponseStream(buffer: &buffer)
         #expect(result == .response(.untagged(.mailboxData(.exists(5)))))
     }
@@ -255,10 +255,10 @@ extension ResponseParserTests {
 
     private func parse(_ chunks: [[UInt8]]) throws -> [Response] {
         var parser = ResponseParser()
-        var buffer = ByteBuffer()
+        var buffer = IMAPInputBuffer()
         var result: [Response] = []
         for chunk in chunks {
-            buffer.writeBytes(chunk)
+            buffer.append(chunk)
             while let next = try parser.parseResponseStream(buffer: &buffer) {
                 guard case .response(let response) = next else {
                     Issue.record("Unexpected continuation request: \(next)")
@@ -274,7 +274,7 @@ extension ResponseParserTests {
                 }
             }
         }
-        #expect(buffer.readableBytes == 0)
+        #expect(buffer.isEmpty)
         return result
     }
 

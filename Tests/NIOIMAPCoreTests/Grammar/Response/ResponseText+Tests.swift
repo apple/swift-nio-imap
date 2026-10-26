@@ -95,9 +95,10 @@ struct ResponseTextTests {
     @Test("non-UTF-8 text fails to parse")
     func parseLatin1() {
         // Latin-1 `ü`.
-        var buffer = ParseBuffer(ByteBuffer(bytes: [UInt8(ascii: "a"), 0xFC, UInt8(ascii: "\r")]))
         #expect(throws: ParserError.self) {
-            try GrammarParser().parseResponseText(buffer: &buffer, tracker: .testTracker)
+            try [UInt8(ascii: "a"), 0xFC, UInt8(ascii: "\r")].withParseInput(limit: .max) { input in
+                try GrammarParser().parseResponseText(buffer: &input, tracker: .testTracker)
+            }
         }
     }
 

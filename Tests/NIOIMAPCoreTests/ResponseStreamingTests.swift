@@ -215,7 +215,7 @@ struct ResponseStreamingTests {
         ]
     )
     func parseFetchResponses(_ fixture: FetchResponseFixture) throws {
-        var buffer = ByteBuffer(string: fixture.input)
+        var buffer = IMAPInputBuffer(fixture.input)
         var parser = ResponseParser()
 
         for expected in fixture.expectation {
@@ -223,6 +223,6 @@ struct ResponseStreamingTests {
             #expect(actual == .response(expected), "Mismatch in response sequence")
         }
 
-        #expect(buffer.readableBytes == 0, "All bytes should be consumed")
+        #expect(buffer.count == 0, "All bytes should be consumed")
     }
 }

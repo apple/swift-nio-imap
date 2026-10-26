@@ -194,11 +194,10 @@ struct MailboxAttributeTests {
 
     @Test("invalid non-UTF-8 MAILBOXID in STATUS is parsed as invalid")
     func parseStatusMailboxIDWithNonUTF8Bytes() throws {
-        var buffer = ByteBuffer(string: "MAILBOXID (")
-        buffer.writeBytes([0x30, 0x10, 0x50, 0x87, 0x6d, 0x55])
-        buffer.writeString(")\r")
-        var parseBuffer = ParseBuffer(buffer)
-        let status = try GrammarParser().parseMailboxStatus(buffer: &parseBuffer, tracker: .testTracker)
+        let bytes = Array("MAILBOXID (".utf8) + [0x30, 0x10, 0x50, 0x87, 0x6d, 0x55] + Array(")\r".utf8)
+        let status = try bytes.withParseInput(limit: .max) { input in
+            try GrammarParser().parseMailboxStatus(buffer: &input, tracker: .testTracker)
+        }
         #expect(status.mailboxID == .invalid)
     }
 

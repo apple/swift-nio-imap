@@ -497,12 +497,14 @@ struct CommandTypeTests {
 
     @Test("parser literal length limit") func parserLiteralLengthLimit() throws {
         let parser = GrammarParser(literalSizeLimit: 5)
-        var b1 = ParseBuffer("{5}\r\nabcde")
-        #expect(try parser.parseLiteral(buffer: &b1, tracker: .makeNewDefault) == "abcde")
+        try TestUtilities.withParseInput(for: "{5}\r\nabcde") { buffer in
+            let literal = try parser.parseLiteral(buffer: &buffer, tracker: .makeNewDefault)
+            #expect(literal == "abcde")
+        }
 
-        var b2 = ParseBuffer("{6}\r\nabcdef")
-        #expect(throws: ExceededLiteralSizeLimitError.self) {
-            try parser.parseLiteral(buffer: &b2, tracker: .makeNewDefault)
+        TestUtilities.withParseInput(for: "{6}\r\nabcdef") { buffer in
+            let error = errorThrown(by: { try parser.parseLiteral(buffer: &buffer, tracker: .makeNewDefault) })
+            #expect(error is ExceededLiteralSizeLimitError)
         }
     }
 
