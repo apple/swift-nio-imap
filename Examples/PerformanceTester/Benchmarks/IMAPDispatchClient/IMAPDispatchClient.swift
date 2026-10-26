@@ -78,7 +78,8 @@ let benchmarks: @Sendable () -> Void = {
     // `encode.responses.session` reported retain deltas of 38 and 58 across two runs of the same binary
     // with identical allocation counters. Gating that gates noise, and quoting it in a before/after would
     // be quoting the scheduler. The allocation counters stay; an asynchronous `free` cannot change how
-    // many times something was allocated.
+    // many times something was allocated. `encode.dispatch.*` in `IMAPEncoding` has the same treatment;
+    // see the long note there.
     let encodeMetrics: [BenchmarkMetric] = [
         .wallClock,
         .throughput,
