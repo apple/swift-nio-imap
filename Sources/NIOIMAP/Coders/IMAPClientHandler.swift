@@ -36,7 +36,8 @@ public final class IMAPClientHandler: ChannelDuplexHandler {
         case setEncodingOptions(EncodingOptions)
     }
 
-    private let decoder: NIOSingleStepByteToMessageProcessor<ResponseDecoder>
+    /// Received bytes, parsed where they landed rather than coalesced into one buffer first.
+    private let decoder: IMAPInputProcessor<ResponseDecoder>
 
     private var state: ClientStateMachine
 
@@ -46,7 +47,7 @@ public final class IMAPClientHandler: ChannelDuplexHandler {
         maximumBufferSize: Int = IMAPDefaults.lineLengthLimit
     ) {
         self.state = .init(encodingOptions: encodingOptions)
-        self.decoder = NIOSingleStepByteToMessageProcessor(
+        self.decoder = IMAPInputProcessor(
             ResponseDecoder(
                 options: parserOptions
             ),

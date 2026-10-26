@@ -1484,6 +1484,42 @@ private final class WriteOnRead: ChannelInboundHandler {
     }
 }
 
+// MARK: - After a parse error
+
+extension IMAPClientHandlerTests {
+    /// A peer that keeps sending after a parse error must not be able to grow the buffer, nor make every
+    /// read re-parse and re-copy everything it sent before.
+    @Test("after a parse error, later reads fail without buffering or re-copying the input")
+    func parseErrorDoesNotAccumulate() {
+        let maximumBufferSize = 100
+        let laterReads = 50
+        let readSize = 1024
+        let channel = EmbeddedChannel(handler: IMAPClientHandler(maximumBufferSize: maximumBufferSize))
+        defer { _ = try? channel.finish() }
+
+        func errorBufferSize(afterReading bytes: ByteBuffer) -> Int? {
+            do {
+                try channel.writeInbound(bytes)
+                return nil
+            } catch let error as IMAPDecoderError {
+                return error.buffer.readableBytes
+            } catch {
+                Issue.record("unexpected error \(error)")
+                return nil
+            }
+        }
+
+        guard let first = errorBufferSize(afterReading: ByteBuffer(string: "* 1 EXISTS)\r\n")) else {
+            Issue.record("the first read should fail to parse")
+            return
+        }
+        for _ in 0..<laterReads {
+            let size = errorBufferSize(afterReading: ByteBuffer(repeating: UInt8(ascii: "x"), count: readSize))
+            #expect(size == first)
+        }
+    }
+}
+
 extension IMAPClientHandlerTests {
     struct Helper {
         var channel: EmbeddedChannel
