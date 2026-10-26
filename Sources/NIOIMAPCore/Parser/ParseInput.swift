@@ -297,6 +297,16 @@ extension ParseInput {
     @_lifetime(self: copy self)
     internal mutating func advance(by n: Int) {
         precondition(n >= 0, "cannot advance by \(n)")
+        #if DEBUG
+        // Checked against what was visible *before* the call, so this also catches skipped bytes, which
+        // nothing in release can. `remaining` walks the table, hence debug only.
+        let consumedBefore = consumed
+        let visibleBefore = remaining
+        defer {
+            assert(consumed - consumedBefore == Swift.min(n, visibleBefore), "advance consumed the wrong count")
+            assert(!head.isEmpty || remaining == 0, "cursor invariant broken: head empty, bytes remain")
+        }
+        #endif
         var wanted = n
         while true {
             let take = Swift.min(wanted, headAvailable)
@@ -309,6 +319,28 @@ extension ParseInput {
             guard normalizeHead() else { return }  // exhausted; `wanted` may still be positive
             if wanted == 0 || headAvailable == 0 { return }
         }
+    }
+
+    /// Advances by `n`, which must be positive, and reports whether anything was consumed.
+    ///
+    /// For loops whose termination rests on `advance` moving: they stop instead of spinning should it
+    /// ever not, and debug builds trap at the bug.
+    @_lifetime(self: copy self)
+    private mutating func advanceProgressing(by n: Int) -> Bool {
+        let consumedBefore = consumed
+        advance(by: n)
+        guard consumed > consumedBefore else {
+            assertionFailure("advance(by: \(n)) consumed nothing")
+            return false
+        }
+        return true
+    }
+
+    /// Throws ``NoForwardProgress`` unless something was consumed since `mark`, a value of ``consumed``.
+    ///
+    /// For hand-written loops in the grammar: an iteration that consumed nothing would repeat forever.
+    internal func requireProgress(since mark: Int) throws {
+        guard consumed > mark else { throw NoForwardProgress() }
     }
 
     /// Narrows the limit to the next `count` bytes.
@@ -409,7 +441,7 @@ extension ParseInput {
             }
             if let hit { return scanned + hit }
             scanned += available
-            walker.advance(by: available)
+            guard walker.advanceProgressing(by: available) else { return nil }
         }
     }
 
@@ -437,7 +469,7 @@ extension ParseInput {
             }
             if let stop { return scanned + stop }
             scanned += available
-            walker.advance(by: available)
+            guard walker.advanceProgressing(by: available) else { return nil }
         }
     }
 }
@@ -469,6 +501,12 @@ extension ParseInput {
         var wanted = length
         while wanted > 0 {
             let take = Swift.min(wanted, headAvailable)
+            // `remaining >= length` above promises the bytes, and by the invariant a cursor that is not
+            // exhausted has some in `head`. Were the invariant ever broken this would spin, not end.
+            guard take > 0 else {
+                assertionFailure("cursor invariant broken: bytes remain but none are in the head")
+                throw NoForwardProgress()
+            }
             withCurrentChunk { chunk in
                 chunk.extracting(first: take).withUnsafeBufferPointer { bytes.append(contentsOf: $0) }
             }

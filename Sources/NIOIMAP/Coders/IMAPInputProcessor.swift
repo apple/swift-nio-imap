@@ -61,6 +61,15 @@ internal final class IMAPInputProcessor<Decoder: IMAPMessageDecoder> {
     /// How many bytes are waiting to be parsed.
     internal var bufferedByteCount: Int { self.input.count }
 
+    /// How many messages in a row the decoder may return without consuming a byte.
+    ///
+    /// Some messages consume nothing, but the parsers' state machines bound how many come in a row: on
+    /// the command side two (`.append(.messageBytes)` with no bytes, then `.append(.endMessage)`, for a
+    /// `{0}` literal; likewise `.catenateData` for a zero-length `TEXT`), on the response side one
+    /// (`.fetch(.streamingEnd)`). The step after each always consumes. Twice the longest chain leaves
+    /// room for one more without letting a stalled decoder spin the event loop on a single read.
+    static var maximumMessagesWithoutProgress: Int { 4 }
+
     /// Creates a processor.
     ///
     /// - Parameters:
@@ -78,16 +87,28 @@ internal final class IMAPInputProcessor<Decoder: IMAPMessageDecoder> {
     /// - Parameters:
     ///   - buffer: The bytes that just arrived. Retained if at least 1 KiB, copied otherwise.
     ///   - messageReceiver: Called once per message, in order.
-    /// - Throws: Whatever the decoder throws, or `ByteToMessageDecoderError.PayloadTooLargeError` if
-    ///   more than `maximumBufferSize` bytes are waiting once it stops producing messages. Either one
-    ///   is final: the buffered bytes are dropped and every later call throws the same error without
-    ///   decoding. (`ByteToMessageHandler` also stops decoding, but reports later reads as
+    /// - Throws: Whatever the decoder throws, `ByteToMessageDecoderError.PayloadTooLargeError` if more
+    ///   than `maximumBufferSize` bytes are waiting once it stops producing messages, or an
+    ///   ``IMAPDecoderError`` carrying ``NoForwardProgress`` if it keeps producing messages without
+    ///   consuming (see ``maximumMessagesWithoutProgress``). Each is final: the buffered bytes are
+    ///   dropped and every later call throws the same error without decoding. (`ByteToMessageHandler`
+    ///   also stops decoding, but reports later reads as
     ///   `ByteToMessageDecoderError.dataReceivedInErrorState`.) What `messageReceiver` throws is
     ///   passed through and is not final.
     internal func process(buffer: ByteBuffer, _ messageReceiver: (Decoder.InboundOut) throws -> Void) throws {
         if let failure = self.failure { throw failure }
         self.input.append(buffer)
-        while let message = try self.decodeNext() {
+        var messagesWithoutProgress = 0
+        while true {
+            // Measured around `decode` alone: `messageReceiver` may re-enter and append a read.
+            let unparsed = self.input.count
+            guard let message = try self.decodeNext() else { break }
+            messagesWithoutProgress = self.input.count < unparsed ? 0 : messagesWithoutProgress + 1
+            guard messagesWithoutProgress <= Self.maximumMessagesWithoutProgress else {
+                throw self.fail(
+                    IMAPDecoderError(parserError: NoForwardProgress(), buffer: self.input.coalescedByteBuffer())
+                )
+            }
             try messageReceiver(message)
         }
         if let maximumBufferSize = self.maximumBufferSize, self.input.count > maximumBufferSize {

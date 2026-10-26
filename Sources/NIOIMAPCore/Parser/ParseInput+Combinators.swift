@@ -182,6 +182,25 @@ extension ParseInput {
         }
     }
 
+    /// Runs `parser` until it stops matching, handing each result to `body`.
+    ///
+    /// A match that consumes nothing would match again at the same position forever, so it throws
+    /// ``NoForwardProgress`` instead. No production used with the repetition combinators matches empty
+    /// today; this keeps a future one from becoming a hang on peer input.
+    @_lifetime(self: copy self)
+    mutating func forEachRepetition<T>(
+        tracker: StackTracker,
+        parser: SubParser<T>,
+        _ body: (T) -> Void
+    ) throws {
+        while true {
+            let mark = consumed
+            guard let next = try parseOptional(tracker: tracker, parser: parser) else { return }
+            try requireProgress(since: mark)
+            body(next)
+        }
+    }
+
     /// Runs each of `subParsers` in turn and returns the first result, consuming nothing for the
     /// alternatives that fail.
     @_lifetime(self: copy self)
@@ -280,9 +299,7 @@ extension ParseInput {
     ) throws {
         try composite(tracker: tracker) { input, tracker in
             parsed.append(try parser(&input, tracker))
-            while let next = try input.parseOptional(tracker: tracker, parser: parser) {
-                parsed.append(next)
-            }
+            try input.forEachRepetition(tracker: tracker, parser: parser) { parsed.append($0) }
         }
     }
 
@@ -302,9 +319,7 @@ extension ParseInput {
         parser: SubParser<T>
     ) throws {
         try composite(tracker: tracker) { input, tracker in
-            while let next = try input.parseOptional(tracker: tracker, parser: parser) {
-                parsed.append(next)
-            }
+            try input.forEachRepetition(tracker: tracker, parser: parser) { parsed.append($0) }
         }
     }
 
@@ -316,9 +331,7 @@ extension ParseInput {
         parser: SubParser<(K, V)>
     ) throws {
         try composite(tracker: tracker) { input, tracker in
-            while let next = try input.parseOptional(tracker: tracker, parser: parser) {
-                orderedDictionary[next.0] = next.1
-            }
+            try input.forEachRepetition(tracker: tracker, parser: parser) { orderedDictionary[$0.0] = $0.1 }
         }
     }
 
@@ -330,9 +343,7 @@ extension ParseInput {
         parser: SubParser<KeyValue<K, V>>
     ) throws {
         try composite(tracker: tracker) { input, tracker in
-            while let next = try input.parseOptional(tracker: tracker, parser: parser) {
-                orderedDictionary[next.key] = next.value
-            }
+            try input.forEachRepetition(tracker: tracker, parser: parser) { orderedDictionary[$0.key] = $0.value }
         }
     }
 }

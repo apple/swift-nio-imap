@@ -39,6 +39,8 @@ extension GrammarParser {
 
         do {
             return try .valid(self.parseBody(buffer: &buffer, tracker: tracker))
+        } catch let error as NoForwardProgress {
+            throw error
         } catch {
             // Re-try parsing as an invalid body response.
             // This may throw either IncompleteMessage or a “real” parse error.
@@ -92,6 +94,8 @@ extension GrammarParser {
                 guard
                     byteCount < maximumByteCount
                 else { throw ParserError(hint: "Run-away body structure") }
+                // No progress check needed: `byteCount` grows by at least one per iteration whatever is
+                // consumed, so the guard above bounds the loop.
                 switch state {
                 case .normal:
                     // Skip anything except for
@@ -114,12 +118,10 @@ extension GrammarParser {
                                 tracker: tracker,
                                 maxLength: max(0, maximumByteCount - byteCount)
                             )
-                        } catch let error as IncompleteMessage {
-                            // The length may simply not have arrived yet, e.g. a read ending in `{1`.
-                            throw error
-                        } catch {
+                        } catch is ParserError, is ExceededLiteralSizeLimitError {
                             throw ParserError(hint: "Run-away literal in body structure")
                         }
+                        // Anything else propagates, e.g. `IncompleteMessage` for a read ending in `{1`.
                         try buffer.matchFixed("}")
                         try buffer.matchNewline()
                         _ = try buffer.extractBytes(length: literalCount)
@@ -197,6 +199,7 @@ extension GrammarParser {
                     save = buffer
                     try buffer.parseSpaces()
                     try parseBodyExtension_arrayOrStatic(buffer: &buffer, tracker: tracker, into: &array)
+                    try buffer.requireProgress(since: save.consumed)
                 }
             } catch is ParserError {
                 buffer = save

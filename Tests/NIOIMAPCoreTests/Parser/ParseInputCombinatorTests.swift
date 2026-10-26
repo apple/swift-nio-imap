@@ -12,8 +12,9 @@
 //
 //===----------------------------------------------------------------------===//
 
-@testable import NIOIMAPCore
+@_spi(NIOIMAPInternal) @testable import NIOIMAPCore
 
+import OrderedCollections
 import Testing
 
 /// The grammar's building blocks, as methods on the cursor.
@@ -190,6 +191,137 @@ extension ParseInputCombinatorTests {
                 return 1
             }
             #expect(result == [1, 1])
+        }
+    }
+}
+
+// MARK: - Forward progress
+
+/// Matches without consuming the first `count` times, then stops matching — so with the forward-progress
+/// guard removed a repetition ends after `count` results instead of hanging the test run.
+private final class EmptyMatches {
+    private var remaining: Int
+
+    init(count: Int) { self.remaining = count }
+
+    func next() throws {
+        guard remaining > 0 else { throw ParserError(hint: "done") }
+        remaining -= 1
+    }
+}
+
+private let emptyMatchCount = 3
+
+extension ParseInputCombinatorTests {
+    @Test("parseZeroOrMore throws when an element consumes nothing")
+    func parseZeroOrMoreThrowsWithoutProgress() {
+        let matches = EmptyMatches(count: emptyMatchCount)
+        TestUtilities.withParseInput(for: "xy") { buffer in
+            let error = errorThrown {
+                try buffer.parseZeroOrMore(tracker: .testTracker) { _, _ -> Int in
+                    try matches.next()
+                    return 1
+                }
+            }
+            #expect(error is NoForwardProgress)
+        }
+    }
+
+    @Test("parseOneOrMore throws when a repeated element consumes nothing")
+    func parseOneOrMoreThrowsWithoutProgress() {
+        let matches = EmptyMatches(count: emptyMatchCount)
+        TestUtilities.withParseInput(for: "xy") { buffer in
+            let error = errorThrown {
+                try buffer.parseOneOrMore(tracker: .testTracker) { _, _ -> Int in
+                    try matches.next()
+                    return 1
+                }
+            }
+            #expect(error is NoForwardProgress)
+        }
+    }
+
+    @Test("parseZeroOrMore into a dictionary throws when an element consumes nothing")
+    func parseZeroOrMoreIntoDictionaryThrowsWithoutProgress() {
+        let matches = EmptyMatches(count: emptyMatchCount)
+        TestUtilities.withParseInput(for: "xy") { buffer in
+            var dictionary = OrderedDictionary<Int, Int>()
+            let error = errorThrown {
+                try buffer.parseZeroOrMore(into: &dictionary, tracker: .testTracker) { _, _ -> (Int, Int) in
+                    try matches.next()
+                    return (1, 1)
+                }
+            }
+            #expect(error is NoForwardProgress)
+        }
+    }
+
+    @Test("parseZeroOrMore into a dictionary of KeyValue throws when an element consumes nothing")
+    func parseZeroOrMoreIntoKeyValueDictionaryThrowsWithoutProgress() {
+        let matches = EmptyMatches(count: emptyMatchCount)
+        TestUtilities.withParseInput(for: "xy") { buffer in
+            var dictionary = OrderedDictionary<Int, Int>()
+            let error = errorThrown {
+                try buffer.parseZeroOrMore(into: &dictionary, tracker: .testTracker) { _, _ -> KeyValue<Int, Int> in
+                    try matches.next()
+                    return KeyValue(key: 1, value: 1)
+                }
+            }
+            #expect(error is NoForwardProgress)
+        }
+    }
+
+    @Test("NoForwardProgress names the check that fired")
+    func noForwardProgressDescription() {
+        #expect(String(describing: NoForwardProgress()).contains("ParseInputCombinatorTests.swift"))
+    }
+
+    /// `NoForwardProgress` is not a "did not match": the backtracking combinators must let it through.
+    @Test("parseOptional and parseOneOf do not absorb NoForwardProgress")
+    func backtrackingDoesNotAbsorbNoForwardProgress() {
+        TestUtilities.withParseInput(for: "xy") { buffer in
+            let optional = errorThrown {
+                try buffer.parseOptional(tracker: .testTracker) { _, _ -> Int in throw NoForwardProgress() }
+            }
+            #expect(optional is NoForwardProgress)
+            let oneOf = errorThrown {
+                try buffer.parseOneOf(
+                    [{ _, _ -> Int in throw NoForwardProgress() }, { _, _ -> Int in 1 }],
+                    tracker: .testTracker
+                )
+            }
+            #expect(oneOf is NoForwardProgress)
+        }
+    }
+}
+
+// MARK: - Incomplete is not a mismatch
+
+extension ParseInputCombinatorTests {
+    /// Hand-written list loops used to end on *any* error, so a list cut short by the end of the input
+    /// came back as complete. Only a `ParserError` ends one now.
+    @Test("a mailbox flag list cut short by the end of the input is incomplete")
+    func mailboxListFlagsIncomplete() {
+        TestUtilities.withParseInput(for: #"\Noselect \Mar"#) { buffer in
+            let error = errorThrown {
+                try GrammarParser().parseMailboxListFlags(buffer: &buffer, tracker: .testTracker)
+            }
+            #expect(error is IncompleteMessage)
+        }
+    }
+
+    @Test("a tagged extension continuation cut short by the end of the input is incomplete")
+    func taggedExtensionContinuationIncomplete() {
+        TestUtilities.withParseInput(for: " foo ba") { buffer in
+            var parts: [String] = []
+            let error = errorThrown {
+                try GrammarParser().parseTaggedExtensionComplex_continuation(
+                    into: &parts,
+                    buffer: &buffer,
+                    tracker: .testTracker
+                )
+            }
+            #expect(error is IncompleteMessage)
         }
     }
 }
