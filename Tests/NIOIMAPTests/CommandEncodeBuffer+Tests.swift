@@ -208,7 +208,7 @@ struct CommandEncodeBuffer_Tests {
                     )
                 ), #" (\Answered) "14-Jan-2022 13:54:22 -0200" {30531+}\#r\#n"#, #line
             ),
-            (.append(.messageBytes(ByteBuffer(string: "foobar"))), "", #line),
+            (.append(.messageBytes("foobar")), "", #line),
             (.append(.endMessage), "∅", #line),
             (.append(.finish), "\r\n", #line),
         ]

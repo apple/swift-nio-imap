@@ -94,7 +94,7 @@ final actor TestServer: Sendable {
         var completion: TaggedResponse.State?
 
         enum ExpectedPart {
-            case continuationResponse(ByteBuffer)
+            case continuationResponse(IMAPBuffer)
             case command(Command)
             case append(MailboxName, [NIOIMAPCore.AppendCommand])
         }
@@ -329,10 +329,10 @@ extension TestServer {
 
 extension TestServer {
     private func popExpected(
-        continuationResponse response: ByteBuffer
+        continuationResponse response: IMAPBuffer
     ) throws -> ExpectedCommand {
         struct UnexpectedContinuationResponse: Swift.Error {
-            var bytes: ByteBuffer
+            var bytes: IMAPBuffer
         }
 
         let index: Int
@@ -361,7 +361,7 @@ extension TestServer {
     }
 
     private func didReceive(
-        continuationResponse: ByteBuffer,
+        continuationResponse: IMAPBuffer,
         expectation: TestServer.ExpectedCommand
     ) throws {
         print("S: -> Received continuation response")
@@ -375,7 +375,7 @@ extension TestServer {
         }
         if let c = expectation.completion {
             struct NoPreviousTagForTaggedResponse: Swift.Error {
-                var continuationResponse: ByteBuffer
+                var continuationResponse: IMAPBuffer
             }
 
             guard

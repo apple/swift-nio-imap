@@ -54,7 +54,7 @@ extension IMAPCredential {
 
 extension CommandStreamPart {
     static func continuationResponse(_ data: Data) -> CommandStreamPart {
-        .continuationResponse(ByteBuffer(data))
+        .continuationResponse(IMAPBuffer(Array(data)))
     }
 }
 
