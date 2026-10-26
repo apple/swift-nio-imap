@@ -95,8 +95,6 @@ struct GrammarParser: @unchecked Sendable {
     }
 }
 
-typealias PL = ParserLibrary
-
 // MARK: - Grammar Parsers
 
 extension GrammarParser {
@@ -114,8 +112,6 @@ extension GrammarParser {
     /// - Throws: `IncompleteMessage` when every byte that has arrived is part of the keyword, since
     ///     more could still follow; ``ParserError`` when the first byte cannot start one.
     func parseLookupKeyword(buffer: inout ParseBuffer) throws -> String {
-        // A flat scan with nothing to recurse into, so it gets a throwaway tracker rather than
-        // taking the caller's.
         let parsed = try buffer.parseOneOrMoreCharacters { char -> Bool in
             switch char {
             case _ where char.isAlphaNum, UInt8(ascii: "."), UInt8(ascii: "-"):
@@ -825,7 +821,7 @@ extension GrammarParser {
     func parseLastCommandSet<T: MessageIdentifier>(
         buffer: inout ParseBuffer,
         tracker: StackTracker,
-        setParser: LegacySubParser<MessageIdentifierSetNonEmpty<T>>
+        setParser: SubParser<MessageIdentifierSetNonEmpty<T>>
     ) throws -> LastCommandSet<T> {
         func parseLastCommandSet_lastCommand(
             buffer: inout ParseBuffer,
@@ -849,7 +845,7 @@ extension GrammarParser {
     func parseLastCommandMessageID<T: MessageIdentifier>(
         buffer: inout ParseBuffer,
         tracker: StackTracker,
-        setParser: LegacySubParser<T>
+        setParser: SubParser<T>
     ) throws -> LastCommandMessageID<T> {
         func parseLastCommandMessageID_lastCommand(
             buffer: inout ParseBuffer,

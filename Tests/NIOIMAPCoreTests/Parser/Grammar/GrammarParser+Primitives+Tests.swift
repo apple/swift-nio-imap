@@ -312,23 +312,24 @@ private struct GrammarParserPrimitivesTests {
         let parser = GrammarParser()
 
         // Standard {N}\r\n — single-arg overload (covers lines 1467-1468)
-        var b1 = ParseBuffer("{5}\r\n")
-        let size1 = try parser.parseLiteralSize(buffer: &b1, tracker: .makeNewDefault)
-        #expect(size1 == 5)
+        try TestUtilities.withParseInput(for: "{5}\r\n") { buffer in
+            let size = try parser.parseLiteralSize(buffer: &buffer, tracker: .makeNewDefault)
+            #expect(size == 5)
+        }
 
         // Binary ~{N}\r\n — covers the ~ optional branch in the two-arg overload (line 1474)
-        var b2 = ParseBuffer("~{5}\r\n")
-        let size2 = try parser.parseLiteralSize(buffer: &b2, tracker: .makeNewDefault)
-        #expect(size2 == 5)
+        try TestUtilities.withParseInput(for: "~{5}\r\n") { buffer in
+            let size = try parser.parseLiteralSize(buffer: &buffer, tracker: .makeNewDefault)
+            #expect(size == 5)
+        }
     }
 
     @Test("parseLiteral with NUL byte throws")
     func parseLiteralNULByte() {
         let parser = GrammarParser()
         // Literal containing a NUL byte (0x00) — covers line 1495
-        var b = ParseBuffer("{3}\r\na\0b")
-        #expect(throws: (any Error).self) {
-            try parser.parseLiteral(buffer: &b, tracker: .makeNewDefault)
+        TestUtilities.withParseInput(for: "{3}\r\na\0b") { buffer in
+            #expect(errorThrown { try parser.parseLiteral(buffer: &buffer, tracker: .makeNewDefault) } != nil)
         }
     }
 
@@ -337,14 +338,14 @@ private struct GrammarParserPrimitivesTests {
         let parser = GrammarParser()
 
         // Non-synchronizing ~{N+}\r\n — covers the + optional branch (line 1508)
-        var b1 = ParseBuffer("~{3+}\r\nabc")
-        let result = try parser.parseLiteral8(buffer: &b1, tracker: .makeNewDefault)
-        #expect(String(decoding: result, as: UTF8.self) == "abc")
+        try TestUtilities.withParseInput(for: "~{3+}\r\nabc") { buffer in
+            let result = try parser.parseLiteral8(buffer: &buffer, tracker: .makeNewDefault)
+            #expect(String(decoding: result, as: UTF8.self) == "abc")
+        }
 
         // Literal8 containing a NUL byte — covers line 1513
-        var b2 = ParseBuffer("~{3}\r\na\0b")
-        #expect(throws: (any Error).self) {
-            try parser.parseLiteral8(buffer: &b2, tracker: .makeNewDefault)
+        TestUtilities.withParseInput(for: "~{3}\r\na\0b") { buffer in
+            #expect(errorThrown { try parser.parseLiteral8(buffer: &buffer, tracker: .makeNewDefault) } != nil)
         }
     }
 }
@@ -473,8 +474,8 @@ extension ParseFixture<Dummy> {
             input: input,
             terminator: terminator,
             expected: expected,
-            parser: {
-                try PL.parseNewline(buffer: &$0, tracker: $1)
+            parser: { buffer, _ in
+                try buffer.matchNewline()
                 return Dummy()
             }
         )

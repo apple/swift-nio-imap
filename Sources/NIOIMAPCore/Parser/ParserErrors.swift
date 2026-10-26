@@ -80,6 +80,11 @@ public struct ParserError: Error {
     /// Describes the parsing failure in human-readable terms, such as
     /// "Invalid UTF8", "Missing CRLF", "Unexpected character", etc. It's intended
     /// for logging and debugging purposes.
+    ///
+    /// - Note: These errors are thrown as part of ordinary control flow — `parseOneOf` throws one
+    ///     for every alternative that doesn't match — so the hint must not be built by string
+    ///     interpolation on any path that is taken often. A plain literal costs nothing; an
+    ///     interpolation heap-allocates as soon as the result exceeds 15 UTF-8 bytes.
     public var hint: String
     /// `StaticString` rather than `String`: `#fileID` is longer than the 15-byte small-string limit,
     /// so a `String` here would heap-allocate and retain on *every* throw, hint or no hint.
