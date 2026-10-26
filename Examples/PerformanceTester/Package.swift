@@ -22,8 +22,8 @@ import PackageDescription
 // libraries.
 //
 // Only `IMAPCorpus` and `IMAPDispatchClient` are declared in that configuration. The rest of the
-// suite names the post-migration model, which does not exist on `main`, so it cannot compile there
-// and there is nothing to gain by trying.
+// suite names `IMAPOutputBuffer`, `IMAPBufferList` and the post-migration model, none of which exist
+// on `main`, so it cannot compile there and there is nothing to gain by trying.
 let legacyImplementation = Context.environment["IMAP_IMPL"] == "main"
 let libraryPath =
     legacyImplementation
@@ -78,6 +78,19 @@ if !legacyImplementation {
                 .product(name: "Benchmark", package: "benchmark"),
             ],
             path: "Benchmarks/IMAPParsing",
+            plugins: [
+                .plugin(name: "BenchmarkPlugin", package: "benchmark")
+            ]
+        ),
+        .executableTarget(
+            name: "IMAPEncoding",
+            dependencies: [
+                "IMAPBenchmarkSupport",
+                .product(name: "NIOIMAP", package: "swift-nio-imap"),
+                .product(name: "NIO", package: "swift-nio"),
+                .product(name: "Benchmark", package: "benchmark"),
+            ],
+            path: "Benchmarks/IMAPEncoding",
             plugins: [
                 .plugin(name: "BenchmarkPlugin", package: "benchmark")
             ]
