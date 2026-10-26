@@ -202,8 +202,9 @@ private enum RoundtripTests {
             }
         }
 
-        var parseBuffer = ParseBuffer(ByteBuffer(bytes: bytes))
-        let decoded = try GrammarParser().parseTaggedCommand(buffer: &parseBuffer, tracker: .testTracker)
+        let decoded = try bytes.withParseInput { input in
+            try GrammarParser().parseTaggedCommand(buffer: &input, tracker: .testTracker)
+        }
         #expect(decoded == taggedCommand, "Decoded command should match original")
     }
 }

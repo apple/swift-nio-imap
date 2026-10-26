@@ -31,7 +31,7 @@ struct SynchronizedCommandTests {
         // 1 NOOP
         // 2 APPEND INBOX {10}\r\n0123456789
         // 3 NOOP
-        var buffer: ByteBuffer = "1 NOOP\r\n2 APPEND INBOX {10}\r\n0123456789\r\n3 NOOP\r\n"
+        var buffer: IMAPInputBuffer = "1 NOOP\r\n2 APPEND INBOX {10}\r\n0123456789\r\n3 NOOP\r\n"
 
         var parser = CommandParser()
 
@@ -43,7 +43,7 @@ struct SynchronizedCommandTests {
         let c2_5 = try parser.parseCommandStream(buffer: &buffer)
         let c3 = try parser.parseCommandStream(buffer: &buffer)
 
-        #expect(buffer.readableBytes == 0)
+        #expect(buffer.count == 0)
         #expect(
             c1
                 == SynchronizedCommand(
@@ -68,8 +68,8 @@ struct SynchronizedCommandTests {
 
     @Test("CATENATE with multiple URL and TEXT parts")
     func catenateWithMultipleUrlAndTextParts() throws {
-        var buffer = ByteBuffer(
-            string: #"1 NOOP\#r\#n"#
+        var buffer = IMAPInputBuffer(
+            #"1 NOOP\#r\#n"#
                 + #"A003 APPEND Drafts (\Seen \Draft $MDNSent) CATENATE (URL "/Drafts;UIDVALIDITY=385759045/;UID=20/;section=HEADER" TEXT {42}\#r\#n"#
                 + #"\#r\#n--------------030308070208000400050907\#r\#n URL "/Drafts;UIDVALIDITY=385759045/;UID=20/;section=1.MIME" "#
                 + #"URL "/Drafts;UIDVALIDITY=385759045/;UID=20/;section=1" TEXT {42}\#r\#n"#
@@ -99,7 +99,7 @@ struct SynchronizedCommandTests {
         let c2_16 = try parser.parseCommandStream(buffer: &buffer)
         let c2_17 = try parser.parseCommandStream(buffer: &buffer)
 
-        #expect(buffer.readableBytes == 0)
+        #expect(buffer.count == 0)
         #expect(
             c1
                 == SynchronizedCommand(
@@ -152,9 +152,8 @@ struct SynchronizedCommandTests {
 
     @Test("CATENATE with single URL part")
     func catenateWithSingleUrlPart() throws {
-        var buffer = ByteBuffer(
-            string:
-                #"A003 APPEND "Drafts" (\Seen \Draft $MDNSent) CATENATE (URL "/Drafts;UIDVALIDITY=385759045/;UID=20/;section=HEADER")\#r\#n"#
+        var buffer = IMAPInputBuffer(
+            #"A003 APPEND "Drafts" (\Seen \Draft $MDNSent) CATENATE (URL "/Drafts;UIDVALIDITY=385759045/;UID=20/;section=HEADER")\#r\#n"#
         )
 
         var parser = CommandParser()
@@ -165,7 +164,7 @@ struct SynchronizedCommandTests {
         let c2_4 = try parser.parseCommandStream(buffer: &buffer)
         let c2_5 = try parser.parseCommandStream(buffer: &buffer)
 
-        #expect(buffer.readableBytes == 0)
+        #expect(buffer.count == 0)
         #expect(c2_1 == SynchronizedCommand(.append(.start(tag: "A003", appendingTo: MailboxName("Drafts")))))
         #expect(
             c2_2
@@ -184,9 +183,8 @@ struct SynchronizedCommandTests {
 
     @Test("CATENATE fails to parse with extra space after opening parenthesis")
     func catenateFailsToParseWithExtraSpaceAfterOpeningParenthesis() throws {
-        var buffer = ByteBuffer(
-            string:
-                #"A003 APPEND "Drafts" (\Seen \Draft $MDNSent) CATENATE ( URL "/Drafts;UIDVALIDITY=385759045/;UID=20/;section=HEADER")\#r\#n"#
+        var buffer = IMAPInputBuffer(
+            #"A003 APPEND "Drafts" (\Seen \Draft $MDNSent) CATENATE ( URL "/Drafts;UIDVALIDITY=385759045/;UID=20/;section=HEADER")\#r\#n"#
         )
 
         var parser = CommandParser()
@@ -197,9 +195,8 @@ struct SynchronizedCommandTests {
 
     @Test("CATENATE with extension options")
     func catenateWithExtensionOptions() throws {
-        var buffer = ByteBuffer(
-            string:
-                #"A003 APPEND "Drafts" (\Seen \Draft $MDNSent) EXTENSION (extdata) CATENATE (URL "/Drafts;UIDVALIDITY=385759045/;UID=20/;section=HEADER")\#r\#n"#
+        var buffer = IMAPInputBuffer(
+            #"A003 APPEND "Drafts" (\Seen \Draft $MDNSent) EXTENSION (extdata) CATENATE (URL "/Drafts;UIDVALIDITY=385759045/;UID=20/;section=HEADER")\#r\#n"#
         )
 
         var parser = CommandParser()
@@ -210,7 +207,7 @@ struct SynchronizedCommandTests {
         let c2_4 = try parser.parseCommandStream(buffer: &buffer)
         let c2_5 = try parser.parseCommandStream(buffer: &buffer)
 
-        #expect(buffer.readableBytes == 0)
+        #expect(buffer.count == 0)
         #expect(c2_1 == SynchronizedCommand(.append(.start(tag: "A003", appendingTo: MailboxName("Drafts")))))
         #expect(
             c2_2
@@ -234,9 +231,8 @@ struct SynchronizedCommandTests {
 
     @Test("CATENATE with extension options and mixed case keyword")
     func catenateWithExtensionOptionsAndMixedCaseKeyword() throws {
-        var buffer = ByteBuffer(
-            string:
-                #"A003 APPEND "Drafts" (\Seen \Draft $MDNSent) EXTENSION (extdata) cAtEnAtE (URL "/Drafts;UIDVALIDITY=385759045/;UID=20/;section=HEADER")\#r\#n"#
+        var buffer = IMAPInputBuffer(
+            #"A003 APPEND "Drafts" (\Seen \Draft $MDNSent) EXTENSION (extdata) cAtEnAtE (URL "/Drafts;UIDVALIDITY=385759045/;UID=20/;section=HEADER")\#r\#n"#
         )
 
         var parser = CommandParser()
@@ -247,7 +243,7 @@ struct SynchronizedCommandTests {
         let c2_4 = try parser.parseCommandStream(buffer: &buffer)
         let c2_5 = try parser.parseCommandStream(buffer: &buffer)
 
-        #expect(buffer.readableBytes == 0)
+        #expect(buffer.count == 0)
         #expect(c2_1 == SynchronizedCommand(.append(.start(tag: "A003", appendingTo: MailboxName("Drafts")))))
         #expect(
             c2_2
@@ -272,8 +268,8 @@ struct SynchronizedCommandTests {
     @Test("CATENATE with non-synchronizing literal TEXT part")
     func catenateWithNonSynchronizingLiteralTextPart() throws {
         // Uses TEXT {N+}\r\n (non-synchronizing literal with '+')
-        var buffer = ByteBuffer(
-            string: "A1 APPEND Drafts CATENATE (TEXT {5+}\r\nhello)\r\n"
+        var buffer = IMAPInputBuffer(
+            "A1 APPEND Drafts CATENATE (TEXT {5+}\r\nhello)\r\n"
         )
 
         var parser = CommandParser()
@@ -286,7 +282,7 @@ struct SynchronizedCommandTests {
         let c6 = try parser.parseCommandStream(buffer: &buffer)
         let c7 = try parser.parseCommandStream(buffer: &buffer)
 
-        #expect(buffer.readableBytes == 0)
+        #expect(buffer.count == 0)
         #expect(c1 == SynchronizedCommand(.append(.start(tag: "A1", appendingTo: MailboxName("Drafts")))))
         #expect(c2 == SynchronizedCommand(.append(.beginCatenate(options: .none))))
         #expect(c3 == SynchronizedCommand(.append(.catenateData(.begin(size: 5)))))
@@ -304,7 +300,7 @@ struct SynchronizedCommandTests {
     func partialAppendStreamingBytesTriggersIntermediateStreamingMode() throws {
         var parser = CommandParser()
         // Start APPEND with 10-byte non-synchronising literal, but only provide 5 bytes
-        var buf = ByteBuffer("1 APPEND INBOX {10+}\r\nHello")
+        var buf = IMAPInputBuffer("1 APPEND INBOX {10+}\r\nHello")
 
         let c1 = try parser.parseCommandStream(buffer: &buf)
         #expect(c1 == SynchronizedCommand(.append(.start(tag: "1", appendingTo: .inbox))))
@@ -324,12 +320,12 @@ struct SynchronizedCommandTests {
         #expect(parser.mode == .streamingBytes(5))
 
         // Provide the remaining 5 bytes
-        buf.writeString("World")
+        buf.append("World")
         let c4 = try parser.parseCommandStream(buffer: &buf)
         #expect(c4 == SynchronizedCommand(.append(.messageBytes("World"))))
         #expect(parser.mode == .streamingEnd)
 
-        buf.writeString("\r\n")
+        buf.append("\r\n")
         let c5 = try parser.parseCommandStream(buffer: &buf)
         #expect(c5 == SynchronizedCommand(.append(.endMessage)))
 
@@ -341,7 +337,7 @@ struct SynchronizedCommandTests {
     func partialCatenateStreamingBytesTriggersIntermediateStreamingMode() throws {
         var parser = CommandParser()
         // CATENATE with 5-byte TEXT literal but only 3 bytes provided initially
-        var buf = ByteBuffer("A1 APPEND Drafts CATENATE (TEXT {5+}\r\nhel")
+        var buf = IMAPInputBuffer("A1 APPEND Drafts CATENATE (TEXT {5+}\r\nhel")
 
         let c1 = try parser.parseCommandStream(buffer: &buf)
         #expect(c1 == SynchronizedCommand(.append(.start(tag: "A1", appendingTo: MailboxName("Drafts")))))
@@ -358,12 +354,12 @@ struct SynchronizedCommandTests {
         #expect(parser.mode == .streamingCatenateBytes(2))
 
         // Provide the remaining 2 bytes
-        buf.writeString("lo")
+        buf.append("lo")
         let c5 = try parser.parseCommandStream(buffer: &buf)
         #expect(c5 == SynchronizedCommand(.append(.catenateData(.bytes("lo")))))
         #expect(parser.mode == .streamingCatenateEnd)
 
-        buf.writeString(")\r\n")
+        buf.append(")\r\n")
         let c6 = try parser.parseCommandStream(buffer: &buf)
         #expect(c6 == SynchronizedCommand(.append(.catenateData(.end))))
 
@@ -380,7 +376,7 @@ struct SynchronizedCommandTests {
     func incompleteCommandWithNoSynchronisingLiteralsReturnsNil() throws {
         // Buffer has bytes but no complete command line yet — no newline found
         var parser = CommandParser()
-        var buf = ByteBuffer("1 NOO")
+        var buf = IMAPInputBuffer("1 NOO")
         let result = try parser.parseCommandStream(buffer: &buf)
         #expect(result == nil)
     }
@@ -390,7 +386,7 @@ struct SynchronizedCommandTests {
         // The framing parser finds 1 synchronising literal but the literal bytes are absent.
         // parseCommand() returns nil (IncompleteMessage), but synchronizingLiteralCount == 1.
         var parser = CommandParser()
-        var buf = ByteBuffer("1 LOGIN {5}\r\n")
+        var buf = IMAPInputBuffer("1 LOGIN {5}\r\n")
         let result = try parser.parseCommandStream(buffer: &buf)
         #expect(result == SynchronizedCommand(numberOfSynchronisingLiterals: 1))
     }
@@ -403,7 +399,7 @@ struct SynchronizedCommandTests {
         // AUTHENTICATE exchange is in progress.
         var parser = CommandParser()
         // "AHRlc3R1c2VyAHRlc3RwYXNz" is base64 for "\0testuser\0testpass"
-        var buf = ByteBuffer("1 AUTHENTICATE PLAIN\r\nAHRlc3R1c2VyAHRlc3RwYXNz\r\n")
+        var buf = IMAPInputBuffer("1 AUTHENTICATE PLAIN\r\nAHRlc3R1c2VyAHRlc3RwYXNz\r\n")
 
         // The AUTHENTICATE command puts the parser into "expecting authentication response" mode.
         let auth = try parser.parseCommandStream(buffer: &buf)
@@ -418,7 +414,7 @@ struct SynchronizedCommandTests {
             Issue.record("Expected continuationResponse, got \(String(describing: response))")
             return
         }
-        #expect(buf.readableBytes == 0)
+        #expect(buf.count == 0)
     }
 
     @Test(
@@ -433,7 +429,7 @@ struct SynchronizedCommandTests {
         // than being silently misclassified as a continuation response. This must hold both for the
         // conforming CRLF terminator and for a non-conforming bare LF (Unix) terminator.
         var parser = CommandParser()
-        var buf = ByteBuffer(string: lineEnding)
+        var buf = IMAPInputBuffer(lineEnding)
         #expect(throws: (any Error).self) {
             try parser.parseCommandStream(buffer: &buf)
         }
@@ -443,7 +439,7 @@ struct SynchronizedCommandTests {
     func unsolicitedBase64LineWithoutAuthenticateIsRejected() {
         // Without an AUTHENTICATE in progress, an unsolicited base64 line must be a parse error.
         var parser = CommandParser()
-        var buf = ByteBuffer("AHRlc3R1c2VyAHRlc3RwYXNz\r\n")
+        var buf = IMAPInputBuffer("AHRlc3R1c2VyAHRlc3RwYXNz\r\n")
         #expect(throws: (any Error).self) {
             try parser.parseCommandStream(buffer: &buf)
         }
@@ -454,7 +450,7 @@ struct SynchronizedCommandTests {
         // Multi-round SASL (e.g. GSSAPI) sends several base64 responses; the parser stays in
         // authenticate mode across all of them.
         var parser = CommandParser()
-        var buf = ByteBuffer("1 AUTHENTICATE GSSAPI\r\ncmVzcG9uc2Ux\r\ncmVzcG9uc2Uy\r\n")
+        var buf = IMAPInputBuffer("1 AUTHENTICATE GSSAPI\r\ncmVzcG9uc2Ux\r\ncmVzcG9uc2Uy\r\n")
 
         let auth = try parser.parseCommandStream(buffer: &buf)
         guard case .tagged(let tc) = auth?.commandPart, case .authenticate = tc.command else {
@@ -469,7 +465,7 @@ struct SynchronizedCommandTests {
                 return
             }
         }
-        #expect(buf.readableBytes == 0)
+        #expect(buf.count == 0)
     }
 
     @Test("ordinary command after AUTHENTICATE exits authenticate mode")
@@ -477,7 +473,7 @@ struct SynchronizedCommandTests {
         // After an AUTHENTICATE exchange, an ordinary command resets the parser back to `.lines`,
         // and a later stray base64 line is again rejected.
         var parser = CommandParser()
-        var buf = ByteBuffer("1 AUTHENTICATE PLAIN\r\nAHRlc3R1c2Vy\r\n2 NOOP\r\nAHRlc3R1c2Vy\r\n")
+        var buf = IMAPInputBuffer("1 AUTHENTICATE PLAIN\r\nAHRlc3R1c2Vy\r\n2 NOOP\r\nAHRlc3R1c2Vy\r\n")
 
         let auth = try parser.parseCommandStream(buffer: &buf)
         guard case .tagged(let tc) = auth?.commandPart, case .authenticate = tc.command else {
@@ -511,7 +507,7 @@ struct SynchronizedCommandTests {
         // on the non-newline byte — triggering the buffer-restore path (line 231 in
         // CommandParser.swift) before rethrowing.
         var parser = CommandParser()
-        var buf = ByteBuffer("1 APPEND INBOX {0+}\r\ngarbage\r\n")
+        var buf = IMAPInputBuffer("1 APPEND INBOX {0+}\r\ngarbage\r\n")
 
         let c1 = try parser.parseCommandStream(buffer: &buf)
         #expect(c1 == SynchronizedCommand(.append(.start(tag: "1", appendingTo: .inbox))))
@@ -541,7 +537,7 @@ struct SynchronizedCommandTests {
         // 1 NOOP
         // 2 IDLE\r\nDONE\r\n
         // 3 NOOP
-        var buffer: ByteBuffer = "1 NOOP\r\n2 IDLE\r\nDONE\r\n3 NOOP\r\n"
+        var buffer: IMAPInputBuffer = "1 NOOP\r\n2 IDLE\r\nDONE\r\n3 NOOP\r\n"
 
         var parser = CommandParser()
 
@@ -558,7 +554,7 @@ struct SynchronizedCommandTests {
         #expect(parser.mode == .lines)
 
         let c3 = try parser.parseCommandStream(buffer: &buffer)
-        #expect(buffer.readableBytes == 0)
+        #expect(buffer.count == 0)
         #expect(c3 == SynchronizedCommand(.tagged(TaggedCommand(tag: "3", command: .noop))))
         #expect(parser.mode == .lines)
     }

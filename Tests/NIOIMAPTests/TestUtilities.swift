@@ -34,49 +34,6 @@ extension TestUtilities {
         return buffer
     }
 
-    static func withBuffer(
-        _ string: String,
-        terminator: String = "",
-        shouldRemainUnchanged: Bool = false,
-        sourceLocation: SourceLocation = #_sourceLocation,
-        _ body: (inout ByteBuffer) throws -> Void
-    ) {
-        var inputBuffer = ByteBufferAllocator().buffer(capacity: string.utf8.count + terminator.utf8.count + 10)
-        inputBuffer.writeString("hello")
-        inputBuffer.moveReaderIndex(forwardBy: 5)
-        inputBuffer.writeString(string)
-        inputBuffer.writeString(terminator)
-        inputBuffer.writeString("hallo")
-        inputBuffer.moveWriterIndex(to: inputBuffer.writerIndex - 5)
-
-        let expected = inputBuffer.getSlice(
-            at: inputBuffer.readerIndex + string.utf8.count,
-            length: terminator.utf8.count
-        )!
-        let beforeRunningBody = inputBuffer
-
-        var parseBuffer = ParseBuffer(inputBuffer)
-
-        defer {
-            let remaining =
-                (try? PL.parseBytes(
-                    buffer: &parseBuffer,
-                    tracker: .makeNewDefault,
-                    upTo: .max
-                )) ?? ByteBuffer()
-            let expectedString = String(buffer: expected)
-            let remainingString = String(buffer: remaining)
-            if shouldRemainUnchanged {
-                #expect(beforeRunningBody == inputBuffer, sourceLocation: sourceLocation)
-            } else {
-                #expect(remainingString == expectedString, sourceLocation: sourceLocation)
-            }
-        }
-
-        #expect(throws: Never.self, sourceLocation: sourceLocation) {
-            try body(&inputBuffer)
-        }
-    }
 }
 
 // Model fields that used to be `ByteBuffer` are now `[UInt8]`, and the test suite spells hundreds of

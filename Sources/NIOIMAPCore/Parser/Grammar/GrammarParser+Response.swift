@@ -486,9 +486,10 @@ extension GrammarParser {
                     parser: { try parseQuotaResource(buffer: &$0, tracker: $1) }
                 ) {
                     resources.append(resource)
-                    if try buffer.parseOptional(tracker: tracker, parser: { input, _ in try input.parseSpaces() })
-                        == nil
-                    {
+                    let space: Void? = try buffer.parseOptional(tracker: tracker) { input, _ in
+                        try input.parseSpaces()
+                    }
+                    if space == nil {
                         break
                     }
                 }
