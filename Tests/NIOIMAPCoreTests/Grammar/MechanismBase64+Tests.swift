@@ -63,7 +63,7 @@ struct MechanismBase64Tests {
     )
     func roundTrip(_ base64: String?) {
         TestUtilities.expectRoundTrip(
-            MechanismBase64(mechanism: .internal, base64: base64.map { ByteBuffer(string: $0) }),
+            MechanismBase64(mechanism: .internal, base64: base64.map { Array($0.utf8) }),
             encoder: { $0.writeMechanismBase64($1) },
             parser: GrammarParser().parseMechanismBase64
         )

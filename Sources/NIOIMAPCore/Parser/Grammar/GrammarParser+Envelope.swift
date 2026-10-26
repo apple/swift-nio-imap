@@ -32,7 +32,7 @@ import struct NIO.ByteBufferView
 /// RFC 3501 §7.4.2 group markers, classified once.
 private enum AddressListToken {
     /// host NIL, mailbox = group name
-    case groupStart(EmailAddress, name: ByteBuffer)
+    case groupStart(EmailAddress, name: [UInt8])
     /// host NIL, mailbox NIL
     case groupEnd
     case mailbox(EmailAddress)
@@ -52,7 +52,7 @@ private enum AddressListToken {
 /// Group awaiting its end marker.
 private struct OpenGroup {
     var start: EmailAddress
-    var name: ByteBuffer
+    var name: [UInt8]
     var members: [EmailAddress] = []
 }
 
@@ -179,7 +179,7 @@ extension GrammarParser {
         try buffer.composite(tracker: tracker) { buffer, tracker -> Envelope in
             try buffer.matchFixed("(")
             let date = try self.parseNString(buffer: &buffer, tracker: tracker).flatMap {
-                InternetMessageDate(String(buffer: $0))
+                InternetMessageDate(String(decoding: $0, as: UTF8.self))
             }
             try buffer.parseSpaces()
             let subject = try self.parseNString(buffer: &buffer, tracker: tracker)

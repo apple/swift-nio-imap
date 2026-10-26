@@ -177,7 +177,7 @@ enum AppendWriterTests {
             result.parts == [
                 .part(.append(.start(tag: "A1", appendingTo: mailbox))),
                 .part(.append(.beginCatenate(options: AppendOptions()))),
-                .part(.append(.catenateURL(ByteBuffer(string: "/INBOX;UID=1")))),
+                .part(.append(.catenateURL(Array("/INBOX;UID=1".utf8)))),
                 .part(.append(.catenateData(.begin(size: 3)))),
                 .part(.append(.catenateData(.bytes(ByteBuffer(string: "abc"))))),
                 .part(.append(.catenateData(.end))),

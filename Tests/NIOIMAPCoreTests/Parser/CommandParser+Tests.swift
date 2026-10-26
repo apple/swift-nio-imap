@@ -169,37 +169,37 @@ struct CommandParserTests {
     @Test(
         "parseString parses quoted and literal strings",
         arguments: [
-            ParseFixture.string(#""foo""#, " ", expected: .success(ByteBuffer(string: "foo"))),
-            ParseFixture.string(#""f\"oo""#, " ", expected: .success(ByteBuffer(string: #"f"oo"#))),
-            ParseFixture.string(#""f\\oo""#, " ", expected: .success(ByteBuffer(string: #"f\oo"#))),
-            ParseFixture.string("{3}\r\nfoo", " ", expected: .success(ByteBuffer(string: "foo"))),
-            ParseFixture.string(#""aäb""#, " ", expected: .success(ByteBuffer(string: "aäb"))),
+            ParseFixture.string(#""foo""#, " ", expected: .success("foo")),
+            ParseFixture.string(#""f\"oo""#, " ", expected: .success(#"f"oo"#)),
+            ParseFixture.string(#""f\\oo""#, " ", expected: .success(#"f\oo"#)),
+            ParseFixture.string("{3}\r\nfoo", " ", expected: .success("foo")),
+            ParseFixture.string(#""aäb""#, " ", expected: .success("aäb")),
             ParseFixture.string(#"foo"#, " ", expected: .failure),
             ParseFixture.string(#" "foo""#, " ", expected: .failure),
         ]
     )
-    func parseStringParsesQuotedAndLiteralStrings(_ fixture: ParseFixture<ByteBuffer>) {
+    func parseStringParsesQuotedAndLiteralStrings(_ fixture: ParseFixture<[UInt8]>) {
         fixture.checkParsing()
     }
 
     @Test(
         "parseStringAllowingNonASCII parses strings with non-ASCII characters",
         arguments: [
-            ParseFixture.stringAllowingNonASCII(#""foo""#, " ", expected: .success(ByteBuffer(string: "foo"))),
-            ParseFixture.stringAllowingNonASCII(#""äø""#, " ", expected: .success(ByteBuffer(string: "äø"))),
-            ParseFixture.stringAllowingNonASCII(#""ä\"ø""#, " ", expected: .success(ByteBuffer(string: #"ä"ø"#))),
-            ParseFixture.stringAllowingNonASCII(#""ä\\ø""#, " ", expected: .success(ByteBuffer(string: #"ä\ø"#))),
-            ParseFixture.stringAllowingNonASCII("{3}\r\nfoo", " ", expected: .success(ByteBuffer(string: "foo"))),
+            ParseFixture.stringAllowingNonASCII(#""foo""#, " ", expected: .success("foo")),
+            ParseFixture.stringAllowingNonASCII(#""äø""#, " ", expected: .success("äø")),
+            ParseFixture.stringAllowingNonASCII(#""ä\"ø""#, " ", expected: .success(#"ä"ø"#)),
+            ParseFixture.stringAllowingNonASCII(#""ä\\ø""#, " ", expected: .success(#"ä\ø"#)),
+            ParseFixture.stringAllowingNonASCII("{3}\r\nfoo", " ", expected: .success("foo")),
         ]
     )
-    func parseStringAllowingNonAsciiParsesStringsWithNonAsciiCharacters(_ fixture: ParseFixture<ByteBuffer>) {
+    func parseStringAllowingNonAsciiParsesStringsWithNonAsciiCharacters(_ fixture: ParseFixture<[UInt8]>) {
         fixture.checkParsing()
     }
 }
 
 // MARK: -
 
-extension ParseFixture<ByteBuffer> {
+extension ParseFixture<[UInt8]> {
     fileprivate static func string(
         _ input: String,
         _ terminator: String,

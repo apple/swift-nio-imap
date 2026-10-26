@@ -36,7 +36,7 @@ public enum BodyExtension: Hashable, Sendable {
     /// A generic string extension field, or `nil` if not present.
     ///
     /// Represents an optional string value in an extension field, following IMAP's nstring syntax.
-    case string(ByteBuffer?)
+    case string([UInt8]?)
 
     /// A generic numeric extension field.
     ///

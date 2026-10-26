@@ -177,31 +177,31 @@ struct CommandTypeTests {
 
         CommandEncodeFixture.command(.custom(name: "FOOBAR", payloads: []), "FOOBAR"),
         CommandEncodeFixture.command(
-            .custom(name: "FOOBAR", payloads: [.verbatim(.init(string: "A B C"))]),
+            .custom(name: "FOOBAR", payloads: [.verbatim("A B C")]),
             "FOOBAR A B C"
         ),
         CommandEncodeFixture.command(
-            .custom(name: "FOOBAR", payloads: [.verbatim(.init(string: "A")), .verbatim(.init(string: "B"))]),
+            .custom(name: "FOOBAR", payloads: [.verbatim("A"), .verbatim("B")]),
             "FOOBAR AB"
         ),
-        CommandEncodeFixture.command(.custom(name: "FOOBAR", payloads: [.literal(.init(string: "A"))]), #"FOOBAR "A""#),
+        CommandEncodeFixture.command(.custom(name: "FOOBAR", payloads: [.literal("A")]), #"FOOBAR "A""#),
         CommandEncodeFixture.command(
-            .custom(name: "FOOBAR", payloads: [.literal(.init(string: "A B C"))]),
+            .custom(name: "FOOBAR", payloads: [.literal("A B C")]),
             #"FOOBAR "A B C""#
         ),
         CommandEncodeFixture.command(
-            .custom(name: "FOOBAR", payloads: [.literal(.init(string: "A")), .literal(.init(string: "B"))]),
+            .custom(name: "FOOBAR", payloads: [.literal("A"), .literal("B")]),
             #"FOOBAR "A""B""#
         ),
         CommandEncodeFixture.command(
             .custom(
                 name: "FOOBAR",
-                payloads: [.literal(.init(string: "A")), .verbatim(.init(string: " ")), .literal(.init(string: "B"))]
+                payloads: [.literal("A"), .verbatim(" "), .literal("B")]
             ),
             #"FOOBAR "A" "B""#
         ),
         CommandEncodeFixture.command(
-            .custom(name: "FOOBAR", payloads: [.literal(.init(string: "¶"))]),
+            .custom(name: "FOOBAR", payloads: [.literal("¶")]),
             expectedStrings: ["FOOBAR {2}\r\n", "¶"]
         ),
         CommandEncodeFixture.command(
@@ -237,7 +237,7 @@ struct CommandTypeTests {
 
         // authenticate with initial response
         CommandEncodeFixture.command(
-            .authenticate(mechanism: .gssAPI, initialResponse: .init(ByteBuffer(string: "hey"))),
+            .authenticate(mechanism: .gssAPI, initialResponse: .init("hey")),
             "AUTHENTICATE GSSAPI aGV5"
         ),
         CommandEncodeFixture.command(
@@ -297,7 +297,7 @@ struct CommandTypeTests {
             capabilities: [],
             loggingMode: true
         )
-        _ = buffer.writeCommand(.authenticate(mechanism: .gssAPI, initialResponse: .init(ByteBuffer(string: "secret"))))
+        _ = buffer.writeCommand(.authenticate(mechanism: .gssAPI, initialResponse: .init("secret")))
         #expect(String(buffer: buffer.buffer.nextChunk().bytes) == "AUTHENTICATE GSSAPI ∅")
     }
 
@@ -942,7 +942,7 @@ struct CommandTypeTests {
             ParseFixture.renameSuffix(
                 " box1 box2",
                 expected: .success(
-                    .rename(from: .init(.init(string: "box1")), to: .init(.init(string: "box2")), parameters: [:])
+                    .rename(from: .init("box1"), to: .init("box2"), parameters: [:])
                 )
             ),
             ParseFixture.renameSuffix(" {2}b1 {2}b2", "", expected: .failure),
@@ -1134,7 +1134,7 @@ struct CommandTypeTests {
             ParseFixture.authenticateSuffix(
                 " GSSAPI aGV5",
                 expected: .success(
-                    .authenticate(mechanism: .gssAPI, initialResponse: .init(.init(.init(string: "hey"))))
+                    .authenticate(mechanism: .gssAPI, initialResponse: .init("hey"))
                 )
             ),
             ParseFixture.authenticateSuffix(" \"GSSAPI\"", "", expected: .failure),

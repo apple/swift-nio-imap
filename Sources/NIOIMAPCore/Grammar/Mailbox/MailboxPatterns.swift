@@ -37,7 +37,7 @@ import struct NIO.ByteBuffer
 /// S: A001 OK LIST completed
 /// ```
 ///
-/// Using `.pattern([ByteBuffer(string: "Sent"), ByteBuffer(string: "Archive")])` sends the multi-pattern
+/// Using `.pattern([[UInt8](string: "Sent"), [UInt8](string: "Archive")])` sends the multi-pattern
 /// LIST request, and the server returns matching mailboxes wrapped as ``Response/untagged(_:)``
 /// containing ``ResponsePayload/mailboxData(_:)`` entries for each match.
 ///
@@ -52,7 +52,7 @@ import struct NIO.ByteBuffer
 /// S: A001 OK LIST completed
 /// ```
 ///
-/// To list all mailboxes, use `.mailbox(ByteBuffer(string: "*"))` which returns the complete hierarchy.
+/// To list all mailboxes, use `.mailbox([UInt8](string: "*"))` which returns the complete hierarchy.
 /// Per [RFC 3501 Section 6.3.8](https://datatracker.ietf.org/doc/html/rfc3501#section-6.3.8),
 /// the reference name (first parameter in the protocol) is typically an empty string.
 ///
@@ -65,14 +65,14 @@ public enum MailboxPatterns: Hashable, Sendable {
     /// - `%` matches any characters except the delimiter
     /// - `*` matches any characters including the delimiter
     /// - A literal name matches that specific mailbox
-    case mailbox(ByteBuffer)
+    case mailbox([UInt8])
 
     /// Multiple mailbox patterns to match in a single `LIST` command.
     ///
     /// The LIST-EXTENDED extension (RFC 5258) allows multiple patterns to be specified,
     /// and the server returns mailboxes matching any of the patterns.
     /// Each pattern follows the same wildcard rules as the single pattern case.
-    case pattern([ByteBuffer])
+    case pattern([[UInt8]])
 }
 
 // MARK: - Encoding

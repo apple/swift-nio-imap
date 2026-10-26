@@ -330,15 +330,15 @@ extension EncodeBuffer {
         self.writeString("INTERNALDATE ") + self.writeInternalDate(date)
     }
 
-    @discardableResult mutating func writeMessageAttribute_rfc822(_ string: ByteBuffer?) -> Int {
+    @discardableResult mutating func writeMessageAttribute_rfc822(_ string: [UInt8]?) -> Int {
         self.writeString("RFC822") + self.writeSpace() + self.writeNString(string)
     }
 
-    @discardableResult mutating func writeMessageAttribute_rfc822Text(_ string: ByteBuffer?) -> Int {
+    @discardableResult mutating func writeMessageAttribute_rfc822Text(_ string: [UInt8]?) -> Int {
         self.writeString("RFC822.TEXT") + self.writeSpace() + self.writeNString(string)
     }
 
-    @discardableResult mutating func writeMessageAttribute_rfc822Header(_ string: ByteBuffer?) -> Int {
+    @discardableResult mutating func writeMessageAttribute_rfc822Header(_ string: [UInt8]?) -> Int {
         self.writeString("RFC822.HEADER") + self.writeSpace() + self.writeNString(string)
     }
 
@@ -355,7 +355,7 @@ extension EncodeBuffer {
     @discardableResult mutating func writeMessageAttribute_bodySection(
         _ section: SectionSpecifier?,
         number: Int?,
-        string: ByteBuffer?
+        string: [UInt8]?
     ) -> Int {
         self.writeString("BODY") + self.writeSection(section)
             + writeIfExists(number) { (number) -> Int in

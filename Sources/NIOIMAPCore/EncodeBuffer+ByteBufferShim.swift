@@ -14,7 +14,7 @@
 
 import struct NIO.ByteBuffer
 
-// Temporary: lets model types that still hold a `ByteBuffer` write through the sink. Removed in
+// Temporary: lets the payload cases that still hold a `ByteBuffer` write through the sink. Removed in
 // "Make payload cases IMAPBuffer".
 extension EncodeBuffer {
     @discardableResult

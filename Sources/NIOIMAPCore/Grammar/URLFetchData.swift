@@ -61,7 +61,7 @@ public struct URLFetchData: Hashable, Sendable {
     ///
     /// The URL as submitted in the URLFETCH command, typically including
     /// URLAUTH authorization information if the URL was authorized.
-    public var url: ByteBuffer
+    public var url: [UInt8]
 
     /// The message data associated with the URL, or `nil` if unavailable.
     ///
@@ -69,12 +69,12 @@ public struct URLFetchData: Hashable, Sendable {
     /// (for example, because the URL was invalid, authorization failed, or the message was deleted).
     /// When present, contains the message content (or partial content if the URL
     /// specified a section or byte range).
-    public var data: ByteBuffer?
+    public var data: [UInt8]?
 
     /// Creates a new URLFETCH response data item.
     /// - parameter url: The IMAP URL that was fetched.
     /// - parameter data: The message data, or `nil` if unavailable.
-    public init(url: ByteBuffer, data: ByteBuffer?) {
+    public init(url: [UInt8], data: [UInt8]?) {
         self.url = url
         self.data = data
     }

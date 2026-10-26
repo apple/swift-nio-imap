@@ -35,22 +35,22 @@ import struct NIO.ByteBuffer
 /// - SeeAlso: ``MessageAttribute/gmailLabels(_:)``
 public struct GmailLabel: Hashable, Sendable {
     /// The label's raw value -  a sequence of bytes
-    let buffer: ByteBuffer
+    let buffer: [UInt8]
 
     /// Creates a new `GmailLabel` from the given bytes.
     /// - parameter buffer: The raw bytes to construct the label
-    public init(_ buffer: ByteBuffer) {
+    public init(_ buffer: [UInt8]) {
         self.buffer = buffer
     }
 
     /// Creates a new `GmailLabel` from the given `MailboxName`.
     public init(mailboxName: MailboxName) {
-        self.buffer = ByteBuffer(bytes: mailboxName.bytes)
+        self.buffer = mailboxName.bytes
     }
 
     /// Creates a new `GmailLabel` from the given `UseAttribute`.
     public init(useAttribute: UseAttribute) {
-        self.buffer = ByteBuffer(string: useAttribute.stringValue)
+        self.buffer = Array(useAttribute.stringValue.utf8)
     }
 
     /// Creates a display string to be used in UI.
@@ -62,7 +62,7 @@ public struct GmailLabel: Hashable, Sendable {
         do {
             return try ModifiedUTF7.decode(self.buffer)
         } catch {
-            return String(bestEffortDecodingUTF8Bytes: self.buffer.readableBytesView)
+            return String(bestEffortDecodingUTF8Bytes: self.buffer)
         }
     }
 }
@@ -79,7 +79,7 @@ extension EncodeBuffer {
     /// Only a valid system label may go out unquoted: `\Foo bar` or `\x)<CRLF>…` would otherwise
     /// break framing.
     @discardableResult mutating func writeGmailLabel(_ label: GmailLabel) -> Int {
-        let bytes = label.buffer.readableBytesView
+        let bytes = label.buffer
         let atom = bytes.dropFirst()
         guard
             bytes.first == UInt8(ascii: "\\"),

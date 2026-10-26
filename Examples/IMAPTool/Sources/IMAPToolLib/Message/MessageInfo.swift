@@ -100,7 +100,7 @@ extension MessageInfo {
         if let date, let seconds = InternetMessageDate(date).parse() {
             self.dateSeconds = seconds.timeIntervalSince1970
         }
-        self.subject = envelope.subject.map { String(buffer: $0) }
+        self.subject = envelope.subject.map { String(lossyUTF8: $0) }
         self.from = envelope.from.isEmpty ? nil : String(envelope.from)
         self.to = envelope.to.isEmpty ? nil : String(envelope.to)
         self.cc = envelope.cc.isEmpty ? nil : String(envelope.cc)
@@ -111,6 +111,11 @@ extension MessageInfo {
 }
 
 extension String {
+    /// Decodes envelope bytes, replacing invalid UTF-8 rather than failing.
+    fileprivate init(lossyUTF8 bytes: [UInt8]) {
+        self.init(decoding: bytes, as: UTF8.self)
+    }
+
     fileprivate init(_ list: [EmailAddressListElement]) {
         self =
             list
@@ -125,7 +130,7 @@ extension String {
         case .singleAddress(let address):
             self.init(address)
         case .group(let group):
-            let groupName = String(buffer: group.groupName)
+            let groupName = String(lossyUTF8: group.groupName)
             let members = group.children.map { String($0) }.joined(separator: ", ")
             self = "\"\(groupName)\": {\(members)}"
         }
@@ -134,9 +139,9 @@ extension String {
     fileprivate init(_ address: EmailAddress) {
         switch (address.personName, address.mailbox, address.host) {
         case (let name?, let mailbox?, let host?):
-            self = "\"\(String(buffer: name))\" <\(String(buffer: mailbox))@\(String(buffer: host))>"
+            self = "\"\(String(lossyUTF8: name))\" <\(String(lossyUTF8: mailbox))@\(String(lossyUTF8: host))>"
         case (_, let mailbox?, let host?):
-            self = "\(String(buffer: mailbox))@\(String(buffer: host))"
+            self = "\(String(lossyUTF8: mailbox))@\(String(lossyUTF8: host))"
         default:
             self = "<>"
         }
