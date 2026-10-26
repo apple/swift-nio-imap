@@ -18,8 +18,14 @@ import NIO
 ///
 /// Every corpus here is defined **as wire bytes**, and the model values the encode benchmarks use
 /// are obtained by parsing those bytes once at registration time
-/// (`DispatchClient.responses(parsing:)`). One definition, so the two sides cannot drift apart, and no
-/// hand-built `BodyStructure` literal to keep in sync with the text it is supposed to represent.
+/// (`ResponseCorpus.responses(parsing:)`, in `IMAPBenchmarkSupport`). One definition, so the two
+/// sides cannot drift apart, and no hand-built `BodyStructure` literal to keep in sync with the text
+/// it is supposed to represent.
+///
+/// Wire bytes are also what makes this corpus usable against *either* library version, which is what
+/// the `IMAPDispatchClient` comparison needs: the text names no type the buffer migration changed, so
+/// both configurations are fed byte-identical input. That is why this type lives in `IMAPCorpus` and
+/// the model-value helpers that name `Response` and `IMAPBuffer` do not.
 ///
 /// Three shapes, because server traffic is not one thing:
 ///
