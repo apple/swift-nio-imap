@@ -15,7 +15,7 @@
 import NIO
 import NIOIMAPCore
 
-struct ResponseDecoder: NIOSingleStepByteToMessageDecoder {
+struct ResponseDecoder: NIOSingleStepByteToMessageDecoder, IMAPMessageDecoder {
     typealias InboundOut = ResponseOrContinuationRequest
 
     var parser: ResponseParser
@@ -28,13 +28,24 @@ struct ResponseDecoder: NIOSingleStepByteToMessageDecoder {
         )
     }
 
-    mutating func decode(buffer: inout ByteBuffer) throws -> InboundOut? {
-        let save = buffer
+    /// Parses out of the library's own input buffer — the path the handler takes.
+    mutating func decode(input: inout IMAPInputBuffer) throws -> InboundOut? {
         do {
-            return try self.parser.parseResponseStream(buffer: &buffer)
+            return try self.parser.parseResponseStream(buffer: &input)
         } catch {
-            throw IMAPDecoderError(parserError: error, buffer: save)
+            throw IMAPDecoderError(parserError: error, buffer: input.coalescedByteBuffer())
         }
+    }
+
+    /// Parses out of a `ByteBuffer`, for `ByteToMessageHandler` and the decoder verifier.
+    ///
+    /// The parser reads only an ``IMAPInputBuffer``, so `buffer` is appended to a fresh one — kept by
+    /// reference if large, copied if small — and its reader index moved past what was consumed.
+    mutating func decode(buffer: inout ByteBuffer) throws -> InboundOut? {
+        var input = IMAPInputBuffer()
+        input.append(buffer)
+        defer { buffer.moveReaderIndex(forwardBy: buffer.readableBytes - input.count) }
+        return try self.decode(input: &input)
     }
 
     mutating func decodeLast(buffer: inout ByteBuffer, seenEOF: Bool) throws -> InboundOut? {

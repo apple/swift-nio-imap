@@ -20,10 +20,8 @@ import Testing
 /// The `ByteBuffer` half of `NIOIMAPCoreTests`' `LiteralZeroCopyTests`.
 ///
 /// That suite pins the property that a large literal reaches the caller as a reference to the received
-/// bytes; these two tests say which received bytes those can be. A `ByteBuffer` accumulated into an
-/// ``IMAPInputBuffer`` qualifies, and a caller gets it back out as a slice of its own storage. A
-/// `ByteBuffer` handed straight to the parser does not, and its payload is copied — which is what stops
-/// "everything is zero-copy now" from being reachable by making everything retain.
+/// bytes; these tests say when a `ByteBuffer` accumulated into an ``IMAPInputBuffer`` qualifies, and that
+/// a caller gets it back out as a slice of its own storage.
 @Suite("Literal zero copy from a ByteBuffer")
 struct LiteralZeroCopyByteBufferTests {
     /// The address range a `ByteBuffer`'s readable bytes live in.
@@ -35,9 +33,7 @@ struct LiteralZeroCopyByteBufferTests {
     }
 
     /// Reads one FETCH response carrying a literal out of `input` and returns the payload.
-    private func streamedPayload<Input: ConsumableParserInputBuffer>(
-        from input: inout Input
-    ) throws -> IMAPBuffer {
+    private func streamedPayload(from input: inout IMAPInputBuffer) throws -> IMAPBuffer {
         var parser = ResponseParser()
         while true {
             guard case .response(.fetch(let fetch)) = try parser.parseResponseStream(buffer: &input) else {
@@ -91,20 +87,5 @@ struct LiteralZeroCopyByteBufferTests {
         let small = try literal(inReadOfCapacity: 2 * 1_024)
         #expect(small.storageCapacity <= 3 * IMAPBuffer.copyThreshold, "small enough for the literal to be kept")
         #expect(small.payload.backingRegion(as: ByteBuffer.self) != nil, "kept")
-    }
-
-    @Test("a literal read out of a bare ByteBuffer is copied, because nobody vouched for it")
-    func byteBufferInputCopies() throws {
-        let byteCount = 4 * IMAPBuffer.copyThreshold
-        let payload = String(repeating: "x", count: byteCount)
-        var buffer = ByteBuffer(string: "* 1 FETCH (RFC822.TEXT {\(byteCount)}\r\n\(payload))\r\n")
-        let inputStorage = storageRange(of: buffer)
-
-        let streamed = try streamedPayload(from: &buffer)
-
-        // Not a defect: a `ByteBuffer` handed straight to the parser is gone as soon as the caller
-        // reassigns it, so the library cannot promise the payload's bytes will still be there.
-        #expect(streamed.backingRegion(as: ByteBuffer.self) == nil)
-        #expect(!inputStorage.contains(streamed.withUnsafeBytes { UInt(bitPattern: $0.baseAddress) }))
     }
 }

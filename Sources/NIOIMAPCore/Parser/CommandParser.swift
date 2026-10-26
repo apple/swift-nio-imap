@@ -176,9 +176,7 @@ public struct CommandParser: Parser, Sendable {
     /// - UTF-8 validation fails
     ///
     /// - Parameter buffer: The received bytes. Whatever the parser consumes is discarded from the
-    ///   front, so the same buffer is passed again as more arrives. An ``IMAPInputBuffer`` is what a
-    ///   connection should hand over: it keeps each read where it landed, and it is the only input an
-    ///   `APPEND` payload can be delivered out of without being copied.
+    ///   front, so the same buffer is passed again as more arrives.
     ///
     /// - Returns: A ``SynchronizedCommand`` if a complete element is parsed, or `nil`
     ///   if more data is needed.
@@ -187,8 +185,8 @@ public struct CommandParser: Parser, Sendable {
     ///   parse failures, ``TooMuchRecursion`` for overly nested structures.
     ///
     /// - SeeAlso: ``SynchronizedCommand``, [RFC 3501 Section 5](https://datatracker.ietf.org/doc/html/rfc3501#section-5)
-    public mutating func parseCommandStream<Input: ConsumableParserInputBuffer>(
-        buffer: inout Input
+    public mutating func parseCommandStream(
+        buffer: inout IMAPInputBuffer
     ) throws -> SynchronizedCommand? {
         guard buffer.count > 0 else {
             return nil

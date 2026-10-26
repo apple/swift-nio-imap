@@ -42,9 +42,6 @@
 ///   semantics: copying an encoder copies its sink, so a class-backed sink would leave both copies
 ///   writing into one store. ``takeFirst(_:)`` carries the one requirement that is easy to get wrong.
 ///
-/// This mirrors the read side, where ``ParserInputBuffer`` is the seam and ``IMAPInputBuffer`` is the
-/// conformer to reach for.
-///
 /// ## Batched appends
 ///
 /// The encoder stages small writes and appends them together, so a conformer sees fewer, larger
