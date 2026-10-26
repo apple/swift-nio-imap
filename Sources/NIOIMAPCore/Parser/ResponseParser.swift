@@ -220,7 +220,13 @@ public struct ResponseParser: Parser, Sendable {
     ///
     /// - Throws: ``ParserError`` for syntax errors, ``ExceededMaximumMessageAttributesError``
     ///   for attribute limit violations, ``ExceededMaximumBodySizeError`` for body size violations,
-    ///   ``TooMuchRecursion`` for overly nested structures.
+    ///   ``TooMuchRecursion`` for overly nested structures, ``NoForwardProgress`` if parsing stopped
+    ///   consuming input.
+    ///
+    /// - Important: `.fetch(.streamingEnd)` consumes no bytes, and is never followed by another result
+    ///   that does not. A caller driving this in its own loop, rather than through `IMAPClientHandler`,
+    ///   should stop when results keep coming without the buffer shrinking: that is what
+    ///   `IMAPClientHandler` does, and it is the guard against a parser bug spinning forever.
     ///
     /// - SeeAlso: ``ResponseOrContinuationRequest``, ``Options``,
     ///   [RFC 3501 Section 7](https://datatracker.ietf.org/doc/html/rfc3501#section-7)

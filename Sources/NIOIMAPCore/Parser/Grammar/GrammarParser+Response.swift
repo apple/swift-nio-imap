@@ -478,10 +478,15 @@ extension GrammarParser {
             try buffer.composite(tracker: tracker) { buffer, tracker in
                 try buffer.matchFixed("(")
                 var resources: [QuotaResource] = []
-                while let resource = try buffer.parseOptional(
-                    tracker: tracker,
-                    parser: { try parseQuotaResource(buffer: &$0, tracker: $1) }
-                ) {
+                while true {
+                    let mark = buffer.consumed
+                    guard
+                        let resource = try buffer.parseOptional(
+                            tracker: tracker,
+                            parser: { try parseQuotaResource(buffer: &$0, tracker: $1) }
+                        )
+                    else { break }
+                    try buffer.requireProgress(since: mark)
                     resources.append(resource)
                     let space: Void? = try buffer.parseOptional(tracker: tracker) { input, _ in
                         try input.parseSpaces()

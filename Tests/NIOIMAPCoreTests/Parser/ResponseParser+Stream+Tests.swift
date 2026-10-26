@@ -1122,6 +1122,10 @@ extension ResponseParserTests {
             // An unparseable body structure carrying a literal: the fallback that skips it as invalid
             // must report a literal length cut short as incomplete, not as a run-away literal.
             #"* 1 FETCH (BODYSTRUCTURE ("a" {10}\#r\#n0123456789 1 2))\#r\#n"#,
+            // Several flags: the flag list must not end early on a flag cut short.
+            #"* LIST (\Noselect \HasChildren \Marked) "/" INBOX\#r\#n"#,
+            // LIST-EXTENDED data is a tagged-ext value; its list must not end early either.
+            #"* LIST (\Subscribed) "/" foo ("CHILDINFO" ("SUBSCRIBED" "REMOTE"))\#r\#n"#,
             // Optional spaces (before a flag list's `)`, between FETCH attributes, between body parts):
             // a read ending in them must not lose the incomplete signal.
             #"* 1 FETCH (UID 1 FLAGS (\Seen  ) RFC822.SIZE 2)\#r\#n"#,
