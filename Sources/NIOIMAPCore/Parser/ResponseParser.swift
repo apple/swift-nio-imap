@@ -82,7 +82,8 @@ public struct ExceededMaximumBodySizeError: Error {
 ///
 /// ```swift
 /// var parser = ResponseParser()
-/// var buffer = ByteBuffer(bytes: serverData)
+/// var buffer = IMAPInputBuffer()
+/// buffer.append(bytesFromTheNetwork)
 /// while let response = try parser.parseResponseStream(buffer: &buffer) {
 ///     // Process response
 /// }
@@ -211,8 +212,10 @@ public struct ResponseParser: Parser, Sendable {
     /// - The response violates IMAP syntax
     /// - UTF-8 validation fails
     ///
-    /// - Parameter inputBytes: A `ByteBuffer` with incoming server data. The parser consumes
-    ///   bytes from the front as it parses them.
+    /// - Parameter inputBytes: The received bytes. Whatever the parser consumes is discarded from the
+    ///   front, so the same buffer is passed again as more arrives. An ``IMAPInputBuffer`` is what a
+    ///   connection should hand over: it keeps each read where it landed, and it is the only input a
+    ///   large literal can be delivered out of without being copied.
     ///
     /// - Returns: A ``ResponseOrContinuationRequest`` if a complete response element is parsed,
     ///   or `nil` if more data is needed.
@@ -223,55 +226,48 @@ public struct ResponseParser: Parser, Sendable {
     ///
     /// - SeeAlso: ``ResponseOrContinuationRequest``, ``Options``,
     ///   [RFC 3501 Section 7](https://datatracker.ietf.org/doc/html/rfc3501#section-7)
-    public mutating func parseResponseStream(
-        buffer inputBytes: inout ByteBuffer
+    public mutating func parseResponseStream<Input: ConsumableParserInputBuffer>(
+        buffer inputBytes: inout Input
     ) throws -> ResponseOrContinuationRequest? {
         let tracker = StackTracker.makeNewDefault
-        var parseBuffer = ParseBuffer(inputBytes)
-        defer {
-            assert(
-                inputBytes.readableBytes >= parseBuffer.readableBytes,
-                "illegal state, parse buffer has more remaining than input had: \(inputBytes), \(parseBuffer)"
-            )
-
-            // Discard everything that has been parsed off.
-            inputBytes.moveReaderIndex(forwardBy: inputBytes.readableBytes - parseBuffer.readableBytes)
-        }
         do {
-            switch self.mode {
-            case .response(let state):
-                // Handle orphaned CR/LF from split CRLF where previous buffer ended with CR-only:
-                if self.lastResponseNewlineEnding == .cr,
-                    parseBuffer.skipLF() == .didSkip
-                {
-                    // Did consume complete CR-LF pair:
-                    self.lastResponseNewlineEnding = .crlf
-                }
+            // Whatever the parser consumed is discarded on *every* exit path, a throw included, which is
+            // what `parse` does: the streaming modes legitimately make progress and then report that they
+            // need more bytes, and `skipLF` below consumes a byte outside any backtracking scope.
+            return try inputBytes.parse { input in
+                switch self.mode {
+                case .response(let state):
+                    // Handle orphaned CR/LF from split CRLF where previous buffer ended with CR-only:
+                    if self.lastResponseNewlineEnding == .cr, input.skipLF() {
+                        // Did consume complete CR-LF pair:
+                        self.lastResponseNewlineEnding = .crlf
+                    }
 
-                let result = try self.parseResponseAndNewline(
-                    state: state,
-                    buffer: &parseBuffer,
-                    tracker: tracker
-                )
-                self.lastResponseNewlineEnding = result.newline
-                return result.response
-            case .attributeBytes(let remaining, attributeCount: let attributeCount):
-                // Handle orphaned LF from a literal header's CRLF split across buffers. Only the
-                // first byte after the header can be that LF. Any other is part of the literal.
-                if self.lastResponseNewlineEnding == .cr, parseBuffer.readableBytes > 0 {
-                    _ = parseBuffer.skipLF()
-                    self.lastResponseNewlineEnding = nil
-                }
-                return .response(
-                    try self.parseBytes(
-                        buffer: &parseBuffer,
-                        tracker: tracker,
-                        remaining: remaining,
-                        attributeCount: attributeCount
+                    let result = try self.parseResponseAndNewline(
+                        state: state,
+                        buffer: &input,
+                        tracker: tracker
                     )
-                )
-            case .streamingQuoted(attributeCount: let attributeCount):
-                return .response(try self.parseQuotedBytes(buffer: &parseBuffer, attributeCount: attributeCount))
+                    self.lastResponseNewlineEnding = result.newline
+                    return result.response
+                case .attributeBytes(let remaining, attributeCount: let attributeCount):
+                    // Handle orphaned LF from a literal header's CRLF split across buffers. Only the
+                    // first byte after the header can be that LF. Any other is part of the literal.
+                    if self.lastResponseNewlineEnding == .cr, !input.isEmpty {
+                        input.skipLF()
+                        self.lastResponseNewlineEnding = nil
+                    }
+                    return .response(
+                        try self.parseBytes(
+                            buffer: &input,
+                            tracker: tracker,
+                            remaining: remaining,
+                            attributeCount: attributeCount
+                        )
+                    )
+                case .streamingQuoted(attributeCount: let attributeCount):
+                    return .response(try self.parseQuotedBytes(buffer: &input, attributeCount: attributeCount))
+                }
             }
         } catch is IncompleteMessage {
             return nil
@@ -458,11 +454,11 @@ extension ResponseParser {
 // MARK: - Parse bytes
 
 extension ResponseParser {
-    /// Extracts bytes from a given `ByteBuffer`. If more bytes are present than are required
-    /// only those that are required will be extracted. If not enough bytes are provided then the given
-    /// `ByteBuffer` will be emptied.
-    /// - parameter buffer: The buffer from which bytes should be extracted.
-    /// - returns: A new `ByteBuffer` containing extracted bytes.
+    /// Extracts the next run of a streamed literal. If more bytes are present than are required only
+    /// those that are required are extracted, and if fewer have arrived then what there is comes back
+    /// and the rest follows on a later call.
+    /// - parameter buffer: The cursor from which bytes should be extracted.
+    /// - returns: A `.streamingBytes` response carrying the extracted run, or `.streamingEnd`.
     private mutating func parseBytes(
         buffer: inout ParseBuffer,
         tracker: StackTracker,

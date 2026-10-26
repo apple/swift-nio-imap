@@ -141,8 +141,9 @@ extension EnvelopeGroupingPropertyTests {
 
     fileprivate static func parseEnvelope(_ wire: String) throws -> Envelope {
         // Terminator: the envelope must not end the buffer.
-        var buffer = ParseBuffer(ByteBuffer(string: wire + "\r"))
-        return try GrammarParser().parseEnvelope(buffer: &buffer, tracker: .makeNewDefault)
+        try TestUtilities.withParseInput(for: wire + "\r") { buffer in
+            try GrammarParser().parseEnvelope(buffer: &buffer, tracker: .makeNewDefault)
+        }
     }
 }
 

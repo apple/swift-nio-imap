@@ -297,8 +297,9 @@ struct EnvelopeTests {
 
     private static func parseAddressList(_ string: String) throws -> [EmailAddressListElement] {
         // Trailing space: the list must not be at the end of the buffer.
-        var buffer = ParseBuffer(ByteBuffer(string: string + " "))
-        return try GrammarParser().parseOptionalEnvelopeEmailAddresses(buffer: &buffer, tracker: .testTracker)
+        try TestUtilities.withParseInput(for: string + " ") { buffer in
+            try GrammarParser().parseOptionalEnvelopeEmailAddresses(buffer: &buffer, tracker: .testTracker)
+        }
     }
 
     private static func encodeAddressList(_ addresses: [EmailAddressListElement]) -> String {

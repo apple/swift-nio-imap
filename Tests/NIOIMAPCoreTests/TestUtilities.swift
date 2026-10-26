@@ -34,62 +34,6 @@ func expectEqualAndEqualHash<T>(
 
 enum TestUtilities {}
 
-// MARK: - ByteBuffer
-
-extension TestUtilities {
-    static func makeParseBuffer(for text: String) -> ParseBuffer {
-        let buffer = ByteBuffer(string: text)
-        return ParseBuffer(buffer)
-    }
-
-    static func withParseBuffer(
-        _ string: String,
-        terminator: String = "",
-        shouldRemainUnchanged: Bool = false,
-        sourceLocation: SourceLocation = #_sourceLocation,
-        _ body: (inout ParseBuffer) throws -> Void
-    ) {
-        var inputBuffer = ByteBufferAllocator().buffer(capacity: string.utf8.count + terminator.utf8.count + 10)
-        inputBuffer.writeString("hello")
-        inputBuffer.moveReaderIndex(forwardBy: 5)
-        inputBuffer.writeString(string)
-        inputBuffer.writeString(terminator)
-        inputBuffer.writeString("hallo")
-        inputBuffer.moveWriterIndex(to: inputBuffer.writerIndex - 5)
-
-        let expected = inputBuffer.getSlice(
-            at: inputBuffer.readerIndex + string.utf8.count,
-            length: terminator.utf8.count
-        )!
-        let beforeRunningBody = inputBuffer
-
-        var parseBuffer = ParseBuffer(inputBuffer)
-
-        defer {
-            let expectedString = String(buffer: expected)
-            let remaining =
-                (try? PL.parseBytes(
-                    buffer: &parseBuffer,
-                    tracker: .makeNewDefault,
-                    upTo: .max
-                )) ?? ByteBuffer()
-            let remainingString = String(buffer: remaining)
-            if shouldRemainUnchanged {
-                #expect(String(buffer: beforeRunningBody) == remainingString, sourceLocation: sourceLocation)
-            } else {
-                #expect(remainingString == expectedString, sourceLocation: sourceLocation)
-            }
-        }
-
-        #expect(
-            throws: Never.self,
-            sourceLocation: sourceLocation
-        ) {
-            try body(&parseBuffer)
-        }
-    }
-}
-
 // MARK: - Parser input
 
 extension TestUtilities {
@@ -153,11 +97,48 @@ extension Array: @retroactive ExpressibleByStringLiteral where Element == UInt8 
     }
 }
 
-extension ByteBuffer: @retroactive ExpressibleByStringLiteral {
+// The parsers consume from an `IMAPInputBuffer`, which the tests spell as a string literal the way they
+// used to spell a `ByteBuffer`.
+extension IMAPInputBuffer {
+    /// Creates a buffer holding `text`'s UTF-8 bytes as one region.
+    init(_ text: String) {
+        self.init()
+        self.append(Array(text.utf8))
+    }
+
+    /// Creates a buffer holding `bytes` as one region.
+    init(_ bytes: [UInt8]) {
+        self.init()
+        self.append(bytes)
+    }
+
+    /// Adds `text`'s UTF-8 bytes as another region — one more "network read".
+    mutating func append(_ text: String) {
+        self.append(Array(text.utf8))
+    }
+}
+
+extension IMAPInputBuffer: ExpressibleByUnicodeScalarLiteral {}
+extension IMAPInputBuffer: ExpressibleByExtendedGraphemeClusterLiteral {}
+extension IMAPInputBuffer: ExpressibleByStringLiteral {
     public init(stringLiteral value: String) {
-        let allocator = ByteBufferAllocator()
-        self = allocator.buffer(capacity: 0)
-        self.writeString(value)
+        self.init(value)
+    }
+}
+
+extension IMAPInputBuffer {
+    /// The bytes still waiting to be parsed, decoded as UTF-8.
+    ///
+    /// For asserting what a parser left behind. `IMAPInputBuffer` is deliberately not `Equatable` — it
+    /// holds a queue of regions, and two buffers over the same bytes need not be split the same way — so
+    /// tests compare this instead.
+    var remainingText: String {
+        var bytes: [UInt8] = []
+        bytes.reserveCapacity(count)
+        for region in byteRegions {
+            bytes.append(contentsOf: region.copiedBytes())
+        }
+        return String(decoding: bytes, as: UTF8.self)
     }
 }
 
@@ -260,18 +241,22 @@ extension TestUtilities {
     ) {
         var encodeBuffer = EncodeBuffer.serverEncodeBuffer(options: ResponseEncodingOptions(), loggingMode: false)
         _ = encoder(&encodeBuffer, value)
-        var encoded = ByteBuffer(bytes: encodeBuffer.nextChunk().bytes.copiedBytes())
-        encoded.writeString(terminator)
-        let encodedString = String(buffer: encoded)
-        var parseBuffer = ParseBuffer(encoded)
+        let encoded = encodeBuffer.nextChunk().bytes.copiedBytes() + Array(terminator.utf8)
+        let encodedString = String(decoding: encoded, as: UTF8.self)
         do {
-            let parsed = try parser(&parseBuffer, .testTracker)
-            #expect(parsed == value, "Encoded as \(String(reflecting: encodedString))", sourceLocation: sourceLocation)
-            #expect(
-                parseBuffer.readableBytes == terminator.utf8.count,
-                "Trailing bytes after parsing \(String(reflecting: encodedString))",
-                sourceLocation: sourceLocation
-            )
+            try encoded.withParseInput(limit: .max) { input in
+                let parsed = try parser(&input, .testTracker)
+                #expect(
+                    parsed == value,
+                    "Encoded as \(String(reflecting: encodedString))",
+                    sourceLocation: sourceLocation
+                )
+                #expect(
+                    input.remaining == terminator.utf8.count,
+                    "Trailing bytes after parsing \(String(reflecting: encodedString))",
+                    sourceLocation: sourceLocation
+                )
+            }
         } catch {
             Issue.record(
                 "Failed to parse \(String(reflecting: encodedString)): \(error)",
