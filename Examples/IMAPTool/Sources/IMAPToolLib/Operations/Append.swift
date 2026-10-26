@@ -291,7 +291,7 @@ extension MessageToAppend: AsyncSequence {
                     return .endMessage
                 }
                 state = .messageBytes(data)
-                return .messageBytes(bytes)
+                return .messageBytes(IMAPBuffer(bytes))
             case .endMessage:
                 return nil
             }

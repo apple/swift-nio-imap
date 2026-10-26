@@ -153,7 +153,8 @@ extension ParseBuffer {
         Array(try PL.parseBytes(buffer: &self, tracker: .makeNewDefault, length: length).readableBytesView)
     }
 
-    mutating func extractBuffer(upTo maxLength: Int) throws -> ByteBuffer {
-        try PL.parseBytes(buffer: &self, tracker: .makeNewDefault, upTo: maxLength)
+    /// Copies, like every extraction from a `ByteBuffer`: nothing here can vouch for the input's lifetime.
+    mutating func extractBuffer(upTo maxLength: Int) throws -> IMAPBuffer {
+        IMAPBuffer(Array(try PL.parseBytes(buffer: &self, tracker: .makeNewDefault, upTo: maxLength).readableBytesView))
     }
 }

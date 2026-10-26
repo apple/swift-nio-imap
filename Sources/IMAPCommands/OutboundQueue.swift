@@ -283,7 +283,7 @@ extension OutboundQueue {
     ) async throws(IMAPConnection.Error) {
         try await withQueueContinuation { continuation in
             state.withLock {
-                $0.write([.part(.continuationResponse(bytes))], completion: continuation)
+                $0.write([.part(.continuationResponse(IMAPBuffer(bytes)))], completion: continuation)
             }.run()
         }
     }
