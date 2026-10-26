@@ -195,7 +195,7 @@ struct SynchronizingLiteralParserTests {
     )
     func invalidLiteralSyntaxThrows(input: String) {
         var parser = SynchronizingLiteralParser()
-        let buffer = ByteBuffer(string: input)
+        let buffer = Array(input.utf8)
         #expect(throws: (any Error).self) {
             try parser.parseContinuationsNecessary(buffer)
         }
@@ -226,14 +226,18 @@ extension SynchronizingLiteralParserTests {
     struct Helper {
         var parser = SynchronizingLiteralParser()
         var parses: [SynchronizingLiteralParser.FramingResult] = []
-        var accumulator = ByteBuffer()
+        /// Every byte fed so far, including the ones the caller has said it consumed.
+        var accumulator: [UInt8] = []
+        /// How far into `accumulator` the caller has consumed.
+        var readerIndex = 0
         var consumptions: [(numberOfPriorParses: Int, consumption: Int)] = []
 
         mutating func feed(_ string: String) {
-            let buffer = stringBuffer(string)
-            accumulator.writeBytes(buffer.readableBytesView)
+            accumulator.append(contentsOf: string.utf8)
             do {
-                parses.append(try parser.parseContinuationsNecessary(bufferWithGarbage(accumulator)))
+                parses.append(
+                    try parser.parseContinuationsNecessary(withGarbagePrefix(accumulator[readerIndex...]))
+                )
             } catch {
                 Issue.record("Unexpected error: \(error)")
             }
@@ -241,7 +245,7 @@ extension SynchronizingLiteralParserTests {
 
         mutating func indicateConsume(_ string: String) {
             consumptions.append((parses.count, string.utf8.count))
-            accumulator.moveReaderIndex(forwardBy: string.utf8.count)
+            readerIndex += string.utf8.count
             parser.consumed(string.utf8.count)
         }
 
@@ -258,14 +262,15 @@ extension SynchronizingLiteralParserTests {
                 return
             }
 
-            var allBytes = accumulator
-            let initialAllByteReader = accumulator.readerIndex - consumptions.map(\.consumption).reduce(0, +)
-            allBytes.moveReaderIndex(to: initialAllByteReader)
+            // Rewind to where the reader was before any of these parses consumed anything, then walk
+            // it forward one parse at a time.
+            let initialAllByteReader = readerIndex - consumptions.map(\.consumption).reduce(0, +)
+            var allBytesReader = initialAllByteReader
             var continuations = 0
             for expected in expectedStrings.enumerated() {
                 let parse = parses[expected.offset]
                 let expectedUTF8 = Array(expected.element.utf8)
-                let actual = Array(allBytes.readableBytesView.prefix(parse.maximumValidBytes))
+                let actual = Array(accumulator[allBytesReader...].prefix(parse.maximumValidBytes))
                 #expect(
                     expectedUTF8 == actual,
                     "parse \(expected.0): \(String(decoding: expectedUTF8, as: UTF8.self)) != \(String(decoding: actual, as: UTF8.self))",
@@ -274,11 +279,10 @@ extension SynchronizingLiteralParserTests {
                 #expect(parse.synchronizingLiteralCount >= 0, sourceLocation: sourceLocation)
                 continuations += parse.synchronizingLiteralCount
 
-                let newReader =
+                allBytesReader =
                     consumptions.filter {
                         $0.numberOfPriorParses <= expected.offset + 1
                     }.map(\.consumption).reduce(0, +) + initialAllByteReader
-                allBytes.moveReaderIndex(to: newReader)
             }
             #expect(
                 continuationsNecessary == continuations,
@@ -298,7 +302,7 @@ extension SynchronizingLiteralParserTests {
                 return
             }
             let expected = Array(string.utf8)
-            let actual = Array(accumulator.readableBytesView.prefix(parse.maximumValidBytes))
+            let actual = Array(accumulator[readerIndex...].prefix(parse.maximumValidBytes))
             #expect(
                 expected == actual,
                 "\(String(decoding: expected, as: UTF8.self)) != \(String(decoding: actual, as: UTF8.self))",
@@ -310,20 +314,16 @@ extension SynchronizingLiteralParserTests {
             )
         }
 
-        private func stringBuffer(_ string: String) -> ByteBuffer {
-            var buffer = ByteBufferAllocator().buffer(capacity: string.utf8.count)
-            buffer.writeString(string)
-            return bufferWithGarbage(buffer)
-        }
-
-        private func bufferWithGarbage(_ buffer: ByteBuffer) -> ByteBuffer {
-            var buffer = buffer
+        /// The same bytes, preceded in the same allocation by junk the parser must not look at.
+        ///
+        /// A parser that reads from the start of its region's *storage* rather than from where the
+        /// region begins sees the junk and fails; one that respects the region cannot tell the
+        /// difference. This is what a `ByteBuffer`'s reader index used to express here.
+        private func withGarbagePrefix(_ bytes: ArraySlice<UInt8>) -> ArraySlice<UInt8> {
             let garbageByteCount = (0..<32).randomElement() ?? 0
-            var newBuffer = ByteBufferAllocator().buffer(capacity: garbageByteCount + buffer.readableBytes)
-            newBuffer.writeString(String(repeating: "X", count: garbageByteCount))
-            newBuffer.moveReaderIndex(forwardBy: garbageByteCount)
-            newBuffer.writeBuffer(&buffer)
-            return newBuffer
+            var padded = Array(repeating: UInt8(ascii: "X"), count: garbageByteCount)
+            padded.append(contentsOf: bytes)
+            return padded[garbageByteCount...]
         }
     }
 }
