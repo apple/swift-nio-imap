@@ -123,17 +123,22 @@ extension String {
     fileprivate init(_ listElement: EmailAddressListElement) {
         switch listElement {
         case .singleAddress(let address):
-            switch (address.personName, address.mailbox, address.host) {
-            case (let name?, let mailbox?, let host?):
-                self = "\"\(String(buffer: name))\" <\(String(buffer: mailbox))@\(String(buffer: host))>"
-            case (_, let mailbox?, let host?):
-                self = "\(String(buffer: mailbox))@\(String(buffer: host))"
-            default:
-                self = "<>"
-            }
+            self.init(address)
         case .group(let group):
             let groupName = String(buffer: group.groupName)
-            self = "\"\(groupName)\": {\(String(group.children))}"
+            let members = group.children.map { String($0) }.joined(separator: ", ")
+            self = "\"\(groupName)\": {\(members)}"
+        }
+    }
+
+    fileprivate init(_ address: EmailAddress) {
+        switch (address.personName, address.mailbox, address.host) {
+        case (let name?, let mailbox?, let host?):
+            self = "\"\(String(buffer: name))\" <\(String(buffer: mailbox))@\(String(buffer: host))>"
+        case (_, let mailbox?, let host?):
+            self = "\(String(buffer: mailbox))@\(String(buffer: host))"
+        default:
+            self = "<>"
         }
     }
 }

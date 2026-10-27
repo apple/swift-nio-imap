@@ -35,9 +35,9 @@ import struct NIO.ByteBuffer
 ///              (NIL NIL NIL NIL)) NIL NIL NIL NIL))
 /// ```
 ///
-/// The group start/end are implicit in the nested structure. The group name and children
-/// are wrapped in ``EmailAddressGroup``, and child addresses appear as ``EmailAddressListElement/singleAddress(_:)``
-/// cases within ``children``.
+/// The start and end markers are implicit: the group name and member addresses are wrapped in
+/// ``EmailAddressGroup``. Members are plain ``EmailAddress`` values, so groups cannot nest
+/// (RFC 5322 §3.4: `group-list = mailbox-list`).
 ///
 /// - SeeAlso: ``EmailAddress``, ``EmailAddressListElement``, ``Envelope``
 public struct EmailAddressGroup: Hashable, Sendable {
@@ -52,19 +52,15 @@ public struct EmailAddressGroup: Hashable, Sendable {
     /// Per [RFC 5322](https://datatracker.ietf.org/doc/html/rfc5322), this is typically `nil`.
     public var sourceRoot: ByteBuffer?
 
-    /// The nested addresses and groups within this group.
-    ///
-    /// Can contain both individual addresses (``EmailAddressListElement/singleAddress(_:)``)
-    /// and nested address groups (``EmailAddressListElement/group(_:)``), allowing for arbitrarily
-    /// deep hierarchies.
-    public var children: [EmailAddressListElement]
+    /// The member addresses.
+    public var children: [EmailAddress]
 
     /// Creates a new address group.
     ///
     /// - Parameter groupName: The name of the group
     /// - Parameter sourceRoot: Optional source root for routing information
-    /// - Parameter children: The nested addresses and groups
-    public init(groupName: ByteBuffer, sourceRoot: ByteBuffer?, children: [EmailAddressListElement]) {
+    /// - Parameter children: The addresses within this group
+    public init(groupName: ByteBuffer, sourceRoot: ByteBuffer?, children: [EmailAddress]) {
         self.groupName = groupName
         self.sourceRoot = sourceRoot
         self.children = children
@@ -78,7 +74,10 @@ public struct EmailAddressGroup: Hashable, Sendable {
 /// the ENVELOPE structure includes address lists (such as `To:`, `From:`, `Cc:`) that may contain
 /// both individual email addresses and named address groups.
 ///
-/// An indirect enum, allowing arbitrarily deep nesting of groups within groups.
+/// The parser emits a group only when a start and an end marker bracket it.
+/// An unclosed start marker surfaces as ``EmailAddressListElement/singleAddress(_:)`` with
+/// ``EmailAddress/host`` `nil`, followed by its members. Such an address is not a deliverable recipient.
+/// A stray end marker is dropped.
 ///
 /// ### Example
 ///
@@ -94,11 +93,10 @@ public struct EmailAddressGroup: Hashable, Sendable {
 /// ```
 ///
 /// Single addresses map to ``EmailAddressListElement/singleAddress(_:)`` cases,
-/// and groups map to ``EmailAddressListElement/group(_:)`` cases containing the group name
-/// and nested ``EmailAddressListElement`` children.
+/// and groups map to ``EmailAddressListElement/group(_:)`` cases containing the group name and members.
 ///
 /// - SeeAlso: ``EmailAddress``, ``EmailAddressGroup``, ``Envelope``
-public indirect enum EmailAddressListElement: Hashable, Sendable {
+public enum EmailAddressListElement: Hashable, Sendable {
     /// A single email address with no children.
     ///
     /// Wraps a single ``EmailAddress`` in the address list.
@@ -106,8 +104,7 @@ public indirect enum EmailAddressListElement: Hashable, Sendable {
 
     /// A collection of addresses organized under a group name.
     ///
-    /// Wraps an ``EmailAddressGroup`` containing a group name and nested
-    /// ``EmailAddressListElement`` children (which can themselves be addresses or groups).
+    /// Wraps an ``EmailAddressGroup``: a group name and its member addresses.
     case group(EmailAddressGroup)
 }
 
@@ -125,7 +122,7 @@ extension EncodeBuffer {
         )
             + self.writeArray(group.children, prefix: "", separator: "", suffix: "", parenthesis: false) {
                 (child, self) in
-                self.writeEmailAddressOrGroup(child)
+                self.writeEmailAddress(child)
             }
             + self.writeEmailAddress(
                 .init(

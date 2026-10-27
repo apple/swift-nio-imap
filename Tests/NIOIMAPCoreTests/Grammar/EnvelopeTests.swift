@@ -150,6 +150,41 @@ struct EnvelopeTests {
                     )
                 )
             ),
+            // Malformed From (unclosed group, stray end), well-formed To group.
+            ParseFixture.envelope(
+                #"("date" "subject" ((NIL NIL "Team" NIL)(NIL NIL "alice" "example.com")(NIL NIL NIL NIL)(NIL NIL NIL NIL)) NIL NIL ((NIL NIL "Team" NIL)(NIL NIL "alice" "example.com")(NIL NIL NIL NIL)) NIL NIL NIL NIL)"#,
+                expected: .success(
+                    Envelope(
+                        date: "date",
+                        subject: "subject",
+                        from: [.group(.init(groupName: "Team", sourceRoot: nil, children: [.alice]))],
+                        sender: [],
+                        reply: [],
+                        to: [.group(.init(groupName: "Team", sourceRoot: nil, children: [.alice]))],
+                        cc: [],
+                        bcc: [],
+                        inReplyTo: nil,
+                        messageID: nil
+                    )
+                )
+            ),
+            ParseFixture.envelope(
+                #"("date" "subject" ((NIL NIL "Team" NIL)(NIL NIL "alice" "example.com")) NIL NIL ((NIL NIL "Team" NIL)(NIL NIL "alice" "example.com")(NIL NIL NIL NIL)) NIL NIL NIL NIL)"#,
+                expected: .success(
+                    Envelope(
+                        date: "date",
+                        subject: "subject",
+                        from: [.singleAddress(.groupStart("Team")), .singleAddress(.alice)],
+                        sender: [],
+                        reply: [],
+                        to: [.group(.init(groupName: "Team", sourceRoot: nil, children: [.alice]))],
+                        cc: [],
+                        bcc: [],
+                        inReplyTo: nil,
+                        messageID: nil
+                    )
+                )
+            ),
         ]
     )
     func parseEnvelope(_ fixture: ParseFixture<Envelope>) {
@@ -186,14 +221,120 @@ struct EnvelopeTests {
             ),
             ParseFixture.optionalEnvelopeEmailAddresses("NIL", " ", expected: .success([])),
             ParseFixture.optionalEnvelopeEmailAddresses("()", " ", expected: .success([])),
+            // Malformed group markers (#859): normalized, never thrown.
+            ParseFixture.optionalEnvelopeEmailAddresses("((NIL NIL NIL NIL))", " ", expected: .success([])),
+            ParseFixture.optionalEnvelopeEmailAddresses(
+                "((NIL NIL NIL NIL)(NIL NIL NIL NIL))",
+                " ",
+                expected: .success([])
+            ),
+            // Cyrus 07: `To: alice@example.com;`
+            ParseFixture.optionalEnvelopeEmailAddresses(
+                #"((NIL NIL "alice" "example.com")(NIL NIL NIL NIL))"#,
+                " ",
+                expected: .success([.singleAddress(.alice)])
+            ),
+            ParseFixture.optionalEnvelopeEmailAddresses(
+                #"((NIL NIL NIL NIL)(NIL NIL "alice" "example.com"))"#,
+                " ",
+                expected: .success([.singleAddress(.alice)])
+            ),
+            // Unclosed group: start demoted to a host-NIL address.
+            ParseFixture.optionalEnvelopeEmailAddresses(
+                #"((NIL NIL "Team" NIL)(NIL NIL "alice" "example.com"))"#,
+                " ",
+                expected: .success([.singleAddress(.groupStart("Team")), .singleAddress(.alice)])
+            ),
+            // Nested start: outer demoted, inner kept.
+            ParseFixture.optionalEnvelopeEmailAddresses(
+                #"((NIL NIL "A" NIL)(NIL NIL "B" NIL)(NIL NIL "alice" "example.com")(NIL NIL NIL NIL))"#,
+                " ",
+                expected: .success([
+                    .singleAddress(.groupStart("A")),
+                    .group(.init(groupName: "B", sourceRoot: nil, children: [.alice])),
+                ])
+            ),
+            // Malicious server: unqualified addresses.
+            ParseFixture.optionalEnvelopeEmailAddresses(
+                #"((NIL NIL "root" NIL)(NIL NIL "root" NIL))"#,
+                " ",
+                expected: .success([.singleAddress(.groupStart("root")), .singleAddress(.groupStart("root"))])
+            ),
         ]
     )
     func parseOptionalEnvelopeEmailAddresses(_ fixture: ParseFixture<[EmailAddressListElement]>) {
         fixture.checkParsing()
     }
+
+    /// `parse(encode(parse(x))) == parse(x)`. A list of only end markers folds to `[]`, which encodes as `NIL`.
+    @Test(
+        "envelope addresses round trip",
+        arguments: [
+            AddressListRoundTripFixture(input: "((NIL NIL NIL NIL))", expectedEncoding: "NIL"),
+            AddressListRoundTripFixture(
+                input: #"((NIL NIL "alice" "example.com")(NIL NIL NIL NIL))"#,
+                expectedEncoding: #"((NIL NIL "alice" "example.com"))"#
+            ),
+            AddressListRoundTripFixture(input: #"((NIL NIL "Team" NIL)(NIL NIL "alice" "example.com"))"#),
+            AddressListRoundTripFixture(
+                input: #"((NIL NIL "A" NIL)(NIL NIL "B" NIL)(NIL NIL "alice" "example.com")(NIL NIL NIL NIL))"#
+            ),
+            AddressListRoundTripFixture(input: #"((NIL NIL "root" NIL)(NIL NIL "root" NIL))"#),
+            AddressListRoundTripFixture(
+                input: #"((NIL NIL "Team" NIL)(NIL NIL "alice" "example.com")(NIL NIL NIL NIL))"#,
+                expectedEncoding: #"((NIL NIL "Team" NIL)(NIL NIL "alice" "example.com")(NIL NIL NIL NIL))"#
+            ),
+        ]
+    )
+    func envelopeAddressesRoundTrip(_ fixture: AddressListRoundTripFixture) throws {
+        let parsed = try Self.parseAddressList(fixture.input)
+        let encoded = Self.encodeAddressList(parsed)
+        if let expectedEncoding = fixture.expectedEncoding {
+            #expect(encoded == expectedEncoding)
+        }
+        #expect(try Self.parseAddressList(encoded) == parsed)
+    }
+
+    private static func parseAddressList(_ string: String) throws -> [EmailAddressListElement] {
+        // Trailing space: the list must not be at the end of the buffer.
+        var buffer = ParseBuffer(ByteBuffer(string: string + " "))
+        return try GrammarParser().parseOptionalEnvelopeEmailAddresses(buffer: &buffer, tracker: .testTracker)
+    }
+
+    private static func encodeAddressList(_ addresses: [EmailAddressListElement]) -> String {
+        var buffer = EncodeBuffer.serverEncodeBuffer(
+            buffer: ByteBufferAllocator().buffer(capacity: 128),
+            options: ResponseEncodingOptions(),
+            loggingMode: false
+        )
+        buffer.writeEnvelopeAddresses(addresses)
+        var result = ""
+        while true {
+            let chunk = buffer.nextChunk()
+            result += String(buffer: chunk.bytes)
+            guard chunk.waitForContinuation else { return result }
+        }
+    }
 }
 
 // MARK: -
+
+struct AddressListRoundTripFixture: Sendable, CustomTestStringConvertible {
+    var input: String
+    /// `nil`: encoding not pinned.
+    var expectedEncoding: String? = nil
+
+    var testDescription: String { input }
+}
+
+extension EmailAddress {
+    fileprivate static let alice = EmailAddress(personName: nil, sourceRoot: nil, mailbox: "alice", host: "example.com")
+
+    /// RFC 3501 §7.4.2 group start marker (host NIL).
+    fileprivate static func groupStart(_ name: ByteBuffer) -> EmailAddress {
+        .init(personName: nil, sourceRoot: nil, mailbox: name, host: nil)
+    }
+}
 
 extension EncodeFixture<Envelope> {
     fileprivate static func envelope(
