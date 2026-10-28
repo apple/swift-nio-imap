@@ -51,24 +51,37 @@ public struct MailboxInfo: Hashable, Sendable {
     /// the path separator character used to delimit parent/child relationships.
     public var path: MailboxPath
 
+    /// The object identifiers from the `OBJECTID` extended data item, if the server sent one.
+    ///
+    /// The server includes the item when the ``ReturnOption/objectID`` return option was requested,
+    /// and in unsolicited `LIST` responses once `OBJECTID+` is active. An empty `OBJECTID ()`
+    /// yields an empty ``CompoundObjectID``. Unrecognised keys and malformed identifiers are ignored.
+    ///
+    /// From [draft-ietf-mailmaint-imap-objectid-bis Section 7.5](https://datatracker.ietf.org/doc/html/draft-ietf-mailmaint-imap-objectid-bis#section-7.5).
+    public var objectID: CompoundObjectID?
+
     /// Extension parameters for future IMAP extensions.
     ///
     /// This dictionary provides forward compatibility for new mailbox parameters added
-    /// by future IMAP extensions beyond those standardized in RFC 3501.
+    /// by future IMAP extensions beyond those standardized in RFC 3501. Extended data items
+    /// that the library models, such as ``objectID``, are not included.
     public var extensions: OrderedDictionary<ByteBuffer, ParameterValue>
 
     /// Creates a new mailbox information record.
     ///
     /// - Parameter attributes: An array of ``Attribute`` values describing the mailbox's properties
     /// - Parameter path: The ``MailboxPath`` including the mailbox name and optional path separator
+    /// - Parameter objectID: The identifiers from the `OBJECTID` extended data item, if any
     /// - Parameter extensions: Any extension parameters beyond the RFC 3501 base protocol
     public init(
         attributes: [Attribute] = [],
         path: MailboxPath,
+        objectID: CompoundObjectID? = nil,
         extensions: OrderedDictionary<ByteBuffer, ParameterValue>
     ) {
         self.attributes = attributes
         self.path = path
+        self.objectID = objectID
         self.extensions = extensions
     }
 }
@@ -251,6 +264,9 @@ extension EncodeBuffer {
                 self.writeMailboxListFlags(flags)
             } + self.writeString(") ") + self.writeMailboxPathSeparator(list.path.pathSeparator) + self.writeSpace()
             + self.writeMailbox(list.path.name)
+            + self.writeIfExists(list.objectID) { (compound) -> Int in
+                self.writeString(" (\"OBJECTID\" ") + self.writeCompoundObjectID(compound) + self.writeString(")")
+            }
     }
 
     @discardableResult mutating func writeMailboxListFlags(_ flags: [MailboxInfo.Attribute]) -> Int {

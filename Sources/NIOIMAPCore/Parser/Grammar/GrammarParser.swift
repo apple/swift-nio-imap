@@ -2183,6 +2183,11 @@ extension GrammarParser {
             .statusOption(try self.parseStatusOption(buffer: &buffer, tracker: tracker))
         }
 
+        func parseReturnOption_objectID(buffer: inout ParseBuffer, tracker: StackTracker) throws -> ReturnOption {
+            try PL.parseFixedString("OBJECTID", buffer: &buffer, tracker: tracker)
+            return .objectID
+        }
+
         func parseReturnOption_optionExtension(buffer: inout ParseBuffer, tracker: StackTracker) throws -> ReturnOption
         {
             .optionExtension(try self.parseOptionExtension(buffer: &buffer, tracker: tracker))
@@ -2193,6 +2198,7 @@ extension GrammarParser {
                 parseReturnOption_subscribed,
                 parseReturnOption_children,
                 parseReturnOption_statusOption,
+                parseReturnOption_objectID,
                 parseReturnOption_optionExtension,
             ],
             buffer: &buffer,
