@@ -440,7 +440,7 @@ struct CommandTypeTests {
         ),
         ParseFixture.command(
             "AUTHENTICATE GSSAPI",
-            expected: .success(.authenticate(mechanism: AuthenticationMechanism("GSSAPI"), initialResponse: nil))
+            expected: .success(.authenticate(mechanism: .gssAPI, initialResponse: nil))
         ),
         ParseFixture.command("CREATE test", expected: .success(.create(.init("test"), []))),
         ParseFixture.command("GETQUOTA root", expected: .success(.getQuota(.init("root")))),
@@ -1672,35 +1672,6 @@ extension CommandEncodeFixture<Command> {
             options: options,
             expectedStrings: expectedStrings,
             encoder: { $0.writeCommand($1) }
-        )
-    }
-}
-
-@Suite("AuthenticationMechanism")
-struct AuthenticationMechanismTests {
-    @Test(
-        "encode",
-        arguments: [
-            EncodeFixture.authenticationMechanism(.gssAPI, "GSSAPI"),
-            EncodeFixture.authenticationMechanism(.plain, "PLAIN"),
-            EncodeFixture.authenticationMechanism(.init("myAuth"), "MYAUTH"),
-        ]
-    )
-    func encode(_ fixture: EncodeFixture<AuthenticationMechanism>) {
-        fixture.checkEncoding()
-    }
-}
-
-extension EncodeFixture<AuthenticationMechanism> {
-    fileprivate static func authenticationMechanism(
-        _ input: AuthenticationMechanism,
-        _ expectedString: String
-    ) -> Self {
-        EncodeFixture(
-            input: input,
-            bufferKind: .defaultServer,
-            expectedString: expectedString,
-            encoder: { $0.writeAuthenticationMechanism($1) }
         )
     }
 }

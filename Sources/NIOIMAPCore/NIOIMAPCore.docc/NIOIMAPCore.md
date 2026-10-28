@@ -40,7 +40,12 @@ buffer.writeResponse(response)
 
 ### Module Separation
 
-NIOIMAPCore focuses purely on protocol parsing and encoding. For SwiftNIO integration (channel handlers, async/await APIs), see the NIOIMAP module, which builds on top of NIOIMAPCore.
+NIOIMAPCore focuses purely on protocol parsing and encoding. For SwiftNIO integration, the package layers two client interfaces on top — offered on purpose, with neither preferred over the other:
+
+- The `NIOIMAP` module provides event-driven SwiftNIO `ChannelHandler`s. It re-exports NIOIMAPCore.
+- The `IMAPCommands` module provides a high-level, command-centric `async`/`await` client built on top of `NIOIMAP`.
+
+Both share the NIOIMAPCore command and response types described here.
 
 ## Topics
 

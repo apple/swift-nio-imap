@@ -29,32 +29,81 @@ let badOS = { fatalError("unsupported OS") }()
 import struct NIO.ByteBuffer
 import struct NIO.ByteBufferView
 
+/// RFC 3501 §7.4.2 group markers, classified once.
+private enum AddressListToken {
+    /// host NIL, mailbox = group name
+    case groupStart(EmailAddress, name: ByteBuffer)
+    /// host NIL, mailbox NIL
+    case groupEnd
+    case mailbox(EmailAddress)
+
+    init(_ address: EmailAddress) {
+        switch (address.host, address.mailbox) {
+        case (nil, let name?):
+            self = .groupStart(address, name: name)
+        case (nil, nil):
+            self = .groupEnd
+        case (.some, _):
+            self = .mailbox(address)
+        }
+    }
+}
+
+/// Group awaiting its end marker.
+private struct OpenGroup {
+    var start: EmailAddress
+    var name: ByteBuffer
+    var members: [EmailAddress] = []
+}
+
 extension GrammarParser {
+    /// Folds the flat address list into groups. Total over malformed input, lossless, never nests:
+    /// a group exists only when a start and an end marker bracket it. Otherwise its markers are
+    /// dropped (stray end) or demoted to plain addresses (unclosed start).
     func parseEnvelopeEmailAddressGroups(_ addresses: [EmailAddress]) -> [EmailAddressListElement] {
         var results: [EmailAddressListElement] = []
-        var stack: [EmailAddressGroup] = []
+        var open: OpenGroup?
 
         for address in addresses {
-            // RFC 2822 Syntaxt: If the host is nil then the group has started
-            // if the mailbox is also nil, then the group has finished.
-            if address.host == nil, let name = address.mailbox {  // start of group
-                stack.append(EmailAddressGroup(groupName: name, sourceRoot: address.sourceRoot, children: []))
-            } else if address.host == nil, let group = stack.popLast() {  // end of group
-                if stack.last == nil {
-                    results.append(.group(group))
-                } else {
-                    stack[stack.count - 1].children.append(.group(group))
-                }
-            } else {  // normal address
-                if stack.last == nil {
-                    results.append(.singleAddress(address))
-                } else {
-                    stack[stack.count - 1].children.append(.singleAddress(address))
-                }
+            // `take()` leaves `open` nil, so the case owning the group appends in place.
+            switch (AddressListToken(address), open.take()) {
+            case (.groupStart(let start, let name), nil):
+                open = OpenGroup(start: start, name: name)
+            case (.groupStart(let start, let name), let unclosed?):
+                results.append(contentsOf: Self.demote(unclosed))
+                open = OpenGroup(start: start, name: name)
+            case (.groupEnd, nil):
+                continue  // stray end carries no data
+            case (.groupEnd, let group?):
+                results.append(Self.close(group))
+            case (.mailbox(let address), nil):
+                results.append(.singleAddress(address))
+            case (.mailbox(let address), var group?):
+                group.members.append(address)
+                open = group
             }
         }
 
+        guard let unclosed = open else { return results }
+        results.append(contentsOf: Self.demote(unclosed))
         return results
+    }
+
+    /// Unclosed group: start marker as-is (host NIL), then members, all top level.
+    /// E.g. `start(Team), alice` → `[single(Team), single(alice)]`.
+    private static func demote(_ group: OpenGroup) -> [EmailAddressListElement] {
+        [.singleAddress(group.start)] + group.members.map { .singleAddress($0) }
+    }
+
+    /// Bracketed group. Start marker's `personName` is dropped (RFC 3501: NIL).
+    private static func close(_ group: OpenGroup) -> EmailAddressListElement {
+        .group(
+            EmailAddressGroup(
+                groupName: group.name,
+                sourceRoot: group.start.sourceRoot,
+                children: group.members
+            )
+        )
     }
 
     // reusable for a lot of the env-* types

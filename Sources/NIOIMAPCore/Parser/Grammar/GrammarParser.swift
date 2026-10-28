@@ -180,6 +180,24 @@ extension GrammarParser {
         )
     }
 
+    /// RFC 3501 defines
+    /// ```
+    /// auth-type = atom
+    /// ```
+    /// but [RFC 4422 section 3.1](https://datatracker.ietf.org/doc/html/rfc4422#section-3.1)
+    /// restricts what a mechanism name may contain. ``AuthenticationMechanism/init(_:)`` enforces
+    /// that, and a name it rejects is a parse error.
+    func parseAuthenticationMechanism(
+        buffer: inout ParseBuffer,
+        tracker: StackTracker
+    ) throws -> AuthenticationMechanism {
+        let atom = try self.parseAtom(buffer: &buffer, tracker: tracker)
+        guard let mechanism = AuthenticationMechanism(atom) else {
+            throw ParserError(hint: "Invalid authentication mechanism name: \(atom)")
+        }
+        return mechanism
+    }
+
     func parseAuthenticatedURL(buffer: inout ParseBuffer, tracker: StackTracker) throws -> NetworkMessagePath {
         try PL.composite(buffer: &buffer, tracker: tracker) { buffer, tracker -> NetworkMessagePath in
             try PL.parseFixedString("imap://", buffer: &buffer, tracker: tracker)
@@ -2793,13 +2811,24 @@ extension GrammarParser {
         return try ParserLibrary.parseBufferAsUTF8(parsed)
     }
 
+    // resource-name     = "STORAGE" / "MESSAGE" / "MAILBOX" /
+    //                     "ANNOTATION-STORAGE" / resource-name-ext
+    // resource-name-ext = atom
+    func parseQuotaResourceName(
+        buffer: inout ParseBuffer,
+        tracker: StackTracker
+    ) throws -> QuotaResource.Name {
+        // An atom is exactly what a `Name` requires.
+        QuotaResource.Name(unchecked: try parseAtom(buffer: &buffer, tracker: tracker))
+    }
+
     // setquota_list   ::= "(" 0#setquota_resource ")"
     func parseQuotaLimits(buffer: inout ParseBuffer, tracker: StackTracker) throws -> [QuotaLimit] {
         // setquota_resource ::= atom SP number
         func parseQuotaLimit(buffer: inout ParseBuffer, tracker: StackTracker) throws -> QuotaLimit {
             try PL.composite(buffer: &buffer, tracker: tracker) { (buffer, tracker) in
                 try PL.parseOptional(buffer: &buffer, tracker: tracker, parser: PL.parseSpaces)
-                let resourceName = try parseAtom(buffer: &buffer, tracker: tracker)
+                let resourceName = try parseQuotaResourceName(buffer: &buffer, tracker: tracker)
                 try PL.parseSpaces(buffer: &buffer, tracker: tracker)
                 let limit = try parseNumber(buffer: &buffer, tracker: tracker)
                 return QuotaLimit(resourceName: resourceName, limit: limit)
@@ -3059,7 +3088,7 @@ extension GrammarParser {
 
         func parsePair_mailboxID(buffer: inout ParseBuffer, tracker: StackTracker) throws -> Pair {
             try PL.parseFixedString("MAILBOXID ", buffer: &buffer, tracker: tracker)
-            return .mailboxID(try self.parseMailboxID(buffer: &buffer, tracker: tracker))
+            return .mailboxID(MailboxID(try self.parseObjectID(buffer: &buffer, tracker: tracker)))
         }
 
         func parsePair_accountID(buffer: inout ParseBuffer, tracker: StackTracker) throws -> Pair {
@@ -3132,6 +3161,21 @@ extension GrammarParser {
             }
             return compound
         }
+    }
+
+    /// Parses an object ID leniently: any run of bytes up to a delimiter (space, `)`, `]`, CR, LF) is consumed,
+    /// and `nil` is returned if it isn't a valid ``ObjectID`` rather than failing the parse.
+    func parseObjectIDLeniently(buffer: inout ParseBuffer, tracker: StackTracker) throws -> ObjectID? {
+        let parsed = try PL.parseZeroOrMoreCharacters(buffer: &buffer, tracker: tracker) { char -> Bool in
+            switch char {
+            case UInt8(ascii: " "), UInt8(ascii: ")"), UInt8(ascii: "]"), UInt8(ascii: "\r"), UInt8(ascii: "\n"):
+                return false
+            default:
+                return true
+            }
+        }
+        // Non-UTF-8 bytes become U+FFFD, which isn't a valid object ID character.
+        return ObjectID(String(decoding: parsed.readableBytesView, as: UTF8.self))
     }
 }
 

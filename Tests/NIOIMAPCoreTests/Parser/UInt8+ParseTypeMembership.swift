@@ -19,6 +19,26 @@ import Testing
 struct UInt8ParseTypeMembershipTests {
     let allChars = Set(UInt8.min...UInt8.max)
 
+    /// ```
+    /// atom-specials   = "(" / ")" / "{" / SP / CTL / list-wildcards / quoted-specials / resp-specials
+    /// CTL             = %x00-1F / %x7F   ; RFC 5234
+    /// ```
+    ///
+    /// `isAtomChar`, `isAStringChar` and `isListChar` are all derived from this, so the tests
+    /// below share the one set rather than restating it.
+    let atomSpecials: Set<UInt8> = Set(0...31).union([
+        0x7F,  // CTL — DEL
+        UInt8(ascii: "("), UInt8(ascii: ")"), UInt8(ascii: " "), UInt8(ascii: "{"),
+        UInt8(ascii: "]"),  // ResponseSpecial
+        UInt8(ascii: "%"), UInt8(ascii: "*"),  // ListWildcard
+        UInt8(ascii: "\""), UInt8(ascii: "\\"),  // QuotedSpecial
+    ])
+
+    /// `ATOM-CHAR = <any CHAR except atom-specials>`, and `CHAR = %x01-7F`.
+    var atomChars: Set<UInt8> {
+        allChars.subtracting(atomSpecials).subtracting(128...UInt8.max)
+    }
+
     @Test("CR")
     func CR() {
         let valid: Set<UInt8> = [UInt8(ascii: "\r")]
@@ -61,20 +81,66 @@ struct UInt8ParseTypeMembershipTests {
 
     @Test("atom special")
     func atomSpecial() {
-        var valid: Set<UInt8> = [
-            UInt8(ascii: "("), UInt8(ascii: ")"), UInt8(ascii: " "), UInt8(ascii: "{"),
-            UInt8(ascii: "]"),  // ResponseSpecial
-            UInt8(ascii: "%"), UInt8(ascii: "*"),  // ListWildcard
-            UInt8(ascii: "\""), UInt8(ascii: "\\"),  // QuotedSpecial
-        ]
-        valid = valid.union(0...31)
         allChars.forEach { char in
-            if valid.contains(char) {
-                #expect(char.isAtomSpecial)
-            } else {
-                #expect(!char.isAtomSpecial)
-            }
+            #expect(char.isAtomSpecial == atomSpecials.contains(char))
         }
+    }
+
+    /// `ATOM-CHAR = <any CHAR except atom-specials>`
+    @Test("atom char")
+    func atomChar() {
+        // The fences, stated independently of `atomSpecials`: the range runs "!" to "~".
+        // Everything from SP down is a CTL or SP, DEL is a CTL, and CHAR stops at %x7F.
+        #expect(!UInt8(0x00).isAtomChar)
+        #expect(!UInt8(0x1F).isAtomChar)
+        #expect(!UInt8(ascii: " ").isAtomChar)
+        #expect(UInt8(ascii: "!").isAtomChar)
+        #expect(UInt8(ascii: "~").isAtomChar)
+        #expect(!UInt8(0x7F).isAtomChar)
+        #expect(!UInt8(0x80).isAtomChar)
+        #expect(!UInt8(0xFF).isAtomChar)
+
+        let valid = atomChars
+        let invalid = allChars.subtracting(valid)
+        #expect(valid.allSatisfy { $0.isAtomChar })
+        #expect(invalid.allSatisfy { !$0.isAtomChar })
+    }
+
+    /// `ASTRING-CHAR = ATOM-CHAR / resp-specials`
+    @Test("astring char")
+    func aStringChar() {
+        let valid = atomChars.union([UInt8(ascii: "]")])
+        let invalid = allChars.subtracting(valid)
+        #expect(valid.allSatisfy { $0.isAStringChar })
+        #expect(invalid.allSatisfy { !$0.isAStringChar })
+    }
+
+    /// `list-char = ATOM-CHAR / list-wildcards / resp-specials`
+    @Test("list char")
+    func listChar() {
+        let valid = atomChars.union([UInt8(ascii: "]"), UInt8(ascii: "%"), UInt8(ascii: "*")])
+        let invalid = allChars.subtracting(valid)
+        #expect(valid.allSatisfy { $0.isListChar })
+        #expect(invalid.allSatisfy { !$0.isListChar })
+    }
+
+    /// `QUOTED-CHAR = <any TEXT-CHAR except quoted-specials>`
+    ///
+    /// `TEXT-CHAR` includes DEL and the other C0 controls, so a quoted string may carry bytes
+    /// that an atom may not.
+    @Test("quoted char")
+    func quotedChar() {
+        let quotedSpecials: Set<UInt8> = [UInt8(ascii: "\""), UInt8(ascii: "\\")]
+        let nonTextChars: Set<UInt8> = [UInt8(ascii: "\r"), UInt8(ascii: "\n"), 0]
+        let valid =
+            allChars
+            .subtracting(quotedSpecials)
+            .subtracting(nonTextChars)
+            .subtracting(128...UInt8.max)
+        let invalid = allChars.subtracting(valid)
+        #expect(valid.contains(0x7F))
+        #expect(valid.allSatisfy { $0.isQuotedChar })
+        #expect(invalid.allSatisfy { !$0.isQuotedChar })
     }
 
     @Test("text char")

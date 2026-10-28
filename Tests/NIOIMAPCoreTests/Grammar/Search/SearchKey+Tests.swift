@@ -39,13 +39,13 @@ struct SearchKeyTests {
         EncodeFixture.searchKey(.body("some body"), "BODY \"some body\""),
         EncodeFixture.searchKey(.cc("tim@apple.com"), "CC \"tim@apple.com\""),
         EncodeFixture.searchKey(.from("tim@apple.com"), "FROM \"tim@apple.com\""),
-        EncodeFixture.searchKey(.keyword(Flag.Keyword(unchecked: "somekeyword")), "KEYWORD somekeyword"),
+        EncodeFixture.searchKey(.keyword("somekeyword"), "KEYWORD somekeyword"),
         EncodeFixture.searchKey(.on(IMAPCalendarDay(year: 1999, month: 9, day: 16)!), "ON 16-Sep-1999"),
         EncodeFixture.searchKey(.since(IMAPCalendarDay(year: 1984, month: 1, day: 17)!), "SINCE 17-Jan-1984"),
         EncodeFixture.searchKey(.subject("some subject"), "SUBJECT \"some subject\""),
         EncodeFixture.searchKey(.text("some text"), "TEXT \"some text\""),
         EncodeFixture.searchKey(.to("theboss@apple.com"), "TO \"theboss@apple.com\""),
-        EncodeFixture.searchKey(.unkeyword(Flag.Keyword(unchecked: "nokeyword")), "UNKEYWORD nokeyword"),
+        EncodeFixture.searchKey(.unkeyword("nokeyword"), "UNKEYWORD nokeyword"),
         EncodeFixture.searchKey(.header("header", "value"), "HEADER \"header\" \"value\""),
         EncodeFixture.searchKey(.messageSizeLarger(333), "LARGER 333"),
         EncodeFixture.searchKey(.not(.messageSizeLarger(444)), "NOT LARGER 444"),
@@ -90,6 +90,13 @@ struct SearchKeyTests {
         EncodeFixture.searchKey(.threadID(.init("123-456-789")!), "THREADID 123-456-789"),
         EncodeFixture.searchKey(.younger(34), "YOUNGER 34"),
         EncodeFixture.searchKey(.older(45), "OLDER 45"),
+        EncodeFixture.searchKey(.gmailMessageID(1_278_455_344_230_334_865), "X-GM-MSGID 1278455344230334865"),
+        EncodeFixture.searchKey(.gmailThreadID(1_266_894_439_832_287_888), "X-GM-THRID 1266894439832287888"),
+        EncodeFixture.searchKey(.gmailRaw("has:attachment in:unread"), #"X-GM-RAW "has:attachment in:unread""#),
+        EncodeFixture.searchKey(
+            .or(.gmailThreadID(111), .gmailThreadID(222)),
+            "OR X-GM-THRID 111 X-GM-THRID 222"
+        ),
     ])
     func encode(_ fixture: EncodeFixture<SearchKey>) {
         fixture.checkEncoding()
@@ -143,9 +150,9 @@ struct SearchKeyTests {
         ParseFixture.searchKey("SUBJECT data5", expected: .success(.subject("data5"))),
         ParseFixture.searchKey("TEXT data6", expected: .success(.text("data6"))),
         ParseFixture.searchKey("TO data7", expected: .success(.to("data7"))),
-        ParseFixture.searchKey("KEYWORD key1", expected: .success(.keyword(Flag.Keyword("key1")!))),
+        ParseFixture.searchKey("KEYWORD key1", expected: .success(.keyword("key1"))),
         ParseFixture.searchKey("HEADER some value", expected: .success(.header("some", "value"))),
-        ParseFixture.searchKey("UNKEYWORD key2", expected: .success(.unkeyword(Flag.Keyword("key2")!))),
+        ParseFixture.searchKey("UNKEYWORD key2", expected: .success(.unkeyword("key2"))),
         ParseFixture.searchKey("NOT LARGER 1234", expected: .success(.not(.messageSizeLarger(1234)))),
         ParseFixture.searchKey(
             "OR LARGER 6 SMALLER 4",
@@ -163,7 +170,7 @@ struct SearchKeyTests {
         ParseFixture.searchKey("(LARGER 1)", expected: .success(.messageSizeLarger(1))),
         ParseFixture.searchKey(
             "(LARGER 1 SMALLER 5 KEYWORD hello)",
-            expected: .success(.and([.messageSizeLarger(1), .messageSizeSmaller(5), .keyword(Flag.Keyword("hello")!)]))
+            expected: .success(.and([.messageSizeLarger(1), .messageSizeSmaller(5), .keyword("hello")]))
         ),
         ParseFixture.searchKey("YOUNGER 34", expected: .success(.younger(34))),
         ParseFixture.searchKey("OLDER 45", expected: .success(.older(45))),
@@ -174,6 +181,19 @@ struct SearchKeyTests {
         ),
         ParseFixture.searchKey("EMAILID 123-456-789", expected: .success(.emailID(.init("123-456-789")!))),
         ParseFixture.searchKey("THREADID 123-456-789", expected: .success(.threadID(.init("123-456-789")!))),
+        ParseFixture.searchKey(
+            "X-GM-MSGID 1278455344230334865",
+            expected: .success(.gmailMessageID(1_278_455_344_230_334_865))
+        ),
+        ParseFixture.searchKey(
+            "X-GM-THRID 1266894439832287888",
+            expected: .success(.gmailThreadID(1_266_894_439_832_287_888))
+        ),
+        ParseFixture.searchKey(
+            #"X-GM-RAW "has:attachment in:unread""#,
+            expected: .success(.gmailRaw("has:attachment in:unread"))
+        ),
+        ParseFixture.searchKey("X-GM-RAW vacation", expected: .success(.gmailRaw("vacation"))),
     ])
     func parse(_ fixture: ParseFixture<SearchKey>) {
         fixture.checkParsing()
@@ -188,6 +208,9 @@ struct SearchKeyTests {
             (SearchKey.or(.all, .deleted), false),
             (SearchKey.and([.bcc("x"), .deleted]), true),
             (SearchKey.and([.all, .deleted]), false),
+            (SearchKey.gmailMessageID(1_278_455_344_230_334_865), false),
+            (SearchKey.gmailThreadID(1_266_894_439_832_287_888), false),
+            (SearchKey.gmailRaw("has:attachment"), true),
         ] as [(SearchKey, Bool)]
     )
     func usesString(_ fixture: (SearchKey, Bool)) {

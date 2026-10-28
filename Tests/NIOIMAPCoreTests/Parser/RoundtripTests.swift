@@ -44,7 +44,7 @@ private enum RoundtripTests {
             RoundtripFixture(name: "LOGIN command", command: .login(username: "user", password: "password")),
             RoundtripFixture(
                 name: "AUTHENTICATE command",
-                command: .authenticate(mechanism: .init("some"), initialResponse: nil)
+                command: .authenticate(mechanism: .init("some")!, initialResponse: nil)
             ),
             RoundtripFixture(name: "CREATE command with INBOX", command: .create(.inbox, [])),
             RoundtripFixture(name: "CREATE command with mailbox name", command: .create(MailboxName("mailbox"), [])),

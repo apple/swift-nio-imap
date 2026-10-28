@@ -32,7 +32,7 @@ struct EnableDataTests {
             "ENABLED ENABLE CONDSTORE"
         ),
         EncodeFixture.enableData(
-            [.enable, .condStore, .authenticate(.init("some"))],
+            [.enable, .condStore, .authenticate(.init("some")!)],
             "ENABLED ENABLE CONDSTORE AUTH=SOME"
         ),
     ])

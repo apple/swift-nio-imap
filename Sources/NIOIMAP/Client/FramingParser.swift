@@ -262,6 +262,16 @@ public struct FramingParser: Hashable, Sendable {
             case .insideLiteral(lineFeedStrategy: let lfs, remaining: let remaining):
                 self.readByte_state_insideLiteral(lineFeedStrategy: lfs, remainingLiteralBytes: remaining)
                 guard self.frameLength > 0 else {
+                    // A zero-length literal, i.e. `{0}`, contributes no bytes to the
+                    // frame. There is nothing to emit and nothing to wait for, so carry
+                    // on parsing the bytes we already have. `readByte_state_insideLiteral`
+                    // has moved us back to `.normalTraversal`, so this cannot loop.
+                    if remaining == 0 {
+                        continue
+                    }
+                    // Otherwise the frame is empty because the buffer held nothing but the
+                    // line feed of a split literal header CRLF, which `.ignoreFirst` just
+                    // consumed. We do need more bytes.
                     return .incomplete(self.generateIncompleteFramingResult())
                 }
                 let buffer = self.readFrame()

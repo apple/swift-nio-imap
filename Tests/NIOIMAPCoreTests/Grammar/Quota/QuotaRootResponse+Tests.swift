@@ -20,34 +20,44 @@ import Testing
 struct QuotaRootResponseTests {
     @Test(arguments: [
         EncodeFixture.quotaRootResponse(
-            MailboxName("INBOX"),
-            QuotaRoot("Root"),
+            .inbox,
+            [QuotaRoot("Root")],
             #"QUOTAROOT "INBOX" "Root""#
         ),
         EncodeFixture.quotaRootResponse(
-            MailboxName("INBOX"),
-            QuotaRoot("#user/alice"),
+            .inbox,
+            [QuotaRoot("#user/alice")],
             ##"QUOTAROOT "INBOX" "#user/alice""##
         ),
+        EncodeFixture.quotaRootResponse(
+            .inbox,
+            [],
+            #"QUOTAROOT "INBOX""#
+        ),
+        EncodeFixture.quotaRootResponse(
+            .inbox,
+            [QuotaRoot(""), QuotaRoot("Other")],
+            #"QUOTAROOT "INBOX" "" "Other""#
+        ),
     ])
-    func encode(_ fixture: EncodeFixture<(MailboxName, QuotaRoot)>) {
+    func encode(_ fixture: EncodeFixture<(MailboxName, [QuotaRoot])>) {
         fixture.checkEncoding()
     }
 }
 
 // MARK: -
 
-extension EncodeFixture<(MailboxName, QuotaRoot)> {
+extension EncodeFixture<(MailboxName, [QuotaRoot])> {
     fileprivate static func quotaRootResponse(
         _ mailbox: MailboxName,
-        _ quotaRoot: QuotaRoot,
+        _ quotaRoots: [QuotaRoot],
         _ expectedString: String
     ) -> Self {
         EncodeFixture(
-            input: (mailbox, quotaRoot),
+            input: (mailbox, quotaRoots),
             bufferKind: .defaultServer,
             expectedString: expectedString,
-            encoder: { $0.writeQuotaRootResponse(mailbox: $1.0, quotaRoot: $1.1) }
+            encoder: { $0.writeQuotaRootResponse(mailbox: $1.0, quotaRoots: $1.1) }
         )
     }
 }

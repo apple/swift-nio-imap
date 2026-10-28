@@ -145,6 +145,10 @@ struct MailboxAttributeTests {
                 "OBJECTID ()",
                 expected: .success(.init(objectID: CompoundObjectID()))
             ),
+            ParseFixture.mailboxStatus(
+                "MESSAGES 3 MAILBOXID (bad!id) UNSEEN 1",
+                expected: .success(.init(messageCount: 3, unseenCount: 1))
+            ),
             ParseFixture.mailboxStatus("MESSAGES UNSEEN 3 RECENT 4", "\r", expected: .failure),
             ParseFixture.mailboxStatus("2 UNSEEN 3 RECENT 4", "\r", expected: .failure),
             ParseFixture.mailboxStatus("", "", expected: .incompleteMessage),

@@ -13,7 +13,6 @@
 //===----------------------------------------------------------------------===//
 
 import struct NIO.ByteBuffer
-@preconcurrency import SE0270_RangeSet
 
 /// A set of message identifiers represented as an array of ranges.
 ///

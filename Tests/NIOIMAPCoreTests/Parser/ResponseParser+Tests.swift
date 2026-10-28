@@ -195,7 +195,7 @@ struct ResponseParserTests {
         #expect(
             try parser.parseResponseStream(buffer: &buffer)
                 == .response(
-                    .fetch(.simpleAttribute(.flags([.init("\\nees")])))
+                    .fetch(.simpleAttribute(.flags([#"\nees"#])))
                 )
         )
     }

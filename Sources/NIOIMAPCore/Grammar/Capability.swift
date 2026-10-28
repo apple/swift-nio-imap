@@ -473,7 +473,7 @@ extension Capability {
 
     /// The `UIDBATCHES` capability indicates the server supports partitioning messages into evenly-sized UID batches.
     ///
-    /// - SeeAlso: [RFC 9618](https://datatracker.ietf.org/doc/html/draft-ietf-mailmaint-imap-uidbatches-22)
+    /// - SeeAlso: [RFC 10022](https://datatracker.ietf.org/doc/html/rfc10022)
     public static let uidBatches = Self(unchecked: "UIDBATCHES")
 
     /// The `UNSELECT` capability indicates the server supports the `UNSELECT` command to close without expunging.
@@ -560,7 +560,7 @@ extension Capability {
     ///
     /// - SeeAlso: [RFC 4959](https://datatracker.ietf.org/doc/html/rfc4959)
     public static func authenticate(_ type: AuthenticationMechanism) -> Self {
-        Self("AUTH=\(type.rawValue)")
+        Self("AUTH=\(String(type))")
     }
 
     /// Creates a `CONTEXT=<kind>` capability for the specified search or sort context.

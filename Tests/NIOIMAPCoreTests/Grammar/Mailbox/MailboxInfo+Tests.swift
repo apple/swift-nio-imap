@@ -95,7 +95,7 @@ struct MailboxInfoTests {
         EncodeFixture.mailboxInfo(
             MailboxInfo(
                 attributes: [.marked, .hasChildren],
-                path: try! .init(name: MailboxName("INBOX"), pathSeparator: "/"),
+                path: try! .init(name: .inbox, pathSeparator: "/"),
                 extensions: [:]
             ),
             #"(\Marked \HasChildren) "/" "INBOX""#

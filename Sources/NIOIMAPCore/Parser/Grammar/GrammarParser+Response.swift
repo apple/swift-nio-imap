@@ -377,7 +377,7 @@ extension GrammarParser {
         func parseSuffix_mailboxID(buffer: inout ParseBuffer, tracker: StackTracker) throws -> ResponseTextCode {
             try PL.parseSpaces(buffer: &buffer, tracker: tracker)
             try PL.parseFixedString("(", buffer: &buffer, tracker: tracker)
-            let mailboxID = try parseMailboxID(buffer: &buffer, tracker: tracker)
+            let mailboxID = try parseMailboxIDLeniently(buffer: &buffer, tracker: tracker)
             try PL.parseFixedString(")", buffer: &buffer, tracker: tracker)
             return .mailboxID(mailboxID)
         }
@@ -467,7 +467,7 @@ extension GrammarParser {
         // quota_resource  ::= atom SP number SP number
         func parseQuotaResource(buffer: inout ParseBuffer, tracker: StackTracker) throws -> QuotaResource {
             try PL.composite(buffer: &buffer, tracker: tracker) { buffer, tracker in
-                let resourceName = try parseAtom(buffer: &buffer, tracker: tracker)
+                let resourceName = try parseQuotaResourceName(buffer: &buffer, tracker: tracker)
                 try PL.parseSpaces(buffer: &buffer, tracker: tracker)
                 let usage = try parseNumber(buffer: &buffer, tracker: tracker)
                 try PL.parseSpaces(buffer: &buffer, tracker: tracker)
@@ -510,9 +510,11 @@ extension GrammarParser {
         try PL.composite(buffer: &buffer, tracker: tracker) { buffer, tracker in
             try PL.parseFixedString("QUOTAROOT ", buffer: &buffer, tracker: tracker)
             let mailbox = try parseMailbox(buffer: &buffer, tracker: tracker)
-            try PL.parseSpaces(buffer: &buffer, tracker: tracker)
-            let quotaRoot = try parseAString(buffer: &buffer, tracker: tracker)
-            return .quotaRoot(mailbox, .init(quotaRoot))
+            let quotaRoots = try PL.parseZeroOrMore(buffer: &buffer, tracker: tracker) { buffer, tracker in
+                try PL.parseSpaces(buffer: &buffer, tracker: tracker)
+                return try parseQuotaRoot(buffer: &buffer, tracker: tracker)
+            }
+            return .quotaRoot(mailbox, quotaRoots)
         }
     }
 }

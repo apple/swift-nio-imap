@@ -46,6 +46,16 @@ struct QuotaResponseTests {
                 ),
                 ##"QUOTA "#user/alice" (MESSAGE 42 1000)"##
             ),
+            EncodeFixture.quota(
+                (
+                    QuotaRoot(""),
+                    [
+                        QuotaResource(resourceName: "STORAGE", usage: 10, limit: 512),
+                        QuotaResource(resourceName: "MESSAGE", usage: 1, limit: 100),
+                    ]
+                ),
+                #"QUOTA "" (STORAGE 10 512 MESSAGE 1 100)"#
+            ),
         ]
     )
     func encodeQuotaResponse(
@@ -60,6 +70,13 @@ struct QuotaResponseTests {
             EncodeFixture.quotaResources(
                 [QuotaResource(resourceName: "STORAGE", usage: 10, limit: 512)],
                 "(STORAGE 10 512)"
+            ),
+            EncodeFixture.quotaResources(
+                [
+                    QuotaResource(resourceName: "STORAGE", usage: 10, limit: 512),
+                    QuotaResource(resourceName: "MESSAGE", usage: 1, limit: 100),
+                ],
+                "(STORAGE 10 512 MESSAGE 1 100)"
             ),
             EncodeFixture.quotaResources([], "()"),
         ]

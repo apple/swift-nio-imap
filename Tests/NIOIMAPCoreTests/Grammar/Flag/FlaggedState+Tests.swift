@@ -159,7 +159,7 @@ struct FlaggedStateTests {
 
     @Test("FlaggedState(flags:) compares flags case-insensitively")
     func decodeCaseInsensitive() {
-        let flags: [Flag] = [.extension("\\FLAGGED"), .keyword(Flag.Keyword("$mailflagbit1")!)]
+        let flags: [Flag] = [.extension("\\FLAGGED"), .keyword("$mailflagbit1")]
         #expect(FlaggedState(flags: flags) == .flagged(.yellow))
     }
 }

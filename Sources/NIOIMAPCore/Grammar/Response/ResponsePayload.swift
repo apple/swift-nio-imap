@@ -14,8 +14,6 @@
 
 #if canImport(FoundationEssentials)
 import FoundationEssentials
-#elseif swift(<6.0)
-@preconcurrency import Foundation
 #else
 import Foundation
 #endif
@@ -93,12 +91,12 @@ public enum ResponsePayload: Hashable, Sendable {
     /// for details.
     case id(OrderedDictionary<String, String?>)
 
-    /// Matches a quota root with a mailbox.
+    /// Lists the quota roots of a mailbox.
     ///
-    /// Associates a mailbox with its quota root. Multiple mailboxes may share the same
+    /// A mailbox has zero or more quota roots, and multiple mailboxes may share the same
     /// quota root. See [RFC 2087](https://datatracker.ietf.org/doc/html/rfc2087) (QUOTA Extension)
     /// for details and ``QuotaRoot``.
-    case quotaRoot(MailboxName, QuotaRoot)
+    case quotaRoot(MailboxName, [QuotaRoot])
 
     /// Contains quotas and resource limits for the specified quota root.
     ///
@@ -137,8 +135,8 @@ extension EncodeBuffer {
             return self.writeEnableData(data)
         case .id(let data):
             return self.writeIDResponse(data)
-        case .quotaRoot(let mailbox, let quotaRoot):
-            return self.writeQuotaRootResponse(mailbox: mailbox, quotaRoot: quotaRoot)
+        case .quotaRoot(let mailbox, let quotaRoots):
+            return self.writeQuotaRootResponse(mailbox: mailbox, quotaRoots: quotaRoots)
         case .quota(let quotaRoot, let resources):
             return self.writeQuotaResponse(quotaRoot: quotaRoot, resources: resources)
         case .metadata(let response):

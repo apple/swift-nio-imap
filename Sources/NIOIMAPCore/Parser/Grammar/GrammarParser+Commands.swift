@@ -151,7 +151,7 @@ extension GrammarParser {
     func parseCommandSuffix_authenticate(buffer: inout ParseBuffer, tracker: StackTracker) throws -> Command {
         try PL.composite(buffer: &buffer, tracker: tracker) { buffer, tracker -> Command in
             try PL.parseSpaces(buffer: &buffer, tracker: tracker)
-            let mechanism = AuthenticationMechanism(try self.parseAtom(buffer: &buffer, tracker: tracker))
+            let mechanism = try self.parseAuthenticationMechanism(buffer: &buffer, tracker: tracker)
             let initialResponse = try PL.parseOptional(
                 buffer: &buffer,
                 tracker: tracker,

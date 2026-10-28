@@ -176,7 +176,7 @@ public enum MailboxData: Hashable, Sendable {
     ///
     /// See ``UIDBatchesResponse`` for the structure of the returned data.
     ///
-    /// - SeeAlso: [IMAP UID BATCHES Draft](https://datatracker.ietf.org/doc/draft-ietf-mailmaint-imap-uidbatches/)
+    /// - SeeAlso: [RFC 10022](https://datatracker.ietf.org/doc/html/rfc10022) - UIDBATCHES Extension
     case uidBatches(UIDBatchesResponse)
 }
 

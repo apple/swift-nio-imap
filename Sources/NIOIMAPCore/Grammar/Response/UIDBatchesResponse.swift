@@ -39,7 +39,7 @@ import struct NIO.ByteBuffer
 /// identifying the SEARCH request. The parenthesized content contains UID ranges in descending order.
 /// Multiple UIDBATCHES responses can be sent for a single search command.
 ///
-/// - SeeAlso: ``SearchCorrelator``, [UIDBATCHES Draft](https://datatracker.ietf.org/doc/draft-ietf-mailmaint-imap-uidbatches/)
+/// - SeeAlso: ``SearchCorrelator``, [RFC 10022](https://datatracker.ietf.org/doc/html/rfc10022)
 public struct UIDBatchesResponse: Hashable, Sendable {
     /// The correlator linking this response to its search command.
     ///

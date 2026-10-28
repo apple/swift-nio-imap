@@ -12,8 +12,9 @@
 //
 //===----------------------------------------------------------------------===//
 
+import Foundation
 import NIO
-@testable import NIOIMAPCore
+@_spi(NIOIMAPInternal) @testable import NIOIMAPCore
 import OrderedCollections
 import Testing
 
@@ -1122,4 +1123,472 @@ private struct ResponseStreamFixture: CustomTestArgumentEncodable, CustomTestStr
     }
 
     var testDescription: String { input.mappingControlPictures() }
+}
+
+// MARK: - ENVELOPE group markers (#859)
+
+extension ResponseParserTests {
+    @Test("malformed ENVELOPE groups: envelope normalized, stream in sync", arguments: EnvelopeStreamFixture.all)
+    fileprivate func envelopeGroupsInStream(_ fixture: EnvelopeStreamFixture) throws {
+        let parsed = try Self.parseStream(fixture.bytes, delivery: .singleShot)
+        #expect(parsed.unconsumedBytes == 0)
+        #expect(parsed.responses.first == .response(.fetch(.start(fixture.sequenceNumber))))
+        #expect(Array(parsed.responses.suffix(2)) == [.response(.fetch(.finish)), Self.taggedOK])
+        #expect(Self.envelopes(in: parsed.responses) == fixture.expectedEnvelopes)
+    }
+
+    @Test("byte-at-a-time equals single-shot", arguments: EnvelopeStreamFixture.all)
+    fileprivate func envelopeGroupsByteAtATime(_ fixture: EnvelopeStreamFixture) throws {
+        let singleShot = try Self.parseStream(fixture.bytes, delivery: .singleShot)
+        let chunked = try Self.parseStream(fixture.bytes, delivery: .byteAtATime)
+        #expect(chunked == singleShot)
+    }
+
+    #if !os(iOS) && !os(watchOS) && !os(tvOS) && !os(visionOS) && !os(Android)
+    /// Issue #859 reproducer. A regression crashes the child process, not the runner.
+    @Test("deep ENVELOPE groups parse and release on a small stack") func deepEnvelopeGroups() async {
+        await #expect(processExitsWith: .success) {
+            let summary = await DeepEnvelope.onPinnedStack {
+                let parsed = try! ResponseParserTests.parseStream(
+                    DeepEnvelope.response,
+                    delivery: .singleShot,
+                    options: DeepEnvelope.parserOptions
+                )
+                return DeepEnvelope.Summary(parsed)
+            }
+            precondition(summary == DeepEnvelope.expectedSummary, "\(summary)")
+        }
+    }
+
+    /// Deep input in seeded random chunks ≥ 1 KiB (byte-at-a-time would re-parse ~340 KB per byte).
+    @Test("deep ENVELOPE groups: random chunks equal single-shot") func deepEnvelopeGroupsChunked() async {
+        await #expect(processExitsWith: .success) {
+            let equal = await DeepEnvelope.onPinnedStack {
+                let singleShot = try! ResponseParserTests.parseStream(
+                    DeepEnvelope.response,
+                    delivery: .singleShot,
+                    options: DeepEnvelope.parserOptions
+                )
+                let chunked = try! ResponseParserTests.parseStream(
+                    DeepEnvelope.response,
+                    delivery: .randomChunks(seed: DeepEnvelope.chunkSeed, sizes: DeepEnvelope.chunkSizes),
+                    options: DeepEnvelope.parserOptions
+                )
+                return chunked == singleShot
+            }
+            precondition(equal)
+        }
+    }
+    #endif
+
+    /// In-process on every platform: exercises each path the issue names, on a 512 KiB stack.
+    /// A regression kills the runner, so this lands with the fix only.
+    @Test("deep ENVELOPE groups: compare, hash, encode, describe, release on a small stack")
+    func deepEnvelopeGroupsInProcess() async throws {
+        let outcome = await DeepEnvelope.onPinnedStack {
+            Result { try DeepEnvelope.Exercised.run() }
+        }
+        let exercised = try outcome.get()
+        #expect(exercised.summary == DeepEnvelope.expectedSummary)
+        #expect(exercised.parsesEqual)
+        #expect(exercised.hashesEqual)
+        #expect(exercised.encodedByteCount == DeepEnvelope.expectedEncodedByteCount)
+        #expect(exercised.describedNonEmpty)
+    }
+}
+
+// MARK: - Helpers
+
+extension ResponseParserTests {
+    fileprivate static let taggedOK = ResponseOrContinuationRequest.response(
+        .tagged(.init(tag: "A1", state: .ok(.init(text: "done"))))
+    )
+
+    /// Feeds `input` in chunks; after each chunk parses until the parser needs more bytes.
+    fileprivate static func parseStream(
+        _ input: ByteBuffer,
+        delivery: Delivery,
+        options: ResponseParser.Options = .init()
+    ) throws -> ParsedStream {
+        var parser = ResponseParser(options: options)
+        var remaining = input
+        var buffer = ByteBuffer()
+        var responses: [ResponseOrContinuationRequest] = []
+        for size in delivery.chunkSizes(total: input.readableBytes) {
+            var chunk = remaining.readSlice(length: min(size, remaining.readableBytes))!
+            buffer.writeBuffer(&chunk)
+            while let response = try parser.parseResponseStream(buffer: &buffer) {
+                responses.append(response)
+            }
+        }
+        return ParsedStream(responses: responses, unconsumedBytes: buffer.readableBytes)
+    }
+
+    /// Top-level envelopes and those of nested `message/rfc822` parts, in order.
+    fileprivate static func envelopes(in responses: [ResponseOrContinuationRequest]) -> [Envelope] {
+        var result: [Envelope] = []
+        for case .response(.fetch(.simpleAttribute(let attribute))) in responses {
+            switch attribute {
+            case .envelope(let envelope):
+                result.append(envelope)
+            case .body(.valid(let body), hasExtensionData: _):
+                result += envelopes(in: body)
+            default:
+                continue
+            }
+        }
+        return result
+    }
+
+    private static func envelopes(in body: BodyStructure) -> [Envelope] {
+        var pending = [body]
+        var result: [Envelope] = []
+        while let next = pending.popLast() {
+            switch next {
+            case .multipart(let multipart):
+                pending.append(contentsOf: multipart.parts.reversed())
+            case .singlepart(let part):
+                guard case .message(let message) = part.kind else { continue }
+                result.append(message.envelope)
+                pending.append(message.body)
+            }
+        }
+        return result
+    }
+}
+
+private struct ParsedStream: Equatable {
+    var responses: [ResponseOrContinuationRequest]
+    var unconsumedBytes: Int
+}
+
+private enum Delivery {
+    case singleShot
+    /// Small fixtures only: the parser re-parses the whole response per call.
+    case byteAtATime
+    case randomChunks(seed: UInt64, sizes: ClosedRange<Int>)
+
+    func chunkSizes(total: Int) -> [Int] {
+        switch self {
+        case .singleShot:
+            return [total]
+        case .byteAtATime:
+            return Array(repeating: 1, count: total)
+        case .randomChunks(let seed, let sizes):
+            var rng = SplitMix64(seed: seed)
+            var result: [Int] = []
+            var covered = 0
+            while covered < total {
+                let size = Int.random(in: sizes, using: &rng)
+                result.append(size)
+                covered += size
+            }
+            return result
+        }
+    }
+}
+
+/// Issue #859 reproducer: `depth` nested group starts, one address, `depth` end markers (~340 KB).
+private enum DeepEnvelope {
+    static let depth = 10_000
+    static let pinnedStackSize = 512 * 1024
+    static let parserOptions = ResponseParser.Options(bufferLimit: 1 << 20)
+    static let chunkSeed: UInt64 = 859
+    static let chunkSizes = 1024...8192
+
+    static let start = #"(NIL NIL "g" NIL)"#
+    static let member = #"(NIL NIL "x" "example.com")"#
+    static let end = "(NIL NIL NIL NIL)"
+
+    static var response: ByteBuffer {
+        let from = String(repeating: start, count: depth) + member + String(repeating: end, count: depth)
+        return ByteBuffer(
+            string: "* 1 FETCH (ENVELOPE (NIL NIL (\(from)) NIL NIL NIL NIL NIL NIL NIL))\r\nA1 OK done\r\n"
+        )
+    }
+
+    /// Normalized: `depth - 1` demoted starts, then the innermost group with its member.
+    static let expectedSummary = Summary(fromCount: depth, groupCount: 1, responseCount: 4, unconsumedBytes: 0)
+
+    /// Encoder output for the normalized From list: every start (demoted or bracketing), member, one end.
+    static let expectedEncodedByteCount = depth * start.utf8.count + member.utf8.count + end.utf8.count
+
+    struct Summary: Equatable, Sendable {
+        var fromCount: Int
+        var groupCount: Int
+        var responseCount: Int
+        var unconsumedBytes: Int
+
+        init(fromCount: Int, groupCount: Int, responseCount: Int, unconsumedBytes: Int) {
+            self.fromCount = fromCount
+            self.groupCount = groupCount
+            self.responseCount = responseCount
+            self.unconsumedBytes = unconsumedBytes
+        }
+
+        init(_ parsed: ParsedStream) {
+            let from = ResponseParserTests.envelopes(in: parsed.responses).first?.from ?? []
+            let groupCount = from.count { if case .group = $0 { true } else { false } }
+            self.init(
+                fromCount: from.count,
+                groupCount: groupCount,
+                responseCount: parsed.responses.count,
+                unconsumedBytes: parsed.unconsumedBytes
+            )
+        }
+    }
+
+    /// Results of `==`, `hashValue`, encode and `String(describing:)` on two independent parses.
+    struct Exercised: Sendable {
+        var summary: Summary
+        var parsesEqual: Bool
+        var hashesEqual: Bool
+        var encodedByteCount: Int
+        var describedNonEmpty: Bool
+
+        /// Call on the pinned stack: both trees are built and released there.
+        static func run() throws -> Exercised {
+            // Two parses, so `==` can't short-circuit on shared storage.
+            let first = try ResponseParserTests.parseStream(response, delivery: .singleShot, options: parserOptions)
+            let second = try ResponseParserTests.parseStream(response, delivery: .singleShot, options: parserOptions)
+            let firstFrom = ResponseParserTests.envelopes(in: first.responses).first?.from ?? []
+            let secondFrom = ResponseParserTests.envelopes(in: second.responses).first?.from ?? []
+
+            var encoder = EncodeBuffer.serverEncodeBuffer(
+                buffer: ByteBufferAllocator().buffer(capacity: 1 << 20),
+                options: ResponseEncodingOptions(),
+                loggingMode: false
+            )
+            let encodedByteCount = firstFrom.reduce(0) { $0 + encoder.writeEmailAddressOrGroup($1) }
+
+            return Exercised(
+                summary: Summary(first),
+                parsesEqual: first == second,
+                hashesEqual: firstFrom.hashValue == secondFrom.hashValue,
+                encodedByteCount: encodedByteCount,
+                // From list: Mirror; response: `debugDescription` (encoder).
+                describedNonEmpty: !String(describing: firstFrom).isEmpty && !String(describing: first).isEmpty
+            )
+        }
+    }
+
+    /// Runs `body` on a thread with a fixed 512 KiB stack; locals are released there too.
+    static func onPinnedStack<T: Sendable>(_ body: @escaping @Sendable () -> T) async -> T {
+        await withCheckedContinuation { continuation in
+            let thread = Thread {
+                continuation.resume(returning: body())
+            }
+            thread.stackSize = pinnedStackSize
+            thread.start()
+        }
+    }
+}
+
+// MARK: - Fixtures
+
+private struct EnvelopeStreamFixture: Sendable, CustomTestStringConvertible {
+    var name: String
+    var sequenceNumber: SequenceNumber
+    /// One FETCH response; `A1 OK done` is appended.
+    var response: String
+    var expectedEnvelopes: [Envelope]
+
+    var testDescription: String { name }
+
+    var bytes: ByteBuffer {
+        ByteBuffer(string: response + "\r\nA1 OK done\r\n")
+    }
+}
+
+extension EnvelopeStreamFixture {
+    static let all: [EnvelopeStreamFixture] = [
+        // Cyrus 3.10.2, msg 07, `To: alice@example.com;`: stray end dropped.
+        EnvelopeStreamFixture(
+            name: "Cyrus 07 stray end",
+            sequenceNumber: 7,
+            response:
+                #"* 7 FETCH (UID 7 ENVELOPE ("Mon, 12 Oct 2026 10:00:00 +0000" "07-stray-end" ((NIL NIL "sender" "example.com")) ((NIL NIL "sender" "example.com")) ((NIL NIL "sender" "example.com")) ((NIL NIL "alice" "example.com")(NIL NIL NIL NIL)) NIL NIL NIL "<07-stray-end@example.com>") BODYSTRUCTURE ("TEXT" "PLAIN" ("CHARSET" "us-ascii") NIL NIL "7BIT" 23 1 NIL NIL NIL NIL))"#,
+            expectedEnvelopes: [
+                .captured("07-stray-end", to: [.singleAddress(.address("alice", "example.com"))])
+            ]
+        ),
+        // Cyrus 3.10.2, msg 35, `To: team@x: alice@example.com;`: stray end dropped.
+        EnvelopeStreamFixture(
+            name: "Cyrus 35 stray end",
+            sequenceNumber: 35,
+            response:
+                #"* 35 FETCH (UID 35 ENVELOPE ("Mon, 12 Oct 2026 10:00:00 +0000" "35-group-name-with-at" ((NIL NIL "sender" "example.com")) ((NIL NIL "sender" "example.com")) ((NIL NIL "sender" "example.com")) ((NIL NIL "team" "x:alice@example.com")(NIL NIL NIL NIL)) NIL NIL NIL "<35-group-name-with-at@example.com>") BODYSTRUCTURE ("TEXT" "PLAIN" ("CHARSET" "us-ascii") NIL NIL "7BIT" 32 1 NIL NIL NIL NIL))"#,
+            expectedEnvelopes: [
+                .captured("35-group-name-with-at", to: [.singleAddress(.address("team", "x:alice@example.com"))])
+            ]
+        ),
+        // Cyrus 3.10.2, msg 03, `To: A: B: x@example.com;;`: balanced, unchanged.
+        EnvelopeStreamFixture(
+            name: "Cyrus 03 nested header",
+            sequenceNumber: 3,
+            response:
+                #"* 3 FETCH (UID 3 ENVELOPE ("Mon, 12 Oct 2026 10:00:00 +0000" "03-nested" ((NIL NIL "sender" "example.com")) ((NIL NIL "sender" "example.com")) ((NIL NIL "sender" "example.com")) ((NIL NIL "A" NIL)(NIL NIL "B: x" "example.com")(NIL NIL NIL NIL)(NIL NIL ";" "unspecified-domain")) NIL NIL NIL "<03-nested@example.com>") BODYSTRUCTURE ("TEXT" "PLAIN" ("CHARSET" "us-ascii") NIL NIL "7BIT" 20 1 NIL NIL NIL NIL))"#,
+            expectedEnvelopes: [.captured("03-nested", to: .cyrusNested)]
+        ),
+        // Dovecot 2.4.3, msg 03, `To: A: B: x@example.com;;`: balanced, unchanged.
+        EnvelopeStreamFixture(
+            name: "Dovecot 03 nested header",
+            sequenceNumber: 3,
+            response:
+                #"* 3 FETCH (UID 3 ENVELOPE ("Mon, 12 Oct 2026 10:00:00 +0000" "03-nested" ((NIL NIL "sender" "example.com")) ((NIL NIL "sender" "example.com")) ((NIL NIL "sender" "example.com")) ((NIL NIL "A" NIL)(NIL NIL "B" "MISSING_DOMAIN")(NIL NIL NIL NIL)) NIL NIL NIL "<03-nested@example.com>") BODYSTRUCTURE ("text" "plain" ("charset" "us-ascii") NIL NIL "7bit" 20 1 NIL NIL NIL NIL))"#,
+            expectedEnvelopes: [
+                .captured(
+                    "03-nested",
+                    to: [.group(.init(groupName: "A", sourceRoot: nil, children: [.address("B", "MISSING_DOMAIN")]))]
+                )
+            ]
+        ),
+        // Dovecot 2.4.3, msg 01: well-formed group (control).
+        EnvelopeStreamFixture(
+            name: "Dovecot 01 well-formed group",
+            sequenceNumber: 1,
+            response:
+                #"* 1 FETCH (UID 1 ENVELOPE ("Mon, 12 Oct 2026 10:00:00 +0000" "01-control-wellformed-group" ((NIL NIL "sender" "example.com")) ((NIL NIL "sender" "example.com")) ((NIL NIL "sender" "example.com")) ((NIL NIL "Team" NIL)(NIL NIL "alice" "example.com")(NIL NIL "bob" "example.com")(NIL NIL NIL NIL)) NIL NIL NIL "<01-control-wellformed-group@example.com>") BODYSTRUCTURE ("text" "plain" ("charset" "us-ascii") NIL NIL "7bit" 38 1 NIL NIL NIL NIL))"#,
+            expectedEnvelopes: [
+                .captured(
+                    "01-control-wellformed-group",
+                    to: [
+                        .group(
+                            .init(
+                                groupName: "Team",
+                                sourceRoot: nil,
+                                children: [
+                                    .address("alice", "example.com"),
+                                    .address("bob", "example.com"),
+                                ]
+                            )
+                        )
+                    ]
+                )
+            ]
+        ),
+        // Cyrus 3.10.2, msg 18: groups in a nested `message/rfc822` envelope (control).
+        EnvelopeStreamFixture(
+            name: "Cyrus 18 message/rfc822",
+            sequenceNumber: 18,
+            response:
+                #"* 18 FETCH (UID 18 ENVELOPE ("Mon, 12 Oct 2026 10:00:00 +0000" "18-rfc822-attachment-nested" ((NIL NIL "sender" "example.com")) ((NIL NIL "sender" "example.com")) ((NIL NIL "sender" "example.com")) ((NIL NIL "outer" "example.com")) NIL NIL NIL "<18-rfc822-attachment-nested@example.com>") BODYSTRUCTURE (("TEXT" "PLAIN" ("CHARSET" "us-ascii") NIL NIL "7BIT" 11 0 NIL NIL NIL NIL)("MESSAGE" "RFC822" NIL NIL NIL "7BIT" 250 ("Mon, 12 Oct 2026 10:00:00 +0000" "inner" ((NIL NIL "inner" "example.com")) ((NIL NIL "inner" "example.com")) ((NIL NIL "inner" "example.com")) ((NIL NIL "A" NIL)(NIL NIL "B: x" "example.com")(NIL NIL NIL NIL)(NIL NIL ";" "unspecified-domain")) ((NIL NIL "Team" NIL)(NIL NIL "alice" "example.com")(NIL NIL NIL NIL)) NIL NIL "<inner-18@example.com>") ("TEXT" "PLAIN" ("CHARSET" "us-ascii") NIL NIL "7BIT" 13 1 NIL NIL NIL NIL) 10 NIL NIL NIL NIL) "MIXED" ("BOUNDARY" "BOUNDARY859") NIL NIL NIL))"#,
+            expectedEnvelopes: [
+                .captured("18-rfc822-attachment-nested", to: [.singleAddress(.address("outer", "example.com"))]),
+                Envelope(
+                    date: .capturedDate,
+                    subject: "inner",
+                    from: [.singleAddress(.address("inner", "example.com"))],
+                    sender: [.singleAddress(.address("inner", "example.com"))],
+                    reply: [.singleAddress(.address("inner", "example.com"))],
+                    to: .cyrusNested,
+                    cc: [
+                        .group(.init(groupName: "Team", sourceRoot: nil, children: [.address("alice", "example.com")]))
+                    ],
+                    bcc: [],
+                    inReplyTo: nil,
+                    messageID: "<inner-18@example.com>"
+                ),
+            ]
+        ),
+        // Synthetic malicious-server shapes, as FETCH ENVELOPE From.
+        EnvelopeStreamFixture(
+            name: "synthetic nested",
+            sequenceNumber: 1,
+            response:
+                #"* 1 FETCH (ENVELOPE (NIL NIL ((NIL NIL "A" NIL)(NIL NIL "B" NIL)(NIL NIL "x" "example.com")(NIL NIL NIL NIL)(NIL NIL NIL NIL)) NIL NIL NIL NIL NIL NIL NIL))"#,
+            expectedEnvelopes: [
+                .fromOnly([
+                    .singleAddress(.groupStart("A")),
+                    .group(.init(groupName: "B", sourceRoot: nil, children: [.address("x", "example.com")])),
+                ])
+            ]
+        ),
+        EnvelopeStreamFixture(
+            name: "synthetic unclosed",
+            sequenceNumber: 1,
+            response:
+                #"* 1 FETCH (ENVELOPE (NIL NIL ((NIL NIL "Team" NIL)(NIL NIL "alice" "example.com")) NIL NIL NIL NIL NIL NIL NIL))"#,
+            expectedEnvelopes: [
+                .fromOnly([.singleAddress(.groupStart("Team")), .singleAddress(.address("alice", "example.com"))])
+            ]
+        ),
+        EnvelopeStreamFixture(
+            name: "synthetic host-NIL addresses",
+            sequenceNumber: 1,
+            response:
+                #"* 1 FETCH (ENVELOPE (NIL NIL ((NIL NIL "root" NIL)(NIL NIL "admin" NIL)) NIL NIL NIL NIL NIL NIL NIL))"#,
+            expectedEnvelopes: [.fromOnly([.singleAddress(.groupStart("root")), .singleAddress(.groupStart("admin"))])]
+        ),
+        // Synthetic: malformed From (nested start, stray end) in a `message/rfc822` part's envelope.
+        EnvelopeStreamFixture(
+            name: "synthetic message/rfc822 malformed From",
+            sequenceNumber: 2,
+            response:
+                #"* 2 FETCH (BODYSTRUCTURE ("MESSAGE" "RFC822" NIL NIL NIL "7BIT" 250 (NIL NIL ((NIL NIL "A" NIL)(NIL NIL "B" NIL)(NIL NIL "x" "example.com")(NIL NIL NIL NIL)(NIL NIL NIL NIL)) NIL NIL NIL NIL NIL NIL NIL) ("TEXT" "PLAIN" ("CHARSET" "us-ascii") NIL NIL "7BIT" 13 1) 10))"#,
+            expectedEnvelopes: [
+                .fromOnly([
+                    .singleAddress(.groupStart("A")),
+                    .group(.init(groupName: "B", sourceRoot: nil, children: [.address("x", "example.com")])),
+                ])
+            ]
+        ),
+    ]
+}
+
+extension Array where Element == EmailAddressListElement {
+    /// What Cyrus sends for `To: A: B: x@example.com;;` (msgs 03, 18).
+    fileprivate static let cyrusNested: Self = [
+        .group(.init(groupName: "A", sourceRoot: nil, children: [.address("B: x", "example.com")])),
+        .singleAddress(.address(";", "unspecified-domain")),
+    ]
+}
+
+extension InternetMessageDate {
+    fileprivate static let capturedDate: Self = "Mon, 12 Oct 2026 10:00:00 +0000"
+}
+
+extension Envelope {
+    /// Envelope of a captured message: sender@example.com in From/Sender/Reply-To, subject = message ID stem.
+    fileprivate static func captured(_ subject: String, to: [EmailAddressListElement]) -> Envelope {
+        let sender: [EmailAddressListElement] = [.singleAddress(.address("sender", "example.com"))]
+        return Envelope(
+            date: .capturedDate,
+            subject: ByteBuffer(string: subject),
+            from: sender,
+            sender: sender,
+            reply: sender,
+            to: to,
+            cc: [],
+            bcc: [],
+            inReplyTo: nil,
+            messageID: MessageID("<\(subject)@example.com>")
+        )
+    }
+
+    fileprivate static func fromOnly(_ from: [EmailAddressListElement]) -> Envelope {
+        Envelope(
+            date: nil,
+            subject: nil,
+            from: from,
+            sender: [],
+            reply: [],
+            to: [],
+            cc: [],
+            bcc: [],
+            inReplyTo: nil,
+            messageID: nil
+        )
+    }
+}
+
+extension EmailAddress {
+    fileprivate static func address(_ mailbox: ByteBuffer, _ host: ByteBuffer) -> EmailAddress {
+        .init(personName: nil, sourceRoot: nil, mailbox: mailbox, host: host)
+    }
+
+    /// RFC 3501 §7.4.2 group start marker (host NIL).
+    fileprivate static func groupStart(_ name: ByteBuffer) -> EmailAddress {
+        .init(personName: nil, sourceRoot: nil, mailbox: name, host: nil)
+    }
 }
