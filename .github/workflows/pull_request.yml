@@ -54,6 +54,8 @@ jobs:
       swift_6_1_enabled: false
       swift_6_2_build_arguments_override: "-Xswiftc -Xfrontend -Xswiftc -require-explicit-sendable -Xswiftc -warnings-as-errors"
       swift_6_3_build_arguments_override: "-Xswiftc -Xfrontend -Xswiftc -require-explicit-sendable -Xswiftc -warnings-as-errors"
+      # Temporary: run serially so the last test started in a hung log is the culprit.
+      swift_6_3_test_arguments_override: "--no-parallel"
 
   examples:
     name: Build examples
