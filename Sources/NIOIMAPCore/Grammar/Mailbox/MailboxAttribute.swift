@@ -174,7 +174,9 @@ public struct MailboxStatus: Hashable, Sendable {
 
     /// The `MAILBOXID` attribute: the server's permanent object identifier for the mailbox.
     ///
-    /// `nil` if the `MAILBOXID` attribute was not requested or returned.
+    /// The value is `nil` if the attribute wasn't requested or returned, and
+    /// ``MailboxStatus/MailboxID/invalid`` if the server returned an invalid identifier.
+    ///
     /// The `OBJECTID` extension assigns stable, unique identifiers to mailboxes that persist
     /// even if the mailbox is renamed or moved.
     /// **Requires server capability:** ``Capability/objectID``
@@ -194,7 +196,8 @@ public struct MailboxStatus: Hashable, Sendable {
     /// - Parameter size: The `SIZE` value if requested
     /// - Parameter highestModificationSequence: The `HIGHESTMODSEQ` value if requested
     /// - Parameter appendLimit: The `APPENDLIMIT` value if requested
-    /// - Parameter mailboxID: The `MAILBOXID` value if requested
+    /// - Parameter mailboxID: The `MAILBOXID` value if requested. The parser produces
+    ///   ``MailboxStatus/MailboxID/invalid`` when the server sends an invalid identifier.
     public init(
         messageCount: Int? = nil,
         recentCount: Int? = nil,
@@ -215,6 +218,26 @@ public struct MailboxStatus: Hashable, Sendable {
         self.highestModificationSequence = highestModificationSequence
         self.appendLimit = appendLimit
         self.mailboxID = mailboxID
+    }
+}
+
+extension MailboxStatus {
+    /// A mailbox identifier that may be invalid.
+    ///
+    /// Some servers send malformed mailbox IDs. This type represents them
+    /// so that the parser doesn't fail the entire response.
+    public enum MailboxID: Hashable, Sendable {
+        /// A valid mailbox identifier.
+        case valid(NIOIMAPCore.MailboxID)
+        /// An identifier from the server that isn't a valid ``NIOIMAPCore/MailboxID``.
+        case invalid
+
+        /// Creates a value from a leniently parsed identifier.
+        ///
+        /// A `nil` identifier, meaning the parse failed, becomes ``invalid``.
+        init(_ id: NIOIMAPCore.MailboxID?) {
+            self = id.map { .valid($0) } ?? .invalid
+        }
     }
 }
 
@@ -254,10 +277,28 @@ extension EncodeBuffer {
         append(\.size, "SIZE")
         append(\.highestModificationSequence, "HIGHESTMODSEQ")
         append(\.appendLimit, "APPENDLIMIT")
-        append(\.mailboxID, "MAILBOXID")
 
-        return self.writeArray(array, parenthesis: false) { (element, self) -> Int in
+        var size = self.writeArray(array, parenthesis: false) { (element, self) -> Int in
             self.writeString("\(element.0) \(element.1)")
+        }
+        // MAILBOXID is written separately: its value comes from `writeMailboxID`, not string interpolation.
+        if let mailboxID = status.mailboxID {
+            if !array.isEmpty {
+                size += self.writeSpace()
+            }
+            size += self.writeString("MAILBOXID (") + self.writeMailboxID(mailboxID) + self.writeString(")")
+        }
+        return size
+    }
+}
+
+extension EncodeBuffer {
+    @discardableResult mutating func writeMailboxID(_ id: MailboxStatus.MailboxID) -> Int {
+        switch id {
+        case .valid(let id):
+            return self.writeMailboxID(id)
+        case .invalid:
+            return 0
         }
     }
 }

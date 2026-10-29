@@ -56,10 +56,13 @@ struct MailboxAttributeTests {
                     size: 680_543,
                     highestModificationSequence: 797_237,
                     appendLimit: 86_254_193,
-                    mailboxID: "F2212ea87-6097-4256-9d51-71338625"
+                    mailboxID: .valid("F2212ea87-6097-4256-9d51-71338625")
                 ),
                 "MESSAGES 133701 RECENT 255813 UIDNEXT 377003 UIDVALIDITY 427421 UNSEEN 528028 SIZE 680543 HIGHESTMODSEQ 797237 APPENDLIMIT 86254193 MAILBOXID (F2212ea87-6097-4256-9d51-71338625)"
             ),
+            EncodeFixture.mailboxStatus(.init(mailboxID: .invalid), "MAILBOXID ()"),
+            EncodeFixture.mailboxStatus(.init(messageCount: 3, mailboxID: .invalid), "MESSAGES 3 MAILBOXID ()"),
+            EncodeFixture.mailboxStatus(.init(messageCount: 3, mailboxID: nil), "MESSAGES 3"),
             EncodeFixture.mailboxStatus(
                 .init(messageCount: 133_701, nextUID: 377_003, uidValidity: 427_421, appendLimit: 86_254_193),
                 "MESSAGES 133701 UIDNEXT 377003 UIDVALIDITY 427421 APPENDLIMIT 86254193"
@@ -117,6 +120,7 @@ struct MailboxAttributeTests {
             ),
             ParseFixture.mailboxStatus("APPENDLIMIT 257890", expected: .success(.init(appendLimit: 257_890))),
             ParseFixture.mailboxStatus("APPENDLIMIT NIL", expected: .success(.init(appendLimit: nil))),
+            ParseFixture.mailboxStatus("MESSAGES 3", expected: .success(.init(messageCount: 3, mailboxID: nil))),
             ParseFixture.mailboxStatus("SIZE 81630", expected: .success(.init(size: 81_630))),
             ParseFixture.mailboxStatus(
                 "UIDNEXT 95604  HIGHESTMODSEQ 35227 APPENDLIMIT 81818  UIDVALIDITY 33682",
@@ -126,11 +130,16 @@ struct MailboxAttributeTests {
             ),
             ParseFixture.mailboxStatus(
                 "MAILBOXID (F2212ea87-6097-4256-9d51-71338625)",
-                expected: .success(.init(mailboxID: "F2212ea87-6097-4256-9d51-71338625"))
+                expected: .success(.init(mailboxID: .valid("F2212ea87-6097-4256-9d51-71338625")))
             ),
             ParseFixture.mailboxStatus(
                 "MESSAGES 3 MAILBOXID (bad!id) UNSEEN 1",
-                expected: .success(.init(messageCount: 3, unseenCount: 1))
+                expected: .success(.init(messageCount: 3, unseenCount: 1, mailboxID: .invalid))
+            ),
+            ParseFixture.mailboxStatus("MAILBOXID ()", expected: .success(.init(mailboxID: .invalid))),
+            ParseFixture.mailboxStatus(
+                "UNSEEN 1 MAILBOXID (bad!id)",
+                expected: .success(.init(unseenCount: 1, mailboxID: .invalid))
             ),
             ParseFixture.mailboxStatus("MESSAGES UNSEEN 3 RECENT 4", "\r", expected: .failure),
             ParseFixture.mailboxStatus("2 UNSEEN 3 RECENT 4", "\r", expected: .failure),
@@ -141,6 +150,29 @@ struct MailboxAttributeTests {
     func parseMailboxStatus(_ fixture: ParseFixture<MailboxStatus>) {
         fixture.checkParsing()
     }
+
+    @Test("invalid non-UTF-8 MAILBOXID in STATUS is parsed as invalid")
+    func parseStatusMailboxIDWithNonUTF8Bytes() throws {
+        var buffer = ByteBuffer(string: "MAILBOXID (")
+        buffer.writeBytes([0x30, 0x10, 0x50, 0x87, 0x6d, 0x55])
+        buffer.writeString(")\r")
+        var parseBuffer = ParseBuffer(buffer)
+        let status = try GrammarParser().parseMailboxStatus(buffer: &parseBuffer, tracker: .testTracker)
+        #expect(status.mailboxID == .invalid)
+    }
+
+    @Test("nil, invalid, and valid mailbox IDs are distinct")
+    func mailboxIDStatesAreDistinct() {
+        let states: [MailboxStatus] = [
+            .init(mailboxID: nil),
+            .init(mailboxID: .invalid),
+            .init(mailboxID: .valid("a")),
+            .init(mailboxID: .valid("b")),
+        ]
+        #expect(Set(states).count == states.count)
+        #expect(MailboxStatus.MailboxID.valid("a") == .valid("a"))
+    }
+
     @Test(
         "parse status option",
         arguments: [

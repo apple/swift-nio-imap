@@ -379,7 +379,7 @@ extension GrammarParser {
             try PL.parseFixedString("(", buffer: &buffer, tracker: tracker)
             let mailboxID = try parseMailboxIDLeniently(buffer: &buffer, tracker: tracker)
             try PL.parseFixedString(")", buffer: &buffer, tracker: tracker)
-            return .mailboxID(mailboxID)
+            return .mailboxID(.init(mailboxID))
         }
 
         func parseResponseTextCode_atom(buffer: inout ParseBuffer, tracker: StackTracker) throws -> ResponseTextCode {

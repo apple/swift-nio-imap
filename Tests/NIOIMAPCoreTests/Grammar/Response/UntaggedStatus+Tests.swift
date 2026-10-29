@@ -69,6 +69,11 @@ struct UntaggedStatusTests {
             "\n",
             expected: .success(.bye(.init(code: .readWrite, text: "hello5")))
         ),
+        ParseFixture.untaggedStatus(
+            "OK [MAILBOXID (bad!id)] hello",
+            "\n",
+            expected: .success(.ok(.init(code: .mailboxID(.invalid), text: "hello")))
+        ),
         ParseFixture.untaggedStatus("NO [ALERT] ", "\n", expected: .success(.no(.init(code: .alert, text: "")))),
         ParseFixture.untaggedStatus("NO [ALERT]", "\n", expected: .success(.no(.init(code: .alert, text: "")))),
         ParseFixture.untaggedStatus("NO ", "\n", expected: .success(.no(.init(code: nil, text: "")))),

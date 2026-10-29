@@ -425,12 +425,12 @@ public indirect enum ResponseTextCode: Hashable, Sendable {
     /// Contains the MAILBOXID value for the selected mailbox. The client should remember
     /// this value to track mailboxes across sessions.
     ///
-    /// The value is `nil` if the server sent an invalid identifier.
+    /// The value is ``ResponseTextCode/MailboxID/invalid`` if the server sent an invalid identifier.
     /// E.g. https://github.com/cyrusimap/cyrus-imapd/issues/4944
     ///
     /// Part of the OBJECTID extension.
     /// See [RFC 8474](https://datatracker.ietf.org/doc/html/rfc8474) (OBJECTID Extension) for details.
-    case mailboxID(MailboxID?)
+    case mailboxID(MailboxID)
 
     /// The client must not use message sequence numbers.
     ///
@@ -447,6 +447,26 @@ extension ResponseTextCode {
 
     public static func modified(_ set: MessageIdentifierSetNonEmpty<SequenceNumber>) -> Self {
         .modified(.set(.init(set)))
+    }
+}
+
+extension ResponseTextCode {
+    /// A mailbox identifier that may be invalid.
+    ///
+    /// Some servers send malformed mailbox IDs. This type represents them
+    /// so that the parser doesn't fail the entire response.
+    public enum MailboxID: Hashable, Sendable {
+        /// A valid mailbox identifier.
+        case valid(NIOIMAPCore.MailboxID)
+        /// An identifier from the server that isn't a valid ``NIOIMAPCore/MailboxID``.
+        case invalid
+
+        /// Creates a value from a leniently parsed identifier.
+        ///
+        /// A `nil` identifier, meaning the parse failed, becomes ``invalid``.
+        init(_ id: NIOIMAPCore.MailboxID?) {
+            self = id.map { .valid($0) } ?? .invalid
+        }
     }
 }
 
@@ -553,7 +573,7 @@ extension EncodeBuffer {
             return self.writeString("COMPRESSIONACTIVE")
         case .mailboxID(let mailboxID):
             return self.writeString("MAILBOXID (")
-                + self.writeIfExists(mailboxID) { self.writeMailboxID($0) }
+                + self.writeMailboxID(mailboxID)
                 + self.writeString(")")
         case .uidRequired:
             return self.writeString("UIDREQUIRED")
@@ -582,6 +602,17 @@ extension ResponseTextCode: CustomDebugStringConvertible {
     public var debugDescription: String {
         EncodeBuffer.makeDescription {
             $0.writeResponseTextCode(self)
+        }
+    }
+}
+
+extension EncodeBuffer {
+    @discardableResult mutating func writeMailboxID(_ id: ResponseTextCode.MailboxID) -> Int {
+        switch id {
+        case .valid(let id):
+            return self.writeMailboxID(id)
+        case .invalid:
+            return 0
         }
     }
 }
