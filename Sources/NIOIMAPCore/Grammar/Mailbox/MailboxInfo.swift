@@ -55,7 +55,7 @@ public struct MailboxInfo: Hashable, Sendable {
     ///
     /// The server includes the item when the ``ReturnOption/objectID`` return option was requested,
     /// and in unsolicited `LIST` responses once `OBJECTID+` is active. An empty `OBJECTID ()`
-    /// yields an empty ``CompoundObjectID``. Unrecognised keys and malformed identifiers are ignored.
+    /// yields an empty ``CompoundObjectID``. Unrecognized keys and malformed identifiers are ignored.
     ///
     /// From [draft-ietf-mailmaint-imap-objectid-bis Section 7.5](https://datatracker.ietf.org/doc/html/draft-ietf-mailmaint-imap-objectid-bis#section-7.5).
     public var objectID: CompoundObjectID?

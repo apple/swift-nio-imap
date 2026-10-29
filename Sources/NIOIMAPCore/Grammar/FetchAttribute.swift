@@ -240,8 +240,8 @@ public enum FetchAttribute: Hashable, Sendable {
 
     /// A compound bundle of the message's object identifiers (`OBJECTID+` extension).
     ///
-    /// Returns whichever of `EMAILID`/`THREADID` the server chooses to disclose, bundled
-    /// together in a single ``CompoundObjectID`` value. Supersedes ``emailID``/``threadID``
+    /// Returns whichever of `EMAILID` and `THREADID` the server chooses to disclose, bundled
+    /// in a single ``CompoundObjectID`` value. Supersedes ``emailID`` and ``threadID``
     /// (RFC 8474) with this compound format.
     ///
     /// **Requires server capability:** ``Capability/objectIDPlus``

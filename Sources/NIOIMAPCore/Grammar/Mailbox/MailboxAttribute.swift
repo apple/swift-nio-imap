@@ -96,8 +96,8 @@ public enum MailboxAttribute: String, CaseIterable, Sendable {
 
     /// The `OBJECTID` attribute: a compound bundle of the mailbox's object identifiers.
     ///
-    /// Returns whichever of `MAILBOXID`/`ACCOUNTID` the server chooses to disclose, bundled
-    /// together in a single ``CompoundObjectID`` value. Part of the `OBJECTID+` extension, which
+    /// Returns whichever of `MAILBOXID` and `ACCOUNTID` the server chooses to disclose, bundled
+    /// in a single ``CompoundObjectID`` value. Part of the `OBJECTID+` extension, which
     /// supersedes ``mailboxID`` (RFC 8474) with this compound format.
     /// **Requires server capability:** ``Capability/objectIDPlus``
     /// See `draft-ietf-mailmaint-imap-objectid-bis` for details.

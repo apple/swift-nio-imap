@@ -3112,8 +3112,8 @@ extension GrammarParser {
             return .threadID(ThreadID(try self.parseObjectID(buffer: &buffer, tracker: tracker)))
         }
 
-        // Unrecognised keys, and their values, are parsed and discarded: clients MUST ignore
-        // unrecognised key-value pairs so that future extensions can add new identifier types.
+        // Unrecognized keys, and their values, are parsed and discarded. Clients MUST ignore
+        // unrecognized key-value pairs so that future extensions can add new identifier types.
         func parsePair_unknown(buffer: inout ParseBuffer, tracker: StackTracker) throws -> Pair {
             _ = try self.parseAtom(buffer: &buffer, tracker: tracker)
             try PL.parseSpaces(buffer: &buffer, tracker: tracker)

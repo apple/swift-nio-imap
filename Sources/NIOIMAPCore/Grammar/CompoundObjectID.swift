@@ -39,7 +39,7 @@ public struct CompoundObjectID: Hashable, Sendable {
     /// The identifier for the message's thread, if present and applicable to this context.
     public var threadID: ThreadID?
 
-    /// Creates a new compound of object identifiers.
+    /// Creates a compound of object identifiers.
     ///
     /// - Parameter mailboxID: The mailbox's identifier, if any
     /// - Parameter accountID: The owning account's identifier, if any

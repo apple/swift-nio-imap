@@ -434,7 +434,7 @@ public indirect enum ResponseTextCode: Hashable, Sendable {
 
     /// A compound bundle of object identifiers for the selected, created, or renamed mailbox.
     ///
-    /// Contains whichever of `MAILBOXID`/`ACCOUNTID`/`EMAILID`/`THREADID` the server chooses to
+    /// Contains whichever of `MAILBOXID`, `ACCOUNTID`, `EMAILID`, and `THREADID` the server chooses to
     /// disclose for the mailbox affected by the command. Part of the `OBJECTID+` extension, which
     /// supersedes ``mailboxID(_:)`` (RFC 8474) with this compound format.
     /// See `draft-ietf-mailmaint-imap-objectid-bis` for details.

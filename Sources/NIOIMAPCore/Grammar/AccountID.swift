@@ -30,12 +30,12 @@
 public struct AccountID: Hashable, Sendable {
     fileprivate var objectID: ObjectID
 
-    /// Creates a new `AccountID` from an `ObjectID`.
+    /// Creates an `AccountID` from an `ObjectID`.
     init(_ objectID: ObjectID) {
         self.objectID = objectID
     }
 
-    /// Creates a new `AccountID` from a `String`.
+    /// Creates an `AccountID` from a `String`.
     ///
     /// Valid account IDs are 1-255 alphanumeric or `-` or `_` characters.
     ///

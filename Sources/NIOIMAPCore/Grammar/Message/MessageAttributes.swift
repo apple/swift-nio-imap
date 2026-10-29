@@ -239,8 +239,8 @@ public enum MessageAttribute: Hashable, Sendable {
 
     /// A compound bundle of the message's object identifiers (`OBJECTID+` extension).
     ///
-    /// Contains whichever of `EMAILID`/`THREADID` the server chooses to disclose, bundled
-    /// together in a single ``CompoundObjectID`` value. Supersedes ``emailID(_:)``/``threadID(_:)``
+    /// Contains whichever of `EMAILID` and `THREADID` the server chooses to disclose, bundled
+    /// in a single ``CompoundObjectID`` value. Supersedes ``emailID(_:)`` and ``threadID(_:)``
     /// (RFC 8474) with this compound format.
     ///
     /// **Requires server capability:** ``Capability/objectIDPlus``

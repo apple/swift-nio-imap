@@ -139,17 +139,17 @@ public enum SelectParameter: Hashable, Sendable {
     case condStore
 
     /// Activate the `OBJECTID+` extension, and optionally select the mailbox by identifier
-    /// rather than by name (RFC OBJECTID+ extension).
+    /// rather than by name (draft-ietf-mailmaint-imap-objectid-bis `OBJECTID+` extension).
     ///
     /// Without arguments (`nil`), this merely activates the extension and requests the compound
     /// `OBJECTID` response code in place of the `MAILBOXID` response code. With arguments, it
     /// additionally asks the server to select the mailbox matching the given identifiers,
-    /// regardless of whether the mailbox name given to `SELECT`/`EXAMINE` still refers to it. If
+    /// regardless of whether the mailbox name given to `SELECT` or `EXAMINE` still refers to it. If
     /// no mailbox matches, the server falls back to selecting by name.
     ///
     /// **Requires server capability:** ``Capability/objectIDPlus``
     ///
-    /// - parameter CompoundObjectID: The identifiers to select by, if selecting by identifier
+    /// - Parameter compound: The identifiers to select by, or `nil` to only activate the extension
     ///
     /// - SeeAlso: `draft-ietf-mailmaint-imap-objectid-bis`
     case objectID(CompoundObjectID?)
