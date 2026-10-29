@@ -381,6 +381,24 @@ extension ByteToMessageDecoderVerifierTests {
                 [.untagged(.mailboxData(.status(.inbox, .init(messageCount: 231, nextUID: 44292))))]
             ),
 
+            (
+                "* STATUS INBOX (MESSAGES 3 MAILBOXID (F2212ea87-6097-4256-9d51-71338625))",
+                [
+                    .untagged(
+                        .mailboxData(
+                            .status(
+                                .inbox,
+                                .init(messageCount: 3, mailboxID: .valid("F2212ea87-6097-4256-9d51-71338625"))
+                            )
+                        )
+                    )
+                ]
+            ),
+            (
+                "* STATUS INBOX (MESSAGES 3 MAILBOXID (bad!id))",
+                [.untagged(.mailboxData(.status(.inbox, .init(messageCount: 3, mailboxID: .invalid))))]
+            ),
+
             // MARK: Flags
 
             ("* FLAGS (\\Answered \\Seen)", [.untagged(.mailboxData(.flags([.answered, .seen])))]),

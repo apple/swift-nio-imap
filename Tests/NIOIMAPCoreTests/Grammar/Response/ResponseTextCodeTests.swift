@@ -42,9 +42,10 @@ struct ResponseTextCodeTests {
         EncodeFixture.responseTextCode(.inUse, "INUSE"),
         EncodeFixture.responseTextCode(.limit, "LIMIT"),
         EncodeFixture.responseTextCode(
-            .mailboxID("F2212ea87-6097-4256-9d51-71338625"),
+            .mailboxID(.valid("F2212ea87-6097-4256-9d51-71338625")),
             "MAILBOXID (F2212ea87-6097-4256-9d51-71338625)"
         ),
+        EncodeFixture.responseTextCode(.mailboxID(.invalid), "MAILBOXID ()"),
         EncodeFixture.responseTextCode(.metadataLongEntries(456), "METADATA LONGENTRIES 456"),
         EncodeFixture.responseTextCode(.metadataMaxsize(123), "METADATA MAXSIZE 123"),
         EncodeFixture.responseTextCode(.metadataNoPrivate, "METADATA NOPRIVATE"),
@@ -160,12 +161,13 @@ struct ResponseTextCodeTests {
         ParseFixture.responseTextCode("LIMIT", expected: .success(.limit)),
         ParseFixture.responseTextCode(
             "MAILBOXID (F2212ea87-6097-4256-9d51-71338625)",
-            expected: .success(.mailboxID("F2212ea87-6097-4256-9d51-71338625"))
+            expected: .success(.mailboxID(.valid("F2212ea87-6097-4256-9d51-71338625")))
         ),
         ParseFixture.responseTextCode(
             "MAILBOXID (bad!id)",
-            expected: .success(.mailboxID(nil))
+            expected: .success(.mailboxID(.invalid))
         ),
+        ParseFixture.responseTextCode("MAILBOXID ()", expected: .success(.mailboxID(.invalid))),
         ParseFixture.responseTextCode("METADATA LONGENTRIES 456", expected: .success(.metadataLongEntries(456))),
         ParseFixture.responseTextCode("METADATA MAXSIZE 123", expected: .success(.metadataMaxsize(123))),
         ParseFixture.responseTextCode("METADATA NOPRIVATE", expected: .success(.metadataNoPrivate)),
@@ -235,20 +237,29 @@ struct ResponseTextCodeTests {
         fixture.checkParsing()
     }
 
-    @Test("invalid non-UTF-8 MAILBOXID is parsed as nil")
+    @Test("invalid non-UTF-8 MAILBOXID is parsed as invalid")
     func parseMailboxIDWithNonUTF8Bytes() throws {
         var buffer = ByteBuffer(string: "MAILBOXID (")
         buffer.writeBytes([0x30, 0x10, 0x50, 0x87, 0x6d, 0x55])
         buffer.writeString(")\r")
         var parseBuffer = ParseBuffer(buffer)
         let code = try GrammarParser().parseResponseTextCode(buffer: &parseBuffer, tracker: .testTracker)
-        #expect(code == .mailboxID(nil))
+        #expect(code == .mailboxID(.invalid))
+    }
+
+    @Test("MAILBOXID equality distinguishes valid from invalid")
+    func mailboxIDEquality() {
+        #expect(ResponseTextCode.mailboxID(.valid("a")) != .mailboxID(.valid("b")))
+        #expect(ResponseTextCode.mailboxID(.valid("a")) != .mailboxID(.invalid))
+        #expect(Set([ResponseTextCode.mailboxID(.invalid), .mailboxID(.invalid)]).count == 1)
     }
 
     @Test(
         "debug string description",
         arguments: [
             DebugStringFixture<ResponseTextCode>(sut: .noPermission, expected: "NOPERM"),
+            DebugStringFixture<ResponseTextCode>(sut: .mailboxID(.invalid), expected: "MAILBOXID ()"),
+            DebugStringFixture<ResponseTextCode>(sut: .mailboxID(.valid("abc")), expected: "MAILBOXID (abc)"),
             DebugStringFixture<ResponseTextCode>(
                 sut: .badCharset(["some", "string"]),
                 expected: "BADCHARSET (some string)"

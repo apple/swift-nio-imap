@@ -159,7 +159,7 @@ extension GrammarParser {
     }
 
     /// Parses a `MAILBOXID` value leniently: if the server sends an invalid ID, it is consumed and `nil` is returned
-    /// rather than failing the parse.
+    /// rather than failing the parse. Callers map `nil` to their `.invalid` case.
     func parseMailboxIDLeniently(buffer: inout ParseBuffer, tracker: StackTracker) throws -> MailboxID? {
         try parseObjectIDLeniently(buffer: &buffer, tracker: tracker).map(MailboxID.init)
     }
@@ -290,7 +290,7 @@ extension GrammarParser {
             case recent(Int)
             case highestModifierSequence(ModificationSequenceValue)
             case appendLimit(Int?)
-            case mailboxID(MailboxID?)
+            case mailboxID(MailboxStatus.MailboxID)
         }
 
         func parseStatusAttributeValue_messages(buffer: inout ParseBuffer, tracker: StackTracker) throws -> MailboxValue
@@ -373,7 +373,7 @@ extension GrammarParser {
             try PL.parseFixedString("MAILBOXID (", buffer: &buffer, tracker: tracker)
             let mailboxID = try self.parseMailboxIDLeniently(buffer: &buffer, tracker: tracker)
             try PL.parseFixedString(")", buffer: &buffer, tracker: tracker)
-            return .mailboxID(mailboxID)
+            return .mailboxID(.init(mailboxID))
         }
 
         func parseStatusAttributeValue(buffer: inout ParseBuffer, tracker: StackTracker) throws -> MailboxValue {
@@ -423,9 +423,7 @@ extension GrammarParser {
                 case .appendLimit(let limit):
                     status.appendLimit = limit
                 case .mailboxID(let id):
-                    if let id {
-                        status.mailboxID = id
-                    }
+                    status.mailboxID = id
                 }
             }
             return status
