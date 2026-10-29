@@ -42,7 +42,6 @@ jobs:
     name: macOS tests
     uses: apple/swift-nio/.github/workflows/macos_tests.yml@main
     with:
-      runner_pool: general
       # Xcode auto-generates the schemes for this package (`.swiftpm` is not checked in).
       # A package with two or more products gets one scheme per product plus an aggregate
       # `<package>-Package` scheme; a package with a single product gets just one scheme,
