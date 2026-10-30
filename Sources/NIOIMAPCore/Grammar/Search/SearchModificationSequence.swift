@@ -42,10 +42,11 @@ import struct OrderedCollections.OrderedDictionary
 /// - SeeAlso: ``SearchKey``
 /// - SeeAlso: ``ModificationSequenceValue``
 public struct SearchModificationSequence: Hashable, Sendable {
-    /// Extension-specific entry attributes for future CONDSTORE enhancements.
+    /// The flag whose modification sequence to test, and which metadata items to consider:
+    /// `search-modseq-ext = SP entry-name SP entry-type-req`. Empty tests the message's
+    /// modification sequence.
     ///
-    /// May contain additional entry attributes defined by future IMAP extensions.
-    /// For basic MODSEQ searches (RFC 7162), this is typically empty.
+    /// RFC 7162 allows at most one entry.
     public var extensions: OrderedDictionary<EntryFlagName, EntryKindRequest>
 
     /// The minimum modification sequence value that matching messages must have.
@@ -54,7 +55,7 @@ public struct SearchModificationSequence: Hashable, Sendable {
     public var sequenceValue: ModificationSequenceValue
 
     /// Creates a new `SearchModificationSequence`.
-    /// - parameter extensions: Extension-specific entry attributes (typically empty for RFC 7162)
+    /// - parameter extensions: The flag and metadata item type to test; at most one, usually empty
     /// - parameter sequenceValue: The minimum modification sequence value to match
     public init(
         extensions: OrderedDictionary<EntryFlagName, EntryKindRequest>,
