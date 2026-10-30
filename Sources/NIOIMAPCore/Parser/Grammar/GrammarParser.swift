@@ -1852,17 +1852,25 @@ extension GrammarParser {
     //                        (DQUOTE QUOTED-CHAR DQUOTE / nil)
     //                         [Namespace-Response-Extensions] ")"
     func parseNamespaceDescription(buffer: inout ParseBuffer, tracker: StackTracker) throws -> NamespaceDescription {
-        func parseNamespaceDescr_quotedChar(buffer: inout ParseBuffer, tracker: StackTracker) throws -> Character? {
+        func parseNamespaceDescr_quotedChar(buffer: inout ParseBuffer, tracker: StackTracker) throws -> UInt8? {
             try PL.parseFixedString("\"", buffer: &buffer, tracker: tracker)
-            let char = try PL.parseByte(buffer: &buffer, tracker: tracker)
-            guard char.isQuotedChar else {
-                throw ParserError(hint: "Invalid character")
+            // QUOTED-CHAR = <any TEXT-CHAR except quoted-specials> / "\" quoted-specials
+            var byte = try PL.parseByte(buffer: &buffer, tracker: tracker)
+            if byte == UInt8(ascii: "\\") {
+                byte = try PL.parseByte(buffer: &buffer, tracker: tracker)
+                guard byte.isQuotedSpecial else {
+                    throw ParserError(hint: "Expected quoted special")
+                }
+            } else {
+                guard byte.isQuotedChar else {
+                    throw ParserError(hint: "Invalid character")
+                }
             }
             try PL.parseFixedString("\"", buffer: &buffer, tracker: tracker)
-            return Character(.init(char))
+            return byte
         }
 
-        func parseNamespaceDescr_nil(buffer: inout ParseBuffer, tracker: StackTracker) throws -> Character? {
+        func parseNamespaceDescr_nil(buffer: inout ParseBuffer, tracker: StackTracker) throws -> UInt8? {
             try self.parseNil(buffer: &buffer, tracker: tracker)
             return nil
         }
@@ -1871,7 +1879,7 @@ extension GrammarParser {
             try PL.parseFixedString("(", buffer: &buffer, tracker: tracker)
             let string = try self.parseString(buffer: &buffer, tracker: tracker)
             try PL.parseSpaces(buffer: &buffer, tracker: tracker)
-            let char = try PL.parseOneOf(
+            let delimiter = try PL.parseOneOf(
                 parseNamespaceDescr_quotedChar,
                 parseNamespaceDescr_nil,
                 buffer: &buffer,
@@ -1879,7 +1887,7 @@ extension GrammarParser {
             )
             let extensions = try self.parseNamespaceResponseExtensions(buffer: &buffer, tracker: tracker)
             try PL.parseFixedString(")", buffer: &buffer, tracker: tracker)
-            return .init(string: string, char: char, responseExtensions: extensions)
+            return .init(string: string, delimiterByte: delimiter, responseExtensions: extensions)
         }
     }
 
@@ -2647,11 +2655,9 @@ extension GrammarParser {
     }
 
     // tag             = 1*<any ASTRING-CHAR except "+">
-    func parseTag(buffer: inout ParseBuffer, tracker: StackTracker) throws -> String {
-        let parsed = try PL.parseOneOrMoreCharacters(buffer: &buffer, tracker: tracker) { char -> Bool in
-            char.isAStringChar && char != UInt8(ascii: "+")
-        }
-        return try ParserLibrary.parseBufferAsUTF8(parsed)
+    func parseTag(buffer: inout ParseBuffer, tracker: StackTracker) throws -> Command.Tag {
+        let parsed = try PL.parseOneOrMoreCharacters(buffer: &buffer, tracker: tracker) { $0.isTagChar }
+        return Command.Tag(unchecked: try ParserLibrary.parseBufferAsUTF8(parsed))
     }
 
     // tagged-ext = tagged-ext-label SP tagged-ext-val
