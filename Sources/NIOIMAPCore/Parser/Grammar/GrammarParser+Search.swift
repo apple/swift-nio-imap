@@ -68,9 +68,9 @@ extension GrammarParser {
         var uidValidity: UIDValidity?
 
         func parseSearchCorrelator_tag(buffer: inout ParseBuffer, tracker: StackTracker) throws {
-            try PL.parseFixedString("TAG \"", buffer: &buffer, tracker: tracker)
-            tag = try self.parseTag(buffer: &buffer, tracker: tracker)
-            try PL.parseFixedString("\"", buffer: &buffer, tracker: tracker)
+            // tag-string = string
+            try PL.parseFixedString("TAG ", buffer: &buffer, tracker: tracker)
+            tag = try ParserLibrary.parseBufferAsUTF8(self.parseString(buffer: &buffer, tracker: tracker))
         }
 
         func parseSearchCorrelator_mailbox(buffer: inout ParseBuffer, tracker: StackTracker) throws {

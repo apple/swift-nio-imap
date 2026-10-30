@@ -151,6 +151,19 @@ struct CommandTypeTests {
 
         CommandEncodeFixture.command(.urlFetch(["test"]), "URLFETCH test"),
         CommandEncodeFixture.command(.urlFetch(["test1", "test2"]), "URLFETCH test1 test2"),
+        // 1*ASTRING-CHAR goes bare, even when too long to quote:
+        CommandEncodeFixture.command(
+            .urlFetch([
+                "imap://joe@example.com/INBOX/;uid=20/;section=1.2;urlauth=submit+fred:internal:91354a473744909de610943775f92038"
+            ]),
+            "URLFETCH imap://joe@example.com/INBOX/;uid=20/;section=1.2;urlauth=submit+fred:internal:91354a473744909de610943775f92038"
+        ),
+        CommandEncodeFixture.command(.urlFetch(["imap://h/INBOX;AUTH=*"]), #"URLFETCH "imap://h/INBOX;AUTH=*""#),
+        CommandEncodeFixture.command(.urlFetch([""]), #"URLFETCH """#),
+        CommandEncodeFixture.command(
+            .urlFetch(["x\r\nA2 DELETE INBOX"]),
+            expectedStrings: ["URLFETCH {18}\r\n", "x\r\nA2 DELETE INBOX"]
+        ),
 
         CommandEncodeFixture.command(.create(.inbox, []), "CREATE \"INBOX\""),
         CommandEncodeFixture.command(
