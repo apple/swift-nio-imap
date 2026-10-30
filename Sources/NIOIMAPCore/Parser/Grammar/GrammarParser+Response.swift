@@ -382,6 +382,11 @@ extension GrammarParser {
             return .mailboxID(mailboxID)
         }
 
+        func parseSuffix_objectID(buffer: inout ParseBuffer, tracker: StackTracker) throws -> ResponseTextCode {
+            try PL.parseSpaces(buffer: &buffer, tracker: tracker)
+            return .objectID(try parseCompoundObjectID(buffer: &buffer, tracker: tracker))
+        }
+
         func parseResponseTextCode_atom(buffer: inout ParseBuffer, tracker: StackTracker) throws -> ResponseTextCode {
             let atom = try self.parseAtom(buffer: &buffer, tracker: tracker)
             let string = try PL.parseOptional(buffer: &buffer, tracker: tracker) { (buffer, tracker) -> String in
@@ -423,6 +428,7 @@ extension GrammarParser {
             "NONEXISTENT": { _, _ in .nonExistent },
             "NOPERM": { _, _ in .noPermission },
             "NOTSAVED": { _, _ in .notSaved },
+            "OBJECTID": parseSuffix_objectID,
             "OVERQUOTA": { _, _ in .overQuota },
             "PARSE": { _, _ in .parse },
             "PERMANENTFLAGS": parseSuffix_permanentFlags,

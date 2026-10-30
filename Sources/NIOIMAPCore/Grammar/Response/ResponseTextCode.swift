@@ -432,6 +432,14 @@ public indirect enum ResponseTextCode: Hashable, Sendable {
     /// See [RFC 8474](https://datatracker.ietf.org/doc/html/rfc8474) (OBJECTID Extension) for details.
     case mailboxID(MailboxID?)
 
+    /// A compound bundle of object identifiers for the selected, created, or renamed mailbox.
+    ///
+    /// Contains whichever of `MAILBOXID`, `ACCOUNTID`, `EMAILID`, and `THREADID` the server chooses to
+    /// disclose for the mailbox affected by the command. Part of the `OBJECTID+` extension, which
+    /// supersedes ``mailboxID(_:)`` (RFC 8474) with this compound format.
+    /// See `draft-ietf-mailmaint-imap-objectid-bis` for details.
+    case objectID(CompoundObjectID)
+
     /// The client must not use message sequence numbers.
     ///
     /// Indicates that the server does not support the use of message sequence numbers and
@@ -555,6 +563,8 @@ extension EncodeBuffer {
             return self.writeString("MAILBOXID (")
                 + self.writeIfExists(mailboxID) { self.writeMailboxID($0) }
                 + self.writeString(")")
+        case .objectID(let compound):
+            return self.writeString("OBJECTID ") + self.writeCompoundObjectID(compound)
         case .uidRequired:
             return self.writeString("UIDREQUIRED")
         }

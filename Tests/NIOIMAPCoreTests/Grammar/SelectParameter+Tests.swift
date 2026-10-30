@@ -24,6 +24,14 @@ struct SelectParameterTests {
             "CONDSTORE"
         ),
         EncodeFixture.selectParameter(
+            .objectID(nil),
+            "OBJECTID"
+        ),
+        EncodeFixture.selectParameter(
+            .objectID(CompoundObjectID(mailboxID: "abc123", accountID: "def456")),
+            "OBJECTID (MAILBOXID abc123 ACCOUNTID def456)"
+        ),
+        EncodeFixture.selectParameter(
             .basic(.init(key: "test", value: nil)),
             "test"
         ),
@@ -89,6 +97,18 @@ struct SelectParameterTests {
         ParseFixture.selectParameter(
             "CONDSTORE",
             expected: .success(.condStore)
+        ),
+        ParseFixture.selectParameter(
+            "OBJECTID",
+            expected: .success(.objectID(nil))
+        ),
+        ParseFixture.selectParameter(
+            "OBJECTID ()",
+            expected: .success(.objectID(CompoundObjectID()))
+        ),
+        ParseFixture.selectParameter(
+            "OBJECTID (MAILBOXID abc123 ACCOUNTID def456)",
+            expected: .success(.objectID(CompoundObjectID(mailboxID: "abc123", accountID: "def456")))
         ),
         ParseFixture.selectParameter(
             "QRESYNC (1 1)",

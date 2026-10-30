@@ -207,58 +207,79 @@ extension GrammarParser {
                 try PL.parseOptional(
                     buffer: &buffer,
                     tracker: tracker,
-                    parser: { (buffer, tracker) -> OrderedDictionary<ByteBuffer, ParameterValue> in
+                    parser: { (buffer, tracker) -> ListExtended in
                         try PL.parseSpaces(buffer: &buffer, tracker: tracker)
                         return try self.parseMailboxListExtended(buffer: &buffer, tracker: tracker)
                     }
-                ) ?? [:]
+                ) ?? ListExtended()
             return MailboxInfo(
                 attributes: flags,
                 path: try .init(name: mailbox, pathSeparator: character),
-                extensions: listExtended
+                objectID: listExtended.objectID,
+                extensions: listExtended.extensions
             )
         }
     }
 
+    struct ListExtended {
+        var objectID: CompoundObjectID?
+        var extensions = OrderedDictionary<ByteBuffer, ParameterValue>()
+    }
+
     // mbox-list-extended =  "(" [mbox-list-extended-item
     //                       *(SP mbox-list-extended-item)] ")"
-    func parseMailboxListExtended(
-        buffer: inout ParseBuffer,
-        tracker: StackTracker
-    ) throws -> OrderedDictionary<ByteBuffer, ParameterValue> {
-        try PL.composite(buffer: &buffer, tracker: tracker) {
-            buffer,
-            tracker -> OrderedDictionary<ByteBuffer, ParameterValue> in
+    func parseMailboxListExtended(buffer: inout ParseBuffer, tracker: StackTracker) throws -> ListExtended {
+        try PL.composite(buffer: &buffer, tracker: tracker) { buffer, tracker -> ListExtended in
             try PL.parseFixedString("(", buffer: &buffer, tracker: tracker)
-            let data =
-                try PL.parseOptional(buffer: &buffer, tracker: tracker) {
-                    (buffer, tracker) -> OrderedDictionary<ByteBuffer, ParameterValue> in
-                    var kvs = OrderedDictionary<ByteBuffer, ParameterValue>()
-                    let item = try self.parseMailboxListExtendedItem(buffer: &buffer, tracker: tracker)
-                    kvs[item.key] = item.value
-                    try PL.parseZeroOrMore(buffer: &buffer, into: &kvs, tracker: tracker) {
-                        (buffer, tracker) -> KeyValue<ByteBuffer, ParameterValue> in
-                        try PL.parseSpaces(buffer: &buffer, tracker: tracker)
-                        return try self.parseMailboxListExtendedItem(buffer: &buffer, tracker: tracker)
-                    }
-                    return kvs
-                } ?? [:]
+            var items: [MailboxListExtendedItem] = []
+            if let first = try PL.parseOptional(
+                buffer: &buffer,
+                tracker: tracker,
+                parser: self.parseMailboxListExtendedItem
+            ) {
+                items.append(first)
+                try PL.parseZeroOrMore(buffer: &buffer, into: &items, tracker: tracker) {
+                    (buffer, tracker) -> MailboxListExtendedItem in
+                    try PL.parseSpaces(buffer: &buffer, tracker: tracker)
+                    return try self.parseMailboxListExtendedItem(buffer: &buffer, tracker: tracker)
+                }
+            }
             try PL.parseFixedString(")", buffer: &buffer, tracker: tracker)
-            return data
+
+            var result = ListExtended()
+            for item in items {
+                switch item {
+                case .objectID(let compound):
+                    result.objectID = compound
+                case .other(let kv):
+                    result.extensions[kv.key] = kv.value
+                }
+            }
+            return result
         }
+    }
+
+    enum MailboxListExtendedItem {
+        case objectID(CompoundObjectID)
+        case other(KeyValue<ByteBuffer, ParameterValue>)
     }
 
     // mbox-list-extended-item =  mbox-list-extended-item-tag SP
     //                            tagged-ext-val
+    // objectid-extended-item  =  "OBJECTID" SP objectid-compound-value
+    //                            ; the tag may be quoted, per mbox-list-extended-item-tag
     func parseMailboxListExtendedItem(
         buffer: inout ParseBuffer,
         tracker: StackTracker
-    ) throws -> KeyValue<ByteBuffer, ParameterValue> {
-        try PL.composite(buffer: &buffer, tracker: tracker) { buffer, tracker -> KeyValue<ByteBuffer, ParameterValue> in
+    ) throws -> MailboxListExtendedItem {
+        try PL.composite(buffer: &buffer, tracker: tracker) { buffer, tracker -> MailboxListExtendedItem in
             let tag = try self.parseAString(buffer: &buffer, tracker: tracker)
             try PL.parseSpaces(buffer: &buffer, tracker: tracker)
+            if String(buffer: tag).uppercased() == "OBJECTID" {
+                return .objectID(try self.parseCompoundObjectID(buffer: &buffer, tracker: tracker))
+            }
             let val = try self.parseParameterValue(buffer: &buffer, tracker: tracker)
-            return .init(key: tag, value: val)
+            return .other(.init(key: tag, value: val))
         }
     }
 
@@ -291,6 +312,7 @@ extension GrammarParser {
             case highestModifierSequence(ModificationSequenceValue)
             case appendLimit(Int?)
             case mailboxID(MailboxID?)
+            case objectID(CompoundObjectID)
         }
 
         func parseStatusAttributeValue_messages(buffer: inout ParseBuffer, tracker: StackTracker) throws -> MailboxValue
@@ -376,6 +398,14 @@ extension GrammarParser {
             return .mailboxID(mailboxID)
         }
 
+        func parseStatusAttributeValue_objectID(
+            buffer: inout ParseBuffer,
+            tracker: StackTracker
+        ) throws -> MailboxValue {
+            try PL.parseFixedString("OBJECTID ", buffer: &buffer, tracker: tracker)
+            return .objectID(try self.parseCompoundObjectID(buffer: &buffer, tracker: tracker))
+        }
+
         func parseStatusAttributeValue(buffer: inout ParseBuffer, tracker: StackTracker) throws -> MailboxValue {
             try PL.parseOneOf(
                 [
@@ -388,6 +418,7 @@ extension GrammarParser {
                     parseStatusAttributeValue_recent,
                     parseStatusAttributeValue_appendLimit,
                     parseStatusAttributeValue_mailboxID,
+                    parseStatusAttributeValue_objectID,
                 ],
                 buffer: &buffer,
                 tracker: tracker
@@ -426,6 +457,8 @@ extension GrammarParser {
                     if let id {
                         status.mailboxID = id
                     }
+                case .objectID(let compound):
+                    status.objectID = compound
                 }
             }
             return status
