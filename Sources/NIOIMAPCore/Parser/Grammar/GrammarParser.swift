@@ -434,9 +434,12 @@ extension GrammarParser {
         )
     }
 
-    func parseParameter(buffer: inout ParseBuffer, tracker: StackTracker) throws -> KeyValue<String, ParameterValue?> {
+    func parseParameter<Kind>(
+        buffer: inout ParseBuffer,
+        tracker: StackTracker
+    ) throws -> KeyValue<ExtensionKey<Kind>, ParameterValue?> {
         try PL.composite(buffer: &buffer, tracker: tracker) { (buffer, tracker) in
-            let name = try self.parseParameterName(buffer: &buffer, tracker: tracker)
+            let name: ExtensionKey<Kind> = try self.parseParameterName(buffer: &buffer, tracker: tracker)
             let value = try PL.parseOptional(buffer: &buffer, tracker: tracker) { (buffer, tracker) -> ParameterValue in
                 try PL.parseSpaces(buffer: &buffer, tracker: tracker)
                 return try self.parseParameterValue(buffer: &buffer, tracker: tracker)
@@ -2446,18 +2449,19 @@ extension GrammarParser {
     }
 
     // select-params = SP "(" select-param *(SP select-param ")"
-    func parseParameters(
+    func parseParameters<Kind>(
         buffer: inout ParseBuffer,
         tracker: StackTracker
-    ) throws -> OrderedDictionary<String, ParameterValue?> {
+    ) throws -> OrderedDictionary<ExtensionKey<Kind>, ParameterValue?> {
         try PL.composite(buffer: &buffer, tracker: tracker) {
-            (buffer, tracker) -> OrderedDictionary<String, ParameterValue?> in
+            (buffer, tracker) -> OrderedDictionary<ExtensionKey<Kind>, ParameterValue?> in
             try PL.parseFixedString(" (", buffer: &buffer, tracker: tracker)
-            var kvs = OrderedDictionary<String, ParameterValue?>()
-            let param = try self.parseParameter(buffer: &buffer, tracker: tracker)
+            var kvs = OrderedDictionary<ExtensionKey<Kind>, ParameterValue?>()
+            let param: KeyValue<ExtensionKey<Kind>, ParameterValue?> =
+                try self.parseParameter(buffer: &buffer, tracker: tracker)
             kvs[param.key] = param.value
             try PL.parseZeroOrMore(buffer: &buffer, into: &kvs, tracker: tracker) {
-                (buffer, tracker) -> KeyValue<String, ParameterValue?> in
+                (buffer, tracker) -> KeyValue<ExtensionKey<Kind>, ParameterValue?> in
                 try PL.parseSpaces(buffer: &buffer, tracker: tracker)
                 return try self.parseParameter(buffer: &buffer, tracker: tracker)
             }
@@ -2651,18 +2655,18 @@ extension GrammarParser {
     }
 
     // tagged-ext = tagged-ext-label SP tagged-ext-val
-    func parseTaggedExtension(
+    func parseTaggedExtension<Kind>(
         buffer: inout ParseBuffer,
         tracker: StackTracker
-    ) throws -> KeyValue<String, ParameterValue> {
+    ) throws -> KeyValue<ExtensionKey<Kind>, ParameterValue> {
         try PL.composite(buffer: &buffer, tracker: tracker) { (buffer, tracker) in
-            let key = try self.parseParameterName(buffer: &buffer, tracker: tracker)
+            let key: ExtensionKey<Kind> = try self.parseParameterName(buffer: &buffer, tracker: tracker)
 
             // Warning: weird hack alert.
             // CATENATE (RFC 4469) has basically identical syntax to tagged extensions, but it is actually append-data.
             // to avoid that being a problem here, we check if we just parsed `CATENATE`. If we did, we bail out: this is
             // data now.
-            if key.lowercased() == "catenate" {
+            if String(key).lowercased() == "catenate" {
                 throw ParserError(hint: "catenate extension")
             }
 
@@ -2673,8 +2677,8 @@ extension GrammarParser {
     }
 
     // tagged-ext-label    = tagged-label-fchar *tagged-label-char
-    func parseParameterName(buffer: inout ParseBuffer, tracker: StackTracker) throws -> String {
-        try PL.composite(buffer: &buffer, tracker: tracker) { buffer, tracker -> String in
+    func parseParameterName<Kind>(buffer: inout ParseBuffer, tracker: StackTracker) throws -> ExtensionKey<Kind> {
+        try PL.composite(buffer: &buffer, tracker: tracker) { buffer, tracker -> ExtensionKey<Kind> in
 
             let fchar = try PL.parseByte(buffer: &buffer, tracker: tracker)
             guard fchar.isTaggedLabelFchar else {
@@ -2685,7 +2689,7 @@ extension GrammarParser {
                 char.isTaggedLabelChar
             }
             let trailing = try ParserLibrary.parseBufferAsUTF8(parsed)
-            return String(decoding: [fchar], as: Unicode.UTF8.self) + trailing
+            return ExtensionKey(unchecked: String(decoding: [fchar], as: Unicode.UTF8.self) + trailing)
         }
     }
 
@@ -2951,9 +2955,10 @@ extension GrammarParser {
         buffer: inout ParseBuffer,
         tracker: StackTracker
     ) throws -> ExtendedSearchScopeOptions {
-        var options = OrderedDictionary<String, ParameterValue?>()
+        var options = OrderedDictionary<ExtensionKey<ExtendedSearchScopeOptions>, ParameterValue?>()
         repeat {
-            let param = try parseParameter(buffer: &buffer, tracker: tracker)
+            let param: KeyValue<ExtensionKey<ExtendedSearchScopeOptions>, ParameterValue?> =
+                try parseParameter(buffer: &buffer, tracker: tracker)
             options[param.key] = param.value
         } while try PL.parseOptional(buffer: &buffer, tracker: tracker, parser: PL.parseSpaces) != nil
         guard let returnValue = ExtendedSearchScopeOptions(options) else {

@@ -61,7 +61,7 @@ struct ParameterValueTests {
             ParseFixture.parameter("", "", expected: .incompleteMessage),
         ]
     )
-    func parseParameter(_ fixture: ParseFixture<KeyValue<String, ParameterValue?>>) {
+    func parseParameter(_ fixture: ParseFixture<KeyValue<ExtensionKey<SelectParameter>, ParameterValue?>>) {
         fixture.checkParsing()
     }
 }
@@ -94,7 +94,7 @@ extension ParseFixture<ParameterValue> {
     }
 }
 
-extension ParseFixture<KeyValue<String, ParameterValue?>> {
+extension ParseFixture<KeyValue<ExtensionKey<SelectParameter>, ParameterValue?>> {
     fileprivate static func parameter(
         _ input: String,
         _ terminator: String = ")",
