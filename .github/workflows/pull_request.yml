@@ -54,7 +54,7 @@ jobs:
       swift_6_1_enabled: false
       swift_6_2_build_arguments_override: "-Xswiftc -Xfrontend -Xswiftc -require-explicit-sendable -Xswiftc -warnings-as-errors"
       swift_6_3_build_arguments_override: "-Xswiftc -Xfrontend -Xswiftc -require-explicit-sendable -Xswiftc -warnings-as-errors"
-      # Temporary: Experiment C: run only the exit tests, in parallel.
+      # Temporary: Experiment F: exit tests plus NIOIMAPTests, in parallel.
       swift_6_3_test_arguments_override: "--filter (NIOIMAPTests|advancedByOverflowPreconditionFailure|bothNilPreconditionFailure|deepEnvelopeGroups|deepEnvelopeGroupsChunked|emptyArrayLiteralPreconditionFailure|encodeInServerModeCallsPreconditionFailure|extensionPreconditionFailure|indexAfterFatalErrorForInvalidPart|indexBeforeFatalErrorAtStartIndex|invalidDayPrecondition|invalidMonthPrecondition|keywordStringLiteralPreconditionFailure|mimeHeaderWithEmptyPartPreconditionFailure|overflowPreconditionFailure|stringLiteralPreconditionFailure|subscriptFatalErrorForInvalidPart)"
 
   examples:
