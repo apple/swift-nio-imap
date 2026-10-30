@@ -18,6 +18,52 @@ import Testing
 
 @Suite("UseAttribute")
 struct UseAttributeTests {
+    /// A use attribute is written to the wire verbatim, so ``UseAttribute/init(_:)`` is the only
+    /// thing between a caller that builds attributes from untrusted input and an injected command.
+    @Test(
+        "invalid attributes are rejected",
+        arguments: [
+            "",
+            #"\"#,  // `use-attr-ext = "\" atom`, and the atom may not be empty.
+            "All",  // Missing the backslash.
+            #"\a b"#,
+            #"\a)b"#,
+            #"\a]b"#,
+            #"\a\b"#,
+            #"\a"b"#,
+            "\\GRÜEZI",
+            "\\All))\r\nA2 DELETE INBOX\r\nA3 NOOP ((",  // Would inject a whole command.
+        ]
+    )
+    func invalidAttributes(_ string: String) {
+        #expect(UseAttribute(string) == nil)
+    }
+
+    @Test("valid attributes", arguments: validAttributeStrings)
+    func validAttributes(_ string: String) {
+        #expect(UseAttribute(string).map { String($0) } == string)
+    }
+
+    /// Written verbatim, so every attribute we accept has to parse back unchanged.
+    @Test("valid attributes round-trip", arguments: validAttributeStrings)
+    func validAttributesRoundTrip(_ string: String) throws {
+        ParseFixture.useAttribute(string, expected: .success(try #require(UseAttribute(string)))).checkParsing()
+    }
+
+    #if !os(iOS) && !os(watchOS) && !os(tvOS) && !os(visionOS) && !os(Android)
+    @Test("an invalid string literal traps") func stringLiteralPreconditionFailure() async {
+        let result = await #expect(
+            processExitsWith: ExitTest.Condition.failure,
+            observing: [\.standardErrorContent],
+            performing: {
+                let attribute: UseAttribute = "Drafts"
+                _ = attribute
+            }
+        )
+        TestUtilities.expectTrapMessage(result, "Invalid use attribute")
+    }
+    #endif
+
     @Test(arguments: [
         EncodeFixture.useAttribute(.all, "\\All"),
         EncodeFixture.useAttribute(.archive, "\\Archive"),
@@ -37,11 +83,11 @@ struct UseAttributeTests {
 
     @Test("lowercasing behavior")
     func lowercasingBehavior() {
-        let t1 = UseAttribute("TEST")
-        let t2 = UseAttribute("test")
+        let t1 = UseAttribute(#"\TEST"#)
+        let t2 = UseAttribute(#"\test"#)
         #expect(t1 == t2)
-        #expect(t1.stringValue == "TEST")
-        #expect(t2.stringValue == "test")
+        #expect(t1.stringValue == #"\TEST"#)
+        #expect(t2.stringValue == #"\test"#)
     }
 
     @Test("convert from mailbox info attribute")
@@ -79,6 +125,12 @@ struct UseAttributeTests {
 }
 
 // MARK: -
+
+private let validAttributeStrings = [
+    #"\All"#,
+    #"\Drafts"#,
+    #"\X-Vendor.1"#,
+]
 
 extension EncodeFixture<UseAttribute> {
     fileprivate static func useAttribute(_ input: T, _ expectedString: String) -> Self {

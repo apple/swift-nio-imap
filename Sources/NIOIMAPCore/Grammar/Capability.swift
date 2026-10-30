@@ -33,12 +33,18 @@ import struct NIO.ByteBuffer
 /// The server response advertises capabilities: `IMAP4rev1` (simple), `STARTTLS` (simple), `AUTH=GSSAPI`
 /// (configurable with name `AUTH` and value `GSSAPI`), and `XPIG-LATIN` (custom vendor extension).
 ///
+/// ## Validity
+///
+/// A capability, and each of the kinds it is built from (such as ``ContextKind``), is written to
+/// the wire verbatim, so anything that isn't an `atom` is rejected: `init(_:)` returns `nil`,
+/// `init(stringLiteral:)` traps.
+///
 /// - SeeAlso: [RFC 3501 Section 7.2.1](https://datatracker.ietf.org/doc/html/rfc3501#section-7.2.1)
 /// - SeeAlso: <doc:SupportedExtensions>
 public struct Capability: Hashable, Sendable {
     /// The raw string value of the capability.
-    var rawValue: String
-    private var splitIndex: String.Index?
+    let rawValue: String
+    private let splitIndex: String.Index?
 
     /// The name of the capability. For simple capabilities such as `STARTTLS`, the value
     /// will simply be `STARTTLS`. For configurable capabilities such as `AUTH=GSSAPI`, the value
@@ -62,15 +68,33 @@ public struct Capability: Hashable, Sendable {
         return String(self.rawValue[index...])
     }
 
-    /// Creates a new capability from a `String`, and parses any configuration if present.
+    /// Creates a capability from a `String`, if it is an `atom`, and parses any configuration if
+    /// present.
+    ///
+    /// A string literal resolves to ``init(stringLiteral:)`` instead, which traps rather than
+    /// returning `nil`.
+    ///
     /// - parameter value: The raw `String` value of the capability, for example `STARTTLS` or `AUTH=GSSAPI`.
-    public init(_ value: String) {
+    /// - returns: A new capability, or `nil` if `value` is not an `atom`.
+    public init?(_ value: String) {
+        guard Self.isValidCapability(value) else { return nil }
         self.init(unchecked: value)
     }
 
-    fileprivate init(unchecked: String) {
-        self.rawValue = unchecked
+    init(unchecked value: String) {
+        assert(Self.isValidCapability(value))
+        self.rawValue = value
         self.splitIndex = self.rawValue.firstIndex(of: "=")
+    }
+
+    /// Whether the given string is a `capability`
+    /// ([RFC 3501 Section 9](https://datatracker.ietf.org/doc/html/rfc3501#section-9)):
+    /// ```
+    /// capability = ("AUTH=" auth-type) / atom
+    /// ```
+    /// `"AUTH=" auth-type` is itself an `atom`.
+    static func isValidCapability(_ string: String) -> Bool {
+        string.isIMAPAtom
     }
 }
 
@@ -86,25 +110,34 @@ extension Capability {
     /// - SeeAlso: [RFC 5256 SORT Extension](https://datatracker.ietf.org/doc/html/rfc5256)
     public struct ContextKind: Hashable, Sendable {
         /// Extended search context (RFC 4731).
-        public static let search = Self(unchecked: "SEARCH")
+        public static let search: Self = "SEARCH"
 
         /// Extended sort context (RFC 5256).
-        public static let sort = Self(unchecked: "SORT")
+        public static let sort: Self = "SORT"
 
         /// The raw string value of the context kind.
-        var rawValue: String
+        let rawValue: String
 
-        /// Creates a new context kind from a string.
+        /// Creates a context kind from a string, if the uppercased string is an `atom`.
         ///
         /// The provided value is uppercased for consistency with IMAP protocol conventions.
         ///
+        /// A string literal resolves to ``init(stringLiteral:)`` instead, which traps rather than
+        /// returning `nil`.
+        ///
         /// - parameter value: The context kind as a string (for example, SEARCH or SORT).
-        public init(_ value: String) {
-            self.rawValue = value.uppercased()
+        /// - returns: A new kind, or `nil` if the uppercased `value` is not an `atom`.
+        public init?(_ value: String) {
+            let normalized = value.uppercased()
+            guard normalized.isIMAPAtom else { return nil }
+            self.rawValue = normalized
         }
 
-        fileprivate init(unchecked: String) {
-            self.rawValue = unchecked
+        /// Uppercases, like ``init(_:)``.
+        init(unchecked value: String) {
+            let normalized = value.uppercased()
+            assert(normalized.isIMAPAtom)
+            self.rawValue = normalized
         }
     }
 
@@ -116,22 +149,31 @@ extension Capability {
     /// - SeeAlso: [RFC 5256 SORT Extension](https://datatracker.ietf.org/doc/html/rfc5256)
     public struct SortKind: Hashable, Sendable {
         /// Display sort kind supporting DISPLAYFROM and DISPLAYTO criteria (RFC 5256).
-        public static let display = Self(unchecked: "DISPLAY")
+        public static let display: Self = "DISPLAY"
 
         /// The raw string value of the sort kind.
-        var rawValue: String
+        let rawValue: String
 
-        /// Creates a new sort kind from a string.
+        /// Creates a sort kind from a string, if the uppercased string is an `atom`.
         ///
         /// The provided value is uppercased for consistency with IMAP protocol conventions.
         ///
+        /// A string literal resolves to ``init(stringLiteral:)`` instead, which traps rather than
+        /// returning `nil`.
+        ///
         /// - parameter value: The sort kind as a string (for example, DISPLAY).
-        public init(_ value: String) {
-            self.rawValue = value.uppercased()
+        /// - returns: A new kind, or `nil` if the uppercased `value` is not an `atom`.
+        public init?(_ value: String) {
+            let normalized = value.uppercased()
+            guard normalized.isIMAPAtom else { return nil }
+            self.rawValue = normalized
         }
 
-        fileprivate init(unchecked: String) {
-            self.rawValue = unchecked
+        /// Uppercases, like ``init(_:)``.
+        init(unchecked value: String) {
+            let normalized = value.uppercased()
+            assert(normalized.isIMAPAtom)
+            self.rawValue = normalized
         }
     }
 
@@ -143,25 +185,34 @@ extension Capability {
     /// - SeeAlso: [RFC 5256 THREAD Extension](https://datatracker.ietf.org/doc/html/rfc5256)
     public struct ThreadKind: Hashable, Sendable {
         /// ORDEREDSUBJECT threading groups messages by base subject and date (RFC 5256).
-        public static let orderedSubject = Self(unchecked: "ORDEREDSUBJECT")
+        public static let orderedSubject: Self = "ORDEREDSUBJECT"
 
         /// REFERENCES threading groups messages by in-reply-to relationships (RFC 5256).
-        public static let references = Self(unchecked: "REFERENCES")
+        public static let references: Self = "REFERENCES"
 
         /// The raw string value of the thread kind.
-        var rawValue: String
+        let rawValue: String
 
-        /// Creates a new thread kind from a string.
+        /// Creates a thread kind from a string, if the uppercased string is an `atom`.
         ///
         /// The provided value is uppercased for consistency with IMAP protocol conventions.
         ///
+        /// A string literal resolves to ``init(stringLiteral:)`` instead, which traps rather than
+        /// returning `nil`.
+        ///
         /// - parameter value: The thread kind as a string (for example, ORDEREDSUBJECT or REFERENCES).
-        public init(_ value: String) {
-            self.rawValue = value.uppercased()
+        /// - returns: A new kind, or `nil` if the uppercased `value` is not an `atom`.
+        public init?(_ value: String) {
+            let normalized = value.uppercased()
+            guard normalized.isIMAPAtom else { return nil }
+            self.rawValue = normalized
         }
 
-        fileprivate init(unchecked: String) {
-            self.rawValue = unchecked
+        /// Uppercases, like ``init(_:)``.
+        init(unchecked value: String) {
+            let normalized = value.uppercased()
+            assert(normalized.isIMAPAtom)
+            self.rawValue = normalized
         }
     }
 
@@ -173,22 +224,31 @@ extension Capability {
     /// - SeeAlso: [RFC 8438 Status Response Extension](https://datatracker.ietf.org/doc/html/rfc8438)
     public struct StatusKind: Hashable, Sendable {
         /// SIZE status kind allows retrieving total mailbox storage size (RFC 8438).
-        public static let size = Self(unchecked: "SIZE")
+        public static let size: Self = "SIZE"
 
         /// The raw string value of the status kind.
-        var rawValue: String
+        let rawValue: String
 
-        /// Creates a new status kind from a string.
+        /// Creates a status kind from a string, if the uppercased string is an `atom`.
         ///
         /// The provided value is uppercased for consistency with IMAP protocol conventions.
         ///
+        /// A string literal resolves to ``init(stringLiteral:)`` instead, which traps rather than
+        /// returning `nil`.
+        ///
         /// - parameter value: The status kind as a string (for example, SIZE).
-        public init(_ value: String) {
-            self.rawValue = value.uppercased()
+        /// - returns: A new kind, or `nil` if the uppercased `value` is not an `atom`.
+        public init?(_ value: String) {
+            let normalized = value.uppercased()
+            guard normalized.isIMAPAtom else { return nil }
+            self.rawValue = normalized
         }
 
-        fileprivate init(unchecked: String) {
-            self.rawValue = unchecked
+        /// Uppercases, like ``init(_:)``.
+        init(unchecked value: String) {
+            let normalized = value.uppercased()
+            assert(normalized.isIMAPAtom)
+            self.rawValue = normalized
         }
     }
 
@@ -201,22 +261,31 @@ extension Capability {
     /// - SeeAlso: [RFC 6855 IMAP Support for UTF-8](https://datatracker.ietf.org/doc/html/rfc6855)
     public struct UTF8Kind: Hashable, Sendable {
         /// ACCEPT UTF-8 kind allows server to send UTF-8-encoded strings (RFC 6855).
-        public static let accept = Self(unchecked: "ACCEPT")
+        public static let accept: Self = "ACCEPT"
 
         /// The raw string value of the UTF-8 kind.
-        var rawValue: String
+        let rawValue: String
 
-        /// Creates a new UTF-8 kind from a string.
+        /// Creates a UTF-8 kind from a string, if the uppercased string is an `atom`.
         ///
         /// The provided value is uppercased for consistency with IMAP protocol conventions.
         ///
+        /// A string literal resolves to ``init(stringLiteral:)`` instead, which traps rather than
+        /// returning `nil`.
+        ///
         /// - parameter value: The UTF-8 kind as a string (for example, ACCEPT).
-        public init(_ value: String) {
-            self.rawValue = value.uppercased()
+        /// - returns: A new kind, or `nil` if the uppercased `value` is not an `atom`.
+        public init?(_ value: String) {
+            let normalized = value.uppercased()
+            guard normalized.isIMAPAtom else { return nil }
+            self.rawValue = normalized
         }
 
-        fileprivate init(unchecked: String) {
-            self.rawValue = unchecked
+        /// Uppercases, like ``init(_:)``.
+        init(unchecked value: String) {
+            let normalized = value.uppercased()
+            assert(normalized.isIMAPAtom)
+            self.rawValue = normalized
         }
     }
 
@@ -228,22 +297,31 @@ extension Capability {
     /// - SeeAlso: [RFC 4314 Section 4 ACL Extension](https://datatracker.ietf.org/doc/html/rfc4314#section-4)
     public struct RightsKind: Hashable, Sendable {
         /// TEKX rights kind represents a common permission set (RFC 4314).
-        public static let tekx = Self(unchecked: "TEKX")
+        public static let tekx: Self = "TEKX"
 
         /// The raw string value of the rights kind.
-        var rawValue: String
+        let rawValue: String
 
-        /// Creates a new rights kind from a string.
+        /// Creates a rights kind from a string, if the uppercased string is an `atom`.
         ///
         /// The provided value is uppercased for consistency with IMAP protocol conventions.
         ///
+        /// A string literal resolves to ``init(stringLiteral:)`` instead, which traps rather than
+        /// returning `nil`.
+        ///
         /// - parameter value: The rights kind as a string (for example, TEKX).
-        public init(_ value: String) {
-            self.rawValue = value.uppercased()
+        /// - returns: A new kind, or `nil` if the uppercased `value` is not an `atom`.
+        public init?(_ value: String) {
+            let normalized = value.uppercased()
+            guard normalized.isIMAPAtom else { return nil }
+            self.rawValue = normalized
         }
 
-        fileprivate init(unchecked: String) {
-            self.rawValue = unchecked
+        /// Uppercases, like ``init(_:)``.
+        init(unchecked value: String) {
+            let normalized = value.uppercased()
+            assert(normalized.isIMAPAtom)
+            self.rawValue = normalized
         }
     }
 
@@ -255,22 +333,31 @@ extension Capability {
     /// - SeeAlso: [RFC 4978 IMAP Compression](https://datatracker.ietf.org/doc/html/rfc4978)
     public struct CompressionKind: Hashable, Sendable {
         /// DEFLATE compression algorithm (RFC 1951).
-        public static let deflate = Self(unchecked: "DEFLATE")
+        public static let deflate: Self = "DEFLATE"
 
         /// The raw string value of the compression kind.
-        var rawValue: String
+        let rawValue: String
 
-        /// Creates a new compression kind from a string.
+        /// Creates a compression kind from a string, if the uppercased string is an `atom`.
         ///
         /// The provided value is uppercased for consistency with IMAP protocol conventions.
         ///
+        /// A string literal resolves to ``init(stringLiteral:)`` instead, which traps rather than
+        /// returning `nil`.
+        ///
         /// - parameter value: The compression kind as a string (for example, DEFLATE).
-        public init(_ value: String) {
-            self.rawValue = value.uppercased()
+        /// - returns: A new kind, or `nil` if the uppercased `value` is not an `atom`.
+        public init?(_ value: String) {
+            let normalized = value.uppercased()
+            guard normalized.isIMAPAtom else { return nil }
+            self.rawValue = normalized
         }
 
-        fileprivate init(unchecked: String) {
-            self.rawValue = unchecked
+        /// Uppercases, like ``init(_:)``.
+        init(unchecked value: String) {
+            let normalized = value.uppercased()
+            assert(normalized.isIMAPAtom)
+            self.rawValue = normalized
         }
     }
 
@@ -538,14 +625,14 @@ extension Capability {
     ///
     /// - SeeAlso: [RFC 7889](https://datatracker.ietf.org/doc/html/rfc7889)
     public static func appendLimit(_ count: Int) -> Self {
-        Self("APPENDLIMIT=\(count)")
+        Self(unchecked: "APPENDLIMIT=\(count)")
     }
 
     /// Creates a `MESSAGELIMIT=<count>` capability advertising the maximum message count for operations.
     ///
     /// - SeeAlso: [RFC 9738](https://datatracker.ietf.org/doc/html/rfc9738)
     public static func messageLimit(_ count: Int) -> Self {
-        Self("MESSAGELIMIT=\(count)")
+        Self(unchecked: "MESSAGELIMIT=\(count)")
     }
 
     /// Creates a `SAVELIMIT=<count>` capability advertising the maximum message count for SAVE operations.
@@ -553,21 +640,21 @@ extension Capability {
     /// - SeeAlso: [RFC 9586](https://datatracker.ietf.org/doc/html/rfc9586)
     /// - SeeAlso: ``uidOnly``
     public static func saveLimit(_ count: Int) -> Self {
-        Self("SAVELIMIT=\(count)")
+        Self(unchecked: "SAVELIMIT=\(count)")
     }
 
     /// Creates an `AUTH=<mechanism>` capability for the specified SASL mechanism.
     ///
     /// - SeeAlso: [RFC 4959](https://datatracker.ietf.org/doc/html/rfc4959)
     public static func authenticate(_ type: AuthenticationMechanism) -> Self {
-        Self("AUTH=\(String(type))")
+        Self(unchecked: "AUTH=\(String(type))")
     }
 
     /// Creates a `CONTEXT=<kind>` capability for the specified search or sort context.
     ///
     /// - SeeAlso: [RFC 4731](https://datatracker.ietf.org/doc/html/rfc4731)
     public static func context(_ type: ContextKind) -> Self {
-        Self("CONTEXT=\(type.rawValue)")
+        Self(unchecked: "CONTEXT=\(type.rawValue)")
     }
 
     /// Creates a `SORT` or `SORT=<kind>` capability for the specified sort algorithm.
@@ -575,52 +662,199 @@ extension Capability {
     /// - SeeAlso: [RFC 5256](https://datatracker.ietf.org/doc/html/rfc5256)
     public static func sort(_ type: SortKind?) -> Self {
         guard let type = type else {
-            return Self("SORT")
+            return Self(unchecked: "SORT")
         }
-        return Self("SORT=\(type.rawValue)")
+        return Self(unchecked: "SORT=\(type.rawValue)")
     }
 
     /// Creates a `UTF8=<kind>` capability for the specified UTF-8 support level.
     ///
     /// - SeeAlso: [RFC 6855](https://datatracker.ietf.org/doc/html/rfc6855)
     public static func utf8(_ type: UTF8Kind) -> Self {
-        Self("UTF8=\(type.rawValue)")
+        Self(unchecked: "UTF8=\(type.rawValue)")
     }
 
     /// Creates a `THREAD=<kind>` capability for the specified threading algorithm.
     ///
     /// - SeeAlso: [RFC 5256](https://datatracker.ietf.org/doc/html/rfc5256)
     public static func thread(_ type: ThreadKind) -> Self {
-        Self("THREAD=\(type.rawValue)")
+        Self(unchecked: "THREAD=\(type.rawValue)")
     }
 
     /// Creates a `STATUS=<kind>` capability for the specified status attribute type.
     ///
     /// - SeeAlso: [RFC 8438](https://datatracker.ietf.org/doc/html/rfc8438)
     public static func status(_ type: StatusKind) -> Self {
-        Self("STATUS=\(type.rawValue)")
+        Self(unchecked: "STATUS=\(type.rawValue)")
     }
 
     /// Creates a `RIGHTS=<kind>` capability for the specified access control right set.
     ///
     /// - SeeAlso: [RFC 4314](https://datatracker.ietf.org/doc/html/rfc4314)
     public static func rights(_ type: RightsKind) -> Self {
-        Self("RIGHTS=\(type.rawValue)")
+        Self(unchecked: "RIGHTS=\(type.rawValue)")
     }
 
     /// Creates a `COMPRESS=<kind>` capability for the specified compression algorithm.
     ///
     /// - SeeAlso: [RFC 4978](https://datatracker.ietf.org/doc/html/rfc4978)
     public static func compression(_ type: CompressionKind) -> Self {
-        Self("COMPRESS=\(type.rawValue)")
+        Self(unchecked: "COMPRESS=\(type.rawValue)")
     }
 }
 
 // MARK: - Capability to String conversion
 
+extension Capability: ExpressibleByStringLiteral {
+    /// Creates a capability from a string literal.
+    ///
+    /// A literal is written by the programmer, so an invalid one is a bug to be caught on first
+    /// run rather than handled. Use ``init(_:)`` for anything else.
+    ///
+    /// - parameter value: The string literal.
+    /// - Precondition: `value` is an `atom`; this traps if it isn't.
+    public init(stringLiteral value: String) {
+        precondition(Self.isValidCapability(value), "Invalid capability: \(String(reflecting: value))")
+        self.init(unchecked: value)
+    }
+}
+
+extension Capability.ContextKind: ExpressibleByStringLiteral {
+    /// Creates a context kind from a string literal, uppercased.
+    ///
+    /// A literal is written by the programmer, so an invalid one is a bug to be caught on first
+    /// run rather than handled. Use ``init(_:)`` for anything else.
+    ///
+    /// - parameter value: The string literal.
+    /// - Precondition: the uppercased `value` is an `atom`; this traps if it isn't.
+    public init(stringLiteral value: String) {
+        precondition(value.uppercased().isIMAPAtom, "Invalid context kind: \(String(reflecting: value))")
+        self.init(unchecked: value)
+    }
+}
+
+extension Capability.SortKind: ExpressibleByStringLiteral {
+    /// Creates a sort kind from a string literal, uppercased.
+    ///
+    /// A literal is written by the programmer, so an invalid one is a bug to be caught on first
+    /// run rather than handled. Use ``init(_:)`` for anything else.
+    ///
+    /// - parameter value: The string literal.
+    /// - Precondition: the uppercased `value` is an `atom`; this traps if it isn't.
+    public init(stringLiteral value: String) {
+        precondition(value.uppercased().isIMAPAtom, "Invalid sort kind: \(String(reflecting: value))")
+        self.init(unchecked: value)
+    }
+}
+
+extension Capability.ThreadKind: ExpressibleByStringLiteral {
+    /// Creates a thread kind from a string literal, uppercased.
+    ///
+    /// A literal is written by the programmer, so an invalid one is a bug to be caught on first
+    /// run rather than handled. Use ``init(_:)`` for anything else.
+    ///
+    /// - parameter value: The string literal.
+    /// - Precondition: the uppercased `value` is an `atom`; this traps if it isn't.
+    public init(stringLiteral value: String) {
+        precondition(value.uppercased().isIMAPAtom, "Invalid thread kind: \(String(reflecting: value))")
+        self.init(unchecked: value)
+    }
+}
+
+extension Capability.StatusKind: ExpressibleByStringLiteral {
+    /// Creates a status kind from a string literal, uppercased.
+    ///
+    /// A literal is written by the programmer, so an invalid one is a bug to be caught on first
+    /// run rather than handled. Use ``init(_:)`` for anything else.
+    ///
+    /// - parameter value: The string literal.
+    /// - Precondition: the uppercased `value` is an `atom`; this traps if it isn't.
+    public init(stringLiteral value: String) {
+        precondition(value.uppercased().isIMAPAtom, "Invalid status kind: \(String(reflecting: value))")
+        self.init(unchecked: value)
+    }
+}
+
+extension Capability.UTF8Kind: ExpressibleByStringLiteral {
+    /// Creates a UTF-8 kind from a string literal, uppercased.
+    ///
+    /// A literal is written by the programmer, so an invalid one is a bug to be caught on first
+    /// run rather than handled. Use ``init(_:)`` for anything else.
+    ///
+    /// - parameter value: The string literal.
+    /// - Precondition: the uppercased `value` is an `atom`; this traps if it isn't.
+    public init(stringLiteral value: String) {
+        precondition(value.uppercased().isIMAPAtom, "Invalid UTF-8 kind: \(String(reflecting: value))")
+        self.init(unchecked: value)
+    }
+}
+
+extension Capability.RightsKind: ExpressibleByStringLiteral {
+    /// Creates a rights kind from a string literal, uppercased.
+    ///
+    /// A literal is written by the programmer, so an invalid one is a bug to be caught on first
+    /// run rather than handled. Use ``init(_:)`` for anything else.
+    ///
+    /// - parameter value: The string literal.
+    /// - Precondition: the uppercased `value` is an `atom`; this traps if it isn't.
+    public init(stringLiteral value: String) {
+        precondition(value.uppercased().isIMAPAtom, "Invalid rights kind: \(String(reflecting: value))")
+        self.init(unchecked: value)
+    }
+}
+
+extension Capability.CompressionKind: ExpressibleByStringLiteral {
+    /// Creates a compression kind from a string literal, uppercased.
+    ///
+    /// A literal is written by the programmer, so an invalid one is a bug to be caught on first
+    /// run rather than handled. Use ``init(_:)`` for anything else.
+    ///
+    /// - parameter value: The string literal.
+    /// - Precondition: the uppercased `value` is an `atom`; this traps if it isn't.
+    public init(stringLiteral value: String) {
+        precondition(value.uppercased().isIMAPAtom, "Invalid compression kind: \(String(reflecting: value))")
+        self.init(unchecked: value)
+    }
+}
+
 extension String {
     public init(_ capability: Capability) {
         self = capability.rawValue
+    }
+
+    /// Creates a `String` from a ``Capability/ContextKind``.
+    public init(_ other: Capability.ContextKind) {
+        self = other.rawValue
+    }
+
+    /// Creates a `String` from a ``Capability/SortKind``.
+    public init(_ other: Capability.SortKind) {
+        self = other.rawValue
+    }
+
+    /// Creates a `String` from a ``Capability/ThreadKind``.
+    public init(_ other: Capability.ThreadKind) {
+        self = other.rawValue
+    }
+
+    /// Creates a `String` from a ``Capability/StatusKind``.
+    public init(_ other: Capability.StatusKind) {
+        self = other.rawValue
+    }
+
+    /// Creates a `String` from a ``Capability/UTF8Kind``.
+    public init(_ other: Capability.UTF8Kind) {
+        self = other.rawValue
+    }
+
+    /// Creates a `String` from a ``Capability/RightsKind``.
+    public init(_ other: Capability.RightsKind) {
+        self = other.rawValue
+    }
+
+    /// Creates a `String` from a ``Capability/CompressionKind``, for example `DEFLATE`.
+    public init(_ other: Capability.CompressionKind) {
+        self = other.rawValue
     }
 }
 
@@ -628,7 +862,7 @@ extension String {
 
 extension EncodeBuffer {
     @discardableResult mutating func writeCapability(_ capability: Capability) -> Int {
-        self.writeString(capability.rawValue)
+        self.writeAtom(capability.rawValue)
     }
 
     @discardableResult mutating func writeCapabilityData(_ data: [Capability]) -> Int {

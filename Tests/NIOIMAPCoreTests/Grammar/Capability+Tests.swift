@@ -18,6 +18,123 @@ import Testing
 
 @Suite("Capability")
 struct CapabilityTests {
+    /// A compression kind is written verbatim in COMPRESS, so ``Capability/CompressionKind/init(_:)``
+    /// is the only thing between a caller that builds kinds from untrusted input and an injected
+    /// command.
+    @Test("invalid compression kinds are rejected", arguments: invalidKindStrings)
+    func invalidCompressionKinds(_ string: String) {
+        #expect(Capability.CompressionKind(string) == nil)
+    }
+
+    @Test("valid compression kinds round-trip", arguments: ["DEFLATE", "deflate", "X-FOO"])
+    func validCompressionKindsRoundTrip(_ string: String) throws {
+        let kind = try #require(Capability.CompressionKind(string))
+        #expect(String(kind) == string.uppercased())
+        ParseFixture(
+            input: "COMPRESS \(string)",
+            terminator: "\r",
+            expected: .success(Command.compress(kind)),
+            parser: GrammarParser().parseCommand
+        ).checkParsing()
+    }
+
+    #if !os(iOS) && !os(watchOS) && !os(tvOS) && !os(visionOS) && !os(Android)
+    @Test("an invalid compression kind literal traps") func compressionKindLiteralPreconditionFailure() async {
+        let result = await #expect(
+            processExitsWith: ExitTest.Condition.failure,
+            observing: [\.standardErrorContent],
+            performing: {
+                let kind: Capability.CompressionKind = "not an atom"
+                _ = kind
+            }
+        )
+        TestUtilities.expectTrapMessage(result, "Invalid compression kind")
+    }
+    #endif
+
+    /// A capability is written to the wire verbatim, so ``Capability/init(_:)`` is the only thing
+    /// between a caller that builds capabilities from untrusted input and an injected command or
+    /// response.
+    @Test(
+        "invalid capabilities are rejected",
+        arguments: [
+            "",  // `atom` is `1*ATOM-CHAR`.
+            "a b",
+            "a(b",
+            "a]b",
+            #"a"b"#,
+            #"a\b"#,
+            "a%b",
+            "a*b",
+            "GRÜEZI",
+            "a\u{7F}b",
+            "X\r\nA2 DELETE INBOX",  // Would inject a whole command.
+            "X\r\n* OK [ALERT] hi",  // Would inject an untagged response.
+        ]
+    )
+    func invalidCapabilities(_ string: String) {
+        #expect(Capability(string) == nil)
+    }
+
+    /// Each kind ends up verbatim in a capability such as `CONTEXT=<kind>`.
+    @Test("invalid kinds are rejected", arguments: invalidKindStrings)
+    func invalidKinds(_ string: String) {
+        #expect(Capability.ContextKind(string) == nil)
+        #expect(Capability.SortKind(string) == nil)
+        #expect(Capability.ThreadKind(string) == nil)
+        #expect(Capability.StatusKind(string) == nil)
+        #expect(Capability.UTF8Kind(string) == nil)
+        #expect(Capability.RightsKind(string) == nil)
+    }
+
+    @Test("valid capabilities", arguments: validCapabilityStrings)
+    func validCapabilities(_ string: String) {
+        #expect(Capability(string).map { String($0) } == string)
+    }
+
+    /// Written verbatim, so every capability we accept has to parse back unchanged.
+    @Test("valid capabilities round-trip", arguments: validCapabilityStrings)
+    func validCapabilitiesRoundTrip(_ string: String) throws {
+        ParseFixture.capability(string, expected: .success(try #require(Capability(string)))).checkParsing()
+    }
+
+    @Test("valid kinds", arguments: ["search", "X-FOO"])
+    func validKinds(_ string: String) throws {
+        let expected = string.uppercased()
+        #expect(String(try #require(Capability.ContextKind(string))) == expected)
+        #expect(String(try #require(Capability.SortKind(string))) == expected)
+        #expect(String(try #require(Capability.ThreadKind(string))) == expected)
+        #expect(String(try #require(Capability.StatusKind(string))) == expected)
+        #expect(String(try #require(Capability.UTF8Kind(string))) == expected)
+        #expect(String(try #require(Capability.RightsKind(string))) == expected)
+    }
+
+    #if !os(iOS) && !os(watchOS) && !os(tvOS) && !os(visionOS) && !os(Android)
+    @Test("an invalid capability literal traps") func capabilityLiteralPreconditionFailure() async {
+        let result = await #expect(
+            processExitsWith: ExitTest.Condition.failure,
+            observing: [\.standardErrorContent],
+            performing: {
+                let capability: Capability = "not an atom"
+                _ = capability
+            }
+        )
+        TestUtilities.expectTrapMessage(result, "Invalid capability")
+    }
+
+    @Test("an invalid kind literal traps") func kindLiteralPreconditionFailure() async {
+        let result = await #expect(
+            processExitsWith: ExitTest.Condition.failure,
+            observing: [\.standardErrorContent],
+            performing: {
+                let kind: Capability.ContextKind = "not an atom"
+                _ = kind
+            }
+        )
+        TestUtilities.expectTrapMessage(result, "Invalid context kind")
+    }
+    #endif
+
     @Test(
         "name and value properties",
         arguments: [
@@ -259,6 +376,28 @@ struct CapabilityTests {
 }
 
 // MARK: -
+
+private let validCapabilityStrings = [
+    "IMAP4rev1",
+    "AUTH=PLAIN",
+    "LITERAL+",
+    "X-GM-EXT-1",
+    "APPENDLIMIT=-1",
+]
+
+private let invalidKindStrings = [
+    "",  // `atom` is `1*ATOM-CHAR`.
+    "a b",
+    "a(b",
+    "a]b",
+    #"a"b"#,
+    #"a\b"#,
+    "a%b",
+    "a*b",
+    "grüezi",
+    "a\u{7F}b",
+    "DEFLATE\r\nA2 DELETE INBOX",  // Would inject a whole command.
+]
 
 struct CapabilityFixture: Sendable, CustomTestStringConvertible {
     var name: String

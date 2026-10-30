@@ -34,6 +34,11 @@ struct FlagKeywordTests {
     }
 
     @Test(arguments: [
+        // `]` is no ATOM-CHAR, but Gmail sends it: the keyword is written as-is, not as an atom.
+        EncodeFixture.flagKeyword(
+            "OIB-Seen-[Gmail]/Trash",
+            "OIB-Seen-[Gmail]/Trash"
+        ),
         EncodeFixture.flagKeyword(
             .forwarded,
             "$Forwarded"
