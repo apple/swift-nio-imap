@@ -28,11 +28,11 @@ struct AccessTests {
             "authuser"
         ),
         EncodeFixture.access(
-            .submit(.init(data: "abc")),
+            .submit("abc"),
             "submit+abc"
         ),
         EncodeFixture.access(
-            .user(.init(data: "abc")),
+            .user("abc"),
             "user+abc"
         ),
     ])
@@ -54,12 +54,12 @@ struct AccessTests {
         ParseFixture.access(
             "submit+abc",
             " ",
-            expected: .success(.submit(.init(data: "abc")))
+            expected: .success(.submit("abc"))
         ),
         ParseFixture.access(
             "user+abc",
             " ",
-            expected: .success(.user(.init(data: "abc")))
+            expected: .success(.user("abc"))
         ),
     ])
     func parse(_ fixture: ParseFixture<Access>) {

@@ -19,7 +19,7 @@ import Testing
 @Suite("EncodedMailbox")
 struct EncodedMailboxTests {
     @Test(arguments: [
-        EncodeFixture.encodedMailbox(.init(mailbox: "hello"), "hello")
+        EncodeFixture.encodedMailbox("hello", "hello")
     ])
     func encode(_ fixture: EncodeFixture<EncodedMailbox>) {
         fixture.checkEncoding()
@@ -29,7 +29,7 @@ struct EncodedMailboxTests {
         ParseFixture.encodedMailbox(
             "hello%FF",
             " ",
-            expected: .success(.init(mailbox: "hello%FF"))
+            expected: .success("hello%FF")
         )
     ])
     func parse(_ fixture: ParseFixture<EncodedMailbox>) {

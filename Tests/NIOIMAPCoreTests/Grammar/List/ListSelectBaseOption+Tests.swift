@@ -30,16 +30,6 @@ struct ListSelectBaseOptionTests {
     }
 
     @Test(
-        "encode quoted",
-        arguments: [
-            EncodeFixture.listSelectBaseOptionQuoted(.subscribed, #""SUBSCRIBED""#)
-        ]
-    )
-    func encodeQuoted(_ fixture: EncodeFixture<ListSelectBaseOption>) {
-        fixture.checkEncoding()
-    }
-
-    @Test(
         "parse",
         arguments: [
             ParseFixture.listSelectBaseOption("SUBSCRIBED", ")", expected: .success(.subscribed)),
@@ -86,18 +76,6 @@ extension EncodeFixture<ListSelectBaseOption> {
             bufferKind: .defaultServer,
             expectedString: expectedString,
             encoder: { $0.writeListSelectBaseOption($1) }
-        )
-    }
-
-    fileprivate static func listSelectBaseOptionQuoted(
-        _ input: ListSelectBaseOption,
-        _ expectedString: String
-    ) -> Self {
-        EncodeFixture(
-            input: input,
-            bufferKind: .defaultServer,
-            expectedString: expectedString,
-            encoder: { $0.writeListSelectBaseOptionQuoted($1) }
         )
     }
 }

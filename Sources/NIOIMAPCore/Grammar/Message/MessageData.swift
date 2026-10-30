@@ -95,8 +95,9 @@ extension EncodeBuffer {
                     buffer.writeIMAPString(data)
                 }
         case .urlFetch(let array):
+            // `"URLFETCH" 1*(SP url-full SP nstring)`, not parenthesized.
             return self.writeString("URLFETCH")
-                + self.writeArray(array) { data, buffer in
+                + self.writeArray(array, prefix: " ", parenthesis: false) { data, buffer in
                     buffer.writeURLFetchData(data)
                 }
         }
