@@ -277,6 +277,28 @@ private struct GrammarParserPrimitivesTests {
         fixture.checkParsing()
     }
 
+    /// The hint and location `parseNDigits` reported when its hint was interpolated.
+    @Test(
+        "parseNDigits names the digit counts and its throw site",
+        arguments: [(1, "12 ", "Expected 1 digits, got 2"), (4, "123 ", "Expected 4 digits, got 3")]
+    )
+    func parseNDigitsHint(bytes: Int, input: String, hint: String) {
+        let error = TestUtilities.withParseInput(for: input) { buffer in
+            errorThrown { try GrammarParser().parseNDigits(buffer: &buffer, tracker: .testTracker, bytes: bytes) }
+        }
+        guard let error = error as? ParserError else {
+            Issue.record("Expected a ParserError, got \(String(describing: error))")
+            return
+        }
+        #expect(error.hint == hint)
+        #expect(error.file == "NIOIMAPCore/GrammarParser.swift")
+        // One throw site, whatever the count.
+        let other = TestUtilities.withParseInput(for: "123 ") { buffer in
+            errorThrown { try GrammarParser().parseNDigits(buffer: &buffer, tracker: .testTracker, bytes: 2) }
+        }
+        #expect((other as? ParserError)?.line == error.line)
+    }
+
     @Test(
         "parse 4DIGIT",
         arguments: [

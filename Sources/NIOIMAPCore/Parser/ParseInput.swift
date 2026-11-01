@@ -30,7 +30,7 @@ import Musl
 //
 // Unsafe seams. In the byte, encoder and parser code — `NIOIMAPCore`'s `Bytes/`, `Parser/` and
 // `EncodeBuffer*.swift`, and `NIOIMAP`'s `Bytes/` — memory safety and `Sendable` are compiler-checked
-// except at these fourteen. Not counted: reading through a pointer, or binding it to `UInt8`, inside the
+// except at these sixteen. Not counted: reading through a pointer, or binding it to `UInt8`, inside the
 // `withUnsafe…` closure that produced it. Outside that scope, `Base64/Chromium.swift` and
 // `MailboxName.swift` use pointers too; both predate this list.
 //
@@ -77,6 +77,10 @@ import Musl
 //     is immutable and keeps its regions alive.
 // 14. Sendable: `GrammarParser: @unchecked Sendable` (GrammarParser.swift), older than this list. Its
 //     `parsedStringCache` closure is not `@Sendable`.
+// 15. Sendable: `ThrowSite: @unchecked Sendable` (ParserErrors.swift). It points at a `#fileID` literal,
+//     which is immutable and lives as long as the process.
+// 16. Sendable: `LiteralHint: @unchecked Sendable` (ParserErrors.swift). It points at `StaticString`
+//     literals, accepted only with a pointer representation.
 
 /// One contiguous run of input bytes, plus whoever can keep those bytes alive.
 ///
