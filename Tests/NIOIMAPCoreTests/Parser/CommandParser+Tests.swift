@@ -212,9 +212,34 @@ struct CommandParserTests {
             ParseFixture.string(#""aäb""#, " ", expected: .success("aäb")),
             ParseFixture.string(#"foo"#, " ", expected: .failure),
             ParseFixture.string(#" "foo""#, " ", expected: .failure),
+            ParseFixture.string(
+                "{\(IMAPDefaults.literalSizeLimit + 1)}\r\n",
+                " ",
+                expected: .failureThrowing(ExceededLiteralSizeLimitError.self)
+            ),
         ]
     )
     func parseStringParsesQuotedAndLiteralStrings(_ fixture: ParseFixture<[UInt8]>) {
+        fixture.checkParsing()
+    }
+
+    @Test(
+        "parseLiteralLength enforces the literal size limit",
+        arguments: [
+            ParseFixture.literalLength(
+                "\(IMAPDefaults.literalSizeLimit)",
+                "}",
+                expected: .success(IMAPDefaults.literalSizeLimit)
+            ),
+            // Throws after consuming the digits; callers restore.
+            ParseFixture.literalLength(
+                "\(IMAPDefaults.literalSizeLimit + 1)",
+                "}",
+                expected: .failureIgnoringBufferModificationsThrowing(ExceededLiteralSizeLimitError.self)
+            ),
+        ]
+    )
+    func parseLiteralLengthEnforcesLimit(_ fixture: ParseFixture<Int>) {
         fixture.checkParsing()
     }
 
@@ -259,6 +284,21 @@ extension ParseFixture<[UInt8]> {
             terminator: terminator,
             expected: expected,
             parser: GrammarParser().parseStringAllowingNonASCII
+        )
+    }
+}
+
+extension ParseFixture<Int> {
+    fileprivate static func literalLength(
+        _ input: String,
+        _ terminator: String,
+        expected: Expected
+    ) -> Self {
+        ParseFixture(
+            input: input,
+            terminator: terminator,
+            expected: expected,
+            parser: GrammarParser().parseLiteralLength
         )
     }
 }
