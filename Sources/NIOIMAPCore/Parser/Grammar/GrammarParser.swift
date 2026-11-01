@@ -203,7 +203,7 @@ extension GrammarParser {
     ) throws -> AuthenticationMechanism {
         let atom = try self.parseAtom(buffer: &buffer, tracker: tracker)
         guard let mechanism = AuthenticationMechanism(atom) else {
-            throw ParserError(hint: "Invalid authentication mechanism name: \(atom)")
+            throw ParserError(dynamicHint: "Invalid authentication mechanism name: \(atom)")
         }
         return mechanism
     }
@@ -261,7 +261,7 @@ extension GrammarParser {
             do {
                 return try Base64.decode(bytes: bytes)
             } catch {
-                throw ParserError(hint: "Invalid base64 \(error)")
+                throw ParserError(dynamicHint: "Invalid base64 \(error)")
             }
         }
     }
@@ -300,7 +300,7 @@ extension GrammarParser {
             let string = String(decoding: bytes, as: UTF8.self)
             // `parseQuoted` is lenient (CR, LF, 8-bit, empty); reject what can't be written back.
             guard let name = CharacterSetName(string) else {
-                throw ParserError(hint: "Invalid charset \(String(reflecting: string))")
+                throw ParserError(dynamicHint: "Invalid charset \(String(reflecting: string))")
             }
             return name
         }
@@ -577,7 +577,7 @@ extension GrammarParser {
             let bytes = try buffer.parseOneOrMoreCharacters(where: \.isHexCharacter)
             guard bytes.count >= EncodedAuthenticatedURL.minimumLength else {
                 throw ParserError(
-                    hint: "Expected at least 32 hex digits, got \(String(decoding: bytes, as: UTF8.self))"
+                    dynamicHint: "Expected at least 32 hex digits, got \(String(decoding: bytes, as: UTF8.self))"
                 )
             }
             return .init(unchecked: String(decoding: bytes, as: UTF8.self))
@@ -1041,7 +1041,7 @@ extension GrammarParser {
                 return .init(userAuthenticationMechanism: info, host: host, port: nil)
             }
             guard let validPort = UInt16(exactly: port) else {
-                throw ParserError(hint: "Port \(port) out of range")
+                throw ParserError(dynamicHint: "Port \(port) out of range")
             }
             return .init(userAuthenticationMechanism: info, host: host, port: validPort)
         }
@@ -1073,7 +1073,7 @@ extension GrammarParser {
                 tracker: tracker
             )
             guard let host = IMAPServer.Host(string) else {
-                throw ParserError(hint: "Invalid host \(string)")
+                throw ParserError(dynamicHint: "Invalid host \(string)")
             }
             return host
         }
@@ -1287,7 +1287,7 @@ extension GrammarParser {
         func parseUChar_unreserved(buffer: inout ParseInput, tracker: StackTracker) throws -> [UInt8] {
             let num = try buffer.readByte()
             guard num.isUnreserved else {
-                throw ParserError(hint: "Expected unreserved char, got \(num)")
+                throw ParserError(dynamicHint: "Expected unreserved char, got \(num)")
             }
             return [num]
         }
@@ -1295,7 +1295,7 @@ extension GrammarParser {
         func parseUChar_subDelimsSH(buffer: inout ParseInput, tracker: StackTracker) throws -> [UInt8] {
             let num = try buffer.readByte()
             guard num.isSubDelimsSh else {
-                throw ParserError(hint: "Expected sub-delims-sh char, got \(num)")
+                throw ParserError(dynamicHint: "Expected sub-delims-sh char, got \(num)")
             }
             return [num]
         }
@@ -1309,7 +1309,7 @@ extension GrammarParser {
             var h2 = try buffer.readByte()
 
             guard h1.isHexCharacter, h2.isHexCharacter else {
-                throw ParserError(hint: "Expected 2 hex digits, got \(h1) and \(h2)")
+                throw ParserError(dynamicHint: "Expected 2 hex digits, got \(h1) and \(h2)")
             }
 
             if h1 > UInt8(ascii: "F") {
@@ -1337,7 +1337,7 @@ extension GrammarParser {
             case UInt8(ascii: "&"), UInt8(ascii: "="):
                 return [char]
             default:
-                throw ParserError(hint: "Expect achar, got \(char)")
+                throw ParserError(dynamicHint: "Expect achar, got \(char)")
             }
         }
 
@@ -1355,7 +1355,7 @@ extension GrammarParser {
             case UInt8(ascii: ":"), UInt8(ascii: "@"), UInt8(ascii: "/"):
                 return [char]
             default:
-                throw ParserError(hint: "Expect bchar, got \(char)")
+                throw ParserError(dynamicHint: "Expect bchar, got \(char)")
             }
         }
 
@@ -1492,7 +1492,7 @@ extension GrammarParser {
             let minute = try self.parse2Digit(buffer: &buffer, tracker: tracker)
             // time-hour = 00-23, time-minute = 00-59
             guard (0...23).contains(hour), (0...59).contains(minute) else {
-                throw ParserError(hint: "Invalid time offset \(hour):\(minute)")
+                throw ParserError(dynamicHint: "Invalid time offset \(hour):\(minute)")
             }
             return (hour, minute)
         }
@@ -2072,12 +2072,12 @@ extension GrammarParser {
             guard let num2 = UInt32(exactly: try self.parseNZNumber(buffer: &buffer, tracker: tracker)) else {
                 throw ParserError(hint: "Partial range count is invalid.")
             }
-            guard num2 > 0 else { throw ParserError(hint: "Partial range is invalid: <\(num1).\(num2)>.") }
+            guard num2 > 0 else { throw ParserError(dynamicHint: "Partial range is invalid: <\(num1).\(num2)>.") }
             try buffer.matchFixed(">")
             let upper1 = num1.addingReportingOverflow(num2)
-            guard !upper1.overflow else { throw ParserError(hint: "Range is invalid: <\(num1).\(num2)>.") }
+            guard !upper1.overflow else { throw ParserError(dynamicHint: "Range is invalid: <\(num1).\(num2)>.") }
             let upper2 = upper1.partialValue.subtractingReportingOverflow(1)
-            guard !upper2.overflow else { throw ParserError(hint: "Range is invalid: <\(num1).\(num2)>.") }
+            guard !upper2.overflow else { throw ParserError(dynamicHint: "Range is invalid: <\(num1).\(num2)>.") }
             return num1...upper2.partialValue
         }
     }
@@ -2155,7 +2155,7 @@ extension GrammarParser {
                 }
                 guard index < data.endIndex, data[index].isQuotedSpecial else {
                     throw ParserError(
-                        hint:
+                        dynamicHint:
                             "Invalid escape in quoted string '\(String(decoding: data, as: Unicode.UTF8.self))'"
                     )
                 }
@@ -2461,7 +2461,7 @@ extension GrammarParser {
         }
         let string = try decodeUTF8(parsed)
         guard let att = MailboxAttribute(rawValue: string.uppercased()) else {
-            throw ParserError(hint: "Found \(string) which was not a status attribute")
+            throw ParserError(dynamicHint: "Found \(string) which was not a status attribute")
         }
         return att
     }
@@ -2665,7 +2665,7 @@ extension GrammarParser {
 
             let fchar = try buffer.readByte()
             guard fchar.isTaggedLabelFchar else {
-                throw ParserError(hint: "\(fchar) is not a valid fchar")
+                throw ParserError(dynamicHint: "\(fchar) is not a valid fchar")
             }
 
             let parsed = try buffer.parseZeroOrMoreCharacters { char -> Bool in
@@ -3182,7 +3182,7 @@ extension GrammarParser {
         try buffer.composite(tracker: tracker) { (buffer, tracker) in
             let (num, size) = try buffer.parseUnsignedInteger(tracker: tracker, leadingZeros: .allowed)
             guard size == bytes else {
-                throw ParserError(hint: "Expected \(bytes) digits, got \(size)")
+                throw ParserError(expectedDigits: bytes, got: size)
             }
             return num
         }

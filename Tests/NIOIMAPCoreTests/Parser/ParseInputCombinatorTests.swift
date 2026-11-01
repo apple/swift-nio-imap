@@ -273,7 +273,50 @@ extension ParseInputCombinatorTests {
 
     @Test("NoForwardProgress names the check that fired")
     func noForwardProgressDescription() {
-        #expect(String(describing: NoForwardProgress()).contains("ParseInputCombinatorTests.swift"))
+        let line = #line + 1
+        let error = NoForwardProgress()
+        #expect(
+            String(describing: error) == "NoForwardProgress at NIOIMAPCoreTests/ParseInputCombinatorTests.swift:\(line)"
+        )
+    }
+
+    /// `ParserError` locations name the site that threw, not the file that declared the default argument.
+    @Test("ParserError names the throwing site's file")
+    func parserErrorNamesThrowingFile() {
+        let thisFile = "NIOIMAPCoreTests/ParseInputCombinatorTests.swift"
+        func site(_ error: (any Error)?) -> String {
+            guard let error = error as? ParserError else { return "<not a ParserError>" }
+            return "\(error.file):\(error.line)"
+        }
+        func here(_ line: Int = #line) -> String { "\(thisFile):\(line)" }
+        #expect(site(ParserError()) == here())
+        #expect(site(ParserError.invalidUTF8()) == here())
+        #expect(site(errorThrown { try decodeUTF8([0xFF]) }) == here())
+        #expect(site(ParserError(dynamicHint: "dynamic \(1)")) == here())
+        TestUtilities.withParseInput(for: "xy") { buffer in
+            let oneOf = errorThrown {
+                try buffer.parseOneOf(
+                    [{ _, _ -> Int in throw ParserError() }, { _, _ -> Int in throw ParserError() }],
+                    tracker: .testTracker
+                )
+            }
+            #expect(site(oneOf) == here(#line - 5))
+        }
+    }
+
+    @Test("ParserError hints survive the compact storage")
+    func parserErrorHints() {
+        let line = #line + 1
+        var error = ParserError(hint: "before")
+        error.hint = "after"
+        #expect(error.hint == "after")
+        #expect(error.line == line)
+    }
+
+    /// No allocation on throw for literal hints; typed throws also need it small to return it in registers.
+    @Test("ParserError is 24 bytes")
+    func parserErrorSize() {
+        #expect(MemoryLayout<ParserError>.size == 24)
     }
 
     /// `NoForwardProgress` is not a "did not match": the backtracking combinators must let it through.

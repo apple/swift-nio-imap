@@ -102,7 +102,7 @@ extension GrammarParser {
             }
 
             guard let state = UntaggedStatus(code: code, responseText: responseText) else {
-                throw ParserError(hint: "Invalid response code: \(code)")
+                throw ParserError(dynamicHint: "Invalid response code: \(code)")
             }
             return state
         }
@@ -132,7 +132,7 @@ extension GrammarParser {
             }
 
             guard let state = TaggedResponse.State(code: code, responseText: responseText) else {
-                throw ParserError(hint: "Invalid response code: \(code)")
+                throw ParserError(dynamicHint: "Invalid response code: \(code)")
             }
             return state
         }

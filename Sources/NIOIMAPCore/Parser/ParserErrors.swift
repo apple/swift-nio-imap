@@ -21,7 +21,7 @@
 /// - Throws: ``ParserError`` when `bytes` are not valid UTF-8.
 func decodeUTF8(
     _ bytes: some Collection<UInt8>,
-    file: StaticString = (#fileID),
+    file: StaticString = #fileID,
     line: Int = #line
 ) throws -> String {
     guard let string = String(validatingUTF8Bytes: bytes) else {
@@ -71,7 +71,25 @@ public struct BadCommand: Error {
 ///
 /// - SeeAlso: [RFC 3501 Section 4](https://datatracker.ietf.org/doc/html/rfc3501#section-4) (grammar)
 public struct ParserError: Error {
-    static func invalidUTF8(file: StaticString = (#fileID), line: Int = #line) -> Self {
+    /// 24 bytes. A `String` hint plus a `StaticString` file plus an `Int` line would be 48.
+    ///
+    /// ```
+    /// literal:  [ hint pointer | file pointer | line u32, file len u8, isASCII, hint len u16 ]
+    /// digits:   [ file pointer | line u32, file len u8, -, expected u16 | got u32 ]
+    /// boxed:    [ InterpolatedHint ─▶ { hint: String, site } ]
+    /// ```
+    private enum Storage {
+        /// Hot: the hint is a string literal. No allocation.
+        case literal(LiteralHint)
+        /// Hot: a digit-count mismatch, formatted when read. No allocation.
+        case digitCount(DigitCountHint)
+        /// Cold: an interpolated hint, or one assigned through ``hint``.
+        case boxed(InterpolatedHint)
+    }
+
+    private var storage: Storage
+
+    static func invalidUTF8(file: StaticString = #fileID, line: Int = #line) -> Self {
         ParserError(hint: "Invalid UTF8", file: file, line: line)
     }
 
@@ -82,19 +100,148 @@ public struct ParserError: Error {
     /// for logging and debugging purposes.
     ///
     /// - Note: These errors are thrown as part of ordinary control flow — `parseOneOf` throws one
-    ///     for every alternative that doesn't match — so the hint must not be built by string
-    ///     interpolation on any path that is taken often. A plain literal costs nothing; an
-    ///     interpolation heap-allocates as soon as the result exceeds 15 UTF-8 bytes.
-    public var hint: String
-    /// `StaticString` rather than `String`: `#fileID` is longer than the 15-byte small-string limit,
-    /// so a `String` here would heap-allocate and retain on *every* throw, hint or no hint.
-    var file: StaticString
-    var line: Int
+    ///     for every alternative that doesn't match. So the parser takes the hint as a `StaticString`
+    ///     and keeps only a pointer to the literal: the hint costs no allocation, and the compiler rejects
+    ///     an interpolated hint. Interpolation needs the explicit `dynamicHint:` spelling, which boxes;
+    ///     keep it off paths that are taken often.
+    public var hint: String {
+        get {
+            switch storage {
+            case .literal(let literal): literal.hint
+            case .digitCount(let digits): digits.hint
+            case .boxed(let boxed): boxed.hint
+            }
+        }
+        set {
+            storage = .boxed(InterpolatedHint(hint: newValue, site: site))
+        }
+    }
 
-    init(hint: String = "Unknown", file: StaticString = (#fileID), line: Int = #line) {
+    /// Where the error was thrown.
+    private var site: ThrowSite {
+        switch storage {
+        case .literal(let literal): literal.site
+        case .digitCount(let digits): digits.site
+        case .boxed(let boxed): boxed.site
+        }
+    }
+
+    /// The `#fileID` of the throwing site.
+    var file: String { site.file }
+    /// The `#line` of the throwing site.
+    var line: Int { site.line }
+
+    /// A literal hint: no allocation, unless the literal is too long to point at (then boxed).
+    init(hint: StaticString = "Unknown", file: StaticString = #fileID, line: Int = #line) {
+        let site = ThrowSite(file: file, line: line)
+        guard let literal = LiteralHint(hint, site: site) else {
+            self.storage = .boxed(InterpolatedHint(hint: "\(hint)", site: site))
+            return
+        }
+        self.storage = .literal(literal)
+    }
+
+    /// `"Expected \(expected) digits, got \(got)"`, without allocating.
+    init(expectedDigits expected: Int, got: Int, file: StaticString = #fileID, line: Int = #line) {
+        let site = ThrowSite(file: file, line: line)
+        self.storage = .digitCount(DigitCountHint(expected: expected, got: got, site: site))
+    }
+
+    /// A computed hint. Allocates; cold paths only.
+    init(dynamicHint: String, file: StaticString = #fileID, line: Int = #line) {
+        self.storage = .boxed(InterpolatedHint(hint: dynamicHint, site: ThrowSite(file: file, line: line)))
+    }
+}
+
+extension ParserError: CustomReflectable {
+    /// The fields it printed with before its storage went compact, rather than raw pointers:
+    /// `ParserError(hint: "Expected digit", file: "NIOIMAPCore/Foo.swift", line: 42)`.
+    public var customMirror: Mirror {
+        Mirror(self, children: ["hint": hint, "file": file, "line": line], displayStyle: .struct)
+    }
+}
+
+/// A `#fileID` / `#line` pair in 13 bytes; `StaticString` plus `Int` is 32.
+///
+/// Points at the literal, so it costs nothing to make. Converted to `String` only when read.
+struct ThrowSite: @unchecked Sendable {  // @unchecked: points at an immutable string literal.
+    /// Stands in for a file that is not a pointer-backed literal (never the case for `#fileID`).
+    private static let unknownFile: StaticString = "<unknown>"
+
+    private var fileStart: UnsafeRawPointer
+    private var lineNumber: UInt32
+    /// `#fileID` is `Module/File.swift`; anything longer is truncated.
+    private var fileLength: UInt8
+
+    init(file: StaticString, line: Int) {
+        let file = file.hasPointerRepresentation ? file : Self.unknownFile
+        self.fileStart = UnsafeRawPointer(file.utf8Start)
+        self.fileLength = UInt8(clamping: file.utf8CodeUnitCount)
+        self.lineNumber = UInt32(clamping: line)
+    }
+
+    var file: String {
+        String(decoding: UnsafeRawBufferPointer(start: fileStart, count: Int(fileLength)), as: UTF8.self)
+    }
+
+    var line: Int { Int(lineNumber) }
+}
+
+/// ``ParserError``'s hot-path storage: pointers to the hint and file literals.
+///
+/// Field order matters: `hintIsASCII` sits at byte 21, beyond the other storages' payloads, so its spare
+/// bits hold the `Storage` tag and ``ParserError`` stays 24 bytes rather than 25.
+private struct LiteralHint: @unchecked Sendable {  // @unchecked: points at immutable string literals.
+    private var hintStart: UnsafeRawPointer
+    let site: ThrowSite
+    private var hintIsASCII: Bool
+    private var hintLength: UInt16
+
+    /// `nil` if `hint` is not a pointer-backed literal or is longer than `UInt16.max` bytes.
+    init?(_ hint: StaticString, site: ThrowSite) {
+        guard hint.hasPointerRepresentation, let length = UInt16(exactly: hint.utf8CodeUnitCount) else {
+            return nil
+        }
+        self.hintStart = UnsafeRawPointer(hint.utf8Start)
+        self.site = site
+        self.hintIsASCII = hint.isASCII
+        self.hintLength = length
+    }
+
+    var hint: String {
+        let bytes = UnsafeRawBufferPointer(start: hintStart, count: Int(hintLength))
+        guard hintIsASCII else { return String(decoding: bytes, as: UTF8.self) }
+        return String(decoding: bytes, as: Unicode.ASCII.self)
+    }
+}
+
+/// ``ParserError``'s storage for a digit-count mismatch: the counts, formatted only when read.
+///
+/// 20 bytes, so like ``LiteralHint`` it leaves byte 21's spare bits for the enum tags. Counts clamp, which
+/// no real value reaches: `expected` is a grammar constant (1, 2 or 4) and `got` is a run of digits in
+/// one buffer.
+private struct DigitCountHint {
+    let site: ThrowSite
+    private var expected: UInt16
+    private var got: UInt32
+
+    init(expected: Int, got: Int, site: ThrowSite) {
+        self.site = site
+        self.expected = UInt16(clamping: expected)
+        self.got = UInt32(clamping: got)
+    }
+
+    var hint: String { "Expected \(expected) digits, got \(got)" }
+}
+
+/// ``ParserError``'s cold storage: one allocation, 8 bytes inline.
+private final class InterpolatedHint: Sendable {
+    let hint: String
+    let site: ThrowSite
+
+    init(hint: String, site: ThrowSite) {
         self.hint = hint
-        self.file = file
-        self.line = line
+        self.site = site
     }
 }
 
@@ -133,9 +280,8 @@ public struct TooMuchRecursion: Error {
 /// Unlike ``ParserError`` it is never taken to mean "this alternative did not match", so no
 /// backtracking point absorbs it.
 public struct NoForwardProgress: Error {
-    /// `StaticString` for the same reason as ``ParserError``'s: no allocation on the throw.
-    var file: StaticString
-    var line: Int
+    /// Compact, like ``ParserError``'s: no allocation on the throw.
+    private var site: ThrowSite
 
     /// Creates the error, recording where the check that fired is.
     ///
@@ -143,12 +289,18 @@ public struct NoForwardProgress: Error {
     ///   - file: The file of the check. Defaults to the caller's.
     ///   - line: The line of the check. Defaults to the caller's.
     public init(file: StaticString = #fileID, line: Int = #line) {
-        self.file = file
-        self.line = line
+        self.site = ThrowSite(file: file, line: line)
     }
 }
 
 extension NoForwardProgress: CustomStringConvertible {
     /// Names the check that fired, which is what a log of this error is for.
-    public var description: String { "NoForwardProgress at \(file):\(line)" }
+    public var description: String { "NoForwardProgress at \(site.file):\(site.line)" }
+}
+
+extension NoForwardProgress: CustomReflectable {
+    /// `file` and `line`, as before its storage went compact, rather than raw pointers.
+    public var customMirror: Mirror {
+        Mirror(self, children: ["file": site.file, "line": site.line], displayStyle: .struct)
+    }
 }
