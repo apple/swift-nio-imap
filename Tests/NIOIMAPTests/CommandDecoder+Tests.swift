@@ -70,3 +70,18 @@ extension CommandDecoder_Tests {
         return buffer
     }
 }
+
+extension CommandDecoder_Tests {
+    /// Logs print this error; its `ParserError` must print its fields, not its compact storage.
+    @Test("IMAPDecoderError prints its ParserError's fields")
+    func decoderErrorDescription() {
+        let error = IMAPDecoderError(
+            parserError: ParserError(hint: "Expected digit", file: "NIOIMAPCore/Foo.swift", line: 42),
+            buffer: self.buffer("x")
+        )
+        #expect(
+            String(describing: error)
+                == #"IMAPDecoderError(parserError: NIOIMAPCore.ParserError(hint: "Expected digit", file: "NIOIMAPCore/Foo.swift", line: 42), buffer: [78](1 bytes))"#
+        )
+    }
+}

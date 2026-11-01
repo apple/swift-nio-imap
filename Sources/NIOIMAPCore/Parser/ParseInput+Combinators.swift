@@ -207,7 +207,7 @@ extension ParseInput {
     mutating func parseOneOf<T>(
         _ subParsers: [SubParser<T>],
         tracker: StackTracker,
-        file: StaticString = (#fileID),
+        file: StaticString = #fileID,
         line: Int = #line
     ) throws -> T {
         for parser in subParsers {
@@ -229,7 +229,7 @@ extension ParseInput {
         _ parser1: SubParser<T>,
         _ parser2: SubParser<T>,
         tracker: StackTracker,
-        file: StaticString = (#fileID),
+        file: StaticString = #fileID,
         line: Int = #line
     ) throws -> T {
         do {
@@ -254,7 +254,7 @@ extension ParseInput {
         _ parser2: SubParser<T>,
         _ parser3: SubParser<T>,
         tracker: StackTracker,
-        file: StaticString = (#fileID),
+        file: StaticString = #fileID,
         line: Int = #line
     ) throws -> T {
         do {

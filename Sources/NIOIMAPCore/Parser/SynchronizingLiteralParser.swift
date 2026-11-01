@@ -205,7 +205,7 @@ extension SynchronizingLiteralParser {
         _ end: inout Int
     ) throws -> Bool {
         guard end > 0 else {
-            throw ParserError(hint: "whilst looking for \(char), found no bytes")
+            throw ParserError(dynamicHint: "whilst looking for \(char), found no bytes")
         }
         switch input.peek(at: end - 1) {
         case .some(char):
@@ -214,7 +214,7 @@ extension SynchronizingLiteralParser {
         case .some:
             return false
         case .none:
-            throw ParserError(hint: "whilst looking for \(char), found no bytes")
+            throw ParserError(dynamicHint: "whilst looking for \(char), found no bytes")
         }
     }
 

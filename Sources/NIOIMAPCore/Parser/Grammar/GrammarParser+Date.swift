@@ -49,7 +49,7 @@ extension GrammarParser {
     func parseDateDay(buffer: inout ParseInput, tracker: StackTracker) throws -> Int {
         let (num, size) = try buffer.parseUnsignedInteger(tracker: tracker, leadingZeros: .allowed)
         guard size <= 2 else {
-            throw ParserError(hint: "Expected 1 or 2 bytes, got \(size)")
+            throw ParserError(dynamicHint: "Expected 1 or 2 bytes, got \(size)")
         }
         return num
     }
@@ -80,7 +80,7 @@ extension GrammarParser {
         }
         let string = try decodeUTF8(parsed)
         guard let month = IMAPCalendarDay.month(text: string.lowercased()) else {
-            throw ParserError(hint: "No month match for \(string)")
+            throw ParserError(dynamicHint: "No month match for \(string)")
         }
         return month
     }
@@ -94,7 +94,7 @@ extension GrammarParser {
             try buffer.matchFixed("-")
             let year = try self.parse4Digit(buffer: &buffer, tracker: tracker)
             guard let date = IMAPCalendarDay(year: year, month: month, day: day) else {
-                throw ParserError(hint: "Invalid date components \(year) \(month) \(day)")
+                throw ParserError(dynamicHint: "Invalid date components \(year) \(month) \(day)")
             }
             return date
         }
@@ -134,7 +134,7 @@ extension GrammarParser {
                 try buffer.matchFixed("+")
                 let num = try self.parse4Digit(buffer: &buffer, tracker: tracker)
                 guard let zone = splitZoneMinutes(num) else {
-                    throw ParserError(hint: "Building TimeZone from \(num) failed")
+                    throw ParserError(dynamicHint: "Building TimeZone from \(num) failed")
                 }
                 return zone
             }
@@ -143,7 +143,7 @@ extension GrammarParser {
                 try buffer.matchFixed("-")
                 let num = try self.parse4Digit(buffer: &buffer, tracker: tracker)
                 guard let zone = splitZoneMinutes(num) else {
-                    throw ParserError(hint: "Building TimeZone from \(num) failed")
+                    throw ParserError(dynamicHint: "Building TimeZone from \(num) failed")
                 }
                 return -zone
             }
