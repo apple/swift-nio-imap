@@ -1112,6 +1112,40 @@ extension ResponseParserTests {
     }
 }
 
+extension ResponseParserTests {
+    /// The client side has no framing, so a read can end anywhere. Wherever it does, the events must be
+    /// the same as for the whole response.
+    @Test(
+        "a response parses the same wherever the read is split",
+        arguments: [
+            // An unparseable body structure carrying a literal: the fallback that skips it as invalid
+            // must report a literal length cut short as incomplete, not as a run-away literal.
+            #"* 1 FETCH (BODYSTRUCTURE ("a" {10}\#r\#n0123456789 1 2))\#r\#n"#
+        ]
+    )
+    func splitAnywhere(response: String) throws {
+        let bytes = Array(response.utf8)
+        let whole = try Self.events(parsing: [bytes])
+        for split in 1..<bytes.count {
+            let parts = [Array(bytes[..<split]), Array(bytes[split...])]
+            #expect(try Self.events(parsing: parts) == whole, "split at \(split)")
+        }
+    }
+
+    private static func events(parsing reads: [[UInt8]]) throws -> [ResponseOrContinuationRequest] {
+        var parser = ResponseParser()
+        var input = ByteBuffer()
+        var events: [ResponseOrContinuationRequest] = []
+        for read in reads {
+            input.writeBytes(read)
+            while let event = try parser.parseResponseStream(buffer: &input) {
+                events.append(event)
+            }
+        }
+        return events
+    }
+}
+
 // MARK: -
 
 private struct ResponseStreamFixture: CustomTestArgumentEncodable, CustomTestStringConvertible {
