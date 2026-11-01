@@ -24,6 +24,7 @@ struct TaggedCommandTests {
             ParseFixture.taggedCommand("1 CAPABILITY", expected: .success(.init(tag: "1", command: .capability))),
             ParseFixture.taggedCommand("a1 CAPABILITY", expected: .success(.init(tag: "a1", command: .capability))),
             ParseFixture.taggedCommand("(", "CAPABILITY", expected: .failure),
+            ParseFixture.taggedCommand("A1 ()", expected: .failureThrowing(BadCommand.self)),
             ParseFixture.taggedCommand("a CAPABILITY", "", expected: .incompleteMessage),
         ]
     )
