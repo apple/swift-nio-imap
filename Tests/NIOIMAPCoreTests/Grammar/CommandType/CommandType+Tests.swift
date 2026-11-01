@@ -478,7 +478,7 @@ struct CommandTypeTests {
         ParseFixture.command("SUBSCRIBE ", expected: .failure),
         ParseFixture.command("UNSUBSCRIBE \r", " ", expected: .failure),
         ParseFixture.command("RENAME box1 ", expected: .failure),
-        ParseFixture.command("COPY 1,2,3,4 ", "", expected: .failureIgnoringBufferModifications),
+        ParseFixture.command("COPY 1,2,3,4 ", "", expected: .incompleteMessageIgnoringBufferModifications),
         ParseFixture.command("COPY inbox ", "", expected: .failureIgnoringBufferModifications),
         ParseFixture.command("SORT (REVERSE REVERSE SUBJECT) UTF-8 UNSEEN", expected: .failure),
         ParseFixture.command("CAPABILITY", "", expected: .incompleteMessage),
