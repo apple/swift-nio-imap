@@ -41,6 +41,23 @@ struct IMAPClientHandlerTests {
         )
     }
 
+    @Test("FETCH literal whose header CRLF is split across reads")
+    func fetchLiteralWithSplitHeaderCRLF() {
+        var helper = Helper()
+        defer {
+            helper.check()
+        }
+
+        helper.writeInbound("* 1 FETCH (BODY[] {5}\r")
+        helper.writeInbound("\nabc\r\n)\r\n")
+
+        helper.expectInbound(.fetch(.start(1)))
+        helper.expectInbound(.fetch(.streamingBegin(kind: .body(section: .init(), offset: nil), byteCount: 5)))
+        helper.expectInbound(.fetch(.streamingBytes("abc\r\n")))
+        helper.expectInbound(.fetch(.streamingEnd))
+        helper.expectInbound(.fetch(.finish))
+    }
+
     @Test("referral URL response")
     func referralURLResponse() {
         var helper = Helper()

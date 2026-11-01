@@ -242,3 +242,168 @@ struct ResponseParserTests {
         #expect(result == .response(.untagged(.mailboxData(.exists(5)))))
     }
 }
+
+// MARK: - Literal header CRLF split across reads
+
+extension ResponseParserTests {
+    /// Feeds each chunk to a parser as if it had just been read from the network, keeping
+    /// unconsumed bytes for the next read, like `ResponseDecoder` does. Adjacent
+    /// `.streamingBytes` are merged, since how they're divided depends on the chunking.
+    private func parse(_ chunks: [String]) throws -> [Response] {
+        try self.parse(chunks.map { Array($0.utf8) })
+    }
+
+    private func parse(_ chunks: [[UInt8]]) throws -> [Response] {
+        var parser = ResponseParser()
+        var buffer = ByteBuffer()
+        var result: [Response] = []
+        for chunk in chunks {
+            buffer.writeBytes(chunk)
+            while let next = try parser.parseResponseStream(buffer: &buffer) {
+                guard case .response(let response) = next else {
+                    Issue.record("Unexpected continuation request: \(next)")
+                    continue
+                }
+                if case .fetch(.streamingBytes(var bytes)) = response,
+                    case .fetch(.streamingBytes(var merged)) = result.last
+                {
+                    merged.writeBuffer(&bytes)
+                    result[result.count - 1] = .fetch(.streamingBytes(merged))
+                } else {
+                    result.append(response)
+                }
+            }
+        }
+        #expect(buffer.readableBytes == 0)
+        return result
+    }
+
+    private func fetch(_ bytes: ByteBuffer) -> [Response] {
+        [
+            .fetch(.start(1)),
+            .fetch(.streamingBegin(kind: .body(section: .init(), offset: nil), byteCount: bytes.readableBytes)),
+            .fetch(.streamingBytes(bytes)),
+            .fetch(.streamingEnd),
+            .fetch(.finish),
+        ]
+    }
+
+    @Test("a message isn't corrupted when the CRLF of its literal header is split across reads")
+    func literalHeaderSplitDoesNotCorruptMessage() throws {
+        // Messages usually end in a line feed. That one used to be silently lost, with the line
+        // feed of the header taking the place of the first byte of the message.
+        let message = "Subject: Hi\r\n\r\nBody\r\n"
+        #expect(
+            try self.parse(["* 1 FETCH (BODY[] {\(message.utf8.count)}\r", "\n\(message))\r\n"])
+                == self.fetch(ByteBuffer(string: message))
+        )
+    }
+
+    @Test(
+        "a split literal header gives the same result as an unsplit one",
+        arguments: [
+            "BODY[]",
+            "BODY[TEXT]<4>",
+            "BODY[HEADER.FIELDS (SUBJECT)]",
+            "RFC822.TEXT",
+            "RFC822.HEADER",
+            "BINARY[1]",
+            "BINARY[1]<5>",
+        ],
+        ["", "~"]
+    )
+    func splitLiteralHeaderForEachAttribute(attribute: String, literalPrefix: String) throws {
+        let content = "\nHi\r\n"
+        let header = "* 1 FETCH (\(attribute) \(literalPrefix){\(content.utf8.count)}\r"
+        let rest = "\n\(content) UID 7)\r\n"
+
+        let expected = try self.parse([header + rest])
+        #expect(expected.contains(.fetch(.streamingBytes(ByteBuffer(string: content)))))
+        #expect(try self.parse([header, rest]) == expected)
+        #expect(try self.parse(Array((header + rest).utf8).map { [$0] }) == expected)
+    }
+
+    @Test("every way of splitting a FETCH with a literal across two reads gives the same result")
+    func everySplitOfFetchWithLiteral() throws {
+        let content = "\nHi\r\n\nThere\r\n"
+        let wire = Array("* 1 FETCH (BODY[] {\(content.utf8.count)}\r\n\(content) UID 7)\r\n* 2 EXISTS\r\n".utf8)
+
+        let expected = try self.parse([wire])
+        #expect(expected.contains(.fetch(.streamingBytes(ByteBuffer(string: content)))))
+        #expect(expected.last == .untagged(.mailboxData(.exists(2))))
+
+        for cut in 1..<wire.count {
+            #expect(try self.parse([Array(wire[..<cut]), Array(wire[cut...])]) == expected, "split after byte \(cut)")
+        }
+    }
+
+    @Test("the line feed of a literal header can arrive on its own")
+    func literalHeaderLineFeedOnItsOwn() throws {
+        #expect(
+            try self.parse(["* 1 FETCH (BODY[] {3}\r", "\n", "abc)\r\n"]) == self.fetch("abc")
+        )
+    }
+
+    @Test("only the line feed of the literal header is skipped, not those in the literal")
+    func lineFeedsInLiteralAreKept() throws {
+        // First byte of the literal is a line feed, as is the first byte of a later read.
+        #expect(
+            try self.parse(["* 1 FETCH (BODY[] {4}\r", "\n\na", "\n", "\n)\r\n"])
+                == self.fetch("\na\n\n")
+        )
+        // Without a split, a line feed at the start of the literal is part of the literal.
+        #expect(try self.parse(["* 1 FETCH (BODY[] {2}\r\n", "\na)\r\n"]) == self.fetch("\na"))
+    }
+
+    @Test("a line feed following a literal with a split header is not skipped as well")
+    func lineFeedAfterLiteralIsNotSkipped() throws {
+        // The line feed of the header has been dealt with. What follows the literal is invalid,
+        // and must be treated as such.
+        #expect(throws: (any Error).self) {
+            try self.parse(["* 1 FETCH (BODY[] {1}\r", "\na", "\n)\r\n"])
+        }
+    }
+
+    @Test("a zero-length literal with a split header")
+    func zeroLengthLiteralWithSplitHeader() throws {
+        let expected: [Response] = [
+            .fetch(.start(1)),
+            .fetch(.streamingBegin(kind: .body(section: .init(), offset: nil), byteCount: 0)),
+            .fetch(.streamingEnd),
+            .fetch(.finish),
+        ]
+        #expect(try self.parse(["* 1 FETCH (BODY[] {0}\r", "\n)\r\n"]) == expected)
+        #expect(try self.parse(["* 1 FETCH (BODY[] {0}\r", "\n", ")\r\n"]) == expected)
+    }
+
+    @Test("each literal in a FETCH can have a split header")
+    func multipleLiteralsWithSplitHeaders() throws {
+        let kind = StreamingKind.rfc822Text
+        #expect(
+            try self.parse(["* 1 FETCH (RFC822.TEXT {2}\r", "\nab RFC822.TEXT {2}\r", "\ncd)\r\n"])
+                == [
+                    .fetch(.start(1)),
+                    .fetch(.streamingBegin(kind: kind, byteCount: 2)),
+                    .fetch(.streamingBytes("ab")),
+                    .fetch(.streamingEnd),
+                    .fetch(.streamingBegin(kind: kind, byteCount: 2)),
+                    .fetch(.streamingBytes("cd")),
+                    .fetch(.streamingEnd),
+                    .fetch(.finish),
+                ]
+        )
+    }
+
+    @Test("a literal header ending in a bare CR is still accepted")
+    func literalHeaderEndingInBareCR() throws {
+        #expect(try self.parse(["* 1 FETCH (BODY[] {3}\rabc)\r\n"]) == self.fetch("abc"))
+        #expect(try self.parse(["* 1 FETCH (BODY[] {3}\r", "abc)\r\n"]) == self.fetch("abc"))
+    }
+
+    @Test("an invalid literal header is rejected")
+    func invalidLiteralHeaderIsRejected() {
+        #expect(throws: (any Error).self) {
+            try self.parse(["* 1 FETCH (BODY[] {3}x", "abc)\r\n"])
+        }
+    }
+}

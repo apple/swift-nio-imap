@@ -256,6 +256,12 @@ public struct ResponseParser: Parser, Sendable {
                 self.lastResponseNewlineEnding = result.newline
                 return result.response
             case .attributeBytes(let remaining, attributeCount: let attributeCount):
+                // Handle orphaned LF from a literal header's CRLF split across buffers. Only the
+                // first byte after the header can be that LF. Any other is part of the literal.
+                if self.lastResponseNewlineEnding == .cr, parseBuffer.readableBytes > 0 {
+                    _ = parseBuffer.skipLF()
+                    self.lastResponseNewlineEnding = nil
+                }
                 return .response(
                     try self.parseBytes(
                         buffer: &parseBuffer,
