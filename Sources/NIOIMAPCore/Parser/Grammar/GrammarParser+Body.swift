@@ -137,7 +137,7 @@ extension GrammarParser {
                     case 0x22:
                         state = .quoted
                     default:
-                        throw ParserError(hint: "Unexpected byte \(byte) in body structure")
+                        throw ParserError(dynamicHint: "Unexpected byte \(byte) in body structure")
                     }
                 case .quoted:
                     // Skip anything except for
@@ -157,7 +157,7 @@ extension GrammarParser {
                     case 0x22:
                         state = .normal
                     default:
-                        throw ParserError(hint: "Unexpected byte \(byte) inside quoted in body structure")
+                        throw ParserError(dynamicHint: "Unexpected byte \(byte) inside quoted in body structure")
                     }
                 }
             }

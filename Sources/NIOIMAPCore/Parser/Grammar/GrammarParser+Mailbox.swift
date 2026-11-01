@@ -68,7 +68,7 @@ extension GrammarParser {
                     try buffer.parseSpaces()
                     let num = try self.parseNZNumber(buffer: &buffer, tracker: tracker)
                     guard let id = UnknownMessageIdentifier(exactly: num) else {
-                        throw ParserError(hint: "Can't make unknown message identfiier from \(num)")
+                        throw ParserError(dynamicHint: "Can't make unknown message identfiier from \(num)")
                     }
                     return id
                 }
@@ -100,7 +100,7 @@ extension GrammarParser {
                     try buffer.parseSpaces()
                     let num = try self.parseNZNumber(buffer: &buffer, tracker: tracker)
                     guard let id = UnknownMessageIdentifier(exactly: num) else {
-                        throw ParserError(hint: "Can't make unknown message identfiier from \(num)")
+                        throw ParserError(dynamicHint: "Can't make unknown message identfiier from \(num)")
                     }
                     return id
                 }
@@ -180,14 +180,14 @@ extension GrammarParser {
                     character = try buffer.readByte()
                     guard character.isQuotedSpecial else {
                         throw ParserError(
-                            hint:
+                            dynamicHint:
                                 "Expected quoted special found \(String(decoding: [character], as: Unicode.UTF8.self))"
                         )
                     }
                 } else {
                     guard character.isQuotedChar else {
                         throw ParserError(
-                            hint: "Expected quoted char found \(String(decoding: [character], as: Unicode.UTF8.self))"
+                            dynamicHint: "Expected quoted char found \(String(decoding: [character], as: Unicode.UTF8.self))"
                         )
                     }
                 }
