@@ -28,11 +28,14 @@ let badOS = { fatalError("unsupported OS") }()
 
 extension GrammarParser {
     // list-select-base-opt =  "SUBSCRIBED" / option-extension
-    func parseListSelectBaseOption(buffer: inout ParseInput, tracker: StackTracker) throws -> ListSelectBaseOption {
+    func parseListSelectBaseOption(
+        buffer: inout ParseInput,
+        tracker: StackTracker
+    ) throws(ParseFailure) -> ListSelectBaseOption {
         func parseListSelectBaseOption_subscribed(
             buffer: inout ParseInput,
             tracker: StackTracker
-        ) throws -> ListSelectBaseOption {
+        ) throws(ParseFailure) -> ListSelectBaseOption {
             try buffer.matchFixed("SUBSCRIBED")
             return .subscribed
         }
@@ -40,13 +43,13 @@ extension GrammarParser {
         func parseListSelectBaseOption_optionExtension(
             buffer: inout ParseInput,
             tracker: StackTracker
-        ) throws -> ListSelectBaseOption {
+        ) throws(ParseFailure) -> ListSelectBaseOption {
             .option(try self.parseOptionExtension(buffer: &buffer, tracker: tracker))
         }
 
         return try buffer.parseOneOf(
-            { try parseListSelectBaseOption_subscribed(buffer: &$0, tracker: $1) },
-            { try parseListSelectBaseOption_optionExtension(buffer: &$0, tracker: $1) },
+            { b, t throws(ParseFailure) in try parseListSelectBaseOption_subscribed(buffer: &b, tracker: t) },
+            { b, t throws(ParseFailure) in try parseListSelectBaseOption_optionExtension(buffer: &b, tracker: t) },
             tracker: tracker
         )
     }
@@ -55,8 +58,8 @@ extension GrammarParser {
     func parseListSelectBaseOptionQuoted(
         buffer: inout ParseInput,
         tracker: StackTracker
-    ) throws -> ListSelectBaseOption {
-        try buffer.composite(tracker: tracker) { buffer, tracker -> ListSelectBaseOption in
+    ) throws(ParseFailure) -> ListSelectBaseOption {
+        try buffer.composite(tracker: tracker) { buffer, tracker throws(ParseFailure) -> ListSelectBaseOption in
             try buffer.matchFixed("\"")
             let option = try self.parseListSelectBaseOption(buffer: &buffer, tracker: tracker)
             try buffer.matchFixed("\"")
@@ -68,11 +71,11 @@ extension GrammarParser {
     func parseListSelectIndependentOption(
         buffer: inout ParseInput,
         tracker: StackTracker
-    ) throws -> ListSelectIndependentOption {
+    ) throws(ParseFailure) -> ListSelectIndependentOption {
         func parseListSelectIndependentOption_subscribed(
             buffer: inout ParseInput,
             tracker: StackTracker
-        ) throws -> ListSelectIndependentOption {
+        ) throws(ParseFailure) -> ListSelectIndependentOption {
             try buffer.matchFixed("REMOTE")
             return .remote
         }
@@ -80,29 +83,36 @@ extension GrammarParser {
         func parseListSelectIndependentOption_optionExtension(
             buffer: inout ParseInput,
             tracker: StackTracker
-        ) throws -> ListSelectIndependentOption {
+        ) throws(ParseFailure) -> ListSelectIndependentOption {
             .option(try self.parseOptionExtension(buffer: &buffer, tracker: tracker))
         }
 
         return try buffer.parseOneOf(
-            { try parseListSelectIndependentOption_subscribed(buffer: &$0, tracker: $1) },
-            { try parseListSelectIndependentOption_optionExtension(buffer: &$0, tracker: $1) },
+            { b, t throws(ParseFailure) in try parseListSelectIndependentOption_subscribed(buffer: &b, tracker: t) },
+            { b, t throws(ParseFailure) in try parseListSelectIndependentOption_optionExtension(buffer: &b, tracker: t)
+            },
             tracker: tracker
         )
     }
 
     // list-select-opt =  list-select-base-opt / list-select-independent-opt
     //                    / list-select-mod-opt
-    func parseListSelectOption(buffer: inout ParseInput, tracker: StackTracker) throws -> ListSelectOption {
+    func parseListSelectOption(
+        buffer: inout ParseInput,
+        tracker: StackTracker
+    ) throws(ParseFailure) -> ListSelectOption {
         func parseListSelectOption_subscribed(
             buffer: inout ParseInput,
             tracker: StackTracker
-        ) throws -> ListSelectOption {
+        ) throws(ParseFailure) -> ListSelectOption {
             try buffer.matchFixed("SUBSCRIBED")
             return .subscribed
         }
 
-        func parseListSelectOption_remote(buffer: inout ParseInput, tracker: StackTracker) throws -> ListSelectOption {
+        func parseListSelectOption_remote(
+            buffer: inout ParseInput,
+            tracker: StackTracker
+        ) throws(ParseFailure) -> ListSelectOption {
             try buffer.matchFixed("REMOTE")
             return .remote
         }
@@ -110,7 +120,7 @@ extension GrammarParser {
         func parseListSelectOption_recursiveMatch(
             buffer: inout ParseInput,
             tracker: StackTracker
-        ) throws -> ListSelectOption {
+        ) throws(ParseFailure) -> ListSelectOption {
             try buffer.matchFixed("RECURSIVEMATCH")
             return .recursiveMatch
         }
@@ -118,7 +128,7 @@ extension GrammarParser {
         func parseListSelectOption_specialUse(
             buffer: inout ParseInput,
             tracker: StackTracker
-        ) throws -> ListSelectOption {
+        ) throws(ParseFailure) -> ListSelectOption {
             try buffer.matchFixed("SPECIAL-USE")
             return .specialUse
         }
@@ -126,20 +136,26 @@ extension GrammarParser {
         func parseListSelectOption_optionExtension(
             buffer: inout ParseInput,
             tracker: StackTracker
-        ) throws -> ListSelectOption {
+        ) throws(ParseFailure) -> ListSelectOption {
             .option(try self.parseOptionExtension(buffer: &buffer, tracker: tracker))
         }
 
-        return try buffer.parseOneOf(
-            [
-                { try parseListSelectOption_subscribed(buffer: &$0, tracker: $1) },
-                { try parseListSelectOption_remote(buffer: &$0, tracker: $1) },
-                { try parseListSelectOption_recursiveMatch(buffer: &$0, tracker: $1) },
-                { try parseListSelectOption_specialUse(buffer: &$0, tracker: $1) },
-                { try parseListSelectOption_optionExtension(buffer: &$0, tracker: $1) },
-            ],
-            tracker: tracker
-        )
+        let p1 = ParseAlternative<ListSelectOption> { b, t throws(ParseFailure) in
+            try parseListSelectOption_subscribed(buffer: &b, tracker: t)
+        }
+        let p2 = ParseAlternative<ListSelectOption> { b, t throws(ParseFailure) in
+            try parseListSelectOption_remote(buffer: &b, tracker: t)
+        }
+        let p3 = ParseAlternative<ListSelectOption> { b, t throws(ParseFailure) in
+            try parseListSelectOption_recursiveMatch(buffer: &b, tracker: t)
+        }
+        let p4 = ParseAlternative<ListSelectOption> { b, t throws(ParseFailure) in
+            try parseListSelectOption_specialUse(buffer: &b, tracker: t)
+        }
+        let p5 = ParseAlternative<ListSelectOption> { b, t throws(ParseFailure) in
+            try parseListSelectOption_optionExtension(buffer: &b, tracker: t)
+        }
+        return try buffer.parseOneOf([p1, p2, p3, p4, p5], tracker: tracker)
     }
 
     // list-select-opts =  "(" [
@@ -148,18 +164,21 @@ extension GrammarParser {
     //                   / (list-select-independent-opt
     //                    *(SP list-select-independent-opt))
     //                      ] ")"
-    func parseListSelectOptions(buffer: inout ParseInput, tracker: StackTracker) throws -> ListSelectOptions {
-        try buffer.composite(tracker: tracker) { (buffer, tracker) in
+    func parseListSelectOptions(
+        buffer: inout ParseInput,
+        tracker: StackTracker
+    ) throws(ParseFailure) -> ListSelectOptions {
+        try buffer.composite(tracker: tracker) { (buffer, tracker) throws(ParseFailure) in
             try buffer.matchFixed("(")
             var selectOptions = try buffer.parseZeroOrMore(tracker: tracker) {
-                (buffer, tracker) -> ListSelectOption in
+                (buffer, tracker) throws(ParseFailure) -> ListSelectOption in
                 let option = try self.parseListSelectOption(buffer: &buffer, tracker: tracker)
                 try buffer.parseSpaces()
                 return option
             }
             let baseOption = try self.parseListSelectBaseOption(buffer: &buffer, tracker: tracker)
             try buffer.parseZeroOrMore(into: &selectOptions, tracker: tracker) {
-                (buffer, tracker) -> ListSelectOption in
+                (buffer, tracker) throws(ParseFailure) -> ListSelectOption in
                 let option = try self.parseListSelectOption(buffer: &buffer, tracker: tracker)
                 try buffer.parseSpaces()
                 return option
@@ -170,14 +189,17 @@ extension GrammarParser {
     }
 
     // list-return-opt = "RETURN" SP "(" [return-option *(SP return-option)] ")"
-    func parseListReturnOptions(buffer: inout ParseInput, tracker: StackTracker) throws -> [ReturnOption] {
-        try buffer.composite(tracker: tracker) { (buffer, tracker) in
+    func parseListReturnOptions(
+        buffer: inout ParseInput,
+        tracker: StackTracker
+    ) throws(ParseFailure) -> [ReturnOption] {
+        try buffer.composite(tracker: tracker) { (buffer, tracker) throws(ParseFailure) in
             try buffer.matchFixed("RETURN (")
             let options = try buffer.parseOptional(tracker: tracker) {
-                (buffer, tracker) -> [ReturnOption] in
+                (buffer, tracker) throws(ParseFailure) -> [ReturnOption] in
                 var array = [try self.parseReturnOption(buffer: &buffer, tracker: tracker)]
                 try buffer.parseZeroOrMore(into: &array, tracker: tracker) {
-                    (buffer, tracker) -> ReturnOption in
+                    (buffer, tracker) throws(ParseFailure) -> ReturnOption in
                     try buffer.parseSpaces()
                     return try self.parseReturnOption(buffer: &buffer, tracker: tracker)
                 }
@@ -189,29 +211,29 @@ extension GrammarParser {
     }
 
     // list-mailbox    = 1*list-char / string
-    func parseListMailbox(buffer: inout ParseInput, tracker: StackTracker) throws -> [UInt8] {
-        func parseListMailbox_string(buffer: inout ParseInput, tracker: StackTracker) throws -> [UInt8] {
+    func parseListMailbox(buffer: inout ParseInput, tracker: StackTracker) throws(ParseFailure) -> [UInt8] {
+        func parseListMailbox_string(buffer: inout ParseInput, tracker: StackTracker) throws(ParseFailure) -> [UInt8] {
             try self.parseString(buffer: &buffer, tracker: tracker)
         }
 
-        func parseListMailbox_chars(buffer: inout ParseInput, tracker: StackTracker) throws -> [UInt8] {
+        func parseListMailbox_chars(buffer: inout ParseInput, tracker: StackTracker) throws(ParseFailure) -> [UInt8] {
             try buffer.parseOneOrMoreCharacters { char -> Bool in
                 char.isListChar
             }
         }
 
         return try buffer.parseOneOf(
-            { try parseListMailbox_string(buffer: &$0, tracker: $1) },
-            { try parseListMailbox_chars(buffer: &$0, tracker: $1) },
+            { b, t throws(ParseFailure) in try parseListMailbox_string(buffer: &b, tracker: t) },
+            { b, t throws(ParseFailure) in try parseListMailbox_chars(buffer: &b, tracker: t) },
             tracker: tracker
         )
     }
 
     // list-wildcards  = "%" / "*"
-    func parseListWildcards(buffer: inout ParseInput, tracker: StackTracker) throws -> String {
+    func parseListWildcards(buffer: inout ParseInput, tracker: StackTracker) throws(ParseFailure) -> String {
         let char = try buffer.readByte()
         guard char.isListWildcard else {
-            throw ParserError()
+            throw .mismatch()
         }
         return String(decoding: CollectionOfOne(char), as: Unicode.UTF8.self)
     }
