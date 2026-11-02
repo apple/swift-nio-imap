@@ -144,7 +144,7 @@ extension GrammarParser {
                 do {
                     try PL.parseFixedString(" (LAZY)", buffer: &buffer, tracker: tracker)
                     return true
-                } catch {
+                } catch is ParserError {
                     return false
                 }
             }
