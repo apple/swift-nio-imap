@@ -22,8 +22,9 @@
 /// [RFC 8474 Section 2](https://datatracker.ietf.org/doc/html/rfc8474#section-2).
 /// Valid mailbox IDs are 1-255 alphanumeric characters plus hyphens and underscores.
 ///
-/// ``MailboxID`` is returned as part of ``MailboxStatus`` when the `MAILBOXID` attribute is requested
-/// in a `STATUS` command, or as part of the `NOTIFY` extension when monitoring mailbox changes.
+/// ``MailboxStatus`` returns a mailbox ID when the `MAILBOXID` attribute is requested in a `STATUS` command.
+/// It wraps the ID in ``MailboxStatus/MailboxID`` to represent invalid identifiers.
+/// A mailbox ID also appears as part of the `NOTIFY` extension when monitoring mailbox changes.
 ///
 /// **Requires server capability:** ``Capability/objectID``
 ///
