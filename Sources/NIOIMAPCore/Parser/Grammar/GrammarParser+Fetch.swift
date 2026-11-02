@@ -32,17 +32,17 @@ import struct NIO.ByteBufferView
 extension GrammarParser {
     func parseFetch_type(buffer: inout ParseBuffer, tracker: StackTracker) throws -> [FetchAttribute] {
         func parseFetch_type_all(buffer: inout ParseBuffer, tracker: StackTracker) throws -> [FetchAttribute] {
-            try PL.parseFixedString("ALL", buffer: &buffer, tracker: tracker)
+            try buffer.matchFixed("ALL")
             return [.flags, .internalDate, .rfc822Size, .envelope]
         }
 
         func parseFetch_type_fast(buffer: inout ParseBuffer, tracker: StackTracker) throws -> [FetchAttribute] {
-            try PL.parseFixedString("FAST", buffer: &buffer, tracker: tracker)
+            try buffer.matchFixed("FAST")
             return [.flags, .internalDate, .rfc822Size]
         }
 
         func parseFetch_type_full(buffer: inout ParseBuffer, tracker: StackTracker) throws -> [FetchAttribute] {
-            try PL.parseFixedString("FULL", buffer: &buffer, tracker: tracker)
+            try buffer.matchFixed("FULL")
             return [.flags, .internalDate, .rfc822Size, .envelope, .bodyStructure(extensions: false)]
         }
 
@@ -51,26 +51,25 @@ extension GrammarParser {
         }
 
         func parseFetch_type_multiAtt(buffer: inout ParseBuffer, tracker: StackTracker) throws -> [FetchAttribute] {
-            try PL.parseFixedString("(", buffer: &buffer, tracker: tracker)
+            try buffer.matchFixed("(")
             var array = [try self.parseFetchAttribute(buffer: &buffer, tracker: tracker)]
-            try PL.parseZeroOrMore(buffer: &buffer, into: &array, tracker: tracker) {
+            try buffer.parseZeroOrMore(into: &array, tracker: tracker) {
                 (buffer, tracker) -> FetchAttribute in
-                try PL.parseFixedString(" ", buffer: &buffer, tracker: tracker)
+                try buffer.matchFixed(" ")
                 return try self.parseFetchAttribute(buffer: &buffer, tracker: tracker)
             }
-            try PL.parseFixedString(")", buffer: &buffer, tracker: tracker)
+            try buffer.matchFixed(")")
             return array
         }
 
-        return try PL.parseOneOf(
+        return try buffer.parseOneOf(
             [
-                parseFetch_type_all,
-                parseFetch_type_full,
-                parseFetch_type_fast,
-                parseFetch_type_singleAtt,
-                parseFetch_type_multiAtt,
+                { try parseFetch_type_all(buffer: &$0, tracker: $1) },
+                { try parseFetch_type_full(buffer: &$0, tracker: $1) },
+                { try parseFetch_type_fast(buffer: &$0, tracker: $1) },
+                { try parseFetch_type_singleAtt(buffer: &$0, tracker: $1) },
+                { try parseFetch_type_multiAtt(buffer: &$0, tracker: $1) },
             ],
-            buffer: &buffer,
             tracker: tracker
         )
     }
@@ -91,7 +90,7 @@ extension GrammarParser {
             // This is one of the few cases where we need to explicitly catch the "incompleteMessage" case and *NOT*
             // propogate it forward.
             if let section = try? self.parseSection(buffer: &buffer, tracker: tracker) {
-                let chevronNumber = try PL.parseOptional(buffer: &buffer, tracker: tracker) {
+                let chevronNumber = try buffer.parseOptional(tracker: tracker) {
                     (buffer, tracker) -> ClosedRange<UInt32> in
                     try self.parsePartial(buffer: &buffer, tracker: tracker)
                 }
@@ -105,7 +104,7 @@ extension GrammarParser {
             tracker: StackTracker
         ) throws -> FetchAttribute {
             let section = try self.parseSection(buffer: &buffer, tracker: tracker)
-            let chevronNumber = try PL.parseOptional(buffer: &buffer, tracker: tracker) {
+            let chevronNumber = try buffer.parseOptional(tracker: tracker) {
                 (buffer, tracker) -> ClosedRange<UInt32> in
                 try self.parsePartial(buffer: &buffer, tracker: tracker)
             }
@@ -121,13 +120,13 @@ extension GrammarParser {
 
         func parseFetchAttribute_binary(buffer: inout ParseBuffer, tracker: StackTracker) throws -> FetchAttribute {
             let sectionBinary = try self.parseSectionBinary(buffer: &buffer, tracker: tracker)
-            let partial = try PL.parseOptional(buffer: &buffer, tracker: tracker, parser: self.parsePartial)
+            let partial = try buffer.parseOptional(tracker: tracker, parser: self.parsePartial)
             return .binary(peek: false, section: sectionBinary, partial: partial)
         }
 
         func parseFetchAttribute_binaryPeek(buffer: inout ParseBuffer, tracker: StackTracker) throws -> FetchAttribute {
             let sectionBinary = try self.parseSectionBinary(buffer: &buffer, tracker: tracker)
-            let partial = try PL.parseOptional(buffer: &buffer, tracker: tracker, parser: self.parsePartial)
+            let partial = try buffer.parseOptional(tracker: tracker, parser: self.parsePartial)
             return .binary(peek: true, section: sectionBinary, partial: partial)
         }
 
@@ -142,7 +141,7 @@ extension GrammarParser {
             // preview-mod       =  "LAZY"
             func parsePreviewLazyModifier(buffer: inout ParseBuffer, tracker: StackTracker) throws -> Bool {
                 do {
-                    try PL.parseFixedString(" (LAZY)", buffer: &buffer, tracker: tracker)
+                    try buffer.matchFixed(" (LAZY)")
                     return true
                 } catch is ParserError {
                     return false
@@ -207,11 +206,11 @@ extension GrammarParser {
         buffer: inout ParseBuffer,
         tracker: StackTracker
     ) throws -> StreamingKind {
-        let section = try PL.parseOptional(buffer: &buffer, tracker: tracker, parser: self.parseSection) ?? .init()
-        let offset = try PL.parseOptional(buffer: &buffer, tracker: tracker) { (buffer, tracker) -> Int in
-            try PL.parseFixedString("<", buffer: &buffer, tracker: tracker)
+        let section = try buffer.parseOptional(tracker: tracker, parser: self.parseSection) ?? .init()
+        let offset = try buffer.parseOptional(tracker: tracker) { (buffer, tracker) -> Int in
+            try buffer.matchFixed("<")
             let num = try self.parseNumber(buffer: &buffer, tracker: tracker)
-            try PL.parseFixedString(">", buffer: &buffer, tracker: tracker)
+            try buffer.matchFixed(">")
             return num
         }
         return .body(section: section, offset: offset)
@@ -219,13 +218,12 @@ extension GrammarParser {
 
     func parseFetchStreamingResponse_binary(buffer: inout ParseBuffer, tracker: StackTracker) throws -> StreamingKind {
         let section = try self.parseSectionBinary(buffer: &buffer, tracker: tracker)
-        let offset = try PL.parseOptional(
-            buffer: &buffer,
+        let offset = try buffer.parseOptional(
             tracker: tracker,
             parser: { buffer, tracker -> Int in
-                try PL.parseFixedString("<", buffer: &buffer, tracker: tracker)
+                try buffer.matchFixed("<")
                 let num = try self.parseNumber(buffer: &buffer, tracker: tracker)
-                try PL.parseFixedString(">", buffer: &buffer, tracker: tracker)
+                try buffer.matchFixed(">")
                 return num
             }
         )
@@ -250,17 +248,17 @@ extension GrammarParser {
     }
 
     func parseFetchModifiers(buffer: inout ParseBuffer, tracker: StackTracker) throws -> [FetchModifier] {
-        try PL.composite(buffer: &buffer, tracker: tracker) { buffer, tracker in
-            try PL.parseSpaces(buffer: &buffer, tracker: tracker)
-            try PL.parseFixedString("(", buffer: &buffer, tracker: tracker)
+        try buffer.composite(tracker: tracker) { buffer, tracker in
+            try buffer.parseSpaces()
+            try buffer.matchFixed("(")
             var array = [try self.parseFetchModifier(buffer: &buffer, tracker: tracker)]
-            try PL.parseZeroOrMore(buffer: &buffer, into: &array, tracker: tracker) {
+            try buffer.parseZeroOrMore(into: &array, tracker: tracker) {
                 buffer,
                 tracker -> FetchModifier in
-                try PL.parseSpaces(buffer: &buffer, tracker: tracker)
+                try buffer.parseSpaces()
                 return try self.parseFetchModifier(buffer: &buffer, tracker: tracker)
             }
-            try PL.parseFixedString(")", buffer: &buffer, tracker: tracker)
+            try buffer.matchFixed(")")
             return array
         }
     }
@@ -271,8 +269,8 @@ extension GrammarParser {
         }
 
         func parseFetchModifier_partial(buffer: inout ParseBuffer, tracker: StackTracker) throws -> FetchModifier {
-            try PL.parseFixedString("PARTIAL", buffer: &buffer, tracker: tracker)
-            try PL.parseSpaces(buffer: &buffer, tracker: tracker)
+            try buffer.matchFixed("PARTIAL")
+            try buffer.parseSpaces()
             return .partial(try self.parsePartialRange(buffer: &buffer, tracker: tracker))
         }
 
@@ -280,40 +278,38 @@ extension GrammarParser {
             .other(try self.parseParameter(buffer: &buffer, tracker: tracker))
         }
 
-        return try PL.parseOneOf(
-            parseFetchModifier_changedSince,
-            parseFetchModifier_partial,
-            parseFetchModifier_other,
-            buffer: &buffer,
+        return try buffer.parseOneOf(
+            { try parseFetchModifier_changedSince(buffer: &$0, tracker: $1) },
+            { try parseFetchModifier_partial(buffer: &$0, tracker: $1) },
+            { try parseFetchModifier_other(buffer: &$0, tracker: $1) },
             tracker: tracker
         )
     }
 
     func parseFetchResponseStart(buffer: inout ParseBuffer, tracker: StackTracker) throws -> _FetchResponse {
         func parseFetchResponseStart_normal(buffer: inout ParseBuffer, tracker: StackTracker) throws -> _FetchResponse {
-            try PL.composite(buffer: &buffer, tracker: tracker) { buffer, tracker in
-                try PL.parseFixedString("* ", buffer: &buffer, tracker: tracker)
+            try buffer.composite(tracker: tracker) { buffer, tracker in
+                try buffer.matchFixed("* ")
                 let number: SequenceNumber = try self.parseMessageIdentifier(buffer: &buffer, tracker: tracker)
-                try PL.parseFixedString(" FETCH (", buffer: &buffer, tracker: tracker)
+                try buffer.matchFixed(" FETCH (")
                 return .start(number)
             }
         }
 
         func parseFetchResponseStart_uid(buffer: inout ParseBuffer, tracker: StackTracker) throws -> _FetchResponse {
-            try PL.composite(buffer: &buffer, tracker: tracker) { buffer, tracker in
-                try PL.parseFixedString("* ", buffer: &buffer, tracker: tracker)
+            try buffer.composite(tracker: tracker) { buffer, tracker in
+                try buffer.matchFixed("* ")
                 let number: UID = try self.parseMessageIdentifier(buffer: &buffer, tracker: tracker)
-                try PL.parseFixedString(" UIDFETCH (", buffer: &buffer, tracker: tracker)
+                try buffer.matchFixed(" UIDFETCH (")
                 return .startUID(number)
             }
         }
 
-        return try PL.parseOneOf(
+        return try buffer.parseOneOf(
             [
-                parseFetchResponseStart_normal,
-                parseFetchResponseStart_uid,
+                { try parseFetchResponseStart_normal(buffer: &$0, tracker: $1) },
+                { try parseFetchResponseStart_uid(buffer: &$0, tracker: $1) },
             ],
-            buffer: &buffer,
             tracker: tracker
         )
     }
@@ -343,7 +339,7 @@ extension GrammarParser {
             tracker: StackTracker
         ) throws -> _FetchResponse {
             let type = try self.parseFetchStreamingResponse(buffer: &buffer, tracker: tracker)
-            try PL.parseSpaces(buffer: &buffer, tracker: tracker)
+            try buffer.parseSpaces()
             let literalSize = try self.parseLiteralSize(
                 buffer: &buffer,
                 tracker: tracker,
@@ -357,7 +353,7 @@ extension GrammarParser {
             tracker: StackTracker
         ) throws -> _FetchResponse {
             let type = try self.parseFetchStreamingResponse(buffer: &buffer, tracker: tracker)
-            try PL.parseSpaces(buffer: &buffer, tracker: tracker)
+            try buffer.parseSpaces()
             let save = buffer
             let quoted = try self.parseQuoted(buffer: &buffer, tracker: tracker)
             buffer = save
@@ -365,19 +361,18 @@ extension GrammarParser {
         }
 
         func parseFetchResponse_finish(buffer: inout ParseBuffer, tracker: StackTracker) throws -> _FetchResponse {
-            try PL.parseFixedString(")", buffer: &buffer, tracker: tracker)
-            try PL.parseNewline(buffer: &buffer, tracker: tracker)
+            try buffer.matchFixed(")")
+            try buffer.matchNewline()
             return .finish
         }
 
-        return try PL.parseOneOf(
+        return try buffer.parseOneOf(
             [
-                parseFetchResponse_streamingBegin,
-                parseFetchResponse_streamingBeginQuoted,
-                parseFetchResponse_simpleAttribute,
-                parseFetchResponse_finish,
+                { try parseFetchResponse_streamingBegin(buffer: &$0, tracker: $1) },
+                { try parseFetchResponse_streamingBeginQuoted(buffer: &$0, tracker: $1) },
+                { try parseFetchResponse_simpleAttribute(buffer: &$0, tracker: $1) },
+                { try parseFetchResponse_finish(buffer: &$0, tracker: $1) },
             ],
-            buffer: &buffer,
             tracker: tracker
         )
     }
