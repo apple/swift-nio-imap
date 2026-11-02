@@ -12,8 +12,6 @@
 //
 //===----------------------------------------------------------------------===//
 
-import struct NIO.ByteBuffer
-
 /// An authorization mechanism paired with base64-encoded authentication data.
 ///
 /// Used in URLAUTH contexts (RFC 4467) to specify both the mechanism used to

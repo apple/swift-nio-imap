@@ -28,9 +28,6 @@ let badOS = { fatalError("unsupported OS") }()
 
 import OrderedCollections
 
-import struct NIO.ByteBuffer
-import struct NIO.ByteBufferView
-
 // MARK: Top-level parser
 
 extension GrammarParser {

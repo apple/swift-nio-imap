@@ -12,8 +12,6 @@
 //
 //===----------------------------------------------------------------------===//
 
-import struct NIO.ByteBuffer
-
 /// Parsing a server response exceeded the maximum allowed message attributes.
 ///
 /// Each ``MessageAttribute`` in a FETCH response is counted. If a server sends a FETCH

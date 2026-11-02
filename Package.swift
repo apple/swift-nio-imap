@@ -29,7 +29,8 @@ let package = Package(
         .target(
             name: "NIOIMAP",
             dependencies: [
-                .target(name: "NIOIMAPCore")
+                .target(name: "NIOIMAPCore"),
+                .product(name: "NIO", package: "swift-nio"),
             ],
             // The documentation is built out-of-band, not by SwiftPM: excluding the catalog
             // keeps it out of the build product instead of being copied in as a resource.
@@ -54,7 +55,6 @@ let package = Package(
         .target(
             name: "NIOIMAPCore",
             dependencies: [
-                .product(name: "NIO", package: "swift-nio"),
                 .product(name: "OrderedCollections", package: "swift-collections"),
                 .product(name: "DequeModule", package: "swift-collections"),
             ],
@@ -71,8 +71,6 @@ let package = Package(
             name: "NIOIMAPCoreTests",
             dependencies: [
                 .target(name: "NIOIMAPCore"),
-                .product(name: "NIO", package: "swift-nio"),
-                .product(name: "NIOTestUtils", package: "swift-nio"),
                 .product(name: "OrderedCollections", package: "swift-collections"),
             ],
             swiftSettings: [

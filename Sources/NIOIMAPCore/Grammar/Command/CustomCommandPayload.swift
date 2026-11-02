@@ -12,8 +12,6 @@
 //
 //===----------------------------------------------------------------------===//
 
-import struct NIO.ByteBuffer
-
 extension Command {
     /// Custom payload encoding for specialized command arguments.
     ///

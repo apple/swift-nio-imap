@@ -12,8 +12,6 @@
 //
 //===----------------------------------------------------------------------===//
 
-import struct NIO.ByteBuffer
-
 /// A group of email addresses.
 ///
 /// ``EmailAddressGroup`` represents an RFC 5322 address group within a message envelope.

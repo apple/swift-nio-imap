@@ -12,8 +12,6 @@
 //
 //===----------------------------------------------------------------------===//
 
-import struct NIO.ByteBuffer
-
 /// A URL and the message data associated with it in a URLFETCH response.
 ///
 /// When a client issues a `URLFETCH` command (RFC 4467) with one or more IMAP URLs (potentially

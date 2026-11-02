@@ -26,9 +26,6 @@ import Android
 let badOS = { fatalError("unsupported OS") }()
 #endif
 
-import struct NIO.ByteBuffer
-import struct NIO.ByteBufferView
-
 extension GrammarParser {
     // uniqueid        = nz-number
     func parseUIDValidity(buffer: inout ParseInput, tracker: StackTracker) throws -> UIDValidity {

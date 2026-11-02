@@ -12,8 +12,6 @@
 //
 //===----------------------------------------------------------------------===//
 
-import NIO
-
 /// A metadata entry name used with `GETMETADATA` and `SETMETADATA` commands (RFC 5464).
 ///
 /// **Requires server capability:** ``Capability/metadata`` or ``Capability/metadataServer``
