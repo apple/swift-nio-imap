@@ -242,7 +242,7 @@ public struct CommandParser: Parser, Sendable {
     }
 
     private mutating func parseCommandStream0(
-        buffer: inout ParseBuffer,
+        buffer: inout ParseInput,
         tracker: StackTracker
     ) throws -> CommandStreamPart? {
         try buffer.composite(tracker: tracker) { buffer, tracker in
@@ -274,7 +274,7 @@ public struct CommandParser: Parser, Sendable {
     }
 
     private mutating func handleStreamingBytes(
-        buffer: inout ParseBuffer,
+        buffer: inout ParseInput,
         tracker: StackTracker,
         remaining: Int
     ) throws -> CommandStreamPart {
@@ -290,7 +290,7 @@ public struct CommandParser: Parser, Sendable {
         return .append(.messageBytes(bytes))
     }
 
-    private mutating func handleLines(buffer: inout ParseBuffer, tracker: StackTracker) throws -> CommandStreamPart {
+    private mutating func handleLines(buffer: inout ParseInput, tracker: StackTracker) throws -> CommandStreamPart {
         // In `.lines` mode there is no `AUTHENTICATE` in progress, so a bare CRLF / unsolicited
         // base64 line must be rejected rather than misclassified as a continuation response.
         try self.parseCommandOrAppend(in: .standard, buffer: &buffer, tracker: tracker)
@@ -303,7 +303,7 @@ public struct CommandParser: Parser, Sendable {
     /// once an ordinary command or `APPEND` is parsed, since it never sees the server's tagged
     /// completion response.
     private mutating func handleAuthentication(
-        buffer: inout ParseBuffer,
+        buffer: inout ParseInput,
         tracker: StackTracker
     ) throws -> CommandStreamPart {
         try self.parseCommandOrAppend(in: .authenticating, buffer: &buffer, tracker: tracker)
@@ -317,10 +317,10 @@ public struct CommandParser: Parser, Sendable {
     /// the two.
     private mutating func parseCommandOrAppend(
         in context: CommandLineContext,
-        buffer: inout ParseBuffer,
+        buffer: inout ParseInput,
         tracker: StackTracker
     ) throws -> CommandStreamPart {
-        func parseCommand(buffer: inout ParseBuffer, tracker: StackTracker) throws -> CommandStreamPart {
+        func parseCommand(buffer: inout ParseInput, tracker: StackTracker) throws -> CommandStreamPart {
             let command = try self.parser.parseTaggedCommand(buffer: &buffer, tracker: tracker)
             try buffer.matchNewline()
             switch command.command {
@@ -337,14 +337,14 @@ public struct CommandParser: Parser, Sendable {
             return .tagged(command)
         }
 
-        func parseAppend(buffer: inout ParseBuffer, tracker: StackTracker) throws -> CommandStreamPart {
+        func parseAppend(buffer: inout ParseInput, tracker: StackTracker) throws -> CommandStreamPart {
             let appendCommand = try self.parser.parseAppend(buffer: &buffer, tracker: tracker)
             self.mode = .waitingForMessage
             return appendCommand
         }
 
         func parseAuthenticationChallengeResponse(
-            buffer: inout ParseBuffer,
+            buffer: inout ParseInput,
             tracker: StackTracker
         ) throws -> CommandStreamPart {
             let authenticationChallengeResponse = try self.parser.parseBase64(buffer: &buffer, tracker: tracker)
@@ -372,7 +372,7 @@ public struct CommandParser: Parser, Sendable {
     }
 
     private mutating func handleWaitingForMessage(
-        buffer: inout ParseBuffer,
+        buffer: inout ParseInput,
         tracker: StackTracker
     ) throws -> CommandStreamPart {
         do {
@@ -400,14 +400,14 @@ public struct CommandParser: Parser, Sendable {
     }
 
     private mutating func handleStreamingEnd(
-        buffer: inout ParseBuffer,
+        buffer: inout ParseInput,
         tracker: StackTracker
     ) throws -> CommandStreamPart {
         self.mode = .waitingForMessage
         return .append(.endMessage)
     }
 
-    private mutating func handleIdle(buffer: inout ParseBuffer, tracker: StackTracker) throws -> CommandStreamPart {
+    private mutating func handleIdle(buffer: inout ParseInput, tracker: StackTracker) throws -> CommandStreamPart {
         try self.parser.parseIdleDone(buffer: &buffer, tracker: tracker)
         self.mode = .lines
         return .idleDone
@@ -415,7 +415,7 @@ public struct CommandParser: Parser, Sendable {
 
     private mutating func handleCatenatePart(
         expectPrecedingSpace: Bool,
-        buffer: inout ParseBuffer,
+        buffer: inout ParseInput,
         tracker: StackTracker
     ) throws -> CommandStreamPart {
         let result = try self.parser.parseCatenatePart(
@@ -437,7 +437,7 @@ public struct CommandParser: Parser, Sendable {
     }
 
     private mutating func handleStreamingCatenateBytes(
-        buffer: inout ParseBuffer,
+        buffer: inout ParseInput,
         tracker: StackTracker,
         remaining: Int
     ) throws -> CommandStreamPart {
@@ -454,7 +454,7 @@ public struct CommandParser: Parser, Sendable {
     }
 
     private mutating func handleStreamingCatenateEnd(
-        buffer: inout ParseBuffer,
+        buffer: inout ParseInput,
         tracker: StackTracker
     ) throws -> CommandStreamPart {
         self.mode = .waitingForCatenatePart(seenPreviousPart: true)

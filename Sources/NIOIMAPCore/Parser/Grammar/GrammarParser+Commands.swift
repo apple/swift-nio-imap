@@ -34,7 +34,7 @@ import struct NIO.ByteBufferView
 // MARK: Top-level parser
 
 extension GrammarParser {
-    func parseTaggedCommand(buffer: inout ParseBuffer, tracker: StackTracker) throws -> TaggedCommand {
+    func parseTaggedCommand(buffer: inout ParseInput, tracker: StackTracker) throws -> TaggedCommand {
         try buffer.composite(tracker: tracker) { buffer, tracker in
             let tag = try self.parseTag(buffer: &buffer, tracker: tracker)
             do {
@@ -49,7 +49,7 @@ extension GrammarParser {
 
     // command         = tag SP (command-any / command-auth / command-nonauth /
     //                   command-select) CRLF
-    func parseCommand(buffer: inout ParseBuffer, tracker: StackTracker) throws -> Command {
+    func parseCommand(buffer: inout ParseInput, tracker: StackTracker) throws -> Command {
         return try self.selectingKeyword(buffer: &buffer) { keyword, buffer in
             switch keyword {
             case "CAPABILITY": return .capability
@@ -111,7 +111,7 @@ extension GrammarParser {
         var returnOptions: [SearchReturnOption]
     }
 
-    func parseCommandSuffix_urlFetch(buffer: inout ParseBuffer, tracker: StackTracker) throws -> Command {
+    func parseCommandSuffix_urlFetch(buffer: inout ParseInput, tracker: StackTracker) throws -> Command {
         let array = try buffer.parseOneOrMore(
             tracker: tracker,
             parser: { buffer, tracker -> [UInt8] in
@@ -122,7 +122,7 @@ extension GrammarParser {
         return .urlFetch(array)
     }
 
-    func parseCommandSuffix_getQuota(buffer: inout ParseBuffer, tracker: StackTracker) throws -> Command {
+    func parseCommandSuffix_getQuota(buffer: inout ParseInput, tracker: StackTracker) throws -> Command {
         try buffer.composite(tracker: tracker) { buffer, tracker in
             try buffer.parseSpaces()
             let quotaRoot = try parseQuotaRoot(buffer: &buffer, tracker: tracker)
@@ -130,7 +130,7 @@ extension GrammarParser {
         }
     }
 
-    func parseCommandSuffix_setQuota(buffer: inout ParseBuffer, tracker: StackTracker) throws -> Command {
+    func parseCommandSuffix_setQuota(buffer: inout ParseInput, tracker: StackTracker) throws -> Command {
         try buffer.composite(tracker: tracker) { buffer, tracker in
             try buffer.parseSpaces()
             let quotaRoot = try parseQuotaRoot(buffer: &buffer, tracker: tracker)
@@ -140,7 +140,7 @@ extension GrammarParser {
         }
     }
 
-    func parseCommandSuffix_getQuotaRoot(buffer: inout ParseBuffer, tracker: StackTracker) throws -> Command {
+    func parseCommandSuffix_getQuotaRoot(buffer: inout ParseInput, tracker: StackTracker) throws -> Command {
         try buffer.composite(tracker: tracker) { buffer, tracker in
             try buffer.parseSpaces()
             let mailbox = try parseMailbox(buffer: &buffer, tracker: tracker)
@@ -149,7 +149,7 @@ extension GrammarParser {
     }
 
     // authenticate  = "AUTHENTICATE" SP auth-type [SP (base64 / "=")] *(CRLF base64)
-    func parseCommandSuffix_authenticate(buffer: inout ParseBuffer, tracker: StackTracker) throws -> Command {
+    func parseCommandSuffix_authenticate(buffer: inout ParseInput, tracker: StackTracker) throws -> Command {
         try buffer.composite(tracker: tracker) { buffer, tracker -> Command in
             try buffer.parseSpaces()
             let mechanism = try self.parseAuthenticationMechanism(buffer: &buffer, tracker: tracker)
@@ -165,7 +165,7 @@ extension GrammarParser {
     }
 
     // login           = "LOGIN" SP userid SP password
-    func parseCommandSuffix_login(buffer: inout ParseBuffer, tracker: StackTracker) throws -> Command {
+    func parseCommandSuffix_login(buffer: inout ParseInput, tracker: StackTracker) throws -> Command {
         try buffer.composite(tracker: tracker) { buffer, tracker -> Command in
             try buffer.parseSpaces()
             let userid = try self.parseUserId(buffer: &buffer, tracker: tracker)
@@ -176,7 +176,7 @@ extension GrammarParser {
     }
 
     // unsubscribe     = "UNSUBSCRIBE" SP mailbox
-    func parseCommandSuffix_unsubscribe(buffer: inout ParseBuffer, tracker: StackTracker) throws -> Command {
+    func parseCommandSuffix_unsubscribe(buffer: inout ParseInput, tracker: StackTracker) throws -> Command {
         try buffer.composite(tracker: tracker) { buffer, tracker -> Command in
             try buffer.parseSpaces()
             let mailbox = try self.parseMailbox(buffer: &buffer, tracker: tracker)
@@ -185,7 +185,7 @@ extension GrammarParser {
     }
 
     // subscribe       = "SUBSCRIBE" SP mailbox
-    func parseCommandSuffix_subscribe(buffer: inout ParseBuffer, tracker: StackTracker) throws -> Command {
+    func parseCommandSuffix_subscribe(buffer: inout ParseInput, tracker: StackTracker) throws -> Command {
         try buffer.composite(tracker: tracker) { buffer, tracker -> Command in
             try buffer.parseSpaces()
             let mailbox = try self.parseMailbox(buffer: &buffer, tracker: tracker)
@@ -195,7 +195,7 @@ extension GrammarParser {
 
     // status          = "STATUS" SP mailbox SP
     //                   "(" status-att *(SP status-att) ")"
-    func parseCommandSuffix_status(buffer: inout ParseBuffer, tracker: StackTracker) throws -> Command {
+    func parseCommandSuffix_status(buffer: inout ParseInput, tracker: StackTracker) throws -> Command {
         try buffer.composite(tracker: tracker) { buffer, tracker -> Command in
             try buffer.parseSpaces()
             let mailbox = try self.parseMailbox(buffer: &buffer, tracker: tracker)
@@ -213,7 +213,7 @@ extension GrammarParser {
     }
 
     // select          = "SELECT" SP mailbox [select-params]
-    func parseCommandSuffix_select(buffer: inout ParseBuffer, tracker: StackTracker) throws -> Command {
+    func parseCommandSuffix_select(buffer: inout ParseInput, tracker: StackTracker) throws -> Command {
         try buffer.composite(tracker: tracker) { buffer, tracker -> Command in
             try buffer.parseSpaces()
             let mailbox = try self.parseMailbox(buffer: &buffer, tracker: tracker)
@@ -223,7 +223,7 @@ extension GrammarParser {
     }
 
     // rename          = "RENAME" SP mailbox SP mailbox [rename-params]
-    func parseCommandSuffix_rename(buffer: inout ParseBuffer, tracker: StackTracker) throws -> Command {
+    func parseCommandSuffix_rename(buffer: inout ParseInput, tracker: StackTracker) throws -> Command {
         try buffer.composite(tracker: tracker) { buffer, tracker -> Command in
             try buffer.parseSpaces()
             let from = try self.parseMailbox(buffer: &buffer, tracker: tracker)
@@ -236,7 +236,7 @@ extension GrammarParser {
     }
 
     // lsub = "LSUB" SP mailbox SP list-mailbox
-    func parseCommandSuffix_LSUB(buffer: inout ParseBuffer, tracker: StackTracker) throws -> Command {
+    func parseCommandSuffix_LSUB(buffer: inout ParseInput, tracker: StackTracker) throws -> Command {
         try buffer.composite(tracker: tracker) { (buffer, tracker) -> Command in
             try buffer.parseSpaces()
             let mailbox = try self.parseMailbox(buffer: &buffer, tracker: tracker)
@@ -247,7 +247,7 @@ extension GrammarParser {
     }
 
     // examine         = "EXAMINE" SP mailbox [select-params
-    func parseCommandSuffix_examine(buffer: inout ParseBuffer, tracker: StackTracker) throws -> Command {
+    func parseCommandSuffix_examine(buffer: inout ParseInput, tracker: StackTracker) throws -> Command {
         try buffer.composite(tracker: tracker) { buffer, tracker -> Command in
             try buffer.parseSpaces()
             let mailbox = try self.parseMailbox(buffer: &buffer, tracker: tracker)
@@ -257,7 +257,7 @@ extension GrammarParser {
     }
 
     // store           = "STORE" SP sequence-set SP store-att-flags
-    func parseCommandSuffix_store(buffer: inout ParseBuffer, tracker: StackTracker) throws -> Command {
+    func parseCommandSuffix_store(buffer: inout ParseInput, tracker: StackTracker) throws -> Command {
         try buffer.composite(tracker: tracker) { buffer, tracker -> Command in
             try buffer.parseSpaces()
             let sequence: LastCommandSet<SequenceNumber> = try self.parseMessageIdentifierSetOrLast(
@@ -275,12 +275,12 @@ extension GrammarParser {
     // RFC 7377
     // esearch =  "ESEARCH" [SP esearch-source-opts]
     // [SP search-return-opts] SP search-program
-    func parseCommandSuffix_esearch(buffer: inout ParseBuffer, tracker: StackTracker) throws -> Command {
+    func parseCommandSuffix_esearch(buffer: inout ParseInput, tracker: StackTracker) throws -> Command {
         .extendedSearch(try parseExtendedSearchOptions(buffer: &buffer, tracker: tracker))
     }
 
     // move            = "MOVE" SP sequence-set SP mailbox
-    func parseCommandSuffix_move(buffer: inout ParseBuffer, tracker: StackTracker) throws -> Command {
+    func parseCommandSuffix_move(buffer: inout ParseInput, tracker: StackTracker) throws -> Command {
         try buffer.composite(tracker: tracker) { buffer, tracker -> Command in
             try buffer.parseSpaces()
             let set: LastCommandSet<SequenceNumber> = try self.parseMessageIdentifierSetOrLast(
@@ -294,7 +294,7 @@ extension GrammarParser {
     }
 
     // delete          = "DELETE" SP mailbox
-    func parseCommandSuffix_delete(buffer: inout ParseBuffer, tracker: StackTracker) throws -> Command {
+    func parseCommandSuffix_delete(buffer: inout ParseInput, tracker: StackTracker) throws -> Command {
         try buffer.composite(tracker: tracker) { buffer, tracker -> Command in
             try buffer.parseSpaces()
             let mailbox = try self.parseMailbox(buffer: &buffer, tracker: tracker)
@@ -303,7 +303,7 @@ extension GrammarParser {
     }
 
     // copy            = "COPY" SP sequence-set SP mailbox
-    func parseCommandSuffix_copy(buffer: inout ParseBuffer, tracker: StackTracker) throws -> Command {
+    func parseCommandSuffix_copy(buffer: inout ParseInput, tracker: StackTracker) throws -> Command {
         try buffer.composite(tracker: tracker) { buffer, tracker -> Command in
             try buffer.parseSpaces()
             let sequence: LastCommandSet<SequenceNumber> = try self.parseMessageIdentifierSetOrLast(
@@ -317,7 +317,7 @@ extension GrammarParser {
     }
 
     // create          = "CREATE" SP mailbox [create-params]
-    func parseCommandSuffix_create(buffer: inout ParseBuffer, tracker: StackTracker) throws -> Command {
+    func parseCommandSuffix_create(buffer: inout ParseInput, tracker: StackTracker) throws -> Command {
         try buffer.composite(tracker: tracker) { buffer, tracker -> Command in
             try buffer.parseSpaces()
             let mailbox = try self.parseMailbox(buffer: &buffer, tracker: tracker)
@@ -328,7 +328,7 @@ extension GrammarParser {
     }
 
     // enable          = "ENABLE" 1*(SP capability)
-    func parseCommandSuffix_enable(buffer: inout ParseBuffer, tracker: StackTracker) throws -> Command {
+    func parseCommandSuffix_enable(buffer: inout ParseInput, tracker: StackTracker) throws -> Command {
         let capabilities = try buffer.parseOneOrMore(tracker: tracker) { (buffer, tracker) -> Capability in
             try buffer.parseSpaces()
             return try self.parseCapability(buffer: &buffer, tracker: tracker)
@@ -337,14 +337,14 @@ extension GrammarParser {
     }
 
     // id = "ID" SP id-params-list
-    func parseCommandSuffix_id(buffer: inout ParseBuffer, tracker: StackTracker) throws -> Command {
+    func parseCommandSuffix_id(buffer: inout ParseInput, tracker: StackTracker) throws -> Command {
         try buffer.composite(tracker: tracker) { (buffer, tracker) in
             try buffer.parseSpaces()
             return .id(try parseIDParamsList(buffer: &buffer, tracker: tracker))
         }
     }
 
-    func parseCommandSuffix_getMetadata(buffer: inout ParseBuffer, tracker: StackTracker) throws -> Command {
+    func parseCommandSuffix_getMetadata(buffer: inout ParseInput, tracker: StackTracker) throws -> Command {
         try buffer.composite(tracker: tracker) { buffer, tracker in
             try buffer.parseSpaces()
             let options =
@@ -363,7 +363,7 @@ extension GrammarParser {
         }
     }
 
-    func parseCommandSuffix_setMetadata(buffer: inout ParseBuffer, tracker: StackTracker) throws -> Command {
+    func parseCommandSuffix_setMetadata(buffer: inout ParseInput, tracker: StackTracker) throws -> Command {
         try buffer.composite(tracker: tracker) { buffer, tracker in
             try buffer.parseSpaces()
             let mailbox = try self.parseMailbox(buffer: &buffer, tracker: tracker)
@@ -373,7 +373,7 @@ extension GrammarParser {
         }
     }
 
-    func parseCommandSuffix_resetKey(buffer: inout ParseBuffer, tracker: StackTracker) throws -> Command {
+    func parseCommandSuffix_resetKey(buffer: inout ParseInput, tracker: StackTracker) throws -> Command {
         try buffer.composite(tracker: tracker) { buffer, tracker in
             let _mailbox = try buffer.parseOptional(
                 tracker: tracker,
@@ -399,7 +399,7 @@ extension GrammarParser {
         }
     }
 
-    func parseCommandSuffix_genURLAuth(buffer: inout ParseBuffer, tracker: StackTracker) throws -> Command {
+    func parseCommandSuffix_genURLAuth(buffer: inout ParseInput, tracker: StackTracker) throws -> Command {
         let array = try buffer.parseOneOrMore(
             tracker: tracker,
             parser: { buffer, tracker -> RumpURLAndMechanism in
@@ -411,7 +411,7 @@ extension GrammarParser {
     }
 
     // search          = "SEARCH" [search-return-opts] SP search-program
-    func parseCommandSuffix_search(buffer: inout ParseBuffer, tracker: StackTracker) throws -> Command {
+    func parseCommandSuffix_search(buffer: inout ParseInput, tracker: StackTracker) throws -> Command {
         try buffer.composite(tracker: tracker) { (buffer, tracker) in
             let returnOpts = try buffer.parseOptional(
                 tracker: tracker,
@@ -429,7 +429,7 @@ extension GrammarParser {
     }
 
     // sort            = "SORT" [search-return-opts] SP sort-criteria SP charset SP search-key
-    func parseCommandSuffix_sort(buffer: inout ParseBuffer, tracker: StackTracker) throws -> Command {
+    func parseCommandSuffix_sort(buffer: inout ParseInput, tracker: StackTracker) throws -> Command {
         let suffix = try self.parseCommandSuffix_sortShared(buffer: &buffer, tracker: tracker)
         return .sort(
             criteria: suffix.criteria,
@@ -439,7 +439,7 @@ extension GrammarParser {
         )
     }
 
-    func parseCommandSuffix_sortShared(buffer: inout ParseBuffer, tracker: StackTracker) throws -> SortCommandSuffix {
+    func parseCommandSuffix_sortShared(buffer: inout ParseInput, tracker: StackTracker) throws -> SortCommandSuffix {
         try buffer.composite(tracker: tracker) { (buffer, tracker) in
             let returnOpts = try buffer.parseOptional(
                 tracker: tracker,
@@ -474,7 +474,7 @@ extension GrammarParser {
     }
 
     // sort-criteria   = "(" sort-key *(SP sort-key) ")"
-    func parseSortCriteria(buffer: inout ParseBuffer, tracker: StackTracker) throws -> [SortCriterion] {
+    func parseSortCriteria(buffer: inout ParseInput, tracker: StackTracker) throws -> [SortCriterion] {
         try buffer.composite(tracker: tracker) { (buffer, tracker) in
             try buffer.matchFixed("(")
             var criteria = [try self.parseSortCriterion(buffer: &buffer, tracker: tracker)]
@@ -491,13 +491,13 @@ extension GrammarParser {
     // sort-key        = "ARRIVAL" / "CC" / "DATE" / "FROM" /
     //                   "REVERSE" SP sort-key-no-reverse / "SIZE" / "SUBJECT" / "TO" /
     //                   "DISPLAYFROM" / "DISPLAYTO"
-    func parseSortCriterion(buffer: inout ParseBuffer, tracker: StackTracker) throws -> SortCriterion {
-        func parseSortCriterion_reverse(buffer: inout ParseBuffer, tracker: StackTracker) throws -> SortCriterion {
+    func parseSortCriterion(buffer: inout ParseInput, tracker: StackTracker) throws -> SortCriterion {
+        func parseSortCriterion_reverse(buffer: inout ParseInput, tracker: StackTracker) throws -> SortCriterion {
             try buffer.matchFixed("REVERSE ")
             return .descending(try self.parseSortCriterionKey(buffer: &buffer, tracker: tracker))
         }
 
-        func parseSortCriterion_ascending(buffer: inout ParseBuffer, tracker: StackTracker) throws -> SortCriterion {
+        func parseSortCriterion_ascending(buffer: inout ParseInput, tracker: StackTracker) throws -> SortCriterion {
             .ascending(try self.parseSortCriterionKey(buffer: &buffer, tracker: tracker))
         }
 
@@ -510,52 +510,51 @@ extension GrammarParser {
         )
     }
 
-    func parseSortCriterionKey(buffer: inout ParseBuffer, tracker: StackTracker) throws -> SortCriterion.Key {
+    func parseSortCriterionKey(buffer: inout ParseInput, tracker: StackTracker) throws -> SortCriterion.Key {
         func parseSortCriterion_displayFrom(
-            buffer: inout ParseBuffer,
+            buffer: inout ParseInput,
             tracker: StackTracker
         ) throws -> SortCriterion.Key {
             try buffer.matchFixed("DISPLAYFROM")
             return .displayFrom
         }
 
-        func parseSortCriterion_displayTo(buffer: inout ParseBuffer, tracker: StackTracker) throws -> SortCriterion.Key
-        {
+        func parseSortCriterion_displayTo(buffer: inout ParseInput, tracker: StackTracker) throws -> SortCriterion.Key {
             try buffer.matchFixed("DISPLAYTO")
             return .displayTo
         }
 
-        func parseSortCriterion_arrival(buffer: inout ParseBuffer, tracker: StackTracker) throws -> SortCriterion.Key {
+        func parseSortCriterion_arrival(buffer: inout ParseInput, tracker: StackTracker) throws -> SortCriterion.Key {
             try buffer.matchFixed("ARRIVAL")
             return .arrival
         }
 
-        func parseSortCriterion_cc(buffer: inout ParseBuffer, tracker: StackTracker) throws -> SortCriterion.Key {
+        func parseSortCriterion_cc(buffer: inout ParseInput, tracker: StackTracker) throws -> SortCriterion.Key {
             try buffer.matchFixed("CC")
             return .cc
         }
 
-        func parseSortCriterion_date(buffer: inout ParseBuffer, tracker: StackTracker) throws -> SortCriterion.Key {
+        func parseSortCriterion_date(buffer: inout ParseInput, tracker: StackTracker) throws -> SortCriterion.Key {
             try buffer.matchFixed("DATE")
             return .date
         }
 
-        func parseSortCriterion_from(buffer: inout ParseBuffer, tracker: StackTracker) throws -> SortCriterion.Key {
+        func parseSortCriterion_from(buffer: inout ParseInput, tracker: StackTracker) throws -> SortCriterion.Key {
             try buffer.matchFixed("FROM")
             return .from
         }
 
-        func parseSortCriterion_size(buffer: inout ParseBuffer, tracker: StackTracker) throws -> SortCriterion.Key {
+        func parseSortCriterion_size(buffer: inout ParseInput, tracker: StackTracker) throws -> SortCriterion.Key {
             try buffer.matchFixed("SIZE")
             return .size
         }
 
-        func parseSortCriterion_subject(buffer: inout ParseBuffer, tracker: StackTracker) throws -> SortCriterion.Key {
+        func parseSortCriterion_subject(buffer: inout ParseInput, tracker: StackTracker) throws -> SortCriterion.Key {
             try buffer.matchFixed("SUBJECT")
             return .subject
         }
 
-        func parseSortCriterion_to(buffer: inout ParseBuffer, tracker: StackTracker) throws -> SortCriterion.Key {
+        func parseSortCriterion_to(buffer: inout ParseInput, tracker: StackTracker) throws -> SortCriterion.Key {
             try buffer.matchFixed("TO")
             return .to
         }
@@ -577,7 +576,7 @@ extension GrammarParser {
     }
 
     // list            = "LIST" [SP list-select-opts] SP mailbox SP mbox-or-pat [SP list-return-opts]
-    func parseCommandSuffix_list(buffer: inout ParseBuffer, tracker: StackTracker) throws -> Command {
+    func parseCommandSuffix_list(buffer: inout ParseInput, tracker: StackTracker) throws -> Command {
         try buffer.composite(tracker: tracker) { (buffer, tracker) in
             let selectOptions = try buffer.parseOptional(tracker: tracker) {
                 (buffer, tracker) -> ListSelectOptions in
@@ -599,8 +598,8 @@ extension GrammarParser {
 
     // uid             = "UID" SP
     //                   (copy / move / fetch / search / store / uid-expunge)
-    func parseCommandSuffix_uid(buffer: inout ParseBuffer, tracker: StackTracker) throws -> Command {
-        func parseUid_copy(buffer: inout ParseBuffer, tracker: StackTracker) throws -> Command {
+    func parseCommandSuffix_uid(buffer: inout ParseInput, tracker: StackTracker) throws -> Command {
+        func parseUid_copy(buffer: inout ParseInput, tracker: StackTracker) throws -> Command {
             try buffer.composite(tracker: tracker) { buffer, tracker -> Command in
                 try buffer.matchFixed("COPY ")
                 let set = try self.parseUIDSetNonEmpty(buffer: &buffer, tracker: tracker)
@@ -610,7 +609,7 @@ extension GrammarParser {
             }
         }
 
-        func parseUid_move(buffer: inout ParseBuffer, tracker: StackTracker) throws -> Command {
+        func parseUid_move(buffer: inout ParseInput, tracker: StackTracker) throws -> Command {
             try buffer.composite(tracker: tracker) { buffer, tracker -> Command in
                 try buffer.matchFixed("MOVE ")
                 let set = try self.parseUIDSetNonEmpty(buffer: &buffer, tracker: tracker)
@@ -620,7 +619,7 @@ extension GrammarParser {
             }
         }
 
-        func parseUid_fetch(buffer: inout ParseBuffer, tracker: StackTracker) throws -> Command {
+        func parseUid_fetch(buffer: inout ParseInput, tracker: StackTracker) throws -> Command {
             try buffer.composite(tracker: tracker) { buffer, tracker -> Command in
                 try buffer.matchFixed("FETCH ")
                 let set = try self.parseUIDSetNonEmpty(buffer: &buffer, tracker: tracker)
@@ -632,7 +631,7 @@ extension GrammarParser {
             }
         }
 
-        func parseUid_search(buffer: inout ParseBuffer, tracker: StackTracker) throws -> Command {
+        func parseUid_search(buffer: inout ParseInput, tracker: StackTracker) throws -> Command {
             try buffer.composite(tracker: tracker) { buffer, tracker in
                 try buffer.matchFixed("SEARCH")
                 guard
@@ -647,7 +646,7 @@ extension GrammarParser {
             }
         }
 
-        func parseUid_sort(buffer: inout ParseBuffer, tracker: StackTracker) throws -> Command {
+        func parseUid_sort(buffer: inout ParseInput, tracker: StackTracker) throws -> Command {
             try buffer.composite(tracker: tracker) { buffer, tracker in
                 try buffer.matchFixed("SORT")
                 let suffix = try self.parseCommandSuffix_sortShared(buffer: &buffer, tracker: tracker)
@@ -660,7 +659,7 @@ extension GrammarParser {
             }
         }
 
-        func parseUid_store(buffer: inout ParseBuffer, tracker: StackTracker) throws -> Command {
+        func parseUid_store(buffer: inout ParseInput, tracker: StackTracker) throws -> Command {
             try buffer.composite(tracker: tracker) { buffer, tracker -> Command in
                 try buffer.matchFixed("STORE ")
                 let set = try self.parseUIDSetNonEmpty(buffer: &buffer, tracker: tracker)
@@ -672,7 +671,7 @@ extension GrammarParser {
             }
         }
 
-        func parseUid_expunge(buffer: inout ParseBuffer, tracker: StackTracker) throws -> Command {
+        func parseUid_expunge(buffer: inout ParseInput, tracker: StackTracker) throws -> Command {
             try buffer.matchFixed("EXPUNGE ")
             let set = try self.parseUIDSetNonEmpty(buffer: &buffer, tracker: tracker)
             return .uidExpunge(.set(set))
@@ -697,7 +696,7 @@ extension GrammarParser {
 
     // fetch           = "FETCH" SP sequence-set SP ("ALL" / "FULL" / "FAST" /
     //                   fetch-att / "(" fetch-att *(SP fetch-att) ")") [fetch-modifiers]
-    func parseCommandSuffix_fetch(buffer: inout ParseBuffer, tracker: StackTracker) throws -> Command {
+    func parseCommandSuffix_fetch(buffer: inout ParseInput, tracker: StackTracker) throws -> Command {
         try buffer.composite(tracker: tracker) { buffer, tracker -> Command in
             try buffer.parseSpaces()
             let sequence: LastCommandSet<SequenceNumber> = try self.parseMessageIdentifierSetOrLast(
@@ -712,7 +711,7 @@ extension GrammarParser {
         }
     }
 
-    func parseCommandSuffix_compress(buffer: inout ParseBuffer, tracker: StackTracker) throws -> Command {
+    func parseCommandSuffix_compress(buffer: inout ParseInput, tracker: StackTracker) throws -> Command {
         try buffer.composite(tracker: tracker) { buffer, tracker -> Command in
             try buffer.parseSpaces()
             let rawAlg = try self.parseAtom(buffer: &buffer, tracker: tracker)
@@ -723,7 +722,7 @@ extension GrammarParser {
 
     // message-batches     = "UIDBATCHES" SP nz-number
     //                       [SP nz-number ":" nz-number]
-    func parseCommandSuffix_uidBatched(buffer: inout ParseBuffer, tracker: StackTracker) throws -> Command {
+    func parseCommandSuffix_uidBatched(buffer: inout ParseInput, tracker: StackTracker) throws -> Command {
         try buffer.composite(tracker: tracker) { buffer, tracker -> Command in
             try buffer.parseSpaces()
             let size = try self.parseNZNumber(buffer: &buffer, tracker: tracker)
@@ -740,7 +739,7 @@ extension GrammarParser {
         }
     }
 
-    func parseSelectParameters(buffer: inout ParseBuffer, tracker: StackTracker) throws -> [SelectParameter] {
+    func parseSelectParameters(buffer: inout ParseInput, tracker: StackTracker) throws -> [SelectParameter] {
         try buffer.parseOptional(tracker: tracker) { (buffer, tracker) -> [SelectParameter] in
             try buffer.parseSpaces()
             try buffer.matchFixed("(")

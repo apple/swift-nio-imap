@@ -32,7 +32,7 @@ import struct OrderedCollections.OrderedDictionary
 
 extension GrammarParser {
     // append          = "APPEND" SP mailbox 1*append-message
-    func parseAppend(buffer: inout ParseBuffer, tracker: StackTracker) throws -> CommandStreamPart {
+    func parseAppend(buffer: inout ParseInput, tracker: StackTracker) throws -> CommandStreamPart {
         try buffer.composite(tracker: tracker) { buffer, tracker -> CommandStreamPart in
             let tag = try self.parseTag(buffer: &buffer, tracker: tracker)
             try buffer.matchFixed(" APPEND ")
@@ -42,7 +42,7 @@ extension GrammarParser {
     }
 
     // append-data = literal / literal8 / append-data-ext
-    func parseAppendData(buffer: inout ParseBuffer, tracker: StackTracker) throws -> AppendData {
+    func parseAppendData(buffer: inout ParseInput, tracker: StackTracker) throws -> AppendData {
         try buffer.composite(tracker: tracker) { buffer, tracker -> AppendData in
             let withoutContentTransferEncoding =
                 try buffer.parseOptional(tracker: tracker) { (buffer, tracker) in
@@ -61,7 +61,7 @@ extension GrammarParser {
     }
 
     // append-message = appents-opts SP append-data
-    func parseAppendMessage(buffer: inout ParseBuffer, tracker: StackTracker) throws -> AppendMessage {
+    func parseAppendMessage(buffer: inout ParseInput, tracker: StackTracker) throws -> AppendMessage {
         try buffer.composite(tracker: tracker) { (buffer, tracker) -> AppendMessage in
             let options = try self.parseAppendOptions(buffer: &buffer, tracker: tracker)
             try buffer.parseSpaces()
@@ -71,7 +71,7 @@ extension GrammarParser {
     }
 
     // Like appendMessage, but with CATENATE at the start instead of regular append data.
-    func parseCatenateMessage(buffer: inout ParseBuffer, tracker: StackTracker) throws -> AppendOptions {
+    func parseCatenateMessage(buffer: inout ParseInput, tracker: StackTracker) throws -> AppendOptions {
         try buffer.composite(tracker: tracker) { (buffer, tracker) -> AppendOptions in
             let options = try self.parseAppendOptions(buffer: &buffer, tracker: tracker)
             try buffer.parseSpaces()
@@ -86,14 +86,14 @@ extension GrammarParser {
     }
 
     func parseAppendOrCatenateMessage(
-        buffer: inout ParseBuffer,
+        buffer: inout ParseInput,
         tracker: StackTracker
     ) throws -> AppendOrCatenateMessage {
-        func parseAppend(buffer: inout ParseBuffer, tracker: StackTracker) throws -> AppendOrCatenateMessage {
+        func parseAppend(buffer: inout ParseInput, tracker: StackTracker) throws -> AppendOrCatenateMessage {
             try .append(self.parseAppendMessage(buffer: &buffer, tracker: tracker))
         }
 
-        func parseCatenate(buffer: inout ParseBuffer, tracker: StackTracker) throws -> AppendOrCatenateMessage {
+        func parseCatenate(buffer: inout ParseInput, tracker: StackTracker) throws -> AppendOrCatenateMessage {
             try .catenate(self.parseCatenateMessage(buffer: &buffer, tracker: tracker))
         }
 
@@ -105,7 +105,7 @@ extension GrammarParser {
     }
 
     // append-options = [SP flag-list] [SP date-time] *(SP append-ext)
-    func parseAppendOptions(buffer: inout ParseBuffer, tracker: StackTracker) throws -> AppendOptions {
+    func parseAppendOptions(buffer: inout ParseInput, tracker: StackTracker) throws -> AppendOptions {
         try buffer.composite(tracker: tracker) { (buffer, tracker) in
             let flagList =
                 try buffer.parseOptional(tracker: tracker) { (buffer, tracker) -> [Flag] in
@@ -135,10 +135,10 @@ extension GrammarParser {
 
     func parseCatenatePart(
         expectPrecedingSpace: Bool,
-        buffer: inout ParseBuffer,
+        buffer: inout ParseInput,
         tracker: StackTracker
     ) throws -> CatenatePart {
-        func parseCatenateURL(buffer: inout ParseBuffer, tracker: StackTracker) throws -> CatenatePart {
+        func parseCatenateURL(buffer: inout ParseInput, tracker: StackTracker) throws -> CatenatePart {
             if expectPrecedingSpace {
                 try buffer.parseSpaces()
             }
@@ -147,7 +147,7 @@ extension GrammarParser {
             return .url(url)
         }
 
-        func parseCatenateText(buffer: inout ParseBuffer, tracker: StackTracker) throws -> CatenatePart {
+        func parseCatenateText(buffer: inout ParseInput, tracker: StackTracker) throws -> CatenatePart {
             if expectPrecedingSpace {
                 try buffer.parseSpaces()
             }
@@ -162,7 +162,7 @@ extension GrammarParser {
             return .text(length)
         }
 
-        func parseCatenateEnd(buffer: inout ParseBuffer, tracker: StackTracker) throws -> CatenatePart {
+        func parseCatenateEnd(buffer: inout ParseInput, tracker: StackTracker) throws -> CatenatePart {
             try buffer.matchFixed(")")
             return .end
         }

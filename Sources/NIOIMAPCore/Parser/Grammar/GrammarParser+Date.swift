@@ -31,8 +31,8 @@ import struct NIO.ByteBufferView
 
 extension GrammarParser {
     // date            = date-text / DQUOTE date-text DQUOTE
-    func parseDate(buffer: inout ParseBuffer, tracker: StackTracker) throws -> IMAPCalendarDay {
-        func parseDateText_quoted(buffer: inout ParseBuffer, tracker: StackTracker) throws -> IMAPCalendarDay {
+    func parseDate(buffer: inout ParseInput, tracker: StackTracker) throws -> IMAPCalendarDay {
+        func parseDateText_quoted(buffer: inout ParseInput, tracker: StackTracker) throws -> IMAPCalendarDay {
             try buffer.composite(tracker: tracker) { buffer, tracker in
                 try buffer.matchFixed("\"")
                 let date = try self.parseDateText(buffer: &buffer, tracker: tracker)
@@ -49,7 +49,7 @@ extension GrammarParser {
     }
 
     // date-day        = 1*2DIGIT
-    func parseDateDay(buffer: inout ParseBuffer, tracker: StackTracker) throws -> Int {
+    func parseDateDay(buffer: inout ParseInput, tracker: StackTracker) throws -> Int {
         let (num, size) = try buffer.parseUnsignedInteger(tracker: tracker, leadingZeros: .allowed)
         guard size <= 2 else {
             throw ParserError(hint: "Expected 1 or 2 bytes, got \(size)")
@@ -58,8 +58,8 @@ extension GrammarParser {
     }
 
     // date-day-fixed  = (SP DIGIT) / 2DIGIT
-    func parseDateDayFixed(buffer: inout ParseBuffer, tracker: StackTracker) throws -> Int {
-        func parseDateDayFixed_spaced(buffer: inout ParseBuffer, tracker: StackTracker) throws -> Int {
+    func parseDateDayFixed(buffer: inout ParseInput, tracker: StackTracker) throws -> Int {
+        func parseDateDayFixed_spaced(buffer: inout ParseInput, tracker: StackTracker) throws -> Int {
             // According to the RFC, there should be a space here.
             // But some servers (e.g. qq.com) don't include one.
             try buffer.parseOptional(tracker: tracker) { buffer, tracker in
@@ -77,7 +77,7 @@ extension GrammarParser {
 
     // date-month      = "Jan" / "Feb" / "Mar" / "Apr" / "May" / "Jun" /
     //                   "Jul" / "Aug" / "Sep" / "Oct" / "Nov" / "Dec"
-    func parseDateMonth(buffer: inout ParseBuffer, tracker: StackTracker) throws -> Int {
+    func parseDateMonth(buffer: inout ParseInput, tracker: StackTracker) throws -> Int {
         let parsed = try buffer.parseOneOrMoreCharacters { char -> Bool in
             isalnum(Int32(char)) != 0
         }
@@ -89,7 +89,7 @@ extension GrammarParser {
     }
 
     // date-text       = date-day "-" date-month "-" date-year
-    func parseDateText(buffer: inout ParseBuffer, tracker: StackTracker) throws -> IMAPCalendarDay {
+    func parseDateText(buffer: inout ParseInput, tracker: StackTracker) throws -> IMAPCalendarDay {
         try buffer.composite(tracker: tracker) { buffer, tracker in
             let day = try self.parseDateDay(buffer: &buffer, tracker: tracker)
             try buffer.matchFixed("-")
@@ -105,7 +105,7 @@ extension GrammarParser {
 
     // date-time       = DQUOTE date-day-fixed "-" date-month "-" date-year
     //                   SP time SP zone DQUOTE
-    func parseInternalDate(buffer: inout ParseBuffer, tracker: StackTracker) throws -> ServerMessageDate {
+    func parseInternalDate(buffer: inout ParseInput, tracker: StackTracker) throws -> ServerMessageDate {
         try buffer.composite(tracker: tracker) { buffer, tracker in
             try buffer.matchFixed("\"")
             let day = try self.parseDateDayFixed(buffer: &buffer, tracker: tracker)
@@ -133,7 +133,7 @@ extension GrammarParser {
             }
 
             // zone            = ("+" / "-") 4DIGIT
-            func parseZonePositive(buffer: inout ParseBuffer, tracker: StackTracker) throws -> Int {
+            func parseZonePositive(buffer: inout ParseInput, tracker: StackTracker) throws -> Int {
                 try buffer.matchFixed("+")
                 let num = try self.parse4Digit(buffer: &buffer, tracker: tracker)
                 guard let zone = splitZoneMinutes(num) else {
@@ -142,7 +142,7 @@ extension GrammarParser {
                 return zone
             }
 
-            func parseZoneNegative(buffer: inout ParseBuffer, tracker: StackTracker) throws -> Int {
+            func parseZoneNegative(buffer: inout ParseInput, tracker: StackTracker) throws -> Int {
                 try buffer.matchFixed("-")
                 let num = try self.parse4Digit(buffer: &buffer, tracker: tracker)
                 guard let zone = splitZoneMinutes(num) else {
