@@ -46,6 +46,7 @@ struct FetchAttributeTests {
         EncodeFixture.fetchAttribute(.preview(lazy: true), "PREVIEW (LAZY)"),
         EncodeFixture.fetchAttribute(.emailID, "EMAILID"),
         EncodeFixture.fetchAttribute(.threadID, "THREADID"),
+        EncodeFixture.fetchAttribute(.objectID, "OBJECTID"),
     ])
     func encode(_ fixture: EncodeFixture<FetchAttribute>) {
         fixture.checkEncoding()
@@ -95,6 +96,7 @@ struct FetchAttributeTests {
             ReflectionFixture<FetchAttribute>(sut: .preview(lazy: true), expected: "PREVIEW (LAZY)"),
             ReflectionFixture<FetchAttribute>(sut: .emailID, expected: "EMAILID"),
             ReflectionFixture<FetchAttribute>(sut: .threadID, expected: "THREADID"),
+            ReflectionFixture<FetchAttribute>(sut: .objectID, expected: "OBJECTID"),
         ]
     )
     func customDebugStringConvertible(_ fixture: ReflectionFixture<FetchAttribute>) {
@@ -202,6 +204,7 @@ struct FetchAttributeTests {
         ParseFixture.fetchAttribute("PREVIEW (LAZY)", " ", expected: .success(.preview(lazy: true))),
         ParseFixture.fetchAttribute("EMAILID", " ", expected: .success(.emailID)),
         ParseFixture.fetchAttribute("THREADID", " ", expected: .success(.threadID)),
+        ParseFixture.fetchAttribute("OBJECTID", " ", expected: .success(.objectID)),
         // Numeric inputs fall back to parseFetchAttribute_modificationSequence
         ParseFixture.fetchAttribute("0", " ", expected: .success(.modificationSequenceValue(.zero))),
         ParseFixture.fetchAttribute("42", " ", expected: .success(.modificationSequenceValue(42))),

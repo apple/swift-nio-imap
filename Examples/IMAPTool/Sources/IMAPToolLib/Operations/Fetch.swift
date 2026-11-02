@@ -197,6 +197,7 @@ extension FetchAttribute {
             .internalDate,
             .modificationSequence,
             .modificationSequenceValue,
+            .objectID,
             .preview,
             .rfc822Size,
             .threadID,

@@ -353,6 +353,12 @@ extension GrammarParser {
             )
         }
 
+        func parseMessageAttribute_objectID(buffer: inout ParseBuffer, tracker: StackTracker) throws -> MessageAttribute
+        {
+            try PL.parseSpaces(buffer: &buffer, tracker: tracker)
+            return .objectID(try self.parseCompoundObjectID(buffer: &buffer, tracker: tracker))
+        }
+
         let parsers: [String: (inout ParseBuffer, StackTracker) throws -> MessageAttribute] = [
             "FLAGS": parseMessageAttribute_flags,
             "ENVELOPE": parseMessageAttribute_envelope,
@@ -372,6 +378,7 @@ extension GrammarParser {
             "PREVIEW": parseMessageAttribute_preview,
             "EMAILID": parseMessageAttribute_emailID,
             "THREADID": parseMessageAttribute_threadID,
+            "OBJECTID": parseMessageAttribute_objectID,
         ]
         return try self.parseFromLookupTable(buffer: &buffer, tracker: tracker, parsers: parsers)
     }

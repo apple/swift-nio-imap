@@ -73,6 +73,15 @@ public enum ReturnOption: Hashable, Sendable {
     /// From [RFC 6154 Section 3](https://datatracker.ietf.org/doc/html/rfc6154#section-3).
     case specialUse
 
+    /// The `OBJECTID` return option requests the object identifiers of each listed mailbox.
+    ///
+    /// **Requires server capability:** ``Capability/objectIDPlus``
+    ///
+    /// Each `LIST` response then carries an `OBJECTID` extended data item, available as
+    /// ``MailboxInfo/objectID``. Requesting this option activates `OBJECTID+`.
+    /// From [draft-ietf-mailmaint-imap-objectid-bis Section 7.5](https://datatracker.ietf.org/doc/html/draft-ietf-mailmaint-imap-objectid-bis#section-7.5).
+    case objectID
+
     /// Catch-all for `LIST` return options defined in future extensions.
     ///
     /// Supports extension return options not yet defined in the standard.
@@ -94,6 +103,8 @@ extension EncodeBuffer {
             return self.writeOptionExtension(option)
         case .specialUse:
             return self.writeString("SPECIAL-USE")
+        case .objectID:
+            return self.writeString("OBJECTID")
         }
     }
 }

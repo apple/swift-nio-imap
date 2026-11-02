@@ -81,6 +81,15 @@ struct MailboxInfoTests {
             #"() NIL "INBOX""#
         ),
         EncodeFixture.mailboxInfo(
+            MailboxInfo(
+                attributes: [],
+                path: try! .init(name: .inbox),
+                objectID: CompoundObjectID(mailboxID: "F1", accountID: "u1"),
+                extensions: [:]
+            ),
+            #"() NIL "INBOX" ("OBJECTID" (MAILBOXID F1 ACCOUNTID u1))"#
+        ),
+        EncodeFixture.mailboxInfo(
             MailboxInfo(attributes: [], path: try! .init(name: .inbox, pathSeparator: "/"), extensions: [:]),
             #"() "/" "INBOX""#
         ),
@@ -211,6 +220,26 @@ struct MailboxInfoTests {
                     path: try! .init(name: .inbox),
                     extensions: [ByteBuffer(string: "CHILDINFO"): .comp(["SUBSCRIBED"])]
                 )
+            )
+        ),
+        // Extended list — OBJECTID is parsed into `objectID`, not `extensions`
+        ParseFixture.mailboxInfo(
+            #"() "." inbox ("OBJECTID" (MAILBOXID F1 ACCOUNTID u1 X-NEW v) KEY (VAL))"#,
+            "\r",
+            expected: .success(
+                .init(
+                    attributes: [],
+                    path: try! .init(name: .inbox, pathSeparator: "."),
+                    objectID: CompoundObjectID(mailboxID: "F1", accountID: "u1"),
+                    extensions: [ByteBuffer(string: "KEY"): .comp(["VAL"])]
+                )
+            )
+        ),
+        ParseFixture.mailboxInfo(
+            "() NIL inbox (objectid ())",
+            "\r",
+            expected: .success(
+                .init(attributes: [], path: try! .init(name: .inbox), objectID: CompoundObjectID(), extensions: [:])
             )
         ),
         // Extended list — two items: covers parseZeroOrMore additional item path (line 244)

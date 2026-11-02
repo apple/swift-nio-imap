@@ -33,6 +33,7 @@ struct ListReturnOptionsTests {
     @Test(arguments: [
         ParseFixture.returnOption("SUBSCRIBED", ")", expected: .success(.subscribed)),
         ParseFixture.returnOption("CHILDREN", ")", expected: .success(.children)),
+        ParseFixture.returnOption("OBJECTID", ")", expected: .success(.objectID)),
         ParseFixture.returnOption("STATUS (MESSAGES)", " ", expected: .success(.statusOption([.messageCount]))),
         ParseFixture.returnOption(
             "MYEXT",

@@ -175,6 +175,7 @@ extension GrammarParser {
             "PREVIEW": parseFetchAttribute_preview,
             "EMAILID": { _, _ in .emailID },
             "THREADID": { _, _ in .threadID },
+            "OBJECTID": { _, _ in .objectID },
         ]
 
         // try to use the lookup table, however obviously an unknown number
