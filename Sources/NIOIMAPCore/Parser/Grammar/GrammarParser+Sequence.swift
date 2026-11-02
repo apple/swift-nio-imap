@@ -36,30 +36,28 @@ extension GrammarParser {
         tracker: StackTracker
     ) throws -> MessageIdentifierRange<T> {
         func parse_wildcard(buffer: inout ParseBuffer, tracker: StackTracker) throws -> T {
-            try PL.parseFixedString("*", buffer: &buffer, tracker: tracker)
+            try buffer.matchFixed("*")
             return .max
         }
 
         func parse_identifierOrWildcard(buffer: inout ParseBuffer, tracker: StackTracker) throws -> T {
-            try PL.parseOneOf(
-                parse_wildcard,
+            try buffer.parseOneOf(
+                { try parse_wildcard(buffer: &$0, tracker: $1) },
                 self.parseMessageIdentifier,
-                buffer: &buffer,
                 tracker: tracker
             )
         }
 
         func parse_colonAndIdentifierOrWildcard(buffer: inout ParseBuffer, tracker: StackTracker) throws -> T {
-            try PL.parseFixedString(":", buffer: &buffer, tracker: tracker)
+            try buffer.matchFixed(":")
             return try parse_identifierOrWildcard(buffer: &buffer, tracker: tracker)
         }
 
-        return try PL.composite(buffer: &buffer, tracker: tracker) { buffer, tracker -> MessageIdentifierRange<T> in
+        return try buffer.composite(tracker: tracker) { buffer, tracker -> MessageIdentifierRange<T> in
             let id1: T = try parse_identifierOrWildcard(buffer: &buffer, tracker: tracker)
-            let id2: T? = try PL.parseOptional(
-                buffer: &buffer,
+            let id2: T? = try buffer.parseOptional(
                 tracker: tracker,
-                parser: parse_colonAndIdentifierOrWildcard
+                parser: { try parse_colonAndIdentifierOrWildcard(buffer: &$0, tracker: $1) }
             )
             guard let id2 = id2 else {
                 return MessageIdentifierRange(id1)
@@ -69,20 +67,20 @@ extension GrammarParser {
     }
 
     func parseSequenceMatchData(buffer: inout ParseBuffer, tracker: StackTracker) throws -> SequenceMatchData {
-        try PL.composite(buffer: &buffer, tracker: tracker) { (buffer, tracker) in
-            try PL.parseFixedString("(", buffer: &buffer, tracker: tracker)
+        try buffer.composite(tracker: tracker) { (buffer, tracker) in
+            try buffer.matchFixed("(")
             let knownSequenceSet = try self.parseLastCommandSet(
                 buffer: &buffer,
                 tracker: tracker,
                 setParser: self.parseUIDSetNonEmpty
             )
-            try PL.parseSpaces(buffer: &buffer, tracker: tracker)
+            try buffer.parseSpaces()
             let knownUidSet = try self.parseLastCommandSet(
                 buffer: &buffer,
                 tracker: tracker,
                 setParser: self.parseUIDSetNonEmpty
             )
-            try PL.parseFixedString(")", buffer: &buffer, tracker: tracker)
+            try buffer.matchFixed(")")
             return SequenceMatchData(knownSequenceSet: knownSequenceSet, knownUidSet: knownUidSet)
         }
     }
@@ -113,10 +111,9 @@ extension GrammarParser {
             buffer: inout ParseBuffer,
             tracker: StackTracker
         ) throws -> MessageIdentifierRange<T> {
-            try PL.parseOneOf(
+            try buffer.parseOneOf(
                 self.parseMessageIdentifierRange,
-                parseMessageIdentifierSet_number,
-                buffer: &buffer,
+                { try parseMessageIdentifierSet_number(buffer: &$0, tracker: $1) },
                 tracker: tracker
             )
         }
@@ -124,8 +121,8 @@ extension GrammarParser {
         var output: [MessageIdentifierRange<T>] = [
             try parseMessageIdentifierSet_element(buffer: &buffer, tracker: tracker)
         ]
-        try PL.parseZeroOrMore(buffer: &buffer, into: &output, tracker: tracker) { buffer, tracker in
-            try PL.parseFixedString(",", buffer: &buffer, tracker: tracker)
+        try buffer.parseZeroOrMore(into: &output, tracker: tracker) { buffer, tracker in
+            try buffer.matchFixed(",")
             return try parseMessageIdentifierSet_element(buffer: &buffer, tracker: tracker)
         }
         let set = MessageIdentifierSet(output)
@@ -154,14 +151,13 @@ extension GrammarParser {
             buffer: inout ParseBuffer,
             tracker: StackTracker
         ) throws -> LastCommandSet<T> {
-            try PL.parseFixedString("$", buffer: &buffer, tracker: tracker)
+            try buffer.matchFixed("$")
             return .lastCommand
         }
 
-        return try PL.parseOneOf(
-            parseMessageIdentifierSet_base,
-            parseMessageIdentifierSet_lastCommand,
-            buffer: &buffer,
+        return try buffer.parseOneOf(
+            { try parseMessageIdentifierSet_base(buffer: &$0, tracker: $1) },
+            { try parseMessageIdentifierSet_lastCommand(buffer: &$0, tracker: $1) },
             tracker: tracker
         )
     }
@@ -171,11 +167,10 @@ extension GrammarParser {
         buffer: inout ParseBuffer,
         tracker: StackTracker
     ) throws -> ModificationSequenceValue {
-        try PL.composite(buffer: &buffer, tracker: tracker) { buffer, tracker in
-            let (number, _) = try ParserLibrary.parseUnsignedInt64(
-                buffer: &buffer,
+        try buffer.composite(tracker: tracker) { buffer, tracker in
+            let (number, _) = try buffer.parseUnsignedInt64(
                 tracker: tracker,
-                allowLeadingZeros: true
+                leadingZeros: .allowed
             )
             guard let v = ModificationSequenceValue(exactly: number) else {
                 throw ParserError(hint: "Mod-seq value is too large.")

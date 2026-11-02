@@ -340,13 +340,12 @@ extension ResponseParser {
             return .untaggedResponse(response)
         }
 
-        return try PL.composite(buffer: &buffer, tracker: tracker) { buffer, tracker in
-            try? PL.parseSpaces(buffer: &buffer, tracker: tracker)
+        return try buffer.composite(tracker: tracker) { buffer, tracker in
+            try? buffer.parseSpaces()
             do {
-                let response = try PL.parseOneOf(
-                    parseResponse_fetch,
-                    parseResponse_normal,
-                    buffer: &buffer,
+                let response = try buffer.parseOneOf(
+                    { try parseResponse_fetch(buffer: &$0, tracker: $1) },
+                    { try parseResponse_normal(buffer: &$0, tracker: $1) },
                     tracker: tracker
                 )
                 switch response {
@@ -446,12 +445,11 @@ extension ResponseParser {
             .response(.tagged(try self.parser.parseTaggedResponse(buffer: &buffer, tracker: tracker)))
         }
 
-        return try PL.parseOneOf(
+        return try buffer.parseOneOf(
             [
-                parseResponse_continuation,
-                parseResponse_tagged,
+                { try parseResponse_continuation(buffer: &$0, tracker: $1) },
+                { try parseResponse_tagged(buffer: &$0, tracker: $1) },
             ],
-            buffer: &buffer,
             tracker: tracker
         )
     }
@@ -472,9 +470,7 @@ extension ResponseParser {
         attributeCount: Int
     ) throws -> Response {
         guard remaining == 0 else {
-            let bytes = try PL.parseBytes(
-                buffer: &buffer,
-                tracker: .makeNewDefault,
+            let bytes = try buffer.extractBuffer(
                 upTo: remaining
             )
             let leftToRead = remaining - bytes.readableBytes
