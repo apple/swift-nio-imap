@@ -502,7 +502,7 @@ struct CommandTypeTests {
         }
 
         TestUtilities.withParseInput(for: "{6}\r\nabcdef") { buffer in
-            let error = errorThrown(by: { try parser.parseLiteral(buffer: &buffer, tracker: .makeNewDefault) })
+            let error = parseErrorThrown(by: { try parser.parseLiteral(buffer: &buffer, tracker: .makeNewDefault) })
             #expect(error is ExceededLiteralSizeLimitError)
         }
     }

@@ -135,7 +135,7 @@ extension ParseFixture {
             finalBufferExpectation: finalBufferExpectation,
             sourceLocation: sourceLocation
         ) { buffer in
-            guard let error = errorThrown(by: { try parser(&buffer, .testTracker) }) else {
+            guard let error = parseErrorThrown(by: { try parser(&buffer, .testTracker) }) else {
                 Issue.record(comment, sourceLocation: sourceLocation)
                 return
             }

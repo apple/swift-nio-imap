@@ -203,23 +203,26 @@ public struct CommandParser: Parser, Sendable {
         // still at the read position.
         var framingResult: SynchronizingLiteralParser.FramingResult?
         var consumedBytes = 0
-        let command: CommandStreamPart?
-        do {
-            command = try buffer.withParseInput(limit: .max) { input in
-                let framing = try self.synchronisingLiteralParser.parseContinuationsNecessary(input)
-                framingResult = framing
-                // `narrowLimit` is what keeps the parser from seeing past what the framing pass deemed
-                // valid. It used to be a `getSlice` of exactly those bytes, which the cursor makes
-                // unnecessary: bytes past the limit are invisible to every primitive.
-                input.narrowLimit(toNext: framing.maximumValidBytes)
-                defer { consumedBytes = input.consumed }
+        let command = try buffer.withParseInput(limit: .max) { input -> CommandStreamPart? in
+            // Framing throws only `ParserError`, never incomplete.
+            let framing = try self.synchronisingLiteralParser.parseContinuationsNecessary(input)
+            framingResult = framing
+            // `narrowLimit` is what keeps the parser from seeing past what the framing pass deemed
+            // valid. It used to be a `getSlice` of exactly those bytes, which the cursor makes
+            // unnecessary: bytes past the limit are invisible to every primitive.
+            input.narrowLimit(toNext: framing.maximumValidBytes)
+            defer { consumedBytes = input.consumed }
+            // Incomplete input is handled here, unboxed; anything else leaves as its public error type.
+            do throws(ParseFailure) {
                 return try self.parseCommandStream0(buffer: &input, tracker: .makeNewDefault)
+            } catch .incomplete {
+                return nil
+            } catch {
+                throw error.unwrapped
             }
-        } catch is IncompleteMessage {
-            command = nil
         }
 
-        // Framing ran before anything could throw `IncompleteMessage`, so its literal count is known
+        // Framing runs before the parser can find the input incomplete, so its literal count is known
         // even when no command came out of this call.
         guard let framingResult else {
             preconditionFailure("framing did not run")
@@ -250,8 +253,8 @@ public struct CommandParser: Parser, Sendable {
     private mutating func parseCommandStream0(
         buffer: inout ParseInput,
         tracker: StackTracker
-    ) throws -> CommandStreamPart? {
-        try buffer.composite(tracker: tracker) { buffer, tracker in
+    ) throws(ParseFailure) -> CommandStreamPart? {
+        try buffer.composite(tracker: tracker) { buffer, tracker throws(ParseFailure) in
             switch self.mode {
             case .idle:
                 return try self.handleIdle(buffer: &buffer, tracker: tracker)
@@ -283,7 +286,7 @@ public struct CommandParser: Parser, Sendable {
         buffer: inout ParseInput,
         tracker: StackTracker,
         remaining: Int
-    ) throws -> CommandStreamPart {
+    ) throws(ParseFailure) -> CommandStreamPart {
         assert(self.mode.isStreamingAppend)
         let bytes = try buffer.extractBuffer(upTo: remaining)
 
@@ -296,7 +299,10 @@ public struct CommandParser: Parser, Sendable {
         return .append(.messageBytes(bytes))
     }
 
-    private mutating func handleLines(buffer: inout ParseInput, tracker: StackTracker) throws -> CommandStreamPart {
+    private mutating func handleLines(
+        buffer: inout ParseInput,
+        tracker: StackTracker
+    ) throws(ParseFailure) -> CommandStreamPart {
         // In `.lines` mode there is no `AUTHENTICATE` in progress, so a bare CRLF / unsolicited
         // base64 line must be rejected rather than misclassified as a continuation response.
         try self.parseCommandOrAppend(in: .standard, buffer: &buffer, tracker: tracker)
@@ -311,7 +317,7 @@ public struct CommandParser: Parser, Sendable {
     private mutating func handleAuthentication(
         buffer: inout ParseInput,
         tracker: StackTracker
-    ) throws -> CommandStreamPart {
+    ) throws(ParseFailure) -> CommandStreamPart {
         try self.parseCommandOrAppend(in: .authenticating, buffer: &buffer, tracker: tracker)
     }
 
@@ -325,8 +331,8 @@ public struct CommandParser: Parser, Sendable {
         in context: CommandLineContext,
         buffer: inout ParseInput,
         tracker: StackTracker
-    ) throws -> CommandStreamPart {
-        func parseCommand(buffer: inout ParseInput, tracker: StackTracker) throws -> CommandStreamPart {
+    ) throws(ParseFailure) -> CommandStreamPart {
+        func parseCommand(buffer: inout ParseInput, tracker: StackTracker) throws(ParseFailure) -> CommandStreamPart {
             let command = try self.parser.parseTaggedCommand(buffer: &buffer, tracker: tracker)
             try buffer.matchNewline()
             switch command.command {
@@ -343,7 +349,7 @@ public struct CommandParser: Parser, Sendable {
             return .tagged(command)
         }
 
-        func parseAppend(buffer: inout ParseInput, tracker: StackTracker) throws -> CommandStreamPart {
+        func parseAppend(buffer: inout ParseInput, tracker: StackTracker) throws(ParseFailure) -> CommandStreamPart {
             let appendCommand = try self.parser.parseAppend(buffer: &buffer, tracker: tracker)
             self.mode = .waitingForMessage
             return appendCommand
@@ -352,7 +358,7 @@ public struct CommandParser: Parser, Sendable {
         func parseAuthenticationChallengeResponse(
             buffer: inout ParseInput,
             tracker: StackTracker
-        ) throws -> CommandStreamPart {
+        ) throws(ParseFailure) -> CommandStreamPart {
             let authenticationChallengeResponse = try self.parser.parseBase64(buffer: &buffer, tracker: tracker)
             try buffer.matchNewline()
             // Stay in `.expectingAuthenticationResponse` to support multi-round SASL exchanges.
@@ -363,15 +369,15 @@ public struct CommandParser: Parser, Sendable {
         switch context {
         case .standard:
             return try buffer.parseOneOf(
-                { try parseCommand(buffer: &$0, tracker: $1) },
-                { try parseAppend(buffer: &$0, tracker: $1) },
+                { b, t throws(ParseFailure) in try parseCommand(buffer: &b, tracker: t) },
+                { b, t throws(ParseFailure) in try parseAppend(buffer: &b, tracker: t) },
                 tracker: tracker
             )
         case .authenticating:
             return try buffer.parseOneOf(
-                { try parseCommand(buffer: &$0, tracker: $1) },
-                { try parseAppend(buffer: &$0, tracker: $1) },
-                { try parseAuthenticationChallengeResponse(buffer: &$0, tracker: $1) },
+                { b, t throws(ParseFailure) in try parseCommand(buffer: &b, tracker: t) },
+                { b, t throws(ParseFailure) in try parseAppend(buffer: &b, tracker: t) },
+                { b, t throws(ParseFailure) in try parseAuthenticationChallengeResponse(buffer: &b, tracker: t) },
                 tracker: tracker
             )
         }
@@ -380,7 +386,7 @@ public struct CommandParser: Parser, Sendable {
     private mutating func handleWaitingForMessage(
         buffer: inout ParseInput,
         tracker: StackTracker
-    ) throws -> CommandStreamPart {
+    ) throws(ParseFailure) -> CommandStreamPart {
         do {
             let command = try self.parser.parseAppendOrCatenateMessage(buffer: &buffer, tracker: tracker)
 
@@ -392,7 +398,7 @@ public struct CommandParser: Parser, Sendable {
                 self.mode = .waitingForCatenatePart(seenPreviousPart: false)
                 return .append(.beginCatenate(options: options))
             }
-        } catch is ParserError {
+        } catch .mismatch {
             let save = buffer
             do {
                 try buffer.matchNewline()
@@ -408,12 +414,15 @@ public struct CommandParser: Parser, Sendable {
     private mutating func handleStreamingEnd(
         buffer: inout ParseInput,
         tracker: StackTracker
-    ) throws -> CommandStreamPart {
+    ) throws(ParseFailure) -> CommandStreamPart {
         self.mode = .waitingForMessage
         return .append(.endMessage)
     }
 
-    private mutating func handleIdle(buffer: inout ParseInput, tracker: StackTracker) throws -> CommandStreamPart {
+    private mutating func handleIdle(
+        buffer: inout ParseInput,
+        tracker: StackTracker
+    ) throws(ParseFailure) -> CommandStreamPart {
         try self.parser.parseIdleDone(buffer: &buffer, tracker: tracker)
         self.mode = .lines
         return .idleDone
@@ -423,7 +432,7 @@ public struct CommandParser: Parser, Sendable {
         expectPrecedingSpace: Bool,
         buffer: inout ParseInput,
         tracker: StackTracker
-    ) throws -> CommandStreamPart {
+    ) throws(ParseFailure) -> CommandStreamPart {
         let result = try self.parser.parseCatenatePart(
             expectPrecedingSpace: expectPrecedingSpace,
             buffer: &buffer,
@@ -446,7 +455,7 @@ public struct CommandParser: Parser, Sendable {
         buffer: inout ParseInput,
         tracker: StackTracker,
         remaining: Int
-    ) throws -> CommandStreamPart {
+    ) throws(ParseFailure) -> CommandStreamPart {
         let bytes = try buffer.extractBuffer(upTo: remaining)
 
         assert(bytes.count <= remaining)
@@ -462,7 +471,7 @@ public struct CommandParser: Parser, Sendable {
     private mutating func handleStreamingCatenateEnd(
         buffer: inout ParseInput,
         tracker: StackTracker
-    ) throws -> CommandStreamPart {
+    ) throws(ParseFailure) -> CommandStreamPart {
         self.mode = .waitingForCatenatePart(seenPreviousPart: true)
         return .append(.catenateData(.end))
     }
