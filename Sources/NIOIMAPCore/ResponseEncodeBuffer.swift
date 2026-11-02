@@ -12,8 +12,6 @@
 //
 //===----------------------------------------------------------------------===//
 
-import struct NIO.ByteBuffer
-
 /// Encodes IMAP server responses into wire format ready for transmission to an IMAP client.
 ///
 /// `ResponseEncodeBuffer` is the primary interface for encoding responses from the server side.

@@ -13,7 +13,6 @@
 //===----------------------------------------------------------------------===//
 
 import Foundation
-import NIO
 @_spi(NIOIMAPInternal) @testable import NIOIMAPCore
 import Testing
 

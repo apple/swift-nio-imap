@@ -12,8 +12,6 @@
 //
 //===----------------------------------------------------------------------===//
 
-import struct NIO.ByteBuffer
-
 /// The parsed envelope structure of a message, extracted from the message headers (RFC 3501).
 ///
 /// The envelope represents the structured header fields of an email message, including the sender,

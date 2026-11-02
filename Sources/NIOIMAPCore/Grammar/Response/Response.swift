@@ -12,9 +12,6 @@
 //
 //===----------------------------------------------------------------------===//
 
-import struct NIO.ByteBuffer
-import struct NIO.ByteBufferAllocator
-
 public enum ResponseOrContinuationRequest: Hashable, Sendable {
     case continuationRequest(ContinuationRequest)
     case response(Response)

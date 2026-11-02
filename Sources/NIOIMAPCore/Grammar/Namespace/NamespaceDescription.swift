@@ -12,7 +12,6 @@
 //
 //===----------------------------------------------------------------------===//
 
-import struct NIO.ByteBuffer
 import struct OrderedCollections.OrderedDictionary
 
 /// A description of a single namespace, including its prefix and hierarchy delimiter.

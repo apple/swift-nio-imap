@@ -12,7 +12,6 @@
 //
 //===----------------------------------------------------------------------===//
 
-import struct NIO.ByteBuffer
 import struct OrderedCollections.OrderedDictionary
 
 /// Commands are sent by clients to perform operations on the server.

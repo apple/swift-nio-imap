@@ -11,7 +11,6 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 //===----------------------------------------------------------------------===//
-import struct NIO.ByteBuffer
 
 /// A Gmail label identifier (vendor extension).
 ///

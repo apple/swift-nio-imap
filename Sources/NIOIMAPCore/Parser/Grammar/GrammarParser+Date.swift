@@ -26,9 +26,6 @@ import Android
 let badOS = { fatalError("unsupported OS") }()
 #endif
 
-import struct NIO.ByteBuffer
-import struct NIO.ByteBufferView
-
 extension GrammarParser {
     // date            = date-text / DQUOTE date-text DQUOTE
     func parseDate(buffer: inout ParseInput, tracker: StackTracker) throws -> IMAPCalendarDay {

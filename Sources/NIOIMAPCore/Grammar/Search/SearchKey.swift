@@ -12,8 +12,6 @@
 //
 //===----------------------------------------------------------------------===//
 
-import struct NIO.ByteBuffer
-
 /// Represents a search criterion for the `SEARCH` command.
 ///
 /// Search keys are used to query mailboxes for messages matching specified criteria.
