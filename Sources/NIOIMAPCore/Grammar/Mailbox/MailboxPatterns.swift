@@ -12,8 +12,6 @@
 //
 //===----------------------------------------------------------------------===//
 
-import struct NIO.ByteBuffer
-
 /// Mailbox name patterns for the `LIST` command.
 ///
 /// ``MailboxPatterns`` allows the `LIST` command to search for mailboxes matching one or more patterns.

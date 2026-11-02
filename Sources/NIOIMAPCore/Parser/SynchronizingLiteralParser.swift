@@ -12,9 +12,6 @@
 //
 //===----------------------------------------------------------------------===//
 
-import struct NIO.ByteBuffer
-import struct NIO.ByteBufferView
-
 /// A parser dedicated to handling synchronizing literals.
 ///
 /// Synchronizing literals are defined in RFC 3501 Section 4.3. When a client sends

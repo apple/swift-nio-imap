@@ -12,8 +12,6 @@
 //
 //===----------------------------------------------------------------------===//
 
-import struct NIO.ByteBuffer
-
 /// An IMAP URL rump and the authentication mechanism used to generate its URLAUTH token.
 ///
 /// In RFC 4467 GENURLAUTH command processing, the client provides a "rump URL" (the URL minus

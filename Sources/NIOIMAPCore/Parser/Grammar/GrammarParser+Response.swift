@@ -26,9 +26,6 @@ import Android
 let badOS = { fatalError("unsupported OS") }()
 #endif
 
-import struct NIO.ByteBuffer
-import struct NIO.ByteBufferView
-
 extension GrammarParser {
     // response-data   = "*" SP response-payload CRLF
     func parseResponseData(buffer: inout ParseInput, tracker: StackTracker) throws -> ResponsePayload {

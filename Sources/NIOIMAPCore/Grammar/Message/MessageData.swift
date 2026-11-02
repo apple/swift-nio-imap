@@ -12,8 +12,6 @@
 //
 //===----------------------------------------------------------------------===//
 
-import struct NIO.ByteBuffer
-
 /// Message data returned in an untagged server response.
 ///
 /// These responses convey information about messages independently of FETCH responses.

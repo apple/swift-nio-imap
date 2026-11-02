@@ -12,8 +12,6 @@
 //
 //===----------------------------------------------------------------------===//
 
-import struct NIO.ByteBuffer
-
 /// A generic extension field for future `BODY` structure enhancements (RFC 3501).
 ///
 /// RFC 3501 allows servers to include extension fields after the standard body structure fields

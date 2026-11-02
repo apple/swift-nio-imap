@@ -14,6 +14,7 @@ Use this module as a building block for creating IMAP clients and servers. It ha
 - **Complete Protocol Support**: Full IMAP4rev1 implementation with extensive support for common extensions (see <doc:SupportedExtensions>)
 - **Bidirectional Conversion**: Convert between IMAP wire format and Swift data structures in both directions
 - **Streaming Support**: Handle large messages and streaming responses efficiently
+- **No Networking Dependency**: The module depends on the standard library and the Swift Collections packages, not on SwiftNIO. Read from any ``ConsumableParserInputBuffer`` and write into any ``EncoderOutputBuffer``.
 - **Parser Combinator Architecture**: Composable, maintainable parsing logic built on reusable parser primitives
 
 ### How It Works
@@ -40,9 +41,9 @@ buffer.writeResponse(response)
 
 ### Module Separation
 
-NIOIMAPCore focuses purely on protocol parsing and encoding. For SwiftNIO integration, the package layers two client interfaces on top — offered on purpose, with neither preferred over the other:
+NIOIMAPCore focuses purely on protocol parsing and encoding, and it does that without a networking stack: it names no SwiftNIO type and does not depend on the package. For SwiftNIO integration, the package layers two client interfaces on top — offered on purpose, with neither preferred over the other:
 
-- The `NIOIMAP` module provides event-driven SwiftNIO `ChannelHandler`s. It re-exports NIOIMAPCore.
+- The `NIOIMAP` module provides event-driven SwiftNIO `ChannelHandler`s and `ByteBuffer` conformances. It re-exports NIOIMAPCore.
 - The `IMAPCommands` module provides a high-level, command-centric `async`/`await` client built on top of `NIOIMAP`.
 
 Both share the NIOIMAPCore command and response types described here.

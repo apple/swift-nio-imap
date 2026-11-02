@@ -26,9 +26,6 @@ import Android
 let badOS = { fatalError("unsupported OS") }()
 #endif
 
-import struct NIO.ByteBuffer
-import struct NIO.ByteBufferView
-
 extension GrammarParser {
     // list-select-base-opt =  "SUBSCRIBED" / option-extension
     func parseListSelectBaseOption(buffer: inout ParseInput, tracker: StackTracker) throws -> ListSelectBaseOption {
