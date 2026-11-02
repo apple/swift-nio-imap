@@ -41,8 +41,8 @@ extension GrammarParser {
     ///     ;; oldest messages.
     ///     ;; A range -500:-400 is the same as -400:-500.
     /// ```
-    func parsePartialRange(buffer: inout ParseInput, tracker: StackTracker) throws -> PartialRange {
-        func parseFirst(buffer: inout ParseInput, tracker: StackTracker) throws -> PartialRange {
+    func parsePartialRange(buffer: inout ParseInput, tracker: StackTracker) throws(ParseFailure) -> PartialRange {
+        func parseFirst(buffer: inout ParseInput, tracker: StackTracker) throws(ParseFailure) -> PartialRange {
             let a: SequenceNumber = try parseMessageIdentifier(buffer: &buffer, tracker: tracker)
             try buffer.matchFixed(":")
             let b: SequenceNumber = try parseMessageIdentifier(buffer: &buffer, tracker: tracker)
@@ -50,7 +50,7 @@ extension GrammarParser {
             return .first(range)
         }
 
-        func parseLast(buffer: inout ParseInput, tracker: StackTracker) throws -> PartialRange {
+        func parseLast(buffer: inout ParseInput, tracker: StackTracker) throws(ParseFailure) -> PartialRange {
             try buffer.matchFixed("-")
             let a: SequenceNumber = try parseMessageIdentifier(buffer: &buffer, tracker: tracker)
             try buffer.matchFixed(":-")
@@ -60,8 +60,8 @@ extension GrammarParser {
         }
 
         return try buffer.parseOneOf(
-            { try parseFirst(buffer: &$0, tracker: $1) },
-            { try parseLast(buffer: &$0, tracker: $1) },
+            { b, t throws(ParseFailure) in try parseFirst(buffer: &b, tracker: t) },
+            { b, t throws(ParseFailure) in try parseLast(buffer: &b, tracker: t) },
             tracker: tracker
         )
     }
@@ -75,22 +75,25 @@ extension GrammarParser {
     ///     ;; <sequence-set> from [RFC3501].
     ///     ;; NIL indicates no results correspond to the requested range.
     /// ```
-    func parseSearchReturnData_partial(buffer: inout ParseInput, tracker: StackTracker) throws -> SearchReturnData {
+    func parseSearchReturnData_partial(
+        buffer: inout ParseInput,
+        tracker: StackTracker
+    ) throws(ParseFailure) -> SearchReturnData {
         func parseSearchReturnData_partial_nil(
             buffer: inout ParseInput,
             tracker: StackTracker
-        ) throws -> MessageIdentifierSet<UnknownMessageIdentifier> {
+        ) throws(ParseFailure) -> MessageIdentifierSet<UnknownMessageIdentifier> {
             try buffer.matchFixed("NIL")
             return MessageIdentifierSet()
         }
         func parseSearchReturnData_partial_set(
             buffer: inout ParseInput,
             tracker: StackTracker
-        ) throws -> MessageIdentifierSet<UnknownMessageIdentifier> {
+        ) throws(ParseFailure) -> MessageIdentifierSet<UnknownMessageIdentifier> {
             let set: LastCommandSet<UnknownMessageIdentifier>
             set = try parseMessageIdentifierSetOrLast(buffer: &buffer, tracker: tracker)
             guard case .set(let result) = set else {
-                throw ParserError(hint: "PARTIAL set invalid")
+                throw .mismatch("PARTIAL set invalid")
             }
             return result.set
         }
@@ -101,8 +104,8 @@ extension GrammarParser {
         let range = try parsePartialRange(buffer: &buffer, tracker: tracker)
         try buffer.parseSpaces()
         let set = try buffer.parseOneOf(
-            { try parseSearchReturnData_partial_nil(buffer: &$0, tracker: $1) },
-            { try parseSearchReturnData_partial_set(buffer: &$0, tracker: $1) },
+            { b, t throws(ParseFailure) in try parseSearchReturnData_partial_nil(buffer: &b, tracker: t) },
+            { b, t throws(ParseFailure) in try parseSearchReturnData_partial_set(buffer: &b, tracker: t) },
             tracker: tracker
         )
         try buffer.matchFixed(")")

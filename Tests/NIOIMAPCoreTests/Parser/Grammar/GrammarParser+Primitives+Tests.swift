@@ -284,7 +284,7 @@ private struct GrammarParserPrimitivesTests {
     )
     func parseNDigitsHint(bytes: Int, input: String, hint: String) {
         let error = TestUtilities.withParseInput(for: input) { buffer in
-            errorThrown { try GrammarParser().parseNDigits(buffer: &buffer, tracker: .testTracker, bytes: bytes) }
+            parseErrorThrown { try GrammarParser().parseNDigits(buffer: &buffer, tracker: .testTracker, bytes: bytes) }
         }
         guard let error = error as? ParserError else {
             Issue.record("Expected a ParserError, got \(String(describing: error))")
@@ -294,7 +294,7 @@ private struct GrammarParserPrimitivesTests {
         #expect(error.file == "NIOIMAPCore/GrammarParser.swift")
         // One throw site, whatever the count.
         let other = TestUtilities.withParseInput(for: "123 ") { buffer in
-            errorThrown { try GrammarParser().parseNDigits(buffer: &buffer, tracker: .testTracker, bytes: 2) }
+            parseErrorThrown { try GrammarParser().parseNDigits(buffer: &buffer, tracker: .testTracker, bytes: 2) }
         }
         #expect((other as? ParserError)?.line == error.line)
     }

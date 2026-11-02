@@ -197,9 +197,9 @@ extension ParseInputTests {
             #expect(input.remaining == 3)
             #expect(input.withCurrentChunk { $0.count } == 3)
             #expect(input.scanUntil(byte: UInt8(ascii: "e")) == nil)
-            #expect(errorThrown(by: { try input.extractBytes(length: 4) }) is IncompleteMessage)
+            #expect(parseErrorThrown(by: { try input.extractBytes(length: 4) }) is IncompleteMessage)
             #expect(try! input.extractBytes(length: 3) == Array("abc".utf8))
-            #expect(errorThrown(by: { try input.extractBuffer(upTo: 1) }) is IncompleteMessage)
+            #expect(parseErrorThrown(by: { try input.extractBuffer(upTo: 1) }) is IncompleteMessage)
         }
     }
 }
@@ -273,7 +273,7 @@ extension ParseInputTests {
     @Test("extractBytes asking for more than is there consumes nothing")
     func extractBytesTooLong() {
         ParseInputHarness.withInput([TestRegion("ab"), TestRegion("cd")]) { input in
-            #expect(errorThrown(by: { try input.extractBytes(length: 5) }) is IncompleteMessage)
+            #expect(parseErrorThrown(by: { try input.extractBytes(length: 5) }) is IncompleteMessage)
             #expect(input.consumed == 0)
             #expect(try! input.extractBytes(length: 4) == Array("abcd".utf8))
         }
@@ -291,7 +291,7 @@ extension ParseInputTests {
         ParseInputHarness.withInput([TestRegion("a"), TestRegion("b")]) { input in
             #expect(try! input.readByte() == UInt8(ascii: "a"))
             #expect(try! input.readByte() == UInt8(ascii: "b"))
-            #expect(errorThrown(by: { try input.readByte() }) is IncompleteMessage)
+            #expect(parseErrorThrown(by: { try input.readByte() }) is IncompleteMessage)
         }
     }
 }
@@ -407,7 +407,7 @@ extension ParseInputTests {
     func extractBufferAtEnd() {
         ParseInputHarness.withInput([TestRegion("ab")]) { input in
             input.advance(by: 2)
-            #expect(errorThrown(by: { try input.extractBuffer(upTo: 4) }) is IncompleteMessage)
+            #expect(parseErrorThrown(by: { try input.extractBuffer(upTo: 4) }) is IncompleteMessage)
         }
     }
 
@@ -427,7 +427,7 @@ extension ParseInputTests {
         try ParseInputHarness.withInput([TestRegion(owned: Self.payload)], limit: 100) { input in
             let buffer = try input.extractBuffer(upTo: 4096)
             #expect(buffer.count == 100)
-            #expect(errorThrown(by: { try input.extractBuffer(upTo: 4096) }) is IncompleteMessage)
+            #expect(parseErrorThrown(by: { try input.extractBuffer(upTo: 4096) }) is IncompleteMessage)
         }
     }
 }
@@ -456,7 +456,7 @@ extension ParseInputTests {
     @Test("matchFixed consumes nothing when a byte disagrees")
     func matchFixedMismatch() {
         ParseInputHarness.withInput([TestRegion("SEL"), TestRegion("XCT")]) { input in
-            #expect(errorThrown(by: { try input.matchFixed("SELECT") }) is ParserError)
+            #expect(parseErrorThrown(by: { try input.matchFixed("SELECT") }) is ParserError)
             #expect(input.consumed == 0)
             #expect(input.peek(at: 0) == UInt8(ascii: "S"))
         }
@@ -465,7 +465,9 @@ extension ParseInputTests {
     @Test("matchFixed is case-sensitive when asked")
     func matchFixedCaseSensitive() {
         ParseInputHarness.withSpan("select") { input in
-            #expect(errorThrown(by: { try input.matchFixed("SELECT", caseSensitivity: .caseSensitive) }) is ParserError)
+            #expect(
+                parseErrorThrown(by: { try input.matchFixed("SELECT", caseSensitivity: .caseSensitive) }) is ParserError
+            )
             #expect(input.consumed == 0)
             try! input.matchFixed("select", caseSensitivity: .caseSensitive)
             #expect(input.consumed == 6)
@@ -477,7 +479,7 @@ extension ParseInputTests {
         // The distinction matters: a prefix may still be completed by the next read, a mismatch never
         // can. Getting it the wrong way round either stalls a connection or rejects a valid command.
         ParseInputHarness.withInput([TestRegion("SE"), TestRegion("L")]) { input in
-            #expect(errorThrown(by: { try input.matchFixed("SELECT") }) is IncompleteMessage)
+            #expect(parseErrorThrown(by: { try input.matchFixed("SELECT") }) is IncompleteMessage)
             #expect(input.consumed == 0)
         }
     }
@@ -542,7 +544,7 @@ extension ParseInputTests {
     func matchNewlineRejectsExcessiveSpaces() {
         let spaces = ParseInput.maximumStraySpaces + 1
         ParseInputHarness.withSpan(String(repeating: " ", count: spaces) + "\r\n") { input in
-            #expect(errorThrown(by: { try input.matchNewline() }) is ParserError)
+            #expect(parseErrorThrown(by: { try input.matchNewline() }) is ParserError)
             #expect(input.consumed == 0)
         }
     }
@@ -556,7 +558,7 @@ extension ParseInputTests {
         }
         let tooMany = Array(repeating: TestRegion(" "), count: ParseInput.maximumStraySpaces + 1)
         ParseInputHarness.withInput(tooMany) { input in
-            #expect(errorThrown(by: { try input.matchNewline() }) is ParserError)
+            #expect(parseErrorThrown(by: { try input.matchNewline() }) is ParserError)
             #expect(input.consumed == 0)
         }
     }
@@ -565,10 +567,10 @@ extension ParseInputTests {
     func matchNewlineSpacesWithoutLineEnding() {
         let cap = ParseInput.maximumStraySpaces
         ParseInputHarness.withSpan(String(repeating: " ", count: cap)) { input in
-            #expect(errorThrown(by: { try input.matchNewline() }) is IncompleteMessage)
+            #expect(parseErrorThrown(by: { try input.matchNewline() }) is IncompleteMessage)
         }
         ParseInputHarness.withSpan(String(repeating: " ", count: cap + 1)) { input in
-            #expect(errorThrown(by: { try input.matchNewline() }) is ParserError)
+            #expect(parseErrorThrown(by: { try input.matchNewline() }) is ParserError)
         }
     }
 
@@ -585,12 +587,12 @@ extension ParseInputTests {
     @Test("matchNewline consumes nothing when there is no line ending")
     func matchNewlineFailure() {
         ParseInputHarness.withSpan(" x") { input in
-            #expect(errorThrown(by: { try input.matchNewline() }) is ParserError)
+            #expect(parseErrorThrown(by: { try input.matchNewline() }) is ParserError)
             #expect(input.consumed == 0)
             #expect(input.terminatingNewline == nil)
         }
         ParseInputHarness.withInput([]) { input in
-            #expect(errorThrown(by: { try input.matchNewline() }) is IncompleteMessage)
+            #expect(parseErrorThrown(by: { try input.matchNewline() }) is IncompleteMessage)
         }
     }
 
@@ -611,12 +613,12 @@ extension ParseInputTests {
     @Test("composite rewinds the read position and the newline on a throw")
     func compositeRewinds() {
         ParseInputHarness.withInput([TestRegion("a\r"), TestRegion("\nbcd")]) { input in
-            let error = errorThrown {
-                try input.composite(tracker: .makeNewDefault) { input, _ in
+            let error = parseErrorThrown {
+                try input.composite(tracker: .makeNewDefault) { input, _ throws(ParseFailure) in
                     input.advance(by: 1)
                     try input.matchNewline()
                     _ = try input.extractBytes(length: 3)
-                    throw ParserError(hint: "nope")
+                    throw .mismatch("nope")
                 }
             }
             #expect(error is ParserError)
@@ -629,7 +631,7 @@ extension ParseInputTests {
     @Test("composite keeps what it parsed when it returns")
     func compositeKeepsProgress() {
         ParseInputHarness.withSpan("abcdef") { input in
-            let bytes = try! input.composite(tracker: .makeNewDefault) { input, _ in
+            let bytes = try! input.composite(tracker: .makeNewDefault) { input, _ throws(ParseFailure) in
                 try input.extractBytes(length: 3)
             }
             #expect(bytes == Array("abc".utf8))
@@ -640,10 +642,12 @@ extension ParseInputTests {
     @Test("composite counts stack frames")
     func compositeTracksRecursion() {
         ParseInputHarness.withSpan("abc") { input in
-            let error = errorThrown {
-                try input.composite(tracker: StackTracker(maximumParserStackDepth: 2)) { input, tracker in
-                    try input.composite(tracker: tracker) { input, tracker in
-                        try input.composite(tracker: tracker) { _, _ in }
+            let error = parseErrorThrown {
+                try input.composite(tracker: StackTracker(maximumParserStackDepth: 2)) {
+                    input,
+                    tracker throws(ParseFailure) in
+                    try input.composite(tracker: tracker) { input, tracker throws(ParseFailure) in
+                        try input.composite(tracker: tracker) { _, _ throws(ParseFailure) in }
                     }
                 }
             }
