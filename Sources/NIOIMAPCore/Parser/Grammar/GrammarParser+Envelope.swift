@@ -26,9 +26,6 @@ import Android
 let badOS = { fatalError("unsupported OS") }()
 #endif
 
-import struct NIO.ByteBuffer
-import struct NIO.ByteBufferView
-
 /// RFC 3501 §7.4.2 group markers, classified once.
 private enum AddressListToken {
     /// host NIL, mailbox = group name

@@ -12,9 +12,7 @@
 //
 //===----------------------------------------------------------------------===//
 
-import NIO
 @testable import NIOIMAPCore
-import NIOTestUtils
 import Testing
 
 @Suite("SynchronizingLiteralParser")

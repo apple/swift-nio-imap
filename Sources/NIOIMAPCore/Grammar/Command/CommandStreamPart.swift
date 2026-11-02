@@ -12,8 +12,6 @@
 //
 //===----------------------------------------------------------------------===//
 
-import struct NIO.ByteBuffer
-
 /// A sub-command for streaming the `APPEND` command (RFC 3501 and RFC 4469 extensions).
 ///
 /// The `AppendCommand` enum manages the lifecycle of appending messages to a mailbox. Unlike

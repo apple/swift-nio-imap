@@ -60,7 +60,6 @@ public struct ExceededLiteralSizeLimitError: Error {
     }
 }
 
-import struct NIO.ByteBuffer
 import struct OrderedCollections.OrderedDictionary
 
 //

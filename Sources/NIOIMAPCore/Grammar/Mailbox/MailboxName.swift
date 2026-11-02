@@ -12,9 +12,6 @@
 //
 //===----------------------------------------------------------------------===//
 
-import struct NIO.ByteBuffer
-import struct NIO.ByteBufferView
-
 /// The mailbox name exceeded the maximum allowed size.
 ///
 /// See [RFC 3501](https://datatracker.ietf.org/doc/html/rfc3501) for mailbox name limitations.

@@ -12,8 +12,6 @@
 //
 //===----------------------------------------------------------------------===//
 
-import struct NIO.ByteBuffer
-
 /// A command stream part with synchronizing literal information.
 ///
 /// When parsing client commands, the parser must handle synchronizing literals (RFC 3501 Section 4.3).

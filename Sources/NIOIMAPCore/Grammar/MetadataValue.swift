@@ -12,8 +12,6 @@
 //
 //===----------------------------------------------------------------------===//
 
-import struct NIO.ByteBuffer
-
 /// A metadata entry value returned from a `GETMETADATA` command or set with `SETMETADATA` (RFC 5464).
 ///
 /// **Requires server capability:** ``Capability/metadata`` or ``Capability/metadataServer``

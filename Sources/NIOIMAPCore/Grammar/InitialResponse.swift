@@ -12,8 +12,6 @@
 //
 //===----------------------------------------------------------------------===//
 
-import struct NIO.ByteBuffer
-
 /// An initial SASL response sent with the AUTHENTICATE command.
 ///
 /// The SASL-IR extension (RFC 4959) allows clients to send an initial response directly with the

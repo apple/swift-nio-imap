@@ -12,8 +12,6 @@
 //
 //===----------------------------------------------------------------------===//
 
-import struct NIO.ByteBuffer
-
 /// Encodes and decodes modified UTF-7 as used in IMAP mailbox names.
 ///
 /// IMAP defines a modified version of UTF-7 encoding in RFC 3501 Section 5.1.3 for

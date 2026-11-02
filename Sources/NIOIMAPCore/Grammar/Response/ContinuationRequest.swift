@@ -12,8 +12,6 @@
 //
 //===----------------------------------------------------------------------===//
 
-import struct NIO.ByteBuffer
-
 /// A command continuation request from the server.
 ///
 /// Servers send continuation requests (prefixed with `+`) when they are waiting for additional

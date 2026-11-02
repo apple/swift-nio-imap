@@ -12,8 +12,6 @@
 //
 //===----------------------------------------------------------------------===//
 
-import struct NIO.ByteBuffer
-
 /// An RFC 2822 electronic mail address with structured components.
 ///
 /// Represents an address as returned in the `ENVELOPE` structure of a `FETCH` response.
