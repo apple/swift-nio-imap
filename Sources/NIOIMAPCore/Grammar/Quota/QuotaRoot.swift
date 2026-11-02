@@ -12,9 +12,6 @@
 //
 //===----------------------------------------------------------------------===//
 
-import struct NIO.ByteBuffer
-import struct NIO.ByteBufferView
-
 /// A named quota root that groups resource limits for one or more mailboxes (RFC 2087).
 ///
 /// **Requires server capability:** ``Capability/quota``

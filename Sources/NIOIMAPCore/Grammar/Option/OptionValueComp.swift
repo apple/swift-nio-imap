@@ -12,8 +12,6 @@
 //
 //===----------------------------------------------------------------------===//
 
-import struct NIO.ByteBuffer
-
 /// An option value, which can be a single string or a nested array of values.
 ///
 /// Allows option values to be nested arbitrarily deep, enabling representation

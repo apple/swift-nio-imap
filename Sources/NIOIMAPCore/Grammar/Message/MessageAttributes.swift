@@ -12,8 +12,6 @@
 //
 //===----------------------------------------------------------------------===//
 
-import struct NIO.ByteBuffer
-
 /// Individual message attributes returned in a `FETCH` response.
 ///
 /// When a client sends a `FETCH` command, the server responds with one or more message attributes for each matching message.

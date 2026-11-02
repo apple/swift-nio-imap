@@ -26,9 +26,6 @@ import Android
 let badOS = { fatalError("unsupported OS") }()
 #endif
 
-import struct NIO.ByteBuffer
-import struct NIO.ByteBufferView
-
 extension GrammarParser {
     func parseFetch_type(buffer: inout ParseInput, tracker: StackTracker) throws -> [FetchAttribute] {
         func parseFetch_type_all(buffer: inout ParseInput, tracker: StackTracker) throws -> [FetchAttribute] {
