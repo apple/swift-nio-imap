@@ -40,11 +40,11 @@ extension GrammarParser {
         buffer: inout ParseBuffer,
         tracker: StackTracker
     ) throws -> KeyValue<MetadataEntryName, MetadataValue> {
-        try PL.composite(buffer: &buffer, tracker: tracker) {
+        try buffer.composite(tracker: tracker) {
             buffer,
             tracker -> KeyValue<MetadataEntryName, MetadataValue> in
             let name = try self.parseMetadataEntryName(buffer: &buffer, tracker: tracker)
-            try PL.parseSpaces(buffer: &buffer, tracker: tracker)
+            try buffer.parseSpaces()
             let value = try self.parseMetadataValue(buffer: &buffer, tracker: tracker)
             return .init(key: name, value: value)
         }
@@ -54,23 +54,22 @@ extension GrammarParser {
         buffer: inout ParseBuffer,
         tracker: StackTracker
     ) throws -> OrderedDictionary<MetadataEntryName, MetadataValue> {
-        try PL.composite(buffer: &buffer, tracker: tracker) {
+        try buffer.composite(tracker: tracker) {
             buffer,
             tracker -> OrderedDictionary<MetadataEntryName, MetadataValue> in
-            try PL.parseFixedString("(", buffer: &buffer, tracker: tracker)
+            try buffer.matchFixed("(")
             var kvs = OrderedDictionary<MetadataEntryName, MetadataValue>()
             let ev = try self.parseEntryValue(buffer: &buffer, tracker: tracker)
             kvs[ev.key] = ev.value
-            try PL.parseZeroOrMore(
-                buffer: &buffer,
+            try buffer.parseZeroOrMore(
                 into: &kvs,
                 tracker: tracker,
                 parser: { buffer, tracker -> KeyValue<MetadataEntryName, MetadataValue> in
-                    try PL.parseSpaces(buffer: &buffer, tracker: tracker)
+                    try buffer.parseSpaces()
                     return try self.parseEntryValue(buffer: &buffer, tracker: tracker)
                 }
             )
-            try PL.parseFixedString(")", buffer: &buffer, tracker: tracker)
+            try buffer.matchFixed(")")
             return kvs
         }
     }
@@ -84,38 +83,35 @@ extension GrammarParser {
         }
 
         func parseEntries_bracketed(buffer: inout ParseBuffer, tracker: StackTracker) throws -> [MetadataEntryName] {
-            try PL.parseFixedString("(", buffer: &buffer, tracker: tracker)
+            try buffer.matchFixed("(")
             var array = [try self.parseMetadataEntryName(buffer: &buffer, tracker: tracker)]
-            try PL.parseZeroOrMore(
-                buffer: &buffer,
+            try buffer.parseZeroOrMore(
                 into: &array,
                 tracker: tracker,
                 parser: { buffer, tracker in
-                    try PL.parseSpaces(buffer: &buffer, tracker: tracker)
+                    try buffer.parseSpaces()
                     return try self.parseMetadataEntryName(buffer: &buffer, tracker: tracker)
                 }
             )
-            try PL.parseFixedString(")", buffer: &buffer, tracker: tracker)
+            try buffer.matchFixed(")")
             return array
         }
 
-        return try PL.parseOneOf(
-            parseEntries_singleUnbracketed,
-            parseEntries_bracketed,
-            buffer: &buffer,
+        return try buffer.parseOneOf(
+            { try parseEntries_singleUnbracketed(buffer: &$0, tracker: $1) },
+            { try parseEntries_bracketed(buffer: &$0, tracker: $1) },
             tracker: tracker
         )
     }
 
     func parseEntryList(buffer: inout ParseBuffer, tracker: StackTracker) throws -> [MetadataEntryName] {
-        try PL.composite(buffer: &buffer, tracker: tracker) { buffer, tracker in
+        try buffer.composite(tracker: tracker) { buffer, tracker in
             var array = [try self.parseMetadataEntryName(buffer: &buffer, tracker: tracker)]
-            try PL.parseZeroOrMore(
-                buffer: &buffer,
+            try buffer.parseZeroOrMore(
                 into: &array,
                 tracker: tracker,
                 parser: { buffer, tracker in
-                    try PL.parseSpaces(buffer: &buffer, tracker: tracker)
+                    try buffer.parseSpaces()
                     return try self.parseMetadataEntryName(buffer: &buffer, tracker: tracker)
                 }
             )
@@ -124,10 +120,10 @@ extension GrammarParser {
     }
 
     func parseEntryFlagName(buffer: inout ParseBuffer, tracker: StackTracker) throws -> EntryFlagName {
-        try PL.composite(buffer: &buffer, tracker: tracker) { (buffer, tracker) -> EntryFlagName in
-            try PL.parseFixedString("\"/flags/", buffer: &buffer, tracker: tracker)
+        try buffer.composite(tracker: tracker) { (buffer, tracker) -> EntryFlagName in
+            try buffer.matchFixed("\"/flags/")
             let flag = try self.parseAttributeFlag(buffer: &buffer, tracker: tracker)
-            try PL.parseFixedString("\"", buffer: &buffer, tracker: tracker)
+            try buffer.matchFixed("\"")
             return .init(flag: flag)
         }
     }
@@ -135,26 +131,25 @@ extension GrammarParser {
     // entry-type-req = entry-type-resp / all
     func parseEntryKindRequest(buffer: inout ParseBuffer, tracker: StackTracker) throws -> EntryKindRequest {
         func parseEntryKindRequest_all(buffer: inout ParseBuffer, tracker: StackTracker) throws -> EntryKindRequest {
-            try PL.parseFixedString("all", buffer: &buffer, tracker: tracker)
+            try buffer.matchFixed("all")
             return .all
         }
 
         func parseEntryKindRequest_private(buffer: inout ParseBuffer, tracker: StackTracker) throws -> EntryKindRequest
         {
-            try PL.parseFixedString("priv", buffer: &buffer, tracker: tracker)
+            try buffer.matchFixed("priv")
             return .private
         }
 
         func parseEntryKindRequest_shared(buffer: inout ParseBuffer, tracker: StackTracker) throws -> EntryKindRequest {
-            try PL.parseFixedString("shared", buffer: &buffer, tracker: tracker)
+            try buffer.matchFixed("shared")
             return .shared
         }
 
-        return try PL.parseOneOf(
-            parseEntryKindRequest_all,
-            parseEntryKindRequest_private,
-            parseEntryKindRequest_shared,
-            buffer: &buffer,
+        return try buffer.parseOneOf(
+            { try parseEntryKindRequest_all(buffer: &$0, tracker: $1) },
+            { try parseEntryKindRequest_private(buffer: &$0, tracker: $1) },
+            { try parseEntryKindRequest_shared(buffer: &$0, tracker: $1) },
             tracker: tracker
         )
     }
@@ -165,20 +160,19 @@ extension GrammarParser {
             buffer: inout ParseBuffer,
             tracker: StackTracker
         ) throws -> EntryKindResponse {
-            try PL.parseFixedString("priv", buffer: &buffer, tracker: tracker)
+            try buffer.matchFixed("priv")
             return .private
         }
 
         func parseEntryKindResponse_shared(buffer: inout ParseBuffer, tracker: StackTracker) throws -> EntryKindResponse
         {
-            try PL.parseFixedString("shared", buffer: &buffer, tracker: tracker)
+            try buffer.matchFixed("shared")
             return .shared
         }
 
-        return try PL.parseOneOf(
-            parseEntryKindResponse_private,
-            parseEntryKindResponse_shared,
-            buffer: &buffer,
+        return try buffer.parseOneOf(
+            { try parseEntryKindResponse_private(buffer: &$0, tracker: $1) },
+            { try parseEntryKindResponse_shared(buffer: &$0, tracker: $1) },
             tracker: tracker
         )
     }
