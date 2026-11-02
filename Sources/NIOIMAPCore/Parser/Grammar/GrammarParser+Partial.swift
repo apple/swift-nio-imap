@@ -44,8 +44,8 @@ extension GrammarParser {
     ///     ;; oldest messages.
     ///     ;; A range -500:-400 is the same as -400:-500.
     /// ```
-    func parsePartialRange(buffer: inout ParseBuffer, tracker: StackTracker) throws -> PartialRange {
-        func parseFirst(buffer: inout ParseBuffer, tracker: StackTracker) throws -> PartialRange {
+    func parsePartialRange(buffer: inout ParseInput, tracker: StackTracker) throws -> PartialRange {
+        func parseFirst(buffer: inout ParseInput, tracker: StackTracker) throws -> PartialRange {
             let a: SequenceNumber = try parseMessageIdentifier(buffer: &buffer, tracker: tracker)
             try buffer.matchFixed(":")
             let b: SequenceNumber = try parseMessageIdentifier(buffer: &buffer, tracker: tracker)
@@ -53,7 +53,7 @@ extension GrammarParser {
             return .first(range)
         }
 
-        func parseLast(buffer: inout ParseBuffer, tracker: StackTracker) throws -> PartialRange {
+        func parseLast(buffer: inout ParseInput, tracker: StackTracker) throws -> PartialRange {
             try buffer.matchFixed("-")
             let a: SequenceNumber = try parseMessageIdentifier(buffer: &buffer, tracker: tracker)
             try buffer.matchFixed(":-")
@@ -78,16 +78,16 @@ extension GrammarParser {
     ///     ;; <sequence-set> from [RFC3501].
     ///     ;; NIL indicates no results correspond to the requested range.
     /// ```
-    func parseSearchReturnData_partial(buffer: inout ParseBuffer, tracker: StackTracker) throws -> SearchReturnData {
+    func parseSearchReturnData_partial(buffer: inout ParseInput, tracker: StackTracker) throws -> SearchReturnData {
         func parseSearchReturnData_partial_nil(
-            buffer: inout ParseBuffer,
+            buffer: inout ParseInput,
             tracker: StackTracker
         ) throws -> MessageIdentifierSet<UnknownMessageIdentifier> {
             try buffer.matchFixed("NIL")
             return MessageIdentifierSet()
         }
         func parseSearchReturnData_partial_set(
-            buffer: inout ParseBuffer,
+            buffer: inout ParseInput,
             tracker: StackTracker
         ) throws -> MessageIdentifierSet<UnknownMessageIdentifier> {
             let set: LastCommandSet<UnknownMessageIdentifier>

@@ -236,7 +236,7 @@ extension TestUtilities {
         _ value: T,
         terminator: String = " ",
         encoder: (inout EncodeBuffer, T) -> Int,
-        parser: (inout ParseBuffer, StackTracker) throws -> T,
+        parser: (inout ParseInput, StackTracker) throws -> T,
         sourceLocation: SourceLocation = #_sourceLocation
     ) {
         var encodeBuffer = EncodeBuffer.serverEncodeBuffer(options: ResponseEncodingOptions(), loggingMode: false)
