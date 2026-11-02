@@ -232,11 +232,12 @@ public struct ResponseParser: Parser, Sendable {
         buffer inputBytes: inout IMAPInputBuffer
     ) throws -> ResponseOrContinuationRequest? {
         let tracker = StackTracker.makeNewDefault
-        do {
-            // Whatever the parser consumed is discarded on *every* exit path, a throw included, which is
-            // what `parse` does: the streaming modes legitimately make progress and then report that they
-            // need more bytes, and `skipLF` below consumes a byte outside any backtracking scope.
-            return try inputBytes.parse { input in
+        // Whatever the parser consumed is discarded on *every* exit path, a throw included, which is
+        // what `parse` does: the streaming modes legitimately make progress and then report that they
+        // need more bytes, and `skipLF` below consumes a byte outside any backtracking scope.
+        return try inputBytes.parse { input in
+            // Incomplete input is handled here, unboxed; anything else leaves as its public error type.
+            do throws(ParseFailure) {
                 switch self.mode {
                 case .response(let state):
                     // Handle orphaned CR/LF from split CRLF where previous buffer ended with CR-only:
@@ -270,9 +271,11 @@ public struct ResponseParser: Parser, Sendable {
                 case .streamingQuoted(attributeCount: let attributeCount):
                     return .response(try self.parseQuotedBytes(buffer: &input, attributeCount: attributeCount))
                 }
+            } catch .incomplete {
+                return nil
+            } catch {
+                throw error.unwrapped
             }
-        } catch is IncompleteMessage {
-            return nil
         }
     }
 
@@ -302,7 +305,7 @@ extension ResponseParser {
         state: ResponseState,
         buffer: inout ParseInput,
         tracker: StackTracker
-    ) throws -> ResponseAndNewline {
+    ) throws(ParseFailure) -> ResponseAndNewline {
         let response = try parseResponse(
             state: state,
             buffer: &buffer,
@@ -318,13 +321,13 @@ extension ResponseParser {
         state: ResponseState,
         buffer: inout ParseInput,
         tracker: StackTracker
-    ) throws -> ResponseOrContinuationRequest {
+    ) throws(ParseFailure) -> ResponseOrContinuationRequest {
         enum _Response: Hashable {
             case untaggedResponse(ResponsePayload)
             case fetchResponse(GrammarParser._FetchResponse)
         }
 
-        func parseResponse_fetch(buffer: inout ParseInput, tracker: StackTracker) throws -> _Response {
+        func parseResponse_fetch(buffer: inout ParseInput, tracker: StackTracker) throws(ParseFailure) -> _Response {
             switch state {
             case .fetchOrNormal:
                 return .fetchResponse(try self.parser.parseFetchResponseStart(buffer: &buffer, tracker: tracker))
@@ -333,17 +336,18 @@ extension ResponseParser {
             }
         }
 
-        func parseResponse_normal(buffer: inout ParseInput, tracker: StackTracker) throws -> _Response {
+        func parseResponse_normal(buffer: inout ParseInput, tracker: StackTracker) throws(ParseFailure) -> _Response {
             let response = try self.parser.parseResponseData(buffer: &buffer, tracker: tracker)
             return .untaggedResponse(response)
         }
 
-        return try buffer.composite(tracker: tracker) { buffer, tracker in
-            try? buffer.parseSpaces()
-            do {
+        return try buffer.composite(tracker: tracker) { buffer, tracker throws(ParseFailure) in
+            // Spaces are optional; incomplete still propagates.
+            do throws(ParseFailure) { try buffer.parseSpaces() } catch .mismatch {}
+            do throws(ParseFailure) {
                 let response = try buffer.parseOneOf(
-                    { try parseResponse_fetch(buffer: &$0, tracker: $1) },
-                    { try parseResponse_normal(buffer: &$0, tracker: $1) },
+                    { b, t throws(ParseFailure) in try parseResponse_fetch(buffer: &b, tracker: t) },
+                    { b, t throws(ParseFailure) in try parseResponse_normal(buffer: &b, tracker: t) },
                     tracker: tracker
                 )
                 switch response {
@@ -396,31 +400,35 @@ extension ResponseParser {
                     )
                     return .response(.fetch(.simpleAttribute(att)))
                 }
-            } catch is ParserError {
+            } catch .mismatch {
                 return try self._parseResponse(buffer: &buffer, tracker: tracker)
             }
         }
     }
 
     /// Validates that the attribute count is within the allowed limit, and returns it.
-    private func guardFetchMiddleAttributeCount() throws -> Int {
+    private func guardFetchMiddleAttributeCount() throws(ParseFailure) -> Int {
         guard case .response(.fetchMiddle(attributeCount: let attributeCount)) = self.mode else {
             preconditionFailure("We should be in fetch middle: \(self.mode)")
         }
         guard attributeCount < self.messageAttributeLimit else {
-            throw ExceededMaximumMessageAttributesError(
-                actualCount: attributeCount,
-                maximumCount: self.messageAttributeLimit
+            throw .messageAttributesExceeded(
+                ExceededMaximumMessageAttributesError(
+                    actualCount: attributeCount,
+                    maximumCount: self.messageAttributeLimit
+                )
             )
         }
         return attributeCount
     }
 
-    private func guardStreamingSizeLimit(size: Int) throws {
+    private func guardStreamingSizeLimit(size: Int) throws(ParseFailure) {
         guard size < self.bodySizeLimit else {
-            throw ExceededMaximumBodySizeError(
-                actualCount: UInt64(exactly: size) ?? 0,
-                maximumCount: self.bodySizeLimit
+            throw .bodySizeExceeded(
+                ExceededMaximumBodySizeError(
+                    actualCount: UInt64(exactly: size) ?? 0,
+                    maximumCount: self.bodySizeLimit
+                )
             )
         }
     }
@@ -428,28 +436,28 @@ extension ResponseParser {
     private func _parseResponse(
         buffer: inout ParseInput,
         tracker: StackTracker
-    ) throws -> ResponseOrContinuationRequest {
+    ) throws(ParseFailure) -> ResponseOrContinuationRequest {
         func parseResponse_continuation(
             buffer: inout ParseInput,
             tracker: StackTracker
-        ) throws -> ResponseOrContinuationRequest {
+        ) throws(ParseFailure) -> ResponseOrContinuationRequest {
             .continuationRequest(try self.parser.parseContinuationRequest(buffer: &buffer, tracker: tracker))
         }
 
         func parseResponse_tagged(
             buffer: inout ParseInput,
             tracker: StackTracker
-        ) throws -> ResponseOrContinuationRequest {
+        ) throws(ParseFailure) -> ResponseOrContinuationRequest {
             .response(.tagged(try self.parser.parseTaggedResponse(buffer: &buffer, tracker: tracker)))
         }
 
-        return try buffer.parseOneOf(
-            [
-                { try parseResponse_continuation(buffer: &$0, tracker: $1) },
-                { try parseResponse_tagged(buffer: &$0, tracker: $1) },
-            ],
-            tracker: tracker
-        )
+        let continuation = ParseAlternative<ResponseOrContinuationRequest> { b, t throws(ParseFailure) in
+            try parseResponse_continuation(buffer: &b, tracker: t)
+        }
+        let tagged = ParseAlternative<ResponseOrContinuationRequest> { b, t throws(ParseFailure) in
+            try parseResponse_tagged(buffer: &b, tracker: t)
+        }
+        return try buffer.parseOneOf([continuation, tagged], tracker: tracker)
     }
 }
 
@@ -466,7 +474,7 @@ extension ResponseParser {
         tracker: StackTracker,
         remaining: Int,
         attributeCount: Int
-    ) throws -> Response {
+    ) throws(ParseFailure) -> Response {
         guard remaining == 0 else {
             let bytes = try buffer.extractBuffer(
                 upTo: remaining
@@ -488,7 +496,10 @@ extension ResponseParser {
         )
     }
 
-    private mutating func parseQuotedBytes(buffer: inout ParseInput, attributeCount: Int) throws -> Response {
+    private mutating func parseQuotedBytes(
+        buffer: inout ParseInput,
+        attributeCount: Int
+    ) throws(ParseFailure) -> Response {
         let quoted = try self.parser.parseQuoted(buffer: &buffer, tracker: .makeNewDefault)
         return self.moveStateMachine(
             expected: .streamingQuoted(attributeCount: attributeCount),

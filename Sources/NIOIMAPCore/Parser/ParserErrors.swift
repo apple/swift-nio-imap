@@ -18,16 +18,117 @@
 /// source location that asked for the decode, which is what the grammar wants and what a general-purpose
 /// initialiser has no business reporting.
 ///
-/// - Throws: ``ParserError`` when `bytes` are not valid UTF-8.
+/// - Throws: ``ParseFailure/mismatch(_:)`` when `bytes` are not valid UTF-8.
 func decodeUTF8(
     _ bytes: some Collection<UInt8>,
     file: StaticString = #fileID,
     line: Int = #line
-) throws -> String {
+) throws(ParseFailure) -> String {
     guard let string = String(validatingUTF8Bytes: bytes) else {
-        throw ParserError.invalidUTF8(file: file, line: line)
+        throw .mismatch(.invalidUTF8(file: file, line: line))
     }
     return string
+}
+
+/// What the parser's internals throw: every parser error, under one concrete type.
+///
+/// Typed throws, because an untyped `throw` boxes its error on the heap, and the parser throws as control
+/// flow — every alternative of every `parseOneOf` that does not match. A `throws(ParseFailure)` function
+/// returns this in registers, so a failed match costs no allocation. Only ``other(_:)``, ``badCommand(_:)``
+/// and a `dynamicHint:` mismatch allocate.
+///
+/// Registers only while it is at most 4 words; at 64 bytes it went through a hidden out-pointer and
+/// doubled debug stack use per nesting level. Hence the compact payloads (``ParserError``,
+/// ``NoForwardProgress``) and the `indirect` ``badCommand(_:)``. A test pins the size.
+///
+/// Throw a mismatch with ``mismatch(_:file:line:)``, which records the throwing site:
+/// `throw .mismatch("Expected digit")`, or `throw .mismatch(dynamicHint: "Got \(byte)")` (allocates).
+///
+/// Internal only. The public entry points convert back with ``unwrapped`` so callers see today's
+/// public error types.
+///
+/// ```
+///  grammar / combinators ── throws(ParseFailure) ──▶ entry point ── unwrapped ──▶ public `throws`
+///         ▲
+///         └── ParseFailure(error) ◀── untyped API (MailboxPath, ModifiedUTF7, …)
+/// ```
+enum ParseFailure: Error {
+    /// The input does not match this production. Backtracking points (``ParseInput/parseOptional(tracker:parser:)``,
+    /// ``ParseInput/parseOneOf(_:tracker:file:line:)``) absorb it.
+    case mismatch(ParserError)
+    /// A tagged command failed to parse. ``ParseInput/parseOneOf(_:tracker:file:line:)`` absorbs it, as
+    /// it did ``BadCommand`` before typed throws.
+    ///
+    /// `indirect`: ``BadCommand`` is 40 bytes and would push `ParseFailure` out of registers. One allocation
+    /// per bad command.
+    indirect case badCommand(BadCommand)
+    /// More bytes are needed. Never absorbed by a backtracking point; becomes ``IncompleteMessage``.
+    case incomplete
+    case noForwardProgress(NoForwardProgress)
+    case tooMuchRecursion(TooMuchRecursion)
+    case literalSizeExceeded(ExceededLiteralSizeLimitError)
+    case messageAttributesExceeded(ExceededMaximumMessageAttributesError)
+    case bodySizeExceeded(ExceededMaximumBodySizeError)
+    /// An error from an untyped API the grammar calls (`MailboxPath.init`, `ModifiedUTF7.decode`). Boxed;
+    /// cold paths only.
+    case other(any Error)
+
+    /// A mismatch with a literal hint, located at the caller. No allocation.
+    static func mismatch(
+        _ hint: StaticString = "Unknown",
+        file: StaticString = #fileID,
+        line: Int = #line
+    ) -> Self {
+        .mismatch(ParserError(hint: hint, file: file, line: line))
+    }
+
+    /// `"Expected \(expected) digits, got \(got)"`, located at the caller. Formatted when read, so no
+    /// allocation: `parseDateDayFixed` throws it on every 2-digit day.
+    static func mismatch(
+        expectedDigits expected: Int,
+        got: Int,
+        file: StaticString = #fileID,
+        line: Int = #line
+    ) -> Self {
+        .mismatch(ParserError(expectedDigits: expected, got: got, file: file, line: line))
+    }
+
+    /// A mismatch with a computed hint, located at the caller. Allocates; cold paths only.
+    static func mismatch(dynamicHint: String, file: StaticString = #fileID, line: Int = #line) -> Self {
+        .mismatch(ParserError(dynamicHint: dynamicHint, file: file, line: line))
+    }
+
+    /// Classifies an untyped error, so that a known type keeps its meaning — a ``ParserError`` from an
+    /// untyped callee must still backtrack.
+    init(_ error: any Error) {
+        switch error {
+        case let failure as ParseFailure: self = failure
+        case let error as ParserError: self = .mismatch(error)
+        case let error as BadCommand: self = .badCommand(error)
+        case is IncompleteMessage: self = .incomplete
+        case let error as NoForwardProgress: self = .noForwardProgress(error)
+        case let error as TooMuchRecursion: self = .tooMuchRecursion(error)
+        case let error as ExceededLiteralSizeLimitError: self = .literalSizeExceeded(error)
+        case let error as ExceededMaximumMessageAttributesError: self = .messageAttributesExceeded(error)
+        case let error as ExceededMaximumBodySizeError: self = .bodySizeExceeded(error)
+        default: self = .other(error)
+        }
+    }
+
+    /// The public error this stands for. Boxes; call once, where an error leaves the parser.
+    var unwrapped: any Error {
+        switch self {
+        case .mismatch(let error): error
+        case .badCommand(let error): error
+        case .incomplete: IncompleteMessage()
+        case .noForwardProgress(let error): error
+        case .tooMuchRecursion(let error): error
+        case .literalSizeExceeded(let error): error
+        case .messageAttributesExceeded(let error): error
+        case .bodySizeExceeded(let error): error
+        case .other(let error): error
+        }
+    }
 }
 
 /// The parser needs more bytes before it can decide.
@@ -71,7 +172,8 @@ public struct BadCommand: Error {
 ///
 /// - SeeAlso: [RFC 3501 Section 4](https://datatracker.ietf.org/doc/html/rfc3501#section-4) (grammar)
 public struct ParserError: Error {
-    /// 24 bytes. A `String` hint plus a `StaticString` file plus an `Int` line would be 48.
+    /// 24 bytes, so that ``ParseFailure`` fits in registers (see `ParseFailure`'s size test). A `String`
+    /// hint plus a `StaticString` file plus an `Int` line would be 48.
     ///
     /// ```
     /// literal:  [ hint pointer | file pointer | line u32, file len u8, isASCII, hint len u16 ]
@@ -101,7 +203,7 @@ public struct ParserError: Error {
     ///
     /// - Note: These errors are thrown as part of ordinary control flow — `parseOneOf` throws one
     ///     for every alternative that doesn't match. So the parser takes the hint as a `StaticString`
-    ///     and keeps only a pointer to the literal: the hint costs no allocation, and the compiler rejects
+    ///     and keeps only a pointer to the literal: throwing costs no allocation, and the compiler rejects
     ///     an interpolated hint. Interpolation needs the explicit `dynamicHint:` spelling, which boxes;
     ///     keep it off paths that are taken often.
     public var hint: String {
@@ -189,8 +291,8 @@ struct ThrowSite: @unchecked Sendable {  // @unchecked: points at an immutable s
 
 /// ``ParserError``'s hot-path storage: pointers to the hint and file literals.
 ///
-/// Field order matters: `hintIsASCII` sits at byte 21, beyond the other storages' payloads, so its spare
-/// bits hold the `Storage` tag and ``ParserError`` stays 24 bytes rather than 25.
+/// Field order matters: `hintIsASCII` sits past byte 16, beyond every other ``ParseFailure`` payload,
+/// so its spare bits hold the enum tags and `ParseFailure` stays 24 bytes rather than 25.
 private struct LiteralHint: @unchecked Sendable {  // @unchecked: points at immutable string literals.
     private var hintStart: UnsafeRawPointer
     let site: ThrowSite
@@ -280,7 +382,7 @@ public struct TooMuchRecursion: Error {
 /// Unlike ``ParserError`` it is never taken to mean "this alternative did not match", so no
 /// backtracking point absorbs it.
 public struct NoForwardProgress: Error {
-    /// Compact, like ``ParserError``'s: no allocation on the throw.
+    /// Compact, like ``ParserError``'s: no allocation on the throw, and ``ParseFailure`` stays small.
     private var site: ThrowSite
 
     /// Creates the error, recording where the check that fired is.

@@ -168,3 +168,12 @@ func errorThrown<T>(by body: () throws -> T) -> Error? {
         return error
     }
 }
+
+/// ``errorThrown(by:)`` for internal parsers, which throw ``ParseFailure``: returns the error as the
+/// public type an entry point would surface (e.g. `.incomplete` -> `IncompleteMessage`).
+///
+/// Only for calls into typed internals. Public-API tests use ``errorThrown(by:)``, so a boxed
+/// `ParseFailure` leaking out of an entry point still fails them.
+func parseErrorThrown<T>(by body: () throws -> T) -> Error? {
+    errorThrown(by: body).map { ParseFailure($0).unwrapped }
+}
