@@ -31,13 +31,13 @@ import struct NIO.ByteBufferView
 import struct OrderedCollections.OrderedDictionary
 
 extension GrammarParser {
-    func parseMetadataEntryName(buffer: inout ParseBuffer, tracker: StackTracker) throws -> MetadataEntryName {
+    func parseMetadataEntryName(buffer: inout ParseInput, tracker: StackTracker) throws -> MetadataEntryName {
         let buffer = try self.parseAString(buffer: &buffer, tracker: tracker)
         return MetadataEntryName(buffer)
     }
 
     func parseEntryValue(
-        buffer: inout ParseBuffer,
+        buffer: inout ParseInput,
         tracker: StackTracker
     ) throws -> KeyValue<MetadataEntryName, MetadataValue> {
         try buffer.composite(tracker: tracker) {
@@ -51,7 +51,7 @@ extension GrammarParser {
     }
 
     func parseEntryValues(
-        buffer: inout ParseBuffer,
+        buffer: inout ParseInput,
         tracker: StackTracker
     ) throws -> OrderedDictionary<MetadataEntryName, MetadataValue> {
         try buffer.composite(tracker: tracker) {
@@ -74,15 +74,15 @@ extension GrammarParser {
         }
     }
 
-    func parseEntries(buffer: inout ParseBuffer, tracker: StackTracker) throws -> [MetadataEntryName] {
+    func parseEntries(buffer: inout ParseInput, tracker: StackTracker) throws -> [MetadataEntryName] {
         func parseEntries_singleUnbracketed(
-            buffer: inout ParseBuffer,
+            buffer: inout ParseInput,
             tracker: StackTracker
         ) throws -> [MetadataEntryName] {
             [try self.parseMetadataEntryName(buffer: &buffer, tracker: tracker)]
         }
 
-        func parseEntries_bracketed(buffer: inout ParseBuffer, tracker: StackTracker) throws -> [MetadataEntryName] {
+        func parseEntries_bracketed(buffer: inout ParseInput, tracker: StackTracker) throws -> [MetadataEntryName] {
             try buffer.matchFixed("(")
             var array = [try self.parseMetadataEntryName(buffer: &buffer, tracker: tracker)]
             try buffer.parseZeroOrMore(
@@ -104,7 +104,7 @@ extension GrammarParser {
         )
     }
 
-    func parseEntryList(buffer: inout ParseBuffer, tracker: StackTracker) throws -> [MetadataEntryName] {
+    func parseEntryList(buffer: inout ParseInput, tracker: StackTracker) throws -> [MetadataEntryName] {
         try buffer.composite(tracker: tracker) { buffer, tracker in
             var array = [try self.parseMetadataEntryName(buffer: &buffer, tracker: tracker)]
             try buffer.parseZeroOrMore(
@@ -119,7 +119,7 @@ extension GrammarParser {
         }
     }
 
-    func parseEntryFlagName(buffer: inout ParseBuffer, tracker: StackTracker) throws -> EntryFlagName {
+    func parseEntryFlagName(buffer: inout ParseInput, tracker: StackTracker) throws -> EntryFlagName {
         try buffer.composite(tracker: tracker) { (buffer, tracker) -> EntryFlagName in
             try buffer.matchFixed("\"/flags/")
             let flag = try self.parseAttributeFlag(buffer: &buffer, tracker: tracker)
@@ -129,19 +129,18 @@ extension GrammarParser {
     }
 
     // entry-type-req = entry-type-resp / all
-    func parseEntryKindRequest(buffer: inout ParseBuffer, tracker: StackTracker) throws -> EntryKindRequest {
-        func parseEntryKindRequest_all(buffer: inout ParseBuffer, tracker: StackTracker) throws -> EntryKindRequest {
+    func parseEntryKindRequest(buffer: inout ParseInput, tracker: StackTracker) throws -> EntryKindRequest {
+        func parseEntryKindRequest_all(buffer: inout ParseInput, tracker: StackTracker) throws -> EntryKindRequest {
             try buffer.matchFixed("all")
             return .all
         }
 
-        func parseEntryKindRequest_private(buffer: inout ParseBuffer, tracker: StackTracker) throws -> EntryKindRequest
-        {
+        func parseEntryKindRequest_private(buffer: inout ParseInput, tracker: StackTracker) throws -> EntryKindRequest {
             try buffer.matchFixed("priv")
             return .private
         }
 
-        func parseEntryKindRequest_shared(buffer: inout ParseBuffer, tracker: StackTracker) throws -> EntryKindRequest {
+        func parseEntryKindRequest_shared(buffer: inout ParseInput, tracker: StackTracker) throws -> EntryKindRequest {
             try buffer.matchFixed("shared")
             return .shared
         }
@@ -155,16 +154,16 @@ extension GrammarParser {
     }
 
     // entry-type-resp = "priv" / "shared"
-    func parseEntryKindResponse(buffer: inout ParseBuffer, tracker: StackTracker) throws -> EntryKindResponse {
+    func parseEntryKindResponse(buffer: inout ParseInput, tracker: StackTracker) throws -> EntryKindResponse {
         func parseEntryKindResponse_private(
-            buffer: inout ParseBuffer,
+            buffer: inout ParseInput,
             tracker: StackTracker
         ) throws -> EntryKindResponse {
             try buffer.matchFixed("priv")
             return .private
         }
 
-        func parseEntryKindResponse_shared(buffer: inout ParseBuffer, tracker: StackTracker) throws -> EntryKindResponse
+        func parseEntryKindResponse_shared(buffer: inout ParseInput, tracker: StackTracker) throws -> EntryKindResponse
         {
             try buffer.matchFixed("shared")
             return .shared

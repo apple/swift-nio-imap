@@ -176,7 +176,7 @@ public struct ResponseParser: Parser, Sendable {
     let bodySizeLimit: UInt64
     private var mode: Mode
     /// Newline kind of the last successfully parsed response.
-    private var lastResponseNewlineEnding: ParseBuffer.Newline?
+    private var lastResponseNewlineEnding: ParseInput.Newline?
 
     /// Creates a new `ResponseParser` with configuration options.
     ///
@@ -293,12 +293,12 @@ public struct ResponseParser: Parser, Sendable {
 extension ResponseParser {
     struct ResponseAndNewline {
         var response: ResponseOrContinuationRequest
-        var newline: ParseBuffer.Newline?
+        var newline: ParseInput.Newline?
     }
 
     private mutating func parseResponseAndNewline(
         state: ResponseState,
-        buffer: inout ParseBuffer,
+        buffer: inout ParseInput,
         tracker: StackTracker
     ) throws -> ResponseAndNewline {
         let response = try parseResponse(
@@ -314,7 +314,7 @@ extension ResponseParser {
 
     private mutating func parseResponse(
         state: ResponseState,
-        buffer: inout ParseBuffer,
+        buffer: inout ParseInput,
         tracker: StackTracker
     ) throws -> ResponseOrContinuationRequest {
         enum _Response: Hashable {
@@ -322,7 +322,7 @@ extension ResponseParser {
             case fetchResponse(GrammarParser._FetchResponse)
         }
 
-        func parseResponse_fetch(buffer: inout ParseBuffer, tracker: StackTracker) throws -> _Response {
+        func parseResponse_fetch(buffer: inout ParseInput, tracker: StackTracker) throws -> _Response {
             switch state {
             case .fetchOrNormal:
                 return .fetchResponse(try self.parser.parseFetchResponseStart(buffer: &buffer, tracker: tracker))
@@ -331,7 +331,7 @@ extension ResponseParser {
             }
         }
 
-        func parseResponse_normal(buffer: inout ParseBuffer, tracker: StackTracker) throws -> _Response {
+        func parseResponse_normal(buffer: inout ParseInput, tracker: StackTracker) throws -> _Response {
             let response = try self.parser.parseResponseData(buffer: &buffer, tracker: tracker)
             return .untaggedResponse(response)
         }
@@ -424,18 +424,18 @@ extension ResponseParser {
     }
 
     private func _parseResponse(
-        buffer: inout ParseBuffer,
+        buffer: inout ParseInput,
         tracker: StackTracker
     ) throws -> ResponseOrContinuationRequest {
         func parseResponse_continuation(
-            buffer: inout ParseBuffer,
+            buffer: inout ParseInput,
             tracker: StackTracker
         ) throws -> ResponseOrContinuationRequest {
             .continuationRequest(try self.parser.parseContinuationRequest(buffer: &buffer, tracker: tracker))
         }
 
         func parseResponse_tagged(
-            buffer: inout ParseBuffer,
+            buffer: inout ParseInput,
             tracker: StackTracker
         ) throws -> ResponseOrContinuationRequest {
             .response(.tagged(try self.parser.parseTaggedResponse(buffer: &buffer, tracker: tracker)))
@@ -460,7 +460,7 @@ extension ResponseParser {
     /// - parameter buffer: The cursor from which bytes should be extracted.
     /// - returns: A `.streamingBytes` response carrying the extracted run, or `.streamingEnd`.
     private mutating func parseBytes(
-        buffer: inout ParseBuffer,
+        buffer: inout ParseInput,
         tracker: StackTracker,
         remaining: Int,
         attributeCount: Int
@@ -486,7 +486,7 @@ extension ResponseParser {
         )
     }
 
-    private mutating func parseQuotedBytes(buffer: inout ParseBuffer, attributeCount: Int) throws -> Response {
+    private mutating func parseQuotedBytes(buffer: inout ParseInput, attributeCount: Int) throws -> Response {
         let quoted = try self.parser.parseQuoted(buffer: &buffer, tracker: .makeNewDefault)
         return self.moveStateMachine(
             expected: .streamingQuoted(attributeCount: attributeCount),
