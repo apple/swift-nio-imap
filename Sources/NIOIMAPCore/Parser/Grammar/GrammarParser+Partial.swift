@@ -47,25 +47,24 @@ extension GrammarParser {
     func parsePartialRange(buffer: inout ParseBuffer, tracker: StackTracker) throws -> PartialRange {
         func parseFirst(buffer: inout ParseBuffer, tracker: StackTracker) throws -> PartialRange {
             let a: SequenceNumber = try parseMessageIdentifier(buffer: &buffer, tracker: tracker)
-            try PL.parseFixedString(":", buffer: &buffer, tracker: tracker)
+            try buffer.matchFixed(":")
             let b: SequenceNumber = try parseMessageIdentifier(buffer: &buffer, tracker: tracker)
             let range = (a <= b) ? SequenceRange(a...b) : SequenceRange(b...a)
             return .first(range)
         }
 
         func parseLast(buffer: inout ParseBuffer, tracker: StackTracker) throws -> PartialRange {
-            try PL.parseFixedString("-", buffer: &buffer, tracker: tracker)
+            try buffer.matchFixed("-")
             let a: SequenceNumber = try parseMessageIdentifier(buffer: &buffer, tracker: tracker)
-            try PL.parseFixedString(":-", buffer: &buffer, tracker: tracker)
+            try buffer.matchFixed(":-")
             let b: SequenceNumber = try parseMessageIdentifier(buffer: &buffer, tracker: tracker)
             let range = (a <= b) ? SequenceRange(a...b) : SequenceRange(b...a)
             return .last(range)
         }
 
-        return try PL.parseOneOf(
-            parseFirst,
-            parseLast,
-            buffer: &buffer,
+        return try buffer.parseOneOf(
+            { try parseFirst(buffer: &$0, tracker: $1) },
+            { try parseLast(buffer: &$0, tracker: $1) },
             tracker: tracker
         )
     }
@@ -84,7 +83,7 @@ extension GrammarParser {
             buffer: inout ParseBuffer,
             tracker: StackTracker
         ) throws -> MessageIdentifierSet<UnknownMessageIdentifier> {
-            try PL.parseFixedString("NIL", buffer: &buffer, tracker: tracker)
+            try buffer.matchFixed("NIL")
             return MessageIdentifierSet()
         }
         func parseSearchReturnData_partial_set(
@@ -99,18 +98,17 @@ extension GrammarParser {
             return result.set
         }
 
-        try PL.parseFixedString("PARTIAL", buffer: &buffer, tracker: tracker)
-        try PL.parseSpaces(buffer: &buffer, tracker: tracker)
-        try PL.parseFixedString("(", buffer: &buffer, tracker: tracker)
+        try buffer.matchFixed("PARTIAL")
+        try buffer.parseSpaces()
+        try buffer.matchFixed("(")
         let range = try parsePartialRange(buffer: &buffer, tracker: tracker)
-        try PL.parseSpaces(buffer: &buffer, tracker: tracker)
-        let set = try PL.parseOneOf(
-            parseSearchReturnData_partial_nil,
-            parseSearchReturnData_partial_set,
-            buffer: &buffer,
+        try buffer.parseSpaces()
+        let set = try buffer.parseOneOf(
+            { try parseSearchReturnData_partial_nil(buffer: &$0, tracker: $1) },
+            { try parseSearchReturnData_partial_set(buffer: &$0, tracker: $1) },
             tracker: tracker
         )
-        try PL.parseFixedString(")", buffer: &buffer, tracker: tracker)
+        try buffer.matchFixed(")")
 
         return .partial(range, set)
     }

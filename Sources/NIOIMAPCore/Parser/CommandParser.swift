@@ -246,7 +246,7 @@ public struct CommandParser: Parser, Sendable {
         buffer: inout ParseBuffer,
         tracker: StackTracker
     ) throws -> CommandStreamPart? {
-        try PL.composite(buffer: &buffer, tracker: tracker) { buffer, tracker in
+        try buffer.composite(tracker: tracker) { buffer, tracker in
             switch self.mode {
             case .idle:
                 return try self.handleIdle(buffer: &buffer, tracker: tracker)
@@ -280,7 +280,7 @@ public struct CommandParser: Parser, Sendable {
         remaining: Int
     ) throws -> CommandStreamPart {
         assert(self.mode.isStreamingAppend)
-        let bytes = try PL.parseBytes(buffer: &buffer, tracker: tracker, upTo: remaining)
+        let bytes = try buffer.extractBuffer(upTo: remaining)
 
         assert(bytes.readableBytes <= remaining)
         if bytes.readableBytes == remaining {
@@ -323,7 +323,7 @@ public struct CommandParser: Parser, Sendable {
     ) throws -> CommandStreamPart {
         func parseCommand(buffer: inout ParseBuffer, tracker: StackTracker) throws -> CommandStreamPart {
             let command = try self.parser.parseTaggedCommand(buffer: &buffer, tracker: tracker)
-            try PL.parseNewline(buffer: &buffer, tracker: tracker)
+            try buffer.matchNewline()
             switch command.command {
             case .idleStart:
                 self.mode = .idle
@@ -349,25 +349,23 @@ public struct CommandParser: Parser, Sendable {
             tracker: StackTracker
         ) throws -> CommandStreamPart {
             let authenticationChallengeResponse = try self.parser.parseBase64(buffer: &buffer, tracker: tracker)
-            try PL.parseNewline(buffer: &buffer, tracker: tracker)
+            try buffer.matchNewline()
             // Stay in `.expectingAuthenticationResponse` to support multi-round SASL exchanges.
             return .continuationResponse(authenticationChallengeResponse)
         }
 
         switch context {
         case .standard:
-            return try PL.parseOneOf(
-                parseCommand,
-                parseAppend,
-                buffer: &buffer,
+            return try buffer.parseOneOf(
+                { try parseCommand(buffer: &$0, tracker: $1) },
+                { try parseAppend(buffer: &$0, tracker: $1) },
                 tracker: tracker
             )
         case .authenticating:
-            return try PL.parseOneOf(
-                parseCommand,
-                parseAppend,
-                parseAuthenticationChallengeResponse,
-                buffer: &buffer,
+            return try buffer.parseOneOf(
+                { try parseCommand(buffer: &$0, tracker: $1) },
+                { try parseAppend(buffer: &$0, tracker: $1) },
+                { try parseAuthenticationChallengeResponse(buffer: &$0, tracker: $1) },
                 tracker: tracker
             )
         }
@@ -391,7 +389,7 @@ public struct CommandParser: Parser, Sendable {
         } catch is ParserError {
             let save = buffer
             do {
-                try PL.parseNewline(buffer: &buffer, tracker: tracker)
+                try buffer.matchNewline()
                 self.mode = .lines
                 return .append(.finish)
             } catch {
@@ -443,7 +441,7 @@ public struct CommandParser: Parser, Sendable {
         tracker: StackTracker,
         remaining: Int
     ) throws -> CommandStreamPart {
-        let bytes = try PL.parseBytes(buffer: &buffer, tracker: tracker, upTo: remaining)
+        let bytes = try buffer.extractBuffer(upTo: remaining)
 
         assert(bytes.readableBytes <= remaining)
         if bytes.readableBytes == remaining {
