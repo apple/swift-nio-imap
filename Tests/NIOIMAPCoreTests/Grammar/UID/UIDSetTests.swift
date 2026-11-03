@@ -35,6 +35,7 @@ struct UIDSetTests {
     }
 
     @Test(arguments: [
+        EncodeFixture.uidSet(MessageIdentifierSet<UID>(), ""),
         EncodeFixture.uidSet(MessageIdentifierSet<UID>(22...22), "22"),
         EncodeFixture.uidSet(MessageIdentifierSet<UID>(5...22), "5:22"),
         EncodeFixture.uidSet(MessageIdentifierSet<UID>.all, "1:*"),
