@@ -1096,15 +1096,17 @@ extension ResponseParserTests {
         var buffer = ByteBuffer(string: fixture.input + "\r\n")
         var results = [ResponseOrContinuationRequest]()
         var parser = ResponseParser()
+        // Stop at the first failure: a failed parse consumes nothing, so retrying would loop forever.
         while buffer.readableBytes > 0 {
-            #expect(throws: Never.self) {
-                guard
-                    let resp = try parser.parseResponseStream(buffer: &buffer)
-                else {
-                    Issue.record()
-                    return
+            do {
+                guard let resp = try parser.parseResponseStream(buffer: &buffer) else {
+                    Issue.record("Incomplete response")
+                    break
                 }
                 results.append(resp)
+            } catch {
+                Issue.record("Unexpected error: \(error)")
+                break
             }
         }
         #expect(results == fixture.expected)
