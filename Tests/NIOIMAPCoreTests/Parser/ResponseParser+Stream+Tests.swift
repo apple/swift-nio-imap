@@ -1122,7 +1122,12 @@ extension ResponseParserTests {
         arguments: [
             // An unparseable body structure carrying a literal: the fallback that skips it as invalid
             // must report a literal length cut short as incomplete, not as a run-away literal.
-            #"* 1 FETCH (BODYSTRUCTURE ("a" {10}\#r\#n0123456789 1 2))\#r\#n"#
+            #"* 1 FETCH (BODYSTRUCTURE ("a" {10}\#r\#n0123456789 1 2))\#r\#n"#,
+            // Optional spaces (before a flag list's `)`, between FETCH attributes, between body parts):
+            // a read ending in them must not lose the incomplete signal.
+            #"* 1 FETCH (UID 1 FLAGS (\Seen  ) RFC822.SIZE 2)\#r\#n"#,
+            #"* 1 FETCH (BODYSTRUCTURE (("text" "plain" NIL NIL NIL "7bit" 1 1)  "#
+                + #"("text" "html" NIL NIL NIL "7bit" 1 1) "alternative"))\#r\#n"#,
         ]
     )
     func splitAnywhere(response: String) throws {
