@@ -31,7 +31,8 @@ struct ResponseTextTests {
         }
     }
 
-    #if DEBUG && !os(iOS) && !os(watchOS) && !os(tvOS) && !os(visionOS) && !os(Android)
+    // Exit tests can only capture values (the `[string = …]` list below) with Swift 6.3 and later.
+    #if compiler(>=6.3) && DEBUG && !os(iOS) && !os(watchOS) && !os(tvOS) && !os(visionOS) && !os(Android)
     /// Text is written to the wire verbatim, so a server that echoes untrusted input could inject a
     /// whole response.
     @Test(
