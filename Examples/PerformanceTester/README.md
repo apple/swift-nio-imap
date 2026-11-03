@@ -84,30 +84,41 @@ single-digit percentage there is not a result. Trust the allocation counters.
 Which pair to read matters. `encode.append.1MB` / `.4MB` still scale with the payload, because their
 driver coalesces every chunk into one contiguous `ByteBuffer` — that is a copy the *driver* asks for, not
 one the encoder makes. The cases that answer the question are the ones whose driver models a transport:
-`encode.handler.append.*` (both report ~1.9 KB) and `encode.dispatch.append.*.array-payload` (both report
-~2.4 KB).
+`encode.handler.append.*` (both report ~1.9 KB) and `encode.dispatch.append.*` (all report ~2.1–2.2 KB).
 
 ### Checking against the committed thresholds
 
 ```sh
-# Fails if a gated metric regressed past its committed p90, and also if one improved past it (then
-# update the thresholds).
-swift package --disable-sandbox benchmark thresholds check \
-  --metric mallocCountTotal --metric mallocBytesCount --metric objectAllocCount \
-  --metric retainCount --metric releaseCount --metric retainReleaseDelta
-
-# Accept the current numbers as the new ceiling (i.e. after a deliberate change).
-swift package --disable-sandbox benchmark thresholds update \
-  --metric mallocCountTotal --metric mallocBytesCount --metric objectAllocCount \
-  --metric retainCount --metric releaseCount --metric retainReleaseDelta
+six=(--metric mallocCountTotal --metric mallocBytesCount --metric objectAllocCount
+     --metric retainCount --metric releaseCount --metric retainReleaseDelta)
+two=(--metric mallocCountTotal --metric mallocBytesCount)
+# `check` fails if a gated metric regressed past its committed p90, and also if one improved past it
+# (then update the thresholds). `update` accepts the current numbers as the new ceiling (i.e. after a
+# deliberate change).
+op=check
+swift package --disable-sandbox benchmark thresholds $op --target IMAPParsing "${six[@]}"
+swift package --disable-sandbox benchmark thresholds $op --target IMAPEncoding \
+  --skip 'encode\.dispatch\..*' "${six[@]}"
+swift package --disable-sandbox benchmark thresholds $op --target IMAPEncoding \
+  --filter 'encode\.dispatch\..*' "${two[@]}"
+swift package --disable-sandbox benchmark thresholds $op --target IMAPDispatchClient \
+  --filter 'dispatch-client\.parse\..*' "${six[@]}"
+swift package --disable-sandbox benchmark thresholds $op --target IMAPDispatchClient \
+  --filter 'dispatch-client\.encode\..*' "${two[@]}"
 ```
 
-The `--metric` flags keep `update` from writing the sampled metrics into the threshold files.
+Five invocations, because a `--metric` on the command line overrides each case's own metric list, and
+`thresholds update` writes every metric passed to every case it runs. The `encode.dispatch.*` and
+`dispatch-client.encode.*` cases donate regions of at least `IMAPBuffer.dispatchDonationThreshold` bytes
+to `DispatchData`, which frees them on a background queue: their ARC counters are not deterministic (see
+[the ARC counters](#the-arc-counters)). So they gate `mallocCountTotal` and `mallocBytesCount` only, and
+every other case gates all six. The flags also keep `update` from writing the sampled metrics into the
+threshold files.
 
 Not wired into CI: the committed thresholds were measured on macOS/arm64 with Swift 6.4 and
 `ordo-one/benchmark` 1.38.1, and allocation counts differ across platforms and across stdlib versions
-even though they are stable on any single one. A CI gate would need per-platform, per-version threshold
-directories — the shape `swift-nio` itself uses (`Thresholds/${SWIFT_VERSION}/`).
+even though they are stable on any single one. A CI gate would need per-platform, per-version threshold directories — the shape
+`swift-nio` itself uses (`Thresholds/${SWIFT_VERSION}/`).
 
 ### Baselines
 
@@ -120,8 +131,8 @@ Baselines land in `.benchmarkBaselines/` and are git-ignored — they embed the 
 measured on, so they are only meaningful locally.
 
 Hold the filter set and the `--metric` selection fixed between `update` and `compare`. Counters are only
-comparable between runs that agree on both: the same binary and case reported 5 retains under the full
-metric set and 3 under `--metric mallocCountTotal --metric retainCount`. Two ad-hoc runs with different
+comparable between runs that agree on both: `parse.command.noop` reports 8 retains under the default
+metric set and 6 under `--metric mallocCountTotal --metric retainCount`. Two ad-hoc runs with different
 flags are not a before and after. Counts are per benchmark, not per symbol; to find *where*, see
 [Profiling](#profiling).
 
@@ -149,7 +160,7 @@ what you thought to remove.
 `IMAPProfile` is a plain executable that runs one corpus a chosen number of times. The benchmark runners
 are the wrong thing to trace: they choose their iteration count from a time budget, and they run inside
 the malloc interposer, which attributes every allocation to itself. Under `Allocations` the budget is
-badly wrong too: the body-structure case allocates ~110,000 times per iteration, so the runner would
+badly wrong too: the body-structure case allocates ~42,000 times per iteration, so the runner would
 record millions of events.
 
 ```sh
@@ -182,7 +193,7 @@ deliberately neither rescales nor sums anything, because the header suffixes are
 the rows after them, so pass the labels:
 
 ```sh
-./dev/summarize-comparison.py /tmp/cmp.txt --before main --after branch
+./dev/summarize-comparison.py /tmp/cmp.txt --before main-parse --after branch-parse
 ```
 
 ## How the corpora were chosen
@@ -277,7 +288,7 @@ registration time, so the two directions cannot drift apart and there is no hand
 
 | Case | What it is for |
 | --- | --- |
-| `dispatch-client.parse.*` | One client's read path — a transport handing over `DispatchData` — run against both library versions. Corpora and read sizes mirror `parse.responses.*` so the two suites cross-check each other: this target's `parse.sweep.1000.read-1448` reports the same counters as `parse.responses.1000.read-1448` does, because it is the same work. |
+| `dispatch-client.parse.*` | One client's read path — a transport handing over `DispatchData` — run against both library versions. Corpora and read sizes mirror `parse.responses.*` so the two suites cross-check each other: this target's `parse.sweep.1000.read-1448` reports nearly the same counters as `parse.responses.1000.read-1448` does (40,827 against 40,575 mallocs), because it is nearly the same work. |
 | `dispatch-client.encode.*` | The same client's write path, plus the response-encoding shape a Dispatch-based *server* has, which is where encoding is expensive enough to be worth measuring. |
 
 Both halves of the driver are in `Benchmarks/IMAPDispatchClient`, selected by `IMAP_LEGACY_BUFFERS`.
@@ -308,130 +319,141 @@ meaningless.
 
 ## Baseline
 
-Measured on an arm64 Mac (Apple Swift 6.4, malloc-interposer backend), p50, with the full default metric
-set. Wall clock is machine-specific and drifts ~7% run to run here; the counts are deterministic
-everywhere except the `encode.dispatch.*` cases (see below).
+Apple M5 Max, macOS 27.3, Swift 6.4.4, malloc-interposer backend. Counts are the committed thresholds
+(`Thresholds/`). Wall clock is the lower p50 of two full default runs; it is machine-specific and drifts
+~3% run to run (median; up to 35% on a few encode cases). The counts are deterministic everywhere except the `encode.dispatch.*` cases (see below).
+Retains depend on the metric selection (see [Baselines](#baselines)), so a default run reports slightly
+different ones.
 
 | Case | wall p50 | mallocs | malloc bytes | retains |
 | --- | --- | --- | --- | --- |
-| `parse.command.noop` | 791 ns | 4 | 142 | 5 |
-| `parse.command.uid_fetch_headers` | 6 µs | 62 | 4 K | 37 |
-| `parse.command.uid_search_compound` | 56 µs | 1 K | 64 K | 465 |
-| `parse.commands.all` | 299 µs | 4 K | 216 K | 2 K |
-| `roundtrip.commands.all` | 372 µs | 4 K | 256 K | 3 K |
-| `parse.responses.session` | 171 µs | 2 K | 139 K | 1 K |
-| `parse.responses.bodystructure.200` | 10 ms | 111 K | 8.2 M | 91 K |
-| `parse.responses.bodystructure.200.read-1448` | 13 ms | 145 K | 10.6 M | 112 K |
-| `parse.responses.1000.contiguous` | 8 ms | 99 K | 5.7 M | 66 K |
-| `parse.responses.1000.read-1448` | 8 ms | 101 K | 5.9 M | 68 K |
-| `parse.responses.1000.read-65536` | 8 ms | 99 K | 5.7 M | 66 K |
-| `parse.responses.100.read-1` | 35 ms | 331 K | 26.0 M | 184 K |
-| `parse.literal-1MB.read-1448` | 245 µs | 2 K | 110 K | 4 K |
-| `parse.literal-1MB.read-65536` | 14 µs | 108 | 7 K | 148 |
-| `parse.dispatch.responses.session` | 197 µs | 3 K | 154 K | 2 K |
-| `parse.dispatch.responses.1000.contiguous` | 11 ms | 134 K | 7.3 M | 81 K |
-| `parse.dispatch.responses.1000.read-1448` | 11 ms | 138 K | 7.6 M | 83 K |
-| `parse.dispatch.responses.1000.read-65536` | 11 ms | 134 K | 7.4 M | 81 K |
-| `parse.dispatch.responses.bodystructure.200.read-1448` | 14 ms | 157 K | 11.2 M | 117 K |
-| `parse.dispatch.literal-1MB.read-1448` | 813 µs | 10 K | 1.5 M | 6 K |
-| `parse.dispatch.literal-1MB.read-65536` | 45 µs | 344 | 1.1 M | 197 |
-| `encode.command.noop` | 666 ns | 6 | 536 | 11 |
-| `encode.commands.all` | 48 µs | 284 | 39 K | 854 |
-| `encode.create.quoted-string` | 791 ns | 6 | 648 | 13 |
-| `encode.create.literal` | 750 ns | 6 | 648 | 13 |
-| `encode.login.sync-literal` | 1,208 ns | 9 | 704 | 24 |
-| `encode.append.128B` | 2,375 ns | 22 | 2,376 | 38 |
-| `encode.append.1MB` | 16 µs | 20 | 2,099 K | 37 |
-| `encode.append.4MB` | 57 µs | 20 | 8,390 K | 37 |
-| `encode.responses.session` | 14 µs | 27 | 5,928 | 256 |
-| `encode.responses.bodystructure.200` | 1,361 µs | 471 | 358 K | 33 K |
-| `encode.responses.1000.reused-buffer` | 798 µs | 41 | 133 K | 24 K |
-| `encode.responses.1000.fresh-buffer` | 1,995 µs | 21 K | 2,463 K | 41 K |
-| `encode.literal-1MB.streamed` | 60 µs | 11 | 1,464 | 2,204 |
-| `encode.handler.command.noop.imap-sink` | 625 ns | 6 | 536 | 10 |
-| `encode.handler.command.noop.bytebuffer-sink` | 666 ns | 4 | 497 | 13 |
-| `encode.handler.commands.all.imap-sink` | 54 µs | 413 | 40 K | 853 |
-| `encode.handler.commands.all.bytebuffer-sink` | 61 µs | 276 | 34 K | 1,058 |
-| `encode.handler.append.1MB.imap-sink` | 2,459 ns | 22 | 1,922 | 40 |
-| `encode.handler.append.4MB.imap-sink` | 2,417 ns | 22 | 1,922 | 40 |
-| `encode.handler.append.1MB.bytebuffer-sink` | 2,501 ns | 16 | 1,827 | 51 |
-| `encode.handler.append.4MB.bytebuffer-sink` | 2,501 ns | 16 | 1,827 | 51 |
-| `encode.handler.responses.1000.imap-sink` | 1,382 µs | 10 K | 619 K | 29 K |
-| `encode.handler.responses.1000.bytebuffer-sink` | 1,768 µs | 5,130 | 334 K | 40 K |
-| `encode.handler.responses.1000.in-flight.imap-sink` | 1,403 µs | 10 K | 946 K | 35 K |
-| `encode.handler.responses.1000.in-flight.bytebuffer-sink` | 2,204 µs | 16 K | 2,397 K | 45 K |
-| `encode.handler.responses.bodystructure.200.imap-sink` | 1,552 µs | 3,706 | 800 K | 35 K |
-| `encode.handler.responses.bodystructure.200.bytebuffer-sink` | 2,202 µs | 2,006 | 132 K | 38 K |
-| `encode.dispatch.commands.all.imap-sink` | 70 µs | 482 | 43 K | not measured |
-| `encode.dispatch.commands.all.bytebuffer-sink` | 62 µs | 414 | 41 K | not measured |
-| `encode.dispatch.append.1MB.imap-sink` | 22 µs | 27 | 1,051 K | not measured |
-| `encode.dispatch.append.4MB.imap-sink` | 61 µs | 27 | 4,197 K | not measured |
-| `encode.dispatch.append.1MB.array-payload` | 3,959 ns | 29 | 2,393 | not measured |
-| `encode.dispatch.append.4MB.array-payload` | 3,917 ns | 29 | 2,393 | not measured |
-| `encode.dispatch.responses.1000.imap-sink` | 2,484 µs | 15 K | 1,037 K | not measured |
-| `encode.dispatch.responses.1000.bytebuffer-sink` | 2,078 µs | 15 K | 784 K | not measured |
-| `encode.dispatch.literal-1MB.streamed.imap-sink` | 178 µs | 1,475 | 1,097 K | not measured |
-| `encode.dispatch.literal-1MB.streamed.bytebuffer-sink` | 151 µs | 1,464 | 1,096 K | not measured |
-| `encode.dispatch.regions.1` | 1,416 ns | 4 | 200 | not measured |
-| `encode.dispatch.regions.4` | 2,083 ns | 19 | 1,216 | not measured |
-| `encode.dispatch.regions.16` | 6,919 ns | 79 | 7,459 | not measured |
-| `encode.dispatch.regions.64` | 42 µs | 319 | 67 K | not measured |
+| `parse.command.noop` | 625 ns | 4 | 142 | 6 |
+| `parse.command.uid_fetch_headers` | 3,625 ns | 33 | 1,956 | 42 |
+| `parse.command.uid_search_compound` | 19 µs | 342 | 21,055 | 485 |
+| `parse.commands.all` | 147 µs | 1,712 | 88,415 | 2,260 |
+| `roundtrip.commands.all` | 200 µs | 2,123 | 128,127 | 3,305 |
+| `parse.responses.session` | 82 µs | 979 | 50,236 | 2,028 |
+| `parse.responses.bodystructure.200` | 5,018 µs | 41,811 | 2,413,224 | 91,823 |
+| `parse.responses.bodystructure.200.read-1448` | 6,476 µs | 55,557 | 3,111,287 | 114,159 |
+| `parse.responses.1000.contiguous` | 3,789 µs | 39,389 | 1,805,421 | 72,278 |
+| `parse.responses.1000.read-1448` | 3,942 µs | 40,575 | 1,867,048 | 73,832 |
+| `parse.responses.1000.read-65536` | 3,805 µs | 39,403 | 1,806,073 | 72,304 |
+| `parse.responses.100.read-1` | 15 ms | 159,186 | 8,074,865 | 197,247 |
+| `parse.literal-1MB.read-1448` | 112 µs | 751 | 49,463 | 2,943 |
+| `parse.literal-1MB.read-65536` | 5,919 ns | 43 | 3,219 | 111 |
+| `parse.dispatch.responses.session` | 95 µs | 1,304 | 64,971 | 2,166 |
+| `parse.dispatch.responses.1000.contiguous` | 5,513 µs | 75,274 | 3,445,756 | 87,656 |
+| `parse.dispatch.responses.1000.read-1448` | 5,743 µs | 76,949 | 3,529,004 | 89,216 |
+| `parse.dispatch.responses.1000.read-65536` | 5,628 µs | 75,293 | 3,446,623 | 87,682 |
+| `parse.dispatch.responses.bodystructure.200.read-1448` | 7,119 µs | 67,959 | 3,676,496 | 118,965 |
+| `parse.dispatch.literal-1MB.read-1448` | 510 µs | 9,482 | 1,399,073 | 5,861 |
+| `parse.dispatch.literal-1MB.read-65536` | 31 µs | 278 | 1,059,233 | 197 |
+| `encode.command.noop` | 459 ns | 6 | 536 | 9 |
+| `encode.commands.all` | 35 µs | 284 | 39,408 | 978 |
+| `encode.create.quoted-string` | 542 ns | 6 | 648 | 11 |
+| `encode.create.literal` | 500 ns | 6 | 648 | 11 |
+| `encode.login.sync-literal` | 833 ns | 9 | 704 | 20 |
+| `encode.append.128B` | 1,542 ns | 22 | 2,376 | 37 |
+| `encode.append.1MB` | 13 µs | 20 | 2,098,976 | 36 |
+| `encode.append.4MB` | 51 µs | 20 | 8,390,432 | 36 |
+| `encode.responses.session` | 6,791 ns | 23 | 5,320 | 232 |
+| `encode.responses.bodystructure.200` | 928 µs | 71 | 332,040 | 33,497 |
+| `encode.responses.1000.reused-buffer` | 518 µs | 41 | 133,200 | 23,924 |
+| `encode.responses.1000.fresh-buffer` | 1,394 µs | 21,379 | 2,463,456 | 40,383 |
+| `encode.literal-1MB.streamed` | 41 µs | 11 | 1,464 | 2,201 |
+| `encode.handler.command.noop.imap-sink` | 500 ns | 6 | 536 | 7 |
+| `encode.handler.command.noop.bytebuffer-sink` | 417 ns | 4 | 497 | 9 |
+| `encode.handler.commands.all.imap-sink` | 41 µs | 413 | 39,784 | 908 |
+| `encode.handler.commands.all.bytebuffer-sink` | 36 µs | 276 | 34,085 | 1,045 |
+| `encode.handler.append.1MB.imap-sink` | 1,792 ns | 22 | 1,922 | 33 |
+| `encode.handler.append.4MB.imap-sink` | 1,708 ns | 22 | 1,922 | 33 |
+| `encode.handler.append.1MB.bytebuffer-sink` | 1,542 ns | 16 | 1,827 | 41 |
+| `encode.handler.append.4MB.bytebuffer-sink` | 1,542 ns | 16 | 1,827 | 41 |
+| `encode.handler.responses.1000.imap-sink` | 992 µs | 10,308 | 618,528 | 29,065 |
+| `encode.handler.responses.1000.bytebuffer-sink` | 1,006 µs | 5,130 | 334,134 | 34,136 |
+| `encode.handler.responses.1000.in-flight.imap-sink` | 1,059 µs | 10,310 | 946,144 | 34,191 |
+| `encode.handler.responses.1000.in-flight.bytebuffer-sink` | 1,338 µs | 15,506 | 2,397,238 | 39,262 |
+| `encode.handler.responses.bodystructure.200.imap-sink` | 1,052 µs | 3,306 | 774,008 | 35,131 |
+| `encode.handler.responses.bodystructure.200.bytebuffer-sink` | 1,083 µs | 1,606 | 106,033 | 36,611 |
+| `encode.dispatch.commands.all.imap-sink` | 35 µs | 413 | 38,469 | not measured |
+| `encode.dispatch.commands.all.bytebuffer-sink` | 35 µs | 414 | 41,322 | not measured |
+| `encode.dispatch.append.1MB.imap-sink` | 3,043 ns | 25 | 2,071 | not measured |
+| `encode.dispatch.append.4MB.imap-sink` | 3,041 ns | 25 | 2,071 | not measured |
+| `encode.dispatch.append.1MB.bytebuffer-sink` | 3,001 ns | 25 | 2,235 | not measured |
+| `encode.dispatch.append.4MB.bytebuffer-sink` | 3,085 ns | 25 | 2,235 | not measured |
+| `encode.dispatch.append.1MB.array-payload` | 3,125 ns | 26 | 2,095 | not measured |
+| `encode.dispatch.append.4MB.array-payload` | 3,167 ns | 26 | 2,095 | not measured |
+| `encode.dispatch.responses.1000.imap-sink` | 889 µs | 10,293 | 582,717 | not measured |
+| `encode.dispatch.responses.1000.bytebuffer-sink` | 1,118 µs | 15,382 | 783,651 | not measured |
+| `encode.dispatch.literal-1MB.streamed.imap-sink` | 145 µs | 2,191 | 129,407 | not measured |
+| `encode.dispatch.literal-1MB.streamed.bytebuffer-sink` | 148 µs | 2,189 | 128,703 | not measured |
+| `encode.dispatch.regions.1` | 1,666 ns | 4 | 200 | not measured |
+| `encode.dispatch.regions.4` | 1,792 ns | 19 | 1,216 | not measured |
+| `encode.dispatch.regions.16` | 5,087 ns | 79 | 7,459 | not measured |
+| `encode.dispatch.regions.64` | 26 µs | 319 | 66,992 | not measured |
 
 The `encode.dispatch.*` cases measure no ARC metric, deliberately: the counters are not deterministic
 there, as a comment above those registrations explains. Their wall clock is also the least trustworthy in
 the suite for the same reason: a donated region's deallocator runs on a background queue, so a case's
 measured time depends on how much destruction work the queue is still retiring from the case before it.
-`encode.dispatch.regions.1` measures 417 ns run in isolation and 1,416 ns run after the 64-region case.
-**Read the allocation counters on that sweep, not the times.**
+`encode.dispatch.regions.1` measured 1,666 / 1,959 ns in two full runs — an 18% spread on identical
+code. **Read the allocation counters on that sweep, not the times.**
 
 Nine things this baseline says that are worth knowing before optimising anything:
 
-1. **Parsing is allocation-bound.** ~99 allocations per light-FETCH message and ~554 per body-structure
-   message. Whatever else is true, that is still the number to attack — but it is **not** the *output
-   model*, which is what this list previously asserted. Profiled under `Allocations`, three mechanisms
-   unrelated to the model were 74% of the allocations the parser made: a hand-rolled UTF-8 decode that
-   regrew a `String` once per scalar, `[String: SubParser]` lookup tables rebuilt on every call, and heap
-   closure contexts from passing `GrammarParser` methods as function values. All three are fixed; find the next ones with
-   [Profiling](#profiling). The model's per-field `[UInt8]` is real —
-   `extractBytes` is 106 allocations per body-structure message — but it is a minority of the remainder.
-2. **Encoding is ~8× cheaper than parsing** on the same traffic: 48 µs against 299 µs for the command
-   corpus, 1.3 ms against 10 ms for the body structures. The parser is still where the work is. The gap
-   used to be 20–30×; it closed because the parser got faster, not because the encoder got slower.
+1. **Parsing is allocation-bound.** ~39 allocations per light-FETCH message and ~209 per body-structure
+   message. Two rounds of work removed mechanisms unrelated to the output model. First, three were 74% of
+   the allocations: a hand-rolled UTF-8 decode that regrew a `String` once per scalar,
+   `[String: SubParser]` lookup tables rebuilt on every call, and heap closure contexts from passing
+   `GrammarParser` methods as function values. Then typed throws roughly halved what remained (46–57% on
+   the response corpora): an untyped throw boxes its error with `swift_allocError`, and every failed
+   speculative match threw one. What is left is mostly the model: `extractBytes`, which copies each small
+   field into its own `[UInt8]`, is 106 of the ~218 allocations per body-structure message that an
+   `IMAPProfile` trace counts. Find the rest with [Profiling](#profiling).
+2. **Encoding is 4–6× cheaper than parsing** on the same traffic: 35 µs against 147 µs for the command
+   corpus, 0.9 ms against 5.0 ms for the body structures. The parser is still where the work is. The gap
+   used to be 20–30×; it closed because the parser got faster, not because the encoder got slower. The
+   encoder stages writes under 256 bytes and appends them to its sink in one call, so a primitive write
+   is an inline copy rather than a call into the sink; the two sinks differ in how they hand bytes out
+   (`encode.handler.*`), not in what a write costs.
 3. **Read size matters, but only once responses are big enough to straddle one.** The light sweep, whose
-   responses are ~70 bytes, costs 99 K mallocs contiguous and 101 K at MTU-sized reads — 2% apart. The
+   responses are ~70 bytes, costs 39,389 mallocs contiguous and 40,575 at MTU-sized reads — 3% apart. The
    body-structure sweep, whose responses are ~1.4 KB and therefore straddle nearly every 1448-byte read,
-   goes from 111 K to 145 K — **31% apart**. Anything measuring only short responses will conclude,
+   goes from 41,811 to 55,557 — **33% apart**. Anything measuring only short responses will conclude,
    wrongly, that read size is irrelevant.
 4. **Byte-at-a-time input costs a parse attempt per byte, not a region per byte.** Per-call parse work
    is O(live regions), so one region per read made parsing one line quadratic in its length:
    `parse.responses.100.read-1` cost 71 ms, 418 K mallocs, 70.3 M bytes and 1.5 M retains before small
    reads were coalesced. `IMAPInputBuffer.append` now copies a read under `copyThreshold` into a shared
-   1 KiB tail, so live regions number about one per KiB. Each read still starts a parse attempt over the
-   partial response.
-5. **`DispatchData` input costs ~10% on line-oriented traffic and 3× on literals.** (Figures in this
-   item and the three below it were measured before the 2026-08-14 allocation work; both sides of each
-   comparison improved together, so the ratios hold but the absolutes are lower now.) 33 ms against 30 ms
-   for the light sweep, but **773 µs against 257 µs** with **12× the allocated bytes** for a 1 MB literal
-   at MTU reads, and 67× the bytes at 64 K reads. That is the "extraction always copies" property: the
-   `DispatchData` gather passes no owner, so a literal is copied out region by region, where an
-   `IMAPInputBuffer` hands it over by reference. Zero copy on the read side is a property of
-   `IMAPInputBuffer` alone.
-6. **A payload reaches either transport uncopied.** `encode.handler.append.*` reports 1,922 B for both
-   1 MB and 4 MB payloads, and `encode.dispatch.append.*.array-payload` reports 2,393 B for both — flat
-   lines, i.e. nothing copying the payload. `encode.dispatch.append.1MB/4MB` hand in a
-   `ByteBuffer`-backed payload, which is a `StableAddressByteRegion` and so is donated too, on either
-   sink. Only `IMAPOutputBuffer`'s own regions are copied, and only on their way into a `ByteBuffer`.
+   1 KiB tail, so live regions number about one per KiB; the case is now 159 K mallocs and 8.1 M bytes.
+   Each read still starts a parse attempt over the partial response.
+5. **`DispatchData` input costs 15–45% on line-oriented traffic and ~4.5× on literals.** 95 µs against
+   82 µs for the session corpus and 5.7 ms against 3.9 ms for the light sweep at MTU reads, with 1.9×
+   the allocations (76,949 against 40,575). For a 1 MB literal at MTU reads it is **510 µs against
+   112 µs** with **28× the allocated bytes**, and 329× the bytes at 64 K reads. That is the "extraction
+   always copies" property: the `DispatchData` gather passes no owner, so a literal is copied out region
+   by region, where an `IMAPInputBuffer` hands it over by reference. Zero copy on the read side is a
+   property of `IMAPInputBuffer` alone.
+6. **A payload reaches either transport uncopied.** `encode.handler.append.*` reports 1,922 B (imap-sink)
+   and 1,827 B (bytebuffer-sink) for both 1 MB and 4 MB payloads. On the Dispatch path the
+   `ByteBuffer`-backed payload, a `StableAddressByteRegion`, is donated on either sink — 2,071 B
+   (imap-sink) and 2,235 B (bytebuffer-sink) — and the array-backed one reports 2,095 B for both sizes.
+   Flat lines, i.e. nothing copying the payload. Still copied: into a `ByteBuffer`, a run of small
+   regions and any region not backed by one (`IMAPOutputBuffer`'s own included); into a `DispatchData`,
+   a region under 512 B (finding 8) or without a fixed address.
 7. **A `DispatchData` output region costs ~5 allocations and ~1 KB, not the ~150 ns + ~40 ns the encoder
    design assumed.** Across the region sweep the malloc count goes 4 → 19 → 79 → 319 for 1 → 4 → 16 → 64
-   regions, i.e. 5.0 per region, and the bytes go 200 → 67,007, i.e. ~1,060 per region. The design's
+   regions, i.e. 5.0 per region, and the bytes go 200 → 66,992, i.e. ~1,060 per region. The design's
    "minimise regions per chunk" rule is right and considerably more important than the number behind it
    suggested; a 64-region chunk is not cheap insurance.
-8. **Converting to `DispatchData` roughly doubles the cost of many small messages.**
-   `encode.dispatch.responses.1000.imap-sink` is 2,484 µs against 1,382 µs for the same sweep handed out
-   as `ByteBuffer`s — about 1.1 µs per response of pure conversion, which is a per-message tax a
-   `ByteBuffer` transport does not pay.
-9. **A reused `ResponseEncodeBuffer` is now better on both counts** — 798 µs / 41 mallocs / 133 KB against
-   1,995 µs / 21 K / 2,463 KB for a fresh one per response. It used to allocate *fewer times but more
+8. **Converting many small messages to `DispatchData` costs about what handing them out as `ByteBuffer`s
+   does.** `encode.dispatch.responses.1000.imap-sink` is 889 µs and 10,293 mallocs against 992 µs and
+   10,308 for the same sweep handed out as `ByteBuffer`s: `makeDispatchData()` copies regions shorter than
+   `IMAPBuffer.dispatchDonationThreshold` (512 B), each run into one allocation, and donates only the
+   rest. With `ByteBufferOutput` it is 1,118 µs, 15,382 mallocs and 784 KB against 1,006 µs, 5,130 and
+   334 KB.
+9. **A reused `ResponseEncodeBuffer` is now better on both counts** — 518 µs / 41 mallocs / 133 KB against
+   1,394 µs / 21 K / 2,463 KB for a fresh one per response. It used to allocate *fewer times but more
    bytes*, because clearing a `ByteBuffer` whose storage was no longer uniquely referenced reallocated it
    once per response. The sink keeps the segment it is writing into instead.
 
@@ -447,14 +469,16 @@ before-and-after number at all.
 cd Examples/PerformanceTester
 ./dev/compare-dispatch-client.sh                       # ~10 minutes, most of it building two libraries
 
-# Then collapse the ~16,000 lines of percentile tables into one row per case:
-swift package --disable-sandbox --scratch-path .build-branch \
-  benchmark baseline compare main branch --target IMAPDispatchClient 2>&1 | tr '\r' '\n' > /tmp/cmp.txt
-./dev/summarize-comparison.py /tmp/cmp.txt --before main --after branch
+# The script prints both comparisons. To summarise one again, one row per case (phase: parse, encode):
+phase=parse
+swift package --disable-sandbox --scratch-path .build-branch benchmark baseline compare \
+  main-$phase branch-$phase --target IMAPDispatchClient --filter "dispatch-client.$phase.*" 2>&1 \
+  | tr '\r' '\n' > /tmp/cmp.txt
+./dev/summarize-comparison.py /tmp/cmp.txt --before main-$phase --after branch-$phase
 ```
 
 The script checks out the pre-migration library under `.worktrees/pre-migration` — pinned to commit
-`f5fa7d36`, not to the branch name, so that it keeps meaning "before" after this branch merges — points
+`b2c94a8b`, not to the branch name, so that it keeps meaning "before" after this branch merges — points
 this package's path dependency at it via `IMAP_IMPL=main`, records a baseline, then does the same for
 this tree and compares. One set of case names, two libraries.
 
@@ -474,65 +498,64 @@ Two things bound what the numbers mean, and both are deliberate:
   accumulator multiply-referenced, so the next append copies the whole storage, which for a 1 MB
   literal at MTU reads works out at roughly 45 MB of copy-on-write against 1 MB for copying the payload
   out. So every figure below is a **floor** on what the migration is worth.
-- **The comparison is of the whole branch**, not of the buffer types alone: the parser's 74% allocation
-  cut and the model's move off `ByteBuffer` are in the same number. Nothing here attributes the win
-  between them.
+- **The comparison is of the whole branch**, not of the buffer types alone: the parser's allocation work
+  (finding 1 above) and the model's move off `ByteBuffer` are in the same number. Nothing here attributes
+  the win between them.
 
 ### Results
 
-Measured against `4b83b70e`, before the pin moved to `17929ed4` and then `f5fa7d36`. Mean of 1,000 iterations, arm64 (Apple Swift 6.4, malloc-interposer backend). Counters are
-deterministic; wall clock drifts ~7% run to run. The read cases are measured with ARC counting on, which
-taxes both sides — re-measured with it off, their time ratios move by ≤3 points (the sweep goes from
-−75.7% to −73.3%), i.e. within that noise. The write cases do not measure ARC counters at all; see
-below.
+Measured against `b2c94a8b` on an Apple M5 Max, macOS 27.3, Swift 6.4.4, `ordo-one/benchmark` 1.38.1,
+malloc-interposer backend. Wall clock is the lower p50 of two runs of the script (up to 1,000 iterations
+per case, capped at 3 s); the two agreed within 5% except on `main`'s 4 MB `APPEND` (8%). Read-side
+counters are deterministic; write-side ones vary by up to 2 allocations per iteration, because
+deallocators run on a background queue, and the table quotes their p50 (equal to the committed p90). The
+read cases are measured with ARC counting on, which taxes both sides — re-measured with it off, their
+time ratios move by ≤1 point (the sweep goes from −84.6% to −84.0%), i.e. within the run-to-run noise.
+The write cases do not measure ARC counters at all; see below.
 
 | Case | wall clock | mallocs | malloc bytes | retains |
 | --- | --- | --- | --- | --- |
-| `parse.session` | 524 → 201 µs | 8,062 → 2,541 | 465 K → 145 K | 6,134 → 1,527 |
-| `parse.sweep.1000.read-1448` | 36.3 → 8.7 ms | 571 K → 102 K | 29.5 M → 5.9 M | 501 K → 68 K |
-| `parse.bodystructure.200.read-1448` | 43.8 → 14.2 ms | 614 K → 146 K | 32.3 M → 10.7 M | 680 K → 113 K |
-| `parse.literal-1MB.read-1448` | 420 → 483 µs | 4,642 → 4,434 | 1.81 M → 313 K | 4,638 → 5,850 |
-| `parse.literal-1MB.read-65536` | 79.6 → 21.2 µs | 387 → 181 | 1.14 M → 10.8 K | 390 → 184 |
-| `parse.literal-4MB.read-65536` | 233 → 56 µs | 676 → 471 | 4.29 M → 29.4 K | 678 → 568 |
-| `encode.commands.all` | 22.8 → 22.0 µs | 214 → 197 | 15.6 K → 17.8 K | not measured |
-| `encode.responses.session` | 24.5 → 29.9 µs | 202 → 174 | 21.8 K → 14.7 K | not measured |
-| `encode.responses.bodystructure.200` | 2.98 → 2.10 ms | 7,014 → 5,318 | 2.16 M → 643 K | not measured |
-| `encode.append.1MB` | 29.7 → 3.6 µs | 26 → 29 | 2.10 M → 2,393 | not measured |
-| `encode.append.4MB` | 129 → 3.7 µs | 26 → 29 | 8.39 M → 2,393 | not measured |
+| `parse.session` | 375 → 83.4 µs | 8,105 → 1,015 | 470 K → 52.8 K | 6,502 → 2,079 |
+| `parse.sweep.1000.read-1448` | 26.3 → 4.0 ms | 582 K → 40.8 K | 32.5 M → 1.88 M | 526 K → 73.9 K |
+| `parse.bodystructure.200.read-1448` | 31.4 → 6.6 ms | 617 K → 56.2 K | 33.4 M → 3.13 M | 740 K → 114 K |
+| `parse.literal-1MB.read-1448` | 277 → 232 µs | 4,646 → 2,937 | 1.81 M → 212 K | 4,647 → 4,394 |
+| `parse.literal-1MB.read-65536` | 55.1 → 9.1 µs | 393 → 99 | 1.14 M → 6,275 | 399 → 146 |
+| `parse.literal-4MB.read-65536` | 169 → 24.8 µs | 682 → 293 | 4.30 M → 18.4 K | 687 → 434 |
+| `encode.commands.all` | 13.7 → 11.6 µs | 260 → 169 | 16.1 K → 15.7 K | not measured |
+| `encode.responses.session` | 14.2 → 11.3 µs | 204 → 113 | 21.8 K → 10.3 K | not measured |
+| `encode.responses.bodystructure.200` | 1.70 → 1.29 ms | 6,615 → 3,487 | 2.13 M → 568 K | not measured |
+| `encode.append.1MB` | 36.7 → 2.1 µs | 27 → 26 | 2.10 M → 2,095 | not measured |
+| `encode.append.4MB` | 113 → 1.7 µs | 27 → 26 | 8.39 M → 2,095 | not measured |
 
 Five things this says:
 
 1. **The read side wins everywhere, and by a factor rather than a percentage.** Ordinary traffic — the
-   session preamble, a thousand-message flag sweep, two hundred body structures — costs **3.2–5.6× fewer
-   allocations, 3–5× fewer allocated bytes and 2.6–4× less time**. None of that is the buffer plumbing
+   session preamble, a thousand-message flag sweep, two hundred body structures — costs **8–14× fewer
+   allocations, 9–17× fewer allocated bytes and 4.5–6.5× less time**. None of that is the buffer plumbing
    alone; it is the migration plus the allocation work that followed it, which is the honest scope of
    the question "what is this branch worth".
 2. **The payload path becomes O(1) in the payload, in bytes *and* in time.** A 1 MB literal at 64 K reads
-   allocates 1.14 MB before and 10.8 KB after; at 4 MB it is 4.29 MB against 29.4 KB. The write side is
-   the cleaner demonstration: an `APPEND` allocates **2,393 bytes and takes ~3.6 µs whether the message
-   is 1 MB or 4 MB**, against 2.10 MB / 29.7 µs and 8.39 MB / 129 µs. Flat against proportional — the
-   4 MB case is **35× faster** — which is what "the payload is never copied" looks like in a counter.
-3. **At MTU reads a large literal is a wash, and slightly slower.** `parse.literal-1MB.read-1448` is
-   483 µs against 420 µs, with 26% more retains, because a 1 MB literal arriving in 1448-byte pieces is
-   ~700 extractions, each boxing a region and taking a reference, where `main` does one `memcpy` per read
-   into a buffer it already owns. The allocated bytes still fall 5.8×. This is the documented trade —
-   per-region bookkeeping against copies — and the one shape where the migration buys footprint rather
-   than time.
-4. **Small-message encoding is between a wash and ~20% slower.** `encode.commands.all` measured 22.0 µs
-   against 22.8 µs run standalone and 22% *slower* than `main` through the plugin; `encode.responses.session`
-   was ~20% slower both ways. A 25-point spread on a 22 µs case is what these two cases are worth — read
-   the direction, not the number. The mechanism is that every chunk is now donated (`bytesNoCopy` plus a
-   custom deallocator block holding the owner) where `main` copied ~30 bytes into a `DispatchData` and was
-   done; it is corroborated in-tree, within one library, by `encode.dispatch.responses.1000.imap-sink`
-   costing 2,484 µs against 1,382 µs for the same sweep handed out as `ByteBuffer`s. Donation is the right
-   default for payload traffic and the wrong one for a `NOOP`. The fix is symmetric with the read side:
-   `makeDispatchData()` could copy a region below `copyThreshold` rather than donate it, the way
-   extraction already does. Not attempted here — this was a measurement exercise — and it is the one queue
-   item these numbers generate.
-5. **Encoding heavy responses wins on every axis it is measured on.**
-   `encode.responses.bodystructure.200` is 29% faster with 3.4× fewer allocated bytes and 24% fewer
-   allocations, which is the traffic the segment sink was chosen for — hundreds of small writes into
-   memory the encoder owns, handed over without a copy.
+   allocates 1.14 MB before and 6.3 KB after; at 4 MB it is 4.30 MB against 18.4 KB. The write side is
+   the cleaner demonstration: an `APPEND` allocates **2,095 bytes and takes ~1.7–2.1 µs whether the
+   message is 1 MB or 4 MB**, against 2.10 MB / 36.7 µs and 8.39 MB / 113 µs. Flat against
+   proportional — the 4 MB case is **66× faster** — which is what "the payload is never copied" looks
+   like in a counter.
+3. **At MTU reads a large literal gains least.** `parse.literal-1MB.read-1448` is 232 µs against 277 µs,
+   with about as many retains (4,394 against 4,647), because a 1 MB literal arriving in 1448-byte pieces
+   is ~700 extractions, each boxing a region and taking a reference, where `main` does one `memcpy` per
+   read into a buffer it already owns. The allocated bytes fall 8.5×. This is the documented trade —
+   per-region bookkeeping against copies — and the shape where the migration buys the least time.
+4. **Small-message encoding is faster too: 15% for commands, 20% for the session preamble,** with 35%
+   and 45% fewer allocations. `encode.commands.all` measured 11.6 µs against 13.7 µs and
+   `encode.responses.session` 11.3 µs against 14.2 µs. On cases this short, read the direction rather
+   than the exact figure. Donating a region (`bytesNoCopy` plus a custom deallocator block holding the
+   owner) costs more than copying a few bytes, so `makeDispatchData()` copies regions shorter than
+   `IMAPBuffer.dispatchDonationThreshold` (512 B), each run into one allocation, the way
+   `IMAPInputBuffer` copies small reads; corroborated in-tree by finding 8 of the baseline above.
+5. **Encoding heavy responses wins on every axis it is measured on.** `encode.responses.bodystructure.200`
+   is 24% faster with 3.7× fewer allocated bytes and 47% fewer allocations (3,487 against 6,615), which is
+   the traffic the segment sink was chosen for — hundreds of small writes into memory the encoder owns,
+   its large regions handed over without a copy.
 
 ### The ARC counters
 
@@ -570,21 +593,19 @@ If the case is one you will want to profile, add a matching entry to the `scenar
 
 ### Known hazards
 
-- **The magnitude suffixes in `baseline compare` headers are not scale factors, and differ between
-  metrics within one case.** On `parse.responses.bodystructure.200`, `Retains (K)` prints `207` for a
-  true 207,000, while `Malloc (bytes total) (K)` prints `20` for a true 20 MB. `Time (wall clock) (ns)`
-  on `parse.command.uid_fetch_headers` prints `24` for a true ~22 µs. Never compare or sum printed values
-  across cases. Ratios within a case are exact; for absolutes use the threshold JSONs or a standalone
-  run (see [Baselines](#baselines)).
+- **The magnitude suffixes in `baseline compare` headers differ between cases.** On
+  `parse.responses.bodystructure.200`, `Retains (K)` prints `92` and `Time (wall clock) (μs)` prints
+  `5018`; on `parse.command.uid_fetch_headers`, `Retains` prints `44` and `Time (wall clock) (ns)` prints
+  `3625`. With `ordo-one/benchmark` 1.36.2 the suffixes were not even scale factors; with 1.38.1 they are.
+  Never compare or sum printed values across cases. Ratios within a case are exact; for absolutes use the
+  threshold JSONs or a standalone run (see [Baselines](#baselines)).
 - **`thresholds update` writes every `--metric` you pass to every case, including ones that opted out.**
-  The six-metric set above adds ARC counters to the `encode.dispatch.*` and
-  `dispatch-client.encode.*` threshold files, which must not be gated (see
-  [the ARC counters](#the-arc-counters)). After any update, revert them;
-  the grep must print nothing:
+  A six-metric update over all cases adds ARC counters to the `encode.dispatch.*` and
+  `dispatch-client.encode.*` threshold files, which must not be gated — hence the five invocations in
+  [Checking against the committed thresholds](#checking-against-the-committed-thresholds). After any
+  update, this must print nothing:
 
   ```sh
-  git checkout -- Thresholds/IMAPEncoding.encode.dispatch.*.json \
-    Thresholds/IMAPDispatchClient.dispatch-client.encode.*.json
   grep -l retainCount Thresholds/IMAPEncoding.encode.dispatch.*.json \
     Thresholds/IMAPDispatchClient.dispatch-client.encode.*.json
   ```

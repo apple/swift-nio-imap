@@ -41,7 +41,7 @@ WORKTREE="${IMAP_MAIN_PATH:-$REPO_ROOT/.worktrees/pre-migration}"
 # It will not stay runnable forever: a library from 2026 stops building on some future toolchain, and at
 # that point the recorded numbers in `README.md` are what survives. That is the expected end state, not a
 # regression to fix.
-PRE_MIGRATION_COMMIT="${IMAP_PRE_MIGRATION_COMMIT:-f5fa7d369115e5d88e13462f7854dcee9d8743ed}"
+PRE_MIGRATION_COMMIT="${IMAP_PRE_MIGRATION_COMMIT:-b2c94a8bceaa5af19a78c9d853258e42dd7ecdf0}"
 # Filters are per phase; see the loop below.
 
 # Same metric selection for both sides of a comparison. Counters are only comparable between runs that
