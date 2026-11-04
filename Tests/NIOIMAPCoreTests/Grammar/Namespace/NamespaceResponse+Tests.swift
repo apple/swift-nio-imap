@@ -26,9 +26,11 @@ struct NamespaceResponseTests {
         ),
         EncodeFixture.namespaceResponse(
             .init(
-                userNamespace: [NamespaceDescription(string: "", responseExtensions: [:])],
-                otherUserNamespace: [NamespaceDescription(string: "#shared/", char: "/", responseExtensions: [:])],
-                sharedNamespace: [NamespaceDescription(string: "Public Folders/", responseExtensions: [:])]
+                userNamespace: [try! NamespaceDescription(string: "", responseExtensions: [:])],
+                otherUserNamespace: [
+                    try! NamespaceDescription(string: "#shared/", delimiter: "/", responseExtensions: [:])
+                ],
+                sharedNamespace: [try! NamespaceDescription(string: "Public Folders/", responseExtensions: [:])]
             ),
             "NAMESPACE ((\"\" NIL)) ((\"#shared/\" \"/\")) ((\"Public Folders/\" NIL))"
         ),

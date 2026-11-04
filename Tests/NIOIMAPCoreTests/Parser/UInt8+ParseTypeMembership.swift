@@ -115,6 +115,14 @@ struct UInt8ParseTypeMembershipTests {
         #expect(invalid.allSatisfy { !$0.isAStringChar })
     }
 
+    @Test("tag char")
+    func tagChar() {
+        let valid = atomChars.union([UInt8(ascii: "]")]).subtracting([UInt8(ascii: "+")])
+        let invalid = allChars.subtracting(valid)
+        #expect(valid.allSatisfy { $0.isTagChar })
+        #expect(invalid.allSatisfy { !$0.isTagChar })
+    }
+
     /// `list-char = ATOM-CHAR / list-wildcards / resp-specials`
     @Test("list char")
     func listChar() {
@@ -150,6 +158,14 @@ struct UInt8ParseTypeMembershipTests {
         let valid = allChars.subtracting(invalid).subtracting(128...UInt8.max)
         #expect(valid.allSatisfy { $0.isTextChar })
         #expect(invalid.allSatisfy { !$0.isTextChar })
+    }
+
+    @Test("UTF-8 text byte")
+    func utf8TextByte() {
+        let invalid: Set<UInt8> = [UInt8(ascii: "\r"), .init(ascii: "\n"), 0]
+        let valid = allChars.subtracting(invalid)
+        #expect(valid.allSatisfy { $0.isUTF8TextByte })
+        #expect(invalid.allSatisfy { !$0.isUTF8TextByte })
     }
 
     @Test("hex character")

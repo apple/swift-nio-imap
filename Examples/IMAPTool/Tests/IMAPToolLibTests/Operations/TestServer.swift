@@ -129,7 +129,7 @@ final actor TestServer: Sendable {
     let greeting: UntaggedStatus
     let expectedOrdering: Ordering
     private var expectedCommands: [ExpectedCommand]
-    private var previousTag: String?
+    private var previousTag: Command.Tag?
     private var runningAppend: RunningAppend?
 
     private init(
@@ -296,7 +296,7 @@ extension TestServer {
             previousTag == nil
         else {
             struct ReceivedCommandWhileWaitingForContinuation: Swift.Error {
-                var previousTag: String
+                var previousTag: Command.Tag
                 var command: TaggedCommand
             }
             throw ReceivedCommandWhileWaitingForContinuation(
@@ -446,7 +446,7 @@ extension TestServer {
 
     private func didReceive(
         appendInto mailbox: MailboxName,
-        tag: String,
+        tag: Command.Tag,
         expectation: RunningAppend
     ) throws {
         guard

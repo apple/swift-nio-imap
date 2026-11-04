@@ -77,7 +77,7 @@ public struct BadCommand: Error {
     ///
     /// Allows the server to send a properly-tagged error response to the client,
     /// maintaining IMAP's request/response correlation even when the command is malformed.
-    public var commandTag: String
+    public var commandTag: Command.Tag
 
     /// Why parsing failed.
     ///

@@ -47,8 +47,14 @@ public struct ResponseText: Hashable, Sendable {
     /// A human-readable description from the server.
     ///
     /// The text provides context-specific information about the response, such as error messages or
-    /// successful completion notifications. It is always present but may be a single space for some
-    /// protocol-compliant responses.
+    /// successful completion notifications. It may be empty.
+    ///
+    /// - Warning: The text is written to the wire verbatim and must not contain NUL, CR, or LF:
+    ///   `No mailbox x\r\n* BYE pwned` would inject a whole response. Writing such text traps in
+    ///   debug builds.
+    /// - Note: The parser skips spaces before the text, so leading spaces are not read back.
+    /// - Warning: With a `nil` ``code``, a text that starts with `[` may be read back as a code:
+    ///   text `[ALERT] hi` is sent as `* OK [ALERT] hi`. Don't start it with untrusted input.
     public var text: String
 
     /// Creates a new `ResponseText`.
@@ -68,14 +74,14 @@ extension EncodeBuffer {
             self.writeString("[") + self.writeResponseTextCode(code) + self.writeString("] ")
         }
 
-            // If the text is empty, write an additional space
-            // to enforce standard compliance. Oddly, this is
-            // perfectly legal IMAP.
-            + self.writeText(text.text.count > 0 ? text.text : " ")
+            // `text` is `1*…`, so empty text is written as a single space, which parses back as
+            // empty.
+            + self.writeText(text.text.isEmpty ? " " : text.text)
     }
 
     @discardableResult mutating func writeText(_ text: String) -> Int {
-        self.writeString(text)
+        assert(text.utf8.allSatisfy(\.isUTF8TextByte), "Invalid text: \(String(reflecting: text))")
+        return self.writeString(text)
     }
 }
 

@@ -226,7 +226,7 @@ extension GrammarParser {
             // text requires minimum 1 char, but we want to be lenient here
             // and allow 0 characters to represent empty text
             let parsed = try PL.parseZeroOrMoreCharacters(buffer: &buffer, tracker: tracker) { (char) -> Bool in
-                char.isTextChar
+                char.isUTF8TextByte
             }
 
             let text = try ParserLibrary.parseBufferAsUTF8(parsed)

@@ -54,7 +54,7 @@ extension ClientStateMachine {
         }
 
         // The tag of the APPEND command
-        var tag: String
+        var tag: Command.Tag
         var state: State = .started(canFinish: false)
 
         var isWaitingForContinuationRequest: Bool {

@@ -139,7 +139,7 @@ final actor TestConnection: ConnectionProtocol {
         continuation.yield(
             .tagged(
                 TaggedResponse(
-                    tag: "\(tag)",
+                    tag: Command.Tag(String(tag))!,
                     state: state
                 )
             )
