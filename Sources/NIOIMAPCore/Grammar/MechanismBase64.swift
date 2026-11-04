@@ -24,12 +24,12 @@ public struct MechanismBase64: Hashable, Sendable {
     /// The authorization mechanism.
     public var mechanism: URLAuthenticationMechanism
 
-    /// The authentication data, encoded as base64.
+    /// The authentication data, decoded. It is base64-encoded on the wire.
     public var base64: ByteBuffer?
 
     /// Creates a new `MechanismBase64`.
     /// - parameter mechanism: The authorization mechanism.
-    /// - parameter base64: The authentication data, encoded as base64.
+    /// - parameter base64: The authentication data, decoded. It is base64-encoded on the wire.
     public init(mechanism: URLAuthenticationMechanism, base64: ByteBuffer?) {
         self.mechanism = mechanism
         self.base64 = base64
@@ -42,7 +42,8 @@ extension EncodeBuffer {
     @discardableResult mutating func writeMechanismBase64(_ data: MechanismBase64) -> Int {
         self.writeURLAuthenticationMechanism(data.mechanism)
             + self.writeIfExists(data.base64) { base64 in
-                self.writeString("=") + self.writeBuffer(&base64)
+                // mechanism-base64 = mechanism ["=" base64]; the parser decodes, so encode here.
+                self.writeString("=") + self.writeBufferAsBase64(base64)
             }
     }
 }

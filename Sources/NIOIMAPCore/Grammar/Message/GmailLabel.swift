@@ -74,11 +74,20 @@ extension EncodeBuffer {
         }
     }
 
+    /// Writes a system label (`\` + `atom`, e.g. `\Sent`) bare, anything else as a `string`.
+    ///
+    /// Only a valid system label may go out unquoted: `\Foo bar` or `\x)<CRLF>…` would otherwise
+    /// break framing.
     @discardableResult mutating func writeGmailLabel(_ label: GmailLabel) -> Int {
-        guard label.buffer.getInteger(at: label.buffer.readerIndex) == UInt8(ascii: "\\") else {
+        let bytes = label.buffer.readableBytesView
+        let atom = bytes.dropFirst()
+        guard
+            bytes.first == UInt8(ascii: "\\"),
+            !atom.isEmpty,
+            atom.allSatisfy(\.isAtomChar)
+        else {
             return self.writeIMAPString(label.buffer)
         }
-        var stringValue = label.buffer
-        return self.writeBuffer(&stringValue)
+        return self.writeBytes(bytes)
     }
 }

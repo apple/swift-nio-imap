@@ -14,7 +14,7 @@
 
 import Foundation
 import NIO
-@testable import NIOIMAPCore
+@_spi(NIOIMAPInternal) @testable import NIOIMAPCore
 import Testing
 
 func expectEqualAndEqualHash<T>(
@@ -181,3 +181,43 @@ extension StackTracker {
 let CR = UInt8(ascii: "\r")
 let LF = UInt8(ascii: "\n")
 let CRLF = String(decoding: [CR, LF], as: Unicode.UTF8.self)
+
+// MARK: - Round-trip
+
+extension TestUtilities {
+    /// Encodes `value` (server mode), parses the bytes back, and expects the original value.
+    ///
+    /// Catches both injection (bytes the parser reads differently) and encode/parse mismatches.
+    static func expectRoundTrip<T: Equatable>(
+        _ value: T,
+        terminator: String = " ",
+        encoder: (inout EncodeBuffer, T) -> Int,
+        parser: (inout ParseBuffer, StackTracker) throws -> T,
+        sourceLocation: SourceLocation = #_sourceLocation
+    ) {
+        var encodeBuffer = EncodeBuffer.serverEncodeBuffer(
+            buffer: ByteBuffer(),
+            options: ResponseEncodingOptions(),
+            loggingMode: false
+        )
+        _ = encoder(&encodeBuffer, value)
+        var encoded = encodeBuffer.nextChunk().bytes
+        encoded.writeString(terminator)
+        let encodedString = String(buffer: encoded)
+        var parseBuffer = ParseBuffer(encoded)
+        do {
+            let parsed = try parser(&parseBuffer, .testTracker)
+            #expect(parsed == value, "Encoded as \(String(reflecting: encodedString))", sourceLocation: sourceLocation)
+            #expect(
+                parseBuffer.readableBytes == terminator.utf8.count,
+                "Trailing bytes after parsing \(String(reflecting: encodedString))",
+                sourceLocation: sourceLocation
+            )
+        } catch {
+            Issue.record(
+                "Failed to parse \(String(reflecting: encodedString)): \(error)",
+                sourceLocation: sourceLocation
+            )
+        }
+    }
+}

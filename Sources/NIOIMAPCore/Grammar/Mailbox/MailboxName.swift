@@ -105,15 +105,22 @@ public struct MailboxPath: Hashable, Sendable {
     ///
     /// - Parameter name: A ``MailboxName`` containing the mailbox path, typically in Modified UTF-7 encoding
     /// - Parameter pathSeparator: An optional path separator as a single ASCII character
-    /// - Throws: ``InvalidPathSeparatorError`` if the path separator is not an ASCII character
+    /// - Throws: ``InvalidPathSeparatorError`` if the path separator is not an ASCII character, or is
+    ///   CR, LF, or NUL (which can't be written as a `QUOTED-CHAR`).
     public init(name: MailboxName, pathSeparator: Character? = nil) throws {
-        // if a path separator is given, it must be a valid ascii character
-        if let pathSeparator, !pathSeparator.isASCII {
+        self.name = name
+        guard let pathSeparator else {
+            self._pathSeparator = 0
+            return
+        }
+        // `Character("\r\n").asciiValue` is LF, so CRLF is rejected here too.
+        guard let byte = pathSeparator.asciiValue, pathSeparator.isASCII else {
             throw InvalidPathSeparatorError(description: "The path separator must be an ascii value")
         }
-
-        self.name = name
-        self._pathSeparator = pathSeparator?.asciiValue ?? 0
+        guard byte.isTextChar else {
+            throw InvalidPathSeparatorError(description: "The path separator must not be CR, LF, or NUL")
+        }
+        self._pathSeparator = byte
     }
 }
 

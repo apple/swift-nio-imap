@@ -139,7 +139,7 @@ struct MailboxInfoTests {
                 path: try! .init(name: MailboxName("Old"), pathSeparator: "\\"),
                 extensions: [:]
             ),
-            #"(\Unmarked) "\" "Old""#
+            #"(\Unmarked) "\\" "Old""#
         ),
         EncodeFixture.mailboxInfo(
             MailboxInfo(
@@ -147,7 +147,7 @@ struct MailboxInfoTests {
                 path: try! .init(name: MailboxName("Ghost"), pathSeparator: "\""),
                 extensions: [:]
             ),
-            #"(\Nonexistent) "\\" "Ghost""#
+            #"(\Nonexistent) "\"" "Ghost""#
         ),
     ])
     func encode(_ fixture: EncodeFixture<MailboxInfo>) {
@@ -165,6 +165,24 @@ struct MailboxInfoTests {
     )
     func encodeFlags(_ fixture: EncodeFixture<[MailboxInfo.Attribute]>) {
         fixture.checkEncoding()
+    }
+
+    @Test("path separator round-trips", arguments: [nil, "/", ".", "\\", "\"", "~"] as [Character?])
+    func pathSeparatorRoundTrip(_ separator: Character?) throws {
+        TestUtilities.expectRoundTrip(
+            MailboxInfo(attributes: [], path: try MailboxPath(name: .inbox, pathSeparator: separator), extensions: [:]),
+            terminator: "\r",
+            encoder: { $0.writeMailboxInfo($1) },
+            parser: GrammarParser().parseMailboxList
+        )
+    }
+
+    /// `(DQUOTE QUOTED-CHAR DQUOTE / nil)`: CR, LF, and NUL can't be written.
+    @Test("invalid path separator throws", arguments: ["\r", "\n", "\r\n", "\0"] as [Character])
+    func invalidPathSeparator(_ separator: Character) {
+        #expect(throws: InvalidPathSeparatorError.self) {
+            try MailboxPath(name: .inbox, pathSeparator: separator)
+        }
     }
 
     @Test(arguments: [
@@ -204,6 +222,22 @@ struct MailboxInfoTests {
         ),
         ParseFixture.mailboxInfo(#"() ""#, "", expected: .incompleteMessageIgnoringBufferModifications),
         ParseFixture.mailboxInfo(#"() "\" inbox"#, "", expected: .failureIgnoringBufferModifications),
+        // Escaped quoted-specials: `"\\"` is a backslash, `"\""` a double quote.
+        ParseFixture.mailboxInfo(
+            #"() "\\" inbox"#,
+            "\r",
+            expected: .success(
+                .init(attributes: [], path: try! .init(name: .inbox, pathSeparator: "\\"), extensions: [:])
+            )
+        ),
+        ParseFixture.mailboxInfo(
+            #"() "\"" inbox"#,
+            "\r",
+            expected: .success(
+                .init(attributes: [], path: try! .init(name: .inbox, pathSeparator: "\""), extensions: [:])
+            )
+        ),
+        ParseFixture.mailboxInfo(#"() "\a" inbox"#, "", expected: .failureIgnoringBufferModifications),
         // Extended list — empty extensions: covers parseMailboxListExtended entry + empty content path
         ParseFixture.mailboxInfo(
             "() NIL inbox ()",

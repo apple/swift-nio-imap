@@ -97,6 +97,7 @@ extension EncodeBuffer {
         guard let encoding = encoding else {
             return self.writeNil()
         }
-        return self.writeString("\"\(encoding.stringValue)\"")
+        // body-fld-enc = (DQUOTE ("7BIT" / …) DQUOTE) / string
+        return self.writeIMAPString(encoding.stringValue)
     }
 }

@@ -279,10 +279,12 @@ extension EncodeBuffer {
     }
 
     @discardableResult mutating func writeMediaTopLevelType(_ type: Media.TopLevelType) -> Int {
-        self.writeString("\"\(String(type).uppercased())\"")
+        // media-basic = ((DQUOTE ("APPLICATION" / …) DQUOTE) / string) SP media-subtype
+        self.writeIMAPString(String(type).uppercased())
     }
 
     @discardableResult mutating func writeMediaSubtype(_ type: Media.Subtype) -> Int {
-        self.writeString("\"") + self.writeString(String(type).uppercased()) + self.writeString("\"")
+        // media-subtype = string
+        self.writeIMAPString(String(type).uppercased())
     }
 }

@@ -249,10 +249,11 @@ extension EncodeBuffer {
         switch character {
         case nil:
             return self.writeNil()
+        // DQUOTE QUOTED-CHAR DQUOTE, QUOTED-CHAR = ... / "\" quoted-specials
         case "\\":
-            return self.writeString(#""\""#)
-        case "\"":
             return self.writeString(#""\\""#)
+        case "\"":
+            return self.writeString(#""\"""#)
         case let character?:
             return self.writeString("\"\(character)\"")
         }

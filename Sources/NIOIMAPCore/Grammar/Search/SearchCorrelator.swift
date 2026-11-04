@@ -76,7 +76,8 @@ public struct SearchCorrelator: Hashable, Sendable {
 
 extension EncodeBuffer {
     @discardableResult mutating func writeSearchCorrelator(_ correlator: SearchCorrelator) -> Int {
-        self.writeString(" (TAG \"") + self.writeString(correlator.tag) + self.writeString("\"")
+        // search-correlator = SP "(" "TAG" SP tag-string ")", tag-string = string
+        self.writeString(" (TAG ") + self.writeIMAPString(correlator.tag)
             + self.writeIfExists(correlator.mailbox) { mailbox in
                 self.writeString(" MAILBOX ") + self.writeMailbox(mailbox)
             }

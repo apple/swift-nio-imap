@@ -24,6 +24,9 @@ struct SearchCorrelatorTests {
             SearchCorrelator(tag: "some", mailbox: MailboxName("mb"), uidValidity: 5),
             #" (TAG "some" MAILBOX "mb" UIDVALIDITY 5)"#
         ),
+        // `tag-string = string`: escape, or fall back to a literal.
+        EncodeFixture.searchCorrelator(SearchCorrelator(tag: #"a") * BYE"#), #" (TAG "a\") * BYE")"#),
+        EncodeFixture.searchCorrelator(SearchCorrelator(tag: "a\r\n* BYE"), " (TAG {8}\r\na\r\n* BYE)"),
     ])
     func encode(_ fixture: EncodeFixture<SearchCorrelator>) {
         fixture.checkEncoding()
@@ -66,9 +69,35 @@ struct SearchCorrelatorTests {
             " (UIDVALIDITY 5)",
             expected: .failure
         ),
+        ParseFixture.searchCorrelator(
+            #" (TAG "a+b\\c")"#,
+            expected: .success(SearchCorrelator(tag: #"a+b\c"#))
+        ),
+        ParseFixture.searchCorrelator(
+            " (TAG {3}\r\nabc)",
+            expected: .success(SearchCorrelator(tag: "abc"))
+        ),
     ])
     func parse(_ fixture: ParseFixture<SearchCorrelator>) {
         fixture.checkParsing()
+    }
+
+    @Test(
+        "encode/parse round-trip",
+        arguments: [
+            SearchCorrelator(tag: "A543"),
+            SearchCorrelator(tag: "some", mailbox: MailboxName("mb"), uidValidity: 5),
+            SearchCorrelator(tag: "a+b"),
+            SearchCorrelator(tag: #"a") * BYE"#),
+            SearchCorrelator(tag: "a\r\n* BYE"),
+        ]
+    )
+    func roundTrip(_ value: SearchCorrelator) {
+        TestUtilities.expectRoundTrip(
+            value,
+            encoder: { $0.writeSearchCorrelator($1) },
+            parser: GrammarParser().parseSearchCorrelator
+        )
     }
 }
 

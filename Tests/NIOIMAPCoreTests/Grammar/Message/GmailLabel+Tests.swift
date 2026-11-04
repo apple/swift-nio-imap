@@ -24,6 +24,13 @@ struct GmailLabelTests {
             EncodeFixture.gmailLabel(GmailLabel(ByteBuffer(string: "Inbox")), #""Inbox""#),
             EncodeFixture.gmailLabel(GmailLabel(ByteBuffer(string: "\\Sent")), #"\Sent"#),
             EncodeFixture.gmailLabel(GmailLabel(ByteBuffer(string: "My Label")), #""My Label""#),
+            // `\` + non-atom must not be written raw:
+            EncodeFixture.gmailLabel(GmailLabel(ByteBuffer(string: "\\Foo bar")), #""\\Foo bar""#),
+            EncodeFixture.gmailLabel(GmailLabel(ByteBuffer(string: "\\")), #""\\""#),
+            EncodeFixture.gmailLabel(
+                GmailLabel(ByteBuffer(string: "\\x)\r\nA2 DELETE INBOX\r\nA3 NOOP (")),
+                "{31}\r\n\\x)\r\nA2 DELETE INBOX\r\nA3 NOOP ("
+            ),
         ]
     )
     func encode(_ fixture: EncodeFixture<GmailLabel>) {
@@ -67,6 +74,24 @@ struct GmailLabelTests {
     )
     func parse(_ fixture: ParseFixture<GmailLabel>) {
         fixture.checkParsing()
+    }
+
+    @Test(
+        "encode/parse round-trip",
+        arguments: [
+            "Inbox",
+            "\\Sent",
+            "\\Foo bar",
+            "\\",
+            "\\x)\r\nA2 DELETE INBOX",
+        ]
+    )
+    func roundTrip(_ value: String) {
+        TestUtilities.expectRoundTrip(
+            GmailLabel(ByteBuffer(string: value)),
+            encoder: { $0.writeGmailLabel($1) },
+            parser: GrammarParser().parseGmailLabel
+        )
     }
 }
 
