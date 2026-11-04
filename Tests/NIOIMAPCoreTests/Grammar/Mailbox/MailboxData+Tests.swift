@@ -29,7 +29,7 @@ struct MailboxDataTests {
         EncodeFixture.mailboxData(
             .lsub(
                 .init(
-                    attributes: [.init("\\draft")],
+                    attributes: ["\\draft"],
                     path: try! .init(name: .init("Drafts"), pathSeparator: "."),
                     extensions: [:]
                 )
@@ -123,7 +123,7 @@ struct MailboxDataTests {
             expected: .success(
                 .list(
                     .init(
-                        attributes: [.init("\\oflag1"), .init("\\oflag2")],
+                        attributes: ["\\oflag1", "\\oflag2"],
                         path: try! .init(name: .inbox),
                         extensions: [:]
                     )
@@ -169,7 +169,7 @@ struct MailboxDataTests {
             expected: .success(
                 .lsub(
                     .init(
-                        attributes: [.init("\\seen"), .init("\\draft")],
+                        attributes: ["\\seen", "\\draft"],
                         path: try! .init(name: .inbox),
                         extensions: [:]
                     )

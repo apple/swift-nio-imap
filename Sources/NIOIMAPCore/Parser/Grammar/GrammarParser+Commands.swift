@@ -104,7 +104,7 @@ extension GrammarParser {
 extension GrammarParser {
     struct SortCommandSuffix {
         var criteria: [SortCriterion]
-        var charset: String
+        var charset: CharacterSetName
         var key: SearchKey
         var returnOptions: [SearchReturnOption]
     }
@@ -724,7 +724,7 @@ extension GrammarParser {
         try PL.composite(buffer: &buffer, tracker: tracker) { buffer, tracker -> Command in
             try PL.parseSpaces(buffer: &buffer, tracker: tracker)
             let rawAlg = try self.parseAtom(buffer: &buffer, tracker: tracker)
-            let alg = Capability.CompressionKind(rawAlg)
+            let alg = Capability.CompressionKind(unchecked: rawAlg)
             return .compress(alg)
         }
     }

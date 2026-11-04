@@ -56,7 +56,7 @@ public struct ExtendedSearchOptions: Hashable, Sendable {
     ///
     /// Optional character set encoding for text-based search operations. When `nil`, the default UTF-8
     /// encoding is assumed. This allows for searches using specific character sets when needed.
-    public var charset: String?
+    public var charset: CharacterSetName?
 
     /// Return options that filter and shape the data returned from the search.
     ///
@@ -78,7 +78,7 @@ public struct ExtendedSearchOptions: Hashable, Sendable {
     /// - parameter sourceOptions: Mailbox and scope filters (default: `nil`).
     public init(
         key: SearchKey,
-        charset: String? = nil,
+        charset: CharacterSetName? = nil,
         returnOptions: [SearchReturnOption] = [],
         sourceOptions: ExtendedSearchSourceOptions? = nil
     ) {
@@ -100,7 +100,7 @@ extension EncodeBuffer {
                 self.writeSearchReturnOptions(options)
             } + self.writeSpace()
             + self.writeIfExists(options.charset) { (charset) -> Int in
-                self.writeString("CHARSET \(charset) ")
+                self.writeString("CHARSET ") + self.writeCharacterSetName(charset) + self.writeSpace()
             } + self.writeSearchKey(options.key)
     }
 }

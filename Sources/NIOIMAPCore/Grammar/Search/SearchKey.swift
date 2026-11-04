@@ -307,7 +307,7 @@ public indirect enum SearchKey: Hashable, Sendable {
     ///
     /// Allows searching using pre-defined server-side filters, identified by name.
     /// From [RFC 5466](https://datatracker.ietf.org/doc/html/rfc5466).
-    case filter(String)
+    case filter(FilterName)
 
     /// Matches messages with a modification sequence (MODSEQ) value matching the specified criteria.
     ///
@@ -651,7 +651,7 @@ extension EncodeBuffer {
             return self.writeString("OLDER \(seconds)")
         case .filter(let filterName):
             return
-                self.writeString("FILTER \(filterName)")
+                self.writeString("FILTER ") + self.writeFilterName(filterName)
         case .sentBefore(let date):
             return
                 self.writeString("SENTBEFORE ") + self.writeDate(date)

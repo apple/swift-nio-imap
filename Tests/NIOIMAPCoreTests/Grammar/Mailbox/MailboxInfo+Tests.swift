@@ -19,14 +19,63 @@ import Testing
 
 @Suite("MailboxInfo")
 struct MailboxInfoTests {
+    /// An attribute is written to the wire verbatim, so ``MailboxInfo/Attribute/init(_:)`` is the
+    /// only thing between a caller that builds attributes from untrusted input and an injected
+    /// response.
+    @Test(
+        "invalid attributes are rejected",
+        arguments: [
+            "",
+            #"\"#,  // `"\" atom`, and the atom may not be empty.
+            "Marked",  // Missing the backslash.
+            #"\a b"#,
+            #"\a(b"#,
+            #"\a)b"#,
+            #"\a]b"#,
+            #"\a\b"#,
+            #"\a"b"#,
+            "\\GRÜEZI",
+            "\\X)\r\n* BYE",  // Would inject an untagged response.
+        ]
+    )
+    func invalidAttributes(_ string: String) {
+        #expect(MailboxInfo.Attribute(string) == nil)
+    }
+
+    @Test("valid attributes", arguments: validAttributeStrings)
+    func validAttributes(_ string: String) {
+        #expect(MailboxInfo.Attribute(string).map { String($0) } == string)
+    }
+
+    /// Written verbatim, so every attribute we accept has to parse back unchanged.
+    @Test("valid attributes round-trip", arguments: validAttributeStrings)
+    func validAttributesRoundTrip(_ string: String) throws {
+        ParseFixture.mailboxListFlags(string, expected: .success([try #require(MailboxInfo.Attribute(string))]))
+            .checkParsing()
+    }
+
+    #if !os(iOS) && !os(watchOS) && !os(tvOS) && !os(visionOS) && !os(Android)
+    @Test("an invalid attribute string literal traps") func attributeStringLiteralPreconditionFailure() async {
+        let result = await #expect(
+            processExitsWith: ExitTest.Condition.failure,
+            observing: [\.standardErrorContent],
+            performing: {
+                let attribute: MailboxInfo.Attribute = "Noselect"
+                _ = attribute
+            }
+        )
+        TestUtilities.expectTrapMessage(result, "Invalid mailbox attribute")
+    }
+    #endif
+
     @Test("attribute hashable")
     func attributeHashable() {
         #expect(
-            MailboxInfo.Attribute("test").hashValue == MailboxInfo.Attribute("TEST").hashValue,
+            MailboxInfo.Attribute(#"\test"#).hashValue == MailboxInfo.Attribute(#"\TEST"#).hashValue,
             "hashing should be case insensitive"
         )
         #expect(
-            MailboxInfo.Attribute("a").hashValue != MailboxInfo.Attribute("b").hashValue
+            MailboxInfo.Attribute(#"\a"#).hashValue != MailboxInfo.Attribute(#"\b"#).hashValue
         )
     }
 
@@ -160,7 +209,7 @@ struct MailboxInfoTests {
             EncodeFixture.mailboxListFlags([], ""),
             EncodeFixture.mailboxListFlags([.marked], #"\Marked"#),
             EncodeFixture.mailboxListFlags([.noInferiors], #"\Noinferiors"#),
-            EncodeFixture.mailboxListFlags([.marked, .noInferiors, .init(#"\test"#)], #"\Marked \Noinferiors \test"#),
+            EncodeFixture.mailboxListFlags([.marked, .noInferiors, #"\test"#], #"\Marked \Noinferiors \test"#),
         ]
     )
     func encodeFlags(_ fixture: EncodeFixture<[MailboxInfo.Attribute]>) {
@@ -203,7 +252,7 @@ struct MailboxInfoTests {
             "\r",
             expected: .success(
                 .init(
-                    attributes: [.init("\\oflag1"), .init("\\oflag2")],
+                    attributes: ["\\oflag1", "\\oflag2"],
                     path: try! .init(name: .inbox),
                     extensions: [:]
                 )
@@ -214,7 +263,7 @@ struct MailboxInfoTests {
             "\r",
             expected: .success(
                 .init(
-                    attributes: [.init("\\oflag1"), .init("\\oflag2")],
+                    attributes: ["\\oflag1", "\\oflag2"],
                     path: try! .init(name: .inbox, pathSeparator: "d"),
                     extensions: [:]
                 )
@@ -304,7 +353,7 @@ struct MailboxInfoTests {
             ParseFixture.mailboxListFlags(
                 "\\marked \\o1 \\o2",
                 "\r",
-                expected: .success([.marked, .init("\\o1"), .init("\\o2")])
+                expected: .success([.marked, "\\o1", "\\o2"])
             ),
         ]
     )
@@ -389,6 +438,13 @@ struct MailboxInfoTests {
 }
 
 // MARK: - Fixtures
+
+private let validAttributeStrings = [
+    #"\Noselect"#,
+    #"\HasNoChildren"#,
+    #"\X-Vendor.1"#,
+    #"\Junk"#,
+]
 
 extension MailboxInfoTests {
     struct ImpliesFixture: Sendable, CustomTestStringConvertible {

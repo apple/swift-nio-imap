@@ -379,6 +379,8 @@ extension Flag: ExpressibleByStringLiteral {
 
 extension EncodeBuffer {
     @discardableResult mutating func writeFlagKeyword(_ keyword: Flag.Keyword) -> Int {
-        self.writeString(keyword.rawValue)
+        // Not `writeAtom`: a keyword may contain `]` (Gmail), which no atom does.
+        assert(Flag.Keyword.isValidKeyword(keyword.rawValue))
+        return self.writeString(keyword.rawValue)
     }
 }

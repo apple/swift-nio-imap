@@ -60,7 +60,10 @@ extension EncodeBuffer {
         }
     }
 
-    private mutating func writeQuotedIMAPString<T: Collection>(_ bytes: T) -> Int where T.Element == UInt8 {
+    /// Writes `bytes` as `quoted`, escaping `\` and `"`.
+    ///
+    /// - Precondition: Every byte is a `TEXT-CHAR`; no check is made.
+    mutating func writeQuotedIMAPString<T: Collection>(_ bytes: T) -> Int where T.Element == UInt8 {
         guard !loggingMode else {
             return self.buffer.writeString("[\(Array(bytes).count) bytes]")
         }
