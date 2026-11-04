@@ -53,7 +53,7 @@ public enum StoreModifier: Hashable, Sendable {
     ///
     /// Captures future `STORE` modifiers defined by extensions, allowing forward compatibility
     /// with new IMAP capabilities without requiring library updates.
-    case other(KeyValue<String, ParameterValue?>)
+    case other(KeyValue<ExtensionKey<StoreModifier>, ParameterValue?>)
 }
 
 // MARK: - Encoding

@@ -215,7 +215,11 @@ public enum Command: Hashable, Sendable {
     /// are moved to the new mailbox, and the original INBOX is left empty.
     ///
     /// - SeeAlso: [RFC 3501 Section 6.3.5](https://datatracker.ietf.org/doc/html/rfc3501#section-6.3.5)
-    case rename(from: MailboxName, to: MailboxName, parameters: OrderedDictionary<String, ParameterValue?>)
+    case rename(
+        from: MailboxName,
+        to: MailboxName,
+        parameters: OrderedDictionary<ExtensionKey<Command>, ParameterValue?>
+    )
 
     /// `SELECT` – Selects a mailbox so that messages can be accessed using message-sequence-number based commands.
     ///
@@ -867,7 +871,7 @@ extension CommandEncodeBuffer {
     private mutating func writeCommandKind_rename(
         from: MailboxName,
         to: MailboxName,
-        parameters: OrderedDictionary<String, ParameterValue?>
+        parameters: OrderedDictionary<ExtensionKey<Command>, ParameterValue?>
     ) -> Int {
         self.buffer.writeString("RENAME ") + self.buffer.writeMailbox(from) + self.buffer.writeSpace()
             + self.buffer.writeMailbox(to)

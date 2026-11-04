@@ -18,9 +18,9 @@ import struct NIO.ByteBuffer
 
 extension EncodeBuffer {
     @discardableResult mutating func writeSearchReturnOptionExtension(
-        _ option: KeyValue<String, ParameterValue?>
+        _ option: KeyValue<ExtensionKey<SearchReturnOption>, ParameterValue?>
     ) -> Int {
-        self.writeString(option.key)
+        self.writeExtensionKey(option.key)
             + self.writeIfExists(option.value) { (params) -> Int in
                 self.writeSpace() + self.writeParameterValue(params)
             }
