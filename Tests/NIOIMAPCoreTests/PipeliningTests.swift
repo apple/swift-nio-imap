@@ -624,7 +624,7 @@ struct PipeliningTests {
                 (#_sourceLocation, .setQuota(QuotaRoot("foo"), [])),
                 (#_sourceLocation, .getMetadata(options: [], mailbox: .food, entries: ["/shared/comment"])),
                 (#_sourceLocation, .setMetadata(mailbox: .food, entries: ["/shared/comment": nil])),
-                (#_sourceLocation, .resetKey(mailbox: nil, mechanisms: [.internal])),
+                (#_sourceLocation, .resetKey(.allMailboxes)),
                 (#_sourceLocation, .generateAuthorizedURL([.joe])),
                 (#_sourceLocation, .urlFetch([.joeURLFetch])),
             ],
@@ -673,7 +673,7 @@ struct PipeliningTests {
                 (#_sourceLocation, .setQuota(QuotaRoot("foo"), [])),
                 (#_sourceLocation, .getMetadata(options: [], mailbox: .food, entries: ["/shared/comment"])),
                 (#_sourceLocation, .setMetadata(mailbox: .food, entries: ["/shared/comment": nil])),
-                (#_sourceLocation, .resetKey(mailbox: nil, mechanisms: [.internal])),
+                (#_sourceLocation, .resetKey(.allMailboxes)),
                 (#_sourceLocation, .generateAuthorizedURL([.joe])),
                 (#_sourceLocation, .urlFetch([.joeURLFetch])),
 
@@ -766,7 +766,7 @@ struct PipeliningTests {
                 (#_sourceLocation, .setQuota(QuotaRoot("foo"), [])),
                 (#_sourceLocation, .getMetadata(options: [], mailbox: .food, entries: ["/shared/comment"])),
                 (#_sourceLocation, .setMetadata(mailbox: .food, entries: ["/shared/comment": nil])),
-                (#_sourceLocation, .resetKey(mailbox: nil, mechanisms: [.internal])),
+                (#_sourceLocation, .resetKey(.allMailboxes)),
                 (#_sourceLocation, .generateAuthorizedURL([.joe])),
                 (#_sourceLocation, .urlFetch([.joeURLFetch])),
 
@@ -871,7 +871,7 @@ struct PipeliningTests {
                 (#_sourceLocation, .setQuota(QuotaRoot("foo"), [])),
                 (#_sourceLocation, .getMetadata(options: [], mailbox: .food, entries: ["/shared/comment"])),
                 (#_sourceLocation, .setMetadata(mailbox: .food, entries: ["/shared/comment": nil])),
-                (#_sourceLocation, .resetKey(mailbox: nil, mechanisms: [.internal])),
+                (#_sourceLocation, .resetKey(.allMailboxes)),
                 (#_sourceLocation, .generateAuthorizedURL([.joe])),
                 (#_sourceLocation, .urlFetch([.joeURLFetch])),
 
@@ -981,7 +981,7 @@ struct PipeliningTests {
                 (#_sourceLocation, .setQuota(QuotaRoot("foo"), [])),
                 (#_sourceLocation, .getMetadata(options: [], mailbox: .food, entries: ["/shared/comment"])),
                 (#_sourceLocation, .setMetadata(mailbox: .food, entries: ["/shared/comment": nil])),
-                (#_sourceLocation, .resetKey(mailbox: nil, mechanisms: [.internal])),
+                (#_sourceLocation, .resetKey(.allMailboxes)),
                 (#_sourceLocation, .generateAuthorizedURL([.joe])),
                 (#_sourceLocation, .urlFetch([.joeURLFetch])),
 
@@ -1084,7 +1084,7 @@ struct PipeliningTests {
                 (#_sourceLocation, .setQuota(QuotaRoot("foo"), [])),
                 (#_sourceLocation, .getMetadata(options: [], mailbox: .food, entries: ["/shared/comment"])),
                 (#_sourceLocation, .setMetadata(mailbox: .food, entries: ["/shared/comment": nil])),
-                (#_sourceLocation, .resetKey(mailbox: nil, mechanisms: [.internal])),
+                (#_sourceLocation, .resetKey(.allMailboxes)),
                 (#_sourceLocation, .generateAuthorizedURL([.joe])),
                 (#_sourceLocation, .urlFetch([.joeURLFetch])),
 
@@ -1157,7 +1157,7 @@ struct PipeliningTests {
                 (#_sourceLocation, .getMetadata(options: [], mailbox: .food, entries: ["/shared/comment"])),
                 (#_sourceLocation, .setMetadata(mailbox: .food, entries: ["/shared/comment": nil])),
 
-                (#_sourceLocation, .resetKey(mailbox: nil, mechanisms: [.internal])),
+                (#_sourceLocation, .resetKey(.allMailboxes)),
                 (#_sourceLocation, .generateAuthorizedURL([.joe])),
                 (#_sourceLocation, .urlFetch([.joeURLFetch])),
             ],
@@ -1252,7 +1252,7 @@ struct PipeliningTests {
                 (#_sourceLocation, .getMetadata(options: [], mailbox: .food, entries: ["/shared/comment"])),
                 (#_sourceLocation, .setMetadata(mailbox: .food, entries: ["/shared/comment": nil])),
                 (#_sourceLocation, .extendedSearch(ExtendedSearchOptions(key: .all))),
-                (#_sourceLocation, .resetKey(mailbox: nil, mechanisms: [.internal])),
+                (#_sourceLocation, .resetKey(.allMailboxes)),
                 (#_sourceLocation, .generateAuthorizedURL([.joe])),
                 (#_sourceLocation, .urlFetch([.joeURLFetch])),
             ],
@@ -1302,7 +1302,7 @@ struct PipeliningTests {
                 (#_sourceLocation, .store(.set([1]), [], .flags(.add(silent: true, list: [.answered])))),
                 (#_sourceLocation, .store(.set([1]), [], .flags(.add(silent: false, list: [.answered])))),
 
-                (#_sourceLocation, .resetKey(mailbox: nil, mechanisms: [.internal])),
+                (#_sourceLocation, .resetKey(.allMailboxes)),
 
                 (#_sourceLocation, .getQuota(QuotaRoot("foo"))),
                 (#_sourceLocation, .getQuotaRoot(.food)),
@@ -1411,7 +1411,7 @@ struct PipeliningTests {
                 (#_sourceLocation, .getMetadata(options: [], mailbox: .food, entries: ["/shared/comment"])),
                 (#_sourceLocation, .setMetadata(mailbox: .food, entries: ["/shared/comment": nil])),
                 (#_sourceLocation, .extendedSearch(ExtendedSearchOptions(key: .all))),
-                (#_sourceLocation, .resetKey(mailbox: nil, mechanisms: [.internal])),
+                (#_sourceLocation, .resetKey(.allMailboxes)),
                 (#_sourceLocation, .generateAuthorizedURL([.joe])),
                 (#_sourceLocation, .urlFetch([.joeURLFetch])),
             ],
@@ -1481,7 +1481,7 @@ struct PipeliningTests {
                 (#_sourceLocation, .setQuota(QuotaRoot("foo"), [])),
                 (#_sourceLocation, .getMetadata(options: [], mailbox: .food, entries: ["/shared/comment"])),
                 (#_sourceLocation, .setMetadata(mailbox: .food, entries: ["/shared/comment": nil])),
-                (#_sourceLocation, .resetKey(mailbox: nil, mechanisms: [.internal])),
+                (#_sourceLocation, .resetKey(.allMailboxes)),
                 (#_sourceLocation, .generateAuthorizedURL([.joe])),
                 (#_sourceLocation, .urlFetch([.joeURLFetch])),
 
@@ -1595,7 +1595,7 @@ struct PipeliningTests {
                 (#_sourceLocation, .getMetadata(options: [], mailbox: .food, entries: ["/shared/comment"])),
                 (#_sourceLocation, .setMetadata(mailbox: .food, entries: ["/shared/comment": nil])),
                 (#_sourceLocation, .extendedSearch(ExtendedSearchOptions(key: .all))),
-                (#_sourceLocation, .resetKey(mailbox: nil, mechanisms: [.internal])),
+                (#_sourceLocation, .resetKey(.allMailboxes)),
                 (#_sourceLocation, .generateAuthorizedURL([.joe])),
                 (#_sourceLocation, .urlFetch([.joeURLFetch])),
             ],
