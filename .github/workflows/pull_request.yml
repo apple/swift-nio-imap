@@ -58,6 +58,9 @@ jobs:
       swift_6_1_enabled: false
       swift_6_2_build_arguments_override: "-Xswiftc -Xfrontend -Xswiftc -require-explicit-sendable -Xswiftc -warnings-as-errors"
       swift_6_3_build_arguments_override: "-Xswiftc -Xfrontend -Xswiftc -require-explicit-sendable -Xswiftc -warnings-as-errors"
+      # Temporary: Swift Testing 6.2/6.3 can deadlock running tests in parallel on macOS.
+      swift_6_2_test_arguments_override: "--no-parallel"
+      swift_6_3_test_arguments_override: "--no-parallel"
       # See `linux_env_vars` above. The setup command runs before build/test and exports via
       # `$GITHUB_ENV`, which scopes this to the Swift 6.3 job.
       swift_6_3_setup_command: 'echo "SWT_SWIFT_ERROR_BACKTRACING_ENABLED=0" >> "$GITHUB_ENV"'
