@@ -28,6 +28,9 @@ import struct NIO.ByteBufferView
 /// - Non-synchronizing literals (`{100+}`, `{100-}`) - no continuation needed
 /// - Binary literals (`~{100}`) - binary data format
 ///
+/// Like ``CommandParser``, this expects correctly framed input. For example, if a literal
+/// header's CRLF is split across reads, the orphaned LF is counted as a literal byte.
+///
 /// - SeeAlso: [RFC 3501 Section 4.3.3](https://datatracker.ietf.org/doc/html/rfc3501#section-4.3.3),
 ///   ``CommandParser``
 public struct SynchronizingLiteralParser: Sendable {

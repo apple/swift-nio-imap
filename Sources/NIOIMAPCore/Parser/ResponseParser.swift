@@ -312,7 +312,7 @@ extension ResponseParser {
         )
         return ResponseAndNewline(
             response: response,
-            newline: buffer.lastParsedNewline
+            newline: buffer.terminatingNewline
         )
     }
 
