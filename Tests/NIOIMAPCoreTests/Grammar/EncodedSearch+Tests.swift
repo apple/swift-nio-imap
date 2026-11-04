@@ -19,7 +19,7 @@ import Testing
 @Suite("EncodedSearch")
 struct EncodedSearchTests {
     @Test(arguments: [
-        EncodeFixture.encodedSearch(.init(query: "hello"), "hello")
+        EncodeFixture.encodedSearch("hello", "hello")
     ])
     func encode(_ fixture: EncodeFixture<EncodedSearch>) {
         fixture.checkEncoding()
@@ -29,7 +29,7 @@ struct EncodedSearchTests {
         ParseFixture.encodedSearch(
             "query%FF",
             " ",
-            expected: .success(.init(query: "query%FF"))
+            expected: .success("query%FF")
         )
     ])
     func parse(_ fixture: ParseFixture<EncodedSearch>) {

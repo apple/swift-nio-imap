@@ -20,24 +20,24 @@ import Testing
 struct URLCommandTests {
     @Test(arguments: [
         EncodeFixture.urlCommand(
-            .messageList(.init(mailboxUIDValidity: .init(encodeMailbox: .init(mailbox: "test")))),
+            .messageList(.init(mailboxUIDValidity: .init(encodeMailbox: "test"))),
             "test"
         ),
         EncodeFixture.urlCommand(
             .fetch(
-                path: .init(mailboxReference: .init(encodeMailbox: .init(mailbox: "test")), iUID: .init(uid: 123)),
+                path: .init(mailboxReference: .init(encodeMailbox: "test"), iUID: .init(uid: 123)),
                 authenticatedURL: nil
             ),
             "test/;UID=123"
         ),
         EncodeFixture.urlCommand(
             .fetch(
-                path: .init(mailboxReference: .init(encodeMailbox: .init(mailbox: "test")), iUID: .init(uid: 123)),
+                path: .init(mailboxReference: .init(encodeMailbox: "test"), iUID: .init(uid: 123)),
                 authenticatedURL: .init(
                     authenticatedURL: .init(access: .anonymous),
                     verifier: .init(
                         urlAuthMechanism: .internal,
-                        encodedAuthenticationURL: .init(data: "01234567890123456789012345678901")
+                        encodedAuthenticationURL: "01234567890123456789012345678901"
                     )
                 )
             ),
@@ -53,7 +53,7 @@ struct URLCommandTests {
             "test",
             " ",
             expected: .success(
-                .messageList(.init(mailboxUIDValidity: .init(encodeMailbox: .init(mailbox: "test"))))
+                .messageList(.init(mailboxUIDValidity: .init(encodeMailbox: "test")))
             )
         ),
         ParseFixture.urlCommand(
@@ -62,7 +62,7 @@ struct URLCommandTests {
             expected: .success(
                 .fetch(
                     path: .init(
-                        mailboxReference: .init(encodeMailbox: .init(mailbox: "test")),
+                        mailboxReference: .init(encodeMailbox: "test"),
                         iUID: .init(uid: 123)
                     ),
                     authenticatedURL: nil
@@ -75,14 +75,14 @@ struct URLCommandTests {
             expected: .success(
                 .fetch(
                     path: .init(
-                        mailboxReference: .init(encodeMailbox: .init(mailbox: "test")),
+                        mailboxReference: .init(encodeMailbox: "test"),
                         iUID: .init(uid: 123)
                     ),
                     authenticatedURL: .init(
                         authenticatedURL: .init(access: .anonymous),
                         verifier: .init(
                             urlAuthMechanism: .internal,
-                            encodedAuthenticationURL: .init(data: "01234567890123456789012345678901")
+                            encodedAuthenticationURL: "01234567890123456789012345678901"
                         )
                     )
                 )

@@ -21,7 +21,7 @@ struct MessagePathTests {
     @Test(arguments: [
         EncodeFixture.messagePath(
             .init(
-                mailboxReference: .init(encodeMailbox: .init(mailbox: "test")),
+                mailboxReference: .init(encodeMailbox: "test"),
                 iUID: .init(uid: 123),
                 section: nil,
                 range: nil
@@ -30,16 +30,16 @@ struct MessagePathTests {
         ),
         EncodeFixture.messagePath(
             .init(
-                mailboxReference: .init(encodeMailbox: .init(mailbox: "test")),
+                mailboxReference: .init(encodeMailbox: "test"),
                 iUID: .init(uid: 123),
-                section: .init(encodedSection: .init(section: "section")),
+                section: .init(encodedSection: "section"),
                 range: nil
             ),
             "test/;UID=123/;SECTION=section"
         ),
         EncodeFixture.messagePath(
             .init(
-                mailboxReference: .init(encodeMailbox: .init(mailbox: "test")),
+                mailboxReference: .init(encodeMailbox: "test"),
                 iUID: .init(uid: 123),
                 section: nil,
                 range: .init(range: .init(offset: 123, length: 4))
@@ -48,9 +48,9 @@ struct MessagePathTests {
         ),
         EncodeFixture.messagePath(
             .init(
-                mailboxReference: .init(encodeMailbox: .init(mailbox: "test")),
+                mailboxReference: .init(encodeMailbox: "test"),
                 iUID: .init(uid: 123),
-                section: .init(encodedSection: .init(section: "section")),
+                section: .init(encodedSection: "section"),
                 range: .init(range: .init(offset: 123, length: 4))
             ),
             "test/;UID=123/;SECTION=section/;PARTIAL=123.4"
@@ -65,7 +65,7 @@ struct MessagePathTests {
             "test/;UID=123",
             expected: .success(
                 .init(
-                    mailboxReference: .init(encodeMailbox: .init(mailbox: "test")),
+                    mailboxReference: .init(encodeMailbox: "test"),
                     iUID: .init(uid: 123),
                     section: nil,
                     range: nil
@@ -76,9 +76,9 @@ struct MessagePathTests {
             "test/;UID=123/;SECTION=section",
             expected: .success(
                 .init(
-                    mailboxReference: .init(encodeMailbox: .init(mailbox: "test")),
+                    mailboxReference: .init(encodeMailbox: "test"),
                     iUID: .init(uid: 123),
-                    section: .init(encodedSection: .init(section: "section")),
+                    section: .init(encodedSection: "section"),
                     range: nil
                 )
             )
@@ -87,7 +87,7 @@ struct MessagePathTests {
             "test/;UID=123/;PARTIAL=1.2",
             expected: .success(
                 .init(
-                    mailboxReference: .init(encodeMailbox: .init(mailbox: "test")),
+                    mailboxReference: .init(encodeMailbox: "test"),
                     iUID: .init(uid: 123),
                     section: nil,
                     range: .init(range: .init(offset: 1, length: 2))
@@ -98,9 +98,9 @@ struct MessagePathTests {
             "test/;UID=123/;SECTION=section/;PARTIAL=1.2",
             expected: .success(
                 .init(
-                    mailboxReference: .init(encodeMailbox: .init(mailbox: "test")),
+                    mailboxReference: .init(encodeMailbox: "test"),
                     iUID: .init(uid: 123),
-                    section: .init(encodedSection: .init(section: "section")),
+                    section: .init(encodedSection: "section"),
                     range: .init(range: .init(offset: 1, length: 2))
                 )
             )
@@ -109,9 +109,9 @@ struct MessagePathTests {
             "test/;UIDVALIDITY=123/;UID=123/;SECTION=section/;PARTIAL=1.2",
             expected: .success(
                 .init(
-                    mailboxReference: .init(encodeMailbox: .init(mailbox: "test/"), uidValidity: 123),
+                    mailboxReference: .init(encodeMailbox: "test/", uidValidity: 123),
                     iUID: .init(uid: 123),
-                    section: .init(encodedSection: .init(section: "section")),
+                    section: .init(encodedSection: "section"),
                     range: .init(range: .init(offset: 1, length: 2))
                 )
             )
@@ -119,6 +119,49 @@ struct MessagePathTests {
     ])
     func parse(_ fixture: ParseFixture<MessagePath>) {
         fixture.checkParsing()
+    }
+
+    @Test(arguments: [
+        // A single `/` is the mailbox, not a separator before `;UID=`.
+        ParseFixture.messagePath("/;UID=1", expected: .failure),
+        ParseFixture.messagePath(
+            "test/;UID=1/;SECTION=/",
+            expected: .success(
+                .init(
+                    mailboxReference: .init(encodeMailbox: "test"),
+                    iUID: .init(uid: 1),
+                    section: .init(encodedSection: "/")
+                )
+            )
+        ),
+    ])
+    func parseSlashOnly(_ fixture: ParseFixture<MessagePath>) {
+        fixture.checkParsing()
+    }
+
+    /// A trailing `/` belongs to the section unless a `;PARTIAL=` follows it.
+    @Test("round-trip", arguments: ["1", "1/", "1//", "/"])
+    func roundTrip(_ section: String) throws {
+        TestUtilities.expectRoundTrip(
+            MessagePath(
+                mailboxReference: .init(encodeMailbox: "test"),
+                iUID: .init(uid: 1),
+                section: .init(encodedSection: try #require(EncodedSection(section))),
+                range: nil
+            ),
+            encoder: { $0.writeMessagePath($1) },
+            parser: GrammarParser().parseMessagePath
+        )
+        TestUtilities.expectRoundTrip(
+            MessagePath(
+                mailboxReference: .init(encodeMailbox: "test"),
+                iUID: .init(uid: 1),
+                section: .init(encodedSection: try #require(EncodedSection(section))),
+                range: .init(range: .init(offset: 1, length: 2))
+            ),
+            encoder: { $0.writeMessagePath($1) },
+            parser: GrammarParser().parseMessagePath
+        )
     }
 }
 

@@ -38,8 +38,4 @@ extension EncodeBuffer {
     @discardableResult mutating func writeMessagePathByteRange(_ data: MessagePath.ByteRange) -> Int {
         self.writeString("/;PARTIAL=") + self.writeByteRange(data.range)
     }
-
-    @discardableResult mutating func writeMessagePathByteRangeOnly(_ data: MessagePath.ByteRange) -> Int {
-        self.writeString(";PARTIAL=") + self.writeByteRange(data.range)
-    }
 }

@@ -22,16 +22,22 @@ struct AuthenticatedURLTests {
         EncodeFixture.authenticatedURL(
             .init(
                 authenticatedURL: .init(access: .anonymous),
-                verifier: .init(urlAuthMechanism: .internal, encodedAuthenticationURL: .init(data: "test"))
+                verifier: .init(
+                    urlAuthMechanism: .internal,
+                    encodedAuthenticationURL: "0123456789abcdef0123456789abcdef"
+                )
             ),
-            ";URLAUTH=anonymous:INTERNAL:test"
+            ";URLAUTH=anonymous:INTERNAL:0123456789abcdef0123456789abcdef"
         ),
         EncodeFixture.authenticatedURL(
             .init(
-                authenticatedURL: .init(access: .user(.init(data: "alice"))),
-                verifier: .init(urlAuthMechanism: .internal, encodedAuthenticationURL: .init(data: "verifier456"))
+                authenticatedURL: .init(access: .user("alice")),
+                verifier: .init(
+                    urlAuthMechanism: .internal,
+                    encodedAuthenticationURL: "0123456789abcdef0123456789abcdef0123"
+                )
             ),
-            ";URLAUTH=user+alice:INTERNAL:verifier456"
+            ";URLAUTH=user+alice:INTERNAL:0123456789abcdef0123456789abcdef0123"
         ),
     ])
     func encode(_ fixture: EncodeFixture<AuthenticatedURL>) {
@@ -47,7 +53,7 @@ struct AuthenticatedURLTests {
                     authenticatedURL: .init(access: .anonymous),
                     verifier: .init(
                         urlAuthMechanism: .internal,
-                        encodedAuthenticationURL: .init(data: "01234567890123456789012345678901")
+                        encodedAuthenticationURL: "01234567890123456789012345678901"
                     )
                 )
             )

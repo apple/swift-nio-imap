@@ -19,8 +19,8 @@ import Testing
 @Suite("EncodedUser")
 struct EncodedUserTests {
     @Test(arguments: [
-        EncodeFixture.encodedUser(.init(data: "hello"), "hello"),
-        EncodeFixture.encodedUser(.init(data: "test@example.com"), "test@example.com"),
+        EncodeFixture.encodedUser("hello", "hello"),
+        EncodeFixture.encodedUser("test%40example.com", "test%40example.com"),
     ])
     func encode(_ fixture: EncodeFixture<EncodedUser>) {
         fixture.checkEncoding()
@@ -30,7 +30,7 @@ struct EncodedUserTests {
         ParseFixture.encodedUser(
             "query%FF",
             " ",
-            expected: .success(.init(data: "query%FF"))
+            expected: .success("query%FF")
         )
     ])
     func parse(_ fixture: ParseFixture<EncodedUser>) {

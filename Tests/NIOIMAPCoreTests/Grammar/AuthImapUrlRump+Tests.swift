@@ -19,38 +19,6 @@ import Testing
 @Suite("RumpAuthenticatedURL")
 struct RumpAuthenticatedURLTests {
     @Test(arguments: [
-        EncodeFixture.rumpAuthenticatedURL(
-            .init(
-                authenticatedURL: .init(
-                    server: .init(host: "localhost"),
-                    messagePath: .init(
-                        mailboxReference: .init(encodeMailbox: .init(mailbox: "test")),
-                        iUID: .init(uid: 123)
-                    )
-                ),
-                authenticatedURLRump: .init(access: .anonymous)
-            ),
-            "imap://localhost/test/;UID=123;URLAUTH=anonymous"
-        ),
-        EncodeFixture.rumpAuthenticatedURL(
-            .init(
-                authenticatedURL: .init(
-                    server: .init(host: "mail.example.com"),
-                    messagePath: .init(
-                        mailboxReference: .init(encodeMailbox: .init(mailbox: "INBOX")),
-                        iUID: .init(uid: 456)
-                    )
-                ),
-                authenticatedURLRump: .init(access: .user(.init(data: "testuser")))
-            ),
-            "imap://mail.example.com/INBOX/;UID=456;URLAUTH=user+testuser"
-        ),
-    ])
-    func encode(_ fixture: EncodeFixture<RumpAuthenticatedURL>) {
-        fixture.checkEncoding()
-    }
-
-    @Test(arguments: [
         ParseFixture.rumpAuthenticatedURL(
             "imap://localhost/test/;UID=123;URLAUTH=anonymous",
             " ",
@@ -59,7 +27,7 @@ struct RumpAuthenticatedURLTests {
                     authenticatedURL: .init(
                         server: .init(host: "localhost"),
                         messagePath: .init(
-                            mailboxReference: .init(encodeMailbox: .init(mailbox: "test")),
+                            mailboxReference: .init(encodeMailbox: "test"),
                             iUID: .init(uid: 123)
                         )
                     ),
@@ -70,17 +38,6 @@ struct RumpAuthenticatedURLTests {
     ])
     func parse(_ fixture: ParseFixture<RumpAuthenticatedURL>) {
         fixture.checkParsing()
-    }
-}
-
-extension EncodeFixture<RumpAuthenticatedURL> {
-    fileprivate static func rumpAuthenticatedURL(_ input: T, _ expectedString: String) -> Self {
-        .init(
-            input: input,
-            bufferKind: .defaultServer,
-            expectedStrings: [expectedString],
-            encoder: { $0.writeAuthIMAPURLRump($1) }
-        )
     }
 }
 

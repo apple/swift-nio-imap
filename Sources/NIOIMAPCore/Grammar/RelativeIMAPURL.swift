@@ -82,18 +82,3 @@ public enum RelativeIMAPURL: Hashable, Sendable {
     /// Resolves to the base URL itself.
     case empty
 }
-
-// MARK: - Encoding
-
-extension EncodeBuffer {
-    @discardableResult mutating func writeRelativeIMAPURL(_ url: RelativeIMAPURL) -> Int {
-        switch url {
-        case .networkPath(let path):
-            return self.writeNetworkPath(path)
-        case .absolutePath(let path):
-            return self.writeAbsoluteMessagePath(path)
-        case .empty:
-            return 0
-        }
-    }
-}

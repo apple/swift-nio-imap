@@ -57,14 +57,3 @@ public struct AbsoluteMessagePath: Hashable, Sendable {
         self.command = command
     }
 }
-
-// MARK: - Encoding
-
-extension EncodeBuffer {
-    @discardableResult mutating func writeAbsoluteMessagePath(_ path: AbsoluteMessagePath) -> Int {
-        self.writeString("/")
-            + self.writeIfExists(path.command) { command in
-                self.writeURLCommand(command)
-            }
-    }
-}

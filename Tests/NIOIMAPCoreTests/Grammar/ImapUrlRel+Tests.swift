@@ -19,28 +19,6 @@ import Testing
 @Suite("RelativeIMAPURL")
 struct RelativeIMAPURLTests {
     @Test(arguments: [
-        EncodeFixture.relativeIMAPURL(
-            .absolutePath(
-                .init(
-                    command: .messageList(.init(mailboxUIDValidity: .init(encodeMailbox: .init(mailbox: "test"))))
-                )
-            ),
-            "/test"
-        ),
-        EncodeFixture.relativeIMAPURL(
-            .networkPath(.init(server: .init(host: "localhost"), query: nil)),
-            "//localhost/"
-        ),
-        EncodeFixture.relativeIMAPURL(
-            .empty,
-            ""
-        ),
-    ])
-    func encode(_ fixture: EncodeFixture<RelativeIMAPURL>) {
-        fixture.checkEncoding()
-    }
-
-    @Test(arguments: [
         ParseFixture.relativeIMAPURL(
             "/test",
             " ",
@@ -48,7 +26,7 @@ struct RelativeIMAPURLTests {
                 .absolutePath(
                     .init(
                         command: .messageList(
-                            .init(mailboxUIDValidity: .init(encodeMailbox: .init(mailbox: "test")))
+                            .init(mailboxUIDValidity: .init(encodeMailbox: "test"))
                         )
                     )
                 )
@@ -67,17 +45,6 @@ struct RelativeIMAPURLTests {
     ])
     func parse(_ fixture: ParseFixture<RelativeIMAPURL>) {
         fixture.checkParsing()
-    }
-}
-
-extension EncodeFixture<RelativeIMAPURL> {
-    fileprivate static func relativeIMAPURL(_ input: T, _ expectedString: String) -> Self {
-        .init(
-            input: input,
-            bufferKind: .defaultServer,
-            expectedStrings: [expectedString],
-            encoder: { $0.writeRelativeIMAPURL($1) }
-        )
     }
 }
 
