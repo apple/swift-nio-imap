@@ -400,6 +400,43 @@ extension ResponseParserTests {
         #expect(try self.parse(["* 1 FETCH (BODY[] {3}\r", "abc)\r\n"]) == self.fetch("abc"))
     }
 
+    // An ENVELOPE isn't streamed, so the newline ending its literal header doesn't end a parse step.
+    private static func envelope(literalHeaderNewline: String) -> String {
+        "ENVELOPE (NIL {3}\(literalHeaderNewline)abc NIL NIL NIL NIL NIL NIL NIL NIL)"
+    }
+
+    @Test(
+        "a line feed after a non-streamed literal with a bare CR header is not skipped",
+        arguments: [" UID 1)\r\n", ")\r\n"]
+    )
+    func lineFeedAfterNonStreamedLiteralIsNotSkipped(rest: String) {
+        // The CR doesn't end the response, so the LF is invalid, as after a CRLF header.
+        for newline in ["\r\n", "\r"] {
+            let start = "* 1 FETCH (\(Self.envelope(literalHeaderNewline: newline))"
+            for chunks in [[start, "\n\(rest)"], [start + "\n\(rest)"]] {
+                #expect(throws: ParserError.self, "\(chunks)") { try self.parse(chunks) }
+            }
+        }
+    }
+
+    @Test("every way of splitting a FETCH with a non-streamed literal across two reads gives the same result")
+    func everySplitOfFetchWithNonStreamedLiteral() throws {
+        let wire = Array("* 1 FETCH (\(Self.envelope(literalHeaderNewline: "\r")) UID 1)\r\n* 2 EXISTS\r\n".utf8)
+
+        let expected = try self.parse([wire])
+        #expect(
+            expected.contains {
+                guard case .fetch(.simpleAttribute(.envelope(let envelope))) = $0 else { return false }
+                return envelope.subject == "abc"
+            }
+        )
+        #expect(expected.last == .untagged(.mailboxData(.exists(2))))
+
+        for cut in 1..<wire.count {
+            #expect(try self.parse([Array(wire[..<cut]), Array(wire[cut...])]) == expected, "split after byte \(cut)")
+        }
+    }
+
     @Test("an invalid literal header is rejected")
     func invalidLiteralHeaderIsRejected() {
         #expect(throws: (any Error).self) {

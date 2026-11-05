@@ -182,8 +182,19 @@ extension FramingIntegrationTests {
         splittingAt boundaries: [Int],
         sourceLocation: SourceLocation = #_sourceLocation
     ) -> [CommandStreamPart] {
+        self.serverOutput(of: bytes, splittingAt: boundaries, sourceLocation: sourceLocation).parts
+    }
+
+    /// Like `parsedParts(of:splittingAt:)`, but also counts the continuation requests the server
+    /// sends for synchronizing literals.
+    func serverOutput(
+        of bytes: [UInt8],
+        splittingAt boundaries: [Int],
+        sourceLocation: SourceLocation = #_sourceLocation
+    ) -> (parts: [CommandStreamPart], continuationRequests: Int) {
         let channel = EmbeddedChannel(handlers: [ByteToMessageHandler(FrameDecoder()), IMAPServerHandler()])
         var parts: [CommandStreamPart] = []
+        var continuationRequests = 0
 
         var start = 0
         for end in boundaries + [bytes.count] {
@@ -200,10 +211,22 @@ extension FramingIntegrationTests {
                 guard let part else { break }
                 parts.append(part)
             }
+            // `IMAPServerHandler` sends outstanding continuation requests on read.
+            channel.read()
+            while true {
+                var outbound: ByteBuffer?
+                #expect(throws: Never.self, sourceLocation: sourceLocation) {
+                    outbound = try channel.readOutbound(as: ByteBuffer.self)
+                }
+                guard let outbound else { break }
+                // `IMAPServerHandler`'s default continuation request.
+                #expect(outbound == ByteBuffer(string: "+ OK\r\n"), sourceLocation: sourceLocation)
+                continuationRequests += 1
+            }
         }
 
         _ = try? channel.finish()
-        return parts
+        return (parts, continuationRequests)
     }
 }
 
@@ -230,5 +253,98 @@ extension FramingIntegrationTests.Helper {
         }
 
         #expect(command == inbound)
+    }
+}
+
+// MARK: - CRLF split between CR and LF
+
+// `CommandParser` relies on `FramingParser` to drop the LF of a CRLF split across reads. These pin
+// that contract for each place a client sends a newline.
+extension FramingIntegrationTests {
+    struct SplitCase: CustomTestStringConvertible, Sendable {
+        var wire: String
+        var expected: [CommandStreamPart]
+        var continuationRequests = 0
+
+        var testDescription: String { self.wire.debugDescription }
+    }
+
+    static let splitCases: [SplitCase] = [
+        // IDLE and DONE.
+        SplitCase(
+            wire: "a IDLE\r\nDONE\r\nb NOOP\r\n",
+            expected: [
+                .tagged(.init(tag: "a", command: .idleStart)),
+                .idleDone,
+                .tagged(.init(tag: "b", command: .noop)),
+            ]
+        ),
+        // APPEND with a synchronizing literal.
+        SplitCase(
+            wire: "a APPEND INBOX {5}\r\nabc\r\n\r\n",
+            expected: Self.appendABC,
+            continuationRequests: 1
+        ),
+        // APPEND with a non-synchronizing literal.
+        SplitCase(wire: "a APPEND INBOX {5+}\r\nabc\r\n\r\n", expected: Self.appendABC),
+        // CATENATE TEXT literal.
+        SplitCase(
+            wire: "a APPEND INBOX CATENATE (TEXT {5+}\r\nabc\r\n)\r\n",
+            expected: [
+                .append(.start(tag: "a", appendingTo: .inbox)),
+                .append(.beginCatenate(options: .none)),
+                .append(.catenateData(.begin(size: 5))),
+                .append(.catenateData(.bytes("abc\r\n"))),
+                .append(.catenateData(.end)),
+                .append(.endCatenate),
+                .append(.finish),
+            ]
+        ),
+        // AUTHENTICATE continuation response.
+        SplitCase(
+            wire: "a AUTHENTICATE PLAIN\r\ndGVzdA==\r\nb NOOP\r\n",
+            expected: [
+                .tagged(.init(tag: "a", command: .authenticate(mechanism: .plain, initialResponse: nil))),
+                .continuationResponse("test"),
+                .tagged(.init(tag: "b", command: .noop)),
+            ]
+        ),
+    ]
+
+    static let appendABC: [CommandStreamPart] = [
+        .append(.start(tag: "a", appendingTo: .inbox)),
+        .append(.beginMessage(message: .init(options: .none, data: .init(byteCount: 5)))),
+        .append(.messageBytes("abc\r\n")),
+        .append(.endMessage),
+        .append(.finish),
+    ]
+
+    @Test("every way of splitting a command across two reads gives the same result", arguments: splitCases)
+    func everySplit(_ splitCase: SplitCase) {
+        let bytes = Array(splitCase.wire.utf8)
+        // No split, then every two-way split.
+        for boundaries in [[]] + (1..<bytes.count).map({ [$0] }) {
+            let output = self.serverOutput(of: bytes, splittingAt: boundaries)
+            #expect(Self.mergingLiteralBytes(output.parts) == splitCase.expected, "split at \(boundaries)")
+            #expect(output.continuationRequests == splitCase.continuationRequests, "split at \(boundaries)")
+        }
+    }
+
+    /// Merges adjacent streamed literal bytes, since how they're divided depends on the reads.
+    static func mergingLiteralBytes(_ parts: [CommandStreamPart]) -> [CommandStreamPart] {
+        var result: [CommandStreamPart] = []
+        for part in parts {
+            switch (result.last, part) {
+            case (.append(.messageBytes(var merged)), .append(.messageBytes(var bytes))):
+                merged.writeBuffer(&bytes)
+                result[result.count - 1] = .append(.messageBytes(merged))
+            case (.append(.catenateData(.bytes(var merged))), .append(.catenateData(.bytes(var bytes)))):
+                merged.writeBuffer(&bytes)
+                result[result.count - 1] = .append(.catenateData(.bytes(merged)))
+            default:
+                result.append(part)
+            }
+        }
+        return result
     }
 }

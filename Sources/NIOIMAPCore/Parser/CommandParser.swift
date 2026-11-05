@@ -68,6 +68,9 @@ public struct SynchronizedCommand: Hashable, Sendable {
 /// The parser maintains internal state to track incomplete parsing operations and can process
 /// incomplete input, returning `nil` until enough bytes are available for a complete element.
 ///
+/// The parser expects correctly framed input, such as `FramingParser` provides. For example,
+/// it doesn't skip an LF orphaned by a CRLF split across reads.
+///
 /// ## Usage
 ///
 /// ```swift
@@ -161,8 +164,9 @@ public struct CommandParser: Parser, Sendable {
     /// Parses a given `ByteBuffer` into command stream parts.
     ///
     /// Incrementally consumes bytes from the buffer and returns parsed command parts.
-    /// The parser maintains state across calls, so it can handle commands and data
-    /// that arrive in multiple network packets.
+    /// The parser maintains state across calls, so a command may arrive in multiple
+    /// reads. The input must be correctly framed, for example by `FramingParser`: a CRLF
+    /// split across reads is not supported.
     ///
     /// Returns `nil` when more data is needed. Throws an error if:
     /// - The buffer exceeds ``bufferLimit``
