@@ -513,7 +513,7 @@ extension IMAPConnection {
                 if configuration.useTLS {
                     handlers.append(
                         try NIOSSLClientHandler(
-                            context: NIOSSLContext(configuration: .clientDefault),
+                            context: NIOSSLContext(configuration: configuration.tlsConfiguration),
                             serverHostname: configuration.endpoint.hostname
                         )
                     )
