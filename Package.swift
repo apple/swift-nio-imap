@@ -101,6 +101,7 @@ let package = Package(
                 .target(name: "IMAPCommands"),
                 .target(name: "NIOIMAP"),
                 .product(name: "Logging", package: "swift-log"),
+                .product(name: "NIOSSL", package: "swift-nio-ssl"),
             ],
             swiftSettings: [
                 .enableUpcomingFeature("NonisolatedNonsendingByDefault")

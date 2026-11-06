@@ -18,10 +18,11 @@ import FoundationEssentials
 import Foundation
 #endif
 import NIOIMAP
+import NIOSSL
 
 extension IMAPConnection {
     /// Configuration for an IMAP server connection.
-    public struct Configuration: Equatable, Sendable {
+    public struct Configuration: Sendable {
         /// The server endpoint to connect to.
         public var endpoint: Endpoint
 
@@ -33,6 +34,15 @@ extension IMAPConnection {
 
         /// Whether to use TLS for the connection.
         public var useTLS: Bool
+
+        /// The TLS settings for the connection, used when ``useTLS`` is `true`.
+        ///
+        /// Defaults to `TLSConfiguration.makeClientConfiguration()`: the platform's trust roots,
+        /// full certificate verification, and any TLS version from 1.0 up. Set
+        /// `minimumTLSVersion` to refuse older versions (RFC 8996 deprecates TLS 1.0 and 1.1),
+        /// `trustRoots` for a server whose certificate a private CA issued, or a client
+        /// certificate.
+        public var tlsConfiguration: TLSConfiguration
 
         /// Controls connection-level debug logging.
         public enum Logging: Hashable, Sendable {
@@ -57,12 +67,25 @@ extension IMAPConnection {
         public init(
             endpoint: Endpoint,
             useTLS: Bool,
+            tlsConfiguration: TLSConfiguration = .makeClientConfiguration(),
             logging: Logging
         ) {
             self.endpoint = endpoint
             self.useTLS = useTLS
+            self.tlsConfiguration = tlsConfiguration
             self.logging = logging
         }
+    }
+}
+
+extension IMAPConnection.Configuration: Equatable {
+    /// `TLSConfiguration` isn't `Equatable`; its settings are compared with
+    /// `TLSConfiguration.bestEffortEquals(_:)`.
+    public static func == (lhs: Self, rhs: Self) -> Bool {
+        lhs.endpoint == rhs.endpoint
+            && lhs.useTLS == rhs.useTLS
+            && lhs.logging == rhs.logging
+            && lhs.tlsConfiguration.bestEffortEquals(rhs.tlsConfiguration)
     }
 }
 
@@ -71,11 +94,13 @@ extension IMAPConnection.Configuration {
         hostname: String,
         port: UInt16,
         useTLS: Bool,
+        tlsConfiguration: TLSConfiguration = .makeClientConfiguration(),
         logging: Logging
     ) {
         self.init(
             endpoint: .hostname(hostname, port: port),
             useTLS: useTLS,
+            tlsConfiguration: tlsConfiguration,
             logging: logging
         )
     }
