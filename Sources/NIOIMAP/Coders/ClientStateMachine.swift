@@ -210,6 +210,10 @@ struct ClientStateMachine {
         /// We're in some part of the appending flow
         case appending(ClientStateMachine.Append)
 
+        /// An append part holds a synchronizing literal before its end, e.g. the mailbox in
+        /// `A1 APPEND {2}\r\nå`. Waiting for `+` before sending the rest of the part.
+        case appendingLiteral(ClientStateMachine.Append, ActiveEncodeContext)
+
         /// We've sent a command that requires a continuation request
         /// for example `A1 LOGIN {1}\r\n\\ {1}\r\n\\`, and
         /// we're waiting for the continuation request from the server
@@ -258,6 +262,8 @@ struct ClientStateMachine {
         switch self.state {
         case .appending:
             return try self.receiveContinuationRequest_appending(request: req)
+        case .appendingLiteral:
+            return try self.receiveContinuationRequest_appendingLiteral()
         case .expectingLiteralContinuationRequest:
             return try self.receiveContinuationRequest_expectingLiteralContinuationRequest(request: req)
         case .authenticating:
@@ -308,6 +314,17 @@ struct ClientStateMachine {
             case .continueAppending:
                 self.state = .appending(appendStateMachine)
             }
+        case .appendingLiteral(var appendStateMachine, var context):
+            // The part isn't fully sent, so this can't complete the APPEND: its tagged response
+            // rejects the literal (RFC 3501 §7.5), and `appendStateMachine` throws for it.
+            do {
+                let result = try appendStateMachine.receiveResponse(response)
+                assert(result == .continueAppending)
+            } catch var error as UnexpectedResponse {
+                error.activePromise = context.drop()
+                throw error
+            }
+            self.state = .appendingLiteral(appendStateMachine, context)
         case .error:
             throw UnexpectedResponse(
                 kind: .errorState
@@ -418,7 +435,8 @@ struct ClientStateMachine {
         switch self.state {
         case .expectingNormalResponse, .idleRejected, .error, .appending, .authenticating, .idle:
             break
-        case .expectingLiteralContinuationRequest(let _activeEncodeContext):
+        case .expectingLiteralContinuationRequest(let _activeEncodeContext),
+            .appendingLiteral(_, let _activeEncodeContext):
             activeEncodeContext = _activeEncodeContext
         }
 
@@ -449,6 +467,21 @@ extension ClientStateMachine {
         try appendingStateMachine.receiveContinuationRequest(request)
         self.state = .appending(appendingStateMachine)
         return try .sendChunks(self.extractSendableChunks().chunks)
+    }
+
+    private mutating func receiveContinuationRequest_appendingLiteral() throws -> ContinuationRequestAction {
+        guard case .appendingLiteral(let appendingStateMachine, var context) = self.state else {
+            preconditionFailure("Invalid state: \(self.state)")
+        }
+        let chunk = context.nextChunk()
+        guard chunk.shouldSucceedPromise else {
+            // Another literal in the same part.
+            self.state = .appendingLiteral(appendingStateMachine, context)
+            return .sendChunks([chunk])
+        }
+        self.state = .appending(appendingStateMachine)
+        // Promises dequeued before a throw are never completed; see #858.
+        return try .sendChunks([chunk] + self.extractSendableChunks().chunks)
     }
 
     private mutating func receiveContinuationRequest_expectingLiteralContinuationRequest(
@@ -573,12 +606,13 @@ extension ClientStateMachine {
         }
 
         // no other commands can be running when we start appending
-        self.state = .appending(Append(tag: tag))
-
-        // TODO: This assumes that the append command doesn't require a continuation - fix this in another PR
+        let append = Append(tag: tag)
         let buffer = self.makeEncodeBuffer(.append(command))
         var context = ActiveEncodeContext(buffer: buffer, promise: promise)
-        return .init(chunks: [context.nextChunk()], nextContext: nil)
+        let chunk = context.nextChunk()
+        // A mailbox sent as a synchronizing literal: the rest of the part follows `+`.
+        self.state = chunk.shouldSucceedPromise ? .appending(append) : .appendingLiteral(append, context)
+        return .init(chunks: [chunk], nextContext: nil)
     }
 
     /// Iterate through the current command queue until we reached the marked position
@@ -633,6 +667,8 @@ extension ClientStateMachine {
         switch self.state {
         case .appending(let sub):
             sub.isWaitingForContinuationRequest
+        case .appendingLiteral:
+            true
         case .idle(let sub):
             sub.isWaitingForContinuationRequest
         case .expectingLiteralContinuationRequest:
@@ -662,7 +698,7 @@ extension ClientStateMachine {
             return self.sendNextCommand_authenticating(command: command, promise: promise)
         case .appending:
             return self.sendNextCommand_appending(command: command, promise: promise)
-        case .expectingLiteralContinuationRequest:
+        case .expectingLiteralContinuationRequest, .appendingLiteral:
             // if we're waiting for a continuation request
             // the by definition we can't do anything
             return nil
@@ -784,14 +820,17 @@ extension ClientStateMachine {
         encodeBuffer.writeCommandStream(.append(command))
 
         appendingStateMachine.sendCommand(.append(command))
-        let chunk = encodeBuffer.buffer.nextChunk()
-        self.state = .appending(appendingStateMachine)
+        var context = ActiveEncodeContext(buffer: encodeBuffer, promise: promise)
+        let chunk = context.nextChunk()
 
-        // We always need append commands to be sent instantly so we can receive continuations
-        // so the write promise should always be succeeded.
-        return .init(
-            chunks: [.init(bytes: chunk.bytes, promise: promise, shouldSucceedPromise: true)],
-            nextContext: nil
-        )
+        // A literal before the part's end, e.g. `URL {90}\r\n` and then the URL: send the rest
+        // after `+`. A part that ends in its own literal header (`beginMessage`,
+        // `catenateData(.begin)`) is fully sent; `appendingStateMachine` waits for that `+`.
+        guard chunk.shouldSucceedPromise else {
+            self.state = .appendingLiteral(appendingStateMachine, context)
+            return .init(chunks: [chunk], nextContext: nil)
+        }
+        self.state = .appending(appendingStateMachine)
+        return .init(chunks: [chunk], nextContext: nil)
     }
 }
