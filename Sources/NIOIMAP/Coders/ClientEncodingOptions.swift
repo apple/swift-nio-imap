@@ -12,7 +12,7 @@
 //
 //===----------------------------------------------------------------------===//
 
-@_spi(NIOIMAPInternal) import NIOIMAPCore
+import NIOIMAPCore
 
 struct ClientEncodingOptions {
     var userOptions: IMAPClientHandler.EncodingOptions
