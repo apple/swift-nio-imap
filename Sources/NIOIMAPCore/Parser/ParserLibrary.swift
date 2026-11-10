@@ -26,7 +26,7 @@ typealias SubParser<T> = (inout ParseBuffer, StackTracker) throws -> T
 internal struct ParseBuffer: Hashable {
     fileprivate var bytes: ByteBuffer
     /// Last newline parsed by `parseNewline()`
-    fileprivate(set) internal var lastParsedNewline: Newline?
+    fileprivate var lastParsedNewline: ParsedNewline?
 
     internal init(_ bytes: ByteBuffer) {
         self.bytes = bytes
@@ -36,6 +36,15 @@ internal struct ParseBuffer: Hashable {
     internal var readableBytes: Int {
         self.bytes.readableBytes
     }
+
+    /// The last parsed newline, if nothing has been consumed after it.
+    ///
+    /// That is, the newline that ends what has been parsed so far. A newline in the middle,
+    /// for example a literal header inside an `ENVELOPE`, is not returned.
+    internal var terminatingNewline: Newline? {
+        guard let last = self.lastParsedNewline, last.endIndex == self.bytes.readerIndex else { return nil }
+        return last.newline
+    }
 }
 
 extension ParseBuffer {
@@ -44,6 +53,12 @@ extension ParseBuffer {
         case crlf
         case cr
         case lf
+    }
+
+    /// A parsed newline, and the reader index right after it.
+    fileprivate struct ParsedNewline: Hashable {
+        var newline: Newline
+        var endIndex: Int
     }
 
     enum SkipLFResult: Hashable, Sendable {
@@ -514,7 +529,7 @@ extension ParserLibrary {
             }
         }
         let result = try _parseNewline()
-        buffer.lastParsedNewline = result
+        buffer.lastParsedNewline = ParseBuffer.ParsedNewline(newline: result, endIndex: buffer.bytes.readerIndex)
         return result
     }
 
