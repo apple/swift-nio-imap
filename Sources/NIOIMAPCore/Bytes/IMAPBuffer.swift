@@ -53,7 +53,8 @@ public struct IMAPBuffer: Sendable {
         case copied([UInt8], Range<Int>)
         /// Bytes somebody else owns, plus the live sub-range within that owner.
         case retained(IMAPByteStorage, Range<Int>)
-        /// Bytes in an encoder output segment, plus the range of it this value exposes.
+        /// Bytes in an encoder output segment or an input buffer's tail, plus the range of it this value
+        /// exposes.
         ///
         /// The encoder's own bytes get their own case rather than going through an
         /// ``IMAPByteStorage``, because a box per handed-out region is a class allocation per
@@ -105,7 +106,7 @@ public struct IMAPBuffer: Sendable {
         self.storage = .retained(storage, 0..<storage.count)
     }
 
-    /// Creates a buffer over a range of an encoder output segment.
+    /// Creates a buffer over a range of an ``OutputSegment``.
     ///
     /// The bytes are not copied, and the segment stays alive for as long as this value does — which
     /// is what lets the encoder hand out a chunk and carry on writing above it.
@@ -357,6 +358,17 @@ extension IMAPBuffer {
             return nil
         case .retained(let storage, let range):
             return (storage, range)
+        }
+    }
+
+    /// Whether these bytes stay at one address for as long as this value is alive: an array and a
+    /// segment never move; a retained region does if its owner promises it.
+    internal var hasStableAddress: Bool {
+        switch storage {
+        case .copied, .segment:
+            return true
+        case .retained(let storage, _):
+            return storage.hasStableAddress
         }
     }
 }

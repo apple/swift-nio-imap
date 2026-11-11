@@ -12,7 +12,7 @@
 //
 //===----------------------------------------------------------------------===//
 
-/// A `malloc`'d, append-only, uniquely-owned run of bytes. One allocation, never reallocated.
+/// A `malloc`'d, append-only, single-writer run of bytes. One allocation, never reallocated.
 ///
 /// This is the unit of storage the encoder writes into. `used` only ever grows and the allocation
 /// never moves, which is the property that lets a chunk be handed out while encoding continues: the
@@ -24,9 +24,10 @@
 ///
 /// - Important: A segment must be written by at most one owner. Nothing here enforces that; the
 ///   staging type above it does, by sealing a segment rather than sharing it when its state is
-///   copied.
+///   copied. ``IMAPInputBuffer``, which uses segments as tails for small reads, writes only while it
+///   holds the sole reference.
 ///
-/// - Note: **Unsafe seam**. `@unchecked Sendable` rests on the
+/// - Note: **Unsafe seam** (all are listed at the top of `ParseInput.swift`). `@unchecked Sendable` rests on the
 ///   disjointness above: a handed-out region exposes a range that has already been written and that
 ///   nothing writes into again, while the writer only ever touches bytes beyond it. So a chunk may
 ///   cross to another thread while encoding continues, and the mutable `used` — which only ever
