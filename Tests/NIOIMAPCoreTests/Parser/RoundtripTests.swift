@@ -185,24 +185,24 @@ private enum RoundtripTests {
         ]
     )
     static func commandRoundtrip(_ fixture: RoundtripFixture) throws {
-        var encodeBuffer = CommandEncodeBuffer(buffer: ByteBuffer(), options: .init(), loggingMode: false)
+        var encodeBuffer = CommandEncodeBuffer(options: .init(), loggingMode: false)
         let tag: Command.Tag = "1"
         let taggedCommand = TaggedCommand(tag: tag, command: fixture.command)
         encodeBuffer.writeCommand(taggedCommand)
         // required for commands that might terminate with a literal (e.g. append)
         encodeBuffer.buffer.writeString("\r\n")
 
-        var buffer = ByteBufferAllocator().buffer(capacity: 128)
+        var bytes: [UInt8] = []
+        bytes.reserveCapacity(128)
         while true {
             let next = encodeBuffer.buffer.nextChunk()
-            var toSend = next.bytes
-            buffer.writeBuffer(&toSend)
+            bytes.append(contentsOf: next.bytes.copiedBytes())
             if !next.waitForContinuation {
                 break
             }
         }
 
-        var parseBuffer = ParseBuffer(buffer)
+        var parseBuffer = ParseBuffer(ByteBuffer(bytes: bytes))
         let decoded = try GrammarParser().parseTaggedCommand(buffer: &parseBuffer, tracker: .testTracker)
         #expect(decoded == taggedCommand, "Decoded command should match original")
     }

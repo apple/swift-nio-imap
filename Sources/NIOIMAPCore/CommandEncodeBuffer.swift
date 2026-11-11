@@ -12,8 +12,6 @@
 //
 //===----------------------------------------------------------------------===//
 
-import struct NIO.ByteBuffer
-
 /// Encodes IMAP client commands into wire format ready for transmission to an IMAP server.
 ///
 /// `CommandEncodeBuffer` is the primary interface for encoding commands from the client side.
@@ -24,16 +22,29 @@ import struct NIO.ByteBuffer
 ///
 /// ```swift
 /// var buffer = CommandEncodeBuffer(
-///     buffer: ByteBuffer(),
 ///     options: CommandEncodingOptions(capabilities: [.literalPlus]),
 ///     loggingMode: false
 /// )
-/// // Encode command data into buffer
-/// // Retrieve chunks via buffer.buffer.nextChunk()
+/// buffer.writeCommand(TaggedCommand(tag: "A1", command: .login(username: "user", password: "pass")))
+/// while let chunk = buffer.nextChunk() {
+///     send(chunk.bytes)
+///     if chunk.nextStep == .awaitContinuationRequest {
+///         // Wait for the server's `+` before sending the next chunk.
+///     }
+/// }
 /// ```
 ///
+/// ## Where the bytes go
+///
+/// This is the type a client creates; it owns an ``EncoderOutputBuffer``, the sink the encoded bytes
+/// are appended to, chosen once with the `sink:` argument and never named again. Leaving it out gives
+/// an ``IMAPOutputBuffer``, which is the right answer unless the bytes have to land somewhere
+/// specific — see ``EncoderOutputBuffer`` for the choice. The bytes come back out as an
+/// ``IMAPBufferList`` from ``nextChunk()``, which converts to a `DispatchData`, to `ByteBuffer`s, or to
+/// one contiguous copy.
+///
 /// - SeeAlso: ``ResponseEncodeBuffer``, ``CommandEncodingOptions``
-public struct CommandEncodeBuffer: Hashable, Sendable {
+public struct CommandEncodeBuffer: Hashable {
     /// The underlying buffer containing data to be written.
     ///
     /// Provides access to the raw ``EncodeBuffer`` for advanced operations,
@@ -46,8 +57,8 @@ public struct CommandEncodeBuffer: Hashable, Sendable {
     /// Creates a new command encoding buffer with explicit options.
     ///
     /// - Parameters:
-    ///   - buffer: The initial `ByteBuffer` to build upon. This buffer is copied,
-    ///     not taken as inout.
+    ///   - sink: Where the encoded bytes are appended. Defaults to an ``IMAPOutputBuffer``, which
+    ///     is the right choice unless the bytes have to land somewhere specific.
     ///   - options: The ``CommandEncodingOptions`` controlling how literals, strings,
     ///     and other protocol elements are encoded.
     ///   - encodedAtLeastOneCatenateElement: Internal tracking for CATENATE operations.
@@ -55,15 +66,22 @@ public struct CommandEncodeBuffer: Hashable, Sendable {
     ///   - loggingMode: When `true`, binary data is replaced with placeholders like
     ///     `[N bytes]` for safe logging. Defaults to `false`.
     public init(
-        buffer: ByteBuffer,
+        sink: some EncoderOutputBuffer = IMAPOutputBuffer(),
         options: CommandEncodingOptions,
         encodedAtLeastOneCatenateElement: Bool = false,
         loggingMode: Bool
     ) {
-        self.buffer = .clientEncodeBuffer(buffer: buffer, options: options, loggingMode: loggingMode)
+        self.buffer = .clientEncodeBuffer(sink: sink, options: options, loggingMode: loggingMode)
         self.encodedAtLeastOneCatenateElement = encodedAtLeastOneCatenateElement
     }
 }
+
+// MARK: - Sendability
+
+/// `CommandEncodeBuffer` is deliberately **not** `Sendable`, because the ``EncoderOutputBuffer`` it
+/// writes into is not: see ``EncodeBuffer``. A chunk that has been handed out *is* `Sendable`.
+@available(*, unavailable)
+extension CommandEncodeBuffer: Sendable {}
 
 extension CommandEncodeBuffer {
     /// The encoding options currently in use.
@@ -93,8 +111,7 @@ extension CommandEncodeBuffer {
     /// server advertises the corresponding capabilities.
     ///
     /// - Parameters:
-    ///   - buffer: The initial `ByteBuffer` to build upon. This buffer is copied,
-    ///     not taken as inout.
+    ///   - sink: Where the encoded bytes are appended. Defaults to an ``IMAPOutputBuffer``.
     ///   - capabilities: Server capabilities from a `CAPABILITY` response. These are
     ///     used to configure encoding options automatically.
     ///   - encodedAtLeastOneCatenateElement: Internal tracking for CATENATE operations.
@@ -102,12 +119,12 @@ extension CommandEncodeBuffer {
     ///   - loggingMode: When `true`, binary data is replaced with placeholders like
     ///     `[N bytes]` for safe logging. Defaults to `false`.
     public init(
-        buffer: ByteBuffer,
+        sink: some EncoderOutputBuffer = IMAPOutputBuffer(),
         capabilities: [Capability],
         encodedAtLeastOneCatenateElement: Bool = false,
         loggingMode: Bool
     ) {
-        self.buffer = .clientEncodeBuffer(buffer: buffer, capabilities: capabilities, loggingMode: loggingMode)
+        self.buffer = .clientEncodeBuffer(sink: sink, capabilities: capabilities, loggingMode: loggingMode)
         self.encodedAtLeastOneCatenateElement = encodedAtLeastOneCatenateElement
     }
 }
@@ -117,14 +134,52 @@ extension CommandEncodeBuffer {
     ///
     /// Used for implementing ``CustomDebugStringConvertible`` conformance.
     static func makeDescription(loggingMode: Bool = false, _ closure: (inout CommandEncodeBuffer) -> Void) -> String {
-        var buffer = CommandEncodeBuffer(buffer: ByteBuffer(), options: .rfc3501, loggingMode: loggingMode)
+        var buffer = CommandEncodeBuffer(options: .rfc3501, loggingMode: loggingMode)
         closure(&buffer)
-        var chunk = buffer.buffer.nextChunk()
-        var result = String(bestEffortDecodingUTF8Bytes: chunk.bytes.readableBytesView)
-        while chunk.waitForContinuation {
-            chunk = buffer.buffer.nextChunk()
-            result += String(bestEffortDecodingUTF8Bytes: chunk.bytes.readableBytesView)
+        var bytes: [UInt8] = []
+        while let chunk = buffer.nextChunk() {
+            bytes.append(contentsOf: chunk.bytes.copiedBytes())
         }
-        return result
+        return String(bestEffortDecodingUTF8Bytes: bytes)
+    }
+}
+
+// MARK: - Chunks
+
+extension CommandEncodeBuffer {
+    /// Encoded bytes to send as one write, and what the client must do before sending more.
+    public struct Chunk: Hashable, Sendable {
+        /// The bytes to send, in order. Large payloads are referenced, not copied.
+        public var bytes: IMAPBufferList
+
+        /// What the client must do after sending `bytes` and before sending the next chunk.
+        public var nextStep: NextStep
+    }
+
+    /// What a client does after sending a chunk.
+    public enum NextStep: Hashable, Sendable {
+        /// Send the next chunk right away.
+        case proceed
+
+        /// The chunk ends with a synchronizing literal header (`{n}`). Wait for the server's
+        /// continuation request (`+`) before sending the next chunk.
+        case awaitContinuationRequest
+    }
+
+    /// Removes and returns the next chunk of encoded bytes, ending at the first pending
+    /// synchronizing literal header; returns `nil` if nothing is pending.
+    ///
+    /// A chunk may end with the last byte written so far, e.g. after `.append(.beginMessage(…))`:
+    /// its `nextStep` is still ``NextStep/awaitContinuationRequest``, and the next chunk, once more
+    /// is written, follows the `+`.
+    public mutating func nextChunk() -> Chunk? {
+        guard self.buffer.hasChunks || self.buffer.pendingByteCount > 0 else { return nil }
+        let (chunk, end) = self.buffer.takeChunk(allowEmptyChunk: true)
+        switch end {
+        case .stopPoint:
+            return Chunk(bytes: chunk.bytes, nextStep: .awaitContinuationRequest)
+        case .pendingBytes:
+            return Chunk(bytes: chunk.bytes, nextStep: .proceed)
+        }
     }
 }

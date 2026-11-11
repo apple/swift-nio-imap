@@ -247,13 +247,9 @@ extension TestUtilities {
         parser: (inout ParseBuffer, StackTracker) throws -> T,
         sourceLocation: SourceLocation = #_sourceLocation
     ) {
-        var encodeBuffer = EncodeBuffer.serverEncodeBuffer(
-            buffer: ByteBuffer(),
-            options: ResponseEncodingOptions(),
-            loggingMode: false
-        )
+        var encodeBuffer = EncodeBuffer.serverEncodeBuffer(options: ResponseEncodingOptions(), loggingMode: false)
         _ = encoder(&encodeBuffer, value)
-        var encoded = encodeBuffer.nextChunk().bytes
+        var encoded = ByteBuffer(bytes: encodeBuffer.nextChunk().bytes.copiedBytes())
         encoded.writeString(terminator)
         let encodedString = String(buffer: encoded)
         var parseBuffer = ParseBuffer(encoded)
@@ -296,3 +292,21 @@ extension TestUtilities {
     }
 }
 #endif
+
+// Encoded chunks are `IMAPBufferList`s. This mirrors NIO's `String(buffer:)` so a test can read a
+// chunk the same way it used to read a `ByteBuffer`.
+extension String {
+    init(buffer list: IMAPBufferList) {
+        self = String(decoding: list.copiedBytes(), as: UTF8.self)
+    }
+}
+
+// Encoded chunks are compared against string literals in a few places. A literal makes a one-region
+// list, and `IMAPBufferList` equality is byte-wise, so it matches however the sink split the bytes up.
+extension IMAPBufferList: ExpressibleByUnicodeScalarLiteral {}
+extension IMAPBufferList: ExpressibleByExtendedGraphemeClusterLiteral {}
+extension IMAPBufferList: ExpressibleByStringLiteral {
+    public init(stringLiteral value: String) {
+        self = IMAPBufferList(IMAPBuffer(Array(value.utf8)))
+    }
+}

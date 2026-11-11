@@ -294,7 +294,6 @@ struct CommandTypeTests {
     @Test("authenticate with initialResponse in loggingMode")
     func authenticateWithInitialResponseLoggingMode() {
         var buffer = CommandEncodeBuffer(
-            buffer: ByteBufferAllocator().buffer(capacity: 64),
             capabilities: [],
             loggingMode: true
         )
@@ -305,7 +304,6 @@ struct CommandTypeTests {
     @Test("login credentials redacted in loggingMode")
     func loginCredentialsRedactedInLoggingMode() {
         var buffer = CommandEncodeBuffer(
-            buffer: ByteBufferAllocator().buffer(capacity: 64),
             capabilities: [],
             loggingMode: true
         )

@@ -30,7 +30,7 @@ import Musl
 //
 // Unsafe seams. In the byte, encoder and parser code — `NIOIMAPCore`'s `Bytes/`, `Parser/` and
 // `EncodeBuffer*.swift`, and `NIOIMAP`'s `Bytes/` — memory safety and `Sendable` are compiler-checked
-// except at these thirteen. Not counted: reading through a pointer, or binding it to `UInt8`, inside the
+// except at these fourteen. Not counted: reading through a pointer, or binding it to `UInt8`, inside the
 // `withUnsafe…` closure that produced it. Outside that scope, `Base64/Chromium.swift` and
 // `MailboxName.swift` use pointers too; both predate this list.
 //
@@ -61,18 +61,21 @@ import Musl
 //    (EncodeBuffer.swift). `maximumDecimalLength` holds every digit of a number up to
 //    `maximumDecimalBitWidth` bits plus a sign; padding stops at the start; only the written suffix is read.
 // 9. Write: `EncodeBuffer.writeQuotedIMAPString(_:)` escapes into a `withUnsafeTemporaryAllocation`
-//    (ByteBuffer+WriteLiteral.swift). Its `2 * count + 2` bytes fit every byte escaped, plus both quotes.
-// 10. Public: `IMAPBuffer.withUnsafeBytesAndOwner(_:)` (IMAPBuffer.swift) lets its pointer escape the
+//    (EncodeBuffer+WriteLiteral.swift). Its `2 * count + 2` bytes fit every byte escaped, plus both quotes.
+// 10. Write: `EncodeBuffer.appendBytes(_:)` copies into the `staging` `InlineArray` with `copyMemory`
+//     (EncodeBuffer.swift). It copies only when `stagedCount + count` fits `stagingCapacity`, flushing
+//     first if needed; `flushStaging()` reads only the `stagedCount` bytes written.
+// 11. Public: `IMAPBuffer.withUnsafeBytesAndOwner(_:)` (IMAPBuffer.swift) lets its pointer escape the
 //     closure. It hands out only bytes with a fixed address, and they stay valid while the caller holds
 //     `owner`; correct use outside the closure is the caller's job.
-// 11. Public: `StableAddressByteRegion` (ByteRegion.swift) is a promise nothing checks; seams 2, 6 and 10
+// 12. Public: `StableAddressByteRegion` (ByteRegion.swift) is a promise nothing checks; seams 2, 6 and 11
 //     rest on it, through `IMAPByteStorage.hasStableAddress`. The library conforms the stdlib byte arrays
 //     and `DispatchDataRegion`, not `DispatchData.Region`, which does not keep its bytes alive; `NIOIMAP`
 //     conforms `ByteBuffer`.
-// 12. Sendable: `DispatchDataRegion: @unchecked Sendable` (ParserInputBuffer+Foundation.swift), what
+// 13. Sendable: `DispatchDataRegion: @unchecked Sendable` (ParserInputBuffer+Foundation.swift), what
 //     `IMAPInputBuffer.append(contentsOf:)` keeps. Its pointer is into the `DispatchData` it holds, which
 //     is immutable and keeps its regions alive.
-// 13. Sendable: `GrammarParser: @unchecked Sendable` (GrammarParser.swift), older than this list. Its
+// 14. Sendable: `GrammarParser: @unchecked Sendable` (GrammarParser.swift), older than this list. Its
 //     `parsedStringCache` closure is not `@Sendable`.
 
 /// One contiguous run of input bytes, plus whoever can keep those bytes alive.

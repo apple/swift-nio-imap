@@ -48,7 +48,6 @@ extension CommandEncodeFixture {
         sourceLocation: SourceLocation = #_sourceLocation
     ) {
         var encodeBuffer = CommandEncodeBuffer(
-            buffer: ByteBufferAllocator().buffer(capacity: 128),
             options: options,
             loggingMode: false
         )

@@ -53,9 +53,9 @@ struct CommandTagTests {
     @Test("valid tags round-trip in a command", arguments: validTagStrings)
     func commandRoundTrip(_ string: String) throws {
         let tag = try #require(Command.Tag(string))
-        var encodeBuffer = CommandEncodeBuffer(buffer: ByteBuffer(), options: .rfc3501, loggingMode: false)
+        var encodeBuffer = CommandEncodeBuffer(options: .rfc3501, loggingMode: false)
         encodeBuffer.writeCommand(TaggedCommand(tag: tag, command: .noop))
-        var buffer = ParseBuffer(encodeBuffer.buffer.nextChunk().bytes)
+        var buffer = ParseBuffer(ByteBuffer(bytes: encodeBuffer.buffer.nextChunk().bytes.copiedBytes()))
         let parsed = try GrammarParser().parseTaggedCommand(buffer: &buffer, tracker: .testTracker)
         #expect(parsed == TaggedCommand(tag: tag, command: .noop))
     }
@@ -63,9 +63,9 @@ struct CommandTagTests {
     @Test("valid tags round-trip in an APPEND", arguments: validTagStrings)
     func appendRoundTrip(_ string: String) throws {
         let tag = try #require(Command.Tag(string))
-        var encodeBuffer = CommandEncodeBuffer(buffer: ByteBuffer(), options: .rfc3501, loggingMode: false)
+        var encodeBuffer = CommandEncodeBuffer(options: .rfc3501, loggingMode: false)
         encodeBuffer.writeCommandStream(.append(.start(tag: tag, appendingTo: .inbox)))
-        var bytes = encodeBuffer.buffer.nextChunk().bytes
+        var bytes = ByteBuffer(bytes: encodeBuffer.buffer.nextChunk().bytes.copiedBytes())
         bytes.writeString(" ")
         var buffer = ParseBuffer(bytes)
         let parsed = try GrammarParser().parseAppend(buffer: &buffer, tracker: .testTracker)

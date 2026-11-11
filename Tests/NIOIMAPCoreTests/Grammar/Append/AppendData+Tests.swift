@@ -51,7 +51,6 @@ struct AppendDataTests {
             processExitsWith: ExitTest.Condition.failure,
             performing: {
                 var buffer = EncodeBuffer.serverEncodeBuffer(
-                    buffer: ByteBufferAllocator().buffer(capacity: 128),
                     options: ResponseEncodingOptions(),
                     loggingMode: false
                 )

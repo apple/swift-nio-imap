@@ -50,6 +50,36 @@ private struct UnstableBuffer: ByteRegion, Sendable {
     }
 }
 
+/// A third-party sink that hands every byte out as a region of its own: the most regions a sink can.
+private struct OneRegionPerByteSink: EncoderOutputBuffer {
+    private var bytes: [UInt8] = []
+
+    var byteCount: Int { bytes.count }
+
+    mutating func append(_ bytes: UnsafeRawBufferPointer) {
+        self.bytes.append(contentsOf: bytes)
+    }
+
+    mutating func append(_ region: IMAPBuffer) {
+        region.withUnsafeBytes { bytes.append(contentsOf: $0) }
+    }
+
+    mutating func takeFirst(_ byteCount: Int) -> IMAPBufferList {
+        let taken = bytes.prefix(byteCount).map { IMAPBuffer([$0]) }
+        bytes.removeFirst(byteCount)
+        return IMAPBufferList(taken)
+    }
+
+    func withPendingRegions<R>(_ body: (Span<IMAPBuffer>) -> R) -> R {
+        let regions = ContiguousArray(bytes.map { IMAPBuffer([$0]) })
+        return body(regions.span)
+    }
+
+    mutating func removeAll() {
+        bytes = []
+    }
+}
+
 /// Where `buffer`'s bytes are.
 private func address(of buffer: IMAPBuffer) -> UnsafeRawPointer? {
     buffer.withUnsafeBytes { UnsafeRawPointer($0.baseAddress) }
@@ -204,5 +234,22 @@ struct StableAddressByteRegionTests {
 
         let unstable = UnstableBuffer(bytes: Array(repeating: 0, count: Self.byteCount))
         #expect(donatedAddress(of: wrapGenerically(unstable)) == nil)
+    }
+
+    /// The most regions the encoder hands out in one chunk. Internal to the library, so spelled here.
+    static let encoderRegionCap = 64
+
+    @Test("the encoder caps the regions a sink of your own hands it")
+    func encoderCapsForeignSink() {
+        var encoder = ResponseEncodeBuffer(
+            sink: OneRegionPerByteSink(),
+            options: ResponseEncodingOptions(),
+            loggingMode: false
+        )
+        let text = String(repeating: "x", count: 1_000)
+        encoder.writeContinuationRequest(.responseText(ResponseText(text: text)))
+        let bytes = encoder.readBytes()
+        #expect(bytes.regionCount == Self.encoderRegionCap)
+        #expect(bytes.copiedBytes() == Array("+ \(text)\r\n".utf8))
     }
 }

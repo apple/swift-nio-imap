@@ -58,7 +58,7 @@ private struct CommandStreamTests {
             .finish,
         ]
 
-        var buffer = CommandEncodeBuffer(buffer: "", capabilities: [], loggingMode: false)
+        var buffer = CommandEncodeBuffer(capabilities: [], loggingMode: false)
         parts.map { CommandStreamPart.append($0) }.forEach {
             buffer.writeCommandStream($0)
         }
@@ -85,7 +85,7 @@ private struct CommandStreamTests {
 
         var options = CommandEncodingOptions()
         options.useNonSynchronizingLiteralPlus = true
-        var buffer = CommandEncodeBuffer(buffer: "", options: options, loggingMode: false)
+        var buffer = CommandEncodeBuffer(options: options, loggingMode: false)
         parts.map { CommandStreamPart.append($0) }.forEach {
             buffer.writeCommandStream($0)
         }
@@ -120,7 +120,7 @@ private struct CommandStreamTests {
             .finish,
         ]
 
-        var buffer = CommandEncodeBuffer(buffer: "", capabilities: [], loggingMode: false)
+        var buffer = CommandEncodeBuffer(capabilities: [], loggingMode: false)
         parts.map { CommandStreamPart.append($0) }.forEach {
             buffer.writeCommandStream($0)
         }
@@ -187,7 +187,7 @@ private struct CommandStreamTests {
 
         var options = CommandEncodingOptions()
         options.useNonSynchronizingLiteralPlus = true
-        var buffer = CommandEncodeBuffer(buffer: "", options: options, loggingMode: false)
+        var buffer = CommandEncodeBuffer(options: options, loggingMode: false)
         parts.map { CommandStreamPart.append($0) }.forEach {
             buffer.writeCommandStream($0)
         }
@@ -216,7 +216,7 @@ private struct CommandStreamTests {
         ]
 
         // Apply parts twice.
-        var buffer = CommandEncodeBuffer(buffer: "", capabilities: [], loggingMode: false)
+        var buffer = CommandEncodeBuffer(capabilities: [], loggingMode: false)
         (parts + parts).map { CommandStreamPart.append($0) }.forEach {
             buffer.writeCommandStream($0)
         }
@@ -329,7 +329,7 @@ private struct CommandStreamTests {
 
     @Test("writeAppendCommand in loggingMode for messageBytes")
     func writeAppendCommandLoggingModeMessageBytes() {
-        var buffer = CommandEncodeBuffer(buffer: "", capabilities: [], loggingMode: true)
+        var buffer = CommandEncodeBuffer(capabilities: [], loggingMode: true)
         let count = buffer.writeCommandStream(.append(.messageBytes("hello")))
         #expect(count == 0)
         #expect(String(buffer: buffer.buffer.nextChunk().bytes) == "")
@@ -337,7 +337,7 @@ private struct CommandStreamTests {
 
     @Test("writeAppendCommand in loggingMode for endMessage")
     func writeAppendCommandLoggingModeEndMessage() {
-        var buffer = CommandEncodeBuffer(buffer: "", capabilities: [], loggingMode: true)
+        var buffer = CommandEncodeBuffer(capabilities: [], loggingMode: true)
         let count = buffer.writeCommandStream(.append(.endMessage))
         #expect(count > 0)
         let chunk = buffer.buffer.nextChunk()

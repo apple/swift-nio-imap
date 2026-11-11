@@ -25,7 +25,6 @@ import struct NIO.ByteBuffer
 ///
 /// ```swift
 /// var buffer = ResponseEncodeBuffer(
-///     buffer: ByteBuffer(),
 ///     options: ResponseEncodingOptions(),
 ///     loggingMode: false
 /// )
@@ -33,8 +32,16 @@ import struct NIO.ByteBuffer
 /// let encoded = buffer.readBytes()  // Get all encoded data
 /// ```
 ///
+/// ## Where the bytes go
+///
+/// This is the type a server creates; it owns an ``EncoderOutputBuffer``, the sink the encoded bytes
+/// are appended to, chosen once with the `sink:` argument and never named again. Leaving it out gives
+/// an ``IMAPOutputBuffer``, which is the right answer unless the bytes have to land somewhere
+/// specific — see ``EncoderOutputBuffer`` for the choice. ``readBytes()`` hands back an
+/// ``IMAPBufferList``, which converts to a `DispatchData`, to `ByteBuffer`s, or to one contiguous copy.
+///
 /// - SeeAlso: ``CommandEncodeBuffer``, ``ResponseEncodingOptions``
-public struct ResponseEncodeBuffer: Sendable {
+public struct ResponseEncodeBuffer {
     var buffer: EncodeBuffer
 
     /// Retrieves all encoded data from the buffer for transmission.
@@ -43,27 +50,49 @@ public struct ResponseEncodeBuffer: Sendable {
     /// next response. This is typically called after encoding a complete response
     /// to retrieve the wire-format bytes for sending to the client.
     ///
-    /// - Returns: A `ByteBuffer` containing all encoded response data.
-    public mutating func readBytes() -> ByteBuffer {
-        let buffer = self.buffer.nextChunk().bytes
-        precondition(self.buffer.buffer.readableBytes == 0)
-        self.buffer.buffer.clear()
-        return buffer
+    /// - Returns: All encoded response data, as one or more regions — usually one.
+    public mutating func readBytes() -> IMAPBufferList {
+        let bytes = self.buffer.nextChunk().bytes
+        // A zero-*bytes* check: a server-mode chunk takes everything, so nothing may be left behind.
+        precondition(self.buffer.pendingByteCount == 0)
+        // Clearing also releases the sink's storage, which matters because a server handler keeps one
+        // of these for the lifetime of a connection.
+        self.buffer.clear()
+        return bytes
     }
 
     /// Creates a new response encoding buffer with explicit options.
     ///
     /// - Parameters:
-    ///   - buffer: The initial `ByteBuffer` to build upon. This buffer is copied,
-    ///     not taken as inout.
+    ///   - sink: Where the encoded bytes are appended. Defaults to an ``IMAPOutputBuffer``, which
+    ///     is the right choice unless the bytes have to land somewhere specific.
     ///   - options: The ``ResponseEncodingOptions`` controlling how strings and other
     ///     protocol elements are encoded.
     ///   - loggingMode: When `true`, binary data is replaced with placeholders like
     ///     `[N bytes]` for safe logging. Defaults to `false`.
-    public init(buffer: ByteBuffer, options: ResponseEncodingOptions, loggingMode: Bool) {
-        self.buffer = .serverEncodeBuffer(buffer: buffer, options: options, loggingMode: loggingMode)
+    public init(
+        sink: some EncoderOutputBuffer = IMAPOutputBuffer(),
+        options: ResponseEncodingOptions,
+        loggingMode: Bool
+    ) {
+        self.buffer = .serverEncodeBuffer(sink: sink, options: options, loggingMode: loggingMode)
+    }
+
+    /// Wraps an existing ``EncodeBuffer``, so response writers can be driven over a buffer somebody
+    /// else created.
+    ///
+    /// - Parameter buffer: The buffer to write to. Must be in server mode.
+    internal init(_ buffer: EncodeBuffer) {
+        self.buffer = buffer
     }
 }
+
+// MARK: - Sendability
+
+/// `ResponseEncodeBuffer` is deliberately **not** `Sendable`, because the ``EncoderOutputBuffer`` it
+/// writes into is not: see ``EncodeBuffer``. The bytes ``readBytes()`` hands out *are* `Sendable`.
+@available(*, unavailable)
+extension ResponseEncodeBuffer: Sendable {}
 
 extension ResponseEncodeBuffer {
     /// Creates a new response encoding buffer from server capabilities.
@@ -72,14 +101,17 @@ extension ResponseEncodeBuffer {
     /// which enables capability-dependent encoding options if the server advertises them.
     ///
     /// - Parameters:
-    ///   - buffer: The initial `ByteBuffer` to build upon. This buffer is copied,
-    ///     not taken as inout.
+    ///   - sink: Where the encoded bytes are appended. Defaults to an ``IMAPOutputBuffer``.
     ///   - capabilities: Server capabilities for context. These may be used to configure
     ///     encoding options if needed.
     ///   - loggingMode: When `true`, binary data is replaced with placeholders like
     ///     `[N bytes]` for safe logging. Defaults to `false`.
-    public init(buffer: ByteBuffer, capabilities: [Capability], loggingMode: Bool) {
-        self.buffer = .serverEncodeBuffer(buffer: buffer, capabilities: capabilities, loggingMode: loggingMode)
+    public init(
+        sink: some EncoderOutputBuffer = IMAPOutputBuffer(),
+        capabilities: [Capability],
+        loggingMode: Bool
+    ) {
+        self.buffer = .serverEncodeBuffer(sink: sink, capabilities: capabilities, loggingMode: loggingMode)
     }
 }
 
@@ -90,9 +122,9 @@ extension ResponseEncodeBuffer {
     static func makeDescription(loggingMode: Bool, _ closure: (inout ResponseEncodeBuffer) -> Void) -> String {
         var options = ResponseEncodingOptions()
         options.useQuotedString = true
-        var buffer = ResponseEncodeBuffer(buffer: ByteBuffer(), options: options, loggingMode: loggingMode)
+        var buffer = ResponseEncodeBuffer(options: options, loggingMode: loggingMode)
         closure(&buffer)
-        return String(bestEffortDecodingUTF8Bytes: buffer.buffer.buffer.readableBytesView)
+        return String(bestEffortDecodingUTF8Bytes: buffer.buffer.makePendingBufferList().copiedBytes())
     }
 }
 

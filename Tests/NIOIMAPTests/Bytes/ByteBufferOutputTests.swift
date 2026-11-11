@@ -16,7 +16,7 @@ import NIO
 import Testing
 
 @_spi(NIOIMAPInternal) @testable import NIOIMAP
-@_spi(NIOIMAPInternal) import NIOIMAPCore
+@_spi(NIOIMAPInternal) @testable import NIOIMAPCore
 
 extension ByteBufferOutput {
     /// Appends bytes, spelled for readability in tests.
@@ -460,6 +460,51 @@ struct ByteBufferOutputTests {
         #expect(buffer.debugDescription == "ByteBufferOutput(0 bytes pending in 0 regions)")
         buffer.append("abc")
         #expect(buffer.debugDescription == "ByteBufferOutput(3 bytes pending in 1 region)")
+    }
+
+    // MARK: - Encoding through it
+
+    @Test("a command encodes through the sink and comes out as one ByteBuffer")
+    func encodeCommand() {
+        var encodeBuffer = CommandEncodeBuffer(
+            sink: ByteBufferOutput(),
+            options: .rfc3501,
+            loggingMode: false
+        )
+        encodeBuffer.writeCommandStream(.tagged(.init(tag: "A1", command: .select(.inbox, []))))
+        let chunk = encodeBuffer.buffer.nextChunk()
+        #expect(chunk.waitForContinuation == false)
+        #expect(chunk.bytes.regionCount == 1)
+        #expect(String(decoding: chunk.bytes.copiedBytes(), as: UTF8.self) == "A1 SELECT \"INBOX\"\r\n")
+    }
+
+    @Test("a chunk encoded through the sink is capped at 64 regions, and nothing is lost")
+    func encodeCapsRegions() {
+        var encodeBuffer = CommandEncodeBuffer(sink: ByteBufferOutput(), options: .rfc3501, loggingMode: false)
+        var expected: [UInt8] = []
+        // Each payload is at the copy threshold, so the sink keeps each one as its own region.
+        for index in 0..<200 {
+            let payload = ByteBufferOutput.pattern(IMAPBuffer.copyThreshold, seed: UInt8(index))
+            encodeBuffer.buffer.writeBytes(IMAPBuffer(payload))
+            expected += payload
+        }
+        let chunk = encodeBuffer.buffer.nextChunk()
+        #expect(chunk.bytes.regionCount == IMAPBufferList.maximumRegionsPerChunk)
+        #expect(chunk.bytes.copiedBytes() == expected)
+    }
+
+    @Test("a response encodes through the sink, and the same sink serves the next response")
+    func encodeResponses() {
+        var encodeBuffer = ResponseEncodeBuffer(
+            sink: ByteBufferOutput(),
+            options: .init(),
+            loggingMode: false
+        )
+        encodeBuffer.writeResponse(.tagged(.init(tag: "A1", state: .ok(.init(text: "done")))))
+        #expect(String(decoding: encodeBuffer.readBytes().copiedBytes(), as: UTF8.self) == "A1 OK done\r\n")
+
+        encodeBuffer.writeResponse(.tagged(.init(tag: "A2", state: .ok(.init(text: "again")))))
+        #expect(String(decoding: encodeBuffer.readBytes().copiedBytes(), as: UTF8.self) == "A2 OK again\r\n")
     }
 
     @Test("a chunk from the sink converts to a DispatchData with the right bytes")

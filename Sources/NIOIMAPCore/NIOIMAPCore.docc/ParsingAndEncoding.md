@@ -6,6 +6,8 @@ Parse IMAP server responses and encode client commands using these streaming par
 
 NIOIMAPCore provides comprehensive parsing and encoding capabilities. These types handle the conversion between the IMAP wire format and strongly-typed Swift structures, including error handling and advanced features like pipelining.
 
+On the way out, ``CommandEncodeBuffer`` and ``ResponseEncodeBuffer`` write into an ``EncoderOutputBuffer`` — ``IMAPOutputBuffer`` unless you pass another — and hand bytes out as an ``IMAPBufferList`` — ordered ``IMAPBuffer`` regions, usually one — from ``CommandEncodeBuffer/nextChunk()`` and ``ResponseEncodeBuffer/readBytes()``. A command chunk ends at each synchronizing literal header; its ``CommandEncodeBuffer/Chunk/nextStep`` says whether to wait for the server's `+` before sending the next. A large payload you supply as an ``IMAPBuffer`` is kept by reference, so forwarding a message costs no copy. Handed-out bytes never move or change, so a chunk is `Sendable` and can be written while encoding continues. Convert it with ``IMAPBufferList/makeDispatchData()``, `makeByteBuffers()` in NIOIMAP, or ``IMAPBufferList/copiedBytes()``.
+
 ## Topics
 
 ### Parsers
