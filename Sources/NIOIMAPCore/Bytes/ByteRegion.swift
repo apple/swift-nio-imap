@@ -16,14 +16,14 @@
 ///
 /// This is the narrowest thing the library needs in order to read somebody else's bytes: a single
 /// scoped accessor. The signature deliberately matches Foundation's `ContiguousBytes`, so Foundation
-/// types conform with an empty extension and the core of `NIOIMAPCore` never has to
-/// `import Foundation`.
+/// types conform with an empty extension and `NIOIMAPCore` never needs full Foundation on Linux:
+/// `FoundationEssentials` is enough.
 ///
 /// ## Conforming
 ///
 /// Most conformances are empty, because the type already has a `withUnsafeBytes(_:)` of the right
 /// shape — that is true of `Array`, `ArraySlice` and `ContiguousArray` over `UInt8`, all of which
-/// conform below, and of `Foundation.Data`.
+/// conform below, and of `Data`.
 ///
 /// ## Immutability
 ///
@@ -55,19 +55,38 @@ extension ContiguousArray: ByteRegion where Element == UInt8 {}
 ///
 /// Conforming promises more: `withUnsafeBytes(_:)` yields the region's actual storage, at a fixed
 /// address, and those bytes stay valid and unchanged for as long as any copy of the value is alive.
-/// In return, ``IMAPBufferList/makeDispatchData()`` donates a region of at least
-/// ``IMAPBuffer/dispatchDonationThreshold`` bytes to the `DispatchData`, keeping a copy of the value
-/// alive in its place, instead of copying it.
+/// In return, the library keeps a copy of the value where it would otherwise copy the bytes:
+/// ``IMAPInputBuffer`` keeps a large region by reference, and ``IMAPBufferList/makeDispatchData()``
+/// donates a region of at least ``IMAPBuffer/dispatchDonationThreshold`` bytes to the `DispatchData`.
 ///
 /// This is the extension point for a byte-buffer type of your own; `NIOIMAP` conforms `ByteBuffer`
 /// with nothing more. A region that does not conform is copied instead, which is always correct.
+/// `DispatchData.Region` does not conform: it does not keep its `DispatchData` alive.
 ///
 /// - Important: The promise cannot be checked. A conformer whose bytes move or change while a copy of
-///   it is alive leaves a donated pointer dangling.
-public protocol StableAddressByteRegion: ByteRegion {}
+///   it is alive leaves the parser's or a `DispatchData`'s pointer dangling.
+public protocol StableAddressByteRegion: ByteRegion {
+    /// How many bytes holding this value keeps alive: its allocation, which may be larger than the
+    /// bytes it exposes.
+    ///
+    /// The parser refers to a large literal only if it is a large enough share of this; a smaller one
+    /// is copied, so it does not pin a mostly unused allocation. Defaults to the region's byte count.
+    var pinnedByteCount: Int { get }
+}
+
+extension StableAddressByteRegion {
+    /// The region's byte count: right for a conformer whose allocation is exactly its bytes.
+    public var pinnedByteCount: Int { withUnsafeBytes { $0.count } }
+}
 
 // An `Array`'s buffer does not move while the array is alive, and holding a copy of the array is
 // enough to keep it alive: any write to another copy goes through copy-on-write.
-extension Array: StableAddressByteRegion where Element == UInt8 {}
+extension Array: StableAddressByteRegion where Element == UInt8 {
+    public var pinnedByteCount: Int { capacity }
+}
+// An `ArraySlice`'s `capacity` is not its base's allocation, so it takes the default, which undercounts
+// what a slice of a larger array pins.
 extension ArraySlice: StableAddressByteRegion where Element == UInt8 {}
-extension ContiguousArray: StableAddressByteRegion where Element == UInt8 {}
+extension ContiguousArray: StableAddressByteRegion where Element == UInt8 {
+    public var pinnedByteCount: Int { capacity }
+}
