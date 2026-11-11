@@ -14,14 +14,34 @@
 
 import NIO
 @testable import NIOIMAP
-@testable import NIOIMAPCore
+@_spi(NIOIMAPInternal) @testable import NIOIMAPCore
 import NIOTestUtils
 import OrderedCollections
 
 import Testing
 
-@Suite("CommandEncoder")
-struct CommandEncoder_Tests {
+@Suite("CommandEncodeBuffer")
+struct CommandEncodeBuffer_Tests {
+    /// Encodes one command stream part and returns every byte of it, draining all chunks.
+    private func encode(
+        _ command: CommandStreamPart,
+        capabilities: [Capability] = [],
+        loggingMode: Bool = false
+    ) -> ByteBuffer {
+        var encodeBuffer = CommandEncodeBuffer(
+            capabilities: capabilities,
+            loggingMode: loggingMode
+        )
+        encodeBuffer.writeCommandStream(command)
+        var bytes: [UInt8] = []
+        while true {
+            let chunk = encodeBuffer.buffer.nextChunk()
+            bytes.append(contentsOf: chunk.bytes.copiedBytes())
+            guard chunk.waitForContinuation else { break }
+        }
+        return ByteBuffer(bytes: bytes)
+    }
+
     @Test
     func encoding() {
         // For now this is a fairly limited sequence of test
@@ -101,9 +121,7 @@ struct CommandEncoder_Tests {
         ]
 
         for (command, expected, _) in inputs {
-            var buffer = ByteBuffer()
-            let encoder = CommandEncoder(loggingMode: false)
-            encoder.encode(data: command, out: &buffer)
+            let buffer = encode(command)
             #expect(
                 expected == buffer,
                 "\(String(buffer: expected)) is not equal to \(String(buffer: buffer))"
@@ -196,10 +214,7 @@ struct CommandEncoder_Tests {
         ]
 
         for (command, expected, _) in inputs {
-            var buffer = ByteBuffer()
-            let encoder = CommandEncoder(loggingMode: true)
-            encoder.capabilities.append(.literalPlus)
-            encoder.encode(data: command, out: &buffer)
+            let buffer = encode(command, capabilities: [.literalPlus], loggingMode: true)
             #expect(
                 expected == buffer,
                 "'\(String(buffer: expected))' is not equal to '\(String(buffer: buffer))'"

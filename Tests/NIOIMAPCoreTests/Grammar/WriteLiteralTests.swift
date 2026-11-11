@@ -16,8 +16,8 @@ import NIO
 @_spi(NIOIMAPInternal) @testable import NIOIMAPCore
 import Testing
 
-@Suite("ByteBuffer Literal Writing")
-struct ByteBufferWriteLiteralTests {
+@Suite("Literal Writing")
+struct WriteLiteralTests {
     @Test(
         "writeIMAPString with client buffers",
         arguments: [
@@ -122,7 +122,6 @@ struct ByteBufferWriteLiteralTests {
     func writeIMAPStringLoggingMode() {
         // quoted string in logging mode → "∅" (with enclosing quotes)
         var quotedBuffer = EncodeBuffer.serverEncodeBuffer(
-            buffer: ByteBufferAllocator().buffer(capacity: 128),
             options: ResponseEncodingOptions(),
             loggingMode: true
         )
@@ -136,7 +135,6 @@ struct ByteBufferWriteLiteralTests {
         var serverOptions = ResponseEncodingOptions()
         serverOptions.useQuotedString = false
         var serverLiteralBuffer = EncodeBuffer.serverEncodeBuffer(
-            buffer: ByteBufferAllocator().buffer(capacity: 128),
             options: serverOptions,
             loggingMode: true
         )
@@ -148,7 +146,6 @@ struct ByteBufferWriteLiteralTests {
 
         // client synchronizing literal in logging mode
         var clientSyncBuffer = EncodeBuffer.clientEncodeBuffer(
-            buffer: ByteBufferAllocator().buffer(capacity: 128),
             options: CommandEncodingOptions(useQuotedString: false, useSynchronizingLiteral: true),
             loggingMode: true
         )
@@ -160,7 +157,6 @@ struct ByteBufferWriteLiteralTests {
 
         // client non-synchronizing literal in logging mode
         var clientNonSyncBuffer = EncodeBuffer.clientEncodeBuffer(
-            buffer: ByteBufferAllocator().buffer(capacity: 128),
             options: CommandEncodingOptions(
                 useQuotedString: false,
                 useSynchronizingLiteral: false,

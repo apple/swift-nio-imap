@@ -97,7 +97,6 @@ struct ExpireTests {
         let parsed = try GrammarParser().parseExpire(buffer: &parseBuffer, tracker: .testTracker)
         #expect(parseBuffer.readableBytes == terminator.utf8.count)
         var encodeBuffer = EncodeBuffer.serverEncodeBuffer(
-            buffer: ByteBuffer(),
             options: ResponseEncodingOptions(),
             loggingMode: false
         )

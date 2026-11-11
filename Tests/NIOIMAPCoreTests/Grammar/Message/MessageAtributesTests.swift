@@ -540,7 +540,6 @@ extension MessageAttributeTests {
     )
     func encodeRfc822Helpers(_ fixture: Rfc822Fixture) {
         var buffer = EncodeBuffer.serverEncodeBuffer(
-            buffer: ByteBufferAllocator().buffer(capacity: 128),
             options: ResponseEncodingOptions(),
             loggingMode: false
         )
@@ -564,7 +563,6 @@ extension MessageAttributeTests {
     )
     func encodeBodySectionText(_ fixture: BodySectionTextFixture) {
         var buffer = EncodeBuffer.serverEncodeBuffer(
-            buffer: ByteBufferAllocator().buffer(capacity: 128),
             options: ResponseEncodingOptions(),
             loggingMode: false
         )
@@ -641,7 +639,6 @@ struct BodySectionFixture: Sendable, CustomTestStringConvertible {
 
     func checkEncoding() {
         var buffer = EncodeBuffer.serverEncodeBuffer(
-            buffer: ByteBufferAllocator().buffer(capacity: 128),
             options: ResponseEncodingOptions(),
             loggingMode: false
         )

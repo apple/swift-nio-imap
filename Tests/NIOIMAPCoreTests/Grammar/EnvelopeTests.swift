@@ -303,7 +303,6 @@ struct EnvelopeTests {
 
     private static func encodeAddressList(_ addresses: [EmailAddressListElement]) -> String {
         var buffer = EncodeBuffer.serverEncodeBuffer(
-            buffer: ByteBufferAllocator().buffer(capacity: 128),
             options: ResponseEncodingOptions(),
             loggingMode: false
         )
