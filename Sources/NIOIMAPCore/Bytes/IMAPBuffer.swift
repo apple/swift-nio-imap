@@ -65,7 +65,8 @@ public struct IMAPBuffer: Sendable {
         case copied([UInt8], Range<Int>)
         /// Bytes somebody else owns, plus the live sub-range within that owner.
         case retained(IMAPByteStorage, Range<Int>)
-        /// Bytes in an encoder output segment, plus the range of it this value exposes.
+        /// Bytes in an encoder output segment or an input buffer's tail, plus the range of it this value
+        /// exposes.
         ///
         /// The encoder's own bytes get their own case rather than going through an
         /// ``IMAPByteStorage``, because a box per handed-out region is a class allocation per
@@ -117,7 +118,7 @@ public struct IMAPBuffer: Sendable {
         self.storage = .retained(storage, 0..<storage.count)
     }
 
-    /// Creates a buffer over a range of an encoder output segment.
+    /// Creates a buffer over a range of an ``OutputSegment``.
     ///
     /// The bytes are not copied, and the segment stays alive for as long as this value does — which
     /// is what lets the encoder hand out a chunk and carry on writing above it.
@@ -267,6 +268,27 @@ extension IMAPBuffer {
     /// It is public so that an ``EncoderOutputBuffer`` of your own makes the same decision with the
     /// same number. It is a tuning value and may change between releases.
     public static let copyThreshold = 1024
+
+    // A literal the parser refers to keeps its owner's whole allocation alive — a 1 KiB literal in a
+    // 64 KiB receive buffer pins 64 KiB. So it refers only to a literal that is both large enough to be
+    // worth not copying and at least a third of what its owner pins, which caps the memory a kept
+    // literal holds at three times its size. Anything else is copied.
+
+    /// The shortest literal the parser refers to rather than copies.
+    internal static let minimumRetainedLiteralByteCount = 512
+
+    /// A literal the parser refers to is at least `1 / retainedLiteralMaximumPinnedFactor` of the bytes
+    /// its owner keeps alive.
+    internal static let retainedLiteralMaximumPinnedFactor = 3
+
+    /// Whether the parser refers to a literal of `byteCount` bytes, out of an owner keeping
+    /// `pinnedByteCount` alive, rather than copying it.
+    internal static func retainsLiteral(byteCount: Int, pinnedByteCount: Int) -> Bool {
+        guard byteCount >= minimumRetainedLiteralByteCount else { return false }
+        // `byteCount * factor >= pinnedByteCount`, without the multiplication that could overflow.
+        let (product, overflow) = byteCount.multipliedReportingOverflow(by: retainedLiteralMaximumPinnedFactor)
+        return overflow || product >= pinnedByteCount
+    }
 }
 
 // MARK: - Representation
@@ -368,6 +390,29 @@ extension IMAPBuffer {
             return nil
         case .retained(let storage, let range):
             return (storage, range)
+        }
+    }
+
+    /// How many bytes holding this value keeps alive: the whole backing allocation, not just ``count``.
+    internal var pinnedByteCount: Int {
+        switch storage {
+        case .copied(let bytes, _):
+            return bytes.capacity
+        case .retained(let storage, _):
+            return storage.pinnedByteCount
+        case .segment(let segment, _):
+            return segment.capacity
+        }
+    }
+
+    /// Whether these bytes stay at one address for as long as this value is alive: an array and a
+    /// segment never move; a retained region does if its owner promises it.
+    internal var hasStableAddress: Bool {
+        switch storage {
+        case .copied, .segment:
+            return true
+        case .retained(let storage, _):
+            return storage.hasStableAddress
         }
     }
 }

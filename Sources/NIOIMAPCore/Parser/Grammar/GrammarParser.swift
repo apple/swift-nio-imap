@@ -839,7 +839,7 @@ extension GrammarParser {
     func parseLastCommandSet<T: MessageIdentifier>(
         buffer: inout ParseBuffer,
         tracker: StackTracker,
-        setParser: SubParser<MessageIdentifierSetNonEmpty<T>>
+        setParser: LegacySubParser<MessageIdentifierSetNonEmpty<T>>
     ) throws -> LastCommandSet<T> {
         func parseLastCommandSet_lastCommand(
             buffer: inout ParseBuffer,
@@ -864,7 +864,7 @@ extension GrammarParser {
     func parseLastCommandMessageID<T: MessageIdentifier>(
         buffer: inout ParseBuffer,
         tracker: StackTracker,
-        setParser: SubParser<T>
+        setParser: LegacySubParser<T>
     ) throws -> LastCommandMessageID<T> {
         func parseLastCommandMessageID_lastCommand(
             buffer: inout ParseBuffer,
