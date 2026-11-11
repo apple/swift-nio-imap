@@ -17,7 +17,9 @@ import struct OrderedCollections.OrderedDictionary
 
 enum ParserLibrary {}
 
-typealias SubParser<T> = (inout ParseBuffer, StackTracker) throws -> T
+// Temporary: renamed to coexist with `SubParser` in ParseInput+Combinators.swift; removed in
+// "Parse from ParseInput instead of ByteBuffer".
+typealias LegacySubParser<T> = (inout ParseBuffer, StackTracker) throws -> T
 
 internal struct ParseBuffer: Hashable {
     fileprivate var bytes: ByteBuffer
@@ -128,8 +130,11 @@ extension ParserLibrary {
         }
     }
 
-    static func parseOneOrMore<T>(buffer: inout ParseBuffer, tracker: StackTracker, parser: SubParser<T>) throws -> [T]
-    {
+    static func parseOneOrMore<T>(
+        buffer: inout ParseBuffer,
+        tracker: StackTracker,
+        parser: LegacySubParser<T>
+    ) throws -> [T] {
         var parsed: [T] = []
         try Self.parseOneOrMore(buffer: &buffer, into: &parsed, tracker: tracker, parser: parser)
         return parsed
@@ -139,7 +144,7 @@ extension ParserLibrary {
         buffer: inout ParseBuffer,
         into parsed: inout [T],
         tracker: StackTracker,
-        parser: SubParser<T>
+        parser: LegacySubParser<T>
     ) throws {
         try PL.composite(buffer: &buffer, tracker: tracker) { buffer, tracker in
             parsed.append(try parser(&buffer, tracker))
@@ -153,7 +158,7 @@ extension ParserLibrary {
         buffer: inout ParseBuffer,
         into parsed: inout [T],
         tracker: StackTracker,
-        parser: SubParser<T>
+        parser: LegacySubParser<T>
     ) throws {
         try PL.composite(buffer: &buffer, tracker: tracker) { buffer, tracker in
             while let next = try PL.parseOptional(buffer: &buffer, tracker: tracker, parser: parser) {
@@ -166,7 +171,7 @@ extension ParserLibrary {
         buffer: inout ParseBuffer,
         into orderedDictionary: inout OrderedDictionary<K, V>,
         tracker: StackTracker,
-        parser: SubParser<(K, V)>
+        parser: LegacySubParser<(K, V)>
     ) throws {
         try PL.composite(buffer: &buffer, tracker: tracker) { buffer, tracker in
             while let next = try PL.parseOptional(buffer: &buffer, tracker: tracker, parser: parser) {
@@ -179,7 +184,7 @@ extension ParserLibrary {
         buffer: inout ParseBuffer,
         into orderedDictionary: inout OrderedDictionary<K, V>,
         tracker: StackTracker,
-        parser: SubParser<KeyValue<K, V>>
+        parser: LegacySubParser<KeyValue<K, V>>
     ) throws {
         try PL.composite(buffer: &buffer, tracker: tracker) { buffer, tracker in
             while let next = try PL.parseOptional(buffer: &buffer, tracker: tracker, parser: parser) {
@@ -188,8 +193,11 @@ extension ParserLibrary {
         }
     }
 
-    static func parseZeroOrMore<T>(buffer: inout ParseBuffer, tracker: StackTracker, parser: SubParser<T>) throws -> [T]
-    {
+    static func parseZeroOrMore<T>(
+        buffer: inout ParseBuffer,
+        tracker: StackTracker,
+        parser: LegacySubParser<T>
+    ) throws -> [T] {
         var parsed: [T] = []
         try Self.parseZeroOrMore(buffer: &buffer, into: &parsed, tracker: tracker, parser: parser)
         return parsed
@@ -305,7 +313,7 @@ extension ParserLibrary {
     }
 
     static func parseOneOf<T>(
-        _ subParsers: [SubParser<T>],
+        _ subParsers: [LegacySubParser<T>],
         buffer: inout ParseBuffer,
         tracker: StackTracker,
         file: StaticString = (#fileID),
@@ -324,8 +332,8 @@ extension ParserLibrary {
     }
 
     static func parseOneOf<T>(
-        _ parser1: SubParser<T>,
-        _ parser2: SubParser<T>,
+        _ parser1: LegacySubParser<T>,
+        _ parser2: LegacySubParser<T>,
         buffer: inout ParseBuffer,
         tracker: StackTracker,
         file: StaticString = (#fileID),
@@ -348,9 +356,9 @@ extension ParserLibrary {
     }
 
     static func parseOneOf<T>(
-        _ parser1: SubParser<T>,
-        _ parser2: SubParser<T>,
-        _ parser3: SubParser<T>,
+        _ parser1: LegacySubParser<T>,
+        _ parser2: LegacySubParser<T>,
+        _ parser3: LegacySubParser<T>,
         buffer: inout ParseBuffer,
         tracker: StackTracker,
         file: StaticString = (#fileID),
@@ -383,7 +391,11 @@ extension ParserLibrary {
         }
     }
 
-    static func parseOptional<T>(buffer: inout ParseBuffer, tracker: StackTracker, parser: SubParser<T>) throws -> T? {
+    static func parseOptional<T>(
+        buffer: inout ParseBuffer,
+        tracker: StackTracker,
+        parser: LegacySubParser<T>
+    ) throws -> T? {
         do {
             return try PL.composite(buffer: &buffer, tracker: tracker, parser)
         } catch is ParserError {
@@ -391,7 +403,7 @@ extension ParserLibrary {
         }
     }
 
-    static func composite<T>(buffer: inout ParseBuffer, tracker: StackTracker, _ body: SubParser<T>) throws -> T {
+    static func composite<T>(buffer: inout ParseBuffer, tracker: StackTracker, _ body: LegacySubParser<T>) throws -> T {
         var tracker = tracker
         try tracker.newStackFrame()
 

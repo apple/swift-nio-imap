@@ -66,6 +66,12 @@ private func wrapGenerically(_ region: some ByteRegion & Sendable) -> IMAPBuffer
     IMAPBuffer(IMAPByteStorage(region))
 }
 
+/// Appends `region` from generic code that knows only `ByteRegion`, which takes the overload that checks
+/// at run time.
+private func appendGenerically(_ region: some ByteRegion & Sendable, to input: inout IMAPInputBuffer) {
+    input.append(region)
+}
+
 @Suite("A third-party StableAddressByteRegion")
 struct StableAddressByteRegionTests {
     /// Large enough to be kept by reference wherever the library has a size cut-off (1 KiB).
@@ -79,6 +85,56 @@ struct StableAddressByteRegionTests {
         data.enumerateBytes { bytes, _, _ in leaf = UnsafeRawPointer(bytes.baseAddress) }
         #expect(data.count == Self.byteCount)
         #expect(leaf == foreign.baseAddress)
+    }
+
+    @Test("is kept by IMAPInputBuffer, not copied")
+    func inputBufferRetains() {
+        let foreign = ForeignBuffer(storage: ForeignStorage(repeating: UInt8(ascii: "f"), count: Self.byteCount))
+        var input = IMAPInputBuffer()
+        input.append(foreign)
+        #expect(input.count == Self.byteCount)
+        #expect(input.byteRegions[0].withUnsafeBytes { UnsafeRawPointer($0.baseAddress) } == foreign.baseAddress)
+    }
+
+    @Test("is kept by IMAPInputBuffer through the generic append, and through an IMAPBuffer")
+    func inputBufferRetainsThroughGenericAppend() {
+        let foreign = ForeignBuffer(storage: ForeignStorage(repeating: UInt8(ascii: "f"), count: Self.byteCount))
+        var input = IMAPInputBuffer()
+        appendGenerically(foreign, to: &input)
+        appendGenerically(IMAPBuffer(IMAPByteStorage(foreign)), to: &input)
+        input.append(IMAPBuffer(IMAPByteStorage(foreign)))
+        #expect(input.regionCount == 3)
+        for region in input.byteRegions {
+            #expect(address(of: region) == foreign.baseAddress)
+        }
+    }
+
+    @Test("is kept by IMAPInputBuffer through an IMAPBuffer, where an unstable region is copied")
+    func inputBufferAppendsIMAPBuffer() {
+        let foreign = ForeignBuffer(storage: ForeignStorage(repeating: UInt8(ascii: "f"), count: Self.byteCount))
+        let unstable = UnstableBuffer(bytes: Array(repeating: UInt8(ascii: "u"), count: Self.byteCount))
+        var input = IMAPInputBuffer()
+        input.append(IMAPBuffer(IMAPByteStorage(foreign)))
+        input.append(IMAPBuffer(IMAPByteStorage(unstable)))
+
+        #expect(input.regionCount == 2)
+        #expect(address(of: input.byteRegions[0]) == foreign.baseAddress, "kept")
+        let copy = input.byteRegions[1]
+        #expect(address(of: copy) != unstable.bytes.withUnsafeBytes { UnsafeRawPointer($0.baseAddress) }, "copied")
+        #expect(donatedAddress(of: copy) == address(of: copy), "the copy has a fixed address")
+        #expect(copy.copiedBytes() == unstable.bytes)
+    }
+
+    @Test("carries its fixed address through an IMAPBuffer into IMAPByteStorage")
+    func stableThroughWrappedBuffer() {
+        let foreign = ForeignBuffer(storage: ForeignStorage(repeating: UInt8(ascii: "f"), count: Self.byteCount))
+        let buffer = IMAPBuffer(IMAPByteStorage(foreign))
+        #expect(donatedAddress(of: IMAPBuffer(IMAPByteStorage(buffer))) == foreign.baseAddress, "static")
+        #expect(donatedAddress(of: wrapGenerically(buffer)) == foreign.baseAddress, "run time")
+
+        let unstable = IMAPBuffer(IMAPByteStorage(UnstableBuffer(bytes: Array(repeating: 0, count: Self.byteCount))))
+        #expect(donatedAddress(of: IMAPBuffer(IMAPByteStorage(unstable))) == nil, "static")
+        #expect(donatedAddress(of: wrapGenerically(unstable)) == nil, "run time")
     }
 
     @Test("backingRegion recovers the region and range, without copying")

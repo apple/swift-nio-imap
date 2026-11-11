@@ -37,11 +37,12 @@ import ucrt
 // `DispatchData(bytesNoCopy:deallocator:)` takes ownership of a pointer, so the pointer has to
 // outlive the `withUnsafeBytes(_:)` call it came from. `ByteRegion` does not promise that — a region
 // is free to yield a temporary buffer — so this file only escapes a pointer that
-// `IMAPBuffer.withUnsafeBytesAndOwner(_:)` hands out: bytes this library owns, or a region that
-// conforms to `StableAddressByteRegion` (the stdlib arrays; `ByteBuffer`, in `NIOIMAP`). It copies
-// from any other. A third-party `ByteRegion` is therefore correct by default and merely pays a copy,
-// unless it conforms too. That method is public, so a conversion to another adopting type can be
-// written outside the library the same way.
+// `IMAPBuffer.withUnsafeBytesAndOwner(_:)` hands out: bytes this library owns, or storage with a fixed
+// address — a `StableAddressByteRegion` (the stdlib arrays, a region `IMAPInputBuffer.append(contentsOf:)`
+// kept with its `DispatchData`; `ByteBuffer`, in `NIOIMAP`) or an `IMAPBuffer` over one. It copies
+// from any other, `DispatchData.Region` included. A third-party `ByteRegion` is
+// therefore correct by default and merely pays a copy, unless it conforms too. That method is public,
+// so a conversion to another adopting type can be written outside the library the same way.
 //
 // The deallocator closure holds the owner, which is what keeps the memory alive for as long as the
 // `DispatchData` refers to it. This file goes through the internal `withUnsafeBytesAndStableOwner(_:)`:

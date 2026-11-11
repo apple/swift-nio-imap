@@ -85,6 +85,16 @@ struct IMAPBufferByteBufferTests {
         #expect(leaf == readableAddress(original)?.advanced(by: 5))
     }
 
+    @Test("a large ByteBuffer appended to an IMAPInputBuffer is retained, not copied")
+    func inputBufferRetainsByteBuffer() {
+        // Well above `IMAPBuffer.copyThreshold` (1 KiB).
+        let largeReadByteCount = 4 * 1_024
+        let read = ByteBuffer(repeating: UInt8(ascii: "r"), count: largeReadByteCount)
+        var input = IMAPInputBuffer()
+        input.append(read)
+        #expect(input.byteRegions[0].withUnsafeBytes { UnsafeRawPointer($0.baseAddress) } == readableAddress(read))
+    }
+
     @Test("an owned buffer converts to a ByteBuffer by copying, with the right bytes")
     func ownedBytesCopyOnConversion() {
         let owned = IMAPBuffer(Array("hello world".utf8))
