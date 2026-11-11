@@ -50,7 +50,6 @@ struct ResponseTextTests {
             observing: [\.standardErrorContent],
             performing: { [string = string as String] in
                 var buffer = EncodeBuffer.serverEncodeBuffer(
-                    buffer: ByteBuffer(),
                     options: ResponseEncodingOptions(),
                     loggingMode: false
                 )

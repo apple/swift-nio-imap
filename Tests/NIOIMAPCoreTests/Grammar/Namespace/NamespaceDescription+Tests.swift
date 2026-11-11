@@ -57,7 +57,6 @@ struct NamespaceDescriptionTests {
     @Test("logging mode shows the delimiter")
     func loggingMode() throws {
         var buffer = EncodeBuffer.serverEncodeBuffer(
-            buffer: ByteBuffer(),
             options: ResponseEncodingOptions(),
             loggingMode: true
         )

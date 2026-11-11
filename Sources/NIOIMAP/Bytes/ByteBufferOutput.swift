@@ -17,11 +17,10 @@ import NIOIMAPCore
 
 /// Encoded output written straight into a `ByteBuffer`.
 ///
-/// This is the ``EncoderOutputBuffer`` to consider when the bytes are going to a NIO `Channel` and the
-/// traffic is dominated by large payloads. Every byte of a command or response is copied exactly once —
-/// into the buffer as it is encoded — and handing a chunk out costs no copy at all: the regions
-/// ``takeFirst(_:)`` returns are slices of that same buffer, so `IMAPBufferList.makeByteBuffers()`
-/// recovers them without touching a byte.
+/// This is the ``EncoderOutputBuffer`` to consider when the bytes are going to a NIO `Channel`. Every
+/// byte of a command or response is copied exactly once — into the buffer as it is encoded — and
+/// handing a chunk out costs no copy at all: the regions ``takeFirst(_:)`` returns are slices of that
+/// same buffer, so `IMAPBufferList.makeByteBuffers()` recovers them without touching a byte.
 ///
 /// ## Choosing between this and `IMAPOutputBuffer`
 ///
@@ -32,13 +31,17 @@ import NIOIMAPCore
 /// ```
 ///
 /// It is deliberately *not* the default, and ``IMAPClientHandler`` and ``IMAPServerHandler`` do not use
-/// it: ``IMAPOutputBuffer`` is faster wherever bytes are written rather than referred
-/// to, because every `ByteBuffer` write pays a uniqueness check and a non-inlined capacity call where a
-/// segment write goes through cached trivial fields — and a `BODYSTRUCTURE` response is hundreds of
-/// small writes. This sink allocates fewer bytes and wins on payload-heavy traffic, so it ships as
-/// a caller's choice. `Examples/PerformanceTester` has the numbers.
+/// it. Per-write cost does not decide it: the encoder stages small writes, so either sink sees about
+/// one append per 256 bytes. The hand-out does. This sink is zero-copy into `ByteBuffer`s — its
+/// regions are slices — where ``IMAPOutputBuffer`` copies its regions into fresh `ByteBuffer`s. Into a
+/// `DispatchData` they are alike: each donates regions of at least
+/// `IMAPBuffer.dispatchDonationThreshold` bytes and copies shorter ones. Both keep large payloads by
+/// reference, so neither wins there. Measured on a stream of small responses into a `Channel`, this
+/// sink allocates fewer bytes but is slower, and while earlier responses are still in flight it is
+/// slower still and allocates more bytes (see below). So it ships as a caller's choice.
+/// `Examples/PerformanceTester` has the numbers.
 ///
-/// ``IMAPOutputBuffer`` also has one structural advantage: it can keep writing into a segment it has
+/// ``IMAPOutputBuffer`` has one structural advantage: it can keep writing into a segment it has
 /// already handed part of out, which this cannot. A `ByteBuffer` grows by reallocating, and writing into
 /// storage that a handed-out slice still refers to would copy the whole buffer — so once bytes have been
 /// handed out, this starts a fresh buffer instead. When the previous one has already been written to the

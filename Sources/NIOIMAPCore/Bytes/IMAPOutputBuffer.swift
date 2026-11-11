@@ -36,9 +36,7 @@ import DequeModule
 /// var encoder = CommandEncodeBuffer(options: options, loggingMode: false)   // sink: IMAPOutputBuffer()
 /// ```
 ///
-/// The alternative is `NIOIMAP`'s `ByteBufferOutput`, which wins on traffic dominated by large
-/// payloads and loses on traffic made of many small writes; see that type.
-/// Callers whose bytes have to land in storage neither type describes — a file, shared
+/// Callers whose bytes have to land in storage this type does not describe — a file, shared
 /// memory — conform to the protocol themselves rather than reaching for this.
 ///
 /// ## Getting the bytes out

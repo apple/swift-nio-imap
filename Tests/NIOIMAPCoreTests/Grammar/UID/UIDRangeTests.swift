@@ -146,7 +146,6 @@ struct UIDRangeTests {
     @Test("range operator prefix")
     func rangeOperatorPrefix() {
         var buffer = EncodeBuffer.serverEncodeBuffer(
-            buffer: ByteBuffer(),
             options: ResponseEncodingOptions(),
             loggingMode: false
         )
@@ -161,7 +160,6 @@ struct UIDRangeTests {
     @Test("range operator postfix")
     func rangeOperatorPostfix() {
         var buffer = EncodeBuffer.serverEncodeBuffer(
-            buffer: ByteBuffer(),
             options: ResponseEncodingOptions(),
             loggingMode: false
         )
@@ -176,7 +174,6 @@ struct UIDRangeTests {
     @Test("range operator postfix complete right larger")
     func rangeOperatorPostfixCompleteRightLarger() {
         var buffer = EncodeBuffer.serverEncodeBuffer(
-            buffer: ByteBuffer(),
             options: ResponseEncodingOptions(),
             loggingMode: false
         )

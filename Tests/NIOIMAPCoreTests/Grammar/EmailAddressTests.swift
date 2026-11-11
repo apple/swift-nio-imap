@@ -297,7 +297,6 @@ struct EmailAddressFixture: Sendable, CustomTestStringConvertible {
 
     func checkEncoding() {
         let buffer = EncodeBuffer.serverEncodeBuffer(
-            buffer: ByteBufferAllocator().buffer(capacity: 128),
             options: ResponseEncodingOptions(),
             loggingMode: false
         )
