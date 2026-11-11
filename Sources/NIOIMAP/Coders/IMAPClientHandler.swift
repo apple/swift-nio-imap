@@ -159,10 +159,47 @@ public final class IMAPClientHandler: ChannelDuplexHandler {
     }
 
     private func writeChunk(_ chunk: OutgoingChunk, context: ChannelHandlerContext) {
-        let outbound = self.wrapOutboundOut(chunk.bytes)
-        if chunk.shouldSucceedPromise {
+        // A chunk usually becomes one write. It becomes several when it carries a payload the encoder
+        // kept by reference — an `APPEND` message — because writing that payload on its own is what
+        // keeps it from being copied, and NIO gathers the writes into one `writev` anyway. See
+        // `IMAPBufferList.makeOutboundBuffers()` for why this is not simply one write per region.
+        //
+        // A chunk with no bytes still has to reach the channel: an empty write is how the end of an
+        // `APPEND` message is signalled, and the promise has to be resolved either way.
+        switch chunk.bytes.regionCount {
+        case 0:
+            self.write(ByteBuffer(), of: chunk, position: .last, context: context)
+        case 1:
+            self.write(chunk.bytes.regions[0].byteBuffer, of: chunk, position: .last, context: context)
+        default:
+            let buffers = chunk.bytes.makeOutboundBuffers()
+            for (index, buffer) in buffers.enumerated() {
+                let position: BufferPosition = index == buffers.count - 1 ? .last : .notLast
+                self.write(buffer, of: chunk, position: position, context: context)
+            }
+        }
+    }
+
+    /// Where a buffer sits among the writes of one chunk.
+    private enum BufferPosition {
+        case notLast
+        /// The chunk's final write; it may resolve the chunk's promise.
+        case last
+    }
+
+    /// Writes one of a chunk's buffers, resolving the chunk's promise on the last of them.
+    private func write(
+        _ bytes: ByteBuffer,
+        of chunk: OutgoingChunk,
+        position: BufferPosition,
+        context: ChannelHandlerContext
+    ) {
+        let outbound = self.wrapOutboundOut(bytes)
+        if position == .last, chunk.shouldSucceedPromise {
             context.write(outbound, promise: chunk.promise)
         } else {
+            // Not the last buffer, or a chunk that will only be finished by a later one: the promise
+            // must not succeed yet, but a failure anywhere has to reach it.
             context.write(outbound).cascadeFailure(to: chunk.promise)
         }
     }

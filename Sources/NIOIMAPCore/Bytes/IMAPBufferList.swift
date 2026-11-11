@@ -173,6 +173,49 @@ extension IMAPBufferList {
     }
 }
 
+// MARK: - The region cap
+
+extension IMAPBufferList {
+    /// The most regions any one chunk is handed out as.
+    ///
+    /// Realistic chunks have one to three regions, and nothing in the library can produce more than a
+    /// handful: a chunk of copied bytes is a protocol line, bounded well below one output segment, and
+    /// at most one payload is appended by reference per command or response.
+    ///
+    /// The cap is insurance against a direct user of the public encode API, which accumulates until
+    /// drained — a caller that writes a thousand payloads before asking for a chunk would otherwise
+    /// get a thousand-region chunk, and 1024 is the most vectors a single `writev` can take.
+    ///
+    /// The encoder applies it to every chunk, whatever the sink handed it, so no
+    /// ``EncoderOutputBuffer`` has to.
+    internal static let maximumRegionsPerChunk = 64
+
+    /// Creates a list of at most ``maximumRegionsPerChunk`` regions, coalescing the tail if there are
+    /// more.
+    ///
+    /// The leading regions are kept as they are — those are the ones most likely to be large payloads
+    /// worth not copying — and everything past the cap is copied into one region. Nothing is ever
+    /// dropped, so this only ever trades zero-copy for a bounded region count.
+    ///
+    /// - Parameter regions: The regions, in order.
+    internal init(cappingRegionCount regions: some Collection<IMAPBuffer>) {
+        guard regions.count > Self.maximumRegionsPerChunk else {
+            self.init(regions)
+            return
+        }
+
+        let keeping = Self.maximumRegionsPerChunk - 1
+        self.init(regions.prefix(keeping))
+        let tail = regions.dropFirst(keeping)
+        var coalesced: [UInt8] = []
+        coalesced.reserveCapacity(tail.reduce(0) { $0 + $1.count })
+        for region in tail {
+            region.withUnsafeBytes { coalesced.append(contentsOf: $0) }
+        }
+        self.append(IMAPBuffer(coalesced))
+    }
+}
+
 // MARK: - Equatable & Hashable
 
 extension IMAPBufferList: Hashable {

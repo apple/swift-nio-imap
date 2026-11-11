@@ -156,14 +156,13 @@ private let validNameStrings = [
 
 /// Encodes `command` (client mode), parses the bytes back, and expects the original command.
 private func expectCommandRoundTrip(_ command: Command, sourceLocation: SourceLocation = #_sourceLocation) {
-    var encodeBuffer = CommandEncodeBuffer(buffer: ByteBuffer(), options: CommandEncodingOptions(), loggingMode: false)
+    var encodeBuffer = CommandEncodeBuffer(options: CommandEncodingOptions(), loggingMode: false)
     _ = encodeBuffer.writeCommand(command)
     var encoded = ByteBuffer()
     var remaining = encodeBuffer.buffer
     while true {
         let chunk = remaining.nextChunk()
-        var bytes = chunk.bytes
-        encoded.writeBuffer(&bytes)
+        encoded.writeBytes(chunk.bytes.copiedBytes())
         if !chunk.waitForContinuation { break }
     }
     encoded.writeString("\r")

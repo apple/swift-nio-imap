@@ -187,7 +187,6 @@ struct FullDateTimeTests {
         var parseBuffer = ParseBuffer(ByteBuffer(string: input + " "))
         let parsed = try GrammarParser().parseFullTime(buffer: &parseBuffer, tracker: .testTracker)
         var encodeBuffer = EncodeBuffer.serverEncodeBuffer(
-            buffer: ByteBuffer(),
             options: ResponseEncodingOptions(),
             loggingMode: false
         )
@@ -231,7 +230,6 @@ struct FullDateTimeTests {
             observing: [\.standardErrorContent],
             performing: {
                 var buffer = EncodeBuffer.serverEncodeBuffer(
-                    buffer: ByteBuffer(),
                     options: ResponseEncodingOptions(),
                     loggingMode: false
                 )
