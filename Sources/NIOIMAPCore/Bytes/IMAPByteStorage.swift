@@ -37,8 +37,8 @@
 ///
 /// This is a correctness contract of the same kind as `Hashable` consistency, not a memory-safety
 /// assertion — nothing here stores a pointer. The exception is ``StableAddressByteRegion``:
-/// ``IMAPBufferList/makeDispatchData()`` lets a pointer outlive the accessor on its word, so a false
-/// conformance does leave one dangling.
+/// ``IMAPInputBuffer`` and ``IMAPBufferList/makeDispatchData()`` let a pointer outlive the accessor on
+/// its word, so a false conformance does leave one dangling.
 public final class IMAPByteStorage: Sendable {
     private let region: any ByteRegion & Sendable
 
@@ -51,9 +51,10 @@ public final class IMAPByteStorage: Sendable {
     /// Whether the wrapped region promises a fixed address, so a pointer to its bytes may outlive a
     /// ``withUnsafeBytes(_:)`` call as long as this object stays alive.
     ///
-    /// Determined once, when the region is wrapped. `false` for any region that does not conform to
-    /// ``StableAddressByteRegion``, which is the safe answer: ``IMAPBuffer/withUnsafeBytesAndOwner(_:)``
-    /// then hands out no pointer, and its callers copy instead.
+    /// Determined once, when the region is wrapped: `true` for a ``StableAddressByteRegion``, and for
+    /// an ``IMAPBuffer`` whose own bytes have a fixed address. `false` otherwise — a `Data` included,
+    /// since it may flatten into a temporary buffer. `false` is the safe answer: ``IMAPInputBuffer``
+    /// then copies, and ``IMAPBuffer/withUnsafeBytesAndOwner(_:)`` hands out no pointer, so its callers copy.
     internal let hasStableAddress: Bool
 
     /// Wraps a region, taking ownership of it.
@@ -64,14 +65,16 @@ public final class IMAPByteStorage: Sendable {
     /// - Parameter region: The bytes to keep alive. Must satisfy the immutability requirement
     ///   described on ``IMAPByteStorage``.
     public convenience init(_ region: some ByteRegion & Sendable) {
-        self.init(region, address: region is any StableAddressByteRegion ? .fixed : .unknown)
+        let isStable =
+            region is any StableAddressByteRegion || (region as? IMAPBuffer)?.hasStableAddress == true
+        self.init(region, address: isStable ? .fixed : .unknown)
     }
 
     /// Wraps a region whose address is fixed, taking ownership of it.
     ///
     /// Overload resolution picks this wherever the region's type is known to conform — `ByteBuffer`,
     /// the stdlib arrays — so wrapping one costs no dynamic cast. The other init is not specialized
-    /// across modules, so its cast runs on every call.
+    /// across modules, so its casts run on every call.
     ///
     /// - Parameter region: The bytes to keep alive. Must satisfy the immutability requirement
     ///   described on ``IMAPByteStorage``.
@@ -79,9 +82,19 @@ public final class IMAPByteStorage: Sendable {
         self.init(region, address: .fixed)
     }
 
+    /// Wraps an ``IMAPBuffer``, taking ownership of it.
+    ///
+    /// The buffer's own fixed address, if it has one, carries over, without the dynamic cast the generic
+    /// init needs to find out.
+    ///
+    /// - Parameter buffer: The bytes to keep alive.
+    public convenience init(_ buffer: IMAPBuffer) {
+        self.init(buffer, address: buffer.hasStableAddress ? .fixed : .unknown)
+    }
+
     /// What a wrapped region promises about its address.
     private enum Address {
-        /// A ``StableAddressByteRegion``: a pointer may outlive the accessor.
+        /// Fixed: a pointer may outlive the accessor.
         case fixed
         /// No promise: a pointer is valid only inside the accessor.
         case unknown

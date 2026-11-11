@@ -35,6 +35,17 @@ Types for carrying raw message payloads without copying them.
 - ``ByteRegion``
 - ``StableAddressByteRegion``
 
+### Parser input
+
+Where received bytes wait to be parsed, and how the parser reads them.
+
+- ``IMAPInputBuffer``
+- ``ParserInputBuffer``
+- ``ConsumableParserInputBuffer``
+- ``StableRegionParserInputBuffer``
+- ``ParseInput``
+- ``RegionSink``
+
 ### Encoder output
 
 Where encoded bytes go.

@@ -90,6 +90,58 @@ extension TestUtilities {
     }
 }
 
+// MARK: - Parser input
+
+extension TestUtilities {
+    /// Runs `body` with a cursor over `text`.
+    ///
+    /// A cursor cannot be stored in a variable — it is non-escapable, which is what stops the parser
+    /// from keeping input bytes past the call — so every test that used to build one and then read
+    /// from it takes this closure form instead.
+    ///
+    /// The text is held in an array, which cannot vouch for its bytes, so a large extraction copies.
+    ///
+    /// - Parameters:
+    ///   - text: The bytes to read.
+    ///   - body: What to read with.
+    static func withParseInput<R>(
+        for text: String,
+        _ body: (inout ParseInput) throws -> R
+    ) rethrows -> R {
+        try Array(text.utf8).withParseInput(limit: .max, body)
+    }
+
+    /// Runs `body` with a cursor over `string + terminator`, then checks what it left unconsumed.
+    ///
+    /// The input is padded on both sides — bytes before the first visible byte and after the last —
+    /// so that a parser which reads outside the region it was given is caught rather than silently
+    /// right. An `ArraySlice` is how that padding is expressed: the bytes are there, in the same
+    /// allocation, and the region the parser sees is a slice that excludes them.
+    static func withParseInput(
+        _ string: String,
+        terminator: String = "",
+        shouldRemainUnchanged: Bool = false,
+        sourceLocation: SourceLocation = #_sourceLocation,
+        _ body: (inout ParseInput) throws -> Void
+    ) {
+        let padded = Array("hello\(string)\(terminator)hallo".utf8)
+        let inputBuffer = padded[5..<(padded.count - 5)]
+
+        let expectedRemainder = shouldRemainUnchanged ? string + terminator : terminator
+
+        inputBuffer.withParseInput(limit: .max) { input in
+            if let error = errorThrown(by: { try body(&input) }) {
+                Issue.record(error, "Parsing should not throw", sourceLocation: sourceLocation)
+            }
+            let remaining = (try? input.extractBytes(length: input.remaining)) ?? []
+            #expect(
+                String(decoding: remaining, as: UTF8.self) == expectedRemainder,
+                sourceLocation: sourceLocation
+            )
+        }
+    }
+}
+
 extension ByteBuffer: @retroactive ExpressibleByStringLiteral {
     public init(stringLiteral value: String) {
         let allocator = ByteBufferAllocator()

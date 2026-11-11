@@ -12,6 +12,24 @@
 //
 //===----------------------------------------------------------------------===//
 
+/// Decodes `bytes` as UTF-8.
+///
+/// A free function rather than a `String` initialiser because it throws a ``ParserError`` carrying the
+/// source location that asked for the decode, which is what the grammar wants and what a general-purpose
+/// initialiser has no business reporting.
+///
+/// - Throws: ``ParserError`` when `bytes` are not valid UTF-8.
+func decodeUTF8(
+    _ bytes: some Collection<UInt8>,
+    file: StaticString = (#fileID),
+    line: Int = #line
+) throws -> String {
+    guard let string = String(validatingUTF8Bytes: bytes) else {
+        throw ParserError.invalidUTF8(file: file, line: line)
+    }
+    return string
+}
+
 /// The parser needs more bytes before it can decide.
 ///
 /// Thrown, rather than returned, because it can arise anywhere in the grammar; the entry points turn

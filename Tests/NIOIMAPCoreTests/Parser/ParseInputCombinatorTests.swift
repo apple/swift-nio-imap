@@ -1,0 +1,389 @@
+//===----------------------------------------------------------------------===//
+//
+// This source file is part of the SwiftNIO open source project
+//
+// Copyright (c) 2020 Apple Inc. and the SwiftNIO project authors
+// Licensed under Apache License v2.0
+//
+// See LICENSE.txt for license information
+// See CONTRIBUTORS.txt for the list of SwiftNIO project authors
+//
+// SPDX-License-Identifier: Apache-2.0
+//
+//===----------------------------------------------------------------------===//
+
+@testable import NIOIMAPCore
+
+import Testing
+
+/// The grammar's building blocks, as methods on the cursor.
+///
+/// These were tests of `ParserLibrary`'s free functions. The cursor is non-escapable, so a test cannot
+/// build one and read from it across statements — every case runs inside a closure instead.
+@Suite("ParseInput combinators")
+struct ParseInputCombinatorTests {}
+
+// MARK: - parseOptional
+
+extension ParseInputCombinatorTests {
+    @Test("parseOptional throws incomplete message when buffer is empty")
+    func parseOptionalThrowsIncompleteMessageWhenBufferIsEmpty() {
+        TestUtilities.withParseInput(for: "") { buffer in
+            let error = errorThrown {
+                try buffer.parseOptional(tracker: .testTracker) { buffer, _ in
+                    try buffer.matchFixed("x")
+                }
+            }
+            #expect(error is IncompleteMessage)
+        }
+    }
+
+    @Test("parseOptional succeeds when element is present")
+    func parseOptionalSucceedsWhenElementIsPresent() throws {
+        try TestUtilities.withParseInput(for: "x") { buffer in
+            try buffer.parseOptional(tracker: .testTracker) { buffer, _ in
+                try buffer.matchFixed("x")
+            }
+        }
+    }
+
+    @Test("parseOptional succeeds when element is not present")
+    func parseOptionalSucceedsWhenElementIsNotPresent() throws {
+        try TestUtilities.withParseInput(for: "y") { buffer in
+            try buffer.parseOptional(tracker: .testTracker) { buffer, _ in
+                try buffer.matchFixed("x")
+            }
+            #expect(buffer.remaining == 1)
+        }
+    }
+
+    @Test("parseOptional resets buffer correctly for composite parsers with incomplete input")
+    func parseOptionalResetsBufferCorrectlyForCompositeParsersWithIncompleteInput() {
+        TestUtilities.withParseInput(for: "x") { buffer in
+            let error = errorThrown {
+                try buffer.parseOptional(tracker: .testTracker) { buffer, _ in
+                    try buffer.matchFixed("x")
+                    try buffer.matchFixed("y")
+                }
+            }
+            #expect(error is IncompleteMessage)
+            #expect(buffer.remaining == 1)
+        }
+    }
+
+    @Test("parseOptional resets buffer correctly for composite parsers with non-matching input")
+    func parseOptionalResetsBufferCorrectlyForCompositeParsersWithNonMatchingInput() throws {
+        try TestUtilities.withParseInput(for: "xz") { buffer in
+            try buffer.parseOptional(tracker: .testTracker) { buffer, _ in
+                try buffer.matchFixed("x")
+                try buffer.matchFixed("y")
+            }
+            #expect(buffer.remaining == 2)
+        }
+    }
+}
+
+// MARK: - matchFixed
+
+extension ParseInputCombinatorTests {
+    @Test("matchFixed with case sensitive matching")
+    func matchFixedWithCaseSensitiveMatching() throws {
+        try TestUtilities.withParseInput(for: "fooFooFOO") { buffer in
+            try buffer.matchFixed("fooFooFOO", caseSensitivity: .caseSensitive)
+        }
+
+        TestUtilities.withParseInput(for: "fooFooFOO") { buffer in
+            #expect(errorThrown { try buffer.matchFixed("foofoofoo", caseSensitivity: .caseSensitive) } is ParserError)
+        }
+
+        TestUtilities.withParseInput(for: "foo") { buffer in
+            #expect(
+                errorThrown { try buffer.matchFixed("fooFooFOO", caseSensitivity: .caseSensitive) } is IncompleteMessage
+            )
+        }
+    }
+
+    @Test("matchFixed with case insensitive matching")
+    func matchFixedWithCaseInsensitiveMatching() throws {
+        try TestUtilities.withParseInput(for: "fooFooFOO") { buffer in
+            try buffer.matchFixed("fooFooFOO")
+        }
+
+        try TestUtilities.withParseInput(for: "fooFooFOO") { buffer in
+            try buffer.matchFixed("foofoofoo")
+        }
+
+        TestUtilities.withParseInput(for: "foo") { buffer in
+            #expect(errorThrown { try buffer.matchFixed("fooFooFOO") } is IncompleteMessage)
+        }
+    }
+
+    @Test("matchFixed rejects non-ASCII characters")
+    func matchFixedRejectsNonAsciiCharacters() {
+        TestUtilities.withParseInput(for: "fooFooFOÖ") { buffer in
+            #expect(errorThrown { try buffer.matchFixed("fooFooFOO", caseSensitivity: .caseSensitive) } is ParserError)
+        }
+    }
+
+    @Test("matchFixed with leading spaces")
+    func matchFixedWithLeadingSpaces() throws {
+        try TestUtilities.withParseInput(for: String(repeating: " ", count: 500) + "fooFooFOO") { buffer in
+            try buffer.matchFixed("fooFooFOO", caseSensitivity: .caseSensitive, leadingSpaces: .allowed)
+        }
+    }
+
+    @Test("matchFixed with leading spaces consumes nothing when the needle does not follow")
+    func matchFixedWithLeadingSpacesConsumesNothingOnMismatch() {
+        TestUtilities.withParseInput(for: "   bar") { buffer in
+            #expect(errorThrown { try buffer.matchFixed("foo", leadingSpaces: .allowed) } is ParserError)
+            #expect(buffer.remaining == 6)
+        }
+    }
+}
+
+// MARK: - parseZeroOrMore
+
+extension ParseInputCombinatorTests {
+    @Test("parseZeroOrMore parses nothing when no match but data present")
+    func parseZeroOrMoreParsesNothingWhenNoMatchButDataPresent() throws {
+        TestUtilities.withParseInput("", terminator: "xy") { buffer in
+            let result = try buffer.parseZeroOrMore(tracker: .testTracker) { buffer, _ -> Int in
+                try buffer.matchFixed("x")
+                try buffer.matchFixed("x")
+                return 1
+            }
+            #expect(result == [])
+        }
+    }
+
+    @Test("parseZeroOrMore throws incomplete message when no data")
+    func parseZeroOrMoreThrowsIncompleteMessageWhenNoData() throws {
+        TestUtilities.withParseInput("") { buffer in
+            let error = errorThrown {
+                try buffer.parseZeroOrMore(tracker: .testTracker) { buffer, _ in
+                    try buffer.matchFixed("x")
+                    try buffer.matchFixed("x")
+                }
+            }
+            #expect(error is IncompleteMessage)
+        }
+    }
+
+    @Test("parseZeroOrMore parses one item when more data present")
+    func parseZeroOrMoreParsesOneItemWhenMoreDataPresent() throws {
+        TestUtilities.withParseInput("xx", terminator: "xy") { buffer in
+            let result = try buffer.parseZeroOrMore(tracker: .testTracker) { buffer, _ -> Int in
+                try buffer.matchFixed("x")
+                try buffer.matchFixed("x")
+                return 1
+            }
+            #expect(result == [1])
+        }
+    }
+
+    @Test("parseZeroOrMore parses two items when more data present")
+    func parseZeroOrMoreParsesTwoItemsWhenMoreDataPresent() throws {
+        TestUtilities.withParseInput("xxxx", terminator: "xy") { buffer in
+            let result = try buffer.parseZeroOrMore(tracker: .testTracker) { buffer, _ -> Int in
+                try buffer.matchFixed("x")
+                try buffer.matchFixed("x")
+                return 1
+            }
+            #expect(result == [1, 1])
+        }
+    }
+}
+
+// MARK: - parseOneOrMore
+
+extension ParseInputCombinatorTests {
+    @Test("parseOneOrMore throws parser error when no match but data present")
+    func parseOneOrMoreThrowsParserErrorWhenNoMatchButDataPresent() throws {
+        TestUtilities.withParseInput("", terminator: "xy") { buffer in
+            let error = errorThrown {
+                try buffer.parseOneOrMore(tracker: .testTracker) { buffer, _ in
+                    try buffer.matchFixed("x")
+                    try buffer.matchFixed("x")
+                }
+            }
+            #expect(error is ParserError)
+        }
+    }
+
+    @Test("parseOneOrMore throws incomplete message when no data")
+    func parseOneOrMoreThrowsIncompleteMessageWhenNoData() throws {
+        TestUtilities.withParseInput("") { buffer in
+            let error = errorThrown {
+                try buffer.parseOneOrMore(tracker: .testTracker) { buffer, _ in
+                    try buffer.matchFixed("x")
+                    try buffer.matchFixed("x")
+                }
+            }
+            #expect(error is IncompleteMessage)
+        }
+    }
+
+    @Test("parseOneOrMore parses one item when more data present")
+    func parseOneOrMoreParsesOneItemWhenMoreDataPresent() throws {
+        TestUtilities.withParseInput("xx", terminator: "xy") { buffer in
+            let result = try buffer.parseOneOrMore(tracker: .testTracker) { buffer, _ -> Int in
+                try buffer.matchFixed("x")
+                try buffer.matchFixed("x")
+                return 1
+            }
+            #expect(result == [1])
+        }
+    }
+
+    @Test("parseOneOrMore parses two items when more data present")
+    func parseOneOrMoreParsesTwoItemsWhenMoreDataPresent() throws {
+        TestUtilities.withParseInput("xxxx", terminator: "xy") { buffer in
+            let result = try buffer.parseOneOrMore(tracker: .testTracker) { buffer, _ -> Int in
+                try buffer.matchFixed("x")
+                try buffer.matchFixed("x")
+                return 1
+            }
+            #expect(result == [1, 1])
+        }
+    }
+}
+
+// MARK: - parseSpaces
+
+extension ParseInputCombinatorTests {
+    @Test(
+        "parseSpaces consumes leading spaces",
+        arguments: [
+            (" a", "a"),
+            ("       a", "a"),
+            ("  a  ", "a  "),
+        ]
+    )
+    func parseSpacesConsumesLeadingSpaces(input: String, expectedRemaining: String) throws {
+        try TestUtilities.withParseInput(for: input) { buffer in
+            try buffer.parseSpaces()
+            let rest = try buffer.extractBytes(length: buffer.remaining)
+            #expect(String(decoding: rest, as: UTF8.self) == expectedRemaining)
+        }
+    }
+
+    @Test("parseSpaces consumes an input that is nothing but spaces")
+    func parseSpacesConsumesAnInputOfOnlySpaces() throws {
+        try TestUtilities.withParseInput(for: "   ") { buffer in
+            try buffer.parseSpaces()
+            #expect(buffer.remaining == 0)
+        }
+    }
+
+    @Test("parseSpaces consumes nothing when the first byte is not a space")
+    func parseSpacesConsumesNothingWhenTheFirstByteIsNotASpace() {
+        TestUtilities.withParseInput(for: "a ") { buffer in
+            #expect(errorThrown { try buffer.parseSpaces() } is ParserError)
+            #expect(buffer.remaining == 2)
+        }
+    }
+}
+
+// MARK: - parseUnsignedInt64
+
+extension ParseInputCombinatorTests {
+    @Test(
+        "parseUnsignedInt64 parses numbers correctly",
+        arguments: [
+            ("12345\r", 12345, 5),
+            ("18446744073709551615\r", UInt64.max, 20),
+            ("12345 a", 12345, 5),
+            ("18446744073709551615b", UInt64.max, 20),
+        ]
+    )
+    func parseUnsignedInt64ParsesNumbersCorrectly(
+        input: String,
+        expectedResult: UInt64,
+        expectedConsumed: Int
+    ) throws {
+        try TestUtilities.withParseInput(for: input) { buffer in
+            let (id, actualConsumed) = try buffer.parseUnsignedInt64(tracker: .makeNewDefault)
+            #expect(actualConsumed == expectedConsumed)
+            #expect(id == expectedResult)
+        }
+    }
+
+    @Test("parseUnsignedInt64 rejects a number that does not fit")
+    func parseUnsignedInt64RejectsANumberThatDoesNotFit() {
+        TestUtilities.withParseInput(for: "18446744073709551616\r") { buffer in
+            #expect(errorThrown { try buffer.parseUnsignedInt64(tracker: .makeNewDefault) } is ParserError)
+        }
+    }
+}
+
+// MARK: - decodeUTF8
+
+extension ParseInputCombinatorTests {
+    @Test("decodeUTF8 with ASCII string")
+    func decodeUtf8WithAsciiString() throws {
+        let test1 = Array("hello, world".utf8)
+        #expect(try decodeUTF8(test1) == "hello, world")
+    }
+
+    @Test("decodeUTF8 with multi-byte UTF-8 characters")
+    func decodeUtf8WithMultiByteUtf8Characters() throws {
+        let test2: [UInt8] = [0xE2, 0x9A, 0xA1, 0xE2, 0x9A, 0xA2, 0xE2, 0x9A, 0xA3, 0xE2, 0x9A, 0xA4]
+        #expect(try decodeUTF8(test2) == "⚡⚢⚣⚤")
+    }
+
+    @Test("decodeUTF8 with incomplete UTF-8 sequence")
+    func decodeUtf8WithIncompleteUtf8Sequence() throws {
+        let test3: [UInt8] = [0xC2]
+        #expect(throws: (any Error).self) {
+            try decodeUTF8(test3)
+        }
+    }
+
+    @Test("decodeUTF8 with truncated multi-byte sequence")
+    func decodeUtf8WithTruncatedMultiByteSequence() throws {
+        let test4: [UInt8] = [0xE1, 0x80]
+        #expect(throws: (any Error).self) {
+            try decodeUTF8(test4)
+        }
+    }
+}
+
+// MARK: - matchNewline
+
+extension ParseInputCombinatorTests {
+    @Test(
+        "matchNewline handles various newline formats",
+        arguments: [
+            "\r\n",
+            "\n",
+            "\r",
+            " \r\n",
+            " \n",
+            " \r",
+            "      \r\n",
+            "      \n",
+            "      \r",
+        ]
+    )
+    func matchNewlineHandlesVariousNewlineFormats(newline: String) throws {
+        try TestUtilities.withParseInput(for: newline + "hello, world") { buffer in
+            try buffer.matchNewline()
+            try buffer.matchFixed("hello, world")
+        }
+    }
+
+    /// A long run of stray spaces used to cost one `composite` frame each, so more than a hundred of them
+    /// threw `TooMuchRecursion`. The cursor measures the whole match ahead of the read position and
+    /// advances once, so this now succeeds up to ``ParseInput/maximumStraySpaces``, and the stack no longer
+    /// grows at all.
+    @Test(
+        "matchNewline skips a long run of stray spaces without recursing",
+        arguments: [80, 200, ParseInput.maximumStraySpaces]
+    )
+    func matchNewlineSkipsALongRunOfStraySpaces(spaces: Int) throws {
+        try TestUtilities.withParseInput(for: String(repeating: " ", count: spaces) + "\r\nhello, world") { buffer in
+            try buffer.matchNewline()
+            try buffer.matchFixed("hello, world")
+        }
+    }
+}

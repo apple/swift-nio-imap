@@ -55,15 +55,16 @@ extension ContiguousArray: ByteRegion where Element == UInt8 {}
 ///
 /// Conforming promises more: `withUnsafeBytes(_:)` yields the region's actual storage, at a fixed
 /// address, and those bytes stay valid and unchanged for as long as any copy of the value is alive.
-/// In return, ``IMAPBufferList/makeDispatchData()`` donates a region of at least
-/// ``IMAPBuffer/dispatchDonationThreshold`` bytes to the `DispatchData`, keeping a copy of the value
-/// alive in its place, instead of copying it.
+/// In return, the library keeps a copy of the value where it would otherwise copy the bytes:
+/// ``IMAPInputBuffer`` keeps a large region by reference, and ``IMAPBufferList/makeDispatchData()``
+/// donates a region of at least ``IMAPBuffer/dispatchDonationThreshold`` bytes to the `DispatchData`.
 ///
 /// This is the extension point for a byte-buffer type of your own; `NIOIMAP` conforms `ByteBuffer`
 /// with nothing more. A region that does not conform is copied instead, which is always correct.
+/// `DispatchData.Region` does not conform: it does not keep its `DispatchData` alive.
 ///
 /// - Important: The promise cannot be checked. A conformer whose bytes move or change while a copy of
-///   it is alive leaves a donated pointer dangling.
+///   it is alive leaves the parser's or a `DispatchData`'s pointer dangling.
 public protocol StableAddressByteRegion: ByteRegion {}
 
 // An `Array`'s buffer does not move while the array is alive, and holding a copy of the array is
