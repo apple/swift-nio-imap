@@ -15,7 +15,7 @@
 import Logging
 import NIO
 import NIOIMAP
-@_spi(NIOIMAPInternal) import NIOIMAPCore
+import NIOIMAPCore
 import NIOSSL
 
 enum CommandRoundtripError: Error {
@@ -46,12 +46,17 @@ public class CommandRoundtripHandler: ChannelOutboundHandler {
             }
 
             var encodeBuffer = CommandEncodeBuffer(
-                buffer: context.channel.allocator.buffer(capacity: originalBuffer.readableBytes),
                 capabilities: self.capabilities,
                 loggingMode: false
             )
             encodeBuffer.writeCommandStream(command)
-            var roundtripBuffer = encodeBuffer.buffer.nextChunk().bytes
+            // Compare all chunks: a synchronizing literal ends a chunk mid-command. Ignores
+            // `nextStep`, since only the original bytes are sent.
+            var roundtripBytes: [UInt8] = []
+            while let chunk = encodeBuffer.nextChunk() {
+                roundtripBytes.append(contentsOf: chunk.bytes.copiedBytes())
+            }
+            var roundtripBuffer = ByteBuffer(bytes: roundtripBytes)
 
             if originalBuffer != roundtripBuffer {
                 self.logger.warning("Input command vs roundtrip output is different")

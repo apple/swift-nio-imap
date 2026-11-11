@@ -86,3 +86,20 @@ extension ByteBuffer: @retroactive ExpressibleByStringLiteral {
         self.writeString(value)
     }
 }
+
+// Encoded chunks are `IMAPBufferList`s, and the state-machine tests spell the bytes they expect as
+// string literals. A literal makes a one-region list; equality is byte-wise and ignores segmentation,
+// so it compares equal to whatever the encoder's sink actually produced.
+extension IMAPBufferList: ExpressibleByUnicodeScalarLiteral {}
+extension IMAPBufferList: ExpressibleByExtendedGraphemeClusterLiteral {}
+extension IMAPBufferList: ExpressibleByStringLiteral {
+    public init(stringLiteral value: String) {
+        self = IMAPBufferList(IMAPBuffer(Array(value.utf8)))
+    }
+}
+
+extension String {
+    init(buffer list: IMAPBufferList) {
+        self = String(decoding: list.copiedBytes(), as: UTF8.self)
+    }
+}

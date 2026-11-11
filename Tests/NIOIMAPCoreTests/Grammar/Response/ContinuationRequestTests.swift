@@ -88,11 +88,7 @@ extension EncodeFixture<ContinuationRequest> {
             bufferKind: .server(ResponseEncodingOptions()),
             expectedString: expectedString,
             encoder: {
-                var encoder = ResponseEncodeBuffer(
-                    buffer: $0.buffer,
-                    options: ResponseEncodingOptions(),
-                    loggingMode: false
-                )
+                var encoder = ResponseEncodeBuffer($0)
                 let count = encoder.writeContinuationRequest($1)
                 $0 = encoder.buffer
                 return count

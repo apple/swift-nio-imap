@@ -39,9 +39,9 @@ extension EncodeBuffer {
 
     /// Writes an IMAP `string` type as defined by the grammar in RFC 3501.
     /// The function will decide to use either `quoted` or `literal` syntax based
-    /// upon what bytes `buffer` contains, and what encoding types are supported.
+    /// upon what `bytes` contains, and what encoding types are supported.
     /// - parameters:
-    ///     - buffer: The buffer to write.
+    ///     - bytes: The bytes to write.
     /// - returns: The number of bytes written.
     @discardableResult mutating func writeIMAPString<T: Collection>(_ bytes: T) -> Int where T.Element == UInt8 {
         guard !self.loggingMode else {
@@ -313,13 +313,15 @@ extension EncodeBuffer {
                 self.writeString(suffix)
             }
     }
+
 }
 
 // MARK: - Conditional writes
 
 // Free functions, not `EncodeBuffer` methods: a method call `self.write(if: …) { self.write… }`
 // borrows `self` while the closure mutates it, so the compiler copies the buffer and the first write
-// inside the closure pays for copy-on-write.
+// inside the closure pays for copy-on-write. On a segmented sink, that is a new segment per
+// conditional write.
 
 /// Writes using a closure if the given `value` is non-`nil`. This allows for chaining together writes
 /// when attempting to perform composite writes and return the total number of bytes written.

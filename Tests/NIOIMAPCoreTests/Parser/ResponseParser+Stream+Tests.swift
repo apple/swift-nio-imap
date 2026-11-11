@@ -1400,7 +1400,6 @@ private enum DeepEnvelope {
             let secondFrom = ResponseParserTests.envelopes(in: second.responses).first?.from ?? []
 
             var encoder = EncodeBuffer.serverEncodeBuffer(
-                buffer: ByteBufferAllocator().buffer(capacity: 1 << 20),
                 options: ResponseEncodingOptions(),
                 loggingMode: false
             )

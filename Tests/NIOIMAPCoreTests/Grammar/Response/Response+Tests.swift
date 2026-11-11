@@ -252,11 +252,7 @@ extension EncodeFixture<Response> {
             bufferKind: .server(ResponseEncodingOptions()),
             expectedString: expectedString,
             encoder: {
-                var encoder = ResponseEncodeBuffer(
-                    buffer: $0.buffer,
-                    options: ResponseEncodingOptions(),
-                    loggingMode: false
-                )
+                var encoder = ResponseEncodeBuffer($0)
                 let count = encoder.writeResponse($1)
                 $0 = encoder.buffer
                 return count
@@ -272,14 +268,10 @@ extension EncodeFixture<[FetchResponse]> {
     ) -> Self {
         EncodeFixture(
             input: input,
-            bufferKind: .client(.rfc3501),
+            bufferKind: .server(ResponseEncodingOptions()),
             expectedString: expectedString,
             encoder: {
-                var encoder = ResponseEncodeBuffer(
-                    buffer: $0.buffer,
-                    options: ResponseEncodingOptions(),
-                    loggingMode: false
-                )
+                var encoder = ResponseEncodeBuffer($0)
                 let count = $1.reduce(into: 0) { count, response in
                     count += encoder.writeFetchResponse(response)
                 }

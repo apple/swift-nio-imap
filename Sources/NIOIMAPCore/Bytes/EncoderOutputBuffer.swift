@@ -30,7 +30,7 @@
 /// ```swift
 /// // the default: segments the library allocates
 /// var encoder = CommandEncodeBuffer(options: options, loggingMode: false)
-/// // or, for payload-heavy traffic headed to a NIO Channel
+/// // or, to hand a NIO Channel slices of one ByteBuffer rather than copies
 /// var encoder = CommandEncodeBuffer(sink: ByteBufferOutput(), options: options, loggingMode: false)
 /// ```
 ///
@@ -38,10 +38,9 @@
 ///   handlers use. Reach for it unless you have measured a reason not to: it never moves a byte it has
 ///   already written, which is what makes handing out a chunk while encoding continues free.
 /// - `ByteBufferOutput`, in `NIOIMAP`, writes straight into a `ByteBuffer` and hands out slices of it,
-///   so nothing is copied between the encoder and a `Channel`. It allocates less and wins on traffic
-///   dominated by large payloads; it loses on traffic made of many small writes, because a
-///   `ByteBuffer` write costs more per call than a segment write. It is a caller's choice, not the
-///   default.
+///   so nothing is copied between the encoder and a `Channel`. It is slower on a stream of small
+///   messages, and allocates a fresh `ByteBuffer` per hand-out while earlier bytes are still in
+///   flight. It is a caller's choice, not the default.
 /// - Conform yourself when the bytes have to land in storage this package cannot know about — a file,
 ///   shared memory, a ring buffer. The six members below are the whole obligation, plus value
 ///   semantics: copying an encoder copies its sink, so a class-backed sink would leave both copies
@@ -49,6 +48,12 @@
 ///
 /// This mirrors the read side, where ``ParserInputBuffer`` is the seam and ``IMAPInputBuffer`` is the
 /// conformer to reach for.
+///
+/// ## Batched appends
+///
+/// The encoder stages small writes and appends them together, so a conformer sees fewer, larger
+/// appends than there were writes, and ``byteCount`` and ``withPendingRegions(_:)`` may lag what has
+/// been encoded. Bytes always arrive in order; staged ones arrive before the next ``takeFirst(_:)``.
 ///
 /// ## What is deliberately not here
 ///

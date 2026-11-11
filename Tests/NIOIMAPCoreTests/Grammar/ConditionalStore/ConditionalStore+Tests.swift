@@ -22,7 +22,6 @@ struct ConditionalStoreTests {
     func encodesToCondstore() {
         let expected = "CONDSTORE"
         var buffer = EncodeBuffer.serverEncodeBuffer(
-            buffer: ByteBufferAllocator().buffer(capacity: 128),
             options: ResponseEncodingOptions(),
             loggingMode: false
         )
