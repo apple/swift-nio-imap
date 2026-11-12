@@ -20,11 +20,11 @@ public struct IMAPDecoderError: Error {
     /// The error that was thrown by the IMAP parser.
     public var parserError: Error
 
-    /// The buffer that was provided to the parser.
+    /// The bytes that were waiting to be parsed when the error was thrown.
     public var buffer: ByteBuffer
 }
 
-struct CommandDecoder: NIOSingleStepByteToMessageDecoder {
+struct CommandDecoder: NIOSingleStepByteToMessageDecoder, IMAPMessageDecoder {
     typealias InboundOut = SynchronizedCommand
 
     private var parser: CommandParser
@@ -33,12 +33,27 @@ struct CommandDecoder: NIOSingleStepByteToMessageDecoder {
         self.parser = CommandParser(literalSizeLimit: literalSizeLimit)
     }
 
+    /// Parses out of the library's own input buffer — the path the handler takes, and the only one that
+    /// delivers a large `APPEND` payload without copying it.
+    mutating func decode(input: inout IMAPInputBuffer) throws -> SynchronizedCommand? {
+        try self.decode(from: &input)
+    }
+
+    /// Parses out of a `ByteBuffer`, for `ByteToMessageHandler` and the decoder verifier.
+    ///
+    /// A `ByteBuffer` cannot vouch for its bytes, so a payload extracted on this path is copied. See
+    /// `IMAPInputProcessor`.
     mutating func decode(buffer: inout ByteBuffer) throws -> SynchronizedCommand? {
-        let save = buffer
+        try self.decode(from: &buffer)
+    }
+
+    private mutating func decode<Input: ConsumableParserInputBuffer>(
+        from input: inout Input
+    ) throws -> SynchronizedCommand? {
         do {
-            return try self.parser.parseCommandStream(buffer: &buffer)
+            return try self.parser.parseCommandStream(buffer: &input)
         } catch {
-            throw IMAPDecoderError(parserError: error, buffer: save)
+            throw IMAPDecoderError(parserError: error, buffer: input.coalescedByteBuffer())
         }
     }
 

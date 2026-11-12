@@ -12,8 +12,6 @@
 //
 //===----------------------------------------------------------------------===//
 
-import struct NIO.ByteBuffer
-
 /// Message data returned in an untagged server response.
 ///
 /// These responses convey information about messages independently of FETCH responses.
@@ -68,7 +66,7 @@ public enum MessageData: Hashable, Sendable {
     /// Contains an array of `URLAUTH`-authorized IMAP URLs that clients can use for authenticated access.
     ///
     /// - SeeAlso: [RFC 4467 URLAUTH](https://datatracker.ietf.org/doc/html/rfc4467)
-    case generateAuthorizedURL([ByteBuffer])
+    case generateAuthorizedURL([[UInt8]])
 
     /// Message data fetched via IMAP URL (RFC 4467).
     ///

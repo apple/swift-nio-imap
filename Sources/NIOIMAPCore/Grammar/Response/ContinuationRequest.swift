@@ -12,8 +12,6 @@
 //
 //===----------------------------------------------------------------------===//
 
-import struct NIO.ByteBuffer
-
 /// A command continuation request from the server.
 ///
 /// Servers send continuation requests (prefixed with `+`) when they are waiting for additional
@@ -63,5 +61,5 @@ public enum ContinuationRequest: Hashable, Sendable {
     /// message content.
     ///
     /// - SeeAlso: [RFC 3501 Section 7.5](https://datatracker.ietf.org/doc/html/rfc3501#section-7.5)
-    case data(ByteBuffer)
+    case data([UInt8])
 }

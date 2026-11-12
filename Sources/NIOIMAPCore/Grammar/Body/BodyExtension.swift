@@ -12,8 +12,6 @@
 //
 //===----------------------------------------------------------------------===//
 
-import struct NIO.ByteBuffer
-
 /// A generic extension field for future `BODY` structure enhancements (RFC 3501).
 ///
 /// RFC 3501 allows servers to include extension fields after the standard body structure fields
@@ -36,7 +34,7 @@ public enum BodyExtension: Hashable, Sendable {
     /// A generic string extension field, or `nil` if not present.
     ///
     /// Represents an optional string value in an extension field, following IMAP's nstring syntax.
-    case string(ByteBuffer?)
+    case string([UInt8]?)
 
     /// A generic numeric extension field.
     ///

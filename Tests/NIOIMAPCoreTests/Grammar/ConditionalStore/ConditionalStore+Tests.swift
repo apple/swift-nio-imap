@@ -12,7 +12,6 @@
 //
 //===----------------------------------------------------------------------===//
 
-import NIO
 @_spi(NIOIMAPInternal) @testable import NIOIMAPCore
 import Testing
 
@@ -22,7 +21,6 @@ struct ConditionalStoreTests {
     func encodesToCondstore() {
         let expected = "CONDSTORE"
         var buffer = EncodeBuffer.serverEncodeBuffer(
-            buffer: ByteBufferAllocator().buffer(capacity: 128),
             options: ResponseEncodingOptions(),
             loggingMode: false
         )

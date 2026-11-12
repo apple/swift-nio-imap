@@ -12,7 +12,6 @@
 //
 //===----------------------------------------------------------------------===//
 
-import NIO
 @_spi(NIOIMAPInternal) @testable import NIOIMAPCore
 import OrderedCollections
 import Testing
@@ -57,7 +56,6 @@ struct NamespaceDescriptionTests {
     @Test("logging mode shows the delimiter")
     func loggingMode() throws {
         var buffer = EncodeBuffer.serverEncodeBuffer(
-            buffer: ByteBuffer(),
             options: ResponseEncodingOptions(),
             loggingMode: true
         )

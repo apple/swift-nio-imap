@@ -71,7 +71,7 @@ struct AppendLiteralTests {
         helper.writeOutbound(.append(.beginCatenate(options: .init())))
         #expect(helper.drainOutbound() == "A1 APPEND \"INBOX\" CATENATE (")
 
-        let urlPart = helper.writeOutbound(.append(.catenateURL(ByteBuffer(string: url))), wait: false)
+        let urlPart = helper.writeOutbound(.append(.catenateURL(Array(url.utf8))), wait: false)
         #expect(helper.drainOutbound() == "URL {90}\r\n")
 
         let endCatenate = helper.writeOutbound(.append(.endCatenate), wait: false)
@@ -158,6 +158,67 @@ struct AppendLiteralTests {
         helper.writeOutbound(.append(.finish), wait: false)
         helper.writeInbound("+ OK\r\n")
         #expect(helper.drainOutbound() == "hello\r\n")
+
+        helper.writeInbound("A1 OK done\r\n")
+        helper.expectInbound(.tagged(.init(tag: "A1", state: .ok(.init(code: nil, text: "done")))))
+    }
+
+    /// A zero-length literal ends the part, yet the next part must still wait for its `+`.
+    @Test("APPEND to an empty mailbox sent as a literal waits for +")
+    func appendToEmptyLiteralMailbox() {
+        var helper = IMAPClientHandlerTests.Helper()
+        defer { helper.check() }
+        var options = CommandEncodingOptions.rfc3501
+        options.useQuotedString = false
+        helper.writeOutbound(.setEncodingOptions(.fixed(options)))
+
+        let start = helper.writeOutbound(.append(.start(tag: "A1", appendingTo: .init(""))), wait: false)
+        #expect(helper.drainOutbound() == "A1 APPEND {0}\r\n")
+
+        let begin = helper.writeOutbound(
+            .append(.beginMessage(message: .init(options: .none, data: .init(byteCount: 5)))),
+            wait: false
+        )
+        #expect(helper.drainOutbound() == "")
+
+        helper.writeInbound("+ OK\r\n")
+        #expect(helper.drainOutbound() == " {5}\r\n")
+        helper.expectSucceeded(start)
+        helper.expectSucceeded(begin)
+
+        helper.writeOutbound(.append(.messageBytes("hello")), wait: false)
+        helper.writeOutbound(.append(.endMessage), wait: false)
+        helper.writeOutbound(.append(.finish), wait: false)
+        helper.writeInbound("+ OK\r\n")
+        #expect(helper.drainOutbound() == "hello\r\n")
+
+        helper.writeInbound("A1 OK done\r\n")
+        helper.expectInbound(.tagged(.init(tag: "A1", state: .ok(.init(code: nil, text: "done")))))
+    }
+
+    @Test("CATENATE with an empty URL sent as a literal waits for +")
+    func catenateEmptyLiteralURL() {
+        var helper = IMAPClientHandlerTests.Helper()
+        defer { helper.check() }
+        helper.writeOutbound(.append(.start(tag: "A1", appendingTo: .inbox)))
+        helper.writeOutbound(.append(.beginCatenate(options: .init())))
+        #expect(helper.drainOutbound() == "A1 APPEND \"INBOX\" CATENATE (")
+
+        var options = CommandEncodingOptions.rfc3501
+        options.useQuotedString = false
+        helper.writeOutbound(.setEncodingOptions(.fixed(options)))
+
+        let urlPart = helper.writeOutbound(.append(.catenateURL("")), wait: false)
+        #expect(helper.drainOutbound() == "URL {0}\r\n")
+
+        let endCatenate = helper.writeOutbound(.append(.endCatenate), wait: false)
+        helper.writeOutbound(.append(.finish), wait: false)
+        #expect(helper.drainOutbound() == "")
+
+        helper.writeInbound("+ OK\r\n")
+        #expect(helper.drainOutbound() == ")\r\n")
+        helper.expectSucceeded(urlPart)
+        helper.expectSucceeded(endCatenate)
 
         helper.writeInbound("A1 OK done\r\n")
         helper.expectInbound(.tagged(.init(tag: "A1", state: .ok(.init(code: nil, text: "done")))))

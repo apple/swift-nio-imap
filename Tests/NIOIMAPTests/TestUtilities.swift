@@ -34,55 +34,37 @@ extension TestUtilities {
         return buffer
     }
 
-    static func withBuffer(
-        _ string: String,
-        terminator: String = "",
-        shouldRemainUnchanged: Bool = false,
-        sourceLocation: SourceLocation = #_sourceLocation,
-        _ body: (inout ByteBuffer) throws -> Void
-    ) {
-        var inputBuffer = ByteBufferAllocator().buffer(capacity: string.utf8.count + terminator.utf8.count + 10)
-        inputBuffer.writeString("hello")
-        inputBuffer.moveReaderIndex(forwardBy: 5)
-        inputBuffer.writeString(string)
-        inputBuffer.writeString(terminator)
-        inputBuffer.writeString("hallo")
-        inputBuffer.moveWriterIndex(to: inputBuffer.writerIndex - 5)
+}
 
-        let expected = inputBuffer.getSlice(
-            at: inputBuffer.readerIndex + string.utf8.count,
-            length: terminator.utf8.count
-        )!
-        let beforeRunningBody = inputBuffer
-
-        var parseBuffer = ParseBuffer(inputBuffer)
-
-        defer {
-            let remaining =
-                (try? PL.parseBytes(
-                    buffer: &parseBuffer,
-                    tracker: .makeNewDefault,
-                    upTo: .max
-                )) ?? ByteBuffer()
-            let expectedString = String(buffer: expected)
-            let remainingString = String(buffer: remaining)
-            if shouldRemainUnchanged {
-                #expect(beforeRunningBody == inputBuffer, sourceLocation: sourceLocation)
-            } else {
-                #expect(remainingString == expectedString, sourceLocation: sourceLocation)
-            }
-        }
-
-        #expect(throws: Never.self, sourceLocation: sourceLocation) {
-            try body(&inputBuffer)
-        }
+// Model fields that used to be `ByteBuffer` are now `[UInt8]`, and the test suite spells hundreds of
+// them as string literals. `IMAPBuffer` ships its own literal conformances; a byte array does not, so
+// this is the test-only stand-in for the retroactive `ByteBuffer` conformance it replaces.
+extension Array: @retroactive ExpressibleByUnicodeScalarLiteral where Element == UInt8 {}
+extension Array: @retroactive ExpressibleByExtendedGraphemeClusterLiteral where Element == UInt8 {}
+extension Array: @retroactive ExpressibleByStringLiteral where Element == UInt8 {
+    public init(stringLiteral value: String) {
+        self = Array(value.utf8)
+    }
+}
+extension ByteBuffer: @retroactive ExpressibleByStringLiteral {
+    public init(stringLiteral value: String) {
+        self = ByteBuffer(string: value)
     }
 }
 
-extension ByteBuffer: @retroactive ExpressibleByStringLiteral {
+// Encoded chunks are `IMAPBufferList`s, and the state-machine tests spell the bytes they expect as
+// string literals. A literal makes a one-region list; equality is byte-wise and ignores segmentation,
+// so it compares equal to whatever the encoder's sink actually produced.
+extension IMAPBufferList: ExpressibleByUnicodeScalarLiteral {}
+extension IMAPBufferList: ExpressibleByExtendedGraphemeClusterLiteral {}
+extension IMAPBufferList: ExpressibleByStringLiteral {
     public init(stringLiteral value: String) {
-        let allocator = ByteBufferAllocator()
-        self = allocator.buffer(capacity: 0)
-        self.writeString(value)
+        self = IMAPBufferList(IMAPBuffer(Array(value.utf8)))
+    }
+}
+
+extension String {
+    init(buffer list: IMAPBufferList) {
+        self = String(decoding: list.copiedBytes(), as: UTF8.self)
     }
 }

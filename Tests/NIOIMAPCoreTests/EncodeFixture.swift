@@ -12,7 +12,6 @@
 //
 //===----------------------------------------------------------------------===//
 
-import NIO
 @_spi(NIOIMAPInternal) @testable import NIOIMAPCore
 import Testing
 
@@ -60,13 +59,11 @@ extension EncodeFixture {
         switch bufferKind {
         case .client(let options):
             testBuffer = EncodeBuffer.clientEncodeBuffer(
-                buffer: ByteBufferAllocator().buffer(capacity: 128),
                 options: options,
                 loggingMode: false
             )
         case .server(let options):
             testBuffer = EncodeBuffer.serverEncodeBuffer(
-                buffer: ByteBufferAllocator().buffer(capacity: 128),
                 options: options,
                 loggingMode: false
             )

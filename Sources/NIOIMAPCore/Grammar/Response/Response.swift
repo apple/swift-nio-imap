@@ -12,9 +12,6 @@
 //
 //===----------------------------------------------------------------------===//
 
-import struct NIO.ByteBuffer
-import struct NIO.ByteBufferAllocator
-
 public enum ResponseOrContinuationRequest: Hashable, Sendable {
     case continuationRequest(ContinuationRequest)
     case response(Response)
@@ -150,7 +147,7 @@ public enum Response: Hashable, Sendable {
     /// that challenge (not a separate response type).
     ///
     /// - SeeAlso: [RFC 4959](https://datatracker.ietf.org/doc/html/rfc4959) - IMAP Extension for SASL Initial Client Response
-    case authenticationChallenge(ByteBuffer)
+    case authenticationChallenge([UInt8])
 
     /// Signals that the IDLE command has been successfully started.
     ///
@@ -284,7 +281,7 @@ public enum FetchResponse: Hashable, Sendable {
     /// preceding ``streamingBegin(kind:byteCount:)`` event.
     ///
     /// - SeeAlso: ``streamingBegin(kind:byteCount:)``
-    case streamingBytes(ByteBuffer)
+    case streamingBytes(IMAPBuffer)
 
     /// The end of the currently streaming section.
     ///

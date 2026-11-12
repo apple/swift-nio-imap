@@ -12,8 +12,6 @@
 //
 //===----------------------------------------------------------------------===//
 
-import struct NIO.ByteBuffer
-
 /// An option value, which can be a single string or a nested array of values.
 ///
 /// Allows option values to be nested arbitrarily deep, enabling representation
@@ -23,7 +21,7 @@ import struct NIO.ByteBuffer
 /// - SeeAlso: [RFC 4466 IMAP4 Extensions](https://datatracker.ietf.org/doc/html/rfc4466)
 public enum OptionValueComp: Hashable, Sendable {
     /// A single value
-    case string(ByteBuffer)
+    case string([UInt8])
 
     /// An array of values
     case array([OptionValueComp])

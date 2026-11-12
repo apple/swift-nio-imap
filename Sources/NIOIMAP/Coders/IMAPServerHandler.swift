@@ -44,19 +44,26 @@ public final class IMAPServerHandler: ChannelDuplexHandler {
         }
         set {
             self._continuationRequest = newValue
-            let buffer = ByteBufferAllocator().buffer(capacity: 16)
-            var encodeBuffer = ResponseEncodeBuffer(buffer: buffer, capabilities: self.capabilities, loggingMode: false)
-            encodeBuffer.writeContinuationRequest(newValue)
-            self.continuationRequestBytes = encodeBuffer.readBytes()
+            self.continuationRequestBytes = Self.encode(newValue, capabilities: self.capabilities)
         }
     }
 
-    private let decoder: NIOSingleStepByteToMessageProcessor<CommandDecoder>
+    /// Received bytes, parsed where they landed rather than coalesced into one buffer first.
+    private let decoder: IMAPInputProcessor<CommandDecoder>
     private var numberOfOutstandingContinuationRequests = 0
+
+    /// The encoded continuation request, written once per outstanding request.
+    ///
+    /// Coalesced into one `ByteBuffer` rather than kept as regions, because it is a handful of bytes
+    /// that gets written many times over the life of the connection.
     private var continuationRequestBytes: ByteBuffer
 
+    /// The buffer every response is encoded into, kept for the lifetime of the connection.
+    ///
+    /// Default sink, `IMAPOutputBuffer`, on purpose: ``ByteBufferOutput`` would hand the channel slices
+    /// rather than copies, but it allocates a fresh `ByteBuffer` per chunk while earlier ones are still
+    /// in flight, and is slower on a stream of small responses.
     private var responseEncodeBuffer = ResponseEncodeBuffer(
-        buffer: ByteBuffer(string: ""),
         options: .init(),
         loggingMode: false
     )
@@ -67,15 +74,19 @@ public final class IMAPServerHandler: ChannelDuplexHandler {
         continuationRequest: ContinuationRequest = .responseText(ResponseText(text: "OK")),
         literalSizeLimit: Int = IMAPDefaults.literalSizeLimit
     ) {
-        self.decoder = NIOSingleStepByteToMessageProcessor(
+        self.decoder = IMAPInputProcessor(
             CommandDecoder(literalSizeLimit: literalSizeLimit),
             maximumBufferSize: IMAPDefaults.lineLengthLimit
         )
         self._continuationRequest = continuationRequest
-        let buffer = ByteBufferAllocator().buffer(capacity: 16)
-        var encodeBuffer = ResponseEncodeBuffer(buffer: buffer, capabilities: self.capabilities, loggingMode: false)
-        encodeBuffer.writeContinuationRequest(continuationRequest)
-        self.continuationRequestBytes = encodeBuffer.readBytes()
+        self.continuationRequestBytes = Self.encode(continuationRequest, capabilities: self.capabilities)
+    }
+
+    /// Encodes one continuation request into a single `ByteBuffer`.
+    private static func encode(_ request: ContinuationRequest, capabilities: [Capability]) -> ByteBuffer {
+        var encodeBuffer = ResponseEncodeBuffer(capabilities: capabilities, loggingMode: false)
+        encodeBuffer.writeContinuationRequest(request)
+        return encodeBuffer.readBytes().makeByteBuffer()
     }
 
     public func read(context: ChannelHandlerContext) {
@@ -116,7 +127,26 @@ public final class IMAPServerHandler: ChannelDuplexHandler {
     public func write(context: ChannelHandlerContext, data: NIOAny, promise: EventLoopPromise<Void>?) {
         let response = self.unwrapOutboundIn(data)
         self.responseEncodeBuffer.writeResponse(response)
-        context.write(self.wrapOutboundOut(self.responseEncodeBuffer.readBytes()), promise: promise)
+        let bytes = self.responseEncodeBuffer.readBytes()
+        // Usually one write. Several when the response carries a payload the encoder kept by reference —
+        // a streamed literal — so that the payload reaches the network without being copied. See
+        // `IMAPBufferList.makeOutboundBuffers()`.
+        switch bytes.regionCount {
+        case 0:
+            context.write(self.wrapOutboundOut(ByteBuffer()), promise: promise)
+        case 1:
+            context.write(self.wrapOutboundOut(bytes.regions[0].byteBuffer), promise: promise)
+        default:
+            let buffers = bytes.makeOutboundBuffers()
+            for (index, buffer) in buffers.enumerated() {
+                let outbound = self.wrapOutboundOut(buffer)
+                if index == buffers.count - 1 {
+                    context.write(outbound, promise: promise)
+                } else {
+                    context.write(outbound).cascadeFailure(to: promise)
+                }
+            }
+        }
     }
 }
 

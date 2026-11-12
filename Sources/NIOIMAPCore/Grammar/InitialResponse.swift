@@ -12,8 +12,6 @@
 //
 //===----------------------------------------------------------------------===//
 
-import struct NIO.ByteBuffer
-
 /// An initial SASL response sent with the AUTHENTICATE command.
 ///
 /// The SASL-IR extension (RFC 4959) allows clients to send an initial response directly with the
@@ -36,14 +34,14 @@ import struct NIO.ByteBuffer
 /// - SeeAlso: [RFC 4959 SASL Initial Response](https://datatracker.ietf.org/doc/html/rfc4959)
 public struct InitialResponse: Hashable, Sendable {
     /// Creates a new empty `InitialResponse` that will be encoded as `=`.
-    public static let empty: Self = .init(ByteBuffer())
+    public static let empty: Self = .init([])
 
     /// The data to be base-64 encoded.
-    public var data: ByteBuffer
+    public var data: [UInt8]
 
     /// Creates a new `InitialResponse`
     /// - parameter data: The raw (ie. not base64 encoded) data to be sent.
-    public init(_ data: ByteBuffer) {
+    public init(_ data: [UInt8]) {
         self.data = data
     }
 }
@@ -52,8 +50,8 @@ public struct InitialResponse: Hashable, Sendable {
 
 extension EncodeBuffer {
     @discardableResult mutating func writeInitialResponse(_ resp: InitialResponse) -> Int {
-        guard resp.data.readableBytes == 0 else {
-            let encoded = Base64.encodeBytes(bytes: resp.data.readableBytesView)
+        guard resp.data.isEmpty else {
+            let encoded = Base64.encodeBytes(bytes: resp.data)
             return self.writeBytes(encoded)
         }
         return self.writeString("=")

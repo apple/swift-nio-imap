@@ -7,7 +7,8 @@ import PackageDescription
 let package = Package(
     name: "imap-tool-example",
     platforms: [
-        .macOS(.v15)
+        // Matches the library, which pins macOS 26 for the stdlib accessors that produce a `Span`.
+        .macOS(.v26)
     ],
     products: [
         .library(name: "IMAPToolLib", targets: ["IMAPToolLib"]),

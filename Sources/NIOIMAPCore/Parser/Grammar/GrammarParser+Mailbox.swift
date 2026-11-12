@@ -26,13 +26,11 @@ import Android
 let badOS = { fatalError("unsupported OS") }()
 #endif
 
-import struct NIO.ByteBuffer
-import struct NIO.ByteBufferView
 import struct OrderedCollections.OrderedDictionary
 
 extension GrammarParser {
     // mailbox         = "INBOX" / astring
-    func parseMailbox(buffer: inout ParseBuffer, tracker: StackTracker) throws -> MailboxName {
+    func parseMailbox(buffer: inout ParseInput, tracker: StackTracker) throws -> MailboxName {
         MailboxName(try self.parseAString(buffer: &buffer, tracker: tracker))
     }
 
@@ -40,82 +38,82 @@ extension GrammarParser {
     //                    esearch-response /
     //                    "STATUS" SP mailbox SP "(" [status-att-list] ")" /
     //                    number SP "EXISTS" / Namespace-Response
-    func parseMailboxData(buffer: inout ParseBuffer, tracker: StackTracker) throws -> MailboxData {
+    func parseMailboxData(buffer: inout ParseInput, tracker: StackTracker) throws -> MailboxData {
         /// Parse those sub-parses that have a fixed text prefix.
-        func parseMailboxData_withFixedPrefix(buffer: inout ParseBuffer, tracker: StackTracker) throws -> MailboxData {
-            func parseMailboxData_flags(buffer: inout ParseBuffer, tracker: StackTracker) throws -> MailboxData {
-                try PL.parseSpaces(buffer: &buffer, tracker: tracker)
+        func parseMailboxData_withFixedPrefix(buffer: inout ParseInput, tracker: StackTracker) throws -> MailboxData {
+            func parseMailboxData_flags(buffer: inout ParseInput, tracker: StackTracker) throws -> MailboxData {
+                try buffer.parseSpaces()
                 return .flags(try self.parseFlagList(buffer: &buffer, tracker: tracker))
             }
 
-            func parseMailboxData_list(buffer: inout ParseBuffer, tracker: StackTracker) throws -> MailboxData {
-                try PL.parseSpaces(buffer: &buffer, tracker: tracker)
+            func parseMailboxData_list(buffer: inout ParseInput, tracker: StackTracker) throws -> MailboxData {
+                try buffer.parseSpaces()
                 return .list(try self.parseMailboxList(buffer: &buffer, tracker: tracker))
             }
 
-            func parseMailboxData_lsub(buffer: inout ParseBuffer, tracker: StackTracker) throws -> MailboxData {
-                try PL.parseSpaces(buffer: &buffer, tracker: tracker)
+            func parseMailboxData_lsub(buffer: inout ParseInput, tracker: StackTracker) throws -> MailboxData {
+                try buffer.parseSpaces()
                 return .lsub(try self.parseMailboxList(buffer: &buffer, tracker: tracker))
             }
 
-            func parseMailboxData_extendedSearch(buffer: inout ParseBuffer, tracker: StackTracker) throws -> MailboxData
+            func parseMailboxData_extendedSearch(buffer: inout ParseInput, tracker: StackTracker) throws -> MailboxData
             {
                 let response = try self.parseExtendedSearchResponse(buffer: &buffer, tracker: tracker)
                 return .extendedSearch(response)
             }
 
-            func parseMailboxData_search(buffer: inout ParseBuffer, tracker: StackTracker) throws -> MailboxData {
-                let identifiers = try PL.parseZeroOrMore(buffer: &buffer, tracker: tracker) {
+            func parseMailboxData_search(buffer: inout ParseInput, tracker: StackTracker) throws -> MailboxData {
+                let identifiers = try buffer.parseZeroOrMore(tracker: tracker) {
                     (buffer, tracker) -> UnknownMessageIdentifier in
-                    try PL.parseSpaces(buffer: &buffer, tracker: tracker)
+                    try buffer.parseSpaces()
                     let num = try self.parseNZNumber(buffer: &buffer, tracker: tracker)
                     guard let id = UnknownMessageIdentifier(exactly: num) else {
                         throw ParserError(hint: "Can't make unknown message identfiier from \(num)")
                     }
                     return id
                 }
-                let modificationSequence = try PL.parseOptional(buffer: &buffer, tracker: tracker) {
+                let modificationSequence = try buffer.parseOptional(tracker: tracker) {
                     (buffer, tracker) -> ModificationSequenceValue in
-                    try PL.parseSpaces(buffer: &buffer, tracker: tracker)
+                    try buffer.parseSpaces()
                     return try self.parseSearchSortModificationSequence(buffer: &buffer, tracker: tracker)
                 }
                 return .search(identifiers, modificationSequence)
             }
 
-            func parseMailboxData_status(buffer: inout ParseBuffer, tracker: StackTracker) throws -> MailboxData {
-                try PL.parseSpaces(buffer: &buffer, tracker: tracker)
+            func parseMailboxData_status(buffer: inout ParseInput, tracker: StackTracker) throws -> MailboxData {
+                try buffer.parseSpaces()
                 let mailbox = try self.parseMailbox(buffer: &buffer, tracker: tracker)
-                try PL.parseSpaces(buffer: &buffer, tracker: tracker)
-                try PL.parseFixedString("(", buffer: &buffer, tracker: tracker)
-                let status = try PL.parseOptional(buffer: &buffer, tracker: tracker, parser: self.parseMailboxStatus)
-                try PL.parseFixedString(")", buffer: &buffer, tracker: tracker)
+                try buffer.parseSpaces()
+                try buffer.matchFixed("(")
+                let status = try buffer.parseOptional(tracker: tracker, parser: self.parseMailboxStatus)
+                try buffer.matchFixed(")")
                 return .status(mailbox, status ?? .init())
             }
 
-            func parseMailboxData_namespace(buffer: inout ParseBuffer, tracker: StackTracker) throws -> MailboxData {
+            func parseMailboxData_namespace(buffer: inout ParseInput, tracker: StackTracker) throws -> MailboxData {
                 .namespace(try self.parseNamespaceResponse(buffer: &buffer, tracker: tracker))
             }
 
-            func parseMailboxData_sort(buffer: inout ParseBuffer, tracker: StackTracker) throws -> MailboxData {
-                let identifiers = try PL.parseZeroOrMore(buffer: &buffer, tracker: tracker) {
+            func parseMailboxData_sort(buffer: inout ParseInput, tracker: StackTracker) throws -> MailboxData {
+                let identifiers = try buffer.parseZeroOrMore(tracker: tracker) {
                     (buffer, tracker) -> UnknownMessageIdentifier in
-                    try PL.parseSpaces(buffer: &buffer, tracker: tracker)
+                    try buffer.parseSpaces()
                     let num = try self.parseNZNumber(buffer: &buffer, tracker: tracker)
                     guard let id = UnknownMessageIdentifier(exactly: num) else {
                         throw ParserError(hint: "Can't make unknown message identfiier from \(num)")
                     }
                     return id
                 }
-                let modificationSequence = try PL.parseOptional(buffer: &buffer, tracker: tracker) {
+                let modificationSequence = try buffer.parseOptional(tracker: tracker) {
                     (buffer, tracker) -> ModificationSequenceValue in
-                    try PL.parseSpaces(buffer: &buffer, tracker: tracker)
+                    try buffer.parseSpaces()
                     return try self.parseSearchSortModificationSequence(buffer: &buffer, tracker: tracker)
                 }
                 return .sort(identifiers, modificationSequence)
             }
 
             func parseMailboxData_uidBatchesResponse(
-                buffer: inout ParseBuffer,
+                buffer: inout ParseInput,
                 tracker: StackTracker
             ) throws -> MailboxData {
                 .uidBatches(try self.parseUIDBatchesResponse(buffer: &buffer, tracker: tracker))
@@ -140,47 +138,46 @@ extension GrammarParser {
             }
         }
 
-        func parseMailboxData_exists(buffer: inout ParseBuffer, tracker: StackTracker) throws -> MailboxData {
+        func parseMailboxData_exists(buffer: inout ParseInput, tracker: StackTracker) throws -> MailboxData {
             let number = try self.parseNumber(buffer: &buffer, tracker: tracker)
-            try PL.parseFixedString(" EXISTS", buffer: &buffer, tracker: tracker)
+            try buffer.matchFixed(" EXISTS")
             return .exists(number)
         }
 
-        func parseMailboxData_recent(buffer: inout ParseBuffer, tracker: StackTracker) throws -> MailboxData {
+        func parseMailboxData_recent(buffer: inout ParseInput, tracker: StackTracker) throws -> MailboxData {
             let number = try self.parseNumber(buffer: &buffer, tracker: tracker)
-            try PL.parseFixedString(" RECENT", buffer: &buffer, tracker: tracker)
+            try buffer.matchFixed(" RECENT")
             return .recent(number)
         }
 
-        return try PL.parseOneOf(
+        return try buffer.parseOneOf(
             [
-                parseMailboxData_withFixedPrefix,
-                parseMailboxData_exists,
-                parseMailboxData_recent,
+                { try parseMailboxData_withFixedPrefix(buffer: &$0, tracker: $1) },
+                { try parseMailboxData_exists(buffer: &$0, tracker: $1) },
+                { try parseMailboxData_recent(buffer: &$0, tracker: $1) },
             ],
-            buffer: &buffer,
             tracker: tracker
         )
     }
 
     /// Parses a `MAILBOXID` value leniently: if the server sends an invalid ID, it is consumed and `nil` is returned
     /// rather than failing the parse. Callers map `nil` to their `.invalid` case.
-    func parseMailboxIDLeniently(buffer: inout ParseBuffer, tracker: StackTracker) throws -> MailboxID? {
+    func parseMailboxIDLeniently(buffer: inout ParseInput, tracker: StackTracker) throws -> MailboxID? {
         try parseObjectIDLeniently(buffer: &buffer, tracker: tracker).map(MailboxID.init)
     }
 
     // mailbox-list    = "(" [mbx-list-flags] ")" SP
     //                    (DQUOTE QUOTED-CHAR DQUOTE / nil) SP mailbox
     //                    [SP mbox-list-extended]
-    func parseMailboxList(buffer: inout ParseBuffer, tracker: StackTracker) throws -> MailboxInfo {
-        func parseMailboxList_quotedChar_some(buffer: inout ParseBuffer, tracker: StackTracker) throws -> Character? {
-            try PL.composite(buffer: &buffer, tracker: tracker) { (buffer, tracker) -> Character? in
-                try PL.parseFixedString("\"", buffer: &buffer, tracker: tracker)
+    func parseMailboxList(buffer: inout ParseInput, tracker: StackTracker) throws -> MailboxInfo {
+        func parseMailboxList_quotedChar_some(buffer: inout ParseInput, tracker: StackTracker) throws -> Character? {
+            try buffer.composite(tracker: tracker) { (buffer, tracker) -> Character? in
+                try buffer.matchFixed("\"")
 
                 // QUOTED-CHAR = <any TEXT-CHAR except quoted-specials> / "\" quoted-specials
-                var character = try PL.parseByte(buffer: &buffer, tracker: tracker)
+                var character = try buffer.readByte()
                 if character == UInt8(ascii: "\\") {
-                    character = try PL.parseByte(buffer: &buffer, tracker: tracker)
+                    character = try buffer.readByte()
                     guard character.isQuotedSpecial else {
                         throw ParserError(
                             hint:
@@ -195,36 +192,34 @@ extension GrammarParser {
                     }
                 }
 
-                try PL.parseFixedString("\"", buffer: &buffer, tracker: tracker)
+                try buffer.matchFixed("\"")
                 return Character(UnicodeScalar(character))
             }
         }
 
-        func parseMailboxList_quotedChar_nil(buffer: inout ParseBuffer, tracker: StackTracker) throws -> Character? {
+        func parseMailboxList_quotedChar_nil(buffer: inout ParseInput, tracker: StackTracker) throws -> Character? {
             try self.parseNil(buffer: &buffer, tracker: tracker)
             return nil
         }
 
-        return try PL.composite(buffer: &buffer, tracker: tracker) { buffer, tracker -> MailboxInfo in
-            try PL.parseFixedString("(", buffer: &buffer, tracker: tracker)
+        return try buffer.composite(tracker: tracker) { buffer, tracker -> MailboxInfo in
+            try buffer.matchFixed("(")
             let flags =
-                try PL.parseOptional(buffer: &buffer, tracker: tracker, parser: self.parseMailboxListFlags) ?? []
-            try PL.parseFixedString(")", buffer: &buffer, tracker: tracker)
-            try PL.parseSpaces(buffer: &buffer, tracker: tracker)
-            let character = try PL.parseOneOf(
-                parseMailboxList_quotedChar_some,
-                parseMailboxList_quotedChar_nil,
-                buffer: &buffer,
+                try buffer.parseOptional(tracker: tracker, parser: self.parseMailboxListFlags) ?? []
+            try buffer.matchFixed(")")
+            try buffer.parseSpaces()
+            let character = try buffer.parseOneOf(
+                { try parseMailboxList_quotedChar_some(buffer: &$0, tracker: $1) },
+                { try parseMailboxList_quotedChar_nil(buffer: &$0, tracker: $1) },
                 tracker: tracker
             )
-            try PL.parseSpaces(buffer: &buffer, tracker: tracker)
+            try buffer.parseSpaces()
             let mailbox = try self.parseMailbox(buffer: &buffer, tracker: tracker)
             let listExtended =
-                try PL.parseOptional(
-                    buffer: &buffer,
+                try buffer.parseOptional(
                     tracker: tracker,
                     parser: { (buffer, tracker) -> ListExtended in
-                        try PL.parseSpaces(buffer: &buffer, tracker: tracker)
+                        try buffer.parseSpaces()
                         return try self.parseMailboxListExtended(buffer: &buffer, tracker: tracker)
                     }
                 ) ?? ListExtended()
@@ -239,28 +234,27 @@ extension GrammarParser {
 
     struct ListExtended {
         var objectID: CompoundObjectID?
-        var extensions = OrderedDictionary<ByteBuffer, ParameterValue>()
+        var extensions = OrderedDictionary<[UInt8], ParameterValue>()
     }
 
     // mbox-list-extended =  "(" [mbox-list-extended-item
     //                       *(SP mbox-list-extended-item)] ")"
-    func parseMailboxListExtended(buffer: inout ParseBuffer, tracker: StackTracker) throws -> ListExtended {
-        try PL.composite(buffer: &buffer, tracker: tracker) { buffer, tracker -> ListExtended in
-            try PL.parseFixedString("(", buffer: &buffer, tracker: tracker)
+    func parseMailboxListExtended(buffer: inout ParseInput, tracker: StackTracker) throws -> ListExtended {
+        try buffer.composite(tracker: tracker) { buffer, tracker -> ListExtended in
+            try buffer.matchFixed("(")
             var items: [MailboxListExtendedItem] = []
-            if let first = try PL.parseOptional(
-                buffer: &buffer,
+            if let first = try buffer.parseOptional(
                 tracker: tracker,
                 parser: self.parseMailboxListExtendedItem
             ) {
                 items.append(first)
-                try PL.parseZeroOrMore(buffer: &buffer, into: &items, tracker: tracker) {
+                try buffer.parseZeroOrMore(into: &items, tracker: tracker) {
                     (buffer, tracker) -> MailboxListExtendedItem in
-                    try PL.parseSpaces(buffer: &buffer, tracker: tracker)
+                    try buffer.parseSpaces()
                     return try self.parseMailboxListExtendedItem(buffer: &buffer, tracker: tracker)
                 }
             }
-            try PL.parseFixedString(")", buffer: &buffer, tracker: tracker)
+            try buffer.matchFixed(")")
 
             var result = ListExtended()
             for item in items {
@@ -277,7 +271,7 @@ extension GrammarParser {
 
     enum MailboxListExtendedItem {
         case objectID(CompoundObjectID)
-        case other(KeyValue<ByteBuffer, ParameterValue>)
+        case other(KeyValue<[UInt8], ParameterValue>)
     }
 
     // mbox-list-extended-item =  mbox-list-extended-item-tag SP
@@ -285,13 +279,13 @@ extension GrammarParser {
     // objectid-extended-item  =  "OBJECTID" SP objectid-compound-value
     //                            ; the tag may be quoted, per mbox-list-extended-item-tag
     func parseMailboxListExtendedItem(
-        buffer: inout ParseBuffer,
+        buffer: inout ParseInput,
         tracker: StackTracker
     ) throws -> MailboxListExtendedItem {
-        try PL.composite(buffer: &buffer, tracker: tracker) { buffer, tracker -> MailboxListExtendedItem in
+        try buffer.composite(tracker: tracker) { buffer, tracker -> MailboxListExtendedItem in
             let tag = try self.parseAString(buffer: &buffer, tracker: tracker)
-            try PL.parseSpaces(buffer: &buffer, tracker: tracker)
-            if String(buffer: tag).uppercased() == "OBJECTID" {
+            try buffer.parseSpaces()
+            if String(decoding: tag, as: UTF8.self).uppercased() == "OBJECTID" {
                 return .objectID(try self.parseCompoundObjectID(buffer: &buffer, tracker: tracker))
             }
             let val = try self.parseParameterValue(buffer: &buffer, tracker: tracker)
@@ -302,23 +296,25 @@ extension GrammarParser {
     // mbx-list-flags  = *(mbx-list-oflag SP) mbx-list-sflag
     //                   *(SP mbx-list-oflag) /
     //                   mbx-list-oflag *(SP mbx-list-oflag)
-    func parseMailboxListFlags(buffer: inout ParseBuffer, tracker: StackTracker) throws -> [MailboxInfo.Attribute] {
+    func parseMailboxListFlags(buffer: inout ParseInput, tracker: StackTracker) throws -> [MailboxInfo.Attribute] {
         // `flag-extension` is `"\" atom`, the same production `Attribute` validates.
         var results = [MailboxInfo.Attribute(unchecked: try self.parseFlagExtension(buffer: &buffer, tracker: tracker))]
         do {
             while true {
-                try PL.parseSpaces(buffer: &buffer, tracker: tracker)
+                let mark = buffer.consumed
+                try buffer.parseSpaces()
                 let att = try self.parseFlagExtension(buffer: &buffer, tracker: tracker)
                 results.append(.init(unchecked: att))
+                try buffer.requireProgress(since: mark)
             }
-        } catch {
-            // do nothing
+        } catch is ParserError {
+            // The list ends at the first flag that does not parse.
         }
         return results
     }
 
     // status-att-list  = status-att-val *(SP status-att-val)
-    func parseMailboxStatus(buffer: inout ParseBuffer, tracker: StackTracker) throws -> MailboxStatus {
+    func parseMailboxStatus(buffer: inout ParseInput, tracker: StackTracker) throws -> MailboxStatus {
         enum MailboxValue: Hashable {
             case messages(Int)
             case uidNext(UID)
@@ -332,122 +328,119 @@ extension GrammarParser {
             case objectID(CompoundObjectID)
         }
 
-        func parseStatusAttributeValue_messages(buffer: inout ParseBuffer, tracker: StackTracker) throws -> MailboxValue
+        func parseStatusAttributeValue_messages(buffer: inout ParseInput, tracker: StackTracker) throws -> MailboxValue
         {
-            try PL.parseFixedString("MESSAGES ", buffer: &buffer, tracker: tracker)
+            try buffer.matchFixed("MESSAGES ")
             return .messages(try self.parseNumber(buffer: &buffer, tracker: tracker))
         }
 
-        func parseStatusAttributeValue_uidnext(buffer: inout ParseBuffer, tracker: StackTracker) throws -> MailboxValue
-        {
-            try PL.parseFixedString("UIDNEXT ", buffer: &buffer, tracker: tracker)
+        func parseStatusAttributeValue_uidnext(buffer: inout ParseInput, tracker: StackTracker) throws -> MailboxValue {
+            try buffer.matchFixed("UIDNEXT ")
             return .uidNext(try self.parseMessageIdentifier(buffer: &buffer, tracker: tracker))
         }
 
         func parseStatusAttributeValue_uidvalidity(
-            buffer: inout ParseBuffer,
+            buffer: inout ParseInput,
             tracker: StackTracker
         ) throws -> MailboxValue {
-            try PL.parseFixedString("UIDVALIDITY ", buffer: &buffer, tracker: tracker)
+            try buffer.matchFixed("UIDVALIDITY ")
             return .uidValidity(try self.parseUIDValidity(buffer: &buffer, tracker: tracker))
         }
 
-        func parseStatusAttributeValue_unseen(buffer: inout ParseBuffer, tracker: StackTracker) throws -> MailboxValue {
-            try PL.parseFixedString("UNSEEN ", buffer: &buffer, tracker: tracker)
+        func parseStatusAttributeValue_unseen(buffer: inout ParseInput, tracker: StackTracker) throws -> MailboxValue {
+            try buffer.matchFixed("UNSEEN ")
             return .unseen(try self.parseNumber(buffer: &buffer, tracker: tracker))
         }
 
-        func parseStatusAttributeValue_size(buffer: inout ParseBuffer, tracker: StackTracker) throws -> MailboxValue {
-            try PL.parseFixedString("SIZE ", buffer: &buffer, tracker: tracker)
+        func parseStatusAttributeValue_size(buffer: inout ParseInput, tracker: StackTracker) throws -> MailboxValue {
+            try buffer.matchFixed("SIZE ")
             return .size(try self.parseNumber(buffer: &buffer, tracker: tracker))
         }
 
         func parseStatusAttributeValue_modificationSequence(
-            buffer: inout ParseBuffer,
+            buffer: inout ParseInput,
             tracker: StackTracker
         ) throws -> MailboxValue {
-            try PL.parseFixedString("HIGHESTMODSEQ ", buffer: &buffer, tracker: tracker)
+            try buffer.matchFixed("HIGHESTMODSEQ ")
             return .highestModifierSequence(try self.parseModificationSequenceValue(buffer: &buffer, tracker: tracker))
         }
 
-        func parseStatusAttributeValue_recent(buffer: inout ParseBuffer, tracker: StackTracker) throws -> MailboxValue {
-            try PL.parseFixedString("RECENT ", buffer: &buffer, tracker: tracker)
+        func parseStatusAttributeValue_recent(buffer: inout ParseInput, tracker: StackTracker) throws -> MailboxValue {
+            try buffer.matchFixed("RECENT ")
             return .recent(try self.parseNumber(buffer: &buffer, tracker: tracker))
         }
 
         func parseStatusAttributeValue_appendLimit(
-            buffer: inout ParseBuffer,
+            buffer: inout ParseInput,
             tracker: StackTracker
         ) throws -> MailboxValue {
-            try PL.parseFixedString("APPENDLIMIT ", buffer: &buffer, tracker: tracker)
+            try buffer.matchFixed("APPENDLIMIT ")
 
             func parseStatusAttributeValue_appendLimit_nil(
-                buffer: inout ParseBuffer,
+                buffer: inout ParseInput,
                 tracker: StackTracker
             ) throws -> MailboxValue {
                 try self.parseNil(buffer: &buffer, tracker: tracker)
                 return .appendLimit(nil)
             }
             func parseStatusAttributeValue_appendLimit_number(
-                buffer: inout ParseBuffer,
+                buffer: inout ParseInput,
                 tracker: StackTracker
             ) throws -> MailboxValue {
                 return .appendLimit(try self.parseNumber(buffer: &buffer, tracker: tracker))
             }
 
-            return try PL.parseOneOf(
+            return try buffer.parseOneOf(
                 [
-                    parseStatusAttributeValue_appendLimit_nil,
-                    parseStatusAttributeValue_appendLimit_number,
+                    { try parseStatusAttributeValue_appendLimit_nil(buffer: &$0, tracker: $1) },
+                    { try parseStatusAttributeValue_appendLimit_number(buffer: &$0, tracker: $1) },
                 ],
-                buffer: &buffer,
                 tracker: tracker
             )
         }
 
         func parseStatusAttributeValue_mailboxID(
-            buffer: inout ParseBuffer,
+            buffer: inout ParseInput,
             tracker: StackTracker
         ) throws -> MailboxValue {
-            try PL.parseFixedString("MAILBOXID (", buffer: &buffer, tracker: tracker)
+            try buffer.matchFixed("MAILBOXID (")
             let mailboxID = try self.parseMailboxIDLeniently(buffer: &buffer, tracker: tracker)
-            try PL.parseFixedString(")", buffer: &buffer, tracker: tracker)
+            try buffer.matchFixed(")")
             return .mailboxID(.init(mailboxID))
         }
 
         func parseStatusAttributeValue_objectID(
-            buffer: inout ParseBuffer,
+            buffer: inout ParseInput,
             tracker: StackTracker
         ) throws -> MailboxValue {
-            try PL.parseFixedString("OBJECTID ", buffer: &buffer, tracker: tracker)
+            try buffer.matchFixed("OBJECTID ")
             return .objectID(try self.parseCompoundObjectID(buffer: &buffer, tracker: tracker))
         }
 
-        func parseStatusAttributeValue(buffer: inout ParseBuffer, tracker: StackTracker) throws -> MailboxValue {
-            try PL.parseOneOf(
+        func parseStatusAttributeValue(buffer: inout ParseInput, tracker: StackTracker) throws -> MailboxValue {
+            try buffer.parseOneOf(
                 [
-                    parseStatusAttributeValue_messages,
-                    parseStatusAttributeValue_uidnext,
-                    parseStatusAttributeValue_uidvalidity,
-                    parseStatusAttributeValue_unseen,
-                    parseStatusAttributeValue_size,
-                    parseStatusAttributeValue_modificationSequence,
-                    parseStatusAttributeValue_recent,
-                    parseStatusAttributeValue_appendLimit,
-                    parseStatusAttributeValue_mailboxID,
-                    parseStatusAttributeValue_objectID,
+                    { try parseStatusAttributeValue_messages(buffer: &$0, tracker: $1) },
+                    { try parseStatusAttributeValue_uidnext(buffer: &$0, tracker: $1) },
+                    { try parseStatusAttributeValue_uidvalidity(buffer: &$0, tracker: $1) },
+                    { try parseStatusAttributeValue_unseen(buffer: &$0, tracker: $1) },
+                    { try parseStatusAttributeValue_size(buffer: &$0, tracker: $1) },
+                    { try parseStatusAttributeValue_modificationSequence(buffer: &$0, tracker: $1) },
+                    { try parseStatusAttributeValue_recent(buffer: &$0, tracker: $1) },
+                    { try parseStatusAttributeValue_appendLimit(buffer: &$0, tracker: $1) },
+                    { try parseStatusAttributeValue_mailboxID(buffer: &$0, tracker: $1) },
+                    { try parseStatusAttributeValue_objectID(buffer: &$0, tracker: $1) },
                 ],
-                buffer: &buffer,
                 tracker: tracker
             )
         }
 
-        return try PL.composite(buffer: &buffer, tracker: tracker) { (buffer, tracker) -> MailboxStatus in
+        return try buffer.composite(tracker: tracker) { (buffer, tracker) -> MailboxStatus in
 
             var array = [try parseStatusAttributeValue(buffer: &buffer, tracker: tracker)]
-            try PL.parseZeroOrMore(buffer: &buffer, into: &array, tracker: tracker) {
+            try buffer.parseZeroOrMore(into: &array, tracker: tracker) {
                 (buffer, tracker) -> MailboxValue in
-                try PL.parseSpaces(buffer: &buffer, tracker: tracker)
+                try buffer.parseSpaces()
                 return try parseStatusAttributeValue(buffer: &buffer, tracker: tracker)
             }
 
@@ -481,19 +474,18 @@ extension GrammarParser {
     }
 
     // mbox-or-pat  = list-mailbox / patterns
-    func parseMailboxPatterns(buffer: inout ParseBuffer, tracker: StackTracker) throws -> MailboxPatterns {
-        func parseMailboxPatterns_list(buffer: inout ParseBuffer, tracker: StackTracker) throws -> MailboxPatterns {
+    func parseMailboxPatterns(buffer: inout ParseInput, tracker: StackTracker) throws -> MailboxPatterns {
+        func parseMailboxPatterns_list(buffer: inout ParseInput, tracker: StackTracker) throws -> MailboxPatterns {
             .mailbox(try self.parseListMailbox(buffer: &buffer, tracker: tracker))
         }
 
-        func parseMailboxPatterns_patterns(buffer: inout ParseBuffer, tracker: StackTracker) throws -> MailboxPatterns {
+        func parseMailboxPatterns_patterns(buffer: inout ParseInput, tracker: StackTracker) throws -> MailboxPatterns {
             .pattern(try self.parsePatterns(buffer: &buffer, tracker: tracker))
         }
 
-        return try PL.parseOneOf(
-            parseMailboxPatterns_list,
-            parseMailboxPatterns_patterns,
-            buffer: &buffer,
+        return try buffer.parseOneOf(
+            { try parseMailboxPatterns_list(buffer: &$0, tracker: $1) },
+            { try parseMailboxPatterns_patterns(buffer: &$0, tracker: $1) },
             tracker: tracker
         )
     }

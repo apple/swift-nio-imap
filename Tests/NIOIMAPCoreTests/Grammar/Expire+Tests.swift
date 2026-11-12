@@ -12,7 +12,6 @@
 //
 //===----------------------------------------------------------------------===//
 
-import NIO
 @_spi(NIOIMAPInternal) @testable import NIOIMAPCore
 import Testing
 
@@ -93,11 +92,12 @@ struct ExpireTests {
     )
     func parseThenEncode(_ input: String) throws {
         let terminator = ";URLAUTH=anonymous"
-        var parseBuffer = ParseBuffer(ByteBuffer(string: input + terminator))
-        let parsed = try GrammarParser().parseExpire(buffer: &parseBuffer, tracker: .testTracker)
-        #expect(parseBuffer.readableBytes == terminator.utf8.count)
+        let parsed = try TestUtilities.withParseInput(for: input + terminator) { input in
+            let parsed = try GrammarParser().parseExpire(buffer: &input, tracker: .testTracker)
+            #expect(input.remaining == terminator.utf8.count)
+            return parsed
+        }
         var encodeBuffer = EncodeBuffer.serverEncodeBuffer(
-            buffer: ByteBuffer(),
             options: ResponseEncodingOptions(),
             loggingMode: false
         )

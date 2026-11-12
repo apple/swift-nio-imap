@@ -26,50 +26,47 @@ import Android
 let badOS = { fatalError("unsupported OS") }()
 #endif
 
-import struct NIO.ByteBuffer
-import struct NIO.ByteBufferView
-
 extension GrammarParser {
     // response-data   = "*" SP response-payload CRLF
-    func parseResponseData(buffer: inout ParseBuffer, tracker: StackTracker) throws -> ResponsePayload {
-        try PL.composite(buffer: &buffer, tracker: tracker) { (buffer, tracker) in
-            try PL.parseFixedString("* ", buffer: &buffer, tracker: tracker)
+    func parseResponseData(buffer: inout ParseInput, tracker: StackTracker) throws -> ResponsePayload {
+        try buffer.composite(tracker: tracker) { (buffer, tracker) in
+            try buffer.matchFixed("* ")
             let payload = try self.parseResponsePayload(buffer: &buffer, tracker: tracker)
-            try PL.parseNewline(buffer: &buffer, tracker: tracker)
+            try buffer.matchNewline()
             return payload
         }
     }
 
     // response-tagged = tag SP resp-cond-state CRLF
-    func parseTaggedResponse(buffer: inout ParseBuffer, tracker: StackTracker) throws -> TaggedResponse {
-        try PL.composite(buffer: &buffer, tracker: tracker) { buffer, tracker -> TaggedResponse in
+    func parseTaggedResponse(buffer: inout ParseInput, tracker: StackTracker) throws -> TaggedResponse {
+        try buffer.composite(tracker: tracker) { buffer, tracker -> TaggedResponse in
             let tag = try self.parseTag(buffer: &buffer, tracker: tracker)
-            try PL.parseSpaces(buffer: &buffer, tracker: tracker)
+            try buffer.parseSpaces()
             let state = try self.parseTaggedResponseState(buffer: &buffer, tracker: tracker)
-            try PL.parseNewline(buffer: &buffer, tracker: tracker)
+            try buffer.matchNewline()
             return TaggedResponse(tag: tag, state: state)
         }
     }
 
     // resp-code-apnd  = "APPENDUID" SP nz-number SP append-uid
-    func parseSuffix_appendUID(buffer: inout ParseBuffer, tracker: StackTracker) throws -> ResponseTextCode {
-        try PL.composite(buffer: &buffer, tracker: tracker) { buffer, tracker -> ResponseTextCode in
-            try PL.parseSpaces(buffer: &buffer, tracker: tracker)
+    func parseSuffix_appendUID(buffer: inout ParseInput, tracker: StackTracker) throws -> ResponseTextCode {
+        try buffer.composite(tracker: tracker) { buffer, tracker -> ResponseTextCode in
+            try buffer.parseSpaces()
             let number = try self.parseUIDValidity(buffer: &buffer, tracker: tracker)
-            try PL.parseSpaces(buffer: &buffer, tracker: tracker)
+            try buffer.parseSpaces()
             let uids = try self.parseUIDSetNonEmpty(buffer: &buffer, tracker: tracker)
             return .uidAppend(ResponseCodeAppend(uidValidity: number, uids: uids))
         }
     }
 
     // resp-code-copy  = "COPYUID" SP nz-number SP uid-set SP uid-set
-    func parseSuffix_uidCopy(buffer: inout ParseBuffer, tracker: StackTracker) throws -> ResponseTextCode {
-        try PL.composite(buffer: &buffer, tracker: tracker) { buffer, tracker -> ResponseTextCode in
-            try PL.parseSpaces(buffer: &buffer, tracker: tracker)
+    func parseSuffix_uidCopy(buffer: inout ParseInput, tracker: StackTracker) throws -> ResponseTextCode {
+        try buffer.composite(tracker: tracker) { buffer, tracker -> ResponseTextCode in
+            try buffer.parseSpaces()
             let uidValidity = try self.parseUIDValidity(buffer: &buffer, tracker: tracker)
-            try PL.parseSpaces(buffer: &buffer, tracker: tracker)
+            try buffer.parseSpaces()
             let sourceUIDRanges = try self.parseUIDRangeArray(buffer: &buffer, tracker: tracker)
-            try PL.parseSpaces(buffer: &buffer, tracker: tracker)
+            try buffer.parseSpaces()
             let destinationUIDRanges = try self.parseUIDRangeArray(buffer: &buffer, tracker: tracker)
             return .uidCopy(
                 ResponseCodeCopy(
@@ -82,13 +79,13 @@ extension GrammarParser {
     }
 
     /// A combination of `resp-cond-state`, `resp-cond-bye`, and `greeting`.
-    func parseUntaggedResponseStatus(buffer: inout ParseBuffer, tracker: StackTracker) throws -> UntaggedStatus {
-        try PL.composite(buffer: &buffer, tracker: tracker) { (buffer, tracker) in
+    func parseUntaggedResponseStatus(buffer: inout ParseInput, tracker: StackTracker) throws -> UntaggedStatus {
+        try buffer.composite(tracker: tracker) { (buffer, tracker) in
             let code = try self.parseAtom(buffer: &buffer, tracker: tracker)
 
             let parsedSpace: Bool
             do {
-                try PL.parseSpaces(buffer: &buffer, tracker: tracker)
+                try buffer.parseSpaces()
                 parsedSpace = true
             } catch is ParserError {
                 parsedSpace = false
@@ -112,13 +109,13 @@ extension GrammarParser {
     }
 
     // resp-cond-state = ("OK" / "NO" / "BAD") SP resp-text
-    func parseTaggedResponseState(buffer: inout ParseBuffer, tracker: StackTracker) throws -> TaggedResponse.State {
-        try PL.composite(buffer: &buffer, tracker: tracker) { (buffer, tracker) in
+    func parseTaggedResponseState(buffer: inout ParseInput, tracker: StackTracker) throws -> TaggedResponse.State {
+        try buffer.composite(tracker: tracker) { (buffer, tracker) in
             let code = try self.parseAtom(buffer: &buffer, tracker: tracker)
 
             let parsedSpace: Bool
             do {
-                try PL.parseSpaces(buffer: &buffer, tracker: tracker)
+                try buffer.parseSpaces()
                 parsedSpace = true
             } catch is ParserError {
                 parsedSpace = false
@@ -142,266 +139,263 @@ extension GrammarParser {
     }
 
     // response-payload = resp-cond-state / resp-cond-bye / mailbox-data / message-data / capability-data / id-response / enable-data
-    func parseResponsePayload(buffer: inout ParseBuffer, tracker: StackTracker) throws -> ResponsePayload {
+    func parseResponsePayload(buffer: inout ParseInput, tracker: StackTracker) throws -> ResponsePayload {
         func parseResponsePayload_conditionalState(
-            buffer: inout ParseBuffer,
+            buffer: inout ParseInput,
             tracker: StackTracker
         ) throws -> ResponsePayload {
             .conditionalState(try self.parseUntaggedResponseStatus(buffer: &buffer, tracker: tracker))
         }
 
         func parseResponsePayload_mailboxData(
-            buffer: inout ParseBuffer,
+            buffer: inout ParseInput,
             tracker: StackTracker
         ) throws -> ResponsePayload {
             .mailboxData(try self.parseMailboxData(buffer: &buffer, tracker: tracker))
         }
 
         func parseResponsePayload_messageData(
-            buffer: inout ParseBuffer,
+            buffer: inout ParseInput,
             tracker: StackTracker
         ) throws -> ResponsePayload {
             .messageData(try self.parseMessageData(buffer: &buffer, tracker: tracker))
         }
 
         func parseResponsePayload_capabilityData(
-            buffer: inout ParseBuffer,
+            buffer: inout ParseInput,
             tracker: StackTracker
         ) throws -> ResponsePayload {
             .capabilityData(try self.parseCapabilityData(buffer: &buffer, tracker: tracker))
         }
 
-        func parseResponsePayload_idResponse(buffer: inout ParseBuffer, tracker: StackTracker) throws -> ResponsePayload
+        func parseResponsePayload_idResponse(buffer: inout ParseInput, tracker: StackTracker) throws -> ResponsePayload
         {
             .id(try self.parseIDResponse(buffer: &buffer, tracker: tracker))
         }
 
-        func parseResponsePayload_enableData(buffer: inout ParseBuffer, tracker: StackTracker) throws -> ResponsePayload
+        func parseResponsePayload_enableData(buffer: inout ParseInput, tracker: StackTracker) throws -> ResponsePayload
         {
             .enableData(try self.parseEnableData(buffer: &buffer, tracker: tracker))
         }
 
-        func parseResponsePayload_metadata(buffer: inout ParseBuffer, tracker: StackTracker) throws -> ResponsePayload {
+        func parseResponsePayload_metadata(buffer: inout ParseInput, tracker: StackTracker) throws -> ResponsePayload {
             .metadata(try self.parseMetadataResponse(buffer: &buffer, tracker: tracker))
         }
 
-        func parseResponsePayload_jmapAccess(buffer: inout ParseBuffer, tracker: StackTracker) throws -> ResponsePayload
+        func parseResponsePayload_jmapAccess(buffer: inout ParseInput, tracker: StackTracker) throws -> ResponsePayload
         {
             .jmapAccess(try self.parseJMAPAccess(buffer: &buffer, tracker: tracker))
         }
 
-        return try PL.parseOneOf(
+        return try buffer.parseOneOf(
             [
-                parseResponsePayload_mailboxData,
-                parseResponsePayload_messageData,
-                parseResponsePayload_capabilityData,
-                parseResponsePayload_idResponse,
-                parseResponsePayload_enableData,
-                parseResponsePayload_quota,
-                parseResponsePayload_quotaRoot,
-                parseResponsePayload_metadata,
-                parseResponsePayload_conditionalState,
-                parseResponsePayload_jmapAccess,
+                { try parseResponsePayload_mailboxData(buffer: &$0, tracker: $1) },
+                { try parseResponsePayload_messageData(buffer: &$0, tracker: $1) },
+                { try parseResponsePayload_capabilityData(buffer: &$0, tracker: $1) },
+                { try parseResponsePayload_idResponse(buffer: &$0, tracker: $1) },
+                { try parseResponsePayload_enableData(buffer: &$0, tracker: $1) },
+                { try parseResponsePayload_quota(buffer: &$0, tracker: $1) },
+                { try parseResponsePayload_quotaRoot(buffer: &$0, tracker: $1) },
+                { try parseResponsePayload_metadata(buffer: &$0, tracker: $1) },
+                { try parseResponsePayload_conditionalState(buffer: &$0, tracker: $1) },
+                { try parseResponsePayload_jmapAccess(buffer: &$0, tracker: $1) },
             ],
-            buffer: &buffer,
             tracker: tracker
         )
     }
 
     // resp-text       = ["[" resp-text-code "]" SP] text
-    func parseResponseText(buffer: inout ParseBuffer, tracker: StackTracker) throws -> ResponseText {
-        try PL.composite(buffer: &buffer, tracker: tracker) { buffer, tracker -> ResponseText in
-            let code = try PL.parseOptional(buffer: &buffer, tracker: tracker) {
+    func parseResponseText(buffer: inout ParseInput, tracker: StackTracker) throws -> ResponseText {
+        try buffer.composite(tracker: tracker) { buffer, tracker -> ResponseText in
+            let code = try buffer.parseOptional(tracker: tracker) {
                 (buffer, tracker) -> ResponseTextCode in
-                try PL.parseFixedString("[", buffer: &buffer, tracker: tracker)
+                try buffer.matchFixed("[")
                 let code = try self.parseResponseTextCode(buffer: &buffer, tracker: tracker)
-                try PL.parseFixedString("]", buffer: &buffer, tracker: tracker)
+                try buffer.matchFixed("]")
                 return code
             }
 
             // because some servers might not send the text (looking at you, iCloud), they might
             // also not send a space after resp-text-code, so make parsing optional
-            try PL.parseOptional(buffer: &buffer, tracker: tracker, parser: PL.parseSpaces)
+            try buffer.parseOptional(tracker: tracker, parser: { input, _ in try input.parseSpaces() })
 
             // text requires minimum 1 char, but we want to be lenient here
             // and allow 0 characters to represent empty text
-            let parsed = try PL.parseZeroOrMoreCharacters(buffer: &buffer, tracker: tracker) { (char) -> Bool in
+            let parsed = try buffer.parseZeroOrMoreCharacters { (char) -> Bool in
                 char.isUTF8TextByte
             }
 
-            let text = try ParserLibrary.parseBufferAsUTF8(parsed)
+            let text = try decodeUTF8(parsed)
             return ResponseText(code: code, text: text)
         }
     }
 
     /// See https://www.iana.org/assignments/imap-response-codes/imap-response-codes.xhtml
-    func parseResponseTextCode(buffer: inout ParseBuffer, tracker: StackTracker) throws -> ResponseTextCode {
-        func parseSuffix_modified(buffer: inout ParseBuffer, tracker: StackTracker) throws -> ResponseTextCode {
-            try PL.parseSpaces(buffer: &buffer, tracker: tracker)
+    func parseResponseTextCode(buffer: inout ParseInput, tracker: StackTracker) throws -> ResponseTextCode {
+        func parseSuffix_modified(buffer: inout ParseInput, tracker: StackTracker) throws -> ResponseTextCode {
+            try buffer.parseSpaces()
             return .modified(try self.parseMessageIdentifierSetOrLast(buffer: &buffer, tracker: tracker))
         }
 
         func parseSuffix_highestModifiedSequence(
-            buffer: inout ParseBuffer,
+            buffer: inout ParseInput,
             tracker: StackTracker
         ) throws -> ResponseTextCode {
-            try PL.parseSpaces(buffer: &buffer, tracker: tracker)
+            try buffer.parseSpaces()
             return .highestModificationSequence(
                 try self.parseModificationSequenceValue(buffer: &buffer, tracker: tracker)
             )
         }
 
-        func parseSuffix_referral(buffer: inout ParseBuffer, tracker: StackTracker) throws -> ResponseTextCode {
-            try PL.parseSpaces(buffer: &buffer, tracker: tracker)
+        func parseSuffix_referral(buffer: inout ParseInput, tracker: StackTracker) throws -> ResponseTextCode {
+            try buffer.parseSpaces()
             return .referral(try self.parseIMAPURL(buffer: &buffer, tracker: tracker))
         }
 
-        func parseSuffix_badCharset(buffer: inout ParseBuffer, tracker: StackTracker) throws -> ResponseTextCode {
+        func parseSuffix_badCharset(buffer: inout ParseInput, tracker: StackTracker) throws -> ResponseTextCode {
             let charsets =
-                try PL.parseOptional(buffer: &buffer, tracker: tracker) { (buffer, tracker) -> [CharacterSetName] in
-                    try PL.parseFixedString(" (", buffer: &buffer, tracker: tracker)
+                try buffer.parseOptional(tracker: tracker) { (buffer, tracker) -> [CharacterSetName] in
+                    try buffer.matchFixed(" (")
                     var array = [try self.parseCharset(buffer: &buffer, tracker: tracker)]
-                    try PL.parseZeroOrMore(buffer: &buffer, into: &array, tracker: tracker) {
+                    try buffer.parseZeroOrMore(into: &array, tracker: tracker) {
                         (buffer, tracker) -> CharacterSetName in
-                        try PL.parseSpaces(buffer: &buffer, tracker: tracker)
+                        try buffer.parseSpaces()
                         return try self.parseCharset(buffer: &buffer, tracker: tracker)
                     }
-                    try PL.parseFixedString(")", buffer: &buffer, tracker: tracker)
+                    try buffer.matchFixed(")")
                     return array
                 } ?? []
             return .badCharset(charsets)
         }
 
-        func parseSuffix_capability(buffer: inout ParseBuffer, tracker: StackTracker) throws -> ResponseTextCode {
+        func parseSuffix_capability(buffer: inout ParseInput, tracker: StackTracker) throws -> ResponseTextCode {
             .capability(try self.parseCapabilitySuffix(buffer: &buffer, tracker: tracker))
         }
 
-        func parseSuffix_permanentFlags(buffer: inout ParseBuffer, tracker: StackTracker) throws -> ResponseTextCode {
-            try PL.parseSpaces(buffer: &buffer, tracker: tracker)
-            try PL.parseFixedString("(", buffer: &buffer, tracker: tracker)
-            let array = try PL.parseOptional(buffer: &buffer, tracker: tracker) {
+        func parseSuffix_permanentFlags(buffer: inout ParseInput, tracker: StackTracker) throws -> ResponseTextCode {
+            try buffer.parseSpaces()
+            try buffer.matchFixed("(")
+            let array = try buffer.parseOptional(tracker: tracker) {
                 (buffer, tracker) -> [PermanentFlag] in
                 var array = [try self.parseFlagPerm(buffer: &buffer, tracker: tracker)]
-                try PL.parseZeroOrMore(buffer: &buffer, into: &array, tracker: tracker) { (buffer, tracker) in
-                    try PL.parseSpaces(buffer: &buffer, tracker: tracker)
+                try buffer.parseZeroOrMore(into: &array, tracker: tracker) { (buffer, tracker) in
+                    try buffer.parseSpaces()
                     return try self.parseFlagPerm(buffer: &buffer, tracker: tracker)
                 }
                 return array
             }
-            try PL.parseFixedString(")", buffer: &buffer, tracker: tracker)
+            try buffer.matchFixed(")")
             return .permanentFlags(array ?? [])
         }
 
-        func parseSuffix_uidNext(buffer: inout ParseBuffer, tracker: StackTracker) throws -> ResponseTextCode {
-            try PL.parseSpaces(buffer: &buffer, tracker: tracker)
+        func parseSuffix_uidNext(buffer: inout ParseInput, tracker: StackTracker) throws -> ResponseTextCode {
+            try buffer.parseSpaces()
             return .uidNext(try self.parseMessageIdentifier(buffer: &buffer, tracker: tracker))
         }
 
-        func parseSuffix_uidValidity(buffer: inout ParseBuffer, tracker: StackTracker) throws -> ResponseTextCode {
-            try PL.parseSpaces(buffer: &buffer, tracker: tracker)
+        func parseSuffix_uidValidity(buffer: inout ParseInput, tracker: StackTracker) throws -> ResponseTextCode {
+            try buffer.parseSpaces()
             return .uidValidity(try self.parseUIDValidity(buffer: &buffer, tracker: tracker))
         }
 
-        func parseSuffix_unseen(buffer: inout ParseBuffer, tracker: StackTracker) throws -> ResponseTextCode {
-            try PL.parseSpaces(buffer: &buffer, tracker: tracker)
+        func parseSuffix_unseen(buffer: inout ParseInput, tracker: StackTracker) throws -> ResponseTextCode {
+            try buffer.parseSpaces()
             return .unseen(try self.parseMessageIdentifier(buffer: &buffer, tracker: tracker))
         }
 
-        func parseSuffix_metadata(buffer: inout ParseBuffer, tracker: StackTracker) throws -> ResponseTextCode {
+        func parseSuffix_metadata(buffer: inout ParseInput, tracker: StackTracker) throws -> ResponseTextCode {
             func parseSuffix_metadataLongEntries(
-                buffer: inout ParseBuffer,
+                buffer: inout ParseInput,
                 tracker: StackTracker
             ) throws -> ResponseTextCode {
-                try PL.parseFixedString("LONGENTRIES ", buffer: &buffer, tracker: tracker)
+                try buffer.matchFixed("LONGENTRIES ")
                 let num = try self.parseNumber(buffer: &buffer, tracker: tracker)
                 return .metadataLongEntries(num)
             }
 
             func parseSuffix_metadataMaxSize(
-                buffer: inout ParseBuffer,
+                buffer: inout ParseInput,
                 tracker: StackTracker
             ) throws -> ResponseTextCode {
-                try PL.parseFixedString("MAXSIZE ", buffer: &buffer, tracker: tracker)
+                try buffer.matchFixed("MAXSIZE ")
                 let num = try self.parseNumber(buffer: &buffer, tracker: tracker)
                 return .metadataMaxsize(num)
             }
 
             func parseSuffix_metadataTooMany(
-                buffer: inout ParseBuffer,
+                buffer: inout ParseInput,
                 tracker: StackTracker
             ) throws -> ResponseTextCode {
-                try PL.parseFixedString("TOOMANY", buffer: &buffer, tracker: tracker)
+                try buffer.matchFixed("TOOMANY")
                 return .metadataTooMany
             }
 
             func parseSuffix_metadataNoPrivate(
-                buffer: inout ParseBuffer,
+                buffer: inout ParseInput,
                 tracker: StackTracker
             ) throws -> ResponseTextCode {
-                try PL.parseFixedString("NOPRIVATE", buffer: &buffer, tracker: tracker)
+                try buffer.matchFixed("NOPRIVATE")
                 return .metadataNoPrivate
             }
 
-            try PL.parseSpaces(buffer: &buffer, tracker: tracker)
+            try buffer.parseSpaces()
 
-            return try PL.parseOneOf(
+            return try buffer.parseOneOf(
                 [
-                    parseSuffix_metadataLongEntries,
-                    parseSuffix_metadataMaxSize,
-                    parseSuffix_metadataTooMany,
-                    parseSuffix_metadataNoPrivate,
+                    { try parseSuffix_metadataLongEntries(buffer: &$0, tracker: $1) },
+                    { try parseSuffix_metadataMaxSize(buffer: &$0, tracker: $1) },
+                    { try parseSuffix_metadataTooMany(buffer: &$0, tracker: $1) },
+                    { try parseSuffix_metadataNoPrivate(buffer: &$0, tracker: $1) },
                 ],
-                buffer: &buffer,
                 tracker: tracker
             )
         }
 
-        func parseSuffix_urlMechanisms(buffer: inout ParseBuffer, tracker: StackTracker) throws -> ResponseTextCode {
-            try PL.parseSpaces(buffer: &buffer, tracker: tracker)
-            try PL.parseFixedString("INTERNAL", buffer: &buffer, tracker: tracker)
-            let array = try PL.parseZeroOrMore(
-                buffer: &buffer,
+        func parseSuffix_urlMechanisms(buffer: inout ParseInput, tracker: StackTracker) throws -> ResponseTextCode {
+            try buffer.parseSpaces()
+            try buffer.matchFixed("INTERNAL")
+            let array = try buffer.parseZeroOrMore(
                 tracker: tracker,
                 parser: { buffer, tracker -> MechanismBase64 in
-                    try PL.parseSpaces(buffer: &buffer, tracker: tracker)
+                    try buffer.parseSpaces()
                     return try self.parseMechanismBase64(buffer: &buffer, tracker: tracker)
                 }
             )
             return .urlMechanisms(array)
         }
 
-        func parseSuffix_namespace(buffer: inout ParseBuffer, tracker: StackTracker) throws -> ResponseTextCode {
+        func parseSuffix_namespace(buffer: inout ParseInput, tracker: StackTracker) throws -> ResponseTextCode {
             .namespace(try self.parseNamespaceResponse(buffer: &buffer, tracker: tracker))
         }
 
-        func parseSuffix_mailboxID(buffer: inout ParseBuffer, tracker: StackTracker) throws -> ResponseTextCode {
-            try PL.parseSpaces(buffer: &buffer, tracker: tracker)
-            try PL.parseFixedString("(", buffer: &buffer, tracker: tracker)
+        func parseSuffix_mailboxID(buffer: inout ParseInput, tracker: StackTracker) throws -> ResponseTextCode {
+            try buffer.parseSpaces()
+            try buffer.matchFixed("(")
             let mailboxID = try parseMailboxIDLeniently(buffer: &buffer, tracker: tracker)
-            try PL.parseFixedString(")", buffer: &buffer, tracker: tracker)
+            try buffer.matchFixed(")")
             return .mailboxID(.init(mailboxID))
         }
 
-        func parseSuffix_objectID(buffer: inout ParseBuffer, tracker: StackTracker) throws -> ResponseTextCode {
-            try PL.parseSpaces(buffer: &buffer, tracker: tracker)
+        func parseSuffix_objectID(buffer: inout ParseInput, tracker: StackTracker) throws -> ResponseTextCode {
+            try buffer.parseSpaces()
             return .objectID(try parseCompoundObjectID(buffer: &buffer, tracker: tracker))
         }
 
-        func parseResponseTextCode_atom(buffer: inout ParseBuffer, tracker: StackTracker) throws -> ResponseTextCode {
+        func parseResponseTextCode_atom(buffer: inout ParseInput, tracker: StackTracker) throws -> ResponseTextCode {
             let atom = try self.parseAtom(buffer: &buffer, tracker: tracker)
-            let string = try PL.parseOptional(buffer: &buffer, tracker: tracker) { (buffer, tracker) -> String in
-                try PL.parseSpaces(buffer: &buffer, tracker: tracker)
-                let parsed = try PL.parseOneOrMoreCharacters(buffer: &buffer, tracker: tracker) { (char) -> Bool in
+            let string = try buffer.parseOptional(tracker: tracker) { (buffer, tracker) -> String in
+                try buffer.parseSpaces()
+                let parsed = try buffer.parseOneOrMoreCharacters { (char) -> Bool in
                     char.isTextChar && char != UInt8(ascii: "]")
                 }
-                let string = try ParserLibrary.parseBufferAsUTF8(parsed)
+                let string = try decodeUTF8(parsed)
                 return string
             }
             return .other(atom, string)
         }
 
         func parseKnownResponseTextCode(
-            buffer: inout ParseBuffer,
+            buffer: inout ParseInput,
             tracker: StackTracker
         ) throws -> ResponseTextCode {
             try self.selectingKeyword(buffer: &buffer) { keyword, buffer in
@@ -456,51 +450,60 @@ extension GrammarParser {
             }
         }
 
-        return try PL.parseOneOf(
+        return try buffer.parseOneOf(
             [
-                parseKnownResponseTextCode,
-                parseResponseTextCode_atom,
+                { try parseKnownResponseTextCode(buffer: &$0, tracker: $1) },
+                { try parseResponseTextCode_atom(buffer: &$0, tracker: $1) },
             ],
-            buffer: &buffer,
             tracker: tracker
         )
     }
 
     // quota_response  ::= "QUOTA" SP astring SP quota_list
-    func parseResponsePayload_quota(buffer: inout ParseBuffer, tracker: StackTracker) throws -> ResponsePayload {
+    func parseResponsePayload_quota(buffer: inout ParseInput, tracker: StackTracker) throws -> ResponsePayload {
         // quota_resource  ::= atom SP number SP number
-        func parseQuotaResource(buffer: inout ParseBuffer, tracker: StackTracker) throws -> QuotaResource {
-            try PL.composite(buffer: &buffer, tracker: tracker) { buffer, tracker in
+        func parseQuotaResource(buffer: inout ParseInput, tracker: StackTracker) throws -> QuotaResource {
+            try buffer.composite(tracker: tracker) { buffer, tracker in
                 let resourceName = try parseQuotaResourceName(buffer: &buffer, tracker: tracker)
-                try PL.parseSpaces(buffer: &buffer, tracker: tracker)
+                try buffer.parseSpaces()
                 let usage = try parseNumber(buffer: &buffer, tracker: tracker)
-                try PL.parseSpaces(buffer: &buffer, tracker: tracker)
+                try buffer.parseSpaces()
                 let limit = try parseNumber(buffer: &buffer, tracker: tracker)
                 return QuotaResource(resourceName: resourceName, usage: usage, limit: limit)
             }
         }
 
         // quota_list      ::= "(" #quota_resource ")"
-        func parseQuotaList(buffer: inout ParseBuffer, tracker: StackTracker) throws -> [QuotaResource] {
-            try PL.composite(buffer: &buffer, tracker: tracker) { buffer, tracker in
-                try PL.parseFixedString("(", buffer: &buffer, tracker: tracker)
+        func parseQuotaList(buffer: inout ParseInput, tracker: StackTracker) throws -> [QuotaResource] {
+            try buffer.composite(tracker: tracker) { buffer, tracker in
+                try buffer.matchFixed("(")
                 var resources: [QuotaResource] = []
-                while let resource = try PL.parseOptional(buffer: &buffer, tracker: tracker, parser: parseQuotaResource)
-                {
+                while true {
+                    let mark = buffer.consumed
+                    guard
+                        let resource = try buffer.parseOptional(
+                            tracker: tracker,
+                            parser: { try parseQuotaResource(buffer: &$0, tracker: $1) }
+                        )
+                    else { break }
+                    try buffer.requireProgress(since: mark)
                     resources.append(resource)
-                    if try PL.parseOptional(buffer: &buffer, tracker: tracker, parser: PL.parseSpaces) == nil {
+                    let space: Void? = try buffer.parseOptional(tracker: tracker) { input, _ in
+                        try input.parseSpaces()
+                    }
+                    if space == nil {
                         break
                     }
                 }
-                try PL.parseFixedString(")", buffer: &buffer, tracker: tracker)
+                try buffer.matchFixed(")")
                 return resources
             }
         }
 
-        return try PL.composite(buffer: &buffer, tracker: tracker) { buffer, tracker in
-            try PL.parseFixedString("QUOTA ", buffer: &buffer, tracker: tracker)
+        return try buffer.composite(tracker: tracker) { buffer, tracker in
+            try buffer.matchFixed("QUOTA ")
             let quotaRoot = try parseAString(buffer: &buffer, tracker: tracker)
-            try PL.parseSpaces(buffer: &buffer, tracker: tracker)
+            try buffer.parseSpaces()
             let resources = try parseQuotaList(buffer: &buffer, tracker: tracker)
             return .quota(.init(quotaRoot), resources)
         }
@@ -508,14 +511,14 @@ extension GrammarParser {
 
     // quotaroot_response ::= "QUOTAROOT" SP astring *(SP astring)
     func parseResponsePayload_quotaRoot(
-        buffer: inout ParseBuffer,
+        buffer: inout ParseInput,
         tracker: StackTracker
     ) throws -> ResponsePayload {
-        try PL.composite(buffer: &buffer, tracker: tracker) { buffer, tracker in
-            try PL.parseFixedString("QUOTAROOT ", buffer: &buffer, tracker: tracker)
+        try buffer.composite(tracker: tracker) { buffer, tracker in
+            try buffer.matchFixed("QUOTAROOT ")
             let mailbox = try parseMailbox(buffer: &buffer, tracker: tracker)
-            let quotaRoots = try PL.parseZeroOrMore(buffer: &buffer, tracker: tracker) { buffer, tracker in
-                try PL.parseSpaces(buffer: &buffer, tracker: tracker)
+            let quotaRoots = try buffer.parseZeroOrMore(tracker: tracker) { buffer, tracker in
+                try buffer.parseSpaces()
                 return try parseQuotaRoot(buffer: &buffer, tracker: tracker)
             }
             return .quotaRoot(mailbox, quotaRoots)

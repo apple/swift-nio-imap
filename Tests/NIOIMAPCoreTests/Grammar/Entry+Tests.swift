@@ -12,7 +12,6 @@
 //
 //===----------------------------------------------------------------------===//
 
-import NIO
 import Testing
 import OrderedCollections
 @_spi(NIOIMAPInternal) @testable import NIOIMAPCore

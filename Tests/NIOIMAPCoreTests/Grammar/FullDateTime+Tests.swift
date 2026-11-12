@@ -12,7 +12,6 @@
 //
 //===----------------------------------------------------------------------===//
 
-import NIO
 import Testing
 @_spi(NIOIMAPInternal) @testable import NIOIMAPCore
 
@@ -184,10 +183,10 @@ struct FullDateTimeTests {
         arguments: ["12:34:56Z", "12:34:56.5Z", "12:34:56.05Z", "12:34:56.000Z", "12:34:56.123456Z"]
     )
     func parseThenEncode(_ input: String) throws {
-        var parseBuffer = ParseBuffer(ByteBuffer(string: input + " "))
-        let parsed = try GrammarParser().parseFullTime(buffer: &parseBuffer, tracker: .testTracker)
+        let parsed = try TestUtilities.withParseInput(for: input + " ") { input in
+            try GrammarParser().parseFullTime(buffer: &input, tracker: .testTracker)
+        }
         var encodeBuffer = EncodeBuffer.serverEncodeBuffer(
-            buffer: ByteBuffer(),
             options: ResponseEncodingOptions(),
             loggingMode: false
         )
@@ -231,7 +230,6 @@ struct FullDateTimeTests {
             observing: [\.standardErrorContent],
             performing: {
                 var buffer = EncodeBuffer.serverEncodeBuffer(
-                    buffer: ByteBuffer(),
                     options: ResponseEncodingOptions(),
                     loggingMode: false
                 )

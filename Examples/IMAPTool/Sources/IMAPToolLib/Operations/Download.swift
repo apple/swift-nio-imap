@@ -284,7 +284,7 @@ extension FetchState {
             self = .didBeginStream(byteCount: byteCount)
             return .none
         case (.didBeginStream, .streamingBytes(let bytes)):
-            return .writeData(bytes)
+            return .writeData(bytes.byteBuffer)
         case (.didBeginStream(byteCount: let byteCount), .streamingEnd):
             self = .didEndStream(byteCount: byteCount)
             return .none

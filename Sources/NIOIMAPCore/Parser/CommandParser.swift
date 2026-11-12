@@ -12,8 +12,6 @@
 //
 //===----------------------------------------------------------------------===//
 
-import struct NIO.ByteBuffer
-
 /// A command stream part with synchronizing literal information.
 ///
 /// When parsing client commands, the parser must handle synchronizing literals (RFC 3501 Section 4.3).
@@ -75,7 +73,8 @@ public struct SynchronizedCommand: Hashable, Sendable {
 ///
 /// ```swift
 /// var parser = CommandParser()
-/// var buffer = ByteBuffer(bytes: clientData)
+/// var buffer = IMAPInputBuffer()
+/// buffer.append(bytesFromTheNetwork)
 /// while let syncedCommand = try parser.parseCommandStream(buffer: &buffer) {
 ///     if syncedCommand.numberOfSynchronisingLiterals > 0 {
 ///         // Wait for continuation requests and responses
@@ -161,7 +160,7 @@ public struct CommandParser: Parser, Sendable {
         self.parser = GrammarParser(literalSizeLimit: literalSizeLimit)
     }
 
-    /// Parses a given `ByteBuffer` into command stream parts.
+    /// Parses incoming bytes into command stream parts.
     ///
     /// Incrementally consumes bytes from the buffer and returns parsed command parts.
     /// The parser maintains state across calls, so a command may arrive in multiple
@@ -174,79 +173,85 @@ public struct CommandParser: Parser, Sendable {
     /// - The input violates IMAP command syntax
     /// - UTF-8 validation fails
     ///
-    /// - Parameter buffer: A `ByteBuffer` with incoming data. The parser consumes
-    ///   bytes from the front as it parses them.
+    /// - Parameter buffer: The received bytes. Whatever the parser consumes is discarded from the
+    ///   front, so the same buffer is passed again as more arrives. An ``IMAPInputBuffer`` is what a
+    ///   connection should hand over: it keeps each read where it landed, and it is the only input an
+    ///   `APPEND` payload can be delivered out of without being copied.
     ///
     /// - Returns: A ``SynchronizedCommand`` if a complete element is parsed, or `nil`
     ///   if more data is needed.
     ///
     /// - Throws: ``ParserError`` for syntax errors, ``BadCommand`` for tagged command
-    ///   parse failures, ``TooMuchRecursion`` for overly nested structures.
+    ///   parse failures, ``TooMuchRecursion`` for overly nested structures, ``NoForwardProgress`` if
+    ///   parsing stopped consuming input.
+    ///
+    /// - Important: Some results consume no bytes — e.g. `.append(.endMessage)` — but never more than
+    ///   two in a row. A caller driving this in its own loop, rather than through `IMAPServerHandler`,
+    ///   should stop when results keep coming without the buffer shrinking: that is what
+    ///   `IMAPServerHandler` does, and it is the guard against a parser bug spinning forever.
     ///
     /// - SeeAlso: ``SynchronizedCommand``, [RFC 3501 Section 5](https://datatracker.ietf.org/doc/html/rfc3501#section-5)
-    public mutating func parseCommandStream(buffer: inout ByteBuffer) throws -> SynchronizedCommand? {
-        guard buffer.readableBytes > 0 else {
+    public mutating func parseCommandStream<Input: ConsumableParserInputBuffer>(
+        buffer: inout Input
+    ) throws -> SynchronizedCommand? {
+        guard buffer.count > 0 else {
             return nil
         }
 
-        let save = buffer
-        let framingResult = try self.synchronisingLiteralParser.parseContinuationsNecessary(buffer)
-        var actuallyVisible = ParseBuffer(
-            buffer.getSlice(at: buffer.readerIndex, length: framingResult.maximumValidBytes)!
-        )
-
-        func parseCommand() throws -> CommandStreamPart? {
-            do {
-                guard
-                    let command = try self.parseCommandStream0(
-                        buffer: &actuallyVisible,
-                        tracker: .makeNewDefault
-                    )
-                else {
-                    assert(
-                        framingResult.maximumValidBytes == actuallyVisible.readableBytes,
-                        "parser consumed bytes on nil: readableBytes before parse: \(framingResult.maximumValidBytes), buffer: \(actuallyVisible)"
-                    )
-                    return nil
-                }
-                // We need to discard the bytes we consumed from the real buffer.
-                let consumedBytes = framingResult.maximumValidBytes - actuallyVisible.readableBytes
-                buffer.moveReaderIndex(forwardBy: consumedBytes)
-
-                assert(
-                    buffer.writerIndex == save.writerIndex,
-                    "the writer index of the buffer moved whilst parsing which is not supported: \(buffer), \(save)"
-                )
-                assert(
-                    consumedBytes >= 0,
-                    "allegedly, we consumed a negative amount of bytes: \(consumedBytes)"
-                )
-                self.synchronisingLiteralParser.consumed(consumedBytes)
-                assert(
-                    consumedBytes <= framingResult.maximumValidBytes,
-                    "We consumed \(consumedBytes) which is more than the framing parser thought are maximally "
-                        + "valid: \(framingResult), \(self.synchronisingLiteralParser)"
-                )
-                return command
-            } catch is IncompleteMessage {
-                return nil
+        // Both passes below share one gather. Framing has to run first — it decides how much of what
+        // has arrived may be parsed at all — and it consumes nothing, so the cursor it hands back is
+        // still at the read position.
+        var framingResult: SynchronizingLiteralParser.FramingResult?
+        var consumedBytes = 0
+        let command: CommandStreamPart?
+        do {
+            command = try buffer.withParseInput(limit: .max) { input in
+                let framing = try self.synchronisingLiteralParser.parseContinuationsNecessary(input)
+                framingResult = framing
+                // `narrowLimit` is what keeps the parser from seeing past what the framing pass deemed
+                // valid. It used to be a `getSlice` of exactly those bytes, which the cursor makes
+                // unnecessary: bytes past the limit are invisible to every primitive.
+                input.narrowLimit(toNext: framing.maximumValidBytes)
+                defer { consumedBytes = input.consumed }
+                return try self.parseCommandStream0(buffer: &input, tracker: .makeNewDefault)
             }
+        } catch is IncompleteMessage {
+            command = nil
         }
 
-        if let command = try parseCommand() {
-            return SynchronizedCommand(command, numberOfSynchronisingLiterals: framingResult.synchronizingLiteralCount)
-        } else if framingResult.synchronizingLiteralCount > 0 {
-            return SynchronizedCommand(numberOfSynchronisingLiterals: framingResult.synchronizingLiteralCount)
-        } else {
-            return nil
+        // Framing ran before anything could throw `IncompleteMessage`, so its literal count is known
+        // even when no command came out of this call.
+        guard let framingResult else {
+            preconditionFailure("framing did not run")
         }
+
+        guard let command else {
+            assert(
+                consumedBytes == 0,
+                "parser consumed \(consumedBytes) bytes on nil, out of \(framingResult.maximumValidBytes)"
+            )
+            guard framingResult.synchronizingLiteralCount > 0 else { return nil }
+            return SynchronizedCommand(numberOfSynchronisingLiterals: framingResult.synchronizingLiteralCount)
+        }
+
+        assert(consumedBytes >= 0, "allegedly, we consumed a negative amount of bytes: \(consumedBytes)")
+        assert(
+            consumedBytes <= framingResult.maximumValidBytes,
+            "We consumed \(consumedBytes) which is more than the framing parser thought are maximally "
+                + "valid: \(framingResult), \(self.synchronisingLiteralParser)"
+        )
+        // Only now are the bytes gone from the caller's buffer: a call that produced nothing consumes
+        // nothing, so the same bytes are parsed again once the rest of the command arrives.
+        buffer.discardFirst(consumedBytes)
+        self.synchronisingLiteralParser.consumed(consumedBytes)
+        return SynchronizedCommand(command, numberOfSynchronisingLiterals: framingResult.synchronizingLiteralCount)
     }
 
     private mutating func parseCommandStream0(
-        buffer: inout ParseBuffer,
+        buffer: inout ParseInput,
         tracker: StackTracker
     ) throws -> CommandStreamPart? {
-        try PL.composite(buffer: &buffer, tracker: tracker) { buffer, tracker in
+        try buffer.composite(tracker: tracker) { buffer, tracker in
             switch self.mode {
             case .idle:
                 return try self.handleIdle(buffer: &buffer, tracker: tracker)
@@ -275,23 +280,23 @@ public struct CommandParser: Parser, Sendable {
     }
 
     private mutating func handleStreamingBytes(
-        buffer: inout ParseBuffer,
+        buffer: inout ParseInput,
         tracker: StackTracker,
         remaining: Int
     ) throws -> CommandStreamPart {
         assert(self.mode.isStreamingAppend)
-        let bytes = try PL.parseBytes(buffer: &buffer, tracker: tracker, upTo: remaining)
+        let bytes = try buffer.extractBuffer(upTo: remaining)
 
-        assert(bytes.readableBytes <= remaining)
-        if bytes.readableBytes == remaining {
+        assert(bytes.count <= remaining)
+        if bytes.count == remaining {
             self.mode = .streamingEnd
         } else {
-            self.mode = .streamingBytes(remaining - bytes.readableBytes)
+            self.mode = .streamingBytes(remaining - bytes.count)
         }
         return .append(.messageBytes(bytes))
     }
 
-    private mutating func handleLines(buffer: inout ParseBuffer, tracker: StackTracker) throws -> CommandStreamPart {
+    private mutating func handleLines(buffer: inout ParseInput, tracker: StackTracker) throws -> CommandStreamPart {
         // In `.lines` mode there is no `AUTHENTICATE` in progress, so a bare CRLF / unsolicited
         // base64 line must be rejected rather than misclassified as a continuation response.
         try self.parseCommandOrAppend(in: .standard, buffer: &buffer, tracker: tracker)
@@ -304,7 +309,7 @@ public struct CommandParser: Parser, Sendable {
     /// once an ordinary command or `APPEND` is parsed, since it never sees the server's tagged
     /// completion response.
     private mutating func handleAuthentication(
-        buffer: inout ParseBuffer,
+        buffer: inout ParseInput,
         tracker: StackTracker
     ) throws -> CommandStreamPart {
         try self.parseCommandOrAppend(in: .authenticating, buffer: &buffer, tracker: tracker)
@@ -318,12 +323,12 @@ public struct CommandParser: Parser, Sendable {
     /// the two.
     private mutating func parseCommandOrAppend(
         in context: CommandLineContext,
-        buffer: inout ParseBuffer,
+        buffer: inout ParseInput,
         tracker: StackTracker
     ) throws -> CommandStreamPart {
-        func parseCommand(buffer: inout ParseBuffer, tracker: StackTracker) throws -> CommandStreamPart {
+        func parseCommand(buffer: inout ParseInput, tracker: StackTracker) throws -> CommandStreamPart {
             let command = try self.parser.parseTaggedCommand(buffer: &buffer, tracker: tracker)
-            try PL.parseNewline(buffer: &buffer, tracker: tracker)
+            try buffer.matchNewline()
             switch command.command {
             case .idleStart:
                 self.mode = .idle
@@ -338,43 +343,42 @@ public struct CommandParser: Parser, Sendable {
             return .tagged(command)
         }
 
-        func parseAppend(buffer: inout ParseBuffer, tracker: StackTracker) throws -> CommandStreamPart {
+        func parseAppend(buffer: inout ParseInput, tracker: StackTracker) throws -> CommandStreamPart {
             let appendCommand = try self.parser.parseAppend(buffer: &buffer, tracker: tracker)
             self.mode = .waitingForMessage
             return appendCommand
         }
 
         func parseAuthenticationChallengeResponse(
-            buffer: inout ParseBuffer,
+            buffer: inout ParseInput,
             tracker: StackTracker
         ) throws -> CommandStreamPart {
             let authenticationChallengeResponse = try self.parser.parseBase64(buffer: &buffer, tracker: tracker)
-            try PL.parseNewline(buffer: &buffer, tracker: tracker)
+            try buffer.matchNewline()
             // Stay in `.expectingAuthenticationResponse` to support multi-round SASL exchanges.
-            return .continuationResponse(authenticationChallengeResponse)
+            // A bounded base64 blob, so this owns its bytes outright rather than pinning the input.
+            return .continuationResponse(IMAPBuffer(authenticationChallengeResponse))
         }
 
         switch context {
         case .standard:
-            return try PL.parseOneOf(
-                parseCommand,
-                parseAppend,
-                buffer: &buffer,
+            return try buffer.parseOneOf(
+                { try parseCommand(buffer: &$0, tracker: $1) },
+                { try parseAppend(buffer: &$0, tracker: $1) },
                 tracker: tracker
             )
         case .authenticating:
-            return try PL.parseOneOf(
-                parseCommand,
-                parseAppend,
-                parseAuthenticationChallengeResponse,
-                buffer: &buffer,
+            return try buffer.parseOneOf(
+                { try parseCommand(buffer: &$0, tracker: $1) },
+                { try parseAppend(buffer: &$0, tracker: $1) },
+                { try parseAuthenticationChallengeResponse(buffer: &$0, tracker: $1) },
                 tracker: tracker
             )
         }
     }
 
     private mutating func handleWaitingForMessage(
-        buffer: inout ParseBuffer,
+        buffer: inout ParseInput,
         tracker: StackTracker
     ) throws -> CommandStreamPart {
         do {
@@ -391,7 +395,7 @@ public struct CommandParser: Parser, Sendable {
         } catch is ParserError {
             let save = buffer
             do {
-                try PL.parseNewline(buffer: &buffer, tracker: tracker)
+                try buffer.matchNewline()
                 self.mode = .lines
                 return .append(.finish)
             } catch {
@@ -402,14 +406,14 @@ public struct CommandParser: Parser, Sendable {
     }
 
     private mutating func handleStreamingEnd(
-        buffer: inout ParseBuffer,
+        buffer: inout ParseInput,
         tracker: StackTracker
     ) throws -> CommandStreamPart {
         self.mode = .waitingForMessage
         return .append(.endMessage)
     }
 
-    private mutating func handleIdle(buffer: inout ParseBuffer, tracker: StackTracker) throws -> CommandStreamPart {
+    private mutating func handleIdle(buffer: inout ParseInput, tracker: StackTracker) throws -> CommandStreamPart {
         try self.parser.parseIdleDone(buffer: &buffer, tracker: tracker)
         self.mode = .lines
         return .idleDone
@@ -417,7 +421,7 @@ public struct CommandParser: Parser, Sendable {
 
     private mutating func handleCatenatePart(
         expectPrecedingSpace: Bool,
-        buffer: inout ParseBuffer,
+        buffer: inout ParseInput,
         tracker: StackTracker
     ) throws -> CommandStreamPart {
         let result = try self.parser.parseCatenatePart(
@@ -439,24 +443,24 @@ public struct CommandParser: Parser, Sendable {
     }
 
     private mutating func handleStreamingCatenateBytes(
-        buffer: inout ParseBuffer,
+        buffer: inout ParseInput,
         tracker: StackTracker,
         remaining: Int
     ) throws -> CommandStreamPart {
-        let bytes = try PL.parseBytes(buffer: &buffer, tracker: tracker, upTo: remaining)
+        let bytes = try buffer.extractBuffer(upTo: remaining)
 
-        assert(bytes.readableBytes <= remaining)
-        if bytes.readableBytes == remaining {
+        assert(bytes.count <= remaining)
+        if bytes.count == remaining {
             self.mode = .streamingCatenateEnd
         } else {
-            self.mode = .streamingCatenateBytes(remaining - bytes.readableBytes)
+            self.mode = .streamingCatenateBytes(remaining - bytes.count)
         }
 
         return .append(.catenateData(.bytes(bytes)))
     }
 
     private mutating func handleStreamingCatenateEnd(
-        buffer: inout ParseBuffer,
+        buffer: inout ParseInput,
         tracker: StackTracker
     ) throws -> CommandStreamPart {
         self.mode = .waitingForCatenatePart(seenPreviousPart: true)

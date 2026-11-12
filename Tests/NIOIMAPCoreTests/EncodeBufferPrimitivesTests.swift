@@ -12,7 +12,6 @@
 //
 //===----------------------------------------------------------------------===//
 
-import NIOCore
 @_spi(NIOIMAPInternal) @testable import NIOIMAPCore
 import Testing
 
@@ -21,7 +20,6 @@ import Testing
 struct EncodeBufferPrimitivesTests {
     private func encoded(_ write: (inout EncodeBuffer) -> Int) -> (string: String, byteCount: Int) {
         var buffer = EncodeBuffer.clientEncodeBuffer(
-            buffer: ByteBuffer(),
             options: .rfc3501,
             loggingMode: false
         )
@@ -152,12 +150,12 @@ struct LoggingModeRedactionTests {
     /// Encodes in logging mode, draining every chunk — redacted literals still mark stop points, so
     /// reading one chunk would silently truncate.
     private func redacted(_ write: (inout EncodeBuffer) -> Void) -> String {
-        var buffer = EncodeBuffer.clientEncodeBuffer(buffer: ByteBuffer(), options: .rfc3501, loggingMode: true)
+        var buffer = EncodeBuffer.clientEncodeBuffer(options: .rfc3501, loggingMode: true)
         write(&buffer)
         var bytes: [UInt8] = []
         while true {
             let chunk = buffer.nextChunk()
-            bytes.append(contentsOf: chunk.bytes.readableBytesView)
+            bytes.append(contentsOf: chunk.bytes.copiedBytes())
             guard chunk.waitForContinuation else { break }
         }
         return String(decoding: bytes, as: UTF8.self)
@@ -167,8 +165,8 @@ struct LoggingModeRedactionTests {
     func rawBytes() {
         #expect(redacted { $0.writeBytes([1, 2, 3]) } == "[3 bytes]")
         #expect(redacted { $0.writeBytes([]) } == "[0 bytes]")
-        var payload = ByteBuffer(repeating: 0, count: 4096)
-        #expect(redacted { $0.writeBuffer(&payload) } == "[4096 bytes]")
+        let payload = IMAPBuffer(Array(repeating: UInt8(0), count: 4096))
+        #expect(redacted { $0.writeBytes(payload) } == "[4096 bytes]")
     }
 
     @Test("numbers and single bytes are not redacted, because they are not payload")

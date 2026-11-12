@@ -13,7 +13,7 @@
 //===----------------------------------------------------------------------===//
 
 import NIO
-@_spi(NIOIMAPInternal) import NIOIMAPCore
+import NIOIMAPCore
 
 public struct InvalidClientState: Error {
     public init() {}
@@ -110,7 +110,7 @@ extension InvalidCommandForState: CustomStringConvertible, CustomDebugStringConv
 }
 
 struct OutgoingChunk: Equatable {
-    var bytes: ByteBuffer
+    var bytes: IMAPBufferList
     var promise: EventLoopPromise<Void>?
     var shouldSucceedPromise: Bool
 
@@ -157,30 +157,52 @@ struct ClientStateMachine {
         private var buffer: CommandEncodeBuffer
         private var promise: EventLoopPromise<Void>?
 
+        /// The chunk after the one handed out last, taken from `buffer` one early to tell whether that
+        /// one was the command's last; see ``isDrained``.
+        private var upcoming: CommandEncodeBuffer.Chunk?
+
         init(buffer: CommandEncodeBuffer, promise: EventLoopPromise<Void>?) {
             self.buffer = buffer
             self.promise = promise
+            self.upcoming = self.buffer.nextChunk()
         }
 
         mutating func drop() -> EventLoopPromise<Void>? {
             defer {
                 self.promise = nil
-                self.buffer = .init(buffer: ByteBuffer(), capabilities: .init(), loggingMode: false)
+                self.buffer = .init(capabilities: .init(), loggingMode: false)
+                self.upcoming = nil
             }
             return self.promise
         }
 
-        mutating func nextChunk() -> OutgoingChunk {
-            let chunk = self.buffer.buffer.nextChunk()
-            let promise = self.promise
-            return .init(bytes: chunk.bytes, promise: promise, shouldSucceedPromise: !chunk.waitForContinuation)
+        /// Whether every chunk has been handed out. A chunk that awaits `+` may still be the last,
+        /// e.g. APPEND's `{5}\r\n` before the message bytes.
+        var isDrained: Bool { self.upcoming == nil }
+
+        /// The command's next chunk, and what the client does after sending it. Writing a chunk that
+        /// proceeds completes the promise.
+        ///
+        /// A command without bytes, e.g. APPEND's `.endMessage`, gives one empty chunk, so that its
+        /// promise completes too.
+        mutating func nextChunk() -> (chunk: OutgoingChunk, nextStep: CommandEncodeBuffer.NextStep) {
+            let current = self.upcoming
+            self.upcoming = self.buffer.nextChunk()
+            let nextStep = current?.nextStep ?? .proceed
+            let chunk = OutgoingChunk(
+                bytes: current?.bytes ?? IMAPBufferList(),
+                promise: self.promise,
+                shouldSucceedPromise: nextStep == .proceed
+            )
+            return (chunk, nextStep)
         }
 
         static func == (
             lhs: ClientStateMachine.ActiveEncodeContext,
             rhs: ClientStateMachine.ActiveEncodeContext
         ) -> Bool {
-            lhs.buffer == rhs.buffer && lhs.promise?.futureResult == rhs.promise?.futureResult
+            lhs.buffer == rhs.buffer && lhs.upcoming == rhs.upcoming
+                && lhs.promise?.futureResult == rhs.promise?.futureResult
         }
     }
 
@@ -211,7 +233,8 @@ struct ClientStateMachine {
         case appending(ClientStateMachine.Append)
 
         /// An append part holds a synchronizing literal before its end, e.g. the mailbox in
-        /// `A1 APPEND {2}\r\nå`. Waiting for `+` before sending the rest of the part.
+        /// `A1 APPEND {2}\r\nå`. Waiting for `+` before sending the rest of the part. Also a
+        /// zero-length literal that ends the part, e.g. an empty mailbox as `{0}\r\n`.
         case appendingLiteral(ClientStateMachine.Append, ActiveEncodeContext)
 
         /// We've sent a command that requires a continuation request
@@ -229,7 +252,12 @@ struct ClientStateMachine {
 
     var state: State = .expectingNormalResponse
     private var activeCommandTags: Set<Command.Tag> = []
-    private var allocator: ByteBufferAllocator!
+    /// The channel's allocator.
+    ///
+    /// Nothing reads it while commands are encoded into an `IMAPOutputBuffer`, which allocates its own
+    /// segments. It is kept because the other shipped sink — `ByteBufferOutput` — needs one, and which
+    /// of the two belongs here is a question the benchmarks answer differently for different traffic.
+    private var allocator = ByteBufferAllocator()
 
     // We mark where we should write up to at the next opportunity
     // using the `flush` method called from the channel handler.
@@ -473,13 +501,12 @@ extension ClientStateMachine {
         guard case .appendingLiteral(let appendingStateMachine, var context) = self.state else {
             preconditionFailure("Invalid state: \(self.state)")
         }
-        let chunk = context.nextChunk()
-        guard chunk.shouldSucceedPromise else {
+        let (next, nextStep) = context.nextChunk()
+        let chunk = self.handOutAppendChunk(next, nextStep, context: context, append: appendingStateMachine)
+        guard case .appending = self.state else {
             // Another literal in the same part.
-            self.state = .appendingLiteral(appendingStateMachine, context)
             return .sendChunks([chunk])
         }
-        self.state = .appending(appendingStateMachine)
         // Promises dequeued before a throw are never completed; see #858.
         return try .sendChunks([chunk] + self.extractSendableChunks().chunks)
     }
@@ -515,10 +542,10 @@ extension ClientStateMachine {
         switch request {
         case .responseText:
             // no valid base 64, so we can assume it was empty
-            try authenticatingStateMachine.receiveContinuationRequest(.data(ByteBuffer()))
+            try authenticatingStateMachine.receiveContinuationRequest(.data([]))
             self.state = .authenticating(authenticatingStateMachine)
-        case .data(let byteBuffer):
-            try authenticatingStateMachine.receiveContinuationRequest(.data(byteBuffer))
+        case .data(let bytes):
+            try authenticatingStateMachine.receiveContinuationRequest(.data(bytes))
             self.state = .authenticating(authenticatingStateMachine)
         }
         return .fireAuthenticationChallenge
@@ -575,20 +602,20 @@ extension ClientStateMachine {
             // instead of failing the connection; see #858.
             self.guardAgainstMultipleRunningCommands()
             self.state = .idle(Idle(tag: command.tag))
-            return .init(chunks: [context.nextChunk()], nextContext: nil)
+            return .init(chunks: [context.nextChunk().chunk], nextContext: nil)
         case .authenticate:
             self.guardAgainstMultipleRunningCommands()
             self.state = .authenticating(Authentication())
-            return .init(chunks: [context.nextChunk()], nextContext: nil)
+            return .init(chunks: [context.nextChunk().chunk], nextContext: nil)
         default:
-            let chunk = context.nextChunk()
+            let chunk = context.nextChunk().chunk
 
             // if we're meant to succeed the promise then there can't be any next context
             guard chunk.shouldSucceedPromise else {
                 self.state = .expectingLiteralContinuationRequest(context)
                 return .init(chunks: [chunk], nextContext: context)
             }
-            precondition(context.nextChunk().bytes.readableBytes == 0)
+            assert(context.isDrained)
             self.state = .expectingNormalResponse
             return .init(chunks: [chunk], nextContext: nil)
         }
@@ -606,13 +633,43 @@ extension ClientStateMachine {
         }
 
         // no other commands can be running when we start appending
-        let append = Append(tag: tag)
         let buffer = self.makeEncodeBuffer(.append(command))
         var context = ActiveEncodeContext(buffer: buffer, promise: promise)
-        let chunk = context.nextChunk()
-        // A mailbox sent as a synchronizing literal: the rest of the part follows `+`.
-        self.state = chunk.shouldSucceedPromise ? .appending(append) : .appendingLiteral(append, context)
-        return .init(chunks: [chunk], nextContext: nil)
+        let (chunk, nextStep) = context.nextChunk()
+        return .init(
+            chunks: [self.handOutAppendChunk(chunk, nextStep, context: context, append: Append(tag: tag))],
+            nextContext: nil
+        )
+    }
+
+    /// Moves to the state that follows `chunk`, just taken from an APPEND part's `context`, and
+    /// returns the chunk to write.
+    private mutating func handOutAppendChunk(
+        _ chunk: OutgoingChunk,
+        _ nextStep: CommandEncodeBuffer.NextStep,
+        context: ActiveEncodeContext,
+        append: Append
+    ) -> OutgoingChunk {
+        switch nextStep {
+        case .proceed:
+            self.state = .appending(append)
+            return chunk
+        case .awaitContinuationRequest:
+            guard context.isDrained, append.isWaitingForContinuationRequest else {
+                // A literal before the part's end, e.g. the mailbox in `A1 APPEND {2}\r\nå`: the rest
+                // of the part follows `+`. Or one ending the part that `append` doesn't expect, e.g. an
+                // empty mailbox as `{0}\r\n`: the next part still waits for `+`, and the empty chunk
+                // after it completes the promise.
+                self.state = .appendingLiteral(append, context)
+                return chunk
+            }
+            // The part ends in the message's or CATENATE data's literal header (`beginMessage`,
+            // `catenateData(.begin)`): it is fully sent, and `append` waits for that `+`.
+            self.state = .appending(append)
+            var sent = chunk
+            sent.shouldSucceedPromise = true
+            return sent
+        }
     }
 
     /// Iterate through the current command queue until we reached the marked position
@@ -626,7 +683,7 @@ extension ClientStateMachine {
     private mutating func extractSendableChunks(currentContext: ActiveEncodeContext? = nil) throws -> SendableChunks {
         var results: [OutgoingChunk] = []
         if var currentContext = currentContext {
-            let chunk = currentContext.nextChunk()
+            let chunk = currentContext.nextChunk().chunk
             guard chunk.shouldSucceedPromise else {
                 self.state = .expectingLiteralContinuationRequest(currentContext)
                 return .init(chunks: [chunk], nextContext: currentContext)
@@ -650,10 +707,10 @@ extension ClientStateMachine {
         precondition(self.activeCommandTags.count == 1)
     }
 
+    // Default sink, `IMAPOutputBuffer`, on purpose: `ByteBufferOutput` would hand the channel slices
+    // rather than copies, but it measured no faster on commands. See its doc comment.
     private func makeEncodeBuffer(_ command: CommandStreamPart? = nil) -> CommandEncodeBuffer {
-        let byteBuffer = self.allocator.buffer(capacity: 128)
         var encodeBuffer = CommandEncodeBuffer(
-            buffer: byteBuffer,
             options: self.encodingOptions.encodingOptions,
             loggingMode: false
         )
@@ -749,13 +806,10 @@ extension ClientStateMachine {
 
         idleStateMachine.sendCommand(command)
         self.state = .expectingNormalResponse
-        var encodeBuffer = self.makeEncodeBuffer(command)
-        let chunk = encodeBuffer.buffer.nextChunk()
-        precondition(!chunk.waitForContinuation)
-        return .init(
-            chunks: [.init(bytes: chunk.bytes, promise: promise, shouldSucceedPromise: true)],
-            nextContext: nil
-        )
+        var context = ActiveEncodeContext(buffer: self.makeEncodeBuffer(command), promise: promise)
+        let (chunk, nextStep) = context.nextChunk()
+        precondition(chunk.shouldSucceedPromise && nextStep == .proceed)
+        return .init(chunks: [chunk], nextContext: nil)
     }
 
     /// When authenticating we need to first defer to the authentication state machine to make sure
@@ -774,13 +828,10 @@ extension ClientStateMachine {
 
         authenticatingStateMachine.sendCommand(command)
         self.state = .authenticating(authenticatingStateMachine)
-        var encodeBuffer = self.makeEncodeBuffer(.continuationResponse(data))
-        let chunk = encodeBuffer.buffer.nextChunk()
-        precondition(!chunk.waitForContinuation)
-        return .init(
-            chunks: [.init(bytes: chunk.bytes, promise: promise, shouldSucceedPromise: true)],
-            nextContext: nil
-        )
+        var context = ActiveEncodeContext(buffer: self.makeEncodeBuffer(.continuationResponse(data)), promise: promise)
+        let (chunk, nextStep) = context.nextChunk()
+        precondition(chunk.shouldSucceedPromise && nextStep == .proceed)
+        return .init(chunks: [chunk], nextContext: nil)
     }
 
     /// When appending we need to first defer to the appending state machine to see if we can actually
@@ -812,7 +863,6 @@ extension ClientStateMachine {
         encodingOptions.useNonSynchronizingLiteralMinus = false
 
         var encodeBuffer = CommandEncodeBuffer(
-            buffer: ByteBuffer(),
             options: encodingOptions,
             encodedAtLeastOneCatenateElement: appendingStateMachine.hasCatenatedAtLeastOneObject,
             loggingMode: false
@@ -821,16 +871,10 @@ extension ClientStateMachine {
 
         appendingStateMachine.sendCommand(.append(command))
         var context = ActiveEncodeContext(buffer: encodeBuffer, promise: promise)
-        let chunk = context.nextChunk()
-
-        // A literal before the part's end, e.g. `URL {90}\r\n` and then the URL: send the rest
-        // after `+`. A part that ends in its own literal header (`beginMessage`,
-        // `catenateData(.begin)`) is fully sent; `appendingStateMachine` waits for that `+`.
-        guard chunk.shouldSucceedPromise else {
-            self.state = .appendingLiteral(appendingStateMachine, context)
-            return .init(chunks: [chunk], nextContext: nil)
-        }
-        self.state = .appending(appendingStateMachine)
-        return .init(chunks: [chunk], nextContext: nil)
+        let (chunk, nextStep) = context.nextChunk()
+        return .init(
+            chunks: [self.handOutAppendChunk(chunk, nextStep, context: context, append: appendingStateMachine)],
+            nextContext: nil
+        )
     }
 }

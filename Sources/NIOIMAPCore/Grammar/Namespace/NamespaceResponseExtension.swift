@@ -12,14 +12,13 @@
 //
 //===----------------------------------------------------------------------===//
 
-import struct NIO.ByteBuffer
 import struct OrderedCollections.OrderedDictionary
 
 // MARK: - Encoding
 
 extension EncodeBuffer {
     @discardableResult mutating func writeNamespaceResponseExtensions(
-        _ extensions: OrderedDictionary<ByteBuffer, [ByteBuffer]>
+        _ extensions: OrderedDictionary<[UInt8], [[UInt8]]>
     ) -> Int {
         extensions.reduce(into: 0) { (res, ext) in
             res +=

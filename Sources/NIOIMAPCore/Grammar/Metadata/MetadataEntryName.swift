@@ -12,8 +12,6 @@
 //
 //===----------------------------------------------------------------------===//
 
-import NIO
-
 /// A metadata entry name used with `GETMETADATA` and `SETMETADATA` commands (RFC 5464).
 ///
 /// **Requires server capability:** ``Capability/metadata`` or ``Capability/metadataServer``
@@ -43,12 +41,12 @@ import NIO
 ///
 /// - SeeAlso: [RFC 5464 Section 3.2.1](https://datatracker.ietf.org/doc/html/rfc5464#section-3.2.1)
 public struct MetadataEntryName: Hashable, Sendable {
-    fileprivate var backing: ByteBuffer
+    fileprivate var backing: [UInt8]
 
-    /// Creates a `MetadataEntryName` from a `ByteBuffer`.
+    /// Creates a `MetadataEntryName` from a `[UInt8]`.
     ///
-    /// - parameter buffer: The raw `ByteBuffer` containing the entry name bytes.
-    public init(_ buffer: ByteBuffer) {
+    /// - parameter buffer: The raw `[UInt8]` containing the entry name bytes.
+    public init(_ buffer: [UInt8]) {
         self.backing = buffer
     }
 
@@ -56,7 +54,7 @@ public struct MetadataEntryName: Hashable, Sendable {
     ///
     /// - parameter string: The entry name as a string (for example, `"/shared/comment"` or `"/private/notes"`).
     public init(_ string: String) {
-        self.backing = ByteBuffer(string: string)
+        self.backing = Array(string.utf8)
     }
 }
 
@@ -65,7 +63,7 @@ extension String {
     ///
     /// - parameter metadataEntryName: The entry name to convert.
     public init(_ metadataEntryName: MetadataEntryName) {
-        self = String(buffer: metadataEntryName.backing)
+        self = String(decoding: metadataEntryName.backing, as: UTF8.self)
     }
 }
 
@@ -73,6 +71,6 @@ extension MetadataEntryName: ExpressibleByStringLiteral {
     public typealias StringLiteralType = String
 
     public init(stringLiteral value: String) {
-        self.backing = ByteBuffer(string: value)
+        self.backing = Array(value.utf8)
     }
 }

@@ -12,7 +12,6 @@
 //
 //===----------------------------------------------------------------------===//
 
-import struct NIO.ByteBuffer
 import struct OrderedCollections.OrderedDictionary
 
 /// Information about a mailbox returned by a `LIST` command.
@@ -65,7 +64,7 @@ public struct MailboxInfo: Hashable, Sendable {
     /// This dictionary provides forward compatibility for new mailbox parameters added
     /// by future IMAP extensions beyond those standardized in RFC 3501. Extended data items
     /// that the library models, such as ``objectID``, are not included.
-    public var extensions: OrderedDictionary<ByteBuffer, ParameterValue>
+    public var extensions: OrderedDictionary<[UInt8], ParameterValue>
 
     /// Creates a new mailbox information record.
     ///
@@ -77,7 +76,7 @@ public struct MailboxInfo: Hashable, Sendable {
         attributes: [Attribute] = [],
         path: MailboxPath,
         objectID: CompoundObjectID? = nil,
-        extensions: OrderedDictionary<ByteBuffer, ParameterValue>
+        extensions: OrderedDictionary<[UInt8], ParameterValue>
     ) {
         self.attributes = attributes
         self.path = path
@@ -309,7 +308,7 @@ extension EncodeBuffer {
     // The modeled `OBJECTID` item is written first, followed by the remaining items.
     @discardableResult mutating func writeMailboxListExtended(
         objectID: CompoundObjectID?,
-        extensions: OrderedDictionary<ByteBuffer, ParameterValue>
+        extensions: OrderedDictionary<[UInt8], ParameterValue>
     ) -> Int {
         var written = self.writeString("(")
         if let objectID {

@@ -12,8 +12,6 @@
 //
 //===----------------------------------------------------------------------===//
 
-import struct NIO.ByteBuffer
-
 /// An RFC 2822 electronic mail address with structured components.
 ///
 /// Represents an address as returned in the `ENVELOPE` structure of a `FETCH` response.
@@ -35,23 +33,23 @@ import struct NIO.ByteBuffer
 /// - SeeAlso: [RFC 3501 Section 7.4.2](https://datatracker.ietf.org/doc/html/rfc3501#section-7.4.2)
 public struct EmailAddress: Hashable, Sendable {
     /// The addressee's personal name (may be an alias).
-    public var personName: ByteBuffer?
+    public var personName: [UInt8]?
 
     /// The SMTP at-domain-list (source-root).
-    public var sourceRoot: ByteBuffer?
+    public var sourceRoot: [UInt8]?
 
     /// The mailbox containing the message.
-    public var mailbox: ByteBuffer?
+    public var mailbox: [UInt8]?
 
     /// The host name of the server that sent the message.
-    public var host: ByteBuffer?
+    public var host: [UInt8]?
 
     /// Creates a new `EmailAddress`.
     /// - parameter personName: The addressee's personal name (may be an alias).
     /// - parameter sourceRoot: The SMTP at-domain-list (source-root).
     /// - parameter mailbox: The mailbox the message.
     /// - parameter host: The host name of the server that sent the message.
-    public init(personName: ByteBuffer?, sourceRoot: ByteBuffer?, mailbox: ByteBuffer?, host: ByteBuffer?) {
+    public init(personName: [UInt8]?, sourceRoot: [UInt8]?, mailbox: [UInt8]?, host: [UInt8]?) {
         self.personName = personName
         self.sourceRoot = sourceRoot
         self.mailbox = mailbox

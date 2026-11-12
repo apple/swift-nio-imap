@@ -12,7 +12,6 @@
 //
 //===----------------------------------------------------------------------===//
 
-import NIO
 @_spi(NIOIMAPInternal) @testable import NIOIMAPCore
 import Testing
 
@@ -124,8 +123,9 @@ struct CharacterSetNameTests {
     /// `==` ignores case, so round-trip tests can't catch a parser that changes it.
     @Test("parsing keeps case", arguments: [("utf-8", "utf-8"), (#""utf-8 x""#, "utf-8 x")])
     func parseKeepsCase(_ input: String, _ expected: String) throws {
-        var buffer = ParseBuffer(ByteBuffer(string: input + " "))
-        let parsed = try GrammarParser().parseCharset(buffer: &buffer, tracker: .testTracker)
+        let parsed = try TestUtilities.withParseInput(for: input + " ") { input in
+            try GrammarParser().parseCharset(buffer: &input, tracker: .testTracker)
+        }
         #expect(String(parsed) == expected)
     }
 
@@ -156,27 +156,31 @@ private let validNameStrings = [
 
 /// Encodes `command` (client mode), parses the bytes back, and expects the original command.
 private func expectCommandRoundTrip(_ command: Command, sourceLocation: SourceLocation = #_sourceLocation) {
-    var encodeBuffer = CommandEncodeBuffer(buffer: ByteBuffer(), options: CommandEncodingOptions(), loggingMode: false)
+    var encodeBuffer = CommandEncodeBuffer(options: CommandEncodingOptions(), loggingMode: false)
     _ = encodeBuffer.writeCommand(command)
-    var encoded = ByteBuffer()
+    var encoded: [UInt8] = []
     var remaining = encodeBuffer.buffer
     while true {
         let chunk = remaining.nextChunk()
-        var bytes = chunk.bytes
-        encoded.writeBuffer(&bytes)
+        encoded.append(contentsOf: chunk.bytes.copiedBytes())
         if !chunk.waitForContinuation { break }
     }
-    encoded.writeString("\r")
-    let encodedString = String(buffer: encoded)
-    var parseBuffer = ParseBuffer(encoded)
+    encoded.append(UInt8(ascii: "\r"))
+    let encodedString = String(decoding: encoded, as: UTF8.self)
     do {
-        let parsed = try GrammarParser().parseCommand(buffer: &parseBuffer, tracker: .testTracker)
-        #expect(parsed == command, "Encoded as \(String(reflecting: encodedString))", sourceLocation: sourceLocation)
-        #expect(
-            parseBuffer.readableBytes == 1,
-            "Trailing bytes in \(String(reflecting: encodedString))",
-            sourceLocation: sourceLocation
-        )
+        try encoded.withParseInput(limit: .max) { input in
+            let parsed = try GrammarParser().parseCommand(buffer: &input, tracker: .testTracker)
+            #expect(
+                parsed == command,
+                "Encoded as \(String(reflecting: encodedString))",
+                sourceLocation: sourceLocation
+            )
+            #expect(
+                input.remaining == 1,
+                "Trailing bytes in \(String(reflecting: encodedString))",
+                sourceLocation: sourceLocation
+            )
+        }
     } catch {
         Issue.record("Failed to parse \(String(reflecting: encodedString)): \(error)", sourceLocation: sourceLocation)
     }

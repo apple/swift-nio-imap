@@ -18,13 +18,25 @@ import IMAPCorpus
 import NIO
 import NIOIMAP
 
-// What it costs a client whose transport is `DispatchData` in both directions — a `DispatchIO` or
-// Network.framework client. See `DispatchClient.swift` for what the client does, and why it is the
-// best client the API allows.
+// What the buffer migration is worth to a client whose transport is `DispatchData` in both directions
+// — a `DispatchIO` or Network.framework client, which is the second backing the whole abstraction
+// exists for and the one with no measurement at all until now.
+//
+// Every case here runs twice, against two libraries, from one set of case names:
+//
+//     IMAP_IMPL=main swift package … benchmark baseline update main   --filter 'dispatch-client.*'
+//                    swift package … benchmark baseline update branch --filter 'dispatch-client.*'
+//                    swift package … benchmark baseline compare main branch --filter 'dispatch-client.*'
+//
+// `dev/compare-dispatch-client.sh` runs exactly that. See `DispatchClient.swift` for what each side
+// does and for the two caveats that bound the result — chiefly that the `main` side is the best client
+// that API allows, which makes every difference a floor rather than an estimate.
 //
 // Read the allocation counters, not the wall clock. `mallocBytesCount` is the stand-in for "bytes
 // copied", and it is what the paired 1 MB / 4 MB cases are for: a copying implementation's allocated
-// bytes scale with the payload, a zero-copy one's do not.
+// bytes scale with the payload, a zero-copy one's do not. The wall clock here is additionally
+// suspect because donated segments are freed asynchronously on a background queue, so a case's time
+// depends on how much destruction the queue is still retiring from the case before it.
 let benchmarks: @Sendable () -> Void = {
     let thresholds: [BenchmarkMetric: BenchmarkThresholds] = [
         .wallClock: .relaxed,
@@ -58,6 +70,16 @@ let benchmarks: @Sendable () -> Void = {
     // dereferences, so a thread already inside the hook calls through NULL: `EXC_BAD_ACCESS` at `0x0`.
     // Upstream race in ordo-one/benchmark 1.36.2; not requesting the metrics means the hook is never
     // installed.
+    //
+    // `DispatchClient+Current` donates every large region, and `DispatchData` frees adopted memory on a
+    // background queue, the thread the race fires on (`com.apple.root.default-qos`; this target hit it
+    // once in roughly six runs while these cases still asked for ARC metrics). How many of a chunk's
+    // releases land inside the measured region depends on how far that queue has got:
+    // `encode.responses.session` reported retain deltas of 38 and 58 across two runs of the same binary
+    // with identical allocation counters. Gating that gates noise, and quoting it in a before/after would
+    // be quoting the scheduler. The allocation counters stay; an asynchronous `free` cannot change how
+    // many times something was allocated. `encode.dispatch.*` in `IMAPEncoding` has the same treatment;
+    // see the long note there.
     let encodeMetrics: [BenchmarkMetric] = [
         .wallClock,
         .throughput,
@@ -78,7 +100,8 @@ let benchmarks: @Sendable () -> Void = {
         thresholds: encodeThresholds
     )
 
-    // Corpora, built here at registration time. All of them are wire bytes.
+    // Corpora, built here at registration time. All of them are wire bytes, so both configurations
+    // are fed byte-identical input.
     let sweepMessageCount = ResponseCorpus.defaultMessageCount
     let sweep = ResponseCorpus.sweepBytes(messageCount: sweepMessageCount)
     let session = ResponseCorpus.sessionBytes()
@@ -89,8 +112,10 @@ let benchmarks: @Sendable () -> Void = {
 
     // MARK: Corpus checks
 
-    // Outside any measured region: a corpus that stops parsing, or parses to something else, shows up
-    // here rather than as an unexplained difference in the numbers.
+    // Outside any measured region, and worth more here than in the other suites: this target is
+    // compiled twice against two libraries, so "the corpus parses, and parses to the same thing" is
+    // the property that makes the two runs comparable at all. A drift shows up here rather than as an
+    // unexplained difference in the numbers.
     do {
         let sweepEvents = try! DispatchClient.receiveResponses(DispatchClient.reads(sweep, ofSize: ReadSize.mtu)) {
             _ in
@@ -106,12 +131,15 @@ let benchmarks: @Sendable () -> Void = {
             "parsed \(commands.count) commands from \(ClientCommandCorpus.lines.count) corpus lines"
         )
 
-        // How payloads are delivered, asserted rather than assumed. See `checkPayloadDelivery`.
+        // The zero-copy claim, asserted rather than assumed — in both configurations, each against its
+        // own expectation. See `checkPayloadDelivery` in either driver half.
         let literalReads = DispatchClient.reads(
             ResponseCorpus.literalFetchBytes(byteCount: 1_024 * 1_024),
             ofSize: ReadSize.mtu
         )
         DispatchClient.checkPayloadDelivery(literalReads)
+
+        print("// dispatch-client: measuring \(DispatchClient.implementation)")
     }
 
     // MARK: - Reading
@@ -128,7 +156,7 @@ let benchmarks: @Sendable () -> Void = {
     }
 
     // One read holding everything: the floor the read-size sweep below is measured against, and the
-    // only shape in which the accumulator never compacts.
+    // only shape in which the `main` side never compacts.
     do {
         let reads = DispatchClient.reads(sweep, ofSize: sweep.readableBytes)
         Benchmark("dispatch-client.parse.sweep.\(sweepMessageCount).contiguous") { benchmark in
@@ -138,8 +166,11 @@ let benchmarks: @Sendable () -> Void = {
         }
     }
 
-    // ~70-byte responses across the read sizes a socket delivers. The client pays a copy per received
-    // byte and a memmove per half-buffer, both of which get relatively cheaper as reads get larger.
+    // ~70-byte responses across the read sizes a socket delivers. This is the axis where the two
+    // implementations differ structurally: the `main` side pays a copy per received byte and a
+    // memmove per half-buffer, both of which get relatively cheaper as reads get larger, while this
+    // side pays a box and a few retains per read, which gets cheaper too. Whether the gap narrows or
+    // widens is the thing the sweep answers.
     for readSize in ReadSize.sweep {
         let reads = DispatchClient.reads(sweep, ofSize: readSize)
         Benchmark("dispatch-client.parse.sweep.\(sweepMessageCount).read-\(readSize)") { benchmark in
@@ -150,7 +181,8 @@ let benchmarks: @Sendable () -> Void = {
     }
 
     // ~1.4 KB responses, so at MTU reads nearly every message straddles a read boundary — the case
-    // where read size costs the most, and the most expensive grammar a client parses per message.
+    // that made read size look expensive on the `ByteBuffer` side, and the most expensive grammar a
+    // client parses per message.
     for readSize in [ReadSize.mtu, 65_536] {
         let reads = DispatchClient.reads(bodyStructures, ofSize: readSize)
         Benchmark("dispatch-client.parse.bodystructure.\(bodyStructureMessageCount).read-\(readSize)") { benchmark in
@@ -160,9 +192,10 @@ let benchmarks: @Sendable () -> Void = {
         }
     }
 
-    // The payload path: a client fetching a message body. `mallocBytesCount` is the number to read. It
-    // scales with the payload, because the bytes are copied into the accumulator and copied again out
-    // of it.
+    // The payload path, and the case the migration was built for: a client fetching a message body.
+    // `mallocBytesCount` is the number to read. On `main` it scales with the payload — the bytes are
+    // copied into the accumulator and copied again out of it — and here it should not, because the
+    // payload is delivered as a reference to the received region.
     for payloadSize in [1_024 * 1_024, 4 * 1_024 * 1_024] {
         let label = "\(payloadSize / (1_024 * 1_024))MB"
         let corpus = ResponseCorpus.literalFetchBytes(byteCount: payloadSize)
@@ -179,7 +212,10 @@ let benchmarks: @Sendable () -> Void = {
 
     // MARK: - Writing
 
-    // Every command a client sends in volume, encoded and handed to the transport. Many small writes.
+    // Every command a client sends in volume, encoded and handed to the transport. Many small writes,
+    // which is the traffic shape where the segment sink was measured to beat writing into a
+    // `ByteBuffer`; the conversion at the end is where it wins again, by donating large regions and
+    // copying each run of short ones once.
     Benchmark("dispatch-client.encode.commands.all", configuration: encodeConfiguration) { benchmark in
         for _ in benchmark.scaledIterations {
             blackHole(DispatchClient.sendCommands(commands) { blackHole($0) })
@@ -207,10 +243,11 @@ let benchmarks: @Sendable () -> Void = {
         }
     }
 
-    // `APPEND` of a payload the caller already holds. The write-side twin of the literal cases: the
-    // bytes are copied twice on the way to the transport, so `mallocBytesCount` scales with the
-    // payload. The parts are built once, outside the measured region, so that this is about encoding
-    // rather than about getting a caller's array into the model — see `appendParts(payload:)`.
+    // `APPEND` of a payload the caller already holds. The write-side twin of the literal cases: on
+    // `main` the bytes are copied twice on the way to the transport, and here they are copied not at
+    // all, so `mallocBytesCount` should stop scaling with the payload. The parts are built once,
+    // outside the measured region, so that this is about encoding rather than about how each version
+    // gets a caller's array into its model — see `appendParts(payload:)` in either driver half.
     for payloadSize in [1_024 * 1_024, 4 * 1_024 * 1_024] {
         let payload = [UInt8](repeating: UInt8(ascii: "x"), count: payloadSize)
         let parts = DispatchClient.appendParts(payload: payload)

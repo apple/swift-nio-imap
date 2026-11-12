@@ -12,8 +12,6 @@
 //
 //===----------------------------------------------------------------------===//
 
-import struct NIO.ByteBuffer
-
 /// Encodes and decodes modified UTF-7 as used in IMAP mailbox names.
 ///
 /// IMAP defines a modified version of UTF-7 encoding in RFC 3501 Section 5.1.3 for
@@ -53,8 +51,8 @@ public enum ModifiedUTF7: Sendable {
     ///
     /// Typically indicates the encoded data is corrupted or uses invalid UTF-7 sequences.
     public struct EncodingRoundtripError: Error {
-        /// The buffer that failed to roundtrip.
-        public var buffer: ByteBuffer
+        /// The bytes that failed to roundtrip.
+        public var bytes: [UInt8]
     }
 
     /// Encodes a `String` into modified UTF-7 bytes for use as an IMAP mailbox name.
@@ -64,11 +62,11 @@ public enum ModifiedUTF7: Sendable {
     /// escape character.
     ///
     /// - Parameter string: The Unicode string to encode.
-    /// - Returns: A `ByteBuffer` containing modified UTF-7 bytes.
+    /// - Returns: The modified UTF-7 bytes.
     ///
     /// - SeeAlso: [RFC 3501 Section 5.1.3](https://datatracker.ietf.org/doc/html/rfc3501#section-5.1.3)
-    static func encode(_ string: String) -> ByteBuffer {
-        var buffer = ByteBuffer()
+    static func encode(_ string: String) -> [UInt8] {
+        var buffer: [UInt8] = []
         buffer.reserveCapacity(string.utf8.count)
 
         var index = string.startIndex
@@ -77,9 +75,9 @@ public enum ModifiedUTF7: Sendable {
 
             // check if it's a simple character that can be copied straight in
             if let asciiValue = char.asciiValue, asciiValue > 0x1F, asciiValue < 0x7F {
-                buffer.writeInteger(asciiValue)
+                buffer.append(asciiValue)
                 if asciiValue == UInt8(ascii: "&") {
-                    buffer.writeInteger(UInt8(ascii: "-"))
+                    buffer.append(UInt8(ascii: "-"))
                 }
                 index = string.index(after: index)
             } else {
@@ -101,34 +99,40 @@ public enum ModifiedUTF7: Sendable {
                 // convert the buffer to base64
                 let b64 = Base64.encodeBytes(bytes: specials).map { $0 == UInt8(ascii: "/") ? UInt8(ascii: ",") : $0 }
                     .filter { $0 != UInt8(ascii: "=") }
-                buffer.writeInteger(UInt8(ascii: "&"))
-                buffer.writeBytes(b64)
-                buffer.writeInteger(UInt8(ascii: "-"))
+                buffer.append(UInt8(ascii: "&"))
+                buffer.append(contentsOf: b64)
+                buffer.append(UInt8(ascii: "-"))
             }
         }
 
         return buffer
     }
 
-    /// Decodes a `ByteBuffer` containing UTF-7 bytes into a `String`
-    /// - parameter buffer: The bytes to decode.
-    /// - throws: An `OddByteCountError` if `buffer` contains an off number of bytes.
+    /// Decodes UTF-7 bytes into a `String`
+    /// - parameter bytes: The bytes to decode.
+    /// - throws: An `OddByteCountError` if `bytes` contains an odd number of bytes.
     /// - returns: A `String` that can be used to, for example, display to a user.
-    static func decode(_ buffer: ByteBuffer) throws -> String {
+    static func decode(_ bytes: [UInt8]) throws -> String {
         var string = ""
-        string.reserveCapacity(buffer.readableBytes)
+        string.reserveCapacity(bytes.count)
 
-        var buffer = buffer
-        while let byte = buffer.readInteger(as: UInt8.self) {
+        var index = bytes.startIndex
+        func next() -> UInt8? {
+            guard index < bytes.endIndex else { return nil }
+            defer { index += 1 }
+            return bytes[index]
+        }
+
+        while let byte = next() {
             if byte == UInt8(ascii: "&") {
                 // check if the string is &-, if so then ignore the -
-                if buffer.getInteger(at: buffer.readerIndex, as: UInt8.self) == UInt8(ascii: "-") {
-                    buffer.moveReaderIndex(forwardBy: 1)
+                if index < bytes.endIndex, bytes[index] == UInt8(ascii: "-") {
+                    index += 1
                     string.append("&")
                 } else {
                     // get all the specials until we return to normal non-base64
                     var specials: [UInt8] = []
-                    while let byte = buffer.readInteger(as: UInt8.self) {
+                    while let byte = next() {
                         if byte == UInt8(ascii: "-") {
                             break
                         } else if byte == UInt8(ascii: ",") {
@@ -164,14 +168,14 @@ public enum ModifiedUTF7: Sendable {
 }
 
 extension ModifiedUTF7 {
-    /// Checks that a given ByteBuffer can rountrip through IMAP's UTF-7 encoding.
-    /// - parameter buffer: The `ByteBuffer` to roundtrip.
+    /// Checks that the given bytes can roundtrip through IMAP's UTF-7 encoding.
+    /// - parameter bytes: The bytes to roundtrip.
     /// - throws: An `EncodingRoundtripError` if round-tripping was not successful.
-    static func validate(_ buffer: ByteBuffer) throws {
-        let decoded = try self.decode(buffer)
+    static func validate(_ bytes: [UInt8]) throws {
+        let decoded = try self.decode(bytes)
         let encoded = self.encode(decoded)
-        guard encoded == buffer else {
-            throw EncodingRoundtripError(buffer: buffer)
+        guard encoded == bytes else {
+            throw EncodingRoundtripError(bytes: bytes)
         }
     }
 }

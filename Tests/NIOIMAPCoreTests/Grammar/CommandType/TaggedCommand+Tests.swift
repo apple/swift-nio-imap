@@ -12,7 +12,6 @@
 //
 //===----------------------------------------------------------------------===//
 
-import NIO
 @_spi(NIOIMAPInternal) @testable import NIOIMAPCore
 import Testing
 
@@ -55,31 +54,35 @@ struct TaggedCommandTests {
 
     @Test("parse tagged command throws bad command") func parseTaggedCommandThrowsBadCommand() {
         // Test that the parser error occurs when parsing the command name
-        var buffer1 = TestUtilities.makeParseBuffer(for: "A1 ()\r\n")
-        do {
-            _ = try GrammarParser().parseTaggedCommand(buffer: &buffer1, tracker: .testTracker)
-            Issue.record("Expected BadCommand error to be thrown")
-        } catch let error as BadCommand {
-            #expect(error.commandTag == "A1")
-        } catch {
-            Issue.record("Expected BadCommand, got \(error)")
+        TestUtilities.withParseInput(for: "A1 ()\r\n") { buffer in
+            let error = errorThrown {
+                try GrammarParser().parseTaggedCommand(buffer: &buffer, tracker: .testTracker)
+            }
+            if let badCommand = error as? BadCommand {
+                #expect(badCommand.commandTag == "A1")
+            } else {
+                Issue.record("Expected BadCommand, got \(String(describing: error))")
+            }
         }
 
         // Test that the parser error occurs when parsing a command component
-        var buffer2 = TestUtilities.makeParseBuffer(for: "A2 ID aaaa\r\n")
-        do {
-            _ = try GrammarParser().parseTaggedCommand(buffer: &buffer2, tracker: .testTracker)
-            Issue.record("Expected BadCommand error to be thrown")
-        } catch let error as BadCommand {
-            #expect(error.commandTag == "A2")
-        } catch {
-            Issue.record("Expected BadCommand, got \(error)")
+        TestUtilities.withParseInput(for: "A2 ID aaaa\r\n") { buffer in
+            let error = errorThrown {
+                try GrammarParser().parseTaggedCommand(buffer: &buffer, tracker: .testTracker)
+            }
+            if let badCommand = error as? BadCommand {
+                #expect(badCommand.commandTag == "A2")
+            } else {
+                Issue.record("Expected BadCommand, got \(String(describing: error))")
+            }
         }
 
         // Make sure we still throw incomplete messages
-        var buffer3 = TestUtilities.makeParseBuffer(for: "A2 LOGIN")
-        #expect(throws: IncompleteMessage.self) {
-            try GrammarParser().parseTaggedCommand(buffer: &buffer3, tracker: .testTracker)
+        TestUtilities.withParseInput(for: "A2 LOGIN") { buffer in
+            let error = errorThrown {
+                try GrammarParser().parseTaggedCommand(buffer: &buffer, tracker: .testTracker)
+            }
+            #expect(error is IncompleteMessage)
         }
     }
 }

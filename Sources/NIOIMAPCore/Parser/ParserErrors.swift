@@ -12,6 +12,24 @@
 //
 //===----------------------------------------------------------------------===//
 
+/// Decodes `bytes` as UTF-8.
+///
+/// A free function rather than a `String` initialiser because it throws a ``ParserError`` carrying the
+/// source location that asked for the decode, which is what the grammar wants and what a general-purpose
+/// initialiser has no business reporting.
+///
+/// - Throws: ``ParserError`` when `bytes` are not valid UTF-8.
+func decodeUTF8(
+    _ bytes: some Collection<UInt8>,
+    file: StaticString = (#fileID),
+    line: Int = #line
+) throws -> String {
+    guard let string = String(validatingUTF8Bytes: bytes) else {
+        throw ParserError.invalidUTF8(file: file, line: line)
+    }
+    return string
+}
+
 /// The parser needs more bytes before it can decide.
 ///
 /// Thrown, rather than returned, because it can arise anywhere in the grammar; the entry points turn
@@ -62,6 +80,11 @@ public struct ParserError: Error {
     /// Describes the parsing failure in human-readable terms, such as
     /// "Invalid UTF8", "Missing CRLF", "Unexpected character", etc. It's intended
     /// for logging and debugging purposes.
+    ///
+    /// - Note: These errors are thrown as part of ordinary control flow — `parseOneOf` throws one
+    ///     for every alternative that doesn't match — so the hint must not be built by string
+    ///     interpolation on any path that is taken often. A plain literal costs nothing; an
+    ///     interpolation heap-allocates as soon as the result exceeds 15 UTF-8 bytes.
     public var hint: String
     /// `StaticString` rather than `String`: `#fileID` is longer than the 15-byte small-string limit,
     /// so a `String` here would heap-allocate and retain on *every* throw, hint or no hint.
@@ -99,4 +122,33 @@ public struct TooMuchRecursion: Error {
     init(limit: Int) {
         self.limit = limit
     }
+}
+
+/// Signals that parsing stopped consuming input while it would otherwise have kept going.
+///
+/// Parsing that produces results without consuming bytes would produce them forever. Rather than spin,
+/// the parser throws this, and the connection should be closed: no valid input causes it, so it means
+/// either a parser bug or input crafted to find one.
+///
+/// Unlike ``ParserError`` it is never taken to mean "this alternative did not match", so no
+/// backtracking point absorbs it.
+public struct NoForwardProgress: Error {
+    /// `StaticString` for the same reason as ``ParserError``'s: no allocation on the throw.
+    var file: StaticString
+    var line: Int
+
+    /// Creates the error, recording where the check that fired is.
+    ///
+    /// - Parameters:
+    ///   - file: The file of the check. Defaults to the caller's.
+    ///   - line: The line of the check. Defaults to the caller's.
+    public init(file: StaticString = #fileID, line: Int = #line) {
+        self.file = file
+        self.line = line
+    }
+}
+
+extension NoForwardProgress: CustomStringConvertible {
+    /// Names the check that fired, which is what a log of this error is for.
+    public var description: String { "NoForwardProgress at \(file):\(line)" }
 }

@@ -12,7 +12,6 @@
 //
 //===----------------------------------------------------------------------===//
 
-import NIO
 @testable import NIOIMAPCore
 import Testing
 
@@ -50,7 +49,7 @@ private struct MailboxPathTests {
     @Test("make sub-mailbox enforces size limit")
     func makeSubMailboxEnforcesSizeLimit() {
         #expect(throws: MailboxTooBigError.self) {
-            try MailboxPath(name: .init(ByteBuffer(string: String(repeating: "a", count: 999))), pathSeparator: "/")
+            try MailboxPath(name: .init(Array(String(repeating: "a", count: 999).utf8)), pathSeparator: "/")
                 .makeSubMailbox(displayName: "1")
         }
     }
@@ -146,15 +145,14 @@ private struct MailboxPathTests {
     @Test("validateUTF8String with valid UTF-8")
     func validateUTF8StringValid() {
         let path = try! MailboxPath(name: .inbox)
-        let validBytes = ByteBuffer(string: "hello")
+        let validBytes = Array("hello".utf8)
         #expect(path.validateUTF8String(validBytes) == "hello")
     }
 
     @Test("validateUTF8String with invalid UTF-8 returns nil")
     func validateUTF8StringInvalid() {
         let path = try! MailboxPath(name: .inbox)
-        var invalidBytes = ByteBuffer()
-        invalidBytes.writeBytes([0x80, 0xFF])
+        let invalidBytes: [UInt8] = [0x80, 0xFF]
         #expect(path.validateUTF8String(invalidBytes) == nil)
     }
 
@@ -170,7 +168,7 @@ private struct MailboxPathTests {
         // "&AQID-" in modified UTF-7 decodes base64 "AQID" → 3 bytes (odd count) → throws
         // The catch falls back to UTF-8 interpretation of the original bytes
         let path = try! MailboxPath(
-            name: MailboxName(ByteBuffer(string: "box/&AQID-/sub")),
+            name: MailboxName(Array("box/&AQID-/sub".utf8)),
             pathSeparator: "/"
         )
         let components = path.displayStringComponents()
@@ -196,13 +194,13 @@ private struct MailboxPathTests {
         "custom debug string convertible",
         arguments: [
             DebugStringFixture(sut: MailboxName.inbox, expected: "INBOX"),
-            DebugStringFixture(sut: .init(ByteBuffer()), expected: ""),
-            DebugStringFixture(sut: .init(ByteBuffer("Food")), expected: "Food"),
-            DebugStringFixture(sut: .init(ByteBuffer("food")), expected: "food"),
-            DebugStringFixture(sut: .init(ByteBuffer("FOOD")), expected: "FOOD"),
-            DebugStringFixture(sut: .init(ByteBuffer("box/&AKM-")), expected: "box/&AKM-"),
-            DebugStringFixture(sut: .init(ByteBuffer("a\u{11}b")), expected: "a\u{11}b"),
-            DebugStringFixture(sut: .init(ByteBuffer("båd")), expected: "båd"),
+            DebugStringFixture(sut: .init([]), expected: ""),
+            DebugStringFixture(sut: .init("Food"), expected: "Food"),
+            DebugStringFixture(sut: .init("food"), expected: "food"),
+            DebugStringFixture(sut: .init("FOOD"), expected: "FOOD"),
+            DebugStringFixture(sut: .init("box/&AKM-"), expected: "box/&AKM-"),
+            DebugStringFixture(sut: .init("a\u{11}b"), expected: "a\u{11}b"),
+            DebugStringFixture(sut: .init("båd"), expected: "båd"),
         ]
     )
     func customDebugStringConvertible(_ fixture: DebugStringFixture<MailboxName>) {
@@ -238,7 +236,7 @@ struct MailboxNameTests {
     @Test("initialization with non-UTF8 bytes")
     func initializationWithNonUTF8Bytes() {
         let hexBytes: [UInt8] = [0x80]
-        let test1 = MailboxName(.init(bytes: hexBytes))
+        let test1 = MailboxName(hexBytes)
         #expect(test1.bytes == hexBytes)
         #expect(!test1.isInbox)
     }

@@ -35,7 +35,7 @@ struct CreateMailboxTests {
                     command: .listIndependent(
                         [],
                         reference: MailboxName([]),
-                        .mailbox(ByteBuffer(string: "foo")),
+                        .mailbox(Array("foo".utf8)),
                         []
                     ),
                     untagged: [
@@ -125,7 +125,7 @@ struct CreateMailboxTests {
                     command: .listIndependent(
                         [],
                         reference: MailboxName([]),
-                        .mailbox(ByteBuffer(string: "foo")),
+                        .mailbox(Array("foo".utf8)),
                         []
                     ),
                     untagged: [

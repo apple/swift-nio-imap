@@ -12,7 +12,6 @@
 //
 //===----------------------------------------------------------------------===//
 
-import NIO
 @_spi(NIOIMAPInternal) @testable import NIOIMAPCore
 import Testing
 
@@ -184,8 +183,9 @@ struct IMAPServerTests {
     /// `==` ignores case, so round-trip tests can't catch a parser that changes it.
     @Test("parsing keeps case", arguments: ["imap.example.com", "Imap.Example.COM", "[2001:db8::a]", "[v1a.x]"])
     func parseKeepsCase(_ string: String) throws {
-        var buffer = ParseBuffer(ByteBuffer(string: string + " "))
-        let parsed = try GrammarParser().parseHost(buffer: &buffer, tracker: .testTracker)
+        let parsed = try TestUtilities.withParseInput(for: string + " ") { input in
+            try GrammarParser().parseHost(buffer: &input, tracker: .testTracker)
+        }
         #expect(String(parsed) == string)
     }
 

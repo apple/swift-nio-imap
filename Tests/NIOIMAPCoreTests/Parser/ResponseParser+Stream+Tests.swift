@@ -13,7 +13,6 @@
 //===----------------------------------------------------------------------===//
 
 import Foundation
-import NIO
 @_spi(NIOIMAPInternal) @testable import NIOIMAPCore
 import OrderedCollections
 import Testing
@@ -1093,11 +1092,11 @@ extension ResponseParserTests {
     fileprivate func parseResponseStream(
         fixture: ResponseStreamFixture
     ) {
-        var buffer = ByteBuffer(string: fixture.input + "\r\n")
+        var buffer = IMAPInputBuffer(fixture.input + "\r\n")
         var results = [ResponseOrContinuationRequest]()
         var parser = ResponseParser()
         // Stop at the first failure: a failed parse consumes nothing, so retrying would loop forever.
-        while buffer.readableBytes > 0 {
+        while buffer.count > 0 {
             do {
                 guard let resp = try parser.parseResponseStream(buffer: &buffer) else {
                     Issue.record("Incomplete response")
@@ -1110,7 +1109,7 @@ extension ResponseParserTests {
             }
         }
         #expect(results == fixture.expected)
-        #expect(buffer.readableBytes == 0)
+        #expect(buffer.count == 0)
     }
 }
 
@@ -1123,6 +1122,10 @@ extension ResponseParserTests {
             // An unparseable body structure carrying a literal: the fallback that skips it as invalid
             // must report a literal length cut short as incomplete, not as a run-away literal.
             #"* 1 FETCH (BODYSTRUCTURE ("a" {10}\#r\#n0123456789 1 2))\#r\#n"#,
+            // Several flags: the flag list must not end early on a flag cut short.
+            #"* LIST (\Noselect \HasChildren \Marked) "/" INBOX\#r\#n"#,
+            // LIST-EXTENDED data is a tagged-ext value; its list must not end early either.
+            #"* LIST (\Subscribed) "/" foo ("CHILDINFO" ("SUBSCRIBED" "REMOTE"))\#r\#n"#,
             // Optional spaces (before a flag list's `)`, between FETCH attributes, between body parts):
             // a read ending in them must not lose the incomplete signal.
             #"* 1 FETCH (UID 1 FLAGS (\Seen  ) RFC822.SIZE 2)\#r\#n"#,
@@ -1141,10 +1144,10 @@ extension ResponseParserTests {
 
     private static func events(parsing reads: [[UInt8]]) throws -> [ResponseOrContinuationRequest] {
         var parser = ResponseParser()
-        var input = ByteBuffer()
+        var input = IMAPInputBuffer()
         var events: [ResponseOrContinuationRequest] = []
         for read in reads {
-            input.writeBytes(read)
+            input.append(read)
             while let event = try parser.parseResponseStream(buffer: &input) {
                 events.append(event)
             }
@@ -1247,22 +1250,23 @@ extension ResponseParserTests {
 
     /// Feeds `input` in chunks; after each chunk parses until the parser needs more bytes.
     fileprivate static func parseStream(
-        _ input: ByteBuffer,
+        _ input: [UInt8],
         delivery: Delivery,
         options: ResponseParser.Options = .init()
     ) throws -> ParsedStream {
         var parser = ResponseParser(options: options)
-        var remaining = input
-        var buffer = ByteBuffer()
+        var remaining = input[...]
+        var buffer = IMAPInputBuffer()
         var responses: [ResponseOrContinuationRequest] = []
-        for size in delivery.chunkSizes(total: input.readableBytes) {
-            var chunk = remaining.readSlice(length: min(size, remaining.readableBytes))!
-            buffer.writeBuffer(&chunk)
+        for size in delivery.chunkSizes(total: input.count) {
+            let chunk = remaining.prefix(size)
+            remaining = remaining.dropFirst(chunk.count)
+            buffer.append(Array(chunk))
             while let response = try parser.parseResponseStream(buffer: &buffer) {
                 responses.append(response)
             }
         }
-        return ParsedStream(responses: responses, unconsumedBytes: buffer.readableBytes)
+        return ParsedStream(responses: responses, unconsumedBytes: buffer.count)
     }
 
     /// Top-level envelopes and those of nested `message/rfc822` parts, in order.
@@ -1341,11 +1345,9 @@ private enum DeepEnvelope {
     static let member = #"(NIL NIL "x" "example.com")"#
     static let end = "(NIL NIL NIL NIL)"
 
-    static var response: ByteBuffer {
+    static var response: [UInt8] {
         let from = String(repeating: start, count: depth) + member + String(repeating: end, count: depth)
-        return ByteBuffer(
-            string: "* 1 FETCH (ENVELOPE (NIL NIL (\(from)) NIL NIL NIL NIL NIL NIL NIL))\r\nA1 OK done\r\n"
-        )
+        return Array("* 1 FETCH (ENVELOPE (NIL NIL (\(from)) NIL NIL NIL NIL NIL NIL NIL))\r\nA1 OK done\r\n".utf8)
     }
 
     /// Normalized: `depth - 1` demoted starts, then the innermost group with its member.
@@ -1396,7 +1398,6 @@ private enum DeepEnvelope {
             let secondFrom = ResponseParserTests.envelopes(in: second.responses).first?.from ?? []
 
             var encoder = EncodeBuffer.serverEncodeBuffer(
-                buffer: ByteBufferAllocator().buffer(capacity: 1 << 20),
                 options: ResponseEncodingOptions(),
                 loggingMode: false
             )
@@ -1436,8 +1437,8 @@ private struct EnvelopeStreamFixture: Sendable, CustomTestStringConvertible {
 
     var testDescription: String { name }
 
-    var bytes: ByteBuffer {
-        ByteBuffer(string: response + "\r\nA1 OK done\r\n")
+    var bytes: [UInt8] {
+        Array((response + "\r\nA1 OK done\r\n").utf8)
     }
 }
 
@@ -1595,7 +1596,7 @@ extension Envelope {
         let sender: [EmailAddressListElement] = [.singleAddress(.address("sender", "example.com"))]
         return Envelope(
             date: .capturedDate,
-            subject: ByteBuffer(string: subject),
+            subject: Array(subject.utf8),
             from: sender,
             sender: sender,
             reply: sender,
@@ -1624,12 +1625,12 @@ extension Envelope {
 }
 
 extension EmailAddress {
-    fileprivate static func address(_ mailbox: ByteBuffer, _ host: ByteBuffer) -> EmailAddress {
+    fileprivate static func address(_ mailbox: [UInt8], _ host: [UInt8]) -> EmailAddress {
         .init(personName: nil, sourceRoot: nil, mailbox: mailbox, host: host)
     }
 
     /// RFC 3501 §7.4.2 group start marker (host NIL).
-    fileprivate static func groupStart(_ name: ByteBuffer) -> EmailAddress {
+    fileprivate static func groupStart(_ name: [UInt8]) -> EmailAddress {
         .init(personName: nil, sourceRoot: nil, mailbox: name, host: nil)
     }
 }

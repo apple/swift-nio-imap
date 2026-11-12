@@ -13,7 +13,6 @@
 //===----------------------------------------------------------------------===//
 
 import Foundation
-import NIO
 @_spi(NIOIMAPInternal) @testable import NIOIMAPCore
 import Testing
 
@@ -34,67 +33,111 @@ func expectEqualAndEqualHash<T>(
 
 enum TestUtilities {}
 
-// MARK: - ByteBuffer
+// MARK: - Parser input
 
 extension TestUtilities {
-    static func makeParseBuffer(for text: String) -> ParseBuffer {
-        let buffer = ByteBuffer(string: text)
-        return ParseBuffer(buffer)
+    /// Runs `body` with a cursor over `text`.
+    ///
+    /// A cursor cannot be stored in a variable — it is non-escapable, which is what stops the parser
+    /// from keeping input bytes past the call — so every test that used to build one and then read
+    /// from it takes this closure form instead.
+    ///
+    /// The text is held in an array, which cannot vouch for its bytes, so a large extraction copies.
+    ///
+    /// - Parameters:
+    ///   - text: The bytes to read.
+    ///   - body: What to read with.
+    static func withParseInput<R>(
+        for text: String,
+        _ body: (inout ParseInput) throws -> R
+    ) rethrows -> R {
+        try Array(text.utf8).withParseInput(limit: .max, body)
     }
 
-    static func withParseBuffer(
+    /// Runs `body` with a cursor over `string + terminator`, then checks what it left unconsumed.
+    ///
+    /// The input is padded on both sides — bytes before the first visible byte and after the last —
+    /// so that a parser which reads outside the region it was given is caught rather than silently
+    /// right. An `ArraySlice` is how that padding is expressed: the bytes are there, in the same
+    /// allocation, and the region the parser sees is a slice that excludes them.
+    static func withParseInput(
         _ string: String,
         terminator: String = "",
         shouldRemainUnchanged: Bool = false,
         sourceLocation: SourceLocation = #_sourceLocation,
-        _ body: (inout ParseBuffer) throws -> Void
+        _ body: (inout ParseInput) throws -> Void
     ) {
-        var inputBuffer = ByteBufferAllocator().buffer(capacity: string.utf8.count + terminator.utf8.count + 10)
-        inputBuffer.writeString("hello")
-        inputBuffer.moveReaderIndex(forwardBy: 5)
-        inputBuffer.writeString(string)
-        inputBuffer.writeString(terminator)
-        inputBuffer.writeString("hallo")
-        inputBuffer.moveWriterIndex(to: inputBuffer.writerIndex - 5)
+        let padded = Array("hello\(string)\(terminator)hallo".utf8)
+        let inputBuffer = padded[5..<(padded.count - 5)]
 
-        let expected = inputBuffer.getSlice(
-            at: inputBuffer.readerIndex + string.utf8.count,
-            length: terminator.utf8.count
-        )!
-        let beforeRunningBody = inputBuffer
+        let expectedRemainder = shouldRemainUnchanged ? string + terminator : terminator
 
-        var parseBuffer = ParseBuffer(inputBuffer)
-
-        defer {
-            let expectedString = String(buffer: expected)
-            let remaining =
-                (try? PL.parseBytes(
-                    buffer: &parseBuffer,
-                    tracker: .makeNewDefault,
-                    upTo: .max
-                )) ?? ByteBuffer()
-            let remainingString = String(buffer: remaining)
-            if shouldRemainUnchanged {
-                #expect(String(buffer: beforeRunningBody) == remainingString, sourceLocation: sourceLocation)
-            } else {
-                #expect(remainingString == expectedString, sourceLocation: sourceLocation)
+        inputBuffer.withParseInput(limit: .max) { input in
+            if let error = errorThrown(by: { try body(&input) }) {
+                Issue.record(error, "Parsing should not throw", sourceLocation: sourceLocation)
             }
-        }
-
-        #expect(
-            throws: Never.self,
-            sourceLocation: sourceLocation
-        ) {
-            try body(&parseBuffer)
+            let remaining = (try? input.extractBytes(length: input.remaining)) ?? []
+            #expect(
+                String(decoding: remaining, as: UTF8.self) == expectedRemainder,
+                sourceLocation: sourceLocation
+            )
         }
     }
 }
 
-extension ByteBuffer: @retroactive ExpressibleByStringLiteral {
+// Model fields that used to be `ByteBuffer` are now `[UInt8]`, and the test suite spells hundreds of
+// them as string literals. `IMAPBuffer` ships its own literal conformances; a byte array does not, so
+// this is the test-only stand-in for the retroactive `ByteBuffer` conformance it replaces.
+extension Array: @retroactive ExpressibleByUnicodeScalarLiteral where Element == UInt8 {}
+extension Array: @retroactive ExpressibleByExtendedGraphemeClusterLiteral where Element == UInt8 {}
+extension Array: @retroactive ExpressibleByStringLiteral where Element == UInt8 {
     public init(stringLiteral value: String) {
-        let allocator = ByteBufferAllocator()
-        self = allocator.buffer(capacity: 0)
-        self.writeString(value)
+        self = Array(value.utf8)
+    }
+}
+
+// The parsers consume from an `IMAPInputBuffer`, which the tests spell as a string literal the way they
+// used to spell a `ByteBuffer`.
+extension IMAPInputBuffer {
+    /// Creates a buffer holding `text`'s UTF-8 bytes as one region.
+    init(_ text: String) {
+        self.init()
+        self.append(Array(text.utf8))
+    }
+
+    /// Creates a buffer holding `bytes` as one region.
+    init(_ bytes: [UInt8]) {
+        self.init()
+        self.append(bytes)
+    }
+
+    /// Adds `text`'s UTF-8 bytes as another region — one more "network read".
+    mutating func append(_ text: String) {
+        self.append(Array(text.utf8))
+    }
+}
+
+extension IMAPInputBuffer: ExpressibleByUnicodeScalarLiteral {}
+extension IMAPInputBuffer: ExpressibleByExtendedGraphemeClusterLiteral {}
+extension IMAPInputBuffer: ExpressibleByStringLiteral {
+    public init(stringLiteral value: String) {
+        self.init(value)
+    }
+}
+
+extension IMAPInputBuffer {
+    /// The bytes still waiting to be parsed, decoded as UTF-8.
+    ///
+    /// For asserting what a parser left behind. `IMAPInputBuffer` is deliberately not `Equatable` — it
+    /// holds a queue of regions, and two buffers over the same bytes need not be split the same way — so
+    /// tests compare this instead.
+    var remainingText: String {
+        var bytes: [UInt8] = []
+        bytes.reserveCapacity(count)
+        for region in byteRegions {
+            bytes.append(contentsOf: region.copiedBytes())
+        }
+        return String(decoding: bytes, as: UTF8.self)
     }
 }
 
@@ -192,27 +235,27 @@ extension TestUtilities {
         _ value: T,
         terminator: String = " ",
         encoder: (inout EncodeBuffer, T) -> Int,
-        parser: (inout ParseBuffer, StackTracker) throws -> T,
+        parser: (inout ParseInput, StackTracker) throws -> T,
         sourceLocation: SourceLocation = #_sourceLocation
     ) {
-        var encodeBuffer = EncodeBuffer.serverEncodeBuffer(
-            buffer: ByteBuffer(),
-            options: ResponseEncodingOptions(),
-            loggingMode: false
-        )
+        var encodeBuffer = EncodeBuffer.serverEncodeBuffer(options: ResponseEncodingOptions(), loggingMode: false)
         _ = encoder(&encodeBuffer, value)
-        var encoded = encodeBuffer.nextChunk().bytes
-        encoded.writeString(terminator)
-        let encodedString = String(buffer: encoded)
-        var parseBuffer = ParseBuffer(encoded)
+        let encoded = encodeBuffer.nextChunk().bytes.copiedBytes() + Array(terminator.utf8)
+        let encodedString = String(decoding: encoded, as: UTF8.self)
         do {
-            let parsed = try parser(&parseBuffer, .testTracker)
-            #expect(parsed == value, "Encoded as \(String(reflecting: encodedString))", sourceLocation: sourceLocation)
-            #expect(
-                parseBuffer.readableBytes == terminator.utf8.count,
-                "Trailing bytes after parsing \(String(reflecting: encodedString))",
-                sourceLocation: sourceLocation
-            )
+            try encoded.withParseInput(limit: .max) { input in
+                let parsed = try parser(&input, .testTracker)
+                #expect(
+                    parsed == value,
+                    "Encoded as \(String(reflecting: encodedString))",
+                    sourceLocation: sourceLocation
+                )
+                #expect(
+                    input.remaining == terminator.utf8.count,
+                    "Trailing bytes after parsing \(String(reflecting: encodedString))",
+                    sourceLocation: sourceLocation
+                )
+            }
         } catch {
             Issue.record(
                 "Failed to parse \(String(reflecting: encodedString)): \(error)",
@@ -244,3 +287,21 @@ extension TestUtilities {
     }
 }
 #endif
+
+// Encoded chunks are `IMAPBufferList`s. This mirrors NIO's `String(buffer:)` so a test can read a
+// chunk the same way it used to read a `ByteBuffer`.
+extension String {
+    init(buffer list: IMAPBufferList) {
+        self = String(decoding: list.copiedBytes(), as: UTF8.self)
+    }
+}
+
+// Encoded chunks are compared against string literals in a few places. A literal makes a one-region
+// list, and `IMAPBufferList` equality is byte-wise, so it matches however the sink split the bytes up.
+extension IMAPBufferList: ExpressibleByUnicodeScalarLiteral {}
+extension IMAPBufferList: ExpressibleByExtendedGraphemeClusterLiteral {}
+extension IMAPBufferList: ExpressibleByStringLiteral {
+    public init(stringLiteral value: String) {
+        self = IMAPBufferList(IMAPBuffer(Array(value.utf8)))
+    }
+}

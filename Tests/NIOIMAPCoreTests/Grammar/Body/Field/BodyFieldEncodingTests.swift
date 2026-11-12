@@ -12,7 +12,6 @@
 //
 //===----------------------------------------------------------------------===//
 
-import NIO
 @_spi(NIOIMAPInternal) @testable import NIOIMAPCore
 import Testing
 
@@ -68,7 +67,6 @@ struct BodyFieldEncodingTests {
     func nilEncodingEncodesAsNIL() {
         let expected = "NIL"
         var buffer = EncodeBuffer.serverEncodeBuffer(
-            buffer: ByteBufferAllocator().buffer(capacity: 32),
             options: ResponseEncodingOptions(),
             loggingMode: false
         )

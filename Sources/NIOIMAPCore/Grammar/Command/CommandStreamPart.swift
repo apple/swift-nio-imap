@@ -12,8 +12,6 @@
 //
 //===----------------------------------------------------------------------===//
 
-import struct NIO.ByteBuffer
-
 /// A sub-command for streaming the `APPEND` command (RFC 3501 and RFC 4469 extensions).
 ///
 /// The `AppendCommand` enum manages the lifecycle of appending messages to a mailbox. Unlike
@@ -78,8 +76,8 @@ public enum AppendCommand: Hashable, Sendable {
     /// number of bytes sent must match exactly the byte count specified in the corresponding
     /// `beginMessage`.
     ///
-    /// - parameter ByteBuffer: The bytes to stream
-    case messageBytes(ByteBuffer)
+    /// - parameter IMAPBuffer: The bytes to stream
+    case messageBytes(IMAPBuffer)
 
     /// Signals that the current message has finished being streamed.
     ///
@@ -102,8 +100,8 @@ public enum AppendCommand: Hashable, Sendable {
     /// The URL is included in the catenation and refers to an existing message or
     /// message part on the server.
     ///
-    /// - parameter ByteBuffer: The URL to catenate as raw bytes
-    case catenateURL(ByteBuffer)
+    /// - parameter urlBytes: The URL to catenate as raw bytes
+    case catenateURL([UInt8])
 
     /// Catenates inline data using the `CATENATE` extension (RFC 4469).
     ///
@@ -170,8 +168,8 @@ extension AppendCommand {
         ///
         /// Multiple `bytes(_:)` cases can be sent to accumulate the declared size.
         ///
-        /// - parameter ByteBuffer: A buffer containing the data to send
-        case bytes(ByteBuffer)
+        /// - parameter IMAPBuffer: The data to send
+        case bytes(IMAPBuffer)
 
         /// Signals the end of inline data streaming.
         ///
@@ -255,8 +253,8 @@ public enum CommandStreamPart: Hashable, Sendable {
     /// contains base64-encoded credentials for `AUTHENTICATE` commands or raw message
     /// bytes for message uploads.
     ///
-    /// - parameter ByteBuffer: The response data as raw bytes
-    case continuationResponse(ByteBuffer)
+    /// - parameter IMAPBuffer: The response data as raw bytes
+    case continuationResponse(IMAPBuffer)
 
     /// The tag of the command, if any.
     ///
@@ -312,13 +310,8 @@ extension CommandEncodeBuffer {
         }
     }
 
-    @discardableResult private mutating func writeBytes(_ bytes: ByteBuffer) -> Int {
-        var buffer = bytes
-        return self.buffer.writeBuffer(&buffer)
-    }
-
-    @discardableResult private mutating func writeAuthenticationChallengeResponse(_ bytes: ByteBuffer) -> Int {
-        self.buffer.writeBufferAsBase64(bytes) + self.buffer.writeString("\r\n")
+    @discardableResult private mutating func writeAuthenticationChallengeResponse(_ bytes: IMAPBuffer) -> Int {
+        self.buffer.writeBytesAsBase64(bytes) + self.buffer.writeString("\r\n")
     }
 
     @discardableResult private mutating func writeAppendCommand(_ command: AppendCommand) -> Int {
@@ -328,9 +321,9 @@ extension CommandEncodeBuffer {
                 self.buffer.writeTag(tag) + self.buffer.writeString(" APPEND ") + self.buffer.writeMailbox(mailbox)
         case .beginMessage(message: let message):
             return self.buffer.writeAppendMessage(message)
-        case .messageBytes(var bytes):
+        case .messageBytes(let bytes):
             guard !self.buffer.loggingMode else { return 0 }
-            return self.buffer.writeBuffer(&bytes)
+            return self.buffer.writeBytes(bytes)
         case .endMessage:
             guard !self.buffer.loggingMode else {
                 return self.buffer.writeString("∅")
@@ -357,8 +350,8 @@ extension CommandEncodeBuffer {
                 self.buffer.markStopPoint()
             }
             return written
-        case .catenateData(.bytes(var bytes)):
-            return self.buffer.writeBuffer(&bytes)
+        case .catenateData(.bytes(let bytes)):
+            return self.buffer.writeBytes(bytes)
         case .catenateData(.end):
             self.encodedAtLeastOneCatenateElement = true
             return 0
