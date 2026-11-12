@@ -77,7 +77,8 @@ public struct ResponseCodeCopy: Hashable, Sendable {
 
 extension EncodeBuffer {
     @discardableResult mutating func writeResponseCodeCopy(_ data: ResponseCodeCopy) -> Int {
-        self.writeString("COPYUID \(data.destinationUIDValidity.rawValue) ") + self.writeUIDRangeArray(data.sourceUIDs)
+        self.writeString("COPYUID ") + self.writeDecimal(data.destinationUIDValidity.rawValue) + self.writeSpace()
+            + self.writeUIDRangeArray(data.sourceUIDs)
             + self.writeSpace() + self.writeUIDRangeArray(data.destinationUIDs)
     }
 

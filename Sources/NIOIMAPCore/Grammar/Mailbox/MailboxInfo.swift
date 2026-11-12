@@ -294,11 +294,11 @@ extension EncodeBuffer {
 
     @discardableResult mutating func writeMailboxInfo(_ list: MailboxInfo) -> Int {
         self.writeString("(")
-            + self.writeIfExists(list.attributes) { (flags) -> Int in
+            + writeIfExists(list.attributes) { (flags) -> Int in
                 self.writeMailboxListFlags(flags)
             } + self.writeString(") ") + self.writeMailboxPathSeparator(list.path.pathSeparator) + self.writeSpace()
             + self.writeMailbox(list.path.name)
-            + self.write(if: list.objectID != nil || !list.extensions.isEmpty) {
+            + write(if: list.objectID != nil || !list.extensions.isEmpty) {
                 self.writeSpace() + self.writeMailboxListExtended(objectID: list.objectID, extensions: list.extensions)
             }
     }

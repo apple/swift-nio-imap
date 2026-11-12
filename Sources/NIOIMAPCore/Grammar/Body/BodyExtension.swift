@@ -58,7 +58,7 @@ extension EncodeBuffer {
         case .string(let string):
             return self.writeNString(string)
         case .number(let number):
-            return self.writeString("\(number)")
+            return self.writeDecimal(number)
         }
     }
 }

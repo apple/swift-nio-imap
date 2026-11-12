@@ -1096,19 +1096,60 @@ extension ResponseParserTests {
         var buffer = ByteBuffer(string: fixture.input + "\r\n")
         var results = [ResponseOrContinuationRequest]()
         var parser = ResponseParser()
+        // Stop at the first failure: a failed parse consumes nothing, so retrying would loop forever.
         while buffer.readableBytes > 0 {
-            #expect(throws: Never.self) {
-                guard
-                    let resp = try parser.parseResponseStream(buffer: &buffer)
-                else {
-                    Issue.record()
-                    return
+            do {
+                guard let resp = try parser.parseResponseStream(buffer: &buffer) else {
+                    Issue.record("Incomplete response")
+                    break
                 }
                 results.append(resp)
+            } catch {
+                Issue.record("Unexpected error: \(error)")
+                break
             }
         }
         #expect(results == fixture.expected)
         #expect(buffer.readableBytes == 0)
+    }
+}
+
+extension ResponseParserTests {
+    /// The client side has no framing, so a read can end anywhere. Wherever it does, the events must be
+    /// the same as for the whole response.
+    @Test(
+        "a response parses the same wherever the read is split",
+        arguments: [
+            // An unparseable body structure carrying a literal: the fallback that skips it as invalid
+            // must report a literal length cut short as incomplete, not as a run-away literal.
+            #"* 1 FETCH (BODYSTRUCTURE ("a" {10}\#r\#n0123456789 1 2))\#r\#n"#,
+            // Optional spaces (before a flag list's `)`, between FETCH attributes, between body parts):
+            // a read ending in them must not lose the incomplete signal.
+            #"* 1 FETCH (UID 1 FLAGS (\Seen  ) RFC822.SIZE 2)\#r\#n"#,
+            #"* 1 FETCH (BODYSTRUCTURE (("text" "plain" NIL NIL NIL "7bit" 1 1)  "#
+                + #"("text" "html" NIL NIL NIL "7bit" 1 1) "alternative"))\#r\#n"#,
+        ]
+    )
+    func splitAnywhere(response: String) throws {
+        let bytes = Array(response.utf8)
+        let whole = try Self.events(parsing: [bytes])
+        for split in 1..<bytes.count {
+            let parts = [Array(bytes[..<split]), Array(bytes[split...])]
+            #expect(try Self.events(parsing: parts) == whole, "split at \(split)")
+        }
+    }
+
+    private static func events(parsing reads: [[UInt8]]) throws -> [ResponseOrContinuationRequest] {
+        var parser = ResponseParser()
+        var input = ByteBuffer()
+        var events: [ResponseOrContinuationRequest] = []
+        for read in reads {
+            input.writeBytes(read)
+            while let event = try parser.parseResponseStream(buffer: &input) {
+                events.append(event)
+            }
+        }
+        return events
     }
 }
 

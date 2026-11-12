@@ -12,8 +12,6 @@
 //
 //===----------------------------------------------------------------------===//
 
-import struct NIO.ByteBuffer
-
 /// Source options specifying which mailboxes to search in a multi-mailbox search operation (RFC 7377).
 ///
 /// **Requires server capability:** ``Capability/multiSearch``
@@ -78,7 +76,7 @@ extension EncodeBuffer {
             + self.writeArray(options.sourceMailbox, parenthesis: false) { (filter, buffer) -> Int in
                 buffer.writeMailboxFilter(filter)
             }
-            + self.writeIfExists(options.scopeOptions) { scopeOptions in
+            + writeIfExists(options.scopeOptions) { scopeOptions in
                 self.writeString(" (") + self.writeExtendedSearchScopeOptions(scopeOptions) + self.writeString(")")
             } + self.writeString(")")
     }

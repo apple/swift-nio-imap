@@ -12,8 +12,6 @@
 //
 //===----------------------------------------------------------------------===//
 
-import struct NIO.ByteBuffer
-
 // TODO: Convert to struct
 /// Structured status codes sent with server responses.
 ///
@@ -529,9 +527,9 @@ extension EncodeBuffer {
         case .highestModificationSequence(let val):
             return self.writeString("HIGHESTMODSEQ ") + self.writeModificationSequenceValue(val)
         case .metadataLongEntries(let num):
-            return self.writeString("METADATA LONGENTRIES \(num)")
+            return self.writeString("METADATA LONGENTRIES ") + self.writeDecimal(num)
         case .metadataMaxsize(let num):
-            return self.writeString("METADATA MAXSIZE \(num)")
+            return self.writeString("METADATA MAXSIZE ") + self.writeDecimal(num)
         case .metadataTooMany:
             return self.writeString("METADATA TOOMANY")
         case .metadataNoPrivate:
@@ -592,7 +590,7 @@ extension EncodeBuffer {
 
     private mutating func writeResponseTextCode_badCharsets(_ charsets: [CharacterSetName]) -> Int {
         self.writeString("BADCHARSET")
-            + self.write(if: charsets.count >= 1) {
+            + write(if: charsets.count >= 1) {
                 self.writeSpace()
                     + self.writeArray(charsets) { (charset, self) in
                         self.writeCharacterSetName(charset)
@@ -602,8 +600,8 @@ extension EncodeBuffer {
 
     private mutating func writeResponseTextCode_other(atom: String, string: String?) -> Int {
         self.writeString(atom)
-            + self.writeIfExists(string) { (string) -> Int in
-                self.writeString(" \(string)")
+            + writeIfExists(string) { (string) -> Int in
+                self.writeSpace() + self.writeString(string)
             }
     }
 }

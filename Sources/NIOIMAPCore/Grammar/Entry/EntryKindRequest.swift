@@ -12,8 +12,6 @@
 //
 //===----------------------------------------------------------------------===//
 
-import struct NIO.ByteBuffer
-
 /// Which metadata items a `SEARCH MODSEQ` criterion considers (RFC 7162 `entry-type-req`).
 ///
 /// **Requires server capability:** ``Capability/condStore``

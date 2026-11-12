@@ -12,8 +12,6 @@
 //
 //===----------------------------------------------------------------------===//
 
-import struct NIO.ByteBuffer
-
 extension TaggedResponse {
     /// The outcome status of a tagged response.
     ///

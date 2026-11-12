@@ -119,6 +119,9 @@ extension GrammarParser {
                                 tracker: tracker,
                                 maxLength: max(0, maximumByteCount - byteCount)
                             )
+                        } catch let error as IncompleteMessage {
+                            // The length may simply not have arrived yet, e.g. a read ending in `{1`.
+                            throw error
                         } catch {
                             throw ParserError(hint: "Run-away literal in body structure")
                         }

@@ -153,6 +153,6 @@ extension EncodeBuffer {
         guard id != .max else {
             return self.writeString("*")
         }
-        return self.writeString("\(id.rawValue)")
+        return self.writeDecimal(id.rawValue)
     }
 }

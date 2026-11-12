@@ -12,8 +12,6 @@
 //
 //===----------------------------------------------------------------------===//
 
-import struct NIO.ByteBuffer
-
 /// A capability advertised by a server to indicate supported functionality.
 ///
 /// A server advertises its capabilities in response to a CAPABILITY command or automatically in greeting and

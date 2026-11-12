@@ -12,8 +12,6 @@
 //
 //===----------------------------------------------------------------------===//
 
-import struct NIO.ByteBuffer
-
 /// A calendar day formatted as `dd-MMM-yyyy` as defined in RFC 3501.
 ///
 /// This type represents a date in the IMAP date format, where the month is represented
@@ -81,7 +79,9 @@ public struct IMAPCalendarDay: Hashable, Sendable {
 
 extension EncodeBuffer {
     @discardableResult mutating func writeDate(_ date: IMAPCalendarDay) -> Int {
-        self.writeString("\(date.day)-\(date.monthString)-\(date.year)")
+        let hyphen = UInt8(ascii: "-")
+        return self.writeDecimal(date.day) + self.writeByte(hyphen) + self.writeString(date.monthString)
+            + self.writeByte(hyphen) + self.writeDecimal(date.year)
     }
 }
 

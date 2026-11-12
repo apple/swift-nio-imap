@@ -12,8 +12,6 @@
 //
 //===----------------------------------------------------------------------===//
 
-import struct NIO.ByteBuffer
-
 /// A message attribute that can be retrieved using the `FETCH` command (RFC 3501 and extensions).
 ///
 /// The `FETCH` command allows clients to retrieve specific attributes of messages from the server.
@@ -392,7 +390,7 @@ extension EncodeBuffer {
         partial: ClosedRange<UInt32>?
     ) -> Int {
         self.writeString(peek ? "BODY.PEEK" : "BODY") + self.writeSection(section)
-            + self.writeIfExists(partial) { (partial) -> Int in
+            + writeIfExists(partial) { (partial) -> Int in
                 self.writeByteRange(partial)
             }
     }
@@ -407,10 +405,10 @@ extension EncodeBuffer {
         partial: ClosedRange<UInt32>?
     ) -> Int {
         self.writeString("BINARY")
-            + self.write(if: peek) {
+            + write(if: peek) {
                 self.writeString(".PEEK")
             } + self.writeSectionBinary(section)
-            + self.writeIfExists(partial) { (partial) -> Int in
+            + writeIfExists(partial) { (partial) -> Int in
                 self.writeByteRange(partial)
             }
     }

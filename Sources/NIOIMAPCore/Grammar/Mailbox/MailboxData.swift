@@ -12,8 +12,6 @@
 //
 //===----------------------------------------------------------------------===//
 
-import struct NIO.ByteBuffer
-
 /// Untagged response data from the server about mailboxes, messages, or search results.
 ///
 /// Servers send untagged responses (prefixed with `*`) that convey information about mailboxes, messages, and operation results.
@@ -200,9 +198,9 @@ extension EncodeBuffer {
         case .status(let mailbox, let status):
             return self.writeMailboxData_status(mailbox: mailbox, status: status)
         case .exists(let num):
-            return self.writeString("\(num) EXISTS")
+            return self.writeDecimal(num) + self.writeString(" EXISTS")
         case .recent(let num):
-            return self.writeString("\(num) RECENT")
+            return self.writeDecimal(num) + self.writeString(" RECENT")
         case .namespace(let namespaceResponse):
             return self.writeNamespaceResponse(namespaceResponse)
         case .uidBatches(let response):
@@ -218,7 +216,7 @@ extension EncodeBuffer {
             + self.writeArray(list, prefix: " ", separator: " ", parenthesis: false) { (id, buffer) -> Int in
                 buffer.writeMessageIdentifier(id)
             }
-            + self.writeIfExists(modificationSequence) { value -> Int in
+            + writeIfExists(modificationSequence) { value -> Int in
                 self.writeString(" (MODSEQ ") + self.writeModificationSequenceValue(value) + self.writeString(")")
             }
     }
@@ -231,7 +229,7 @@ extension EncodeBuffer {
             + self.writeArray(list, prefix: " ", separator: " ", parenthesis: false) { (id, buffer) -> Int in
                 buffer.writeMessageIdentifier(id)
             }
-            + self.writeIfExists(modificationSequence) { value -> Int in
+            + writeIfExists(modificationSequence) { value -> Int in
                 self.writeString(" (MODSEQ ") + self.writeModificationSequenceValue(value) + self.writeString(")")
             }
     }

@@ -12,8 +12,6 @@
 //
 //===----------------------------------------------------------------------===//
 
-import struct NIO.ByteBuffer
-
 /// A percent-encoded SASL authentication mechanism name for use in IMAP URLs.
 ///
 /// IMAP URLs may specify an authentication mechanism requirement using the `;AUTH=` parameter.

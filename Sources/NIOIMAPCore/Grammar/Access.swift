@@ -12,8 +12,6 @@
 //
 //===----------------------------------------------------------------------===//
 
-import struct NIO.ByteBuffer
-
 /// An access restriction identifier that controls who may use a URLAUTH-authorized URL.
 ///
 /// The access identifier is part of the `URLAUTH` component appended to IMAP URLs (RFC 4467).

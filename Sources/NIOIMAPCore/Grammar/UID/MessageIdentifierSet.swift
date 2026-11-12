@@ -12,8 +12,6 @@
 //
 //===----------------------------------------------------------------------===//
 
-import struct NIO.ByteBuffer
-
 /// A set of message identifiers represented as an array of ranges.
 ///
 /// A `MessageIdentifierSet` represents a potentially non-contiguous collection of message
@@ -545,10 +543,17 @@ extension MessageIdentifierSet where IdentifierType == UnknownMessageIdentifier 
 
 extension MessageIdentifierSet {
     @_spi(NIOIMAPInternal) public func writeIntoBuffer(_ buffer: inout EncodeBuffer) -> Int {
-        buffer.writeArray(self._ranges.ranges, separator: ",", parenthesis: false) { (element, buffer) in
-            let r = MessageIdentifierRange<IdentifierType>(element)
-            return buffer.writeMessageIdentifierRange(r)
+        // Index loop, not `writeArray`: iterating `RangeSet.Ranges` with its iterator allocates
+        // twice per range (inside the standard library); subscripting by index doesn't.
+        let ranges = self._ranges.ranges
+        var size = 0
+        for index in ranges.indices {
+            if index != ranges.startIndex {
+                size += buffer.writeByte(UInt8(ascii: ","))
+            }
+            size += buffer.writeMessageIdentifierRange(MessageIdentifierRange<IdentifierType>(ranges[index]))
         }
+        return size
     }
 }
 

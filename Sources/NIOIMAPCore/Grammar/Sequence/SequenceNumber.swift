@@ -82,13 +82,13 @@ extension UnknownMessageIdentifier {
 
 extension EncodeBuffer {
     @discardableResult mutating func writeSequenceNumber(_ num: SequenceNumber) -> Int {
-        self.writeString("\(num.rawValue)")
+        self.writeDecimal(num.rawValue)
     }
 
     @discardableResult mutating func writeSequenceNumberOrWildcard(_ num: SequenceNumber) -> Int {
         guard num.rawValue < UInt32.max else {
             return self.writeString("*")
         }
-        return self.writeString("\(num.rawValue)")
+        return self.writeDecimal(num.rawValue)
     }
 }
