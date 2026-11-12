@@ -2,7 +2,7 @@
   "mallocBytesCount" : 799608,
   "mallocCountTotal" : 3706,
   "objectAllocCount" : 2093,
-  "releaseCount" : 36880,
-  "retainCount" : 34742,
+  "releaseCount" : 36869,
+  "retainCount" : 34731,
   "retainReleaseDelta" : 45
 }

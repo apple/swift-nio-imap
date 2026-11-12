@@ -159,6 +159,17 @@ struct ResponseParserTests {
         }
     }
 
+    /// An error from untyped API the grammar calls reaches the caller as thrown.
+    @Test("non-parser error is thrown unwrapped")
+    func nonParserErrorIsThrownUnwrapped() {
+        var parser = ResponseParser()
+        // `&AA-` decodes to one byte; modified UTF-7 needs an even count.
+        var buffer: IMAPInputBuffer = "* ID (\"name\" \"&AA-\")\r\n"
+        #expect(throws: ModifiedUTF7.OddByteCountError.self) {
+            try parser.parseResponseStream(buffer: &buffer)
+        }
+    }
+
     @Test("parse without string cache")
     func parseWithoutStringCache() throws {
         var parser = ResponseParser(

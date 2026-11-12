@@ -30,7 +30,7 @@ import Musl
 //
 // Unsafe seams. In the byte, encoder and parser code — `NIOIMAPCore`'s `Bytes/`, `Parser/` and
 // `EncodeBuffer*.swift`, and `NIOIMAP`'s `Bytes/` — memory safety and `Sendable` are compiler-checked
-// except at these fourteen. Not counted: reading through a pointer, or binding it to `UInt8`, inside the
+// except at these sixteen. Not counted: reading through a pointer, or binding it to `UInt8`, inside the
 // `withUnsafe…` closure that produced it. Outside that scope, `Base64/Chromium.swift` and
 // `MailboxName.swift` use pointers too; both predate this list.
 //
@@ -77,6 +77,10 @@ import Musl
 //     is immutable and keeps its regions alive.
 // 14. Sendable: `GrammarParser: @unchecked Sendable` (GrammarParser.swift), older than this list. Its
 //     `parsedStringCache` closure is not `@Sendable`.
+// 15. Sendable: `ThrowSite: @unchecked Sendable` (ParserErrors.swift). It points at a `#fileID` literal,
+//     which is immutable and lives as long as the process.
+// 16. Sendable: `LiteralHint: @unchecked Sendable` (ParserErrors.swift). It points at `StaticString`
+//     literals, accepted only with a pointer representation.
 
 /// One contiguous run of input bytes, plus whoever can keep those bytes alive.
 ///
@@ -336,11 +340,12 @@ extension ParseInput {
         return true
     }
 
-    /// Throws ``NoForwardProgress`` unless something was consumed since `mark`, a value of ``consumed``.
+    /// Throws ``ParseFailure/noForwardProgress(_:)`` unless something was consumed since `mark`, a value
+    /// of ``consumed``.
     ///
     /// For hand-written loops in the grammar: an iteration that consumed nothing would repeat forever.
-    internal func requireProgress(since mark: Int) throws {
-        guard consumed > mark else { throw NoForwardProgress() }
+    internal func requireProgress(since mark: Int) throws(ParseFailure) {
+        guard consumed > mark else { throw .noForwardProgress(NoForwardProgress()) }
     }
 
     /// Narrows the limit to the next `count` bytes.
@@ -448,7 +453,7 @@ extension ParseInput {
     /// How many leading bytes satisfy `predicate`, or `nil` if *every* visible byte does.
     ///
     /// Non-consuming. `nil` means "the run might continue in bytes that have not arrived yet", which is
-    /// what both character-class parsers turn into `IncompleteMessage`. Callers therefore never have to
+    /// what both character-class parsers turn into ``ParseFailure/incomplete``. Callers therefore never have to
     /// compare a count against the input length to work out which case they are in.
     ///
     /// The pointer is hoisted once per region: this is the primitive behind every atom and every number,
@@ -478,8 +483,8 @@ extension ParseInput {
 
 extension ParseInput {
     /// Consumes and returns one byte.
-    internal mutating func readByte() throws -> UInt8 {
-        guard let byte = peek(at: 0) else { throw IncompleteMessage() }
+    internal mutating func readByte() throws(ParseFailure) -> UInt8 {
+        guard let byte = peek(at: 0) else { throw .incomplete }
         advance(by: 1)
         return byte
     }
@@ -491,11 +496,11 @@ extension ParseInput {
     /// outright beats pinning the whole input. Raw message payloads go through
     /// ``extractBuffer(upTo:)`` instead.
     @_lifetime(self: copy self)
-    internal mutating func extractBytes(length: Int) throws -> [UInt8] {
+    internal mutating func extractBytes(length: Int) throws(ParseFailure) -> [UInt8] {
         precondition(length >= 0, "cannot extract \(length) bytes")
         guard length > 0 else { return [] }
         // Only walk the table when the answer isn't already in the current region.
-        guard headAvailable >= length || remaining >= length else { throw IncompleteMessage() }
+        guard headAvailable >= length || remaining >= length else { throw .incomplete }
         var bytes = [UInt8]()
         bytes.reserveCapacity(length)
         var wanted = length
@@ -505,7 +510,7 @@ extension ParseInput {
             // exhausted has some in `head`. Were the invariant ever broken this would spin, not end.
             guard take > 0 else {
                 assertionFailure("cursor invariant broken: bytes remain but none are in the head")
-                throw NoForwardProgress()
+                throw .noForwardProgress(NoForwardProgress())
             }
             withCurrentChunk { chunk in
                 chunk.extracting(first: take).withUnsafeBufferPointer { bytes.append(contentsOf: $0) }
@@ -532,10 +537,10 @@ extension ParseInput {
     ///   what `APPEND … {0+}` needs: the command parser has no zero-remaining special case and relies on
     ///   getting an empty payload back so that it can move on to the end of the literal.
     @_lifetime(self: copy self)
-    internal mutating func extractBuffer(upTo maxLength: Int) throws -> IMAPBuffer {
+    internal mutating func extractBuffer(upTo maxLength: Int) throws(ParseFailure) -> IMAPBuffer {
         precondition(maxLength >= 0, "cannot extract up to \(maxLength) bytes")
         let available = headAvailable
-        guard available > 0 else { throw IncompleteMessage() }
+        guard available > 0 else { throw .incomplete }
         let take = Swift.min(maxLength, available)
         if take >= IMAPBuffer.copyThreshold, Int(regionIndex) < table.count {
             let entry = table[Int(regionIndex)]
@@ -569,11 +574,14 @@ extension ParseInput {
     ///   - needle: The bytes to match. Must be ASCII.
     ///   - caseSensitivity: How to compare letters. ASCII case folding is a mask, so the insensitive
     ///     compare costs nothing extra.
-    /// - Throws: `IncompleteMessage` when everything that has arrived matches a prefix of `needle`, so
-    ///   more bytes could still complete it; ``ParserError`` when a byte disagrees, which no
+    /// - Throws: ``ParseFailure/incomplete`` when everything that has arrived matches a prefix of `needle`,
+    ///   so more bytes could still complete it; ``ParseFailure/mismatch(_:)`` when a byte disagrees, which no
     ///   continuation can fix.
     @_lifetime(self: copy self)
-    internal mutating func matchFixed(_ needle: String, caseSensitivity: CaseSensitivity = .caseInsensitive) throws {
+    internal mutating func matchFixed(
+        _ needle: String,
+        caseSensitivity: CaseSensitivity = .caseInsensitive
+    ) throws(ParseFailure) {
         assert(needle.utf8.allSatisfy { $0 & 0b1000_0000 == 0 }, "needle needs to be ASCII but \(needle) isn't")
         let caseSensitive = caseSensitivity == .caseSensitive
         let mask: UInt8 = caseSensitive ? 0xFF : 0xDF
@@ -587,16 +595,16 @@ extension ParseInput {
                 }
             }
             guard matches else {
-                throw ParserError(hint: caseSensitive ? "Fixed string mismatch" : "Fixed string mismatch (ci)")
+                throw .mismatch(caseSensitive ? "Fixed string mismatch" : "Fixed string mismatch (ci)")
             }
             advance(by: count)
             return
         }
         var offset = 0
         for expected in needle.utf8 {
-            guard let byte = peek(at: offset) else { throw IncompleteMessage() }
+            guard let byte = peek(at: offset) else { throw .incomplete }
             guard byte & mask == expected & mask else {
-                throw ParserError(hint: caseSensitive ? "Fixed string mismatch" : "Fixed string mismatch (ci)")
+                throw .mismatch(caseSensitive ? "Fixed string mismatch" : "Fixed string mismatch (ci)")
             }
             offset += 1
         }
@@ -625,10 +633,10 @@ extension ParseInput {
     ///
     /// Some servers send a stray space before the line ending, so spaces are skipped first, up to
     /// ``maximumStraySpaces``. Spaces within the cap with nothing after them report
-    /// ``IncompleteMessage``. Nothing is consumed unless a line ending is found, so a caller does not
+    /// ``ParseFailure/incomplete``. Nothing is consumed unless a line ending is found, so a caller does not
     /// need to wrap this in ``composite(tracker:_:)`` to keep its position on a failure.
     @discardableResult
-    internal mutating func matchNewline() throws -> Newline {
+    internal mutating func matchNewline() throws(ParseFailure) -> Newline {
         let (newline, length) = try newlineAhead()
         advance(by: length)
         terminatingNewline = newline
@@ -642,7 +650,7 @@ extension ParseInput {
     internal static let maximumStraySpaces = 1024
 
     /// The line ending at the read position, and how many bytes it takes up including skipped spaces.
-    private func newlineAhead() throws -> (Newline, Int) {
+    private func newlineAhead() throws(ParseFailure) -> (Newline, Int) {
         // One linear pass over the spaces: `peek(at:)` walks from the head each call, so peeking at a
         // growing offset would be quadratic in the spaces times the regions.
         // The scan stops one past the cap, so a hostile run is not read in full. A space at `offset`
@@ -653,22 +661,22 @@ extension ParseInput {
             return byte == UInt8(ascii: " ") && scanned <= Self.maximumStraySpaces
         }
         // Only spaces so far, within the cap: more spaces, or the line ending, may still arrive.
-        guard let offset = spaces else { throw IncompleteMessage() }
+        guard let offset = spaces else { throw .incomplete }
 
-        guard let first = peek(at: offset) else { throw IncompleteMessage() }
+        guard let first = peek(at: offset) else { throw .incomplete }
         guard let second = peek(at: offset + 1) else {
             // One byte, and no more may ever arrive as far as this cursor is concerned.
             switch first {
             case UInt8(ascii: "\n"): return (.lf, offset + 1)
             case UInt8(ascii: "\r"): return (.cr, offset + 1)
-            default: throw ParserError(hint: "Expected newline")
+            default: throw .mismatch("Expected newline")
             }
         }
         switch (first, second) {
         case (UInt8(ascii: "\r"), UInt8(ascii: "\n")): return (.crlf, offset + 2)
         case (UInt8(ascii: "\n"), _): return (.lf, offset + 1)
         case (UInt8(ascii: "\r"), _): return (.cr, offset + 1)
-        default: throw ParserError(hint: "Expected newline")
+        default: throw .mismatch("Expected newline")
         }
     }
 
@@ -715,8 +723,8 @@ extension ParseInput {
     @_lifetime(self: copy self)
     internal mutating func composite<T>(
         tracker: StackTracker,
-        _ body: (inout ParseInput, StackTracker) throws -> T
-    ) throws -> T {
+        _ body: SubParser<T>
+    ) throws(ParseFailure) -> T {
         var tracker = tracker
         try tracker.newStackFrame()
         let save = copy self

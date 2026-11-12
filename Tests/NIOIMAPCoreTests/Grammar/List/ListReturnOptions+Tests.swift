@@ -40,7 +40,7 @@ struct ListReturnOptionsTests {
             expected: .success(.optionExtension(.init(key: .standard("MYEXT"), value: nil)))
         ),
         ParseFixture.returnOption("", "", expected: .incompleteMessage),
-        ParseFixture.returnOption("123invalid", expected: .failure),
+        ParseFixture.returnOption("123invalid", expected: .incompleteMessage),
     ])
     func parse(_ fixture: ParseFixture<ReturnOption>) {
         fixture.checkParsing()

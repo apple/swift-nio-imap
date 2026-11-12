@@ -39,13 +39,18 @@ struct ParseFixture<T>: Sendable where T: Sendable {
         /// This is for parsers that don't save+restore on failure because they’re expected
         /// to only be used from within another parser that does so.
         case incompleteMessageIgnoringBufferModifications
-        /// The input is invalid.
+        /// The input is invalid. Should throw ``ParserError``.
         case failure
-        /// The input is invalid.
+        /// The input is invalid. Should throw an error of the given type.
+        case failureThrowing(any Error.Type)
+        /// The input is invalid. Should throw ``ParserError``.
         /// We don’t expect the buffer to remain unchanged.
         /// This is for parsers that don't save+restore on failure because they’re expected
         /// to only be used from within another parser that does so.
         case failureIgnoringBufferModifications
+        /// The input is invalid. Should throw an error of the given type.
+        /// We don’t expect the buffer to remain unchanged.
+        case failureIgnoringBufferModificationsThrowing(any Error.Type)
     }
 }
 
@@ -99,20 +104,28 @@ extension ParseFixture {
                 sourceLocation: sourceLocation
             )
         case .failure:
-            expectFailure(.initialCondition, nil, "Parsing should throw an error", sourceLocation: sourceLocation)
+            expectFailure(
+                .initialCondition,
+                ParserError.self,
+                "Should throw ParserError.",
+                sourceLocation: sourceLocation
+            )
+        case .failureThrowing(let errorType):
+            expectFailure(.initialCondition, errorType, "Should throw \(errorType).", sourceLocation: sourceLocation)
         case .failureIgnoringBufferModifications:
-            expectFailure(.ignore, nil, "Parsing should throw an error", sourceLocation: sourceLocation)
+            expectFailure(.ignore, ParserError.self, "Should throw ParserError.", sourceLocation: sourceLocation)
+        case .failureIgnoringBufferModificationsThrowing(let errorType):
+            expectFailure(.ignore, errorType, "Should throw \(errorType).", sourceLocation: sourceLocation)
         }
     }
 
-    /// Runs the parser and requires it to throw — an error of a particular type when `expectedError` is
-    /// given, and any error otherwise.
+    /// Runs the parser and requires it to throw an error of type `expectedError`.
     ///
     /// `#expect(throws:)` cannot wrap a parse: its closure would have to capture an `inout` value of a
     /// non-escapable type, which is exactly what a cursor is.
     private func expectFailure(
         _ finalBufferExpectation: ParseInputFixture.FinalBufferExpectation,
-        _ expectedError: Any.Type?,
+        _ expectedError: any Error.Type,
         _ comment: Comment,
         sourceLocation: SourceLocation
     ) {
@@ -122,17 +135,15 @@ extension ParseFixture {
             finalBufferExpectation: finalBufferExpectation,
             sourceLocation: sourceLocation
         ) { buffer in
-            guard let error = errorThrown(by: { try parser(&buffer, .testTracker) }) else {
+            guard let error = parseErrorThrown(by: { try parser(&buffer, .testTracker) }) else {
                 Issue.record(comment, sourceLocation: sourceLocation)
                 return
             }
-            if let expectedError {
-                #expect(
-                    type(of: error) == expectedError,
-                    comment,
-                    sourceLocation: sourceLocation
-                )
-            }
+            #expect(
+                type(of: error) == expectedError,
+                "\(comment) Got \(type(of: error)).",
+                sourceLocation: sourceLocation
+            )
         }
     }
 }

@@ -33,7 +33,7 @@ struct ListSelectIndependentOptionTests {
         "parse",
         arguments: [
             ParseFixture.listSelectIndependentOption("REMOTE", " ", expected: .success(.remote)),
-            ParseFixture.listSelectIndependentOption("SPECIAL-USE", " ", expected: .failure),
+            ParseFixture.listSelectIndependentOption("SPECIAL-USE", " ", expected: .incompleteMessage),
             ParseFixture.listSelectIndependentOption("", "", expected: .incompleteMessage),
         ]
     )
