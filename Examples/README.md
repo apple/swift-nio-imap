@@ -15,7 +15,7 @@ smaller — consumers don't resolve example-only dependencies such as `ArgumentP
 | [`CLI`](CLI) | A smaller command-line interface plus its supporting `CLILib` (with tests). |
 | [`Proxy`](Proxy) | An IMAP proxy that logs the traffic flowing through it. |
 | [`Fuzzer`](Fuzzer) | Fuzzing harness for the IMAP parser (`NIOIMAPFuzzer`). |
-| [`PerformanceTester`](PerformanceTester) | Micro-benchmarks for parsing/encoding (`NIOIMAPPerformanceTester`). |
+| [`PerformanceTester`](PerformanceTester) | Parser and encoder benchmarks, built on [ordo-one/benchmark](https://github.com/ordo-one/benchmark). |
 
 ## Building and running
 
@@ -27,5 +27,5 @@ swift run   --package-path Examples/IMAPTool imap-tool --help
 ```
 
 Because they are separate packages, `swift build` / `swift test` at the repository
-root builds only the library targets — not these examples. CI builds them via a
-dedicated `Build examples` job.
+root builds only the library targets — not these examples. CI builds them in the
+`Build examples` job; `PerformanceTester` has its own `Build benchmarks` job.
