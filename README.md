@@ -146,7 +146,7 @@ Add the package to your `Package.swift`:
 
 ```swift
 dependencies: [
-    .package(url: "https://github.com/apple/swift-nio-imap.git", from: "0.4.0"),
+    .package(url: "https://github.com/apple/swift-nio-imap.git", from: "0.5.0"),
 ],
 ```
 
