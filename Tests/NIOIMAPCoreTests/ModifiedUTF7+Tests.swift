@@ -41,6 +41,12 @@ struct ModifiedUTF7Tests {
             ("\u{7F}", "&AH8-"),
             ("é\u{1F}", "&AOkAHw-"),
             ("é\u{7F}", "&AOkAfw-"),
+            // Converted to NFC (RFC 5198): decomposed "é" encodes as U+00E9.
+            ("Re\u{301}pertoire", "R&AOk-pertoire"),
+            ("e\u{301}", "&AOk-"),
+            ("\u{212B}", "&AMU-"),
+            // Hangul jamo compose to U+D55C.
+            ("\u{1112}\u{1161}\u{11AB}", "&1Vw-"),
         ]
     )
     func encodeConvertsStringsToModifiedUTF7(input: String, expected: String) {
@@ -102,6 +108,8 @@ struct ModifiedUTF7Tests {
         arguments: [
             "&Jjo!",
             "&U,BTFw-&ZeVnLIqe-",
+            // Not NFC: "e" + U+0301.
+            "e&AwE-",
         ]
     )
     func validateRejectsInvalidModifiedUTF7Strings(input: String) {

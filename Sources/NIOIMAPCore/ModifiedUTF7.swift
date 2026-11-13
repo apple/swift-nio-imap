@@ -63,11 +63,16 @@ public enum ModifiedUTF7: Sendable {
     /// non-ASCII characters are represented using Base64 encoding with `&` as the
     /// escape character.
     ///
+    /// The string is first converted to Unicode Normalization Form C (NFC),
+    /// e.g. `"e\u{301}"` encodes the same as `"\u{E9}"`.
+    ///
     /// - Parameter string: The Unicode string to encode.
     /// - Returns: A `ByteBuffer` containing modified UTF-7 bytes.
     ///
     /// - SeeAlso: [RFC 3501 Section 5.1.3](https://datatracker.ietf.org/doc/html/rfc3501#section-5.1.3)
+    /// - SeeAlso: [RFC 5198 Section 2](https://datatracker.ietf.org/doc/html/rfc5198#section-2)
     static func encode(_ string: String) -> ByteBuffer {
+        let string = string.nfcNormalized
         var buffer = ByteBuffer()
         buffer.reserveCapacity(string.utf8.count)
 
@@ -173,5 +178,19 @@ extension ModifiedUTF7 {
         guard encoded == buffer else {
             throw EncodingRoundtripError(buffer: buffer)
         }
+    }
+}
+
+extension String {
+    /// UTF-8 lead byte of U+0300, the first scalar that may not be NFC.
+    private static let firstNonNFCSafeUTF8Byte: UInt8 = 0xCC
+
+    /// The string in Unicode Normalization Form C (NFC), as required by RFC 5198.
+    fileprivate var nfcNormalized: String {
+        // Scalars below U+0300 are always NFC. Skips the conversion for e.g. ASCII.
+        guard self.utf8.contains(where: { $0 >= Self.firstNonNFCSafeUTF8Byte }) else {
+            return self
+        }
+        return String(decoding: self._nfcCodeUnits, as: UTF8.self)
     }
 }
