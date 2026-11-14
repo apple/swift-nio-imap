@@ -377,9 +377,8 @@ everywhere except the `encode.dispatch.*` cases (see below).
 | `encode.dispatch.regions.16` | 6,919 ns | 79 | 7,459 | not measured |
 | `encode.dispatch.regions.64` | 42 µs | 319 | 67 K | not measured |
 
-The `encode.dispatch.*` cases measure no ARC metric, deliberately and for two reasons — the counters are
-not deterministic there, and asking for them crashes the harness. Both come from the same cause and both
-are explained in a comment above those registrations. Their wall clock is also the least trustworthy in
+The `encode.dispatch.*` cases measure no ARC metric, deliberately: the counters are not deterministic
+there, as a comment above those registrations explains. Their wall clock is also the least trustworthy in
 the suite for the same reason: a donated region's deallocator runs on a background queue, so a case's
 measured time depends on how much destruction work the queue is still retiring from the case before it.
 `encode.dispatch.regions.1` measures 417 ns run in isolation and 1,416 ns run after the 64-region case.
@@ -535,24 +534,17 @@ Five things this says:
    allocations, which is the traffic the segment sink was chosen for — hundreds of small writes into
    memory the encoder owns, handed over without a copy.
 
-### The ARC counters, and a crash worth knowing about
+### The ARC counters
 
-The write cases **do not measure ARC metrics**, and the omission is load-bearing twice over. Both
-reasons are the ones `encode.dispatch.*` already carries, arrived at again from the other direction:
+The write cases **do not measure ARC metrics**, for the reason `encode.dispatch.*` already carries: large
+regions are donated to a `DispatchData`, which frees the memory it adopted on a background queue, so how
+many of a chunk's releases land inside the measured region depends on how far that queue has got.
+`encode.responses.session` reported retain deltas of 38 and 58 across two runs of the same binary with
+byte-identical allocation counters.
 
-- Large regions are donated to a `DispatchData`, which frees the memory it adopted on a background queue,
-  so how many of a chunk's releases land inside the measured region depends on how far that queue has
-  got. `encode.responses.session` reported retain deltas of 38 and 58 across two runs of the same binary
-  with byte-identical allocation counters.
-- *Asking* for an ARC metric makes the harness install a `swift_retain` hook whose teardown restores the
-  original function pointer before clearing the hook data it still dereferences, so a thread already
-  inside the hook calls through NULL. This target hit it once in ~6 runs — `EXC_BAD_ACCESS` at `0x0` on
-  `com.apple.root.default-qos` — while its encode cases still requested ARC metrics, and never since.
-  Upstream race, `ordo-one/benchmark` 1.36.2.
-
-**A `--metric` on the command line overrides the per-case opt-out and puts the hook back.** So
-`thresholds check --metric retainCount …` over a filter that includes these cases both gates noise and
-can crash, which is why `dev/compare-dispatch-client.sh` runs the read and write halves as two phases
+**A `--metric` on the command line overrides the per-case opt-out.** So
+`thresholds check --metric retainCount …` over a filter that includes these cases gates noise, which is
+why `dev/compare-dispatch-client.sh` runs the read and write halves as two phases
 with different metric sets, and why the committed thresholds for the write cases hold `mallocCountTotal`
 and `mallocBytesCount` only. Read those cases' ratios in allocations and bytes; the wall clock is
 directional and the ARC counters are not measured at all.
@@ -587,7 +579,7 @@ If the case is one you will want to profile, add a matching entry to the `scenar
 - **`thresholds update` writes every `--metric` you pass to every case, including ones that opted out.**
   The six-metric set above adds ARC counters to the `encode.dispatch.*` and
   `dispatch-client.encode.*` threshold files, which must not be gated (see
-  [the ARC counters](#the-arc-counters-and-a-crash-worth-knowing-about)). After any update, revert them;
+  [the ARC counters](#the-arc-counters)). After any update, revert them;
   the grep must print nothing:
 
   ```sh
@@ -598,10 +590,6 @@ If the case is one you will want to profile, add a matching entry to the `scenar
   ```
 
   The same override applies to `thresholds check` and `baseline update`.
-- **`EXC_BAD_ACCESS` at address 0 on `com.apple.root.default-qos`** is the upstream ARC-hook race, not a
-  `DispatchData` use-after-free. Details in
-  [the ARC counters](#the-arc-counters-and-a-crash-worth-knowing-about). The stack is not always
-  symbolicated; the only sign may be `frame #0: 0x0000000000000000` on that queue.
 - **Occasional "1 benchmark job(s) failed during runtime" on full-suite runs.** Re-running the case alone
   has always succeeded. Afterwards, check every registered case got a threshold file: compare
   `swift package --disable-sandbox benchmark list` against `ls Thresholds`.

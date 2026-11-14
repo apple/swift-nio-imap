@@ -49,11 +49,8 @@ PRE_MIGRATION_COMMIT="${IMAP_PRE_MIGRATION_COMMIT:-f5fa7d369115e5d88e13462f7854d
 # each set is defined once and used twice rather than typed per invocation.
 #
 # Two sets, and the split is not cosmetic. The `encode.*` cases donate large regions to a `DispatchData`,
-# which frees on a background queue, so (a) their ARC counters are noise and (b) *asking* for an ARC
-# metric installs a `swift_retain` hook whose teardown races with a thread already inside it, which
-# segfaults on `com.apple.root.default-qos` roughly one run in six. The cases opt out in their own
-# configuration, but a `--metric` on the command line overrides that and puts the hook back — so the
-# encode phase must not ask. See the note in `Benchmarks/IMAPDispatchClient/IMAPDispatchClient.swift`.
+# which frees on a background queue, so their ARC counters are noise. The cases opt out in their own
+# configuration, but a `--metric` on the command line overrides that — so the encode phase must not ask. See the note in `Benchmarks/IMAPDispatchClient/IMAPDispatchClient.swift`.
 PARSE_METRICS=(
     --metric wallClock
     --metric mallocCountTotal

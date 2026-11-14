@@ -368,25 +368,15 @@ let benchmarks: @Sendable () -> Void = {
 
     // MARK: The DispatchData hand-out, per sink
 
-    // These cases deliberately measure **no ARC metric**, which is both a correctness fix and an honesty
-    // fix, and the reason is the same in each direction: a donated region carries a custom deallocator
+    // These cases deliberately measure **no ARC metric**: a donated region carries a custom deallocator
     // block, and libdispatch runs a custom destructor on the default global queue when the queue is
     // `nil` rather than inline, so this is the only path in the suite that does reference counting on a
     // thread the benchmark does not own.
     //
-    // *Honesty:* how many of a chunk's releases land inside the measured region depends on how far the
+    // How many of a chunk's releases land inside the measured region depends on how far the
     // background queue has got. Over successive runs of the same binary `encode.dispatch.regions.64`
     // reported retain/release deltas of 61, 128 and 212 while its allocation counters were identical to
     // the byte, so gating them would gate noise.
-    //
-    // *Correctness:* asking for an ARC metric makes the harness install a `swift_retain` hook for the
-    // duration of the benchmark, and its teardown (`swift_runtime_set_retain_hook(nil, nil)`) restores
-    // the original function pointer and only *then* clears the hook data it still dereferences. A thread
-    // already inside the hook therefore calls through a NULL pointer. Requesting ARC metrics here
-    // segfaulted roughly one run in three, always on `com.apple.root.default-qos` inside the deallocator
-    // block; not requesting them means the hook is never installed, because the harness installs it only
-    // when a metric needs it. This is an upstream race (ordo-one/benchmark 1.36.2) that any benchmark
-    // doing ARC work off-thread can hit — the second upstream issue this suite has had to work around.
     //
     // The allocation counters stay gated, and they are the ones the zero-copy claims are written in terms
     // of anyway: an asynchronous `free` cannot change how many times something was allocated, which is
