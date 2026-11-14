@@ -96,7 +96,8 @@ extension EncodeBuffer {
 
     /// Creates a new `EncodeBuffer` suitable for a client to write commands.
     /// - parameter buffer: An initial `ByteBuffer` to write to. Note that this is copied and not taken as `inout`.
-    /// - parameter options: Configuration to use when writing.
+    /// - parameter capabilities: The capabilities the server advertised, which decide the encoding
+    ///     options.
     /// - returns: A new `EncodeBuffer` configured for client use.
     static func clientEncodeBuffer(buffer: ByteBuffer, capabilities: [Capability], loggingMode: Bool) -> EncodeBuffer {
         clientEncodeBuffer(
@@ -106,7 +107,7 @@ extension EncodeBuffer {
         )
     }
 
-    /// Creates a new `EncodeBuffer` suitable for a client to write commands.
+    /// Creates a new `EncodeBuffer` suitable for a server to write responses.
     /// - parameter buffer: An initial `ByteBuffer` to write to. Note that this is copied and not taken as `inout`.
     /// - parameter options: Configuration to use when writing.
     /// - returns: A new `EncodeBuffer` configured for server use.
@@ -118,9 +119,10 @@ extension EncodeBuffer {
         EncodeBuffer(buffer, mode: .server(streamingAttributes: false, options: options), loggingMode: loggingMode)
     }
 
-    /// Creates a new `EncodeBuffer` suitable for a client to write commands.
+    /// Creates a new `EncodeBuffer` suitable for a server to write responses.
     /// - parameter buffer: An initial `ByteBuffer` to write to. Note that this is copied and not taken as `inout`.
-    /// - parameter options: Configuration to use when writing.
+    /// - parameter capabilities: The capabilities the server advertises, which decide the encoding
+    ///     options.
     /// - returns: A new `EncodeBuffer` configured for server use.
     static func serverEncodeBuffer(buffer: ByteBuffer, capabilities: [Capability], loggingMode: Bool) -> EncodeBuffer {
         serverEncodeBuffer(
@@ -179,11 +181,11 @@ extension EncodeBuffer {
     /// Retrieves the next chunk of encoded data ready to transmit.
     ///
     /// In client mode with synchronizing literals, this may return multiple chunks with
-    /// ``Chunk.waitForContinuation`` set to `true` between chunks, requiring the caller
+    /// ``Chunk/waitForContinuation`` set to `true` between chunks, requiring the caller
     /// to pause and wait for the server's `+` continuation request.
     ///
     /// In server mode, this always returns all remaining data in a single chunk with
-    /// ``Chunk.waitForContinuation`` set to `false`.
+    /// ``Chunk/waitForContinuation`` set to `false`.
     ///
     /// - Returns: The next ``Chunk`` of data to transmit.
     public mutating func nextChunk() -> Chunk {
@@ -241,6 +243,76 @@ extension EncodeBuffer {
         self.buffer.writeString(string)
     }
 
+    /// Writes a single byte to the buffer.
+    ///
+    /// Prefer this over ``writeString(_:)`` with a one-character literal: it skips the `String`
+    /// machinery entirely.
+    ///
+    /// - Parameter byte: The byte to write.
+    /// - Returns: The number of bytes written, always 1.
+    @discardableResult
+    @inlinable
+    public mutating func writeByte(_ byte: UInt8) -> Int {
+        // `withUnsafeBytes(of:)` on a trivial local, rather than `writeBytes(CollectionOfOne(byte))`:
+        // the sink takes a pointer, so a one-element collection would have to be materialised first.
+        withUnsafeBytes(of: byte) { self.appendBytes($0) }
+    }
+
+    /// The widest integer ``writeDecimal(_:minimumDigits:)`` accepts, in bits: the widest standard
+    /// library integer.
+    @inlinable
+    static var maximumDecimalBitWidth: Int { 128 }
+
+    /// The most bytes ``writeDecimal(_:minimumDigits:)`` writes: the digits of the widest
+    /// ``maximumDecimalBitWidth``-bit magnitude, plus a sign.
+    @inlinable
+    static var maximumDecimalLength: Int { 39 + 1 }  // digits in UInt128.max + sign
+
+    /// Writes an integer as ASCII decimal digits.
+    ///
+    /// Prefer this over interpolating a number into a string: `writeString("{\(count)}")` runs the
+    /// interpolation machinery and heap-allocates as soon as the result exceeds 15 UTF-8 bytes,
+    /// whereas this formats the digits into a stack buffer and copies them once.
+    ///
+    /// Unlike ``writeBytes(_:)``, this is never redacted in ``loggingMode`` — the numbers
+    /// written here are lengths, offsets and identifiers, not payload.
+    ///
+    /// - Parameters:
+    ///   - number: The number to write, at most `maximumDecimalBitWidth` bits wide. A negative number is
+    ///     written with a leading `-`.
+    ///   - minimumDigits: Pad with leading zeros up to this many digits. The sign, if any, doesn't
+    ///     count towards it. Must be less than `maximumDecimalLength`.
+    /// - Returns: The number of bytes written.
+    @discardableResult
+    @inlinable
+    public mutating func writeDecimal<Number: FixedWidthInteger>(_ number: Number, minimumDigits: Int = 1) -> Int {
+        precondition(minimumDigits < Self.maximumDecimalLength, "minimumDigits must be less than maximumDecimalLength")
+        // A wider magnitude can have more digits than the buffer holds. Folds away when specialized.
+        precondition(Number.bitWidth <= Self.maximumDecimalBitWidth, "Number is wider than maximumDecimalBitWidth")
+        return withUnsafeTemporaryAllocation(of: UInt8.self, capacity: Self.maximumDecimalLength) { digits in
+            var index = digits.endIndex
+            var magnitude = number.magnitude
+            var written = 0
+            repeat {
+                let (quotient, remainder) = magnitude.quotientAndRemainder(dividingBy: 10)
+                index -= 1
+                digits[index] = UInt8(ascii: "0") + UInt8(truncatingIfNeeded: remainder)
+                magnitude = quotient
+                written += 1
+            } while magnitude != 0
+            while written < minimumDigits, index > digits.startIndex {
+                index -= 1
+                digits[index] = UInt8(ascii: "0")
+                written += 1
+            }
+            if number < 0, index > digits.startIndex {
+                index -= 1
+                digits[index] = UInt8(ascii: "-")
+            }
+            return self.appendBytes(UnsafeRawBufferPointer(UnsafeBufferPointer(rebasing: digits[index...])))
+        }
+    }
+
     /// Writes raw bytes to the buffer.
     ///
     /// When ``loggingMode`` is enabled, this writes a placeholder like `[N bytes]`
@@ -254,7 +326,7 @@ extension EncodeBuffer {
         guard loggingMode else {
             return self.buffer.writeBytes(bytes)
         }
-        return self.buffer.writeString("[\(Array(bytes).count) bytes]")
+        return self.writeRedactedByteCount(bytes.reduce(into: 0) { count, _ in count += 1 })
     }
 
     /// Writes a `ByteBuffer` to the buffer.
@@ -270,7 +342,31 @@ extension EncodeBuffer {
         guard loggingMode else {
             return self.buffer.writeBuffer(&buffer)
         }
-        return self.buffer.writeString("[\(buffer.readableBytes) bytes]")
+        return self.writeRedactedByteCount(buffer.readableBytes)
+    }
+
+    /// Appends bytes to the buffer with no redaction.
+    ///
+    /// The primitive the redaction-exempt writers (``writeByte(_:)``,
+    /// ``writeDecimal(_:minimumDigits:)``) and the already-redacted ones build on. A caller that
+    /// writes payload has to consult ``loggingMode`` before reaching this.
+    ///
+    /// - Parameter bytes: The bytes to append.
+    /// - Returns: The number of bytes appended.
+    @discardableResult
+    @inlinable
+    mutating func appendBytes(_ bytes: UnsafeRawBufferPointer) -> Int {
+        self.buffer.writeBytes(bytes)
+    }
+
+    /// Writes the `[123 bytes]` placeholder that ``loggingMode`` substitutes for payload bytes.
+    ///
+    /// - Parameter byteCount: The number of bytes that were redacted.
+    /// - Returns: The number of bytes written.
+    @discardableResult
+    @inlinable
+    mutating func writeRedactedByteCount(_ byteCount: Int) -> Int {
+        self.writeByte(UInt8(ascii: "[")) + self.writeDecimal(byteCount) + self.writeString(" bytes]")
     }
 
     /// Erases all data from the buffer and resets the chunk tracking.

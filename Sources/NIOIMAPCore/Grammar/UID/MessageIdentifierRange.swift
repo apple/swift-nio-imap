@@ -12,8 +12,6 @@
 //
 //===----------------------------------------------------------------------===//
 
-import struct NIO.ByteBuffer
-
 /// A closed range of message identifiers (either UIDs or sequence numbers).
 ///
 /// A `MessageIdentifierRange` represents a contiguous sequence of message identifiers using
@@ -208,7 +206,7 @@ extension EncodeBuffer {
         let a = descending ? range.range.upperBound : range.range.lowerBound
         let b = descending ? range.range.lowerBound : range.range.upperBound
         return self.writeMessageIdentifier(a)
-            + self.write(if: range.range.lowerBound < range.range.upperBound) {
+            + write(if: range.range.lowerBound < range.range.upperBound) {
                 self.writeString(":") + self.writeMessageIdentifier(b)
             }
     }

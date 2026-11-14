@@ -12,8 +12,6 @@
 //
 //===----------------------------------------------------------------------===//
 
-import struct NIO.ByteBuffer
-
 /// A resource usage report showing current usage and maximum limit (RFC 2087).
 ///
 /// **Requires server capability:** ``Capability/quota``
@@ -76,7 +74,7 @@ public struct QuotaResource: Hashable, Sendable {
 
 extension EncodeBuffer {
     @discardableResult mutating func writeQuotaResource(_ quotaDetails: QuotaResource) -> Int {
-        self.writeQuotaResourceName(quotaDetails.resourceName)
-            + self.writeString(" \(quotaDetails.usage) \(quotaDetails.limit)")
+        self.writeQuotaResourceName(quotaDetails.resourceName) + self.writeSpace()
+            + self.writeDecimal(quotaDetails.usage) + self.writeSpace() + self.writeDecimal(quotaDetails.limit)
     }
 }

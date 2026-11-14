@@ -12,8 +12,6 @@
 //
 //===----------------------------------------------------------------------===//
 
-import struct NIO.ByteBuffer
-
 /// A network-accessible IMAP URL pointing to a specific message or message part on a remote server.
 ///
 /// A network message path combines an IMAP server specification (``IMAPServer``) with a message path

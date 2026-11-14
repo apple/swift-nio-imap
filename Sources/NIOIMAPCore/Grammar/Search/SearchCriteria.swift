@@ -12,8 +12,6 @@
 //
 //===----------------------------------------------------------------------===//
 
-import struct NIO.ByteBuffer
-
 extension EncodeBuffer {
     @discardableResult mutating func writeSearchCriteria(_ criteria: [SearchKey]) -> Int {
         self.writeArray(criteria, parenthesis: false) { (key, self) in

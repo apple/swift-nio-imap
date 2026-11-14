@@ -12,8 +12,6 @@
 //
 //===----------------------------------------------------------------------===//
 
-import struct NIO.ByteBuffer
-
 /// The type of option extension, either standard or vendor-specific.
 ///
 /// Option extensions are part of the RFC 4466 extension mechanism that allows servers to advertise

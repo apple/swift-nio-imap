@@ -12,7 +12,6 @@
 //
 //===----------------------------------------------------------------------===//
 
-import struct NIO.ByteBuffer
 import struct OrderedCollections.OrderedDictionary
 
 /// Optional metadata to attach to a message in an `APPEND` command.
@@ -89,10 +88,10 @@ public struct AppendOptions: Hashable, Sendable {
 
 extension EncodeBuffer {
     @discardableResult mutating func writeAppendOptions(_ options: AppendOptions) -> Int {
-        self.write(if: options.flagList.count >= 1) {
+        write(if: options.flagList.count >= 1) {
             self.writeSpace() + self.writeFlags(options.flagList)
         }
-            + self.writeIfExists(options.internalDate) { (internalDate) -> Int in
+            + writeIfExists(options.internalDate) { (internalDate) -> Int in
                 self.writeSpace() + self.writeInternalDate(internalDate)
             }
             + self.writeOrderedDictionary(options.extensions, prefix: " ", parenthesis: false) { (ext, self) -> Int in

@@ -200,8 +200,12 @@ struct FetchAttributeTests {
         ParseFixture.fetchAttribute("X-GM-THRID", " ", expected: .success(.gmailThreadID)),
         ParseFixture.fetchAttribute("X-GM-LABELS", " ", expected: .success(.gmailLabels)),
         ParseFixture.fetchAttribute("MODSEQ", " ", expected: .success(.modificationSequence)),
-        ParseFixture.fetchAttribute("PREVIEW", " ", expected: .success(.preview(lazy: false))),
+        // Not " ": with only "PREVIEW " visible, " (LAZY)" may still follow, so that is incomplete.
+        ParseFixture.fetchAttribute("PREVIEW", ")", expected: .success(.preview(lazy: false))),
         ParseFixture.fetchAttribute("PREVIEW (LAZY)", " ", expected: .success(.preview(lazy: true))),
+        // A read that ends inside the optional " (LAZY)" waits for more input.
+        ParseFixture.fetchAttribute("PREVIEW ", "", expected: .incompleteMessage),
+        ParseFixture.fetchAttribute("PREVIEW (LA", "", expected: .incompleteMessage),
         ParseFixture.fetchAttribute("EMAILID", " ", expected: .success(.emailID)),
         ParseFixture.fetchAttribute("THREADID", " ", expected: .success(.threadID)),
         ParseFixture.fetchAttribute("OBJECTID", " ", expected: .success(.objectID)),

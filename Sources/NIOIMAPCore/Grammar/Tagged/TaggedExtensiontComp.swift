@@ -12,13 +12,11 @@
 //
 //===----------------------------------------------------------------------===//
 
-import struct NIO.ByteBuffer
-
 // MARK: - Encoding
 
 extension EncodeBuffer {
     @discardableResult mutating func writeTaggedExtensionComp(_ comp: [String]) -> Int {
-        self.write(if: comp.count >= 1) {
+        write(if: comp.count >= 1) {
             self.writeArray(comp) { (string, self) in
                 self.writeIMAPString(string)
             }

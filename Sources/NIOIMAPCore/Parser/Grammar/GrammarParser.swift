@@ -100,33 +100,50 @@ typealias PL = ParserLibrary
 // MARK: - Grammar Parsers
 
 extension GrammarParser {
-    /// Attempts to select a parser from the given `parsers` by extracting the first unbroken sequence of alpha characters.
-    /// E.g. for the command `LOGIN username password`, the parser will parse `LOGIN`, and use that as a (case-insensitive) key to find a suitable parser in `parsers`.
-    /// - parameter buffer: The `ByteBuffer` to parse from.
-    /// - parameter tracker: Used to limit the stack depth.
-    /// - parameter parsers: A dictionary that maps a string to a sub-parser.
-    /// - returns: `T` if a suitable sub-parser was located and executed.
-    /// - throws: A `ParserError` if a parser wasn't found.
-    func parseFromLookupTable<T>(
+    /// Consumes the keyword that selects a sub-parser, and returns it uppercased.
+    ///
+    /// The keyword is the leading unbroken run of alphanumerics, `.` and `-`; `LOGIN` out of
+    /// `LOGIN username password`, `RFC822.SIZE` out of `RFC822.SIZE 1234`. IMAP keywords are
+    /// case-insensitive, hence the uppercasing, and every call site compares against upper-case
+    /// literals.
+    ///
+    /// Consumes the keyword whether or not the caller goes on to recognise it, so a caller that may
+    /// reject it has to save and restore the cursor around the whole selection. That is what
+    /// ``selectingKeyword(buffer:_:)`` is for.
+    ///
+    /// - Throws: `IncompleteMessage` when every byte that has arrived is part of the keyword, since
+    ///     more could still follow; ``ParserError`` when the first byte cannot start one.
+    func parseLookupKeyword(buffer: inout ParseBuffer) throws -> String {
+        // A flat scan with nothing to recurse into, so it gets a throwaway tracker rather than
+        // taking the caller's.
+        let parsed = try PL.parseOneOrMoreCharacters(buffer: &buffer, tracker: .makeNewDefault) { char -> Bool in
+            switch char {
+            case _ where char.isAlphaNum, UInt8(ascii: "."), UInt8(ascii: "-"):
+                return true
+            default:
+                return false
+            }
+        }
+        return try ParserLibrary.parseBufferAsUTF8(parsed).uppercased()
+    }
+
+    /// Parses a keyword with ``parseLookupKeyword(buffer:)``, hands it to `select`, and rewinds the
+    /// cursor if anything throws.
+    ///
+    /// Pair it with a `switch` on the keyword: a dictionary of sub-parsers would allocate a closure
+    /// context per entry on every call.
+    ///
+    /// - Important: `select` should throw ``ParserError`` for an unrecognised keyword — not
+    ///     `IncompleteMessage`, which would make the caller wait for bytes that cannot help. Callers
+    ///     that fall back to another production (`parseFetchAttribute`, say) catch exactly that.
+    func selectingKeyword<T>(
         buffer: inout ParseBuffer,
-        tracker: StackTracker,
-        parsers: [String: (inout ParseBuffer, StackTracker) throws -> T]
+        _ select: (String, inout ParseBuffer) throws -> T
     ) throws -> T {
         let save = buffer
         do {
-            let parsed = try PL.parseOneOrMoreCharacters(buffer: &buffer, tracker: tracker) { char -> Bool in
-                switch char {
-                case _ where char.isAlphaNum, UInt8(ascii: "."), UInt8(ascii: "-"):
-                    return true
-                default:
-                    return false
-                }
-            }
-            let word = try ParserLibrary.parseBufferAsUTF8(parsed).uppercased()
-            guard let parser = parsers[word] else {
-                throw ParserError(hint: "Didn't find parser for \(word)")
-            }
-            return try parser(&buffer, tracker)
+            let keyword = try parseLookupKeyword(buffer: &buffer)
+            return try select(keyword, &buffer)
         } catch {
             buffer = save
             throw error
@@ -2738,7 +2755,7 @@ extension GrammarParser {
             do {
                 try PL.parseSpaces(buffer: &buffer, tracker: tracker)
                 try self.parseTaggedExtensionComplex_helper(into: &into, buffer: &buffer, tracker: tracker)
-            } catch {
+            } catch is ParserError {
                 return
             }
         }
@@ -2776,7 +2793,7 @@ extension GrammarParser {
             let save = buffer
             do {
                 try parseTaggedExtensionComplex_string(into: &into, buffer: &buffer, tracker: tracker)
-            } catch {
+            } catch is ParserError {
                 buffer = save
                 try parseTaggedExtensionComplex_bracketed(into: &into, buffer: &buffer, tracker: tracker)
             }

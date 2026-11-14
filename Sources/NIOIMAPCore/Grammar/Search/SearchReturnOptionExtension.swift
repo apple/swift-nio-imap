@@ -12,8 +12,6 @@
 //
 //===----------------------------------------------------------------------===//
 
-import struct NIO.ByteBuffer
-
 // MARK: - Encoding
 
 extension EncodeBuffer {
@@ -21,7 +19,7 @@ extension EncodeBuffer {
         _ option: KeyValue<ExtensionKey<SearchReturnOption>, ParameterValue?>
     ) -> Int {
         self.writeExtensionKey(option.key)
-            + self.writeIfExists(option.value) { (params) -> Int in
+            + writeIfExists(option.value) { (params) -> Int in
                 self.writeSpace() + self.writeParameterValue(params)
             }
     }

@@ -12,8 +12,6 @@
 //
 //===----------------------------------------------------------------------===//
 
-import struct NIO.ByteBuffer
-
 /// A result option for the `SEARCH` command's extended `RETURN` clause (RFC 4731 ESEARCH extension).
 ///
 /// The ESEARCH extension allows clients to control what kind of information is returned from a search operation,
@@ -125,7 +123,7 @@ extension EncodeBuffer {
         // servers will fail to parse this correctly.
         return
             self.writeString(" RETURN (")
-            + self.writeIfExists(options) { (options) -> Int in
+            + writeIfExists(options) { (options) -> Int in
                 self.writeArray(options, parenthesis: false) { (option, self) in
                     self.writeSearchReturnOption(option)
                 }

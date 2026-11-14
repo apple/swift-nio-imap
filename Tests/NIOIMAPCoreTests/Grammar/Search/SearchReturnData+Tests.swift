@@ -24,6 +24,10 @@ struct SearchReturnDataTests {
         EncodeFixture.searchReturnData(.all(LastCommandSet.range(1...3)), "ALL 1:3"),
         EncodeFixture.searchReturnData(.count(1), "COUNT 1"),
         EncodeFixture.searchReturnData(.modificationSequence(1), "MODSEQ 1"),
+        EncodeFixture.searchReturnData(.min(4_294_967_294), "MIN 4294967294"),
+        EncodeFixture.searchReturnData(.max(4_294_967_294), "MAX 4294967294"),
+        EncodeFixture.searchReturnData(.count(Int.max), "COUNT 9223372036854775807"),
+        EncodeFixture.searchReturnData(.modificationSequence(9_223_372_036_854_775_807), "MODSEQ 9223372036854775807"),
         EncodeFixture.searchReturnData(
             .partial(.first(23_500...24_000), [67, 100...102]),
             "PARTIAL (23500:24000 67,100:102)"

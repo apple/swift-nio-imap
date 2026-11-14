@@ -12,8 +12,6 @@
 //
 //===----------------------------------------------------------------------===//
 
-import struct NIO.ByteBuffer
-
 /// Parameters that modify the behavior of the `CREATE` command.
 ///
 /// The `CreateParameter` enum allows clients to attach special attributes or other

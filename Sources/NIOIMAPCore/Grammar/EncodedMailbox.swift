@@ -12,8 +12,6 @@
 //
 //===----------------------------------------------------------------------===//
 
-import struct NIO.ByteBuffer
-
 /// A percent-encoded mailbox name for use in IMAP URLs.
 ///
 /// IMAP URLs include mailbox names as part of the URL path. When a mailbox name contains

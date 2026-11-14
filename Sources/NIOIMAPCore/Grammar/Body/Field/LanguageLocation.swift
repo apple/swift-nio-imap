@@ -12,8 +12,6 @@
 //
 //===----------------------------------------------------------------------===//
 
-import struct NIO.ByteBuffer
-
 extension BodyStructure {
     /// Language and content location information for a message part.
     ///
@@ -64,7 +62,7 @@ extension BodyStructure {
 extension EncodeBuffer {
     @discardableResult mutating func writeBodyFieldLanguageLocation(_ langLoc: BodyStructure.LanguageLocation) -> Int {
         self.writeSpace() + self.writeBodyLanguages(langLoc.languages)
-            + self.writeIfExists(langLoc.location) { (location) -> Int in
+            + writeIfExists(langLoc.location) { (location) -> Int in
                 self.writeBodyLocationAndExtensions(location)
             }
     }

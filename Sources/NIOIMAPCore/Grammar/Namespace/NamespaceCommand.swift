@@ -12,8 +12,6 @@
 //
 //===----------------------------------------------------------------------===//
 
-import struct NIO.ByteBuffer
-
 /// IMAPv4 `Namespace-Command`
 let NamespaceCommand = "NAMESPACE"
 
