@@ -113,12 +113,8 @@ extension EncodeBuffer {
         guard !loggingMode else {
             return self.writeRedactedByteCount(bytes.count)
         }
-        // Escape into a stack buffer, then copy once: a write per byte would dominate the cost of
-        // encoding a quoted mailbox name.
-        //
-        // Every byte grows to at most two, plus the two surrounding quotes. `shouldUseQuotedString`
-        // caps the input at 70 bytes, so this is a small allocation, but the bound above holds
-        // whatever it decides.
+        // Escape into a temporary buffer, then copy once: a write per byte would dominate the cost.
+        // Worst case: every byte escaped, plus the two quotes.
         let quote = UInt8(ascii: "\"")
         let escape = UInt8(ascii: "\\")
         let count = bytes.count
@@ -136,9 +132,7 @@ extension EncodeBuffer {
             }
             quoted[index] = quote
             index += 1
-            // `appendBytes` rather than `writeBytes`: redaction has already been decided. In logging
-            // mode `writeIMAPString` diverts to `writeIMAPStringLoggingMode` before choosing an
-            // encoding, so this function is never reached — the guard above is belt and braces.
+            // `appendBytes`: redaction was decided by the guard above.
             return self.appendBytes(UnsafeRawBufferPointer(UnsafeBufferPointer(rebasing: quoted[..<index])))
         }
     }
