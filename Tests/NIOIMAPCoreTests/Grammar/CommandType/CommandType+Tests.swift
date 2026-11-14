@@ -515,6 +515,7 @@ struct CommandTypeTests {
             ParseFixture.idSuffix(" nil", expected: .success(.id([:]))),
             ParseFixture.idSuffix(#" ("name" "some")"#, expected: .success(.id(["name": "some"]))),
             ParseFixture.idSuffix(#" ("k1" "v1" "k2" "v2")"#, expected: .success(.id(["k1": "v1", "k2": "v2"]))),
+            ParseFixture.idSuffix(#" ("vendor" "AT&T")"#, expected: .success(.id(["vendor": "AT&T"]))),
             ParseFixture.idSuffix(" ~", "", expected: .failure),
             ParseFixture.idSuffix(" []", "", expected: .failure),
             ParseFixture.idSuffix(" (\"name\"", "", expected: .incompleteMessage),
