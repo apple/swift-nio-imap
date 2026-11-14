@@ -315,11 +315,16 @@ struct ClientStateMachine {
                 self.state = .appending(appendStateMachine)
             }
         case .appendingLiteral(var appendStateMachine, var context):
-            // The part isn't fully sent, so this can't complete the APPEND: its tagged response
-            // rejects the literal (RFC 3501 §7.5), and `appendStateMachine` throws for it.
+            // The part isn't fully sent, so its tagged response rejects the literal (RFC 3501 §7.5) and
+            // `appendStateMachine` throws. `.doneAppending` is unreachable; fail closed rather than send
+            // the rest of the part on the next `+`.
             do {
-                let result = try appendStateMachine.receiveResponse(response)
-                assert(result == .continueAppending)
+                switch try appendStateMachine.receiveResponse(response) {
+                case .continueAppending:
+                    break
+                case .doneAppending:
+                    throw UnexpectedResponse(kind: .appendWithPendingContinuation)
+                }
             } catch var error as UnexpectedResponse {
                 error.activePromise = context.drop()
                 throw error
