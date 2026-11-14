@@ -92,11 +92,15 @@ struct IDTests {
                 "",
                 expected: .success(["key1": "value1", "key2": "value2", "key3": "value3"])
             ),
+            // Values are plain strings, not Modified UTF-7.
             ParseFixture.idParamsList(
                 #"("key1" "&AKM-" "flag" "&2Dzf9NtA3GfbQNxi20DcZdtA3G7bQNxn20Dcfw-")"#,
                 "",
-                expected: .success(["key1": "£", "flag": "🏴󠁧󠁢󠁥󠁮󠁧󠁿"])
+                expected: .success(["key1": "&AKM-", "flag": "&2Dzf9NtA3GfbQNxi20DcZdtA3G7bQNxn20Dcfw-"])
             ),
+            ParseFixture.idParamsList(#"("vendor" "AT&T")"#, "", expected: .success(["vendor": "AT&T"])),
+            ParseFixture.idParamsList(#"("vendor" "Tom&-Jerry")"#, "", expected: .success(["vendor": "Tom&-Jerry"])),
+            ParseFixture.idParamsList("(\"name\" {5}\r\ncafé)", "", expected: .success(["name": "café"])),
             ParseFixture.idParamsList(
                 #"("a" "1" "b" "2")"#,
                 "",
@@ -116,6 +120,26 @@ struct IDTests {
     )
     func parseIDParamsList(_ fixture: ParseFixture<OrderedDictionary<String, String?>>) {
         fixture.checkParsing()
+    }
+
+    /// RFC 2971: `id_params_list ::= "(" #(string SPACE nstring) ")" / nil`.
+    @Test(
+        "ID params round-trip",
+        arguments: [
+            ["name": "Imap", "version": "1.5"],
+            ["vendor": "AT&T"],
+            ["vendor": "Tom&-Jerry"],
+            ["support-url": "https://example.com/help?a=1&b=2"],
+            ["name": "café"],
+        ] as [OrderedDictionary<String, String?>]
+    )
+    func idParamsRoundTrip(_ values: OrderedDictionary<String, String?>) {
+        TestUtilities.expectRoundTrip(
+            values,
+            terminator: "\r",
+            encoder: { $0.writeIDParameters($1) },
+            parser: GrammarParser().parseIDParamsList
+        )
     }
 }
 

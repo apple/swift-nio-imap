@@ -935,7 +935,9 @@ extension GrammarParser {
             guard let value = try self.parseNString(buffer: &buffer, tracker: tracker) else {
                 return nil
             }
-            return try ModifiedUTF7.decode(value)
+            // RFC 2971 values are plain strings. Modified UTF-7 (RFC 3501 Section 5.1.3) is only for
+            // mailbox names, and `writeIDParameters` writes values as-is.
+            return String(bestEffortDecodingUTF8Bytes: value.readableBytesView)
         }
 
         func parseIDParamsList_nil(
