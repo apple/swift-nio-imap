@@ -326,7 +326,7 @@ extension EncodeBuffer {
         guard loggingMode else {
             return self.buffer.writeBytes(bytes)
         }
-        return self.writeRedactedByteCount(Array(bytes).count)
+        return self.writeRedactedByteCount(bytes.reduce(into: 0) { count, _ in count += 1 })
     }
 
     /// Writes a `ByteBuffer` to the buffer.
