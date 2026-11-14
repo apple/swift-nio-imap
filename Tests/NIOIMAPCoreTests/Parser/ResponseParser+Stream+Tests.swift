@@ -1128,6 +1128,10 @@ extension ResponseParserTests {
             #"* 1 FETCH (UID 1 FLAGS (\Seen  ) RFC822.SIZE 2)\#r\#n"#,
             #"* 1 FETCH (BODYSTRUCTURE (("text" "plain" NIL NIL NIL "7bit" 1 1)  "#
                 + #"("text" "html" NIL NIL NIL "7bit" 1 1) "alternative"))\#r\#n"#,
+            // Extension values (`tagged-ext-comp`): a read ending inside one must stay incomplete.
+            #"* LIST (\HasNoChildren) "." "INBOX.Sent" ("CHILDINFO" ("SUBSCRIBED"))\#r\#n"#,
+            #"* LIST () "/" INBOX ("OLDNAME" ("foo"))\#r\#n"#,
+            #"* ESEARCH (TAG "A1") UID XFOO (abc def) COUNT 2\#r\#n"#,
         ]
     )
     func splitAnywhere(response: String) throws {

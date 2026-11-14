@@ -130,10 +130,8 @@ extension GrammarParser {
     /// Parses a keyword with ``parseLookupKeyword(buffer:)``, hands it to `select`, and rewinds the
     /// cursor if anything throws.
     ///
-    /// Pair it with a `switch` on the keyword, not a dictionary of sub-parsers. A dictionary literal is
-    /// built **on every call**, and every entry that names a nested function or a method captures the
-    /// `GrammarParser`, so each one is a separate heap-allocated closure context, of which exactly one
-    /// is ever invoked. A `switch` calls the chosen sub-parser directly, so no closure is ever formed.
+    /// Pair it with a `switch` on the keyword: a dictionary of sub-parsers would allocate a closure
+    /// context per entry on every call.
     ///
     /// - Important: `select` should throw ``ParserError`` for an unrecognised keyword — not
     ///     `IncompleteMessage`, which would make the caller wait for bytes that cannot help. Callers
@@ -2757,7 +2755,7 @@ extension GrammarParser {
             do {
                 try PL.parseSpaces(buffer: &buffer, tracker: tracker)
                 try self.parseTaggedExtensionComplex_helper(into: &into, buffer: &buffer, tracker: tracker)
-            } catch {
+            } catch is ParserError {
                 return
             }
         }
@@ -2795,7 +2793,7 @@ extension GrammarParser {
             let save = buffer
             do {
                 try parseTaggedExtensionComplex_string(into: &into, buffer: &buffer, tracker: tracker)
-            } catch {
+            } catch is ParserError {
                 buffer = save
                 try parseTaggedExtensionComplex_bracketed(into: &into, buffer: &buffer, tracker: tracker)
             }
