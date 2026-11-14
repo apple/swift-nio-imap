@@ -318,6 +318,42 @@ struct AppendLiteralTests {
         }
         #expect(stateMachine.channelInactive().isEmpty)
     }
+
+    /// Unreachable today: `.finish` carries no literal. Injects the state to check that it fails closed
+    /// rather than sending the rest of the part after the APPEND completed.
+    @Test("APPEND completing while a part waits for + fails the part's write")
+    func completionWhileWaitingForLiteral() {
+        let eventLoop = EmbeddedEventLoop()
+        var stateMachine = ClientStateMachine(encodingOptions: .fixed(.rfc3501))
+        stateMachine.handlerAdded(ByteBufferAllocator())
+
+        let start = eventLoop.makePromise(of: Void.self)
+        #expect(throws: Never.self) {
+            try stateMachine.sendCommand(.append(.start(tag: "A1", appendingTo: .init("å"))), promise: start)
+        }
+        guard case .appendingLiteral(var append, let context) = stateMachine.state else {
+            Issue.record("Should wait for +, not \(stateMachine.state)")
+            start.succeed()
+            return
+        }
+        append.state = .waitingForTaggedResponse
+        stateMachine.state = .appendingLiteral(append, context)
+
+        do {
+            _ = try stateMachine.receiveResponse(.tagged(.init(tag: "A1", state: .ok(.init(code: nil, text: "")))))
+            Issue.record("Completing the APPEND mid-part must throw")
+            start.succeed()
+        } catch let error as UnexpectedResponse {
+            #expect(error.kind == .appendWithPendingContinuation)
+            #expect(error.activePromise?.futureResult === start.futureResult)
+            start.fail(error)
+        } catch {
+            Issue.record("Unexpected error \(error)")
+            start.fail(error)
+        }
+        #expect(stateMachine.state == .error)
+        #expect(stateMachine.channelInactive().isEmpty)
+    }
 }
 
 extension IMAPClientHandlerTests.Helper {
