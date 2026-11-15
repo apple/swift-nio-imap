@@ -111,10 +111,7 @@ public protocol ParserInputBuffer {
 }
 
 /// A ``ParserInputBuffer`` the parser can also consume from, so that a caller does not have to trim
-/// it by hand.
-///
-/// ``ConsumableParserInputBuffer/parse(limit:_:)`` is the entry point that trims: whatever the
-/// parser consumed is discarded when it returns, including when it throws.
+/// it by hand: the stream parsers discard whatever they consumed, including when they throw.
 ///
 /// - Important: ``discardFirst(_:)`` must be O(1) amortised in the number of bytes discarded. A
 ///   conformer that moves the remaining bytes down instead makes a caller that trims after every
@@ -257,7 +254,7 @@ extension ParserInputBuffer {
     ///   default argument here would shadow a conformer's own witness, so a one-pass conformer would
     ///   silently take the generic path whenever the caller left the limit out — which is the common
     ///   case, and the failure is invisible.
-    public func withParseInput<R>(_ body: (inout ParseInput) throws -> R) rethrows -> R {
+    internal func withParseInput<R>(_ body: (inout ParseInput) throws -> R) rethrows -> R {
         try withParseInput(limit: .max, body)
     }
 
@@ -397,7 +394,7 @@ extension ConsumableParserInputBuffer {
     ///   - limit: The most bytes the parser may consume.
     ///   - body: A closure that reads through the cursor.
     /// - Returns: Whatever `body` returns.
-    public mutating func parse<R>(
+    internal mutating func parse<R>(
         limit: Int = .max,
         _ body: (inout ParseInput) throws -> R
     ) rethrows -> R {

@@ -157,10 +157,9 @@ internal func _span(_ bytes: UnsafeBufferPointer<UInt8>) -> Span<UInt8> {
 ///
 /// If you are looking for how to give the parser bytes, you want ``ParserInputBuffer`` — in a
 /// connection, ``IMAPInputBuffer``. `ParseInput` is `public` for one reason only: it appears in the
-/// closure signature of ``ParserInputBuffer/withParseInput(limit:_:)`` and
-/// ``ConsumableParserInputBuffer/parse(limit:_:)``, which a caller outside this module has to be able
-/// to spell in order to conform. Everything that *reads* through a cursor — both initialisers, every
-/// primitive, every combinator, and the read position itself — is `internal`.
+/// closure signature of ``ParserInputBuffer/withParseInput(limit:_:)``, which a caller outside this
+/// module has to be able to spell in order to conform. Everything that *reads* through a cursor — both
+/// initialisers, every primitive, every combinator, and the read position itself — is `internal`.
 ///
 /// So there is nothing a client can do with one, and nothing it needs to do: no public API takes a
 /// cursor. ``CommandParser/parseCommandStream(buffer:)`` and
