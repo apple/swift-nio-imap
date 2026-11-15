@@ -286,6 +286,17 @@ extension ParseInputTests {
         }
     }
 
+    @Test("skipBytes consumes across regions, or nothing if too few are there")
+    func skipBytes() {
+        ParseInputHarness.withInput([TestRegion("ab"), TestRegion("cd"), TestRegion("e")]) { input in
+            #expect(errorThrown(by: { try input.skipBytes(length: 6) }) is IncompleteMessage)
+            #expect(input.consumed == 0)
+            try! input.skipBytes(length: 3)
+            #expect(input.consumed == 3)
+            #expect(try! input.readByte() == UInt8(ascii: "d"))
+        }
+    }
+
     @Test("readByte consumes one byte, and reports the end")
     func readByte() {
         ParseInputHarness.withInput([TestRegion("a"), TestRegion("b")]) { input in
