@@ -606,9 +606,9 @@ extension ParseInput {
 
     /// Most stray spaces tolerated before a line ending.
     ///
-    /// Lenient towards peers that pad lines, but bounded so a hostile run of spaces cannot make the
-    /// parser scan without limit. 1024 is far beyond any real padding.
-    internal static let maximumStraySpaces = 1024
+    /// RFC 3501 allows none. Lenient towards peers that pad lines, but bounded. Spaces elsewhere are
+    /// bounded only by the buffer limit.
+    internal static let maximumStraySpaces = 40
 
     /// The line ending at the read position, and how many bytes it takes up including skipped spaces.
     private func newlineAhead() throws -> (Newline, Int) {

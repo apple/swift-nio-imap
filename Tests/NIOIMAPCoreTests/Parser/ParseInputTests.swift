@@ -538,6 +538,16 @@ extension ParseInputTests {
         }
     }
 
+    @Test("matchNewline allows 40 stray spaces, not 41")
+    func matchNewlineStraySpaceCap() {
+        ParseInputHarness.withSpan(String(repeating: " ", count: 40) + "\r\n") { input in
+            #expect(try! input.matchNewline() == .crlf)
+        }
+        ParseInputHarness.withSpan(String(repeating: " ", count: 41) + "\r\n") { input in
+            #expect(errorThrown(by: { try input.matchNewline() }) is ParserError)
+        }
+    }
+
     @Test("matchNewline rejects an excessive run of stray spaces")
     func matchNewlineRejectsExcessiveSpaces() {
         let spaces = ParseInput.maximumStraySpaces + 1

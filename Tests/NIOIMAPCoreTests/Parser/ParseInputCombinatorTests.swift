@@ -372,13 +372,12 @@ extension ParseInputCombinatorTests {
         }
     }
 
-    /// A long run of stray spaces used to cost one `composite` frame each, so more than a hundred of them
-    /// threw `TooMuchRecursion`. The cursor measures the whole match ahead of the read position and
-    /// advances once, so this now succeeds up to ``ParseInput/maximumStraySpaces``, and the stack no longer
-    /// grows at all.
+    /// Stray spaces used to cost one `composite` frame each, which capped them at the tracker's depth.
+    /// The cursor now measures the whole match ahead of the read position and advances once, taking no
+    /// frame, so the cap is ``ParseInput/maximumStraySpaces`` alone.
     @Test(
         "matchNewline skips a long run of stray spaces without recursing",
-        arguments: [80, 200, ParseInput.maximumStraySpaces]
+        arguments: [2, ParseInput.maximumStraySpaces]
     )
     func matchNewlineSkipsALongRunOfStraySpaces(spaces: Int) throws {
         try TestUtilities.withParseInput(for: String(repeating: " ", count: spaces) + "\r\nhello, world") { buffer in
