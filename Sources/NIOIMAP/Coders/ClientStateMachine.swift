@@ -252,13 +252,6 @@ struct ClientStateMachine {
 
     var state: State = .expectingNormalResponse
     private var activeCommandTags: Set<Command.Tag> = []
-    /// The channel's allocator.
-    ///
-    /// Nothing reads it while commands are encoded into an `IMAPOutputBuffer`, which allocates its own
-    /// segments. It is kept because the other shipped sink — `ByteBufferOutput` — needs one, and which
-    /// of the two belongs here is a question the benchmarks answer differently for different traffic.
-    private var allocator = ByteBufferAllocator()
-
     // We mark where we should write up to at the next opportunity
     // using the `flush` method called from the channel handler.
     private var queuedCommands: MarkedCircularBuffer<(CommandStreamPart, EventLoopPromise<Void>?)> = .init(
@@ -269,10 +262,6 @@ struct ClientStateMachine {
         self.encodingOptions = ClientEncodingOptions(
             userOptions: encodingOptions
         )
-    }
-
-    mutating func handlerAdded(_ allocator: ByteBufferAllocator) {
-        self.allocator = allocator
     }
 
     /// Tells the state machine that a continuation request has been received from the network.
@@ -620,7 +609,7 @@ extension ClientStateMachine {
                 self.state = .expectingLiteralContinuationRequest(context)
                 return .init(chunks: [chunk], nextContext: context)
             }
-            assert(context.isDrained)
+            precondition(context.isDrained)
             self.state = .expectingNormalResponse
             return .init(chunks: [chunk], nextContext: nil)
         }

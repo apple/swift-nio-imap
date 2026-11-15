@@ -18,9 +18,7 @@ import NIO
 import Testing
 
 private func makeStateMachine() -> ClientStateMachine {
-    var stateMachine = ClientStateMachine(encodingOptions: .fixed(.rfc3501))
-    stateMachine.handlerAdded(ByteBufferAllocator())
-    return stateMachine
+    ClientStateMachine(encodingOptions: .fixed(.rfc3501))
 }
 
 struct ClientStateMachineTests {
