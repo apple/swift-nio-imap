@@ -35,7 +35,8 @@
 public protocol ByteRegion {
     /// Calls the given closure with a pointer to the region's bytes.
     ///
-    /// The pointer is valid only for the duration of the call. Do not let it escape.
+    /// The pointer is valid only for the duration of the call. Do not let it escape. The memory must
+    /// be bound to `UInt8`, as byte storage is: the parser reads it as typed bytes.
     ///
     /// - Parameter body: A closure that receives the region's bytes.
     /// - Returns: Whatever `body` returns.

@@ -287,7 +287,9 @@ extension ParserInputBuffer {
                 // An empty region carries no bytes, so it needs no entry — but it does cost a frame.
                 return try descend(regions, next, depth + 1, filled, table, limit, body)
             }
-            table[filled] = RegionEntry(bytes: raw.bindMemory(to: UInt8.self))
+            // Not `bindMemory`, which would rebind the caller's memory for good; and not
+            // `withMemoryRebound`, which costs a frame per region on a stack-bounded descent.
+            table[filled] = RegionEntry(bytes: raw.assumingMemoryBound(to: UInt8.self))
             return try descend(regions, next, depth + 1, filled + 1, table, limit, body)
         }
     }
@@ -309,10 +311,10 @@ extension ParserInputBuffer {
         for region in regions[index...] {
             region.withUnsafeBytes { tail.append(contentsOf: $0) }
         }
-        return try tail.withUnsafeBytes { raw -> R in
+        return try tail.withUnsafeBufferPointer { bytes -> R in
             var count = filled
-            if !raw.isEmpty {
-                table[filled] = RegionEntry(bytes: raw.bindMemory(to: UInt8.self))
+            if !bytes.isEmpty {
+                table[filled] = RegionEntry(bytes: bytes)
                 count += 1
             }
             var input = ParseInput(table: ChunkTable(rebasing: table[..<count]), owner: tail, limit: limit)
