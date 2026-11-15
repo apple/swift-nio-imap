@@ -309,11 +309,11 @@ extension IMAPInputBuffer: ConsumableParserInputBuffer, StableRegionParserInputB
                 // The pointer escapes its accessor on purpose. See the note above.
                 let bytes = storage.withUnsafeBytes { $0 }
                 let visible = UnsafeRawBufferPointer(rebasing: bytes[offset...])
-                sink.append(visible.bindMemory(to: UInt8.self), owner: storage, offset: offset)
+                sink.append(visible.assumingMemoryBound(to: UInt8.self), owner: storage, offset: offset)
             case .tail(let segment):
                 let written = UnsafeRawBufferPointer(segment.storage)[offset..<segment.used]
                 let visible = UnsafeRawBufferPointer(rebasing: written)
-                sink.append(visible.bindMemory(to: UInt8.self), owner: nil, offset: 0)
+                sink.append(visible.assumingMemoryBound(to: UInt8.self), owner: nil, offset: 0)
             }
         }
     }
