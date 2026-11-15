@@ -117,7 +117,7 @@ struct IMAPBufferByteBufferTests {
         let list = IMAPBufferList([
             wrapped.dropFirst(5),
             IMAPBuffer(Array(" - ".utf8)),
-            IMAPBuffer(IMAPByteStorage(backing), 0..<5),
+            IMAPBuffer(IMAPByteStorage(backing), range: 0..<5),
         ])
 
         let buffers = list.makeByteBuffers()

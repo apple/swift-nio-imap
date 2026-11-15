@@ -420,8 +420,75 @@ extension IMAPInputBufferTests {
 
         var buffer = IMAPInputBuffer()
         buffer.append(wrapped)
-        #expect(try Self.storage(of: 0, in: buffer).wrappedRegion(as: IMAPBuffer.self) != nil)
+        // The array is boxed once, not wrapped in a box around the IMAPBuffer.
+        #expect(try Self.storage(of: 0, in: buffer).wrappedRegion(as: [UInt8].self) != nil)
         #expect(Self.address(of: 0, in: buffer) == wrapped.withUnsafeBytes { UInt(bitPattern: $0.baseAddress) })
+    }
+
+    @Test("A retained IMAPBuffer slice is kept in its own storage, and a literal from it shares that storage")
+    func retainedSliceReusesItsStorage() throws {
+        let header = "* 1 FETCH (BODY[] {2048}\r\n"
+        let literal = Self.large("L") + Self.large("M")
+        let original = IMAPByteStorage(Array(("junk" + header + literal + "tail").utf8))
+        let slice = IMAPBuffer(original, range: 4..<(4 + header.utf8.count + literal.utf8.count))
+
+        var buffer = IMAPInputBuffer()
+        buffer.append(slice)
+        #expect(buffer.count == slice.count)
+        let region = try #require(buffer.byteRegions[0].retainedRegion)
+        #expect(region.storage === original, "re-boxed instead of reusing the slice's storage")
+        #expect(region.range == slice.retainedRegion?.range)
+
+        let parsed = try buffer.parse { input in
+            (try input.extractBytes(length: header.utf8.count), try input.extractBuffer(upTo: literal.utf8.count))
+        }
+        #expect(String(decoding: parsed.0, as: UTF8.self) == header)
+        #expect(String(decoding: parsed.1.copiedBytes(), as: UTF8.self) == literal)
+        let extracted = try #require(parsed.1.retainedRegion, "a literal this size should not have been copied")
+        #expect(extracted.storage === original)
+        #expect(extracted.range == (4 + header.utf8.count)..<(4 + header.utf8.count + literal.utf8.count))
+        #expect(buffer.isEmpty)
+    }
+
+    @Test("Consuming part of a retained IMAPBuffer slice keeps offsets within its storage")
+    func partialHeadOfARetainedSlice() throws {
+        let original = IMAPByteStorage(Array(("xxxx" + Self.large("a") + Self.large("b") + "yyyy").utf8))
+        let slice = IMAPBuffer(original, range: 4..<(4 + 2 * IMAPBuffer.copyThreshold))
+        var buffer = IMAPInputBuffer()
+        buffer.append(slice)
+        buffer.append(Array(Self.large("c").utf8))
+
+        // Head inside the slice: the region and the gather both start past it.
+        buffer.discardFirst(IMAPBuffer.copyThreshold - 3)
+        #expect(buffer.count == 2 * IMAPBuffer.copyThreshold + 3)
+        let head = try #require(buffer.byteRegions[0].retainedRegion)
+        #expect(head.storage === original)
+        #expect(head.range == (IMAPBuffer.copyThreshold + 1)..<(4 + 2 * IMAPBuffer.copyThreshold))
+        #expect(Self.text(buffer) == "aaa" + Self.large("b") + Self.large("c"))
+
+        let parsed = try buffer.parse { input in
+            (try input.extractBytes(length: 3), try input.extractBuffer(upTo: IMAPBuffer.copyThreshold))
+        }
+        #expect(parsed.0 == Array("aaa".utf8))
+        #expect(parsed.1.copiedBytes() == Array(Self.large("b").utf8))
+        #expect(parsed.1.retainedRegion?.storage === original)
+        #expect(parsed.1.retainedRegion?.range == (IMAPBuffer.copyThreshold + 4)..<(2 * IMAPBuffer.copyThreshold + 4))
+
+        // The used-up slice is dropped; the next read is next.
+        #expect(buffer.regionCount == 1)
+        #expect(Self.text(buffer) == Self.large("c"))
+    }
+
+    @Test("A large segment-backed IMAPBuffer is kept, not copied")
+    func segmentBufferIsRetained() throws {
+        let bytes = Array(Self.large("g").utf8)
+        let segment = OutputSegment(capacity: bytes.count + 8)
+        _ = bytes.withUnsafeBytes { segment.append($0) }
+        let wrapped = IMAPBuffer(segment: segment, range: 0..<bytes.count)
+        var buffer = IMAPInputBuffer()
+        buffer.append(wrapped)
+        #expect(Self.address(of: 0, in: buffer) == wrapped.withUnsafeBytes { UInt(bitPattern: $0.baseAddress) })
+        #expect(buffer.byteRegions[0].copiedBytes() == bytes)
     }
 
     @Test("An IMAPBuffer over storage with no fixed address is copied")

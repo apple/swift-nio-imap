@@ -80,7 +80,7 @@ struct TestInputBuffer: StableRegionParserInputBuffer, ConsumableParserInputBuff
     }
 
     var byteRegions: [IMAPBuffer] {
-        entries.map { IMAPBuffer($0.storage, $0.visible) }
+        entries.map { IMAPBuffer($0.storage, range: $0.visible) }
     }
 
     var regionCount: Int { entries.count }

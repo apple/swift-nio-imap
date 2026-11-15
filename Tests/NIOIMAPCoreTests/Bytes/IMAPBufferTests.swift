@@ -118,7 +118,7 @@ struct IMAPBufferTests {
     @Test("a buffer over a sub-range of a borrowed region exposes only that sub-range")
     func retainedSubRange() {
         let storage = IMAPByteStorage(Array("A003 LOGOUT\r\nHELLOWORLD".utf8))
-        let buffer = IMAPBuffer(storage, 13..<23)
+        let buffer = IMAPBuffer(storage, range: 13..<23)
         #expect(buffer.count == 10)
         #expect(string(buffer) == "HELLOWORLD")
         #expect(buffer.withUnsafeBytes { Array($0) } == Array("HELLOWORLD".utf8))
@@ -128,7 +128,7 @@ struct IMAPBufferTests {
     func retainsTheOwner() {
         let liveness = Liveness()
         func make() -> IMAPBuffer {
-            IMAPBuffer(IMAPByteStorage(TrackedRegion([1, 2, 3, 4], liveness)), 1..<3)
+            IMAPBuffer(IMAPByteStorage(TrackedRegion([1, 2, 3, 4], liveness)), range: 1..<3)
         }
 
         let buffer = make()
@@ -140,7 +140,7 @@ struct IMAPBufferTests {
     func copiedReleasesThePin() {
         let liveness = Liveness()
         func make() -> IMAPBuffer {
-            IMAPBuffer(IMAPByteStorage(TrackedRegion([1, 2, 3, 4], liveness)), 1..<3).copied()
+            IMAPBuffer(IMAPByteStorage(TrackedRegion([1, 2, 3, 4], liveness)), range: 1..<3).copied()
         }
 
         let buffer = make()
@@ -169,11 +169,10 @@ struct IMAPBufferTests {
         }
     }
 
-    @Test("dropFirst clamps rather than trapping")
+    @Test("dropFirst clamps past the end")
     func dropFirstClamps() {
         let buffer = imapBuffer("abc")
         #expect(buffer.dropFirst(0) == buffer)
-        #expect(buffer.dropFirst(-5) == buffer)
         #expect(buffer.dropFirst(3).isEmpty)
         #expect(buffer.dropFirst(99).isEmpty)
     }
@@ -190,7 +189,7 @@ struct IMAPBufferTests {
         let owned = imapBuffer("HELLOWORLD")
         // The same bytes, borrowed, and sitting in the middle of a larger region.
         let storage = IMAPByteStorage(Array("A003 LOGOUT\r\nHELLOWORLD".utf8))
-        let borrowed = IMAPBuffer(storage, 13..<23)
+        let borrowed = IMAPBuffer(storage, range: 13..<23)
         // And the same bytes again as a sub-range of an owned array.
         let ownedSubRange = imapBuffer("xxHELLOWORLD").dropFirst(2)
 
@@ -208,6 +207,35 @@ struct IMAPBufferTests {
         #expect(imapBuffer("abc") != imapBuffer("ab"))
         #expect(imapBuffer("") != imapBuffer("a"))
         #expect(imapBuffer("") == IMAPBuffer())
+    }
+
+    @Test("equality compares bytes across copied, retained and segment buffers, empty ones included")
+    func equalityAcrossAllRepresentations() {
+        let bytes = Array("xxHELLOWORLD".utf8)
+        let segment = OutputSegment(capacity: 64)
+        _ = bytes.withUnsafeBytes { segment.append($0) }
+
+        let copied = IMAPBuffer(bytes).dropFirst(2)
+        let retained = IMAPBuffer(IMAPByteStorage(bytes), range: 2..<12)
+        let inSegment = IMAPBuffer(segment: segment, range: 2..<12)
+        for (a, b) in [(copied, retained), (retained, inSegment), (inSegment, copied)] {
+            #expect(a == b)
+            #expect(a.prefix(9) != b.dropFirst(1))  // same length, different bytes
+            #expect(a.prefix(9) != b)  // different length
+        }
+
+        // Empty buffers are equal whatever they are over, and whether or not they have a base address.
+        let empties = [
+            IMAPBuffer(), IMAPBuffer(bytes).dropFirst(12), IMAPBuffer(IMAPByteStorage([] as [UInt8])),
+            retained.prefix(0), IMAPBuffer(segment: segment, range: 5..<5),
+        ]
+        for a in empties {
+            for b in empties { #expect(a == b) }
+            #expect(a != copied)
+        }
+
+        // A buffer is equal to itself, which takes the same-address shortcut.
+        #expect(inSegment == inSegment)
     }
 
     @Test("string and array literals")
