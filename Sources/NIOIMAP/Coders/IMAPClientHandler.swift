@@ -193,12 +193,16 @@ public final class IMAPClientHandler: ChannelDuplexHandler {
         context: ChannelHandlerContext
     ) {
         let outbound = self.wrapOutboundOut(bytes)
+        guard let promise = chunk.promise else {
+            context.write(outbound, promise: nil)
+            return
+        }
         if position == .last, chunk.shouldSucceedPromise {
-            context.write(outbound, promise: chunk.promise)
+            context.write(outbound, promise: promise)
         } else {
             // Not the last buffer, or a chunk that will only be finished by a later one: the promise
             // must not succeed yet, but a failure anywhere has to reach it.
-            context.write(outbound).cascadeFailure(to: chunk.promise)
+            context.write(outbound).cascadeFailure(to: promise)
         }
     }
 
