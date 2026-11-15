@@ -40,10 +40,3 @@ extension ByteBuffer: StableAddressByteRegion {
     /// slice of a 64 KiB read pins 64 KiB.
     public var pinnedByteCount: Int { storageCapacity }
 }
-
-// A `ByteBuffer` deliberately does *not* conform to `StableRegionParserInputBuffer`, so a payload
-// extracted from one is copied rather than referred to. Vouching for a region means handing the gather
-// an `IMAPByteStorage` that outlives it, and `RegionSink.append` takes that owner *unretained* — so a
-// conformer that boxes inside `withStableRegions` would hand over a box that is already dead. Only
-// something that *stores* the box can promise this, which is what `IMAPInputBuffer` is for: append a
-// `ByteBuffer` to one of those and a multi-megabyte literal reaches the caller uncopied.
