@@ -122,7 +122,7 @@ extension GrammarParser {
                         }
                         try buffer.matchFixed("}")
                         try buffer.matchNewline()
-                        _ = try buffer.extractBytes(length: literalCount)
+                        try buffer.skipBytes(length: literalCount)
                     case 0x28:
                         parenthesisCount += 1
                     case 0x29:

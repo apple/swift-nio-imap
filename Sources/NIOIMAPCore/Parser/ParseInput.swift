@@ -477,6 +477,16 @@ extension ParseInput {
         return bytes
     }
 
+    /// Consumes `length` bytes without copying them.
+    ///
+    /// Throws ``IncompleteMessage`` if fewer are visible, and consumes nothing then.
+    @_lifetime(self: copy self)
+    internal mutating func skipBytes(length: Int) throws {
+        precondition(length >= 0, "cannot skip \(length) bytes")
+        guard headAvailable >= length || remaining >= length else { throw IncompleteMessage() }
+        advance(by: length)
+    }
+
     /// Consumes raw message bytes — the streaming-literal path.
     ///
     /// Returns what is available, never more than `maxLength`, and never crossing a region boundary: a
