@@ -140,7 +140,8 @@ public final class IMAPServerHandler: ChannelDuplexHandler {
             let buffers = bytes.makeOutboundBuffers()
             for (index, buffer) in buffers.enumerated() {
                 let outbound = self.wrapOutboundOut(buffer)
-                if index == buffers.count - 1 {
+                // Without a promise there is nothing to order, and no need to allocate one per write.
+                if index == buffers.count - 1 || promise == nil {
                     context.write(outbound, promise: promise)
                 } else {
                     context.write(outbound).cascadeFailure(to: promise)
