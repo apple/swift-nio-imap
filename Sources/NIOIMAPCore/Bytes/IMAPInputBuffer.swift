@@ -60,8 +60,9 @@ public struct IMAPInputBuffer: Sendable {
     /// One run of bytes in the queue.
     fileprivate enum Chunk: Sendable {
         /// A read of at least ``IMAPBuffer/copyThreshold`` bytes: kept as received if its address is
-        /// fixed, otherwise copied into an array. Either way its storage has a stable address.
-        case received(IMAPByteStorage)
+        /// fixed, otherwise copied into an array. Either way its storage has a stable address. The range
+        /// is the run's extent within that storage, so a slice of a larger one is kept without re-boxing.
+        case received(IMAPByteStorage, Range<Int>)
         /// Small reads copied together. Its `used` is the run's length.
         ///
         /// Invariants: only the last chunk (or `spareTail`) is written into, only past `used`, and only
@@ -71,7 +72,7 @@ public struct IMAPInputBuffer: Sendable {
 
         var count: Int {
             switch self {
-            case .received(let storage): storage.count
+            case .received(_, let range): range.count
             case .tail(let segment): segment.used
             }
         }
@@ -134,7 +135,7 @@ public struct IMAPInputBuffer: Sendable {
         if !storage.hasStableAddress {
             storage = IMAPByteStorage(region.withUnsafeBytes { [UInt8]($0) })
         }
-        appendReceived(storage)
+        appendReceived(storage, range: 0..<storage.count)
     }
 
     /// Adds received bytes whose address is fixed to the end of the buffer.
@@ -147,7 +148,8 @@ public struct IMAPInputBuffer: Sendable {
     ///   described on ``IMAPInputBuffer``.
     public mutating func append(_ region: some StableAddressByteRegion & Sendable) {
         guard !appendToTail(ifSmall: region) else { return }
-        appendReceived(IMAPByteStorage(region))
+        let storage = IMAPByteStorage(region)
+        appendReceived(storage, range: 0..<storage.count)
     }
 
     /// Adds an ``IMAPBuffer`` to the end of the buffer.
@@ -158,11 +160,21 @@ public struct IMAPInputBuffer: Sendable {
     /// - Parameter buffer: The bytes to add.
     public mutating func append(_ buffer: IMAPBuffer) {
         guard !appendToTail(ifSmall: buffer) else { return }
-        guard buffer.hasStableAddress else {
-            appendReceived(IMAPByteStorage(buffer.withUnsafeBytes { [UInt8]($0) }))
-            return
+        // Reuse the buffer's own box where it has one, rather than boxing the box: one fewer
+        // allocation, and one fewer indirection on every read.
+        switch buffer.storage {
+        case .retained(let storage, let range) where storage.hasStableAddress:
+            appendReceived(storage, range: range)
+        case .retained:
+            let copy = IMAPByteStorage(buffer.withUnsafeBytes { [UInt8]($0) })
+            appendReceived(copy, range: 0..<copy.count)
+        case .copied(let bytes, let range):
+            appendReceived(IMAPByteStorage(bytes), range: range)
+        case .segment:
+            // A segment is not an `IMAPByteStorage`, so it takes one box.
+            let storage = IMAPByteStorage(buffer)
+            appendReceived(storage, range: 0..<storage.count)
         }
-        appendReceived(IMAPByteStorage(buffer))
     }
 
     /// Copies `region` into the tail if it is shorter than ``IMAPBuffer/copyThreshold``.
@@ -176,11 +188,16 @@ public struct IMAPInputBuffer: Sendable {
         }
     }
 
-    /// Queues a run of at least ``IMAPBuffer/copyThreshold`` bytes at a fixed address.
-    internal mutating func appendReceived(_ storage: IMAPByteStorage) {
+    /// Queues `range` of `storage`, a run of at least ``IMAPBuffer/copyThreshold`` bytes at a fixed
+    /// address.
+    internal mutating func appendReceived(_ storage: IMAPByteStorage, range: Range<Int>) {
         assert(storage.hasStableAddress, "a retained run must have a fixed address")
-        chunks.append(.received(storage))
-        count += storage.count
+        precondition(
+            range.lowerBound >= 0 && range.upperBound <= storage.count,
+            "\(range) is out of bounds for an IMAPByteStorage of \(storage.count) bytes"
+        )
+        chunks.append(.received(storage, range))
+        count += range.count
     }
 
     /// Copies `bytes` past the end of the tail, starting a new tail if the last one cannot take them.
@@ -276,8 +293,8 @@ extension IMAPInputBuffer: ConsumableParserInputBuffer, StableRegionParserInputB
         public subscript(position: Int) -> IMAPBuffer {
             let start = position == 0 ? headOffset : 0
             switch chunks[position] {
-            case .received(let storage):
-                return IMAPBuffer(storage, start..<storage.count)
+            case .received(let storage, let range):
+                return IMAPBuffer(storage, range: (range.lowerBound + start)..<range.upperBound)
             case .tail(let segment):
                 return IMAPBuffer(segment: segment, range: start..<segment.used)
             }
@@ -305,11 +322,12 @@ extension IMAPInputBuffer: ConsumableParserInputBuffer, StableRegionParserInputB
         for index in chunks.indices {
             let offset = index == chunks.startIndex ? headOffset : 0
             switch chunks[index] {
-            case .received(let storage):
+            case .received(let storage, let range):
                 // The pointer escapes its accessor on purpose. See the note above.
+                let start = range.lowerBound + offset
                 let bytes = storage.withUnsafeBytes { $0 }
-                let visible = UnsafeRawBufferPointer(rebasing: bytes[offset...])
-                sink.append(visible.assumingMemoryBound(to: UInt8.self), owner: storage, offset: offset)
+                let visible = UnsafeRawBufferPointer(rebasing: bytes[start..<range.upperBound])
+                sink.append(visible.assumingMemoryBound(to: UInt8.self), owner: storage, offset: start)
             case .tail(let segment):
                 let written = UnsafeRawBufferPointer(segment.storage)[offset..<segment.used]
                 let visible = UnsafeRawBufferPointer(rebasing: written)

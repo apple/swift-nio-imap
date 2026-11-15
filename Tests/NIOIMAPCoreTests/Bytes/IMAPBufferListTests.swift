@@ -109,8 +109,8 @@ struct IMAPBufferListTests {
 
         let storage = IMAPByteStorage(Array("xxhello worldxx".utf8))
         let retained = IMAPBufferList([
-            IMAPBuffer(storage, 2..<8),
-            IMAPBuffer(storage, 8..<13),
+            IMAPBuffer(storage, range: 2..<8),
+            IMAPBuffer(storage, range: 8..<13),
         ])
 
         #expect(copied == retained)

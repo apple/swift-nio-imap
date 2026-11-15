@@ -202,7 +202,9 @@ public struct ByteBufferOutput: EncoderOutputBuffer, Sendable {
         if closed.isEmpty {
             // The common case: everything pending is the one run of bytes being written, so the
             // hand-out is a single region and needs neither the region list nor an intermediate array.
-            list = IMAPBufferList(IMAPBuffer(IMAPByteStorage(buffer), openRegionStart..<(openRegionStart + byteCount)))
+            list = IMAPBufferList(
+                IMAPBuffer(IMAPByteStorage(buffer), range: openRegionStart..<(openRegionStart + byteCount))
+            )
             openRegionStart += byteCount
         } else if closed[0].count >= byteCount {
             // The oldest region covers the request on its own, which is what a streamed literal looks
@@ -252,7 +254,7 @@ public struct ByteBufferOutput: EncoderOutputBuffer, Sendable {
             case .owned(let range):
                 let owner = storage ?? IMAPByteStorage(buffer)
                 storage = owner
-                regions.append(IMAPBuffer(owner, range))
+                regions.append(IMAPBuffer(owner, range: range))
             case .foreign(let buffer):
                 regions.append(buffer)
             }
@@ -260,7 +262,7 @@ public struct ByteBufferOutput: EncoderOutputBuffer, Sendable {
         // The run still being written is pending too, even though it is not in `closed`.
         if buffer.writerIndex > openRegionStart {
             let owner = storage ?? IMAPByteStorage(buffer)
-            regions.append(IMAPBuffer(owner, openRegionStart..<buffer.writerIndex))
+            regions.append(IMAPBuffer(owner, range: openRegionStart..<buffer.writerIndex))
         }
         return body(regions.span)
     }
@@ -379,7 +381,7 @@ public struct ByteBufferOutput: EncoderOutputBuffer, Sendable {
     /// region can never see bytes written later.
     private func makeBuffer(_ region: Region) -> IMAPBuffer {
         switch region {
-        case .owned(let range): return IMAPBuffer(IMAPByteStorage(buffer), range)
+        case .owned(let range): return IMAPBuffer(IMAPByteStorage(buffer), range: range)
         case .foreign(let region): return region
         }
     }
@@ -414,7 +416,7 @@ public struct ByteBufferOutput: EncoderOutputBuffer, Sendable {
                 // is what the bytes are kept alive by, and they are all kept alive by the same buffer.
                 let owner = storage ?? IMAPByteStorage(buffer)
                 storage = owner
-                taken.append(IMAPBuffer(owner, range))
+                taken.append(IMAPBuffer(owner, range: range))
             case .foreign(let region):
                 taken.append(region)
             }

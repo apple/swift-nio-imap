@@ -109,7 +109,8 @@ extension IMAPInputBuffer {
                 appendToTail(bytes)
                 return
             }
-            appendReceived(IMAPByteStorage(DispatchDataRegion(data: data, bytes: bytes)))
+            let storage = IMAPByteStorage(DispatchDataRegion(data: data, bytes: bytes))
+            appendReceived(storage, range: 0..<storage.count)
         }
     }
 }
