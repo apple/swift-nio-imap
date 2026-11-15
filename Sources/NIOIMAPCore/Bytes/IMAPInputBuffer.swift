@@ -281,7 +281,7 @@ extension IMAPInputBuffer: ConsumableParserInputBuffer, StableRegionParserInputB
             let start = position == 0 ? headOffset : 0
             switch chunks[position] {
             case .received(let storage):
-                return IMAPBuffer(storage, start..<storage.count)
+                return IMAPBuffer(storage, range: start..<storage.count)
             case .tail(let segment):
                 return IMAPBuffer(segment: segment, range: start..<segment.used)
             }

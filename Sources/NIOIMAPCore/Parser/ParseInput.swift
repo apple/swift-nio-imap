@@ -516,7 +516,7 @@ extension ParseInput {
                 // region we already are. Dropping either term returns the wrong bytes.
                 let offset = entry.ownerOffset + (entry.bytes.count - head.count)
                 advance(by: take)
-                return IMAPBuffer(owner.takeUnretainedValue(), offset..<(offset + take))
+                return IMAPBuffer(owner.takeUnretainedValue(), range: offset..<(offset + take))
             }
         }
         return IMAPBuffer(try extractBytes(length: take))

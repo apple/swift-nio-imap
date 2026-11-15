@@ -89,7 +89,7 @@ public struct IMAPBuffer: Sendable {
     /// - Parameters:
     ///   - storage: The owner of the bytes.
     ///   - range: The range of `storage` to expose. Must lie within `storage`.
-    public init(_ storage: IMAPByteStorage, _ range: Range<Int>) {
+    public init(_ storage: IMAPByteStorage, range: Range<Int>) {
         precondition(
             range.lowerBound >= 0 && range.upperBound <= storage.count,
             "\(range) is out of bounds for an IMAPByteStorage of \(storage.count) bytes"
@@ -188,12 +188,13 @@ public struct IMAPBuffer: Sendable {
     /// Returns a buffer over everything but the first `k` bytes.
     ///
     /// - Complexity: O(1) — this is range arithmetic, and copies nothing.
-    /// - Parameter k: How many bytes to drop. Values beyond ``count`` give an empty buffer;
-    ///   negative values are treated as zero.
+    /// - Parameter k: How many bytes to drop. Must not be negative. Values beyond ``count`` give an
+    ///   empty buffer.
     /// - Returns: The remaining bytes.
     public func dropFirst(_ k: Int = 1) -> IMAPBuffer {
+        precondition(k >= 0, "Can't drop a negative number of bytes")
         var result = self
-        let dropped = Swift.min(Swift.max(k, 0), count)
+        let dropped = Swift.min(k, count)
         switch storage {
         case .copied(let bytes, let range):
             result.storage = .copied(bytes, (range.lowerBound + dropped)..<range.upperBound)
@@ -208,12 +209,13 @@ public struct IMAPBuffer: Sendable {
     /// Returns a buffer over the first `k` bytes.
     ///
     /// - Complexity: O(1) — this is range arithmetic, and copies nothing.
-    /// - Parameter k: How many bytes to keep. Values beyond ``count`` give the whole buffer;
-    ///   negative values give an empty one.
+    /// - Parameter k: How many bytes to keep. Must not be negative. Values beyond ``count`` give the
+    ///   whole buffer.
     /// - Returns: The leading bytes.
     public func prefix(_ k: Int) -> IMAPBuffer {
+        precondition(k >= 0, "Can't take a prefix of negative length")
         var result = self
-        let keeping = Swift.min(Swift.max(k, 0), count)
+        let keeping = Swift.min(k, count)
         switch storage {
         case .copied(let bytes, let range):
             result.storage = .copied(bytes, range.lowerBound..<(range.lowerBound + keeping))

@@ -118,7 +118,7 @@ struct IMAPBufferTests {
     @Test("a buffer over a sub-range of a borrowed region exposes only that sub-range")
     func retainedSubRange() {
         let storage = IMAPByteStorage(Array("A003 LOGOUT\r\nHELLOWORLD".utf8))
-        let buffer = IMAPBuffer(storage, 13..<23)
+        let buffer = IMAPBuffer(storage, range: 13..<23)
         #expect(buffer.count == 10)
         #expect(string(buffer) == "HELLOWORLD")
         #expect(buffer.withUnsafeBytes { Array($0) } == Array("HELLOWORLD".utf8))
@@ -128,7 +128,7 @@ struct IMAPBufferTests {
     func retainsTheOwner() {
         let liveness = Liveness()
         func make() -> IMAPBuffer {
-            IMAPBuffer(IMAPByteStorage(TrackedRegion([1, 2, 3, 4], liveness)), 1..<3)
+            IMAPBuffer(IMAPByteStorage(TrackedRegion([1, 2, 3, 4], liveness)), range: 1..<3)
         }
 
         let buffer = make()
@@ -140,7 +140,7 @@ struct IMAPBufferTests {
     func copiedReleasesThePin() {
         let liveness = Liveness()
         func make() -> IMAPBuffer {
-            IMAPBuffer(IMAPByteStorage(TrackedRegion([1, 2, 3, 4], liveness)), 1..<3).copied()
+            IMAPBuffer(IMAPByteStorage(TrackedRegion([1, 2, 3, 4], liveness)), range: 1..<3).copied()
         }
 
         let buffer = make()
@@ -169,11 +169,10 @@ struct IMAPBufferTests {
         }
     }
 
-    @Test("dropFirst clamps rather than trapping")
+    @Test("dropFirst clamps past the end")
     func dropFirstClamps() {
         let buffer = imapBuffer("abc")
         #expect(buffer.dropFirst(0) == buffer)
-        #expect(buffer.dropFirst(-5) == buffer)
         #expect(buffer.dropFirst(3).isEmpty)
         #expect(buffer.dropFirst(99).isEmpty)
     }
@@ -190,7 +189,7 @@ struct IMAPBufferTests {
         let owned = imapBuffer("HELLOWORLD")
         // The same bytes, borrowed, and sitting in the middle of a larger region.
         let storage = IMAPByteStorage(Array("A003 LOGOUT\r\nHELLOWORLD".utf8))
-        let borrowed = IMAPBuffer(storage, 13..<23)
+        let borrowed = IMAPBuffer(storage, range: 13..<23)
         // And the same bytes again as a sub-range of an owned array.
         let ownedSubRange = imapBuffer("xxHELLOWORLD").dropFirst(2)
 
