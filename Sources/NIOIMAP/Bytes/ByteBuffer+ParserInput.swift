@@ -65,7 +65,6 @@ extension ByteBuffer: ConsumableParserInputBuffer {
 
 // A `ByteBuffer` deliberately does *not* conform to `StableRegionParserInputBuffer`, so a payload
 // extracted from one is copied rather than referred to. Vouching for a region means handing the gather
-// an `IMAPByteStorage` that outlives it, and `RegionSink.append` takes that owner *unretained* — so a
-// conformer that boxes inside `withStableRegions` would hand over a box that is already dead. Only
-// something that *stores* the box can promise this, which is what `IMAPInputBuffer` is for: append a
-// `ByteBuffer` to one of those and a multi-megabyte literal reaches the caller uncopied.
+// an `IMAPByteStorage`, and boxing inside `withStableRegions` would allocate one per parse call.
+// `IMAPInputBuffer` boxes once per append: append a `ByteBuffer` to one of those and a multi-megabyte
+// literal reaches the caller uncopied.

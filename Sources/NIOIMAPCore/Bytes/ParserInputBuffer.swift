@@ -178,7 +178,8 @@ public struct RegionSink: ~Copyable, ~Escapable {
     ///     ``StableRegionParserInputBuffer`` makes.
     ///   - owner: Who keeps `bytes` alive, if the buffer can vouch for them, so that a large
     ///     extraction can refer to the input rather than copying it. `nil` means an extraction
-    ///     copies, which is always correct.
+    ///     copies, which is always correct. The sink retains it until the gather ends, so a box
+    ///     created just for this call is safe, if wasteful.
     ///   - offset: Where `bytes` begins inside `owner`. Zero when the region is all of the owner;
     ///     the head offset when the region is the unconsumed tail of one.
     @_lifetime(self: copy self)
@@ -195,11 +196,16 @@ public struct RegionSink: ~Copyable, ~Escapable {
         }
         table[filled] = RegionEntry(
             bytes: bytes,
-            owner: owner.map { Unmanaged.passUnretained($0) },
+            owner: owner.map { Unmanaged.passRetained($0) },
             ownerOffset: offset
         )
         filled += 1
         byteCount += bytes.count
+    }
+
+    /// Balances the retain `append` took on each owner. Called once, when the gather ends.
+    internal func releaseOwners() {
+        for entry in table[..<filled] { entry.owner?.release() }
     }
 
     /// The entries pushed so far.
@@ -367,6 +373,7 @@ extension StableRegionParserInputBuffer {
             capacity: Swift.max(regionCount, 1)
         ) { table in
             var sink = RegionSink(table: table)
+            defer { sink.releaseOwners() }
             withStableRegions(into: &sink)
             assert(
                 sink.byteCount == count,

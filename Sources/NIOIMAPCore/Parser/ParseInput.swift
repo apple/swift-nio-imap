@@ -39,8 +39,8 @@ import Musl
 //    only below the table's capacity and read only below the count filled.
 // 2. Read: `StableRegionParserInputBuffer.withStableRegions(into:)` via `RegionSink`
 //    (ParserInputBuffer.swift). The conformer's region pointers outlive their accessor and its owners
-//    keep them alive. `RegionSink` holds owners unretained (`Unmanaged`) and its init is
-//    `@_lifetime(immortal)`; it is `~Copyable`, and only the gather creates one. `IMAPInputBuffer`
+//    keep them alive. `RegionSink` retains each owner until the gather ends (`Unmanaged`) and its init
+//    is `@_lifetime(immortal)`; it is `~Copyable`, and only the gather creates one. `IMAPInputBuffer`
 //    retains only regions with `IMAPByteStorage.hasStableAddress` and copies the rest.
 // 3. Write: `OutputSegment: @unchecked Sendable` (OutputSegment.swift). Handed-out ranges and the bytes
 //    still being written are disjoint; a segment never reallocates. An `IMAPInputBuffer` tail is written
@@ -84,10 +84,10 @@ import Musl
 /// `Span<UInt8>` is not expressible — no container may hold a non-escapable element — which is why the
 /// bytes are a pointer here and become a `Span` only inside the cursor.
 ///
-/// `owner` is *unretained* on purpose. The gather borrows whatever holds the boxes for as long as the
-/// cursor exists, so the boxes cannot go away underneath it, and reading an `Unmanaged` emits no
-/// reference counting. Exactly one retain happens per extraction, when the owner is handed to an
-/// ``IMAPBuffer``.
+/// `owner` holds a +1 that ``RegionSink/append(_:owner:offset:)`` took and the gather releases when it
+/// ends, so a conformer that boxes inside `withStableRegions` cannot hand over a dead box. Reading an
+/// `Unmanaged` emits no reference counting; one more retain happens per extraction, when the owner is
+/// handed to an ``IMAPBuffer``.
 ///
 /// `nil` is always a correct answer for `owner`: it means an extraction copies rather than pinning the
 /// input, which is the right default for a caller whose region pointers this package cannot vouch for.
