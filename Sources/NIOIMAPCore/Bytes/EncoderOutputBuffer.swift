@@ -131,11 +131,12 @@ public protocol EncoderOutputBuffer {
     /// - Returns: Whatever `body` returns.
     func withPendingRegions<R>(_ body: (Span<IMAPBuffer>) -> R) -> R
 
-    /// Discards everything pending, and releases whatever memory was backing it.
+    /// Discards everything pending, and releases the memory that was backing it.
     ///
-    /// - Important: This must actually release storage, not just reset a position. A long-lived
-    ///   encoder — a server handler reuses one for the lifetime of a connection — calls this after
-    ///   every response, so anything retained here is retained forever.
+    /// - Important: What stays held afterwards must be bounded, not grow with what was written. A
+    ///   long-lived encoder — a server handler reuses one for the lifetime of a connection — calls this
+    ///   after every response, so anything retained here is retained forever. Keeping a fixed amount
+    ///   for reuse, such as one open segment, is fine.
     mutating func removeAll()
 }
 
