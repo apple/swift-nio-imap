@@ -53,8 +53,8 @@ public struct ResponseEncodeBuffer {
         let bytes = self.buffer.nextChunk().bytes
         // A zero-*bytes* check: a server-mode chunk takes everything, so nothing may be left behind.
         precondition(self.buffer.pendingByteCount == 0)
-        // Clearing also releases the sink's storage, which matters because a server handler keeps one
-        // of these for the lifetime of a connection.
+        // Clearing also releases the sink's storage, bar what it keeps for reuse, which matters because
+        // a server handler keeps one of these for the lifetime of a connection.
         self.buffer.clear()
         return bytes
     }
