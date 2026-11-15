@@ -76,7 +76,6 @@ public final class IMAPClientHandler: ChannelDuplexHandler {
     }
 
     public func handlerAdded(context: ChannelHandlerContext) {
-        self.state.handlerAdded(context.channel.allocator)
         context.fireChannelActive()
     }
 

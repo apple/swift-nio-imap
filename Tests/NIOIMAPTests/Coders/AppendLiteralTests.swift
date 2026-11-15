@@ -344,7 +344,6 @@ struct AppendLiteralTests {
     func fatalWhileWaitingForLiteral() {
         let eventLoop = EmbeddedEventLoop()
         var stateMachine = ClientStateMachine(encodingOptions: .fixed(.rfc3501))
-        stateMachine.handlerAdded(ByteBufferAllocator())
 
         let start = eventLoop.makePromise(of: Void.self)
         #expect(throws: Never.self) {
@@ -386,7 +385,6 @@ struct AppendLiteralTests {
     func completionWhileWaitingForLiteral() {
         let eventLoop = EmbeddedEventLoop()
         var stateMachine = ClientStateMachine(encodingOptions: .fixed(.rfc3501))
-        stateMachine.handlerAdded(ByteBufferAllocator())
 
         let start = eventLoop.makePromise(of: Void.self)
         #expect(throws: Never.self) {
