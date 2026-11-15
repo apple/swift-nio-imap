@@ -15,6 +15,7 @@
 import Logging
 import NIO
 import NIOIMAP
+import NIOSSL
 import Synchronization
 
 // MARK: - Shared state
@@ -151,8 +152,10 @@ final class LoopbackServer {
     /// Starts a server that sends an IMAP greeting on connect and then stays open,
     /// ignoring anything the client sends and never replying. The connection only
     /// closes when the client closes it.
-    static func greetThenStayOpen() async throws -> LoopbackServer {
-        try await start { GreetAndStayOpenHandler() }
+    ///
+    /// With `tls`, the server speaks TLS with those settings before the greeting.
+    static func greetThenStayOpen(tls: TLSConfiguration? = nil) async throws -> LoopbackServer {
+        try await start(tls: tls) { GreetAndStayOpenHandler() }
     }
 
     /// Starts a server that sends an IMAP greeting on connect, then answers each line the
@@ -172,14 +175,19 @@ final class LoopbackServer {
     }
 
     private static func start(
+        tls: TLSConfiguration? = nil,
         _ makeHandler: @escaping @Sendable () -> any ChannelInboundHandler
     ) async throws -> LoopbackServer {
+        let sslContext = try tls.map { try NIOSSLContext(configuration: $0) }
         let group = MultiThreadedEventLoopGroup(numberOfThreads: 1)
         let channel = try await ServerBootstrap(group: group)
             .serverChannelOption(ChannelOptions.backlog, value: 16)
             .serverChannelOption(ChannelOptions.socketOption(.so_reuseaddr), value: 1)
             .childChannelInitializer { channel in
                 channel.eventLoop.makeCompletedFuture {
+                    if let sslContext {
+                        try channel.pipeline.syncOperations.addHandler(NIOSSLServerHandler(context: sslContext))
+                    }
                     try channel.pipeline.syncOperations.addHandler(makeHandler())
                 }
             }

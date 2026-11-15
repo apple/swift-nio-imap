@@ -21,6 +21,23 @@ let configuration = IMAPConnection.Configuration(
 )
 ```
 
+With `useTLS`, the connection uses ``IMAPConnection/Configuration/tlsConfiguration``: by default the platform's trust roots, full certificate verification, and any TLS version from 1.0 up. Pass your own to change that, for example to refuse TLS 1.0 and 1.1 (deprecated by RFC 8996) or to trust a private certificate authority:
+
+```swift
+import NIOSSL
+
+var tls = TLSConfiguration.makeClientConfiguration()
+tls.minimumTLSVersion = .tlsv12
+
+let configuration = IMAPConnection.Configuration(
+    hostname: "mail.example.com",
+    port: 993,
+    useTLS: true,
+    tlsConfiguration: tls,
+    logging: .noLogging
+)
+```
+
 ### Opening a connection and sending commands
 
 ``IMAPConnection/withConnection(configuration:_:)`` hands you the server ``IMAPConnection/Greeting`` and a connection. Send a command with ``IMAPConnection/send(_:_:)``: the closure receives the command’s ``IMAPConnection/Tag`` and a stream of the `Response` values the server produces while the command runs, up to and including its final `TaggedResponse`.
