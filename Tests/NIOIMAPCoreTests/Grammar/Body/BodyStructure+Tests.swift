@@ -1947,6 +1947,27 @@ private struct BodyStructureTests {
                 " UID 1",
                 expected: .failure
             ),
+            // Run-away literals: each fits the 200,000 budget, together they exceed it.
+            // The third literal's length exceeds what is left → "Run-away literal in body structure"
+            ParseFixture.invalidBodyStructure(
+                "(" + String(repeating: "{70000}\r\n" + String(repeating: "x", count: 70_000) + " ", count: 3) + ")",
+                " UID 1",
+                expected: .failure
+            ),
+            // The second literal uses up exactly what is left → "Run-away body structure"
+            ParseFixture.invalidBodyStructure(
+                "({100000}\r\n" + String(repeating: "x", count: 100_000)
+                    + " {99997}\r\n" + String(repeating: "x", count: 99_997) + ")",
+                " UID 1",
+                expected: .failure
+            ),
+            // One byte less leaves one byte of budget for the `)`.
+            ParseFixture.invalidBodyStructure(
+                "({100000}\r\n" + String(repeating: "x", count: 100_000)
+                    + " {99996}\r\n" + String(repeating: "x", count: 99_996) + ")",
+                " UID 1",
+                expected: .success(.invalid)
+            ),
         ]
     )
     func parseInvalidBody(_ fixture: ParseFixture<MessageAttribute.BodyStructure>) {
