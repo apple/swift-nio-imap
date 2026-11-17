@@ -23,8 +23,8 @@ import NIOIMAPCore
 
 // The "after" half: the client this library is designed for. Received regions are appended to an
 // `IMAPInputBuffer` and parsed where they landed; encoded bytes are written into segments the encoder
-// owns and then donated to a `DispatchData`, or copied into it when shorter than
-// `IMAPBuffer.dispatchDonationThreshold`. Nothing on either path copies a payload.
+// owns and then donated to a `DispatchData`, or copied into it when shorter than the dispatch
+// donation threshold (512 B). Nothing on either path copies a payload.
 //
 // Every function here has a same-signature twin in `DispatchClient+Legacy.swift`. Keep them in step:
 // the comparison is only meaningful if the two configurations do the same work in the same order, and

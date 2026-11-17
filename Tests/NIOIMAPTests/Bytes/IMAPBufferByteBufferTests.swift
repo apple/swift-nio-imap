@@ -15,7 +15,7 @@
 import Dispatch
 import NIO
 import NIOIMAP
-import NIOIMAPCore
+@testable import NIOIMAPCore
 import Testing
 
 /// The address of a `ByteBuffer`'s first readable byte — the only way to observe from the outside

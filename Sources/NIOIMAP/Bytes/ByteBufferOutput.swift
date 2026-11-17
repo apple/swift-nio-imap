@@ -34,8 +34,8 @@ import NIOIMAPCore
 /// it. Per-write cost does not decide it: the encoder stages small writes, so either sink sees about
 /// one append per 256 bytes. The hand-out does. This sink is zero-copy into `ByteBuffer`s — its
 /// regions are slices — where ``IMAPOutputBuffer`` copies its regions into fresh `ByteBuffer`s. Into a
-/// `DispatchData` they are alike: each donates regions of at least
-/// `IMAPBuffer.dispatchDonationThreshold` bytes and copies shorter ones. Both keep large payloads by
+/// `DispatchData` they are alike: each donates regions of at least the dispatch donation threshold
+/// (512 B) and copies shorter ones. Both keep large payloads by
 /// reference, so neither wins there. Measured on a stream of small responses into a `Channel`, this
 /// sink allocates fewer bytes but is slower, and while earlier responses are still in flight it is
 /// slower still and allocates more bytes (see below). So it ships as a caller's choice.
