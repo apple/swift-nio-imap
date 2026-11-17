@@ -28,6 +28,18 @@ let badOS = { fatalError("unsupported OS") }()
 
 import struct OrderedCollections.OrderedDictionary
 
+/// Bytes per UID in a `SEARCH` result, guessed low so the reservation rarely exceeds the result: a
+/// 5-digit UID and its space take 6, a 9-digit one 10.
+private let searchBytesPerUIDEstimate = 7
+
+/// The most UIDs reserved up front, so a huge line cannot reserve much memory before it is parsed.
+/// Larger results grow from there: 5,000 UIDs reallocate twice rather than ~12 times.
+private let searchReservedUIDLimit = 2_000
+
+/// Lines shorter than this are not reserved for. The fast path appends up to 64 UIDs at once, which
+/// sizes the array exactly; a low guess would only add a reallocation (e.g. 32 5-digit UIDs: 27).
+private let searchReservationThreshold = 512
+
 extension GrammarParser {
     // mailbox         = "INBOX" / astring
     func parseMailbox(buffer: inout ParseInput, tracker: StackTracker) throws(ParseFailure) -> MailboxName {
@@ -83,10 +95,13 @@ extension GrammarParser {
                 tracker: StackTracker
             ) throws(ParseFailure) -> MailboxData {
                 // Results can span many reads; don't re-parse them until the line is complete.
-                try buffer.requireVisibleLineEnding()
+                let lineLength = try buffer.requireVisibleLineEnding()
                 // The fast path takes well-formed runs; whenever it stops (a region boundary, extra
                 // spaces, `(MODSEQ …)`), one generic element follows, then the fast path resumes.
                 var identifiers: [UnknownMessageIdentifier] = []
+                if lineLength >= searchReservationThreshold {
+                    identifiers.reserveCapacity(Swift.min(lineLength / searchBytesPerUIDEstimate, searchReservedUIDLimit))
+                }
                 while true {
                     buffer.parseSpaceSeparatedNZNumbers(appendingTo: &identifiers) {
                         UnknownMessageIdentifier(rawValue: $0)

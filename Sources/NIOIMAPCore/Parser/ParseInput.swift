@@ -456,9 +456,12 @@ extension ParseInput {
     /// every read, which is quadratic in its length. `memchr` makes the check cheap.
     ///
     /// A CR is the likely hit, so the LF scan runs only when no CR is visible.
-    internal func requireVisibleLineEnding() throws(ParseFailure) {
-        if scanUntil(byte: UInt8(ascii: "\r")) != nil { return }
-        if scanUntil(byte: UInt8(ascii: "\n")) != nil { return }
+    ///
+    /// - Returns: The distance to the first CR, or to the first LF if there is no CR.
+    @discardableResult
+    internal func requireVisibleLineEnding() throws(ParseFailure) -> Int {
+        if let distance = scanUntil(byte: UInt8(ascii: "\r")) { return distance }
+        if let distance = scanUntil(byte: UInt8(ascii: "\n")) { return distance }
         throw .incomplete
     }
 
