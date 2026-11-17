@@ -53,13 +53,14 @@ import Android
 /// }
 /// ```
 ///
-/// ``copiedBytes()`` is the convenient path, and it allocates and copies on **every** call. It is a
-/// method rather than a property to say so: on a value that may hold a multi-megabyte literal, a
-/// property that copies reads as free.
-///
-/// - Note: `IMAPBuffer` is deliberately not a `Collection`. Subscripting a byte at a time through a
-///   scoped accessor is a performance trap that looks free.
+/// ``copiedBytes()`` is the convenient path, and it allocates and copies on **every** call.
 public struct IMAPBuffer: Sendable {
+    // `copiedBytes()` is a method rather than a property to say that it copies: on a value that may hold
+    // a multi-megabyte literal, a property that copies reads as free.
+    //
+    // `IMAPBuffer` is deliberately not a `Collection`. Subscripting a byte at a time through a scoped
+    // accessor is a performance trap that looks free.
+
     internal enum Storage: Sendable {
         /// Bytes this value owns, plus the live sub-range of them.
         case copied([UInt8], Range<Int>)
@@ -243,26 +244,28 @@ public struct IMAPBuffer: Sendable {
 // MARK: - The copy threshold
 
 extension IMAPBuffer {
+    // Input and output share this one number: do not change one without the other; they are the same
+    // trade seen from two sides. The parser's literal rule, below, is a separate trade made with it in
+    // mind: every read this keeps is long enough to yield a literal the parser may refer to.
+    //
+    // Why 1024: it sits **below the smallest realistic network read**. The case that decides it is a
+    // large message arriving one Ethernet-MTU read at a time: each extraction takes essentially the
+    // whole 1448-byte read, so referring to it wastes no memory — the region is ~100% live — while
+    // copying allocates once per packet. For a 10 MB message that is ~7,240 allocations and 10 MB
+    // copied, against none and nothing.
+    //
+    // A microbenchmark comparing a `memcpy` against the cost of one extra output region argues for
+    // something nearer 16 KB, and that reading is wrong: it assumes the copy has an open segment to
+    // merge into and that the bytes are not handed out immediately, neither of which holds while
+    // streaming. What is left once those assumptions go is allocation churn, and that points below
+    // an MTU.
+
     /// Runs of bytes shorter than this are copied; runs this long or longer are referred to.
     ///
-    /// Both directions use this one number. The parser decides with it whether to copy an extracted
-    /// payload or to hand out a reference into the received buffer, and ``IMAPOutputBuffer`` decides
-    /// with it whether to copy an appended region or to keep a reference to it. Do not change one
-    /// without the other; they are the same trade seen from two sides.
-    ///
-    /// ## Why 1024
-    ///
-    /// It sits **below the smallest realistic network read**. The case that decides it is a large
-    /// message arriving one Ethernet-MTU read at a time: each extraction takes essentially the whole
-    /// 1448-byte read, so referring to it wastes no memory — the region is ~100% live — while copying
-    /// allocates once per packet. For a 10 MB message that is ~7,240 allocations and 10 MB copied,
-    /// against none and nothing.
-    ///
-    /// A microbenchmark comparing a `memcpy` against the cost of one extra output region argues for
-    /// something nearer 16 KB, and that reading is wrong: it assumes the copy has an open segment to
-    /// merge into and that the bytes are not handed out immediately, neither of which holds while
-    /// streaming. What is left once those assumptions go is allocation churn, and that points below
-    /// an MTU.
+    /// ``IMAPOutputBuffer`` decides with it whether to copy an appended region or to keep a reference
+    /// to it, and ``IMAPInputBuffer`` whether to copy a received region into its tail or to keep it.
+    /// The parser decides whether to copy an extracted payload by a rule of its own, which also
+    /// weighs how much memory a reference would keep alive.
     ///
     /// - Note: This is not ``IMAPDefaults/lineLengthLimit``. That is a protocol and denial-of-service
     ///   limit and stays at 8192; this is a performance trade-off and has nothing to do with it.

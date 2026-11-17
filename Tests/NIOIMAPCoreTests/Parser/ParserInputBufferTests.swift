@@ -14,8 +14,6 @@
 
 @_spi(NIOIMAPInternal) @testable import NIOIMAPCore
 
-import Dispatch
-import Foundation
 import Testing
 
 /// Coverage for the input seam: the gather, the two paths through it, and the trimming contract.
@@ -59,14 +57,6 @@ private func makeInputBuffer(_ regions: [[UInt8]]) -> IMAPInputBuffer {
     return buffer
 }
 
-private func makeDispatchData(_ pieces: [[UInt8]]) -> DispatchData {
-    var data = DispatchData.empty
-    for piece in pieces {
-        piece.withUnsafeBufferPointer { data.append($0) }
-    }
-    return data
-}
-
 /// A conformer with no fast path at all: several regions, no owners, so it takes the recursive gather.
 private struct ManyRegions: ParserInputBuffer {
     var byteRegions: [[UInt8]]
@@ -108,10 +98,8 @@ extension ParserInputBufferTests {
     @Test("A conformer that cannot vouch for its bytes gets a copy")
     func genericGatherCopies() throws {
         // Not a defect: nobody is keeping these bytes alive past the call, so a payload that outlives it
-        // has to be copied. This is the honest answer for `Data`, `Array` and third-party conformers.
+        // has to be copied. This is the honest answer for `Array`.
         #expect(try payload.withParseInput { try extractsWithoutCopying(&$0) } == false)
-        #expect(try Data(payload).withParseInput { try extractsWithoutCopying(&$0) } == false)
-        #expect(try makeDispatchData([payload]).withParseInput { try extractsWithoutCopying(&$0) } == false)
     }
 
     @Test("A payload extracted after an earlier parse is the right payload")
@@ -196,17 +184,6 @@ extension ParserInputBufferTests {
 // MARK: - Region counts
 
 extension ParserInputBufferTests {
-    @Test("A DispatchData parses across its regions", arguments: [1, 2, 25, 5000])
-    func dispatchDataRegions(pieceCount: Int) throws {
-        let pieces = (0..<pieceCount).map { [UInt8($0 % 251)] }
-        var data = makeDispatchData(pieces)
-        #expect(data.count == pieceCount)
-        #expect(data.regionCount == data.regions.count)
-        let bytes = try data.parse { try $0.extractBytes(length: pieceCount) }
-        #expect(bytes == pieces.flatMap { $0 })
-        #expect(data.count == 0)
-    }
-
     @Test("More regions than the recursion can descend are coalesced rather than crashing")
     func recursionIsCapped() throws {
         // Uncapped, this is a stack overflow at somewhere around 1,520 regions — and a stack overflow
@@ -247,10 +224,10 @@ extension ParserInputBufferTests {
     }
 }
 
-// MARK: - Stdlib and Foundation conformers
+// MARK: - Stdlib conformers
 
 extension ParserInputBufferTests {
-    @Test("The stdlib byte containers and Foundation's can all be parsed from")
+    @Test("The stdlib byte containers can all be parsed from")
     func shippedConformers() throws {
         let text = "A001 NOOP\r\n"
         let bytes = Array(text.utf8)
@@ -260,45 +237,9 @@ extension ParserInputBufferTests {
         let fromContiguous = try ContiguousArray(bytes).withParseInput {
             try $0.extractBytes(length: bytes.count)
         }
-        let fromData = try Data(bytes).withParseInput { try $0.extractBytes(length: bytes.count) }
-        let fromDispatch = try makeDispatchData([bytes]).withParseInput {
-            try $0.extractBytes(length: bytes.count)
-        }
 
         #expect(fromArray == bytes)
         #expect(fromSlice == bytes)
         #expect(fromContiguous == bytes)
-        #expect(fromData == bytes)
-        #expect(fromDispatch == bytes)
-    }
-
-    @Test("A parsed prefix is discarded from a DispatchData without copying the rest")
-    func dispatchDataDiscardFirst() throws {
-        var data = makeDispatchData([Array("A001 NOOP\r\n".utf8), Array("A002 NOOP\r\n".utf8)])
-        for tag in ["A001", "A002"] {
-            let line = try data.parse { try $0.extractBytes(length: 11) }
-            #expect(String(decoding: line, as: UTF8.self) == "\(tag) NOOP\r\n")
-        }
-        #expect(data.count == 0)
-    }
-
-    @Test("Trimming a DispatchData repeatedly does not pile up wrappers")
-    func dispatchDataTrimmingStaysFlat() throws {
-        // `subdata(in:)` is the cheap way to consume a prefix, but a chain of subranges that the gather
-        // then had to walk would make each parse a little more expensive than the last. It does not: the
-        // region count only ever goes down, whether the trim lands on a boundary or inside a region.
-        var data = makeDispatchData((0..<20).map { Array(repeating: UInt8($0), count: 10) })
-        #expect(data.regionCount == 20)
-        for step in 1...20 {
-            _ = try data.parse { try $0.extractBytes(length: 10) }
-            #expect(data.regionCount == 20 - step)
-        }
-        #expect(data.count == 0)
-
-        var uneven = makeDispatchData((0..<4).map { Array(repeating: UInt8($0), count: 10) })
-        _ = try uneven.parse { try $0.extractBytes(length: 5) }
-        #expect(uneven.regionCount == 4, "a trim inside a region leaves that region, shortened")
-        _ = try uneven.parse { try $0.extractBytes(length: 5) }
-        #expect(uneven.regionCount == 3)
     }
 }

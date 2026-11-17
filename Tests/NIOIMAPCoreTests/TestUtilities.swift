@@ -35,6 +35,13 @@ enum TestUtilities {}
 
 // MARK: - Parser input
 
+extension IMAPInputBuffer {
+    /// The runs the buffer holds, oldest first, the first one starting at the read head.
+    ///
+    /// The region view is internal; this lets suites that otherwise use public API only inspect it.
+    var regionsForTesting: [IMAPBuffer] { Array(byteRegions) }
+}
+
 extension TestUtilities {
     /// Runs `body` with a cursor over `text`.
     ///

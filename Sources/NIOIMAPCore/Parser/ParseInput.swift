@@ -159,21 +159,9 @@ internal func _span(_ bytes: UnsafeBufferPointer<UInt8>) -> Span<UInt8> {
 ///
 /// ## This is not the type to hand the parser
 ///
-/// If you are looking for how to give the parser bytes, you want ``ParserInputBuffer`` — in a
-/// connection, ``IMAPInputBuffer``. `ParseInput` is `public` for one reason only: it appears in the
-/// closure signature of ``ParserInputBuffer/withParseInput(limit:_:)``, which a caller outside this
-/// module has to be able to spell in order to conform. Everything that *reads* through a cursor — both
-/// initialisers, every primitive, every combinator, and the read position itself — is `internal`.
-///
-/// So there is nothing a client can do with one, and nothing it needs to do: no public API takes a
-/// cursor. ``CommandParser/parseCommandStream(buffer:)`` and
-/// ``ResponseParser/parseResponseStream(buffer:)`` take the *buffer* and open their own cursor over
-/// it, and a conformer's obligation is to describe its bytes, not to read them — see
-/// ``ParserInputBuffer``, whose gather is where every `ParseInput` is built.
-///
-/// - Note: The reading surface becomes public if a parser entry point is ever added that takes a
-///   cursor directly, so that one gather can serve several parses. Until then, treat the parameter as
-///   opaque.
+/// Callers hand the parser an ``IMAPInputBuffer``. ``CommandParser/parseCommandStream(buffer:)`` and
+/// ``ResponseParser/parseResponseStream(buffer:)`` open their own cursor over it, through the gather in
+/// ``ParserInputBuffer``, which is where every `ParseInput` is built.
 ///
 /// ## The invariant
 ///
@@ -188,7 +176,7 @@ internal func _span(_ bytes: UnsafeBufferPointer<UInt8>) -> Span<UInt8> {
 /// `limit` caps how many bytes may ever be consumed through this cursor. It replaces clamping the input
 /// down to a slice before parsing, so bytes past it are invisible to every primitive rather than merely
 /// discouraged.
-public struct ParseInput: ~Escapable {
+internal struct ParseInput: ~Escapable {
     /// Every region, in order. Empty for a single-span cursor.
     private var table: ChunkTable
 

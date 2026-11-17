@@ -18,11 +18,6 @@
 /// multi-megabyte message payload can be handed to a caller — or written back out again — as a
 /// reference to somebody else's memory rather than as a copy.
 ///
-/// It is a `final class` on purpose: it gives the wrapped region exactly one heap box with a
-/// reference count, which is the whole mechanism. Wrapping a value of three words or fewer — a
-/// `ByteBuffer` is 24 bytes of stride, `Data` is 16 — costs **one** allocation in total, because the
-/// value fits in the existential's inline storage.
-///
 /// ## Immutability requirement
 ///
 /// - Important: The wrapped region's bytes, and their count, must never change for as long as this
@@ -40,6 +35,11 @@
 /// ``IMAPInputBuffer`` and ``IMAPBufferList/makeDispatchData()`` let a pointer outlive the accessor on
 /// its word, so a false conformance does leave one dangling.
 public final class IMAPByteStorage: Sendable {
+    // A `final class` on purpose: it gives the wrapped region exactly one heap box with a reference
+    // count, which is the whole mechanism. Wrapping a value of three words or fewer — a `ByteBuffer`
+    // is 24 bytes of stride, `Data` is 16 — costs **one** allocation in total, because the value fits
+    // in the existential's inline storage.
+
     private let region: any ByteRegion & Sendable
 
     /// The number of bytes in the wrapped region.
@@ -88,12 +88,12 @@ public final class IMAPByteStorage: Sendable {
     /// Wraps a region whose address is fixed, taking ownership of it.
     ///
     /// Overload resolution picks this wherever the region's type is known to conform — `ByteBuffer`,
-    /// the stdlib arrays — so wrapping one costs no dynamic cast. The other init is not specialized
-    /// across modules, so its casts run on every call.
+    /// the stdlib arrays — so wrapping one costs no dynamic cast.
     ///
     /// - Parameter region: The bytes to keep alive. Must satisfy the immutability requirement
     ///   described on ``IMAPByteStorage``.
     public convenience init(_ region: some StableAddressByteRegion & Sendable) {
+        // The other init is not specialized across modules, so its casts run on every call.
         self.init(region, address: .fixed)
     }
 

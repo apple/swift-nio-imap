@@ -170,7 +170,7 @@ struct StableAddressByteRegionTests {
         var input = IMAPInputBuffer()
         input.append(foreign)
         #expect(input.count == Self.byteCount)
-        #expect(input.byteRegions[0].withUnsafeBytes { UnsafeRawPointer($0.baseAddress) } == foreign.baseAddress)
+        #expect(input.regionsForTesting[0].withUnsafeBytes { UnsafeRawPointer($0.baseAddress) } == foreign.baseAddress)
     }
 
     @Test("is kept by IMAPInputBuffer through the generic append, and through an IMAPBuffer")
@@ -180,8 +180,8 @@ struct StableAddressByteRegionTests {
         appendGenerically(foreign, to: &input)
         appendGenerically(IMAPBuffer(IMAPByteStorage(foreign)), to: &input)
         input.append(IMAPBuffer(IMAPByteStorage(foreign)))
-        #expect(input.regionCount == 3)
-        for region in input.byteRegions {
+        #expect(input.regionsForTesting.count == 3)
+        for region in input.regionsForTesting {
             #expect(address(of: region) == foreign.baseAddress)
         }
     }
@@ -194,9 +194,9 @@ struct StableAddressByteRegionTests {
         input.append(IMAPBuffer(IMAPByteStorage(foreign)))
         input.append(IMAPBuffer(IMAPByteStorage(unstable)))
 
-        #expect(input.regionCount == 2)
-        #expect(address(of: input.byteRegions[0]) == foreign.baseAddress, "kept")
-        let copy = input.byteRegions[1]
+        #expect(input.regionsForTesting.count == 2)
+        #expect(address(of: input.regionsForTesting[0]) == foreign.baseAddress, "kept")
+        let copy = input.regionsForTesting[1]
         #expect(address(of: copy) != unstable.bytes.withUnsafeBytes { UnsafeRawPointer($0.baseAddress) }, "copied")
         #expect(donatedAddress(of: copy) == address(of: copy), "the copy has a fixed address")
         #expect(copy.copiedBytes() == unstable.bytes)

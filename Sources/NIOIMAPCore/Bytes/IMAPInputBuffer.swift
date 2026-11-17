@@ -283,14 +283,14 @@ extension IMAPInputBuffer: ConsumableParserInputBuffer, StableRegionParserInputB
     /// A view rather than an array: it allocates nothing, and it *slices* the first run rather than
     /// handing over the whole thing, which is the conformance requirement
     /// ``ParserInputBuffer/byteRegions`` states.
-    public struct Regions: RandomAccessCollection, Sendable {
+    internal struct Regions: RandomAccessCollection, Sendable {
         fileprivate let chunks: Deque<Chunk>
         fileprivate let headOffset: Int
 
-        public var startIndex: Int { 0 }
-        public var endIndex: Int { chunks.count }
+        var startIndex: Int { 0 }
+        var endIndex: Int { chunks.count }
 
-        public subscript(position: Int) -> IMAPBuffer {
+        subscript(position: Int) -> IMAPBuffer {
             let start = position == 0 ? headOffset : 0
             switch chunks[position] {
             case .received(let storage, let range):
@@ -301,24 +301,24 @@ extension IMAPInputBuffer: ConsumableParserInputBuffer, StableRegionParserInputB
         }
     }
 
-    public var byteRegions: Regions {
+    internal var byteRegions: Regions {
         Regions(chunks: chunks, headOffset: headOffset)
     }
 
     /// How many runs the buffer holds. O(1), and it needs no ``byteRegions`` view to answer.
-    public var regionCount: Int { chunks.count }
+    internal var regionCount: Int { chunks.count }
 
     /// Fills the region table in one pass.
-    ///
-    /// This is where the ``StableRegionParserInputBuffer`` promise is honest rather than asserted: the
-    /// runs are ours, boxed, kept alive by `self` for as long as this borrow lasts, and at a fixed
-    /// address (appending copies a region that has none), so a pointer to one of them may outlive
-    /// the accessor that produced it. It is also where a payload gets an owner — the box handed to
-    /// ``RegionSink/append(_:owner:offset:)`` is what a large extraction refers to instead of copying.
-    ///
-    /// A tail passes no owner: it holds at most ``minimumTailCapacity`` bytes, so a payload from it is
-    /// copied, at no more cost than the small reads it was copied from.
-    public borrowing func withStableRegions(into sink: inout RegionSink) {
+    internal borrowing func withStableRegions(into sink: inout RegionSink) {
+        // This is where the `StableRegionParserInputBuffer` promise is honest rather than asserted: the
+        // runs are ours, boxed, kept alive by `self` for as long as this borrow lasts, and at a fixed
+        // address (appending copies a region that has none), so a pointer to one of them may outlive
+        // the accessor that produced it. It is also where a payload gets an owner — the box handed to
+        // `RegionSink.append(_:owner:offset:)` is what an extraction refers to, when it is worth it, instead
+        // of copying.
+        //
+        // A tail passes no owner: it holds at most `minimumTailCapacity` bytes, so a payload from it is
+        // copied, at no more cost than the small reads it was copied from.
         for index in chunks.indices {
             let offset = index == chunks.startIndex ? headOffset : 0
             switch chunks[index] {
@@ -338,16 +338,15 @@ extension IMAPInputBuffer: ConsumableParserInputBuffer, StableRegionParserInputB
 
     /// Reads through the buffer's bytes.
     ///
-    /// Written out rather than inherited: a default implementation on
-    /// ``StableRegionParserInputBuffer`` would satisfy the base protocol's requirement only sometimes,
-    /// and the failure — quietly taking the recursive path, and quietly copying every payload — looks
-    /// exactly like success.
-    ///
     /// - Parameters:
     ///   - limit: The most bytes the parser may consume.
     ///   - body: A closure that reads through the cursor.
     /// - Returns: Whatever `body` returns.
-    public func withParseInput<R>(limit: Int, _ body: (inout ParseInput) throws -> R) rethrows -> R {
+    internal func withParseInput<R>(limit: Int, _ body: (inout ParseInput) throws -> R) rethrows -> R {
+        // Written out rather than inherited: a default implementation on
+        // `StableRegionParserInputBuffer` would satisfy the base protocol's requirement only sometimes,
+        // and the failure — quietly taking the recursive path, and quietly copying every payload — looks
+        // exactly like success.
         try _stableWithParseInput(limit: limit, body)
     }
 }
