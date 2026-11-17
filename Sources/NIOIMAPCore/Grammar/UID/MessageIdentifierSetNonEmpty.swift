@@ -57,7 +57,8 @@ public struct MessageIdentifierSetNonEmpty<IdentifierType: MessageIdentifier>: H
     /// - parameter set: The underlying `MessageIdentifierSet` to use.
     /// - returns: `nil` if the given `MessageIdentifierSet` is empty.
     public init?(set: MessageIdentifierSet<IdentifierType>) {
-        guard set.count > 0 else {
+        // `isEmpty`, not `count > 0`: `count` walks every range, through unspecialized `RangeSet` code.
+        guard !set.isEmpty else {
             return nil
         }
         self.set = set
