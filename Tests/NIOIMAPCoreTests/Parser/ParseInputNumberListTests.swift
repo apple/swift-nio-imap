@@ -58,4 +58,49 @@ extension ParseInputTests {
             #expect(buffer.consumed == 2)
         }
     }
+
+    @Test(
+        "comma-separated ranges: reads well-formed elements, stops before the rest",
+        arguments: [
+            (",5,7:9,12\r\n", [5...5, 7...9, 12...12], 9),
+            // A reversed range is ordered, as the generic grammar does.
+            (",20:12 ", [12...20], 6),
+            (",1:4294967295)", [1...4_294_967_295], 13),
+            // `*` and anything malformed are left to the generic grammar.
+            (",5,7:*\r\n", [5...5], 2),
+            (",5,*:7\r\n", [5...5], 2),
+            (",5,7:\r\n", [5...5], 2),
+            (",5,7:0\r\n", [5...5], 2),
+            (",5,07\r\n", [5...5], 2),
+            (",5,,7\r\n", [5...5], 2),
+            (",5,4294967296\r\n", [5...5], 2),
+            // No visible terminator, after either bound.
+            (",5,7", [5...5], 2),
+            (",5,7:9", [5...5], 2),
+            (",5,7:", [5...5], 2),
+            // What may follow a sequence set.
+            (",5 COUNT 2\r\n", [5...5], 2),
+            ("5,7\r\n", [], 0),
+            ("", [], 0),
+        ] as [(String, [ClosedRange<UInt32>], Int)]
+    )
+    func commaSeparatedRanges(_ input: String, _ expected: [ClosedRange<UInt32>], _ consumed: Int) {
+        ParseInputHarness.withSpan(input) { buffer in
+            var ranges: [ClosedRange<UInt32>] = []
+            let count = buffer.parseCommaSeparatedNZRanges { ranges.append($0) }
+            #expect(ranges == expected)
+            #expect(count == expected.count)
+            #expect(buffer.consumed == consumed)
+        }
+    }
+
+    @Test("comma-separated ranges: stops before an element that crosses a region boundary")
+    func commaSeparatedRangesAcrossRegions() {
+        ParseInputHarness.withInput([TestRegion(",5,7:"), TestRegion("9,12\r\n")]) { buffer in
+            var ranges: [ClosedRange<UInt32>] = []
+            buffer.parseCommaSeparatedNZRanges { ranges.append($0) }
+            #expect(ranges == [5...5])
+            #expect(buffer.consumed == 2)
+        }
+    }
 }

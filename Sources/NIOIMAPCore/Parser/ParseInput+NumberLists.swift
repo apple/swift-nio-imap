@@ -54,6 +54,41 @@ extension ParseInput {
         return elements
     }
 
+    /// Consumes as many `"," nz-number [":" nz-number]` elements as the current chunk holds, calling
+    /// `body` with each.
+    ///
+    /// Reads the tail of a sequence set, e.g. `",5,7:9,20:12"`, as `5...5`, `7...9`, `12...20`: a range
+    /// is ordered, as the generic grammar does. Stops before the first element it cannot read whole,
+    /// e.g. one containing `*`.
+    ///
+    /// - Returns: How many elements it consumed.
+    @_lifetime(self: copy self)
+    @discardableResult
+    mutating func parseCommaSeparatedNZRanges(_ body: (ClosedRange<UInt32>) -> Void) -> Int {
+        var elements = 0
+        let consumed = withCurrentChunk { chunk in
+            chunk.withUnsafeBufferPointer { bytes -> Int in
+                var consumed = 0
+                while let (first, firstEnd) = Self.nzNumber(in: bytes, after: UInt8(ascii: ","), at: consumed) {
+                    var end = firstEnd
+                    var range = first...first
+                    if bytes[firstEnd] == UInt8(ascii: ":") {
+                        guard let (second, secondEnd) = Self.nzNumber(in: bytes, after: UInt8(ascii: ":"), at: firstEnd)
+                        else { break }
+                        range = min(first, second)...max(first, second)
+                        end = secondEnd
+                    }
+                    body(range)
+                    elements += 1
+                    consumed = end
+                }
+                return consumed
+            }
+        }
+        advance(by: consumed)
+        return elements
+    }
+
     /// Reads `separator nz-number` at `start`, e.g. `" 300"`.
     ///
     /// - Returns: The number and the index just past it, or `nil` if `bytes` does not hold exactly that
