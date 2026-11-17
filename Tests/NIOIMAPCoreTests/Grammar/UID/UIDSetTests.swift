@@ -73,6 +73,39 @@ struct UIDSetTests {
         #expect(set.debugDescription == expected)
     }
 
+    // `init(_ ranges:)` has a fast path for sorted input and a fallback for the rest. Random small
+    // inputs — sorted and not, overlapping, adjacent, duplicated — must match one `insert` per range.
+    @Test("init from ranges matches inserting each range")
+    func initFromRangesMatchesInsert() {
+        // 64-bit LCG: deterministic, so a failure reproduces.
+        var state: UInt64 = 0x2545_F491_4F6C_DD1D
+        func next(_ bound: UInt32) -> UInt32 {
+            state = state &* 6_364_136_223_846_793_005 &+ 1_442_695_040_888_963_407
+            return UInt32(truncatingIfNeeded: state >> 33) % bound
+        }
+
+        for iteration in 0..<20_000 {
+            var ranges: [ClosedRange<UID>] = []
+            for _ in 0..<next(13) {
+                // Small values, so overlap and adjacency are common; sometimes up to `UID.max`.
+                let lower = 1 + next(40)
+                let upper = next(20) == 0 ? UInt32.max : lower + next(6)
+                ranges.append(UID(rawValue: lower)...UID(rawValue: upper))
+            }
+            if iteration % 2 == 0 {
+                ranges.sort { $0.lowerBound < $1.lowerBound }
+            }
+
+            var expected = RangeSet<MessageIdentificationShiftWrapper>()
+            for range in ranges {
+                expected.insert(contentsOf: Range(MessageIdentifierRange(range)))
+            }
+            let set = MessageIdentifierSet(ranges.map { MessageIdentifierRange($0) })
+            #expect(set._ranges == expected, "input \(ranges)")
+            if set._ranges != expected { return }
+        }
+    }
+
     @Test("min max")
     func minMax() {
         #expect(MessageIdentifierSet<UID>().min() == nil)
