@@ -383,4 +383,8 @@ let benchmarks: @Sendable () -> Void = {
             }
         }
     }
+
+    // MARK: SEARCH and ESEARCH results
+
+    registerSearchBenchmarks()
 }
