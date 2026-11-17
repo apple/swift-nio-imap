@@ -54,6 +54,25 @@ struct UIDSetTests {
         fixture.checkEncoding()
     }
 
+    // `init(_ ranges:)` must order and merge whatever it is given, not only the ascending, disjoint
+    // ranges a server usually sends.
+    @Test(
+        "init from ranges orders and merges",
+        arguments: [
+            ([3...3, 7...9, 12...12], "3,7:9,12"),
+            ([12...12, 3...3, 7...9], "3,7:9,12"),
+            ([5...10, 1...6], "1:10"),
+            ([1...3, 4...6], "1:6"),
+            ([4...4, 4...4, 2...2], "2,4"),
+            ([10...UID.max, 1...2, 3...3], "1:3,10:*"),
+            ([], ""),
+        ] as [([ClosedRange<UID>], String)]
+    )
+    func initFromRanges(_ ranges: [ClosedRange<UID>], _ expected: String) {
+        let set = MessageIdentifierSet(ranges.map { MessageIdentifierRange($0) })
+        #expect(set.debugDescription == expected)
+    }
+
     @Test("min max")
     func minMax() {
         #expect(MessageIdentifierSet<UID>().min() == nil)

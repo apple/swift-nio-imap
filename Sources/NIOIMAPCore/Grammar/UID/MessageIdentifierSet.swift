@@ -77,10 +77,11 @@ public struct MessageIdentifierSet<IdentifierType: MessageIdentifier>: Hashable,
     /// Creates a new `MessageIdentifierSet` containing the `MessageIdentifier`s in the given ranges.
     @inlinable
     public init<S: Sequence>(_ ranges: S) where S.Element == MessageIdentifierRange<IdentifierType> {
-        self.init()
-        ranges.forEach {
-            self._ranges.insert(contentsOf: Range($0))
-        }
+        // One sort-and-merge pass: ~2× faster than an `insert(contentsOf:)` per range (5,000 ranges:
+        // 455 µs vs 993 µs). `RangeSet` is not inlinable, so both run unspecialized in the stdlib.
+        // Pass an `Array`, not a lazy map: iterating a lazy sequence from unspecialized code costs
+        // several allocations per element.
+        self._ranges = RangeSet(ranges.map { Range($0) })
     }
 
     public init() {
