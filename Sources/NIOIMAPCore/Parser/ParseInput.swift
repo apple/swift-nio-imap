@@ -449,6 +449,19 @@ extension ParseInput {
         }
     }
 
+    /// Throws ``ParseFailure/incomplete`` unless a line ending (CR or LF) is among the visible bytes.
+    ///
+    /// Guards a response line that cannot finish parsing before its ending arrives, e.g.
+    /// `* SEARCH 2 5 9\r\n`. Without it, a line spread over many reads is re-parsed from its start on
+    /// every read, which is quadratic in its length. `memchr` makes the check cheap.
+    ///
+    /// A CR is the likely hit, so the LF scan runs only when no CR is visible.
+    internal func requireVisibleLineEnding() throws(ParseFailure) {
+        if scanUntil(byte: UInt8(ascii: "\r")) != nil { return }
+        if scanUntil(byte: UInt8(ascii: "\n")) != nil { return }
+        throw .incomplete
+    }
+
     /// How many leading bytes satisfy `predicate`, or `nil` if *every* visible byte does.
     ///
     /// Non-consuming. `nil` means "the run might continue in bytes that have not arrived yet", which is
