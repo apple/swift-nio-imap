@@ -132,8 +132,8 @@ extension GrammarParser {
         // The fast path takes well-formed `,n` / `,n:m` runs; whenever it stops (a region boundary, `*`),
         // one generic element follows, then the fast path resumes.
         while true {
-            buffer.parseCommaSeparatedNZRanges { range in
-                output.append(MessageIdentifierRange(T(rawValue: range.lowerBound)...T(rawValue: range.upperBound)))
+            buffer.parseCommaSeparatedNZRanges(appendingTo: &output) { range in
+                MessageIdentifierRange(T(rawValue: range.lowerBound)...T(rawValue: range.upperBound))
             }
             let next = try buffer.parseOptional(tracker: tracker) {
                 (buffer, tracker) throws(ParseFailure) -> MessageIdentifierRange<T> in
