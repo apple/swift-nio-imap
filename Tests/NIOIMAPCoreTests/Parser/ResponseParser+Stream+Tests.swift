@@ -1133,6 +1133,15 @@ extension ResponseParserTests {
             #"* LIST (\HasNoChildren) "." "INBOX.Sent" ("CHILDINFO" ("SUBSCRIBED"))\#r\#n"#,
             #"* LIST () "/" INBOX ("OLDNAME" ("foo"))\#r\#n"#,
             #"* ESEARCH (TAG "A1") UID XFOO (abc def) COUNT 2\#r\#n"#,
+            // SEARCH and ESEARCH results wait for their line ending before parsing: a read ending
+            // anywhere before it must stay incomplete, whatever the ending is.
+            #"* SEARCH 2 10 300\#r\#n"#,
+            #"* SEARCH 2 10 (MODSEQ 917162500)\#r\#n"#,
+            #"* SEARCH 2 10\#n"#,
+            #"* SEARCH\#r\#n"#,
+            #"* ESEARCH (TAG "A1") UID ALL 2,4:7,10 COUNT 6\#r\#n"#,
+            // A literal correlator puts a CRLF before the result data.
+            #"* ESEARCH (TAG {2}\#r\#nA1) UID ALL 2,4:7\#r\#n"#,
         ]
     )
     func splitAnywhere(response: String) throws {

@@ -72,6 +72,8 @@ extension GrammarParser {
                 buffer: inout ParseInput,
                 tracker: StackTracker
             ) throws(ParseFailure) -> MailboxData {
+                // Results can span many reads; don't re-parse them until the line is complete.
+                try buffer.requireVisibleLineEnding()
                 let response = try self.parseExtendedSearchResponse(buffer: &buffer, tracker: tracker)
                 return .extendedSearch(response)
             }
@@ -80,6 +82,8 @@ extension GrammarParser {
                 buffer: inout ParseInput,
                 tracker: StackTracker
             ) throws(ParseFailure) -> MailboxData {
+                // Results can span many reads; don't re-parse them until the line is complete.
+                try buffer.requireVisibleLineEnding()
                 let identifiers = try buffer.parseZeroOrMore(tracker: tracker) {
                     (buffer, tracker) throws(ParseFailure) -> UnknownMessageIdentifier in
                     try buffer.parseSpaces()
