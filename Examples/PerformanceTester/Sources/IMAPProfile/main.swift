@@ -61,6 +61,21 @@ let scenarios: [String: (Int) -> Void] = [
         }
     },
 
+    // A 5,000-element SEARCH / ESEARCH result, 5-digit UIDs, contiguous.
+    // `parse.search.d5.n5000.contiguous`, `parse.esearch.d5.n5000.contiguous`.
+    "search": { iterations in
+        let bytes = SearchCorpus.responseBytes(kind: .search, count: SearchCorpus.largeCount, digits: .five)
+        for _ in 0..<iterations {
+            try! Parsing.parseResponses(chunks: [bytes]) { consume($0) }
+        }
+    },
+    "esearch": { iterations in
+        let bytes = SearchCorpus.responseBytes(kind: .esearch, count: SearchCorpus.largeCount, digits: .five)
+        for _ in 0..<iterations {
+            try! Parsing.parseResponses(chunks: [bytes]) { consume($0) }
+        }
+    },
+
     // Wide rather than deep: most of the distinct response grammar a client handles.
     // `parse.responses.session`.
     "session": { iterations in
