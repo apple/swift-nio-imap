@@ -128,6 +128,8 @@ extension GrammarParser {
                         try PL.parseFixedString("}", buffer: &buffer, tracker: tracker)
                         try PL.parseNewline(buffer: &buffer, tracker: tracker)
                         _ = try PL.parseBytes(buffer: &buffer, tracker: tracker, length: literalCount)
+                        // Count the literal against the budget, else each literal could use all of it.
+                        byteCount += literalCount
                     case 0x28:
                         parenthesisCount += 1
                     case 0x29:
