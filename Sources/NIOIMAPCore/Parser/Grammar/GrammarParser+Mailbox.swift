@@ -84,14 +84,22 @@ extension GrammarParser {
             ) throws(ParseFailure) -> MailboxData {
                 // Results can span many reads; don't re-parse them until the line is complete.
                 try buffer.requireVisibleLineEnding()
-                let identifiers = try buffer.parseZeroOrMore(tracker: tracker) {
-                    (buffer, tracker) throws(ParseFailure) -> UnknownMessageIdentifier in
-                    try buffer.parseSpaces()
-                    let num = try self.parseNZNumber(buffer: &buffer, tracker: tracker)
-                    guard let id = UnknownMessageIdentifier(exactly: num) else {
-                        throw .mismatch(dynamicHint: "Can't make unknown message identfiier from \(num)")
+                // The fast path takes well-formed runs; whenever it stops (a region boundary, extra
+                // spaces, `(MODSEQ …)`), one generic element follows, then the fast path resumes.
+                var identifiers: [UnknownMessageIdentifier] = []
+                while true {
+                    buffer.parseSpaceSeparatedNZNumbers { identifiers.append(UnknownMessageIdentifier(rawValue: $0)) }
+                    let next = try buffer.parseOptional(tracker: tracker) {
+                        (buffer, tracker) throws(ParseFailure) -> UnknownMessageIdentifier in
+                        try buffer.parseSpaces()
+                        let num = try self.parseNZNumber(buffer: &buffer, tracker: tracker)
+                        guard let id = UnknownMessageIdentifier(exactly: num) else {
+                            throw .mismatch(dynamicHint: "Can't make unknown message identfiier from \(num)")
+                        }
+                        return id
                     }
-                    return id
+                    guard let next else { break }
+                    identifiers.append(next)
                 }
                 let modificationSequence = try buffer.parseOptional(tracker: tracker) {
                     (buffer, tracker) throws(ParseFailure) -> ModificationSequenceValue in
