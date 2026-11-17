@@ -36,7 +36,7 @@ private func regionAddresses(_ data: DispatchData) -> [UnsafeRawPointer?] {
 
 /// Every byte `input` holds, in order.
 private func contents(_ input: IMAPInputBuffer) -> [UInt8] {
-    input.byteRegions.flatMap { region in region.withUnsafeBytes { Array($0) } }
+    input.regionsForTesting.flatMap { region in region.withUnsafeBytes { Array($0) } }
 }
 
 /// Which deallocators have run. Touched only on the deallocator queue, so `@unchecked` is safe.
@@ -92,9 +92,9 @@ struct IMAPInputBufferDispatchDataTests {
         #expect(contents(input) == parts.flatMap { $0 })
         #expect(input.count == parts.reduce(0) { $0 + $1.count })
         // a | b | c d | e
-        #expect(input.regionCount == 4)
-        #expect(input.byteRegions[1].withUnsafeBytes { UnsafeRawPointer($0.baseAddress) } == leaves[1])
-        #expect(input.byteRegions[3].withUnsafeBytes { UnsafeRawPointer($0.baseAddress) } == leaves[4])
+        #expect(input.regionsForTesting.count == 4)
+        #expect(input.regionsForTesting[1].withUnsafeBytes { UnsafeRawPointer($0.baseAddress) } == leaves[1])
+        #expect(input.regionsForTesting[3].withUnsafeBytes { UnsafeRawPointer($0.baseAddress) } == leaves[4])
     }
 
     @Test("copies only-small regions into one tail")
@@ -107,7 +107,7 @@ struct IMAPInputBufferDispatchDataTests {
         input.append(contentsOf: data)
 
         #expect(contents(input) == Array("A1 NOOP\r\n".utf8))
-        #expect(input.regionCount == 1)
+        #expect(input.regionsForTesting.count == 1)
     }
 
     @Test("appending an empty DispatchData does nothing")
@@ -115,12 +115,12 @@ struct IMAPInputBufferDispatchDataTests {
         var input = IMAPInputBuffer()
         input.append(contentsOf: .empty)
         #expect(input.isEmpty)
-        #expect(input.regionCount == 0)
+        #expect(input.regionsForTesting.count == 0)
 
         input.append(contentsOf: dispatchData([Array("A1".utf8)]))
         input.append(contentsOf: .empty)
         #expect(contents(input) == Array("A1".utf8))
-        #expect(input.regionCount == 1)
+        #expect(input.regionsForTesting.count == 1)
     }
 
     @Test("a kept region keeps the DispatchData's storage alive after the DispatchData is gone")
@@ -243,7 +243,7 @@ struct IMAPInputBufferDispatchDataTests {
             leaf = try #require(regionAddresses(data).first)
             var input = IMAPInputBuffer()
             input.append(contentsOf: data)
-            converted = input.byteRegions[0].makeDispatchData()
+            converted = input.regionsForTesting[0].makeDispatchData()
         }
         queue.sync {}
 

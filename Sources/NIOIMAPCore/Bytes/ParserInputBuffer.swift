@@ -116,7 +116,7 @@ internal protocol StableRegionParserInputBuffer: ParserInputBuffer {
 /// The library owns the storage and validates every push, so a conformer cannot get the bookkeeping
 /// wrong: it cannot overrun the table, and it cannot describe a range that lies outside the owner it
 /// names. It is neither copyable nor escapable, so it cannot outlive the gather that created it.
-public struct RegionSink: ~Copyable, ~Escapable {
+internal struct RegionSink: ~Copyable, ~Escapable {
     /// Where the entries go. Sized from ``ParserInputBuffer/regionCount``.
     private let table: UnsafeMutableBufferPointer<RegionEntry>
 
@@ -146,7 +146,7 @@ public struct RegionSink: ~Copyable, ~Escapable {
     ///   - offset: Where `bytes` begins inside `owner`. Zero when the region is all of the owner;
     ///     the head offset when the region is the unconsumed tail of one.
     @_lifetime(self: copy self)
-    public mutating func append(_ bytes: UnsafeBufferPointer<UInt8>, owner: IMAPByteStorage?, offset: Int) {
+    internal mutating func append(_ bytes: UnsafeBufferPointer<UInt8>, owner: IMAPByteStorage?, offset: Int) {
         precondition(
             filled < table.count,
             "a ParserInputBuffer pushed more than the \(table.count) regions its regionCount promised"
@@ -187,14 +187,16 @@ extension RegionSink: Sendable {}
 // MARK: - The generic gather
 
 extension ParserInputBuffer {
+    // 64 is deliberately conservative: 256 was tried first and overflowed a test thread's stack, and a
+    // stack overflow cannot be caught, so "the caller passed a lot of regions" would otherwise
+    // crash the process.
+
     /// The most frames the recursive gather may use.
     ///
     /// One region costs one frame, and a frame here is not small, especially in a debug build, because a
     /// generic region accessor plus its closure is several physical frames. A Swift concurrency task
     /// thread has a limited stack, and the parser recurses below the gather on top of that — so 64
-    /// frames is the budget. It is deliberately conservative: 256 was tried first and overflowed a test thread's
-    /// stack, and a stack overflow cannot be caught, so "the caller passed a lot of regions" would
-    /// otherwise be a killed process.
+    /// frames is the budget.
     ///
     /// Regions past the cap are coalesced rather than dropped, so the input stays unbounded and only the
     /// stack is bounded. Types that really do carry many regions conform to

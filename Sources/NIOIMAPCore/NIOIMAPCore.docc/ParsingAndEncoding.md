@@ -41,11 +41,9 @@ Types for carrying raw message payloads without copying them.
 
 ### Parser input
 
-Where received bytes wait to be parsed, and how the parser reads them.
+Where received bytes wait to be parsed.
 
 - ``IMAPInputBuffer``
-- ``ParseInput``
-- ``RegionSink``
 
 ### Encoder output
 

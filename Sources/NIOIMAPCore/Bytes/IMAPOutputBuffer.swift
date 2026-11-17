@@ -357,14 +357,15 @@ public struct IMAPOutputBuffer: EncoderOutputBuffer {
 
     /// Calls the given closure with the pending regions, in order.
     ///
-    /// - Note: Cold path. This materialises an array of ``IMAPBuffer``, so it allocates — which is
-    ///   fine where it is used, since equality, hashing and debug descriptions all walk every byte
-    ///   anyway. Building a `Span` without the array would mean reconstructing one from a temporary
-    ///   allocation, which is an unsafe assertion this does not need to make.
+    /// - Note: Cold path. This materialises an array of ``IMAPBuffer``, so it allocates.
     ///
     /// - Parameter body: A closure that receives the pending regions.
     /// - Returns: Whatever `body` returns.
     public func withPendingRegions<R>(_ body: (Span<IMAPBuffer>) -> R) -> R {
+        // Allocating is fine where this is used, since equality, hashing and debug descriptions all walk
+        // every byte anyway. Building a `Span` without the array would mean reconstructing one from a
+        // temporary allocation, which is an unsafe assertion this does not need to make.
+        //
         // `ContiguousArray`, not `Array`: an `Array` may be a bridged `NSArray`, so `Array.span` has to
         // check for that and copy the elements out first, which is also why it was gated at macOS 26
         // while `ContiguousArray.span` back-deploys as far as `Span` itself. The package now declares
@@ -385,11 +386,8 @@ public struct IMAPOutputBuffer: EncoderOutputBuffer {
     /// Discards everything pending and releases the segments backing it.
     ///
     /// The segment currently open for writing is the one exception: it is kept, and the next message
-    /// continues in whatever room is left in it. Dropping it as well would make a long-lived encoder —
-    /// a server handler drains one of these after every response — allocate a fresh segment for every
-    /// message, which is the allocation pattern the segmented design exists to avoid; keeping anything
-    /// more than it would mean never releasing memory at all. So what is held after this returns is at
-    /// most one segment.
+    /// continues in whatever room is left in it. What is held after this returns is at most one
+    /// segment.
     ///
     /// A segment that a handed-out region still refers to stays alive until that region goes away;
     /// everything else is freed here. Bytes already handed out are unaffected: the open segment is
@@ -398,6 +396,10 @@ public struct IMAPOutputBuffer: EncoderOutputBuffer {
     /// The segment *sizing* is kept too, so a buffer that has learned it needs large segments does not
     /// re-climb the growth curve.
     public mutating func removeAll() {
+        // Keeping the open segment: dropping it as well would make a long-lived encoder — a server
+        // handler drains one of these after every response — allocate a fresh segment for every
+        // message, which is the allocation pattern the segmented design exists to avoid; keeping
+        // anything more than it would mean never releasing memory at all.
         guard isKnownUniquelyReferenced(&storage) else {
             // Shared: the other owner keeps the segments, and this copy must not write into the one
             // that was open, so it starts over with nothing.

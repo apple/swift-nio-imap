@@ -22,15 +22,9 @@
 /// ## Two quantities, both named
 ///
 /// This type counts two different things — bytes and regions — so it offers ``byteCount`` and
-/// ``regionCount`` and **no bare `count`**, and no `isEmpty`. That is deliberate. A `count` on this
-/// type would be ambiguous at every call site, and an `isEmpty` meaning "no regions" would read as
-/// "no bytes" in exactly the preconditions where the difference matters: a chunk carrying a single
-/// zero-length region has no bytes but is not regionless. Write `byteCount == 0` or
-/// `regionCount == 0` and say which one is meant.
-///
-/// For the same reason this is not a `Collection`. Nothing that consumes a chunk wants indices,
-/// slicing or a `SubSequence`; they want to iterate the regions and know how many there are, which
-/// is what ``regions`` gives.
+/// ``regionCount`` and **no bare `count`**, and no `isEmpty`: a chunk carrying a single zero-length
+/// region has no bytes but is not regionless. Write `byteCount == 0` or `regionCount == 0` and say
+/// which one is meant. Iterate the regions with ``regions``.
 ///
 /// ## Getting the bytes out
 ///
@@ -43,14 +37,23 @@
 /// }
 /// ```
 ///
-/// ``copiedBytes()`` coalesces everything into one array. Like ``IMAPBuffer/copiedBytes()`` it is a
-/// method because it allocates and copies on every call.
-///
-/// That is the convention across the byte types: anything that copies payload bytes or allocates per
-/// region — ``copiedBytes()``, ``makeDispatchData()``, `makeByteBuffers()` — is a method, never a
-/// computed property, because a property on a value that may hold a multi-megabyte literal reads as
-/// free. Properties (``byteCount``, ``regionCount``, ``regions``) stay O(1).
+/// ``copiedBytes()`` coalesces everything into one array. Like ``IMAPBuffer/copiedBytes()`` it
+/// allocates and copies on every call. Properties (``byteCount``, ``regionCount``, ``regions``) stay
+/// O(1).
 public struct IMAPBufferList: Sendable {
+    // No bare `count` and no `isEmpty`, deliberately. A `count` on this type would be ambiguous at
+    // every call site, and an `isEmpty` meaning "no regions" would read as "no bytes" in exactly the
+    // preconditions where the difference matters.
+    //
+    // For the same reason this is not a `Collection`. Nothing that consumes a chunk wants indices,
+    // slicing or a `SubSequence`; they want to iterate the regions and know how many there are, which
+    // is what `regions` gives.
+    //
+    // The convention across the byte types: anything that copies payload bytes or allocates per
+    // region — `copiedBytes()`, `makeDispatchData()`, `makeByteBuffers()` — is a method, never a
+    // computed property, because a property on a value that may hold a multi-megabyte literal reads as
+    // free.
+
     internal enum Storage: Sendable {
         case empty
         case one(IMAPBuffer)

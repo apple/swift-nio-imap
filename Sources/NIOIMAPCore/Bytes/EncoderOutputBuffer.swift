@@ -54,15 +54,7 @@
 ///   counted in ``byteCount`` and ``takeFirst(_:)`` calls. A conformer never hears about IMAP.
 /// - **An output type.** A conformer does not get to choose what ``takeFirst(_:)`` returns. It is
 ///   always an ``IMAPBufferList``, and converting that to a concrete backing —
-///   `makeByteBuffers()`, ``IMAPBufferList/makeDispatchData()`` — happens afterwards. Making it an
-///   associated type would make the encoder generic, and with it every one of the several hundred
-///   methods that write IMAP grammar.
-/// - **`~Copyable`.** It would be the better design — no copy-on-write box in ``IMAPOutputBuffer``,
-///   and "one writer per segment" enforced statically — but a `~Copyable` sink forces a `~Copyable`
-///   encoder. That breaks the closure-composition pattern of the grammar writers (`writeArray`,
-///   `writeIfExists`) with exclusivity errors, and turns the client state machine's copies of its
-///   stored encoder into moves.
-///   Worth revisiting only as a project of its own. Byte-wise `Equatable`/`Hashable` is not the obstacle.
+///   `makeByteBuffers()`, ``IMAPBufferList/makeDispatchData()`` — happens afterwards.
 ///
 /// ## Sendability
 ///
@@ -71,6 +63,16 @@
 ///   handed-out chunk, so that is where `Sendable` lives — on ``IMAPBuffer`` and
 ///   ``IMAPBufferList``, whose bytes are immutable once handed out.
 public protocol EncoderOutputBuffer {
+    // Also deliberately not here:
+    // - **An associated output type.** It would make the encoder generic, and with it every one of the
+    //   several hundred methods that write IMAP grammar.
+    // - **`~Copyable`.** It would be the better design — no copy-on-write box in `IMAPOutputBuffer`,
+    //   and "one writer per segment" enforced statically — but a `~Copyable` sink forces a `~Copyable`
+    //   encoder. That breaks the closure-composition pattern of the grammar writers (`writeArray`,
+    //   `writeIfExists`) with exclusivity errors, and turns the client state machine's copies of its
+    //   stored encoder into moves.
+    //   Worth revisiting only as a project of its own. Byte-wise `Equatable`/`Hashable` is not the obstacle.
+
     /// How many bytes are waiting to be handed out.
     ///
     /// This counts bytes appended since the last ``takeFirst(_:)``, so it goes **down** when bytes

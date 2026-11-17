@@ -71,11 +71,10 @@ extension IMAPBufferList {
     /// Each run of the other regions — shorter, or without a fixed address — is copied into one
     /// allocation, which becomes one `DispatchData` region.
     ///
-    /// - Note: Each `DispatchData` region costs allocations, and a donated one also a deallocator
-    ///   block run asynchronously. That is why short regions are joined up rather than donated.
-    ///
     /// - Returns: The bytes, in order.
     public func makeDispatchData() -> DispatchData {
+        // Each `DispatchData` region costs allocations, and a donated one also a deallocator block run
+        // asynchronously. That is why short regions are joined up rather than donated.
         switch storage {
         case .empty:
             return DispatchData.empty

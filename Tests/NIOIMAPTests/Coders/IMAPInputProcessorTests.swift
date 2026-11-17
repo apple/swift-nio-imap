@@ -35,7 +35,9 @@ private final class RegionCountingDecoder: IMAPMessageDecoder {
     var mostRegions = 0
 
     func decode(input: inout IMAPInputBuffer) throws -> Int? {
-        mostRegions = max(mostRegions, input.regionCount)
+        var regions = 0
+        input.forEachRegion { _ in regions += 1 }
+        mostRegions = max(mostRegions, regions)
         return nil
     }
 }
