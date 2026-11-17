@@ -88,7 +88,9 @@ extension GrammarParser {
                 // spaces, `(MODSEQ …)`), one generic element follows, then the fast path resumes.
                 var identifiers: [UnknownMessageIdentifier] = []
                 while true {
-                    buffer.parseSpaceSeparatedNZNumbers { identifiers.append(UnknownMessageIdentifier(rawValue: $0)) }
+                    buffer.parseSpaceSeparatedNZNumbers(appendingTo: &identifiers) {
+                        UnknownMessageIdentifier(rawValue: $0)
+                    }
                     let next = try buffer.parseOptional(tracker: tracker) {
                         (buffer, tracker) throws(ParseFailure) -> UnknownMessageIdentifier in
                         try buffer.parseSpaces()
