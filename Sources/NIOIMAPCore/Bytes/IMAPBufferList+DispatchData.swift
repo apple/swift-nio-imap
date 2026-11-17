@@ -59,14 +59,14 @@ extension IMAPBuffer {
     ///
     /// At most ``copyThreshold``, so a region the encoder kept by reference is never copied for being
     /// short. It is a tuning value and may change between releases.
-    public static let dispatchDonationThreshold = 512
+    internal static let dispatchDonationThreshold = 512
 }
 
 extension IMAPBufferList {
     /// Converts to a `DispatchData`, without copying where it pays.
     ///
-    /// A region of at least ``IMAPBuffer/dispatchDonationThreshold`` bytes is donated rather than
-    /// copied when its address is fixed: bytes this library owns, or a region whose owner is a
+    /// A region of at least 512 bytes (a tuning value that may change) is donated rather than copied
+    /// when its address is fixed: bytes this library owns, or a region whose owner is a
     /// ``StableAddressByteRegion``. The `DispatchData` adopts the memory and keeps its owner alive.
     /// Each run of the other regions — shorter, or without a fixed address — is copied into one
     /// allocation, which becomes one `DispatchData` region.
