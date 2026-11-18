@@ -59,12 +59,14 @@ extension MessageIdentifierSet {
         case 1:
             return RangeSet(merged[0])
         default:
-            merged.removeLast(merged.count - count)
             var cursor = 0
-            return withUnsafeMutablePointer(to: &cursor) { cursor in
-                // The collection, and so the pointer, does not outlive this closure: `indices(where:)`
-                // returns only `Range` values.
-                RangeBoundaries(ranges: merged, cursor: cursor).indices(where: { $0 })
+            return merged.withUnsafeBufferPointer { merged in
+                withUnsafeMutablePointer(to: &cursor) { cursor in
+                    // The collection, and so both pointers, does not outlive this closure:
+                    // `indices(where:)` returns only `Range` values.
+                    RangeBoundaries(ranges: UnsafeBufferPointer(rebasing: merged[..<count]), cursor: cursor)
+                        .indices(where: { $0 })
+                }
             }
         }
     }
@@ -115,21 +117,31 @@ extension Range where Bound == MessageIdentificationShiftWrapper {
 /// An index is a bound, not a position, so finding its position takes a search. `cursor` remembers the
 /// last position: `indices(where:)` walks in order, so each lookup is O(1). Any other access pattern
 /// still works, through a binary search.
+///
+/// Pointers rather than an `Array`: `indices(where:)` wraps the collection in a `Slice` for every range,
+/// and each would retain an array. They also skip the bounds checks.
 private struct RangeBoundaries: Collection {
     typealias Index = MessageIdentificationShiftWrapper
 
     /// At least two ranges, sorted, non-empty, with a gap between each.
-    let ranges: [Range<Index>]
+    let ranges: UnsafeBufferPointer<Range<Index>>
 
     /// The position, in `[l0, u0, l1, …]`, of the bound looked up last.
     let cursor: UnsafeMutablePointer<Int>
 
-    var startIndex: Index { ranges[0].lowerBound }
+    let startIndex: Index
 
-    var endIndex: Index { ranges[ranges.count - 1].upperBound }
+    let endIndex: Index
+
+    init(ranges: UnsafeBufferPointer<Range<Index>>, cursor: UnsafeMutablePointer<Int>) {
+        self.ranges = ranges
+        self.cursor = cursor
+        self.startIndex = ranges[0].lowerBound
+        self.endIndex = ranges[ranges.count - 1].upperBound
+    }
 
     subscript(index: Index) -> Bool {
-        position(of: index) % 2 == 0
+        position(of: index) & 1 == 0
     }
 
     func index(after index: Index) -> Index {
@@ -137,12 +149,14 @@ private struct RangeBoundaries: Collection {
     }
 
     /// The bound at `position` in `[l0, u0, l1, u1, …]`.
+    @inline(__always)
     private func bound(at position: Int) -> Index {
-        let range = ranges[position / 2]
-        return position % 2 == 0 ? range.lowerBound : range.upperBound
+        let range = ranges[position >> 1]
+        return position & 1 == 0 ? range.lowerBound : range.upperBound
     }
 
     /// The position of `index` in `[l0, u0, l1, u1, …]`.
+    @inline(__always)
     private func position(of index: Index) -> Int {
         let last = cursor.pointee
         if bound(at: last) == index { return last }
@@ -154,7 +168,7 @@ private struct RangeBoundaries: Collection {
         var low = 0
         var high = boundCount - 1
         while low < high {
-            let middle = (low + high) / 2
+            let middle = (low + high) >> 1
             if bound(at: middle) < index {
                 low = middle + 1
             } else {
