@@ -126,10 +126,15 @@ extension GrammarParser {
             )
         }
 
+        let first = try parseMessageIdentifierSet_element(buffer: &buffer, tracker: tracker)
+        // A single element (e.g. `UID FETCH 5`) needs no array. With nothing visible after it, fall
+        // through: the loop below reports the input as incomplete.
+        if let next = buffer.peek(at: 0), next != UInt8(ascii: ",") {
+            return MessageIdentifierSetNonEmpty(range: first)
+        }
+
         // Collected as `MessageIdentifierSet` stores them, so building the set copies nothing.
-        var output: [Range<MessageIdentificationShiftWrapper>] = [
-            Range(try parseMessageIdentifierSet_element(buffer: &buffer, tracker: tracker))
-        ]
+        var output = [Range(first)]
         // The fast path takes well-formed `,n` / `,n:m` runs; whenever it stops (a region boundary, `*`),
         // one generic element follows, then the fast path resumes.
         while true {
