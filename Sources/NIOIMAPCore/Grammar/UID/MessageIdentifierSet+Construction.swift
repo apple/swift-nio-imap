@@ -37,8 +37,9 @@ extension MessageIdentifierSet {
     /// ``MessageIdentificationShiftWrapper``). What the parser collects, so building the set copies
     /// no range.
     init(shiftedRanges ranges: consuming [Range<MessageIdentificationShiftWrapper>]) {
-        self._ranges = Self.makeRangeSet(ranges)
+        self._ranges = Self.makeRangeSet(consume ranges)
     }
+
 
     /// A `RangeSet` holding the union of `ranges`.
     ///
