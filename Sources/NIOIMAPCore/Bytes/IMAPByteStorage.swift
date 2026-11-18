@@ -18,6 +18,10 @@
 /// multi-megabyte message payload can be handed to a caller — or written back out again — as a
 /// reference to somebody else's memory rather than as a copy.
 ///
+/// - Complexity: Wrapping a value of three words or fewer — a `ByteBuffer` is 24 bytes of stride,
+///   `Data` is 16 — costs **one** allocation in total, because the value fits in the existential's
+///   inline storage.
+///
 /// ## Immutability requirement
 ///
 /// - Important: The wrapped region's bytes, and their count, must never change for as long as this
@@ -36,9 +40,7 @@
 /// its word, so a false conformance does leave one dangling.
 public final class IMAPByteStorage: Sendable {
     // A `final class` on purpose: it gives the wrapped region exactly one heap box with a reference
-    // count, which is the whole mechanism. Wrapping a value of three words or fewer — a `ByteBuffer`
-    // is 24 bytes of stride, `Data` is 16 — costs **one** allocation in total, because the value fits
-    // in the existential's inline storage.
+    // count, which is the whole mechanism.
 
     private let region: any ByteRegion & Sendable
 

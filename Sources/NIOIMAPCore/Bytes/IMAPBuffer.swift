@@ -35,7 +35,7 @@ import Android
 /// - **Retained.** The bytes belong to an ``IMAPByteStorage`` — a network read, an encoder output
 ///   segment, a memory-mapped file — and this value holds a strong reference to it plus a range.
 ///
-/// The two are indistinguishable through the API: ``==`` and ``hash(into:)`` compare bytes, so a
+/// The two are indistinguishable through the API: ``==(_:_:)`` and ``hash(into:)`` compare bytes, so a
 /// copied buffer and a retained buffer over the same bytes are equal and hash equally.
 ///
 /// - Note: `IMAPBuffer` stores an *object and a range*, never a pointer. Nothing here can dangle,
@@ -55,9 +55,6 @@ import Android
 ///
 /// ``copiedBytes()`` is the convenient path, and it allocates and copies on **every** call.
 public struct IMAPBuffer: Sendable {
-    // `copiedBytes()` is a method rather than a property to say that it copies: on a value that may hold
-    // a multi-megabyte literal, a property that copies reads as free.
-    //
     // `IMAPBuffer` is deliberately not a `Collection`. Subscripting a byte at a time through a scoped
     // accessor is a performance trap that looks free.
 
@@ -174,6 +171,8 @@ public struct IMAPBuffer: Sendable {
     ///   ``withUnsafeBytes(_:)`` where the bytes do not need to outlive the call.
     /// - Returns: The bytes.
     public func copiedBytes() -> [UInt8] {
+        // A method rather than a property to say that it copies: on a value that may hold a
+        // multi-megabyte literal, a property that copies reads as free.
         switch storage {
         case .copied(let bytes, let range) where range == bytes.indices:
             return bytes

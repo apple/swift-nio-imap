@@ -58,7 +58,7 @@ extension ContiguousArray: ByteRegion where Element == UInt8 {}
 /// address, and those bytes stay valid and unchanged for as long as any copy of the value is alive.
 /// In return, the library keeps a copy of the value where it would otherwise copy the bytes:
 /// ``IMAPInputBuffer`` keeps a large region by reference, and ``IMAPBufferList/makeDispatchData()``
-/// donates a region of at least the dispatch donation threshold (512 B) to the `DispatchData`.
+/// donates a large enough region to the `DispatchData`.
 ///
 /// This is the extension point for a byte-buffer type of your own; `NIOIMAP` conforms `ByteBuffer`
 /// with nothing more. A region that does not conform is copied instead, which is always correct.

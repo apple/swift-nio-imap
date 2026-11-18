@@ -120,8 +120,8 @@ public struct IMAPInputBuffer: Sendable {
     /// ``StableAddressByteRegion``, or an ``IMAPBuffer`` over one — is not copied: it is retained as-is
     /// and parsed where it lies, for one small object per call. Any other region that large — a `Data`,
     /// say — is copied once into an exact-size array, which is retained instead. A smaller one is copied
-    /// into the tail, or into a fresh ``minimumTailCapacity`` tail if it does not fit, and is not
-    /// retained.
+    /// into the tail, or into a fresh tail of ``IMAPBuffer/copyThreshold`` bytes if it does not fit,
+    /// and is not retained.
     ///
     /// Appending an empty region does nothing.
     ///
