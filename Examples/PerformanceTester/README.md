@@ -268,6 +268,10 @@ registration time, so the two directions cannot drift apart and there is no hand
 | `parse.responses.100.read-1` | One byte at a time: the per-read overhead in isolation, an append plus a parse attempt per byte. `IMAPInputBuffer` copies reads under `copyThreshold` into a shared 1 KiB tail rather than keeping one region per read; see the findings below. |
 | `parse.literal-1MB.read-<n>` | A 1 MB `BODY[TEXT]` literal streamed through `FetchResponse.streamingBytes`, delivered by reference as an `IMAPBuffer` that borrows the received bytes. Zero-copy end to end, asserted separately by address in `ZeroCopyReadTests`; these numbers are the baseline that has to hold. |
 | `parse.dispatch.*` | The same corpora read as `DispatchData` and appended to the `IMAPInputBuffer` with `append(contentsOf:)`, instead of as `ByteBuffer`s. Read each against the case of the same name: what differs is the append, and the owner a kept literal pins — the whole `DispatchData` read. |
+| `parse.search.d<digits>.n<count>` | `SEARCH` results of 1–32 UIDs of 5 or 9 digits, 1,000 per buffer. The per-response cost, and the size below which a fast path would not pay. |
+| `parse.search.d<digits>.n5000.<contiguous\|read-n>` | One 5,000-UID result (issue #694), in one buffer and at 1448 and 16 K reads. The read cases measure re-parsing a response that spans reads. |
+| `parse.esearch.*` | The same for `ESEARCH … UID ALL`, alternating single UIDs and ranges. |
+| `build.esearch-set.n5000` | `MessageIdentifierSet(_:)` from 5,000 parsed ranges, called from outside the library. |
 
 ### Encoding
 
@@ -333,11 +337,11 @@ different ones.
 | Case | wall p50 | mallocs | malloc bytes | retains |
 | --- | --- | --- | --- | --- |
 | `parse.command.noop` | 708 ns | 6 | 1,230 | 6 |
-| `parse.command.uid_fetch_headers` | 3,584 ns | 35 | 3,044 | 42 |
+| `parse.command.uid_fetch_headers` | 3,584 ns | 34 | 3,036 | 40 |
 | `parse.command.uid_search_compound` | 20 µs | 344 | 22,143 | 485 |
-| `parse.commands.all` | 152 µs | 1,848 | 162,399 | 2,260 |
-| `roundtrip.commands.all` | 199 µs | 2,191 | 197,215 | 3,167 |
-| `parse.responses.session` | 77 µs | 979 | 50,267 | 2,029 |
+| `parse.commands.all` | 152 µs | 1,773 | 160,438 | 2,184 |
+| `roundtrip.commands.all` | 199 µs | 2,116 | 195,254 | 3,091 |
+| `parse.responses.session` | 77 µs | 975 | 50,156 | 2,027 |
 | `parse.responses.bodystructure.200` | 4,975 µs | 41,811 | 2,413,255 | 91,824 |
 | `parse.responses.bodystructure.200.read-1448` | 6,667 µs | 55,557 | 3,114,320 | 114,358 |
 | `parse.responses.1000.contiguous` | 3,802 µs | 39,389 | 1,805,452 | 72,279 |
@@ -346,13 +350,26 @@ different ones.
 | `parse.responses.100.read-1` | 15 ms | 159,186 | 8,074,913 | 197,247 |
 | `parse.literal-1MB.read-1448` | 105 µs | 751 | 60,339 | 3,667 |
 | `parse.literal-1MB.read-65536` | 5,650 ns | 43 | 3,475 | 127 |
-| `parse.dispatch.responses.session` | 77 µs | 982 | 50,379 | 2,028 |
+| `parse.dispatch.responses.session` | 77 µs | 978 | 50,268 | 2,026 |
 | `parse.dispatch.responses.1000.contiguous` | 3,759 µs | 39,392 | 1,805,564 | 72,278 |
 | `parse.dispatch.responses.1000.read-1448` | 3,922 µs | 40,827 | 1,877,764 | 73,916 |
 | `parse.dispatch.responses.1000.read-65536` | 3,759 µs | 39,409 | 1,806,375 | 72,306 |
 | `parse.dispatch.responses.bodystructure.200.read-1448` | 6,452 µs | 56,157 | 3,136,720 | 114,360 |
 | `parse.dispatch.literal-1MB.read-1448` | 223 µs | 2,926 | 141,539 | 3,669 |
 | `parse.dispatch.literal-1MB.read-65536` | 8,772 ns | 94 | 5,379 | 129 |
+| `parse.search.d5.n1` | 788 µs | 17,011 | 794,632 | 36,024 |
+| `parse.search.d5.n32` | 823 µs | 17,011 | 918,632 | 36,024 |
+| `parse.search.d5.n5000.contiguous` | 11 µs | 30 | 58,446 | 60 |
+| `parse.search.d5.n5000.read-1448` | 41 µs | 397 | 78,026 | 1,036 |
+| `parse.search.d9.n5000.contiguous` | 18 µs | 30 | 58,446 | 60 |
+| `parse.search.d9.n5000.read-1448` | 77 µs | 654 | 96,260 | 1,951 |
+| `parse.esearch.d5.n1` | 1,440 µs | 30,011 | 1,414,632 | 61,024 |
+| `parse.esearch.d5.n32` | 2,013 µs | 36,011 | 2,382,632 | 60,024 |
+| `parse.esearch.d5.n5000.contiguous` | 49 µs | 60 | 180,622 | 84 |
+| `parse.esearch.d5.n5000.read-1448` | 108 µs | 729 | 216,542 | 1,844 |
+| `parse.esearch.d9.n5000.contiguous` | 54 µs | 60 | 180,626 | 84 |
+| `parse.esearch.d9.n5000.read-1448` | 182 µs | 1,177 | 267,756 | 3,492 |
+| `build.esearch-set.n5000` | 146 µs | 13 | 137,800 | 1 |
 | `encode.command.noop` | 375 ns | 5 | 464 | 7 |
 | `encode.commands.all` | 31 µs | 216 | 34,512 | 840 |
 | `encode.create.quoted-string` | 458 ns | 5 | 576 | 9 |

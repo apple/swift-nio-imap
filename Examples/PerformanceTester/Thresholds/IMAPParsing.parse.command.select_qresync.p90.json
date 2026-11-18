@@ -1,8 +1,8 @@
 {
-  "mallocBytesCount" : 3848,
-  "mallocCountTotal" : 68,
-  "objectAllocCount" : 59,
-  "releaseCount" : 140,
-  "retainCount" : 52,
-  "retainReleaseDelta" : 29
+  "mallocBytesCount" : 3808,
+  "mallocCountTotal" : 63,
+  "objectAllocCount" : 62,
+  "releaseCount" : 138,
+  "retainCount" : 44,
+  "retainReleaseDelta" : 32
 }
