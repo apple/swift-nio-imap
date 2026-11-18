@@ -126,24 +126,23 @@ extension GrammarParser {
             )
         }
 
-        var output: [MessageIdentifierRange<T>] = [
-            try parseMessageIdentifierSet_element(buffer: &buffer, tracker: tracker)
+        // Collected as `MessageIdentifierSet` stores them, so building the set copies nothing.
+        var output: [Range<MessageIdentificationShiftWrapper>] = [
+            Range(try parseMessageIdentifierSet_element(buffer: &buffer, tracker: tracker))
         ]
         // The fast path takes well-formed `,n` / `,n:m` runs; whenever it stops (a region boundary, `*`),
         // one generic element follows, then the fast path resumes.
         while true {
-            buffer.parseCommaSeparatedNZRanges(appendingTo: &output) { range in
-                MessageIdentifierRange(T(rawValue: range.lowerBound)...T(rawValue: range.upperBound))
-            }
+            buffer.parseCommaSeparatedNZRanges(appendingTo: &output) { Range(identifierBounds: $0) }
             let next = try buffer.parseOptional(tracker: tracker) {
                 (buffer, tracker) throws(ParseFailure) -> MessageIdentifierRange<T> in
                 try buffer.matchFixed(",")
                 return try parseMessageIdentifierSet_element(buffer: &buffer, tracker: tracker)
             }
             guard let next else { break }
-            output.append(next)
+            output.append(Range(next))
         }
-        let set = MessageIdentifierSet(output)
+        let set = MessageIdentifierSet<T>(shiftedRanges: consume output)
         guard let nonEmpty = MessageIdentifierSetNonEmpty(set: set) else {
             throw .mismatch("Sequence set is empty.")
         }

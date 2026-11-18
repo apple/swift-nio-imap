@@ -33,6 +33,13 @@
 // this stays correct and only gets slower.
 
 extension MessageIdentifierSet {
+    /// A set holding the union of `ranges`, given as the set stores them (see
+    /// ``MessageIdentificationShiftWrapper``). What the parser collects, so building the set copies
+    /// no range.
+    init(shiftedRanges ranges: consuming [Range<MessageIdentificationShiftWrapper>]) {
+        self._ranges = Self.makeRangeSet(ranges)
+    }
+
     /// A `RangeSet` holding the union of `ranges`.
     ///
     /// Sorted input (the usual case) takes the fast path above; anything else falls back to
@@ -88,6 +95,17 @@ extension MessageIdentifierSet {
             }
         }
         return count
+    }
+}
+
+extension Range where Bound == MessageIdentificationShiftWrapper {
+    /// Identifier bounds as `MessageIdentifierSet` stores them: `5...9` becomes `4..<9`.
+    ///
+    /// - Precondition: `bounds.lowerBound >= 1`, as for every identifier.
+    init(identifierBounds bounds: ClosedRange<UInt32>) {
+        self =
+            MessageIdentificationShiftWrapper(rawValue: bounds.lowerBound - 1)
+            ..< MessageIdentificationShiftWrapper(rawValue: bounds.upperBound)
     }
 }
 
