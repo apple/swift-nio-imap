@@ -109,7 +109,9 @@ struct ModifiedUTF7Tests {
             "&Jjo!",
             "&U,BTFw-&ZeVnLIqe-",
             // Not NFC: "e" + U+0301.
-            "e&AwE-",
+            "&AGUDAQ-",
+            // Not NFC: U+212B (Angstrom sign).
+            "&ISs-",
         ]
     )
     func validateRejectsInvalidModifiedUTF7Strings(input: String) {
