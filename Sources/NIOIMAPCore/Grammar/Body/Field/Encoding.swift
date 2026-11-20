@@ -12,8 +12,6 @@
 //
 //===----------------------------------------------------------------------===//
 
-import struct NIO.ByteBuffer
-
 extension BodyStructure {
     /// Represents the MIME content transfer encoding of a message part.
     ///

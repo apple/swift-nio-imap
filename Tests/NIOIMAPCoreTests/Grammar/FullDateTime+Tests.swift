@@ -68,6 +68,8 @@ struct FullDateTimeTests {
             EncodeFixture.fullDate(.init(year: 2024, month: 2, day: 29), "2024-02-29"),
             EncodeFixture.fullDate(.init(year: 2024, month: 6, day: 15), "2024-06-15"),
             EncodeFixture.fullDate(.init(year: 9999, month: 12, day: 31), "9999-12-31"),
+            // Invalid, but not rejected: the sign comes before the padding.
+            EncodeFixture.fullDate(.init(year: -5, month: 1, day: 2), "-0005-01-02"),
         ]
     )
     func encodeFullDate(_ fixture: EncodeFixture<FullDate>) {
@@ -95,6 +97,8 @@ struct FullDateTimeTests {
                 .init(hour: 1, minute: 2, second: 3, offset: .minus(hour: 8, minute: 0)),
                 "01:02:03-08:00"
             ),
+            // Invalid, but not rejected: the sign comes before the padding.
+            EncodeFixture.fullTime(.init(hour: -1, minute: -2, second: -3, offset: .utc), "-01:-02:-03Z"),
         ]
     )
     func encodeFullTime(_ fixture: EncodeFixture<FullTime>) {

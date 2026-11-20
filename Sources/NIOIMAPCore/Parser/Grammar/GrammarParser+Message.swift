@@ -359,27 +359,37 @@ extension GrammarParser {
             return .objectID(try self.parseCompoundObjectID(buffer: &buffer, tracker: tracker))
         }
 
-        let parsers: [String: (inout ParseBuffer, StackTracker) throws -> MessageAttribute] = [
-            "FLAGS": parseMessageAttribute_flags,
-            "ENVELOPE": parseMessageAttribute_envelope,
-            "INTERNALDATE": parseMessageAttribute_internalDate,
-            "RFC822.SIZE": parseMessageAttribute_rfc822Size,
-            "BODY": parseMessageAttribute_body,
-            "BODYSTRUCTURE": parseMessageAttribute_bodyStructure,
-            "UID": parseMessageAttribute_uid,
-            "BINARY.SIZE": parseMessageAttribute_binarySize,
-            "X-GM-MSGID": parseMessageAttribute_gmailMessageID,
-            "X-GM-THRID": parseMessageAttribute_gmailThreadID,
-            "X-GM-LABELS": parseMessageAttribute_gmailLabels,
-            "MODSEQ": parseMessageAttribute_fetchModifierResponse,
-            "RFC822.TEXT": parseMessageAttribute_rfc822Text_nilBody,
-            "RFC822.HEADER": parseMessageAttribute_rfc822Header_nilBody,
-            "BINARY": parseMessageAttribute_binary_nilBody,
-            "PREVIEW": parseMessageAttribute_preview,
-            "EMAILID": parseMessageAttribute_emailID,
-            "THREADID": parseMessageAttribute_threadID,
-            "OBJECTID": parseMessageAttribute_objectID,
-        ]
-        return try self.parseFromLookupTable(buffer: &buffer, tracker: tracker, parsers: parsers)
+        return try self.selectingKeyword(buffer: &buffer) { keyword, buffer in
+            switch keyword {
+            case "FLAGS": return try parseMessageAttribute_flags(buffer: &buffer, tracker: tracker)
+            case "ENVELOPE": return try parseMessageAttribute_envelope(buffer: &buffer, tracker: tracker)
+            case "INTERNALDATE": return try parseMessageAttribute_internalDate(buffer: &buffer, tracker: tracker)
+            case "RFC822.SIZE": return try parseMessageAttribute_rfc822Size(buffer: &buffer, tracker: tracker)
+            case "BODY": return try parseMessageAttribute_body(buffer: &buffer, tracker: tracker)
+            case "BODYSTRUCTURE":
+                return try parseMessageAttribute_bodyStructure(buffer: &buffer, tracker: tracker)
+            case "UID": return try parseMessageAttribute_uid(buffer: &buffer, tracker: tracker)
+            case "BINARY.SIZE": return try parseMessageAttribute_binarySize(buffer: &buffer, tracker: tracker)
+            case "X-GM-MSGID":
+                return try parseMessageAttribute_gmailMessageID(buffer: &buffer, tracker: tracker)
+            case "X-GM-THRID":
+                return try parseMessageAttribute_gmailThreadID(buffer: &buffer, tracker: tracker)
+            case "X-GM-LABELS":
+                return try parseMessageAttribute_gmailLabels(buffer: &buffer, tracker: tracker)
+            case "MODSEQ":
+                return try parseMessageAttribute_fetchModifierResponse(buffer: &buffer, tracker: tracker)
+            case "RFC822.TEXT":
+                return try parseMessageAttribute_rfc822Text_nilBody(buffer: &buffer, tracker: tracker)
+            case "RFC822.HEADER":
+                return try parseMessageAttribute_rfc822Header_nilBody(buffer: &buffer, tracker: tracker)
+            case "BINARY":
+                return try parseMessageAttribute_binary_nilBody(buffer: &buffer, tracker: tracker)
+            case "PREVIEW": return try parseMessageAttribute_preview(buffer: &buffer, tracker: tracker)
+            case "EMAILID": return try parseMessageAttribute_emailID(buffer: &buffer, tracker: tracker)
+            case "THREADID": return try parseMessageAttribute_threadID(buffer: &buffer, tracker: tracker)
+            case "OBJECTID": return try parseMessageAttribute_objectID(buffer: &buffer, tracker: tracker)
+            default: throw ParserError(hint: "Not a message-attribute keyword")
+            }
+        }
     }
 }

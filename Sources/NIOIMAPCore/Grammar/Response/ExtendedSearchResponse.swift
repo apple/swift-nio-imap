@@ -12,8 +12,6 @@
 //
 //===----------------------------------------------------------------------===//
 
-import struct NIO.ByteBuffer
-
 /// A server response to an extended SEARCH command.
 ///
 /// The ESEARCH extension (see [RFC 4731](https://datatracker.ietf.org/doc/html/rfc4731)) enhances
@@ -241,13 +239,13 @@ extension ExtendedSearchResponse {
 extension EncodeBuffer {
     @discardableResult mutating func writeExtendedSearchResponse(_ response: ExtendedSearchResponse) -> Int {
         self.writeString("ESEARCH")
-            + self.writeIfExists(response.correlator) { (correlator) -> Int in
+            + writeIfExists(response.correlator) { (correlator) -> Int in
                 self.writeSearchCorrelator(correlator)
             }
-            + self.write(if: response.kind == .uid) {
+            + write(if: response.kind == .uid) {
                 self.writeString(" UID")
             }
-            + self.write(if: response.returnData.count > 0) {
+            + write(if: response.returnData.count > 0) {
                 self.writeSpace()
             }
             + self.writeArray(response.returnData, parenthesis: false) { (data, self) in

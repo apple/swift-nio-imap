@@ -12,8 +12,6 @@
 //
 //===----------------------------------------------------------------------===//
 
-import struct NIO.ByteBuffer
-
 protocol Parser {
     var bufferLimit: Int { get }
 }

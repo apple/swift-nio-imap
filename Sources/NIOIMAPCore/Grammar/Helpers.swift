@@ -12,8 +12,6 @@
 //
 //===----------------------------------------------------------------------===//
 
-import struct NIO.ByteBuffer
-
 extension EncodeBuffer {
     /// Writes an `atom` verbatim.
     ///

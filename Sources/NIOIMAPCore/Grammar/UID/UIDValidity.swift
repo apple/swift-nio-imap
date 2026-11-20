@@ -69,6 +69,6 @@ extension BinaryInteger {
 
 extension EncodeBuffer {
     @discardableResult mutating func writeUIDValidity(_ data: UIDValidity) -> Int {
-        self.writeString("\(data.rawValue)")
+        self.writeDecimal(data.rawValue)
     }
 }

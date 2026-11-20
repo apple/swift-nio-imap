@@ -12,7 +12,6 @@
 //
 //===----------------------------------------------------------------------===//
 
-import struct NIO.ByteBuffer
 import struct OrderedCollections.OrderedDictionary
 
 /// Response data sent by a server in reply to a `GETMETADATA` command (RFC 5464).

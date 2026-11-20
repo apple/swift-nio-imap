@@ -12,8 +12,6 @@
 //
 //===----------------------------------------------------------------------===//
 
-import struct NIO.ByteBuffer
-
 /// A byte range specifying an offset and optional length within a message or section.
 ///
 /// Byte ranges are used with `PARTIAL` fetch modifiers (RFC 9394) to retrieve only a portion of
@@ -45,13 +43,14 @@ public struct ByteRange: Hashable, Sendable {
 
 extension EncodeBuffer {
     @discardableResult mutating func writeByteRange(_ num: ClosedRange<UInt32>) -> Int {
-        self.writeString("<\(num.lowerBound).\(num.count)>")
+        self.writeByte(UInt8(ascii: "<")) + self.writeDecimal(num.lowerBound) + self.writeByte(UInt8(ascii: "."))
+            + self.writeDecimal(num.count) + self.writeByte(UInt8(ascii: ">"))
     }
 
     @discardableResult mutating func writeByteRange(_ data: ByteRange) -> Int {
-        self.writeString("\(data.offset)")
-            + self.writeIfExists(data.length) { length in
-                self.writeString(".\(length)")
+        self.writeDecimal(data.offset)
+            + writeIfExists(data.length) { length in
+                self.writeByte(UInt8(ascii: ".")) + self.writeDecimal(length)
             }
     }
 }

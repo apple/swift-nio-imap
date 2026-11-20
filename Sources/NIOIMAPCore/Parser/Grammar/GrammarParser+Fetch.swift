@@ -144,7 +144,7 @@ extension GrammarParser {
                 do {
                     try PL.parseFixedString(" (LAZY)", buffer: &buffer, tracker: tracker)
                     return true
-                } catch {
+                } catch is ParserError {
                     return false
                 }
             }
@@ -153,36 +153,37 @@ extension GrammarParser {
             return .preview(lazy: lazy)
         }
 
-        let parsers: [String: (inout ParseBuffer, StackTracker) throws -> FetchAttribute] = [
-            "ENVELOPE": { _, _ in .envelope },
-            "FLAGS": { _, _ in .flags },
-            "INTERNALDATE": { _, _ in .internalDate },
-            "UID": { _, _ in .uid },
-            "MODSEQ": { _, _ in .modificationSequence },
-            "X-GM-MSGID": { _, _ in .gmailMessageID },
-            "X-GM-THRID": { _, _ in .gmailThreadID },
-            "X-GM-LABELS": { _, _ in .gmailLabels },
-            "RFC822.SIZE": { _, _ in .rfc822Size },
-            "RFC822.HEADER": { _, _ in .rfc822Header },
-            "RFC822.TEXT": { _, _ in .rfc822Text },
-            "RFC822": { _, _ in .rfc822 },
-            "BODYSTRUCTURE": { _, _ in .bodyStructure(extensions: true) },
-            "BODY": parseFetchAttribute_bodySection,
-            "BODY.PEEK": parseFetchAttribute_bodyPeekSection,
-            "BINARY.SIZE": parseFetchAttribute_binarySize,
-            "BINARY": parseFetchAttribute_binary,
-            "BINARY.PEEK": parseFetchAttribute_binaryPeek,
-            "PREVIEW": parseFetchAttribute_preview,
-            "EMAILID": { _, _ in .emailID },
-            "THREADID": { _, _ in .threadID },
-            "OBJECTID": { _, _ in .objectID },
-        ]
-
-        // try to use the lookup table, however obviously an unknown number
-        // cannot be parsed using a lookup table. If the lookup table fails,
-        // fall back and try to parse a modification sequence.
+        // try to use the keyword, however obviously an unknown number
+        // cannot be selected by keyword. If no keyword matches, fall back and try to parse a
+        // modification sequence.
         do {
-            return try self.parseFromLookupTable(buffer: &buffer, tracker: tracker, parsers: parsers)
+            return try self.selectingKeyword(buffer: &buffer) { keyword, buffer in
+                switch keyword {
+                case "ENVELOPE": return .envelope
+                case "FLAGS": return .flags
+                case "INTERNALDATE": return .internalDate
+                case "UID": return .uid
+                case "MODSEQ": return .modificationSequence
+                case "X-GM-MSGID": return .gmailMessageID
+                case "X-GM-THRID": return .gmailThreadID
+                case "X-GM-LABELS": return .gmailLabels
+                case "RFC822.SIZE": return .rfc822Size
+                case "RFC822.HEADER": return .rfc822Header
+                case "RFC822.TEXT": return .rfc822Text
+                case "RFC822": return .rfc822
+                case "BODYSTRUCTURE": return .bodyStructure(extensions: true)
+                case "BODY": return try parseFetchAttribute_bodySection(buffer: &buffer, tracker: tracker)
+                case "BODY.PEEK": return try parseFetchAttribute_bodyPeekSection(buffer: &buffer, tracker: tracker)
+                case "BINARY.SIZE": return try parseFetchAttribute_binarySize(buffer: &buffer, tracker: tracker)
+                case "BINARY": return try parseFetchAttribute_binary(buffer: &buffer, tracker: tracker)
+                case "BINARY.PEEK": return try parseFetchAttribute_binaryPeek(buffer: &buffer, tracker: tracker)
+                case "PREVIEW": return try parseFetchAttribute_preview(buffer: &buffer, tracker: tracker)
+                case "EMAILID": return .emailID
+                case "THREADID": return .threadID
+                case "OBJECTID": return .objectID
+                default: throw ParserError(hint: "Not a fetch attribute keyword")
+                }
+            }
         } catch is ParserError {
             return try parseFetchAttribute_modificationSequence(buffer: &buffer, tracker: tracker)
         }
@@ -232,13 +233,20 @@ extension GrammarParser {
     }
 
     func parseFetchStreamingResponse(buffer: inout ParseBuffer, tracker: StackTracker) throws -> StreamingKind {
-        let parsers: [String: (inout ParseBuffer, StackTracker) throws -> StreamingKind] = [
-            "RFC822.TEXT": parseFetchStreamingResponse_rfc822Text,
-            "RFC822.HEADER": parseFetchStreamingResponse_rfc822Header,
-            "BODY": parseFetchStreamingResponse_bodySectionText,
-            "BINARY": parseFetchStreamingResponse_binary,
-        ]
-        return try self.parseFromLookupTable(buffer: &buffer, tracker: tracker, parsers: parsers)
+        try self.selectingKeyword(buffer: &buffer) { keyword, buffer in
+            switch keyword {
+            case "RFC822.TEXT":
+                return try parseFetchStreamingResponse_rfc822Text(buffer: &buffer, tracker: tracker)
+            case "RFC822.HEADER":
+                return try parseFetchStreamingResponse_rfc822Header(buffer: &buffer, tracker: tracker)
+            case "BODY":
+                return try parseFetchStreamingResponse_bodySectionText(buffer: &buffer, tracker: tracker)
+            case "BINARY":
+                return try parseFetchStreamingResponse_binary(buffer: &buffer, tracker: tracker)
+            default:
+                throw ParserError(hint: "Not a streaming fetch response keyword")
+            }
+        }
     }
 
     func parseFetchModifiers(buffer: inout ParseBuffer, tracker: StackTracker) throws -> [FetchModifier] {

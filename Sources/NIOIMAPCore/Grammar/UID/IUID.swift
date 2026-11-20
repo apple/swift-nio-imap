@@ -59,6 +59,6 @@ public struct IUID: Hashable, Sendable {
 
 extension EncodeBuffer {
     @discardableResult mutating func writeIUID(_ data: IUID) -> Int {
-        self.writeString("/;UID=\(data.uid)")
+        self.writeString("/;UID=") + self.writeMessageIdentifier(data.uid)
     }
 }

@@ -12,7 +12,6 @@
 //
 //===----------------------------------------------------------------------===//
 
-import struct NIO.ByteBuffer
 import struct OrderedCollections.OrderedDictionary
 
 extension BodyStructure {
@@ -103,14 +102,14 @@ extension EncodeBuffer {
         part.parts.reduce(into: 0) { (result, body) in
             result += self.writeBody(body)
         } + self.writeSpace() + self.writeMediaSubtype(part.mediaSubtype)
-            + self.writeIfExists(part.extension) { (ext) -> Int in
+            + writeIfExists(part.extension) { (ext) -> Int in
                 self.writeSpace() + self.writeBodyExtensionMultipart(ext)
             }
     }
 
     @discardableResult mutating func writeBodyExtensionMultipart(_ ext: BodyStructure.Multipart.Extension) -> Int {
         self.writeBodyParameterPairs(ext.parameters)
-            + self.writeIfExists(ext.dispositionAndLanguage) { (dspLanguage) -> Int in
+            + writeIfExists(ext.dispositionAndLanguage) { (dspLanguage) -> Int in
                 self.writeBodyDispositionAndLanguage(dspLanguage)
             }
     }

@@ -12,8 +12,6 @@
 //
 //===----------------------------------------------------------------------===//
 
-import struct NIO.ByteBuffer
-
 /// Text and optional status code returned by the server in a response.
 ///
 /// Response text is always included with tagged responses and some untagged responses to provide
@@ -70,7 +68,7 @@ public struct ResponseText: Hashable, Sendable {
 
 extension EncodeBuffer {
     @discardableResult mutating func writeResponseText(_ text: ResponseText) -> Int {
-        self.writeIfExists(text.code) { (code) -> Int in
+        writeIfExists(text.code) { (code) -> Int in
             self.writeString("[") + self.writeResponseTextCode(code) + self.writeString("] ")
         }
 

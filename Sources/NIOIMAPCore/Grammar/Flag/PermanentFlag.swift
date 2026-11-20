@@ -12,8 +12,6 @@
 //
 //===----------------------------------------------------------------------===//
 
-import struct NIO.ByteBuffer
-
 /// A flag that can be or is permanent on the mailbox.
 ///
 /// In IMAP, servers indicate which flags can be made persistent (saved across sessions) via the `PERMANENTFLAGS`

@@ -273,11 +273,11 @@ extension EncodeBuffer {
         case .internalDate(let date):
             return self.writeMessageAttribute_internalDate(date)
         case .rfc822Size(let size):
-            return self.writeString("RFC822.SIZE \(size)")
+            return self.writeString("RFC822.SIZE ") + self.writeDecimal(size)
         case .body(let body, hasExtensionData: let hasExtensionData):
             return self.writeMessageAttribute_body(body, hasExtensionData: hasExtensionData)
         case .uid(let uid):
-            return self.writeString("UID \(uid.rawValue)")
+            return self.writeString("UID ") + self.writeDecimal(uid.rawValue)
         case .binarySize(section: let section, size: let number):
             return self.writeMessageAttribute_binarySize(section: section, number: number)
         case .flags(let flags):
@@ -307,7 +307,8 @@ extension EncodeBuffer {
         section: SectionSpecifier.Part,
         number: Int
     ) -> Int {
-        self.writeString("BINARY.SIZE") + self.writeSectionBinary(section) + self.writeString(" \(number)")
+        self.writeString("BINARY.SIZE") + self.writeSectionBinary(section) + self.writeSpace()
+            + self.writeDecimal(number)
     }
 
     @discardableResult mutating func writeMessageAttributeFlags(_ atts: [Flag]) -> Int {
@@ -346,7 +347,7 @@ extension EncodeBuffer {
         hasExtensionData: Bool
     ) -> Int {
         self.writeString("BODY")
-            + self.write(if: hasExtensionData) { () -> Int in
+            + write(if: hasExtensionData) { () -> Int in
                 self.writeString("STRUCTURE")
             } + self.writeSpace() + self.writeBody(body)
     }
@@ -357,24 +358,24 @@ extension EncodeBuffer {
         string: ByteBuffer?
     ) -> Int {
         self.writeString("BODY") + self.writeSection(section)
-            + self.writeIfExists(number) { (number) -> Int in
-                self.writeString("<\(number)>")
+            + writeIfExists(number) { (number) -> Int in
+                self.writeByte(UInt8(ascii: "<")) + self.writeDecimal(number) + self.writeByte(UInt8(ascii: ">"))
             } + self.writeSpace() + self.writeNString(string)
     }
 
     @discardableResult mutating func writeMessageAttribute_bodySectionText(number: Int?, size: Int) -> Int {
         self.writeString("BODY[TEXT]")
-            + self.writeIfExists(number) { (number) -> Int in
-                self.writeString("<\(number)>")
-            } + self.writeString(" {\(size)}\r\n")
+            + writeIfExists(number) { (number) -> Int in
+                self.writeByte(UInt8(ascii: "<")) + self.writeDecimal(number) + self.writeByte(UInt8(ascii: ">"))
+            } + self.writeSpace() + self.writeLiteralHeader(byteCount: size)
     }
 
     @discardableResult mutating func writeMessageAttribute_gmailMessageID(_ id: UInt64) -> Int {
-        self.writeString("X-GM-MSGID \(id)")
+        self.writeString("X-GM-MSGID ") + self.writeDecimal(id)
     }
 
     @discardableResult mutating func writeMessageAttribute_gmailThreadID(_ id: UInt64) -> Int {
-        self.writeString("X-GM-THRID \(id)")
+        self.writeString("X-GM-THRID ") + self.writeDecimal(id)
     }
 
     @discardableResult mutating func writeMessageAttribute_gmailLabels(_ labels: [GmailLabel]) -> Int {

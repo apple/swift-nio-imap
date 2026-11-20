@@ -12,8 +12,6 @@
 //
 //===----------------------------------------------------------------------===//
 
-import struct NIO.ByteBuffer
-
 /// Selection options for `LIST` commands that do not syntactically interact with other options (RFC 5258 LIST-EXTENDED extension).
 ///
 /// **Requires server capability:** ``Capability/listExtended``

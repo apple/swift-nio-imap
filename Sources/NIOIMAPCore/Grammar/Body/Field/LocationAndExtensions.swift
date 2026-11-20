@@ -12,8 +12,6 @@
 //
 //===----------------------------------------------------------------------===//
 
-import struct NIO.ByteBuffer
-
 extension BodyStructure {
     /// Content location URI and future extension fields for a message part.
     ///
@@ -69,7 +67,7 @@ extension EncodeBuffer {
         _ locationExtension: BodyStructure.LocationAndExtensions
     ) -> Int {
         self.writeSpace() + self.writeNString(locationExtension.location)
-            + self.write(if: !locationExtension.extensions.isEmpty) {
+            + write(if: !locationExtension.extensions.isEmpty) {
                 self.writeSpace() + self.writeBodyExtensions(locationExtension.extensions)
             }
     }

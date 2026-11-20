@@ -263,18 +263,21 @@ extension EncodeBuffer {
         default: preconditionFailure("Expected 1 <= month <= 12")
         }
 
+        let hyphen = UInt8(ascii: "-")
+        let quote = UInt8(ascii: "\"")
         return
-            self.writeString("\"\(p.0.day)-\(monthName)-\(p.0.year) ") + self.writeTime(p.1) + self.writeSpace()
-            + self.writeTimezone(p.2) + self.writeString("\"")
+            self.writeByte(quote) + self.writeDecimal(p.0.day) + self.writeByte(hyphen) + self.writeString(monthName)
+            + self.writeByte(hyphen) + self.writeDecimal(p.0.year) + self.writeSpace() + self.writeTime(p.1)
+            + self.writeSpace() + self.writeTimezone(p.2) + self.writeByte(quote)
     }
 }
 
 extension EncodeBuffer {
     @discardableResult private mutating func writeTime(_ time: ServerMessageDate.Time) -> Int {
-        let hour = time.hour < 10 ? "0\(time.hour)" : "\(time.hour)"
-        let minute = time.minute < 10 ? "0\(time.minute)" : "\(time.minute)"
-        let second = time.second < 10 ? "0\(time.second)" : "\(time.second)"
-        return self.writeString("\(hour):\(minute):\(second)")
+        let colon = UInt8(ascii: ":")
+        return self.writeDecimal(time.hour, minimumDigits: 2) + self.writeByte(colon)
+            + self.writeDecimal(time.minute, minimumDigits: 2) + self.writeByte(colon)
+            + self.writeDecimal(time.second, minimumDigits: 2)
     }
 }
 
@@ -283,20 +286,7 @@ extension EncodeBuffer {
         let value = abs(timezone.minutes)
         let minutes = value % 60
         let hours = (value - minutes) / 60
-        let string = String(hours * 100 + minutes)
-
-        let zeroedString: String
-        if string.count < 4 {
-            var output = ""
-            output.reserveCapacity(4)
-            output.append(contentsOf: String(repeating: "0", count: 4 - string.count))
-            output.append(string)
-            zeroedString = output
-        } else {
-            zeroedString = string
-        }
-
-        let modifier = (timezone.minutes >= 0) ? "+" : "-"
-        return self.writeString("\(modifier)\(zeroedString)")
+        let modifier: UInt8 = (timezone.minutes >= 0) ? UInt8(ascii: "+") : UInt8(ascii: "-")
+        return self.writeByte(modifier) + self.writeDecimal(hours * 100 + minutes, minimumDigits: 4)
     }
 }

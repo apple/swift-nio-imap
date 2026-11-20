@@ -12,8 +12,6 @@
 //
 //===----------------------------------------------------------------------===//
 
-import struct NIO.ByteBuffer
-
 /// Metadata for a message being appended to a mailbox.
 ///
 /// An `AppendMessage` combines optional metadata (flags, delivery date, extensions)
