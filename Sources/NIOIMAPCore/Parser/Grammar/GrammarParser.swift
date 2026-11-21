@@ -2685,12 +2685,14 @@ extension GrammarParser {
         tracker: StackTracker
     ) throws {
         while true {
+            let mark = buffer.consumed
             do {
                 try buffer.parseSpaces()
                 try self.parseTaggedExtensionComplex_helper(into: &into, buffer: &buffer, tracker: tracker)
             } catch is ParserError {
                 return
             }
+            try buffer.requireProgress(since: mark)
         }
     }
 
@@ -2727,6 +2729,7 @@ extension GrammarParser {
             do {
                 try parseTaggedExtensionComplex_string(into: &into, buffer: &buffer, tracker: tracker)
             } catch is ParserError {
+                // Only a mismatch means "try the bracketed form"; an astring never starts with `(`.
                 buffer = save
                 try parseTaggedExtensionComplex_bracketed(into: &into, buffer: &buffer, tracker: tracker)
             }
@@ -2836,8 +2839,12 @@ extension GrammarParser {
         func parseManyMailboxes(buffer: inout ParseInput, tracker: StackTracker) throws -> Mailboxes {
             try buffer.matchFixed("(")
             var mailboxes: [MailboxName] = [try parseMailbox(buffer: &buffer, tracker: tracker)]
-            while try buffer.parseOptional(tracker: tracker, parser: { input, _ in try input.parseSpaces() }) != nil {
+            while true {
+                let mark = buffer.consumed
+                guard try buffer.parseOptional(tracker: tracker, parser: { input, _ in try input.parseSpaces() }) != nil
+                else { break }
                 mailboxes.append(try parseMailbox(buffer: &buffer, tracker: tracker))
+                try buffer.requireProgress(since: mark)
             }
             try buffer.matchFixed(")")
             guard let returnValue = Mailboxes(mailboxes) else {
@@ -2935,11 +2942,15 @@ extension GrammarParser {
         tracker: StackTracker
     ) throws -> ExtendedSearchScopeOptions {
         var options = OrderedDictionary<ExtensionKey<ExtendedSearchScopeOptions>, ParameterValue?>()
-        repeat {
+        while true {
+            let mark = buffer.consumed
             let param: KeyValue<ExtensionKey<ExtendedSearchScopeOptions>, ParameterValue?> =
                 try parseParameter(buffer: &buffer, tracker: tracker)
             options[param.key] = param.value
-        } while try buffer.parseOptional(tracker: tracker, parser: { input, _ in try input.parseSpaces() }) != nil
+            try buffer.requireProgress(since: mark)
+            guard try buffer.parseOptional(tracker: tracker, parser: { input, _ in try input.parseSpaces() }) != nil
+            else { break }
+        }
         guard let returnValue = ExtendedSearchScopeOptions(options) else {
             throw ParserError(hint: "Failed to unwrap ESearchScopeOptions which should be impossible.")
         }
@@ -2966,12 +2977,11 @@ extension GrammarParser {
             tracker: StackTracker
         ) throws -> [MailboxFilter] {
             var sources = [try parseFilterMailboxes(buffer: &buffer, tracker: tracker)]
-            while let anotherSource = try buffer.parseOptional(
+            try buffer.forEachRepetition(
                 tracker: tracker,
-                parser: { try parseExtendedSearchSourceOptions_spaceFilter(buffer: &$0, tracker: $1) }
-            ) {
-                sources.append(anotherSource)
-            }
+                parser: { try parseExtendedSearchSourceOptions_spaceFilter(buffer: &$0, tracker: $1) },
+                { sources.append($0) }
+            )
             return sources
         }
 

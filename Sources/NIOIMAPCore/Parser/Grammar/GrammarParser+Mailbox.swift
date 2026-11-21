@@ -301,12 +301,14 @@ extension GrammarParser {
         var results = [MailboxInfo.Attribute(unchecked: try self.parseFlagExtension(buffer: &buffer, tracker: tracker))]
         do {
             while true {
+                let mark = buffer.consumed
                 try buffer.parseSpaces()
                 let att = try self.parseFlagExtension(buffer: &buffer, tracker: tracker)
                 results.append(.init(unchecked: att))
+                try buffer.requireProgress(since: mark)
             }
-        } catch {
-            // do nothing
+        } catch is ParserError {
+            // The list ends at the first flag that does not parse.
         }
         return results
     }
