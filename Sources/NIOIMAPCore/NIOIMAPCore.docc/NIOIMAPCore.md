@@ -8,13 +8,15 @@ NIOIMAPCore is the foundation of the swift-nio-imap project. It provides compreh
 
 Use this module as a building block for creating IMAP clients and servers. It handles the complexity of the IMAP wire protocol, converting between byte streams and strongly-typed Swift data structures.
 
+Large payloads move between the module and SwiftNIO's `ByteBuffer` or Dispatch's `DispatchData` without copying, in both directions. See <doc:ZeroCopy>.
+
 ### Key Features
 
 - **Type-Safe Protocol Representation**: IMAP commands, responses, and all protocol elements are represented as type-safe Swift enums and structures
 - **Complete Protocol Support**: Full IMAP4rev1 implementation with extensive support for common extensions (see <doc:SupportedExtensions>)
 - **Bidirectional Conversion**: Convert between IMAP wire format and Swift data structures in both directions
 - **Streaming Support**: Handle large messages and streaming responses efficiently
-- **No Networking Dependency**: The module depends on the standard library and the Swift Collections packages, not on SwiftNIO. Read from an ``IMAPInputBuffer`` filled from any transport and write into any ``EncoderOutputBuffer``.
+- **No Networking Dependency**: The module depends on the standard library and the Swift Collections packages, not on SwiftNIO. Append received bytes to an ``IMAPInputBuffer`` and take encoded bytes as an ``IMAPBufferList``.
 - **Parser Combinator Architecture**: Composable, maintainable parsing logic built on reusable parser primitives
 
 ### How It Works
@@ -52,6 +54,7 @@ Both share the NIOIMAPCore command and response types described here.
 
 ### Guides
 
+- <doc:ZeroCopy>
 - <doc:SupportedExtensions>
 
 ### Collections
