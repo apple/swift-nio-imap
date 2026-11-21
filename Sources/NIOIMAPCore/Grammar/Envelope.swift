@@ -12,8 +12,6 @@
 //
 //===----------------------------------------------------------------------===//
 
-import struct NIO.ByteBuffer
-
 /// The parsed envelope structure of a message, extracted from the message headers (RFC 3501).
 ///
 /// The envelope represents the structured header fields of an email message, including the sender,
@@ -42,7 +40,7 @@ public struct Envelope: Hashable, Sendable {
     public var date: InternetMessageDate?
 
     /// The subject line of the message, as from the `Subject:` header.
-    public var subject: ByteBuffer?
+    public var subject: [UInt8]?
 
     /// The sender(s) of the message, as from the `From:` header.
     ///
@@ -102,7 +100,7 @@ public struct Envelope: Hashable, Sendable {
     /// - parameter messageID: The unique message identifier
     public init(
         date: InternetMessageDate?,
-        subject: ByteBuffer?,
+        subject: [UInt8]?,
         from: [EmailAddressListElement],
         sender: [EmailAddressListElement],
         reply: [EmailAddressListElement],

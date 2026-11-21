@@ -12,7 +12,6 @@
 //
 //===----------------------------------------------------------------------===//
 
-import struct NIO.ByteBuffer
 import struct OrderedCollections.OrderedDictionary
 
 /// A description of a single namespace, including its prefix and hierarchy delimiter.
@@ -41,7 +40,7 @@ public struct NamespaceDescription: Hashable, Sendable {
     /// Specifies the root of the namespace. Mailboxes within this namespace
     /// are accessed by appending the mailbox name to this prefix, separated by the delimiter.
     /// An empty string indicates the namespace has no prefix (mailboxes are accessed directly).
-    public var string: ByteBuffer
+    public var string: [UInt8]
 
     /// The hierarchy delimiter for this namespace, or `nil` if no delimiter is used.
     ///
@@ -61,7 +60,7 @@ public struct NamespaceDescription: Hashable, Sendable {
     /// to provide additional namespace information. Keys are extension names, and values are
     /// arrays of strings containing the extension parameters.
     /// Non-standard extensions should be prefixed with `X-` as per RFC 2342.
-    public var responseExtensions: OrderedDictionary<ByteBuffer, [ByteBuffer]>
+    public var responseExtensions: OrderedDictionary<[UInt8], [[UInt8]]>
 
     /// Creates a new `NamespaceDescription`.
     ///
@@ -72,9 +71,9 @@ public struct NamespaceDescription: Hashable, Sendable {
     /// - Throws: ``InvalidDelimiterError`` if `delimiter` is not an ASCII character, or is CR, LF, or
     ///   NUL (which can't be written as a `QUOTED-CHAR`).
     public init(
-        string: ByteBuffer,
+        string: [UInt8],
         delimiter: Character? = nil,
-        responseExtensions: OrderedDictionary<ByteBuffer, [ByteBuffer]>
+        responseExtensions: OrderedDictionary<[UInt8], [[UInt8]]>
     ) throws {
         var delimiterByte: UInt8?
         if let delimiter {
@@ -88,9 +87,9 @@ public struct NamespaceDescription: Hashable, Sendable {
     }
 
     init(
-        string: ByteBuffer,
+        string: [UInt8],
         delimiterByte: UInt8?,
-        responseExtensions: OrderedDictionary<ByteBuffer, [ByteBuffer]>
+        responseExtensions: OrderedDictionary<[UInt8], [[UInt8]]>
     ) {
         assert(delimiterByte.map(Self.isValidDelimiter) ?? true)
         self.string = string

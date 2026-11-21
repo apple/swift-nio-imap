@@ -12,7 +12,6 @@
 //
 //===----------------------------------------------------------------------===//
 
-import NIO
 @_spi(NIOIMAPInternal) @testable import NIOIMAPCore
 import Testing
 
@@ -297,13 +296,13 @@ struct EnvelopeTests {
 
     private static func parseAddressList(_ string: String) throws -> [EmailAddressListElement] {
         // Trailing space: the list must not be at the end of the buffer.
-        var buffer = ParseBuffer(ByteBuffer(string: string + " "))
-        return try GrammarParser().parseOptionalEnvelopeEmailAddresses(buffer: &buffer, tracker: .testTracker)
+        try TestUtilities.withParseInput(for: string + " ") { buffer in
+            try GrammarParser().parseOptionalEnvelopeEmailAddresses(buffer: &buffer, tracker: .testTracker)
+        }
     }
 
     private static func encodeAddressList(_ addresses: [EmailAddressListElement]) -> String {
         var buffer = EncodeBuffer.serverEncodeBuffer(
-            buffer: ByteBufferAllocator().buffer(capacity: 128),
             options: ResponseEncodingOptions(),
             loggingMode: false
         )
@@ -331,7 +330,7 @@ extension EmailAddress {
     fileprivate static let alice = EmailAddress(personName: nil, sourceRoot: nil, mailbox: "alice", host: "example.com")
 
     /// RFC 3501 §7.4.2 group start marker (host NIL).
-    fileprivate static func groupStart(_ name: ByteBuffer) -> EmailAddress {
+    fileprivate static func groupStart(_ name: [UInt8]) -> EmailAddress {
         .init(personName: nil, sourceRoot: nil, mailbox: name, host: nil)
     }
 }

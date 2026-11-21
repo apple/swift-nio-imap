@@ -12,7 +12,6 @@
 //
 //===----------------------------------------------------------------------===//
 
-import NIO
 @_spi(NIOIMAPInternal) @testable import NIOIMAPCore
 import Testing
 
@@ -21,14 +20,14 @@ struct GmailLabelTests {
     @Test(
         "encode",
         arguments: [
-            EncodeFixture.gmailLabel(GmailLabel(ByteBuffer(string: "Inbox")), #""Inbox""#),
-            EncodeFixture.gmailLabel(GmailLabel(ByteBuffer(string: "\\Sent")), #"\Sent"#),
-            EncodeFixture.gmailLabel(GmailLabel(ByteBuffer(string: "My Label")), #""My Label""#),
+            EncodeFixture.gmailLabel(GmailLabel("Inbox"), #""Inbox""#),
+            EncodeFixture.gmailLabel(GmailLabel("\\Sent"), #"\Sent"#),
+            EncodeFixture.gmailLabel(GmailLabel("My Label"), #""My Label""#),
             // `\` + non-atom must not be written raw:
-            EncodeFixture.gmailLabel(GmailLabel(ByteBuffer(string: "\\Foo bar")), #""\\Foo bar""#),
-            EncodeFixture.gmailLabel(GmailLabel(ByteBuffer(string: "\\")), #""\\""#),
+            EncodeFixture.gmailLabel(GmailLabel("\\Foo bar"), #""\\Foo bar""#),
+            EncodeFixture.gmailLabel(GmailLabel("\\"), #""\\""#),
             EncodeFixture.gmailLabel(
-                GmailLabel(ByteBuffer(string: "\\x)\r\nA2 DELETE INBOX\r\nA3 NOOP (")),
+                GmailLabel("\\x)\r\nA2 DELETE INBOX\r\nA3 NOOP ("),
                 "{31}\r\n\\x)\r\nA2 DELETE INBOX\r\nA3 NOOP ("
             ),
         ]
@@ -56,8 +55,8 @@ struct GmailLabelTests {
     @Test(
         "makeDisplayString",
         arguments: [
-            (GmailLabel(ByteBuffer(string: "Inbox")), "Inbox"),
-            (GmailLabel(ByteBuffer(string: "&invalid-")), "&invalid-"),  // invalid modified UTF-7 falls back to UTF-8
+            (GmailLabel("Inbox"), "Inbox"),
+            (GmailLabel("&invalid-"), "&invalid-"),  // invalid modified UTF-7 falls back to UTF-8
         ] as [(GmailLabel, String)]
     )
     func makeDisplayString(_ fixture: (GmailLabel, String)) {
@@ -67,8 +66,8 @@ struct GmailLabelTests {
     @Test(
         "parse",
         arguments: [
-            ParseFixture.gmailLabel(#""Inbox""#, expected: .success(GmailLabel(ByteBuffer(string: "Inbox")))),
-            ParseFixture.gmailLabel(#"\Sent"#, expected: .success(GmailLabel(ByteBuffer(string: "\\Sent")))),
+            ParseFixture.gmailLabel(#""Inbox""#, expected: .success(GmailLabel("Inbox"))),
+            ParseFixture.gmailLabel(#"\Sent"#, expected: .success(GmailLabel("\\Sent"))),
             ParseFixture.gmailLabel("", "", expected: .incompleteMessage),
         ]
     )
@@ -88,7 +87,7 @@ struct GmailLabelTests {
     )
     func roundTrip(_ value: String) {
         TestUtilities.expectRoundTrip(
-            GmailLabel(ByteBuffer(string: value)),
+            GmailLabel(Array(value.utf8)),
             encoder: { $0.writeGmailLabel($1) },
             parser: GrammarParser().parseGmailLabel
         )

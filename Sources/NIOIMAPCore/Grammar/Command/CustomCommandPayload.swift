@@ -12,8 +12,6 @@
 //
 //===----------------------------------------------------------------------===//
 
-import struct NIO.ByteBuffer
-
 extension Command {
     /// Custom payload encoding for specialized command arguments.
     ///
@@ -45,7 +43,7 @@ extension Command {
         /// .literal("hello world".utf8)  // Encodes as: {"11"}\r\nhello world
         /// .literal("test".utf8)          // Encodes as: "test"
         /// ```
-        case literal(ByteBuffer)
+        case literal([UInt8])
 
         /// Encodes the buffer verbatim without any IMAP syntax encoding.
         ///
@@ -61,7 +59,7 @@ extension Command {
         /// ```
         /// .verbatim("CUSTOM-KEYWORD (param1 param2)".utf8)  // Sent as-is
         /// ```
-        case verbatim(ByteBuffer)
+        case verbatim([UInt8])
     }
 }
 
@@ -76,7 +74,7 @@ extension EncodeBuffer {
         case .literal(let literal):
             return self.writeIMAPString(literal)
         case .verbatim(let verbatim):
-            return self.writeBytes(verbatim.readableBytesView)
+            return self.writeBytes(verbatim)
         }
     }
 }

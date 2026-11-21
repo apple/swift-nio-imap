@@ -12,7 +12,6 @@
 //
 //===----------------------------------------------------------------------===//
 
-import NIO
 @_spi(NIOIMAPInternal) @testable import NIOIMAPCore
 import OrderedCollections
 import Testing
@@ -140,7 +139,7 @@ private struct ResponseTests {
                 sut: Response.fetch(.streamingBegin(kind: .rfc822Text, byteCount: 0)),
                 expected: "RFC822.TEXT {0}\r\n"
             ),
-            ReflectionFixture(sut: Response.fetch(.streamingBytes(ByteBuffer(string: "hello"))), expected: "hello"),
+            ReflectionFixture(sut: Response.fetch(.streamingBytes("hello")), expected: "hello"),
             ReflectionFixture(sut: Response.fetch(.finish), expected: ")\r\n"),
         ]
     )
@@ -165,7 +164,7 @@ private struct ResponseTests {
                 input: .fetch(.streamingBegin(kind: .rfc822Text, byteCount: 0)),
                 expected: "RFC822.TEXT {0}\r\n"
             ),
-            PIIFixture(input: .fetch(.streamingBytes(ByteBuffer(string: "hello"))), expected: "[5 bytes]"),
+            PIIFixture(input: .fetch(.streamingBytes("hello")), expected: "[5 bytes]"),
             PIIFixture(input: .fetch(.finish), expected: ")\r\n"),
         ]
     )
@@ -252,11 +251,7 @@ extension EncodeFixture<Response> {
             bufferKind: .server(ResponseEncodingOptions()),
             expectedString: expectedString,
             encoder: {
-                var encoder = ResponseEncodeBuffer(
-                    buffer: $0.buffer,
-                    options: ResponseEncodingOptions(),
-                    loggingMode: false
-                )
+                var encoder = ResponseEncodeBuffer($0)
                 let count = encoder.writeResponse($1)
                 $0 = encoder.buffer
                 return count
@@ -272,14 +267,10 @@ extension EncodeFixture<[FetchResponse]> {
     ) -> Self {
         EncodeFixture(
             input: input,
-            bufferKind: .client(.rfc3501),
+            bufferKind: .server(ResponseEncodingOptions()),
             expectedString: expectedString,
             encoder: {
-                var encoder = ResponseEncodeBuffer(
-                    buffer: $0.buffer,
-                    options: ResponseEncodingOptions(),
-                    loggingMode: false
-                )
+                var encoder = ResponseEncodeBuffer($0)
                 let count = $1.reduce(into: 0) { count, response in
                     count += encoder.writeFetchResponse(response)
                 }

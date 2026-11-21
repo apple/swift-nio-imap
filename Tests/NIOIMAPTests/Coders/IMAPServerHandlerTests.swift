@@ -275,7 +275,7 @@ import Testing
         helper.expectOutboundBuffer("+ Ready for literal data\r\n")
 
         helper.writeInbound("012345678901")
-        helper.expectInbound(.append(.messageBytes(ByteBuffer(string: "012345678901"))))
+        helper.expectInbound(.append(.messageBytes("012345678901")))
 
         helper.writeInbound("\r\n")
         helper.expectInbound(.append(.endMessage))

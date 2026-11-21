@@ -6,12 +6,17 @@ import PackageDescription
 
 let package = Package(
     name: "swift-nio-imap",
+    // Pinned so that the package can use the stdlib's newer memory-safety types. `Span` itself
+    // back-deploys to macOS 10.14.4, but the accessors that produce one from an existing value do not:
+    // `String.utf8Span`, `Array.span` and `InlineArray` are all `anyAppleOS 26.0`, because a bridged
+    // or otherwise non-contiguous value has no buffer to lend and the getter cannot back-deploy.
+    // Declaring the floor is what makes those usable in the parser and the encoder.
     platforms: [
-        .macOS(.v15),
-        .iOS(.v18),
-        .watchOS(.v11),
-        .tvOS(.v18),
-        .visionOS(.v2),
+        .macOS(.v26),
+        .iOS(.v26),
+        .tvOS(.v26),
+        .watchOS(.v26),
+        .visionOS(.v26),
     ],
     products: [
         .library(name: "NIOIMAP", targets: ["NIOIMAP"]),
@@ -29,7 +34,8 @@ let package = Package(
         .target(
             name: "NIOIMAP",
             dependencies: [
-                .target(name: "NIOIMAPCore")
+                .target(name: "NIOIMAPCore"),
+                .product(name: "NIO", package: "swift-nio"),
             ],
             // The documentation is built out-of-band, not by SwiftPM: excluding the catalog
             // keeps it out of the build product instead of being copied in as a resource.
@@ -54,26 +60,30 @@ let package = Package(
         .target(
             name: "NIOIMAPCore",
             dependencies: [
-                .product(name: "NIO", package: "swift-nio"),
                 .product(name: "OrderedCollections", package: "swift-collections"),
+                .product(name: "DequeModule", package: "swift-collections"),
             ],
             // The documentation is built out-of-band, not by SwiftPM: excluding the catalog
             // keeps it out of the build product instead of being copied in as a resource.
             exclude: ["NIOIMAPCore.docc"],
             swiftSettings: [
-                .enableUpcomingFeature("MemberImportVisibility")
+                .enableUpcomingFeature("MemberImportVisibility"),
+                // For `@_lifetime` and non-escapable parse cursors. `Lifetimes` is the only feature
+                // needed and the only one to enable: the older `LifetimeDependence` spelling does not
+                // enable `@_lifetime` (verified — "'@_lifetime' attribute is only valid when
+                // experimental feature Lifetimes is enabled"), so adding it would be misleading noise.
+                .enableExperimentalFeature("Lifetimes"),
             ]
         ),
         .testTarget(
             name: "NIOIMAPCoreTests",
             dependencies: [
                 .target(name: "NIOIMAPCore"),
-                .product(name: "NIO", package: "swift-nio"),
-                .product(name: "NIOTestUtils", package: "swift-nio"),
                 .product(name: "OrderedCollections", package: "swift-collections"),
             ],
             swiftSettings: [
-                .enableUpcomingFeature("MemberImportVisibility")
+                .enableUpcomingFeature("MemberImportVisibility"),
+                .enableExperimentalFeature("Lifetimes"),
             ]
         ),
 

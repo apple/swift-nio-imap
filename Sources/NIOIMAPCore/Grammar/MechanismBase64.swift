@@ -12,8 +12,6 @@
 //
 //===----------------------------------------------------------------------===//
 
-import struct NIO.ByteBuffer
-
 /// An authorization mechanism paired with base64-encoded authentication data.
 ///
 /// Used in URLAUTH contexts (RFC 4467) to specify both the mechanism used to
@@ -25,12 +23,12 @@ public struct MechanismBase64: Hashable, Sendable {
     public var mechanism: URLAuthenticationMechanism
 
     /// The authentication data, decoded. It is base64-encoded on the wire.
-    public var base64: ByteBuffer?
+    public var base64: [UInt8]?
 
     /// Creates a new `MechanismBase64`.
     /// - parameter mechanism: The authorization mechanism.
     /// - parameter base64: The authentication data, decoded. It is base64-encoded on the wire.
-    public init(mechanism: URLAuthenticationMechanism, base64: ByteBuffer?) {
+    public init(mechanism: URLAuthenticationMechanism, base64: [UInt8]?) {
         self.mechanism = mechanism
         self.base64 = base64
     }
@@ -43,7 +41,7 @@ extension EncodeBuffer {
         self.writeURLAuthenticationMechanism(data.mechanism)
             + writeIfExists(data.base64) { base64 in
                 // mechanism-base64 = mechanism ["=" base64]; the parser decodes, so encode here.
-                self.writeString("=") + self.writeBufferAsBase64(base64)
+                self.writeString("=") + self.writeBytesAsBase64(base64)
             }
     }
 }

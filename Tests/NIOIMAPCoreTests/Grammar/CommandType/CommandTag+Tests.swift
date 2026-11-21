@@ -12,7 +12,6 @@
 //
 //===----------------------------------------------------------------------===//
 
-import NIO
 @_spi(NIOIMAPInternal) @testable import NIOIMAPCore
 import Testing
 
@@ -53,22 +52,23 @@ struct CommandTagTests {
     @Test("valid tags round-trip in a command", arguments: validTagStrings)
     func commandRoundTrip(_ string: String) throws {
         let tag = try #require(Command.Tag(string))
-        var encodeBuffer = CommandEncodeBuffer(buffer: ByteBuffer(), options: .rfc3501, loggingMode: false)
+        var encodeBuffer = CommandEncodeBuffer(options: .rfc3501, loggingMode: false)
         encodeBuffer.writeCommand(TaggedCommand(tag: tag, command: .noop))
-        var buffer = ParseBuffer(encodeBuffer.buffer.nextChunk().bytes)
-        let parsed = try GrammarParser().parseTaggedCommand(buffer: &buffer, tracker: .testTracker)
+        let parsed = try encodeBuffer.buffer.nextChunk().bytes.copiedBytes().withParseInput(limit: .max) { input in
+            try GrammarParser().parseTaggedCommand(buffer: &input, tracker: .testTracker)
+        }
         #expect(parsed == TaggedCommand(tag: tag, command: .noop))
     }
 
     @Test("valid tags round-trip in an APPEND", arguments: validTagStrings)
     func appendRoundTrip(_ string: String) throws {
         let tag = try #require(Command.Tag(string))
-        var encodeBuffer = CommandEncodeBuffer(buffer: ByteBuffer(), options: .rfc3501, loggingMode: false)
+        var encodeBuffer = CommandEncodeBuffer(options: .rfc3501, loggingMode: false)
         encodeBuffer.writeCommandStream(.append(.start(tag: tag, appendingTo: .inbox)))
-        var bytes = encodeBuffer.buffer.nextChunk().bytes
-        bytes.writeString(" ")
-        var buffer = ParseBuffer(bytes)
-        let parsed = try GrammarParser().parseAppend(buffer: &buffer, tracker: .testTracker)
+        let bytes = encodeBuffer.buffer.nextChunk().bytes.copiedBytes() + Array(" ".utf8)
+        let parsed = try bytes.withParseInput(limit: .max) { input in
+            try GrammarParser().parseAppend(buffer: &input, tracker: .testTracker)
+        }
         #expect(parsed == .append(.start(tag: tag, appendingTo: .inbox)))
     }
 

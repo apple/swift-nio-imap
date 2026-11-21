@@ -12,7 +12,6 @@
 //
 //===----------------------------------------------------------------------===//
 
-import NIO
 import Testing
 @_spi(NIOIMAPInternal) @testable import NIOIMAPCore
 
@@ -20,10 +19,10 @@ import Testing
 struct EmailAddressTestsSuite {
     @Test("address initialization with properties")
     func addressInitializationWithProperties() {
-        let name: ByteBuffer? = "a"
-        let adl: ByteBuffer? = "b"
-        let mailbox: ByteBuffer? = "c"
-        let host: ByteBuffer? = "d"
+        let name: [UInt8]? = "a"
+        let adl: [UInt8]? = "b"
+        let mailbox: [UInt8]? = "c"
+        let host: [UInt8]? = "d"
         let address = EmailAddress(personName: name, sourceRoot: adl, mailbox: mailbox, host: host)
 
         #expect(address.personName == name)
@@ -297,7 +296,6 @@ struct EmailAddressFixture: Sendable, CustomTestStringConvertible {
 
     func checkEncoding() {
         let buffer = EncodeBuffer.serverEncodeBuffer(
-            buffer: ByteBufferAllocator().buffer(capacity: 128),
             options: ResponseEncodingOptions(),
             loggingMode: false
         )
@@ -325,19 +323,19 @@ struct EnvelopeGroupingFixture: Sendable, CustomTestStringConvertible {
 // RFC 3501 §7.4.2 group markers: host NIL; start has mailbox = group name, end has mailbox NIL.
 extension EmailAddress {
     fileprivate static func groupStart(
-        _ name: ByteBuffer,
-        personName: ByteBuffer? = nil,
-        sourceRoot: ByteBuffer? = nil
+        _ name: [UInt8],
+        personName: [UInt8]? = nil,
+        sourceRoot: [UInt8]? = nil
     ) -> EmailAddress {
         .init(personName: personName, sourceRoot: sourceRoot, mailbox: name, host: nil)
     }
 
-    fileprivate static func groupEnd(personName: ByteBuffer? = nil, sourceRoot: ByteBuffer? = nil) -> EmailAddress {
+    fileprivate static func groupEnd(personName: [UInt8]? = nil, sourceRoot: [UInt8]? = nil) -> EmailAddress {
         .init(personName: personName, sourceRoot: sourceRoot, mailbox: nil, host: nil)
     }
 
     /// Ordinary address with every field set to `value`.
-    fileprivate static func address(_ value: ByteBuffer) -> EmailAddress {
+    fileprivate static func address(_ value: [UInt8]) -> EmailAddress {
         .init(personName: value, sourceRoot: value, mailbox: value, host: value)
     }
 }

@@ -359,14 +359,14 @@ struct IMAPClientHandlerTests {
         // server sends challenge
         let challengeBytes1 = ""
         helper.writeInbound("+ \(challengeBytes1)\r\n")
-        helper.expectInbound(.authenticationChallenge(ByteBuffer()))
+        helper.expectInbound(.authenticationChallenge([]))
 
         // client responds
         let responseBytes1 =
             "YIIB+wYJKoZIhvcSAQICAQBuggHqMIIB5qADAgEFoQMCAQ6iBwMFACAAAACjggEmYYIBIjCCAR6gAwIBBaESGxB1Lndhc2hpbmd0b24uZWR1oi0wK6ADAgEDoSQwIhsEaW1hcBsac2hpdmFtcy5jYWMud2FzaGluZ3Rvbi5lZHWjgdMwgdCgAwIBAaEDAgEDooHDBIHAcS1GSa5b+fXnPZNmXB9SjL8Ollj2SKyb+3S0iXMljen/jNkpJXAleKTz6BQPzj8duz8EtoOuNfKgweViyn/9B9bccy1uuAE2HI0yC/PHXNNU9ZrBziJ8Lm0tTNc98kUpjXnHZhsMcz5Mx2GR6dGknbI0iaGcRerMUsWOuBmKKKRmVMMdR9T3EZdpqsBd7jZCNMWotjhivd5zovQlFqQ2Wjc2+y46vKP/iXxWIuQJuDiisyXF0Y8+5GTpALpHDc1/pIGmMIGjoAMCAQGigZsEgZg2on5mSuxoDHEA1w9bcW9nFdFxDKpdrQhVGVRDIzcCMCTzvUboqb5KjY1NJKJsfjRQiBYBdENKfzK+g5DlV8nrw81uOcP8NOQCLR5XkoMHC0Dr/80ziQzbNqhxO6652Npft0LQwJvenwDI13YxpwOdMXzkWZN/XrEqOWp6GCgXTBvCyLWLlWnbaUkZdEYbKHBPjd8t/1x5Yg=="
         helper.writeOutbound(
             .continuationResponse(
-                ByteBuffer(bytes: [
+                IMAPBuffer([
                     0x60, 0x82, 0x01, 0xFB, 0x06, 0x09, 0x2A, 0x86, 0x48, 0x86, 0xF7, 0x12, 0x01, 0x02, 0x02, 0x01,
                     0x00,
                     0x6E, 0x82, 0x01, 0xEA, 0x30, 0x82, 0x01, 0xE6, 0xA0, 0x03, 0x02, 0x01, 0x05, 0xA1, 0x03, 0x02,
@@ -439,7 +439,7 @@ struct IMAPClientHandlerTests {
         helper.writeInbound("+ \(challengeBytes2)\r\n")
         helper.expectInbound(
             .authenticationChallenge(
-                ByteBuffer(bytes: [
+                [UInt8]([
                     0x60, 0x68, 0x06, 0x09, 0x2A, 0x86, 0x48, 0x86, 0xF7, 0x12, 0x01, 0x02, 0x02, 0x02, 0x00, 0x6F,
                     0x59,
                     0x30, 0x57, 0xA0, 0x03, 0x02, 0x01, 0x05, 0xA1, 0x03, 0x02, 0x01, 0x0F, 0xA2, 0x4B, 0x30, 0x49,
@@ -1481,6 +1481,42 @@ private final class WriteOnRead: ChannelInboundHandler {
             context.writeAndFlush(self.wrapOutboundOut(.part(self.command)), promise: nil)
         }
         context.fireChannelRead(data)
+    }
+}
+
+// MARK: - After a parse error
+
+extension IMAPClientHandlerTests {
+    /// A peer that keeps sending after a parse error must not be able to grow the buffer, nor make every
+    /// read re-parse and re-copy everything it sent before.
+    @Test("after a parse error, later reads fail without buffering or re-copying the input")
+    func parseErrorDoesNotAccumulate() {
+        let maximumBufferSize = 100
+        let laterReads = 50
+        let readSize = 1024
+        let channel = EmbeddedChannel(handler: IMAPClientHandler(maximumBufferSize: maximumBufferSize))
+        defer { _ = try? channel.finish() }
+
+        func errorBufferSize(afterReading bytes: ByteBuffer) -> Int? {
+            do {
+                try channel.writeInbound(bytes)
+                return nil
+            } catch let error as IMAPDecoderError {
+                return error.buffer.readableBytes
+            } catch {
+                Issue.record("unexpected error \(error)")
+                return nil
+            }
+        }
+
+        guard let first = errorBufferSize(afterReading: ByteBuffer(string: "* 1 EXISTS)\r\n")) else {
+            Issue.record("the first read should fail to parse")
+            return
+        }
+        for _ in 0..<laterReads {
+            let size = errorBufferSize(afterReading: ByteBuffer(repeating: UInt8(ascii: "x"), count: readSize))
+            #expect(size == first)
+        }
     }
 }
 

@@ -12,6 +12,24 @@
 //
 //===----------------------------------------------------------------------===//
 
+/// Decodes `bytes` as UTF-8.
+///
+/// A free function rather than a `String` initialiser because it throws a ``ParserError`` carrying the
+/// source location that asked for the decode, which is what the grammar wants and what a general-purpose
+/// initialiser has no business reporting.
+///
+/// - Throws: ``ParserError`` when `bytes` are not valid UTF-8.
+func decodeUTF8(
+    _ bytes: some Collection<UInt8>,
+    file: String = (#fileID),
+    line: Int = #line
+) throws -> String {
+    guard let string = String(validatingUTF8Bytes: bytes) else {
+        throw ParserError.invalidUTF8(file: file, line: line)
+    }
+    return string
+}
+
 /// The parser needs more bytes before it can decide.
 ///
 /// Thrown, rather than returned, because it can arise anywhere in the grammar; the entry points turn
@@ -62,6 +80,11 @@ public struct ParserError: Error {
     /// Describes the parsing failure in human-readable terms, such as
     /// "Invalid UTF8", "Missing CRLF", "Unexpected character", etc. It's intended
     /// for logging and debugging purposes.
+    ///
+    /// - Note: These errors are thrown as part of ordinary control flow — `parseOneOf` throws one
+    ///     for every alternative that doesn't match — so the hint must not be built by string
+    ///     interpolation on any path that is taken often. A plain literal costs nothing; an
+    ///     interpolation heap-allocates as soon as the result exceeds 15 UTF-8 bytes.
     public var hint: String
     var file: String
     var line: Int

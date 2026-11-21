@@ -12,7 +12,6 @@
 //
 //===----------------------------------------------------------------------===//
 
-import NIO
 @_spi(NIOIMAPInternal) @testable import NIOIMAPCore
 import Testing
 
@@ -28,7 +27,7 @@ struct ParseFixture<T>: Sendable where T: Sendable {
     /// Should parsing succeed, fail, etc.?
     var expected: Expected
     /// The parser being tested.
-    var parser: @Sendable (inout ParseBuffer, StackTracker) throws -> T
+    var parser: @Sendable (inout ParseInput, StackTracker) throws -> T
 
     enum Expected: Sendable {
         /// The input is valid.
@@ -72,150 +71,112 @@ extension ParseFixture {
     ) where T: Equatable {
         switch expected {
         case .success(let expectedValue):
-            ParseBuffer.withBuffer(
+            ParseInputFixture.withInput(
                 input,
                 terminator: terminator,
                 finalBufferExpectation: .terminatorOnly,
                 sourceLocation: sourceLocation
             ) { buffer in
-                #expect(
-                    throws: Never.self,
-                    sourceLocation: sourceLocation,
-                    performing: {
-                        let parsed = try parser(&buffer, .testTracker)
-                        #expect(
-                            parsed == expectedValue,
-                            sourceLocation: sourceLocation
-                        )
-                    }
-                )
+                do {
+                    let parsed = try parser(&buffer, .testTracker)
+                    #expect(parsed == expectedValue, sourceLocation: sourceLocation)
+                } catch {
+                    Issue.record(error, "Parsing should succeed", sourceLocation: sourceLocation)
+                }
             }
         case .incompleteMessage:
-            ParseBuffer.withBuffer(
-                input,
-                terminator: terminator,
-                finalBufferExpectation: .initialCondition,
+            expectFailure(
+                .initialCondition,
+                IncompleteMessage.self,
+                "The input buffer is incomplete. Should throw IncompleteMessage.",
                 sourceLocation: sourceLocation
-            ) { buffer in
-                #expect(
-                    throws: IncompleteMessage.self,
-                    "The input buffer is incomplete. Should throw IncompleteMessage.",
-                    sourceLocation: sourceLocation,
-                    performing: {
-                        try parser(&buffer, .testTracker)
-                    }
-                )
-            }
+            )
         case .incompleteMessageIgnoringBufferModifications:
-            ParseBuffer.withBuffer(
-                input,
-                terminator: terminator,
-                finalBufferExpectation: .ignore,
+            expectFailure(
+                .ignore,
+                IncompleteMessage.self,
+                "The input buffer is incomplete. Should throw IncompleteMessage.",
                 sourceLocation: sourceLocation
-            ) { buffer in
-                #expect(
-                    throws: IncompleteMessage.self,
-                    "The input buffer is incomplete. Should throw IncompleteMessage.",
-                    sourceLocation: sourceLocation,
-                    performing: {
-                        try parser(&buffer, .testTracker)
-                    }
-                )
-            }
+            )
         case .failure:
-            ParseBuffer.withBuffer(
-                input,
-                terminator: terminator,
-                finalBufferExpectation: .initialCondition,
-                sourceLocation: sourceLocation
-            ) { buffer in
-                #expect(
-                    "Parsing should throw an error",
-                    sourceLocation: sourceLocation,
-                    performing: {
-                        try parser(&buffer, .testTracker)
-                    },
-                    throws: { _ in true }
-                )
-            }
+            expectFailure(.initialCondition, nil, "Parsing should throw an error", sourceLocation: sourceLocation)
         case .failureIgnoringBufferModifications:
-            ParseBuffer.withBuffer(
-                input,
-                terminator: terminator,
-                finalBufferExpectation: .ignore,
-                sourceLocation: sourceLocation
-            ) { buffer in
+            expectFailure(.ignore, nil, "Parsing should throw an error", sourceLocation: sourceLocation)
+        }
+    }
+
+    /// Runs the parser and requires it to throw — an error of a particular type when `expectedError` is
+    /// given, and any error otherwise.
+    ///
+    /// `#expect(throws:)` cannot wrap a parse: its closure would have to capture an `inout` value of a
+    /// non-escapable type, which is exactly what a cursor is.
+    private func expectFailure(
+        _ finalBufferExpectation: ParseInputFixture.FinalBufferExpectation,
+        _ expectedError: Any.Type?,
+        _ comment: Comment,
+        sourceLocation: SourceLocation
+    ) {
+        ParseInputFixture.withInput(
+            input,
+            terminator: terminator,
+            finalBufferExpectation: finalBufferExpectation,
+            sourceLocation: sourceLocation
+        ) { buffer in
+            guard let error = errorThrown(by: { try parser(&buffer, .testTracker) }) else {
+                Issue.record(comment, sourceLocation: sourceLocation)
+                return
+            }
+            if let expectedError {
                 #expect(
-                    "Parsing should throw an error",
-                    sourceLocation: sourceLocation,
-                    performing: {
-                        try parser(&buffer, .testTracker)
-                    },
-                    throws: { _ in true }
+                    type(of: error) == expectedError,
+                    comment,
+                    sourceLocation: sourceLocation
                 )
             }
         }
     }
 }
 
-extension ParseBuffer {
-    /// What do we expect the buffer to look like _after_ parsing
+/// Drives a ``ParseInput`` over a fixture's input, and checks what the parser left behind.
+enum ParseInputFixture {
+    /// What the input should look like once the parser has run.
     enum FinalBufferExpectation: Hashable, Sendable {
-        /// The buffer should only have the passed-in terminator (and data trailing it) in it.
+        /// Only the terminator (and anything trailing it) should be left.
         case terminatorOnly
-        /// Buffer should be identical to its state before parsing
+        /// Nothing should have been consumed.
         case initialCondition
-        /// Don’t check the buffer.
+        /// Don't check.
         case ignore
     }
 
-    static func withBuffer(
+    /// Runs `body` with a cursor over `string + terminator`, then checks what it left unconsumed.
+    ///
+    /// The input is padded on both sides — bytes before the first visible byte and after the last —
+    /// so that a parser which reads outside the region it was given is caught rather than silently
+    /// right. An `ArraySlice` is how that padding is expressed: the bytes are there, in the same
+    /// allocation, and the region the parser sees is a slice that excludes them.
+    static func withInput(
         _ string: String,
         terminator: String,
         finalBufferExpectation: FinalBufferExpectation,
         sourceLocation: SourceLocation,
-        _ body: (inout ParseBuffer) -> Void
+        _ body: (inout ParseInput) -> Void
     ) {
-        var inputBuffer = ByteBufferAllocator().buffer(capacity: string.utf8.count + terminator.utf8.count + 10)
-        inputBuffer.writeString("hello")
-        inputBuffer.moveReaderIndex(forwardBy: 5)
-        inputBuffer.writeString(string)
-        inputBuffer.writeString(terminator)
-        inputBuffer.writeString("hallo")
-        inputBuffer.moveWriterIndex(to: inputBuffer.writerIndex - 5)
+        let padded = Array("hello\(string)\(terminator)hallo".utf8)
+        let inputBuffer = padded[5..<(padded.count - 5)]
 
-        let expected = inputBuffer.getSlice(
-            at: inputBuffer.readerIndex + string.utf8.count,
-            length: terminator.utf8.count
-        )!
-        let beforeRunningBody = inputBuffer
-
-        var parseBuffer = ParseBuffer(inputBuffer)
-
-        body(&parseBuffer)
-
-        let remaining =
-            (try? PL.parseBytes(
-                buffer: &parseBuffer,
-                tracker: .makeNewDefault,
-                upTo: .max
-            )).map { String(buffer: $0) } ?? ""
-        switch finalBufferExpectation {
-        case .terminatorOnly:
-            let expectedString = String(buffer: expected)
+        inputBuffer.withParseInput { input in
+            body(&input)
+            guard finalBufferExpectation != .ignore else { return }
+            let remaining = (try? input.extractBytes(length: input.remaining)) ?? []
+            let expected = finalBufferExpectation == .terminatorOnly ? terminator : string + terminator
             #expect(
-                remaining == expectedString,
-                "Terminator (and trailing) should remain in input buffer, nothing else.",
+                String(decoding: remaining, as: UTF8.self) == expected,
+                finalBufferExpectation == .terminatorOnly
+                    ? "Terminator (and trailing) should remain in the input, nothing else."
+                    : "The input should remain unchanged.",
                 sourceLocation: sourceLocation
             )
-        case .initialCondition:
-            #expect(
-                String(buffer: beforeRunningBody) == remaining,
-                "Input buffer should remain unchanged.",
-                sourceLocation: sourceLocation
-            )
-        case .ignore:
-            break
         }
     }
 }

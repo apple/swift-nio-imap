@@ -15,7 +15,7 @@
 import Logging
 import NIO
 import NIOIMAP
-@_spi(NIOIMAPInternal) import NIOIMAPCore
+import NIOIMAPCore
 import NIOSSL
 
 enum CommandRoundtripError: Error {
@@ -37,8 +37,9 @@ public class CommandRoundtripHandler: ChannelOutboundHandler {
     public func write(context: ChannelHandlerContext, data: NIOAny, promise: EventLoopPromise<Void>?) {
         var originalBuffer = self.unwrapOutboundIn(data)
         do {
-            var originalBufferCopy = originalBuffer
-            guard let commandStream = try parser.parseCommandStream(buffer: &originalBufferCopy),
+            var input = IMAPInputBuffer()
+            input.append(originalBuffer)
+            guard let commandStream = try parser.parseCommandStream(buffer: &input),
                 let command = commandStream.commandPart
             else {
                 // this is fine because the command is input by the user, so *should* be valid
@@ -46,12 +47,17 @@ public class CommandRoundtripHandler: ChannelOutboundHandler {
             }
 
             var encodeBuffer = CommandEncodeBuffer(
-                buffer: context.channel.allocator.buffer(capacity: originalBuffer.readableBytes),
                 capabilities: self.capabilities,
                 loggingMode: false
             )
             encodeBuffer.writeCommandStream(command)
-            var roundtripBuffer = encodeBuffer.buffer.nextChunk().bytes
+            // Compare all chunks: a synchronizing literal ends a chunk mid-command. Ignores
+            // `nextStep`, since only the original bytes are sent.
+            var roundtripBytes: [UInt8] = []
+            while let chunk = encodeBuffer.nextChunk() {
+                roundtripBytes.append(contentsOf: chunk.bytes.copiedBytes())
+            }
+            var roundtripBuffer = ByteBuffer(bytes: roundtripBytes)
 
             if originalBuffer != roundtripBuffer {
                 self.logger.warning("Input command vs roundtrip output is different")

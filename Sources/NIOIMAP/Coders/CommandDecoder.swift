@@ -20,11 +20,11 @@ public struct IMAPDecoderError: Error {
     /// The error that was thrown by the IMAP parser.
     public var parserError: Error
 
-    /// The buffer that was provided to the parser.
+    /// The bytes that were waiting to be parsed when the error was thrown.
     public var buffer: ByteBuffer
 }
 
-struct CommandDecoder: NIOSingleStepByteToMessageDecoder {
+struct CommandDecoder: NIOSingleStepByteToMessageDecoder, IMAPMessageDecoder {
     typealias InboundOut = SynchronizedCommand
 
     private var parser: CommandParser
@@ -33,13 +33,24 @@ struct CommandDecoder: NIOSingleStepByteToMessageDecoder {
         self.parser = CommandParser(literalSizeLimit: literalSizeLimit)
     }
 
-    mutating func decode(buffer: inout ByteBuffer) throws -> SynchronizedCommand? {
-        let save = buffer
+    /// Parses out of the library's own input buffer — the path the handler takes.
+    mutating func decode(input: inout IMAPInputBuffer) throws -> SynchronizedCommand? {
         do {
-            return try self.parser.parseCommandStream(buffer: &buffer)
+            return try self.parser.parseCommandStream(buffer: &input)
         } catch {
-            throw IMAPDecoderError(parserError: error, buffer: save)
+            throw IMAPDecoderError(parserError: error, buffer: input.coalescedByteBuffer())
         }
+    }
+
+    /// Parses out of a `ByteBuffer`, for `ByteToMessageHandler` and the decoder verifier.
+    ///
+    /// The parser reads only an ``IMAPInputBuffer``, so `buffer` is appended to a fresh one — kept by
+    /// reference if large, copied if small — and its reader index moved past what was consumed.
+    mutating func decode(buffer: inout ByteBuffer) throws -> SynchronizedCommand? {
+        var input = IMAPInputBuffer()
+        input.append(buffer)
+        defer { buffer.moveReaderIndex(forwardBy: buffer.readableBytes - input.count) }
+        return try self.decode(input: &input)
     }
 
     mutating func decodeLast(buffer: inout ByteBuffer, seenEOF: Bool) throws -> SynchronizedCommand? {

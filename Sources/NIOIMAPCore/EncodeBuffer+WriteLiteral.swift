@@ -12,7 +12,6 @@
 //
 //===----------------------------------------------------------------------===//
 
-import struct NIO.ByteBuffer
 import struct OrderedCollections.OrderedDictionary
 
 extension EncodeBuffer {
@@ -29,19 +28,9 @@ extension EncodeBuffer {
 
     /// Writes an IMAP `string` type as defined by the grammar in RFC 3501.
     /// The function will decide to use either `quoted` or `literal` syntax based
-    /// upon what bytes `buffer` contains, and what encoding types are supported.
+    /// upon what `bytes` contains, and what encoding types are supported.
     /// - parameters:
-    ///     - buffer: The buffer to write.
-    /// - returns: The number of bytes written.
-    @discardableResult mutating func writeIMAPString(_ buffer: ByteBuffer) -> Int {
-        self.writeIMAPString(buffer.readableBytesView)
-    }
-
-    /// Writes an IMAP `string` type as defined by the grammar in RFC 3501.
-    /// The function will decide to use either `quoted` or `literal` syntax based
-    /// upon what bytes `buffer` contains, and what encoding types are supported.
-    /// - parameters:
-    ///     - buffer: The buffer to write.
+    ///     - bytes: The bytes to write.
     /// - returns: The number of bytes written.
     @discardableResult mutating func writeIMAPString<T: Collection>(_ bytes: T) -> Int where T.Element == UInt8 {
         guard !self.loggingMode else {
@@ -200,12 +189,21 @@ extension EncodeBuffer {
         }
     }
 
-    /// Encodes the given bytes as a Base64 collection, and then writes to `self.`
+    /// Encodes the given bytes as Base64, and then writes them to `self`.
     /// - parameters:
-    ///     - buffer: The `ByteBuffer` to encoded and write.
+    ///     - bytes: The bytes to encode and write.
     /// - returns: The number of bytes written.
-    @discardableResult mutating func writeBufferAsBase64(_ buffer: ByteBuffer) -> Int {
-        let encoded = Base64.encodeBytes(bytes: buffer.readableBytesView)
+    @discardableResult mutating func writeBytesAsBase64(_ bytes: some Collection<UInt8>) -> Int {
+        let encoded = Base64.encodeBytes(bytes: bytes)
+        return self.writeBytes(encoded)
+    }
+
+    /// Encodes the given raw message bytes as Base64, and then writes them to `self`.
+    /// - parameters:
+    ///     - region: The bytes to encode and write.
+    /// - returns: The number of bytes written.
+    @discardableResult mutating func writeBytesAsBase64(_ region: IMAPBuffer) -> Int {
+        let encoded = region.withUnsafeBytes { Base64.encodeBytes(bytes: $0.bindMemory(to: UInt8.self)) }
         return self.writeBytes(encoded)
     }
 
@@ -313,13 +311,15 @@ extension EncodeBuffer {
                 self.writeString(suffix)
             }
     }
+
 }
 
 // MARK: - Conditional writes
 
 // Free functions, not `EncodeBuffer` methods: a method call `self.write(if: …) { self.write… }`
 // borrows `self` while the closure mutates it, so the compiler copies the buffer and the first write
-// inside the closure pays for copy-on-write.
+// inside the closure pays for copy-on-write. On a segmented sink, that is a new segment per
+// conditional write.
 
 /// Writes using a closure if the given `value` is non-`nil`. This allows for chaining together writes
 /// when attempting to perform composite writes and return the total number of bytes written.

@@ -12,7 +12,6 @@
 //
 //===----------------------------------------------------------------------===//
 
-import NIO
 @_spi(NIOIMAPInternal) @testable import NIOIMAPCore
 import Testing
 
@@ -22,7 +21,7 @@ struct MetadataEntryNameTests {
         "string round trip",
         arguments: [
             (MetadataEntryName("/private/vendor/example/color"), "/private/vendor/example/color"),
-            (MetadataEntryName(ByteBuffer(string: "/shared/admin/quota")), "/shared/admin/quota"),
+            (MetadataEntryName(Array("/shared/admin/quota".utf8)), "/shared/admin/quota"),
         ] as [(MetadataEntryName, String)]
     )
     func stringRoundTrip(_ fixture: (MetadataEntryName, String)) {

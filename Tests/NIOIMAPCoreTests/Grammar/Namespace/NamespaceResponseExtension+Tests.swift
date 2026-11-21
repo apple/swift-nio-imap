@@ -12,7 +12,6 @@
 //
 //===----------------------------------------------------------------------===//
 
-import NIO
 @_spi(NIOIMAPInternal) @testable import NIOIMAPCore
 import OrderedCollections
 import Testing
@@ -34,7 +33,7 @@ struct NamespaceResponseExtensionTests {
             " \"str1\" (\"str2\") \"str3\" (\"str4\") \"str5\" (\"str6\")"
         ),
     ])
-    func encode(_ fixture: EncodeFixture<OrderedDictionary<ByteBuffer, [ByteBuffer]>>) {
+    func encode(_ fixture: EncodeFixture<OrderedDictionary<[UInt8], [[UInt8]]>>) {
         fixture.checkEncoding()
     }
 
@@ -50,16 +49,16 @@ struct NamespaceResponseExtensionTests {
             expected: .success(KeyValue(key: "str1", value: ["str2", "str3", "str4"]))
         ),
     ])
-    func parse(_ fixture: ParseFixture<KeyValue<ByteBuffer, [ByteBuffer]>>) {
+    func parse(_ fixture: ParseFixture<KeyValue<[UInt8], [[UInt8]]>>) {
         fixture.checkParsing()
     }
 }
 
 // MARK: -
 
-extension EncodeFixture<OrderedDictionary<ByteBuffer, [ByteBuffer]>> {
+extension EncodeFixture<OrderedDictionary<[UInt8], [[UInt8]]>> {
     fileprivate static func namespaceResponseExtensions(
-        _ input: OrderedDictionary<ByteBuffer, [ByteBuffer]>,
+        _ input: OrderedDictionary<[UInt8], [[UInt8]]>,
         _ expectedString: String
     ) -> Self {
         EncodeFixture(
@@ -71,7 +70,7 @@ extension EncodeFixture<OrderedDictionary<ByteBuffer, [ByteBuffer]>> {
     }
 }
 
-extension ParseFixture<KeyValue<ByteBuffer, [ByteBuffer]>> {
+extension ParseFixture<KeyValue<[UInt8], [[UInt8]]>> {
     fileprivate static func namespaceResponseExtension(
         _ input: String,
         _ terminator: String = "\r",

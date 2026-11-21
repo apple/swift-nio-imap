@@ -12,7 +12,6 @@
 //
 //===----------------------------------------------------------------------===//
 
-import NIO
 @testable import NIOIMAPCore
 import Testing
 
@@ -50,18 +49,55 @@ struct CommandParserTests {
 
     // MARK: - Integration Tests
 
-    @Test("parse empty byte buffer for APPEND does not return empty bytes")
-    func parseEmptyByteBufferForAppendDoesNotReturnEmptyBytes() throws {
+    @Test("stray spaces before the CRLF are tolerated up to a cap")
+    func straySpacesBeforeCRLF() throws {
+        var parser = CommandParser()
+        var input = IMAPInputBuffer("tag NOOP" + String(repeating: " ", count: ParseInput.maximumStraySpaces) + "\r\n")
+        #expect(try parser.parseCommandStream(buffer: &input) != nil)
+    }
+
+    @Test("an excessive run of stray spaces before the CRLF is a parser error")
+    func excessiveSpacesBeforeCRLF() {
+        var parser = CommandParser(bufferLimit: 1_000_000)
+        let spaces = String(repeating: " ", count: ParseInput.maximumStraySpaces + 1)
+        var input = IMAPInputBuffer("tag NOOP" + spaces + "\r\n")
+        #expect(throws: ParserError.self) {
+            try parser.parseCommandStream(buffer: &input)
+        }
+    }
+
+    /// Regression pin. Each `(` of a SEARCH costs one `composite` frame (the `parseOneOf` alternative);
+    /// the rest of the 100-frame budget (`StackTracker.makeNewDefault`) goes to the productions above it.
+    /// Leaf parsers cost no frame. If depth tracking changes, update this deliberately.
+    private static let deepestParsableSearchNesting = 90
+
+    @Test("SEARCH nesting is cut off at a pinned depth")
+    func searchNestingDepthBoundary() throws {
+        func parse(nesting: Int) throws -> SynchronizedCommand? {
+            var parser = CommandParser(bufferLimit: 1_000_000)
+            let open = String(repeating: "(", count: nesting)
+            let close = String(repeating: ")", count: nesting)
+            var input = IMAPInputBuffer("tag SEARCH \(open)ALL\(close)\r\n")
+            return try parser.parseCommandStream(buffer: &input)
+        }
+        #expect(try parse(nesting: Self.deepestParsableSearchNesting) != nil)
+        #expect(throws: TooMuchRecursion.self) {
+            try parse(nesting: Self.deepestParsableSearchNesting + 1)
+        }
+    }
+
+    @Test("parse empty input for APPEND does not return empty bytes")
+    func parseEmptyInputForAppendDoesNotReturnEmptyBytes() throws {
         // Test that we don't just get returned an empty byte case if
         // we haven't yet received any literal data from the network
-        var input = ByteBuffer("1 APPEND INBOX {5}\r\n")  // everything except the literal data
+        var input = IMAPInputBuffer("1 APPEND INBOX {5}\r\n")  // everything except the literal data
         var parser = CommandParser()
         #expect(try parser.parseCommandStream(buffer: &input) != nil)
         #expect(try parser.parseCommandStream(buffer: &input) != nil)
 
         // At this point we should have parsed off all the metadata
         // so should be ready for the literal
-        var literalBuffer = ByteBuffer(string: "")
+        var literalBuffer = IMAPInputBuffer("")
         #expect(try parser.parseCommandStream(buffer: &literalBuffer) == nil)
     }
 
@@ -69,7 +105,7 @@ struct CommandParserTests {
     func parseWithLfMissingFromNewline() throws {
         // The FramingParser might split the CRLF newline into CR only (LF in the "next frame").
         // We thus need to be able to parse this:
-        var inputA = ByteBuffer("A26 UID FETCH 1:10002 (UID FLAGS MODSEQ)\r")
+        var inputA = IMAPInputBuffer("A26 UID FETCH 1:10002 (UID FLAGS MODSEQ)\r")
         var parser = CommandParser()
 
         #expect(
@@ -90,7 +126,7 @@ struct CommandParserTests {
         )
 
         // Send in another line:
-        var inputB = ByteBuffer("A27 UID FETCH 2:22 (UID FLAGS)\r")
+        var inputB = IMAPInputBuffer("A27 UID FETCH 2:22 (UID FLAGS)\r")
         #expect(
             try parser.parseCommandStream(buffer: &inputB)
                 == .init(
@@ -107,7 +143,7 @@ struct CommandParserTests {
 
     @Test("normal usage parses commands correctly")
     func normalUsageParsesCommandsCorrectly() throws {
-        var input = ByteBuffer("")
+        var input = IMAPInputBuffer("")
         var parser = CommandParser()
 
         #expect(try parser.parseCommandStream(buffer: &input) == nil)
@@ -117,7 +153,7 @@ struct CommandParserTests {
             try parser.parseCommandStream(buffer: &input)
                 == .init(.tagged(.init(tag: "1", command: .noop)), numberOfSynchronisingLiterals: 0)
         )
-        #expect(input == "")
+        #expect(input.remainingText == "")
 
         input = "2 LOGIN {0}\r\n {0}\r\n\r\n"
         #expect(
@@ -127,14 +163,14 @@ struct CommandParserTests {
                     numberOfSynchronisingLiterals: 2
                 )
         )
-        #expect(input == "")
+        #expect(input.remainingText == "")
 
         input = "3 APPEND INBOX {3+}\r\n123 {3+}\r\n456 {3+}\r\n789\r\n"
         #expect(
             try parser.parseCommandStream(buffer: &input)
                 == .init(.append(.start(tag: "3", appendingTo: .inbox)), numberOfSynchronisingLiterals: 0)
         )
-        #expect(input == " {3+}\r\n123 {3+}\r\n456 {3+}\r\n789\r\n")
+        #expect(input.remainingText == " {3+}\r\n123 {3+}\r\n456 {3+}\r\n789\r\n")
     }
 
     @Test(
@@ -151,13 +187,13 @@ struct CommandParserTests {
     func randomDataDoesNotCrashParser(input: [UInt8]) {
         var parser = CommandParser()
         do {
-            var buffer = ByteBuffer(bytes: input)
-            var lastReadableBytes = buffer.readableBytes
-            var newReadableBytes = 0
-            while newReadableBytes < lastReadableBytes {
-                lastReadableBytes = buffer.readableBytes
+            var buffer = IMAPInputBuffer(input)
+            var lastRemaining = buffer.count
+            var newRemaining = 0
+            while newRemaining < lastRemaining {
+                lastRemaining = buffer.count
                 _ = try parser.parseCommandStream(buffer: &buffer)
-                newReadableBytes = buffer.readableBytes
+                newRemaining = buffer.count
             }
         } catch {
             // Parser may throw errors on invalid input, which is expected
@@ -169,37 +205,37 @@ struct CommandParserTests {
     @Test(
         "parseString parses quoted and literal strings",
         arguments: [
-            ParseFixture.string(#""foo""#, " ", expected: .success(ByteBuffer(string: "foo"))),
-            ParseFixture.string(#""f\"oo""#, " ", expected: .success(ByteBuffer(string: #"f"oo"#))),
-            ParseFixture.string(#""f\\oo""#, " ", expected: .success(ByteBuffer(string: #"f\oo"#))),
-            ParseFixture.string("{3}\r\nfoo", " ", expected: .success(ByteBuffer(string: "foo"))),
-            ParseFixture.string(#""aäb""#, " ", expected: .success(ByteBuffer(string: "aäb"))),
+            ParseFixture.string(#""foo""#, " ", expected: .success("foo")),
+            ParseFixture.string(#""f\"oo""#, " ", expected: .success(#"f"oo"#)),
+            ParseFixture.string(#""f\\oo""#, " ", expected: .success(#"f\oo"#)),
+            ParseFixture.string("{3}\r\nfoo", " ", expected: .success("foo")),
+            ParseFixture.string(#""aäb""#, " ", expected: .success("aäb")),
             ParseFixture.string(#"foo"#, " ", expected: .failure),
             ParseFixture.string(#" "foo""#, " ", expected: .failure),
         ]
     )
-    func parseStringParsesQuotedAndLiteralStrings(_ fixture: ParseFixture<ByteBuffer>) {
+    func parseStringParsesQuotedAndLiteralStrings(_ fixture: ParseFixture<[UInt8]>) {
         fixture.checkParsing()
     }
 
     @Test(
         "parseStringAllowingNonASCII parses strings with non-ASCII characters",
         arguments: [
-            ParseFixture.stringAllowingNonASCII(#""foo""#, " ", expected: .success(ByteBuffer(string: "foo"))),
-            ParseFixture.stringAllowingNonASCII(#""äø""#, " ", expected: .success(ByteBuffer(string: "äø"))),
-            ParseFixture.stringAllowingNonASCII(#""ä\"ø""#, " ", expected: .success(ByteBuffer(string: #"ä"ø"#))),
-            ParseFixture.stringAllowingNonASCII(#""ä\\ø""#, " ", expected: .success(ByteBuffer(string: #"ä\ø"#))),
-            ParseFixture.stringAllowingNonASCII("{3}\r\nfoo", " ", expected: .success(ByteBuffer(string: "foo"))),
+            ParseFixture.stringAllowingNonASCII(#""foo""#, " ", expected: .success("foo")),
+            ParseFixture.stringAllowingNonASCII(#""äø""#, " ", expected: .success("äø")),
+            ParseFixture.stringAllowingNonASCII(#""ä\"ø""#, " ", expected: .success(#"ä"ø"#)),
+            ParseFixture.stringAllowingNonASCII(#""ä\\ø""#, " ", expected: .success(#"ä\ø"#)),
+            ParseFixture.stringAllowingNonASCII("{3}\r\nfoo", " ", expected: .success("foo")),
         ]
     )
-    func parseStringAllowingNonAsciiParsesStringsWithNonAsciiCharacters(_ fixture: ParseFixture<ByteBuffer>) {
+    func parseStringAllowingNonAsciiParsesStringsWithNonAsciiCharacters(_ fixture: ParseFixture<[UInt8]>) {
         fixture.checkParsing()
     }
 }
 
 // MARK: -
 
-extension ParseFixture<ByteBuffer> {
+extension ParseFixture<[UInt8]> {
     fileprivate static func string(
         _ input: String,
         _ terminator: String,

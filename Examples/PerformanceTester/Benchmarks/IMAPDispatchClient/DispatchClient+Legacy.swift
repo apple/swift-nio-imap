@@ -12,15 +12,18 @@
 //
 //===----------------------------------------------------------------------===//
 
+#if IMAP_LEGACY_BUFFERS
+
 import Dispatch
 import NIO
 import NIOIMAP
 
-// For `CommandEncodeBuffer.buffer`, which is SPI.
+// Builds against `main`, whose `CommandEncodeBuffer.buffer` and `EncodeBuffer` (used to drain chunks) are SPI.
 @_spi(NIOIMAPInternal) import NIOIMAPCore
 
-// The client, written against a library where the parser reads a `ByteBuffer` and the encoder
-// writes one.
+// The "before" half: the same client, written against the library as it was on `main`, where the
+// parser reads a `ByteBuffer` and the encoder writes one. This file is compiled only when
+// `IMAP_IMPL=main` points the package's path dependency at a worktree of that library.
 //
 // It is the *best* client that API allows, not a transcription of `ByteToMessageDecoder`. Three
 // choices make it so, and each one costs this side less than the obvious alternative:
@@ -32,12 +35,13 @@ import NIOIMAP
 // - **A payload is copied out of the accumulator** rather than held as a slice of it. A slice would
 //   leave the accumulator's storage multiply-referenced, so the next append would copy the whole
 //   thing on write — more bytes, and at an unpredictable moment. Paying one payload copy is what a
-//   careful engineer does here, and it is the honest floor: this API has no way to hand over a
-//   payload without copying it, because a `ByteBuffer` the parser was handed may be reassigned by its owner
+//   careful engineer does here, and it is the honest floor: `main` has no way to hand over a payload
+//   without copying it, because a `ByteBuffer` the parser was handed may be reassigned by its owner
 //   the instant the call returns.
 //
 // What remains unavoidable is the first copy: every byte the transport delivers is copied out of its
-// `DispatchData` region into the accumulator, because that is the only thing this parser reads.
+// `DispatchData` region into the accumulator, because that is the only thing this parser reads. That
+// copy, and the payload copy above, are what the migration removed.
 extension DispatchClient {
     /// How many bytes the accumulator reserves up front.
     ///
@@ -95,8 +99,9 @@ extension DispatchClient {
 
     /// Asserts that a payload parsed out of `reads` is a copy of the received bytes.
     ///
-    /// A payload cannot be delivered by reference through this API, so this proves the benchmarks
-    /// measure the copy rather than having quietly avoided it.
+    /// The twin of the current implementation's check, asserting the opposite: on `main` a payload
+    /// cannot be delivered by reference, so this side proves it is measuring the copy rather than
+    /// having quietly avoided it.
     ///
     /// - Parameter reads: A corpus containing at least one literal payload.
     public static func checkPayloadDelivery(_ reads: [DispatchData]) {
@@ -180,10 +185,10 @@ extension DispatchClient {
 
     /// The command stream parts for an `APPEND` of `payload`.
     ///
-    /// Built once, outside the measured region — charging the `ByteBuffer` this copies the caller's
-    /// array into per iteration would fold it into a number that is about encoding. A client whose
-    /// message is not already in a `ByteBuffer` therefore pays *one more* payload copy than these cases
-    /// report.
+    /// Built once, outside the measured region — the `ByteBuffer` this copies the caller's array into is
+    /// a cost the current implementation does not pay, and charging it per iteration would fold it into
+    /// a number that is about encoding. A client whose message is not already in a `ByteBuffer`
+    /// therefore pays *one more* payload copy on `main` than these cases report.
     ///
     /// - Parameter payload: The message to append.
     /// - Returns: The parts, in order.
@@ -245,3 +250,5 @@ extension DispatchClient {
         }
     }
 }
+
+#endif
