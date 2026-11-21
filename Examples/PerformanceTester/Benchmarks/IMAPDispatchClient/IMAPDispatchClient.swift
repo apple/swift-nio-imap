@@ -28,7 +28,7 @@ import NIOIMAP
 //                    swift package … benchmark baseline update branch --filter 'dispatch-client.*'
 //                    swift package … benchmark baseline compare main branch --filter 'dispatch-client.*'
 //
-// See `DispatchClient.swift` for what each side
+// `dev/compare-dispatch-client.sh` runs exactly that. See `DispatchClient.swift` for what each side
 // does and for the two caveats that bound the result — chiefly that the `main` side is the best client
 // that API allows, which makes every difference a floor rather than an estimate.
 //
@@ -71,7 +71,8 @@ let benchmarks: @Sendable () -> Void = {
     // reported retain deltas of 38 and 58 across two runs of the same binary with identical allocation
     // counters. Gating that gates noise, and quoting it in a before/after would be quoting the
     // scheduler. The allocation counters stay; an asynchronous `free` cannot change how many times
-    // something was allocated.
+    // something was allocated. `encode.dispatch.*` in `IMAPEncoding` has the same treatment; see the
+    // long note there.
     let encodeMetrics: [BenchmarkMetric] = [
         .wallClock,
         .throughput,
