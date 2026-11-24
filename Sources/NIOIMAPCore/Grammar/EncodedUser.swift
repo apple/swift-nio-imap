@@ -12,8 +12,6 @@
 //
 //===----------------------------------------------------------------------===//
 
-import struct NIO.ByteBuffer
-
 /// A percent-encoded user identifier for use in IMAP URLs and URLAUTH components.
 ///
 /// User identifiers in IMAP URLs are percent-encoded to ensure they contain only URL-safe

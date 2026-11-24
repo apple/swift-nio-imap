@@ -109,10 +109,10 @@ public struct MessagePath: Hashable, Sendable {
 extension EncodeBuffer {
     @discardableResult mutating func writeMessagePath(_ data: MessagePath) -> Int {
         self.writeEncodedMailboxUIDValidity(data.mailboxReference) + self.writeIUID(data.iUID)
-            + self.writeIfExists(data.section) { section in
+            + writeIfExists(data.section) { section in
                 self.writeURLMessageSection(section)
             }
-            + self.writeIfExists(data.range) { partial in
+            + writeIfExists(data.range) { partial in
                 self.writeMessagePathByteRange(partial)
             }
     }

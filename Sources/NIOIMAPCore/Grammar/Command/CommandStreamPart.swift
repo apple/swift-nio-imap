@@ -343,17 +343,17 @@ extension CommandEncodeBuffer {
                 self.encodedAtLeastOneCatenateElement = true
             }
 
-            return self.buffer.write(if: self.encodedAtLeastOneCatenateElement) { self.buffer.writeSpace() }
+            return write(if: self.encodedAtLeastOneCatenateElement) { self.buffer.writeSpace() }
                 + self.buffer.writeString("URL ") + self.buffer.writeIMAPString(url)
         case .catenateData(.begin(let size)):
             var written =
-                self.buffer.write(if: self.encodedAtLeastOneCatenateElement) { self.buffer.writeSpace() }
+                write(if: self.encodedAtLeastOneCatenateElement) { self.buffer.writeSpace() }
                 + self.buffer.writeString("TEXT ")
 
             if self.options.useNonSynchronizingLiteralPlus {
-                written += self.buffer.writeString("{\(size)+}\r\n")
+                written += self.buffer.writeLiteralHeader(byteCount: size, synchronization: .nonSynchronizing)
             } else {
-                written += self.buffer.writeString("{\(size)}\r\n")
+                written += self.buffer.writeLiteralHeader(byteCount: size)
                 self.buffer.markStopPoint()
             }
             return written

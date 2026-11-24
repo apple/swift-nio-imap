@@ -12,8 +12,6 @@
 //
 //===----------------------------------------------------------------------===//
 
-import struct NIO.ByteBuffer
-
 /// A modification sequence value from RFC 7162 `CONDSTORE` extension.
 ///
 /// A mod-sequence value is a 63-bit unsigned integer that tracks when a message or its flags last changed.
@@ -127,6 +125,6 @@ extension ModificationSequenceValue: Strideable {
 
 extension EncodeBuffer {
     @discardableResult mutating func writeModificationSequenceValue(_ value: ModificationSequenceValue) -> Int {
-        self.writeString("\(value.value)")
+        self.writeDecimal(value.value)
     }
 }

@@ -12,8 +12,6 @@
 //
 //===----------------------------------------------------------------------===//
 
-import struct NIO.ByteBuffer
-
 /// Server connection information for an IMAP URL, including optional user and authentication details.
 ///
 /// The server component of an IMAP URL specifies how to connect to the IMAP server.
@@ -276,11 +274,11 @@ extension IMAPServer.Host: ExpressibleByStringLiteral {
 
 extension EncodeBuffer {
     @discardableResult mutating func writeIMAPServer(_ server: IMAPServer) -> Int {
-        self.writeIfExists(server.userAuthenticationMechanism) { authMechanism in
+        writeIfExists(server.userAuthenticationMechanism) { authMechanism in
             self.writeUserAuthenticationMechanism(authMechanism) + self.writeString("@")
         } + self.writeString(server.host.stringValue)
-            + self.writeIfExists(server.port) { port in
-                self.writeString(":\(port)")
+            + writeIfExists(server.port) { port in
+                self.writeByte(UInt8(ascii: ":")) + self.writeDecimal(port)
             }
     }
 }

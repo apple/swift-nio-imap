@@ -12,8 +12,6 @@
 //
 //===----------------------------------------------------------------------===//
 
-import struct NIO.ByteBuffer
-
 /// A selection option for the `LIST` command (RFC 5258 LIST-EXTENDED extension).
 ///
 /// **Requires server capability:** ``Capability/listExtended``
@@ -125,7 +123,7 @@ extension EncodeBuffer {
 
     @discardableResult mutating func writeListSelectOptions(_ options: ListSelectOptions?) -> Int {
         self.writeString("(")
-            + self.writeIfExists(options) { (optionsData) -> Int in
+            + writeIfExists(options) { (optionsData) -> Int in
                 self.writeArray(optionsData.options, separator: "", parenthesis: false) { (option, self) -> Int in
                     self.writeListSelectOption(option) + self.writeSpace()
                 } + self.writeListSelectBaseOption(optionsData.baseOption)

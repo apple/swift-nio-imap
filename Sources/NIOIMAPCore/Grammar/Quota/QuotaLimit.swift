@@ -12,8 +12,6 @@
 //
 //===----------------------------------------------------------------------===//
 
-import struct NIO.ByteBuffer
-
 /// A resource quota limit specifying the maximum allowed size or count for a resource (RFC 2087).
 ///
 /// **Requires server capability:** ``Capability/quota``
@@ -68,7 +66,6 @@ public struct QuotaLimit: Hashable, Sendable {
 
 extension EncodeBuffer {
     @discardableResult mutating func writeQuotaLimit(_ quotaLimit: QuotaLimit) -> Int {
-        self.writeQuotaResourceName(quotaLimit.resourceName) + self.writeSpace()
-            + self.writeString("\(quotaLimit.limit)")
+        self.writeQuotaResourceName(quotaLimit.resourceName) + self.writeSpace() + self.writeDecimal(quotaLimit.limit)
     }
 }

@@ -400,56 +400,60 @@ extension GrammarParser {
             return .other(atom, string)
         }
 
-        let commandParsers: [String: (inout ParseBuffer, StackTracker) throws -> ResponseTextCode] = [
-            "ALERT": { _, _ in .alert },
-            "ALREADYEXISTS": { _, _ in .alreadyExists },
-            "APPENDUID": parseSuffix_appendUID,
-            "AUTHENTICATIONFAILED": { _, _ in .authenticationFailed },
-            "AUTHORIZATIONFAILED": { _, _ in .authorizationFailed },
-            "BADCHARSET": parseSuffix_badCharset,
-            "CANNOT": { _, _ in .cannot },
-            "CAPABILITY": parseSuffix_capability,
-            "CLIENTBUG": { _, _ in .clientBug },
-            "CLOSED": { _, _ in .closed },
-            "COMPRESSIONACTIVE": { _, _ in .compressionActive },
-            "CONTACTADMIN": { _, _ in .contactAdmin },
-            "COPYUID": parseSuffix_uidCopy,
-            "CORRUPTION": { _, _ in .corruption },
-            "EXPIRED": { _, _ in .expired },
-            "EXPUNGEISSUED": { _, _ in .expungeIssued },
-            "HIGHESTMODSEQ": parseSuffix_highestModifiedSequence,
-            "INUSE": { _, _ in .inUse },
-            "LIMIT": { _, _ in .limit },
-            "MAILBOXID": parseSuffix_mailboxID,
-            "METADATA": parseSuffix_metadata,
-            "MODIFIED": parseSuffix_modified,
-            "NAMESPACE": parseSuffix_namespace,
-            "NOMODSEQ": { _, _ in .noModificationSequence },
-            "NONEXISTENT": { _, _ in .nonExistent },
-            "NOPERM": { _, _ in .noPermission },
-            "NOTSAVED": { _, _ in .notSaved },
-            "OBJECTID": parseSuffix_objectID,
-            "OVERQUOTA": { _, _ in .overQuota },
-            "PARSE": { _, _ in .parse },
-            "PERMANENTFLAGS": parseSuffix_permanentFlags,
-            "PRIVACYREQUIRED": { _, _ in .privacyRequired },
-            "READ-ONLY": { _, _ in .readOnly },
-            "READ-WRITE": { _, _ in .readWrite },
-            "REFERRAL": parseSuffix_referral,
-            "SERVERBUG": { _, _ in .serverBug },
-            "TRYCREATE": { _, _ in .tryCreate },
-            "UIDNEXT": parseSuffix_uidNext,
-            "UIDNOTSTICKY": { _, _ in .uidNotSticky },
-            "UIDREQUIRED": { _, _ in .uidRequired },
-            "UIDVALIDITY": parseSuffix_uidValidity,
-            "UNAVAILABLE": { _, _ in .unavailable },
-            "UNSEEN": parseSuffix_unseen,
-            "URLMECH": parseSuffix_urlMechanisms,
-            "USEATTR": { _, _ in .useAttribute },
-        ]
-
-        func parseKnownResponseTextCode(buffer: inout ParseBuffer, tracker: StackTracker) throws -> ResponseTextCode {
-            try parseFromLookupTable(buffer: &buffer, tracker: tracker, parsers: commandParsers)
+        func parseKnownResponseTextCode(
+            buffer: inout ParseBuffer,
+            tracker: StackTracker
+        ) throws -> ResponseTextCode {
+            try self.selectingKeyword(buffer: &buffer) { keyword, buffer in
+                switch keyword {
+                case "ALERT": return .alert
+                case "ALREADYEXISTS": return .alreadyExists
+                case "APPENDUID": return try parseSuffix_appendUID(buffer: &buffer, tracker: tracker)
+                case "AUTHENTICATIONFAILED": return .authenticationFailed
+                case "AUTHORIZATIONFAILED": return .authorizationFailed
+                case "BADCHARSET": return try parseSuffix_badCharset(buffer: &buffer, tracker: tracker)
+                case "CANNOT": return .cannot
+                case "CAPABILITY": return try parseSuffix_capability(buffer: &buffer, tracker: tracker)
+                case "CLIENTBUG": return .clientBug
+                case "CLOSED": return .closed
+                case "COMPRESSIONACTIVE": return .compressionActive
+                case "CONTACTADMIN": return .contactAdmin
+                case "COPYUID": return try parseSuffix_uidCopy(buffer: &buffer, tracker: tracker)
+                case "CORRUPTION": return .corruption
+                case "EXPIRED": return .expired
+                case "EXPUNGEISSUED": return .expungeIssued
+                case "HIGHESTMODSEQ": return try parseSuffix_highestModifiedSequence(buffer: &buffer, tracker: tracker)
+                case "INUSE": return .inUse
+                case "LIMIT": return .limit
+                case "MAILBOXID": return try parseSuffix_mailboxID(buffer: &buffer, tracker: tracker)
+                case "METADATA": return try parseSuffix_metadata(buffer: &buffer, tracker: tracker)
+                case "MODIFIED": return try parseSuffix_modified(buffer: &buffer, tracker: tracker)
+                case "NAMESPACE": return try parseSuffix_namespace(buffer: &buffer, tracker: tracker)
+                case "NOMODSEQ": return .noModificationSequence
+                case "NONEXISTENT": return .nonExistent
+                case "NOPERM": return .noPermission
+                case "NOTSAVED": return .notSaved
+                case "OBJECTID": return try parseSuffix_objectID(buffer: &buffer, tracker: tracker)
+                case "OVERQUOTA": return .overQuota
+                case "PARSE": return .parse
+                case "PERMANENTFLAGS": return try parseSuffix_permanentFlags(buffer: &buffer, tracker: tracker)
+                case "PRIVACYREQUIRED": return .privacyRequired
+                case "READ-ONLY": return .readOnly
+                case "READ-WRITE": return .readWrite
+                case "REFERRAL": return try parseSuffix_referral(buffer: &buffer, tracker: tracker)
+                case "SERVERBUG": return .serverBug
+                case "TRYCREATE": return .tryCreate
+                case "UIDNEXT": return try parseSuffix_uidNext(buffer: &buffer, tracker: tracker)
+                case "UIDNOTSTICKY": return .uidNotSticky
+                case "UIDREQUIRED": return .uidRequired
+                case "UIDVALIDITY": return try parseSuffix_uidValidity(buffer: &buffer, tracker: tracker)
+                case "UNAVAILABLE": return .unavailable
+                case "UNSEEN": return try parseSuffix_unseen(buffer: &buffer, tracker: tracker)
+                case "URLMECH": return try parseSuffix_urlMechanisms(buffer: &buffer, tracker: tracker)
+                case "USEATTR": return .useAttribute
+                default: throw ParserError(hint: "Not a response-text-code keyword")
+                }
+            }
         }
 
         return try PL.parseOneOf(

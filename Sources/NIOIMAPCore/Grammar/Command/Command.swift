@@ -797,7 +797,7 @@ extension CommandEncodeBuffer {
         entries: [MetadataEntryName]
     ) -> Int {
         self.buffer.writeString("GETMETADATA")
-            + self.buffer.write(if: options.count >= 1) {
+            + write(if: options.count >= 1) {
                 buffer.writeSpace() + buffer.writeMetadataOptions(options)
             } + self.buffer.writeSpace() + self.buffer.writeMailbox(mailbox) + self.buffer.writeSpace()
             + self.buffer.writeEntries(entries)
@@ -825,7 +825,7 @@ extension CommandEncodeBuffer {
 
     private mutating func writeCommandKind_create(mailbox: MailboxName, parameters: [CreateParameter]) -> Int {
         self.buffer.writeString("CREATE ") + self.buffer.writeMailbox(mailbox)
-            + self.buffer.write(if: parameters.count > 0) {
+            + write(if: parameters.count > 0) {
                 self.buffer.writeSpace()
                     + self.buffer.writeArray(parameters, separator: "", parenthesis: true) { (param, buffer) -> Int in
                         buffer.writeCreateParameter(param)
@@ -849,11 +849,11 @@ extension CommandEncodeBuffer {
         returnOptions: [ReturnOption]
     ) -> Int {
         self.buffer.writeString("LIST")
-            + self.buffer.writeIfExists(selectOptions) { (options) -> Int in
+            + writeIfExists(selectOptions) { (options) -> Int in
                 self.buffer.writeSpace() + self.buffer.writeListSelectOptions(options)
             } + self.buffer.writeSpace() + self.buffer.writeMailbox(mailbox) + self.buffer.writeSpace()
             + self.buffer.writeMailboxPatterns(mailboxPatterns)
-            + self.buffer.write(if: returnOptions.count >= 1) {
+            + write(if: returnOptions.count >= 1) {
                 self.buffer.writeSpace() + self.buffer.writeListReturnOptions(returnOptions)
             }
     }
@@ -865,14 +865,14 @@ extension CommandEncodeBuffer {
         returnOptions: [ReturnOption]
     ) -> Int {
         self.buffer.writeString("LIST")
-            + self.buffer.write(if: selectOptions.count >= 1) {
+            + write(if: selectOptions.count >= 1) {
                 self.buffer.writeSpace()
                     + self.buffer.writeArray(selectOptions) { element, buffer in
                         buffer.writeListSelectIndependentOption(element)
                     }
             } + self.buffer.writeSpace() + self.buffer.writeMailbox(mailbox) + self.buffer.writeSpace()
             + self.buffer.writeMailboxPatterns(mailboxPatterns)
-            + self.buffer.write(if: returnOptions.count >= 1) {
+            + write(if: returnOptions.count >= 1) {
                 self.buffer.writeSpace() + self.buffer.writeListReturnOptions(returnOptions)
             }
     }
@@ -889,7 +889,7 @@ extension CommandEncodeBuffer {
     ) -> Int {
         self.buffer.writeString("RENAME ") + self.buffer.writeMailbox(from) + self.buffer.writeSpace()
             + self.buffer.writeMailbox(to)
-            + self.buffer.writeIfExists(parameters) { (params) -> Int in
+            + writeIfExists(parameters) { (params) -> Int in
                 self.buffer.writeParameters(params)
             }
     }
@@ -917,8 +917,8 @@ extension CommandEncodeBuffer {
     }
 
     private mutating func writeCommandKind_uidBatches(batchSize: Int, batchRange: ClosedRange<Int>?) -> Int {
-        self.buffer.writeString("UIDBATCHES \(batchSize)")
-            + self.buffer.writeIfExists(batchRange) {
+        self.buffer.writeString("UIDBATCHES ") + self.buffer.writeDecimal(batchSize)
+            + writeIfExists(batchRange) {
                 let range =
                     UnknownMessageIdentifier(exactly: $0.lowerBound)!...UnknownMessageIdentifier(
                         exactly: $0.upperBound
@@ -931,7 +931,7 @@ extension CommandEncodeBuffer {
     }
 
     private mutating func writeCommandKind_custom(name: String, payloads: [Command.CustomCommandPayload]) -> Int {
-        self.buffer.writeString("\(name)")
+        self.buffer.writeString(name)
             + self.buffer.writeArray(payloads, prefix: " ", separator: "", parenthesis: false) { (payload, self) in
                 self.writeCustomCommandPayload(payload)
             }
@@ -942,7 +942,7 @@ extension CommandEncodeBuffer {
         initialResponse: InitialResponse?
     ) -> Int {
         self.buffer.writeString("AUTHENTICATE ") + self.buffer.writeAuthenticationMechanism(mechanism)
-            + self.buffer.writeIfExists(initialResponse) { resp in
+            + writeIfExists(initialResponse) { resp in
                 var c = self.buffer.writeSpace()
                 if self.buffer.loggingMode {
                     c += self.buffer.writeString("∅")
@@ -1031,7 +1031,7 @@ extension CommandEncodeBuffer {
         data: StoreData
     ) -> Int {
         self.buffer.writeString("STORE ") + self.buffer.writeLastCommandSet(set)
-            + self.buffer.write(if: modifiers.count >= 1) {
+            + write(if: modifiers.count >= 1) {
                 self.buffer.writeSpace()
                     + self.buffer.writeArray(modifiers) { (element, buffer) -> Int in
                         buffer.writeStoreModifier(element)
@@ -1045,7 +1045,7 @@ extension CommandEncodeBuffer {
         data: StoreData
     ) -> Int {
         self.buffer.writeString("UID STORE ") + self.buffer.writeLastCommandSet(set)
-            + self.buffer.write(if: modifiers.count >= 1) {
+            + write(if: modifiers.count >= 1) {
                 self.buffer.writeStoreModifiers(modifiers)
             } + self.buffer.writeSpace() + self.buffer.writeStoreData(data)
     }
@@ -1056,11 +1056,11 @@ extension CommandEncodeBuffer {
         returnOptions: [SearchReturnOption] = []
     ) -> Int {
         self.buffer.writeString("SEARCH")
-            + self.buffer.writeIfExists(returnOptions) { (options) -> Int in
+            + writeIfExists(returnOptions) { (options) -> Int in
                 self.buffer.writeSearchReturnOptions(options)
             } + self.buffer.writeSpace()
-            + self.buffer.write(if: key.usesString && options.useSearchCharset) {
-                self.buffer.writeIfExists(charset) { (charset) -> Int in
+            + write(if: key.usesString && options.useSearchCharset) {
+                writeIfExists(charset) { (charset) -> Int in
                     self.buffer.writeString("CHARSET ") + self.buffer.writeCharacterSetName(charset)
                         + self.buffer.writeSpace()
                 }
@@ -1083,7 +1083,7 @@ extension CommandEncodeBuffer {
         returnOptions: [SearchReturnOption] = []
     ) -> Int {
         self.buffer.writeString("SORT")
-            + self.buffer.writeIfExists(returnOptions) { (options) -> Int in
+            + writeIfExists(returnOptions) { (options) -> Int in
                 self.buffer.writeSearchReturnOptions(options)
             } + self.buffer.writeSpace()
             + self.buffer.writeSortCriteria(criteria)

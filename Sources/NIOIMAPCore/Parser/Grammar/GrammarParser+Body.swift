@@ -119,12 +119,17 @@ extension GrammarParser {
                                 tracker: tracker,
                                 maxLength: max(0, maximumByteCount - byteCount)
                             )
+                        } catch let error as IncompleteMessage {
+                            // The length may simply not have arrived yet, e.g. a read ending in `{1`.
+                            throw error
                         } catch {
                             throw ParserError(hint: "Run-away literal in body structure")
                         }
                         try PL.parseFixedString("}", buffer: &buffer, tracker: tracker)
                         try PL.parseNewline(buffer: &buffer, tracker: tracker)
                         _ = try PL.parseBytes(buffer: &buffer, tracker: tracker, length: literalCount)
+                        // Count the literal against the budget, else each literal could use all of it.
+                        byteCount += literalCount
                     case 0x28:
                         parenthesisCount += 1
                     case 0x29:

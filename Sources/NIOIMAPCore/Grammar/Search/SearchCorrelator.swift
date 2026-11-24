@@ -12,8 +12,6 @@
 //
 //===----------------------------------------------------------------------===//
 
-import struct NIO.ByteBuffer
-
 /// Identifies a search operation in responses when multiple searches are pipelined (RFC 7377 MULTIMAILBOX SEARCH extension).
 ///
 /// When performing multiple concurrent searches across different mailboxes, clients need a way to correlate
@@ -78,10 +76,10 @@ extension EncodeBuffer {
     @discardableResult mutating func writeSearchCorrelator(_ correlator: SearchCorrelator) -> Int {
         // search-correlator = SP "(" "TAG" SP tag-string ")", tag-string = string
         self.writeString(" (TAG ") + self.writeIMAPString(correlator.tag)
-            + self.writeIfExists(correlator.mailbox) { mailbox in
+            + writeIfExists(correlator.mailbox) { mailbox in
                 self.writeString(" MAILBOX ") + self.writeMailbox(mailbox)
             }
-            + self.writeIfExists(correlator.uidValidity) { uidValidity in
+            + writeIfExists(correlator.uidValidity) { uidValidity in
                 self.writeString(" UIDVALIDITY ") + self.writeUIDValidity(uidValidity)
             } + self.writeString(")")
     }

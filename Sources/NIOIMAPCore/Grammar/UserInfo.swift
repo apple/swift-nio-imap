@@ -82,10 +82,10 @@ public struct UserAuthenticationMechanism: Hashable, Sendable {
 
 extension EncodeBuffer {
     @discardableResult mutating func writeUserAuthenticationMechanism(_ data: UserAuthenticationMechanism) -> Int {
-        self.writeIfExists(data.encodedUser) { user in
+        writeIfExists(data.encodedUser) { user in
             self.writeEncodedUser(user)
         }
-            + self.writeIfExists(data.authenticationMechanism) { iAuth in
+            + writeIfExists(data.authenticationMechanism) { iAuth in
                 self.writeIMAPURLAuthenticationMechanism(iAuth)
             }
     }

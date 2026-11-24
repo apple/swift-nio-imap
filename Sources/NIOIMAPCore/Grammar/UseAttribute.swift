@@ -12,8 +12,6 @@
 //
 //===----------------------------------------------------------------------===//
 
-import struct NIO.ByteBuffer
-
 /// A special-use mailbox attribute from RFC 6154.
 ///
 /// The `SPECIAL-USE` extension allows servers to advertise the special purpose of certain mailboxes.

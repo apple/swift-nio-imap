@@ -12,8 +12,6 @@
 //
 //===----------------------------------------------------------------------===//
 
-import struct NIO.ByteBuffer
-
 /// A response containing the server's namespace configuration for personal, other users', and shared mailboxes.
 ///
 /// Represents the response to a `NAMESPACE` command (RFC 2342), which allows clients to discover
