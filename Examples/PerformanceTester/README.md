@@ -36,6 +36,7 @@ Benchmarks always build in release mode, regardless of how you invoke them.
 | `Benchmarks/IMAPParsing` | Parser benchmarks — commands (what a server parses) and responses (what a client parses). |
 | `Benchmarks/IMAPEncoding` | Encoder benchmarks, same two directions. |
 | `Benchmarks/IMAPDispatchClient` | One client, measured against two libraries: this tree and a worktree of the pre-migration library. See [Before and after: a `DispatchData` client](#before-and-after-a-dispatchdata-client). |
+| `Benchmarks/IMAPByteBufferClient` | The same comparison for a client whose transport is `ByteBuffer`. See [Before and after: a `ByteBuffer` client](#before-and-after-a-bytebuffer-client). |
 | `Thresholds/` | Committed p90 ceilings for the deterministic metrics. See below. |
 
 ## Toolchain
@@ -105,15 +106,16 @@ swift package --disable-sandbox benchmark thresholds $op --target IMAPDispatchCl
   --filter 'dispatch-client\.parse\..*' "${six[@]}"
 swift package --disable-sandbox benchmark thresholds $op --target IMAPDispatchClient \
   --filter 'dispatch-client\.encode\..*' "${two[@]}"
+swift package --disable-sandbox benchmark thresholds $op --target IMAPByteBufferClient "${six[@]}"
 ```
 
-Five invocations, because a `--metric` on the command line overrides each case's own metric list, and
+Six invocations, because a `--metric` on the command line overrides each case's own metric list, and
 `thresholds update` writes every metric passed to every case it runs. The `encode.dispatch.*` and
 `dispatch-client.encode.*` cases donate regions of at least the dispatch donation threshold (512 B)
 to `DispatchData`, which frees them on a background queue: their ARC counters are not deterministic (see
 [the ARC counters](#the-arc-counters)). So they gate `mallocCountTotal` and `mallocBytesCount` only, and
-every other case gates all six. The flags also keep `update` from writing the sampled metrics into the
-threshold files.
+every other case gates all six, including `bytebuffer-client.encode.*`, whose writes free
+synchronously. The flags also keep `update` from writing the sampled metrics into the threshold files.
 
 Not wired into CI: the committed thresholds were measured on macOS/arm64 with Swift 6.4 and
 `ordo-one/benchmark` 1.38.1, and allocation counts differ across platforms and across stdlib versions
@@ -284,14 +286,16 @@ registration time, so the two directions cannot drift apart and there is no hand
 | `encode.dispatch.append.<n>MB.array-payload` | The same payload array-backed rather than `ByteBuffer`-backed. Both promise a fixed address, so both are donated; a backing that does not, such as `Data`, would be copied. |
 | `encode.dispatch.regions.<n>` | The conversion with no encoder in front of it, swept over region count up to the per-chunk cap of 64. The slope is the per-region cost and the intercept the flat one, and three design decisions rest on those two numbers — the 64 KB segment cap, the refusal to split eagerly, and the region cap itself. They were originally measured in a scratch directory that no longer exists. |
 
-### The before/after comparison
+### The before/after comparisons
 
 | Case | What it is for |
 | --- | --- |
 | `dispatch-client.parse.*` | One client's read path — a transport handing over `DispatchData` — run against both library versions. Corpora and read sizes mirror `parse.responses.*` so the two suites cross-check each other: this target's `parse.sweep.1000.read-1448` reports nearly the same counters as `parse.responses.1000.read-1448` does (40,827 against 40,575 mallocs), because it is nearly the same work. |
 | `dispatch-client.encode.*` | The same client's write path, plus the response-encoding shape a Dispatch-based *server* has, which is where encoding is expensive enough to be worth measuring. |
+| `bytebuffer-client.parse.*` | The same cases for a client whose transport hands over `ByteBuffer`s, as a NIO `Channel` does. Same corpora, same case set. |
+| `bytebuffer-client.encode.*` | The same client's write path: each chunk written as `ByteBuffer`s, the way `IMAPClientHandler` writes it. Unlike the dispatch client, these gate ARC counters too — nothing is freed on another queue. |
 
-Both halves of the driver are in `Benchmarks/IMAPDispatchClient`, selected by `IMAP_LEGACY_BUFFERS`.
+Both halves of each driver are in `Benchmarks/IMAPDispatchClient` and `Benchmarks/IMAPByteBufferClient`, selected by `IMAP_LEGACY_BUFFERS`.
 The committed thresholds are the current implementation's only: the `main` side needs a worktree that
 is not part of the repository, so it cannot gate anything.
 
@@ -459,15 +463,17 @@ Nine things this baseline says that are worth knowing before optimising anything
 
 ## Before and after: a `DispatchData` client
 
-Everything above measures the current library against itself. This section measures it against
-**`main`** — the library before the `ByteBuffer` migration — from the point of view of one caller: a
-client whose transport is `DispatchData` in both directions, i.e. `DispatchIO` or Network.framework.
-That is the second backing the whole output abstraction exists for, and the one that had no
-before-and-after number at all.
+Everything above measures the current library against itself. These sections measure it against
+**`main`** — the library before the `ByteBuffer` migration — from the point of view of one caller each.
+This one is a client whose transport is `DispatchData` in both directions, i.e. `DispatchIO` or
+Network.framework, the second backing the output abstraction exists for. Its `main` side also pays
+`DispatchData` ↔ `ByteBuffer` conversions that a `ByteBuffer` client never does; for that client see
+[Before and after: a `ByteBuffer` client](#before-and-after-a-bytebuffer-client). One script,
+`dev/compare-dispatch-client.sh`, runs both (`TARGETS=dispatch` or `TARGETS=bytebuffer` for one).
 
 ```sh
 cd Examples/PerformanceTester
-./dev/compare-dispatch-client.sh                       # ~10 minutes, most of it building two libraries
+./dev/compare-dispatch-client.sh                       # ~7 minutes for both clients with warm builds, longer when building
 
 # The script prints both comparisons. To summarise one again, one row per case (phase: parse, encode):
 phase=parse
@@ -579,6 +585,111 @@ with different metric sets, and why the committed thresholds for the write cases
 and `mallocBytesCount` only. Read those cases' ratios in allocations and bytes; the wall clock is
 directional and the ARC counters are not measured at all.
 
+## Before and after: a `ByteBuffer` client
+
+The same comparison for a client whose transport is `ByteBuffer` in both directions — a NIO `Channel`
+client, the usual one. Its `main` side pays no `DispatchData` conversion, so unlike the section above
+every difference is the parser and encoder themselves.
+
+```sh
+./dev/compare-dispatch-client.sh            # both clients, ~7 minutes with warm builds
+TARGETS=bytebuffer ./dev/compare-dispatch-client.sh
+```
+
+Baselines are `bytebuffer-main-<phase>` and `bytebuffer-branch-<phase>`, so the two clients do not
+overwrite each other. `FILTER` and `FILTER_ENCODE` apply to every client the script runs, so set them
+together with `TARGETS`. To summarise, as above, with `--target IMAPByteBufferClient`, `bytebuffer-client.$phase.*`
+and those baseline names.
+
+### What each side does
+
+| | before (`main`) | after (this tree) |
+| --- | --- | --- |
+| read | copy every received `ByteBuffer` into one accumulator; compact when the parsed prefix passes half | append every `ByteBuffer` to an `IMAPInputBuffer`; parse where it landed |
+| payload | copy it out of the accumulator | keep the `IMAPBuffer` the parser handed over |
+| write | encode into the encoder's `ByteBuffer`; write each chunk as it is | encode into `IMAPOutputBuffer`; write each chunk as `IMAPClientHandler` does (`makeOutboundBuffers()`) |
+
+The `main` side is the best client its API allows, as above, so every figure is a floor — with one
+exception. Its read model copies every received byte into the accumulator, whereas a real NIO
+cumulation can keep a read by reference when the cumulation buffer is empty. That is a small effect at
+MTU reads and possibly a larger one at 64 K reads on the sweep, where a read often holds whole
+messages; it is not measured. The write
+side uses the library's default sink, because that is what `IMAPClientHandler` uses; the benchmark-local
+`ByteBufferOutput` is measured against it in `encode.handler.*`. The `APPEND` payload is
+`ByteBuffer`-backed on both sides, and is built outside the measured region on both. A client that
+holds a `[UInt8]` pays one extra copy to get it into a `ByteBuffer` on each side, so for that client
+the win is two copies down to one, not the ratios below. An array-backed payload on the current side
+would be copied by `makeOutboundBuffers()`.
+
+**How `main` yields an `APPEND` payload.** `CommandEncodeBuffer` on `main` writes `.messageBytes` with
+`EncodeBuffer.writeBuffer`, which copies it into the encoder's own `ByteBuffer`; `nextChunk()` then returns
+`readSlice` views of that buffer. So a `ByteBuffer` client pays **one** payload copy, not two (the
+`DispatchData` client pays the second one when it converts the chunk), and the chunk that carries the
+payload is one `ByteBuffer`. The win below is that one copy.
+
+### Results
+
+Measured against `6b1b196c` on an Apple M5 Max, macOS 27.3, Swift 6.4.4, `ordo-one/benchmark` 1.38.1,
+malloc-interposer backend. Wall clock is, per side, the lowest of two script runs and five standalone runs of
+each binary, interleaved main/branch. Load average was 2.0-3.3 during the runs, which is the benchmarks' own
+footprint (1.7 idle afterwards); I could not inspect other processes. The two script runs of a case
+differed by 0-10% (a 36% / 25% outlier on `parse.session`); five standalone runs of a case varied by 0-10%. Cases under ~20 µs reproduce only within
+±15% (rows marked `~`); quote them as approximate.
+Counters on this tree are exact. On `main` they were identical across the five standalone runs of every case
+(`parse.literal-4MB.read-1448`: 14,791 retains and 8,991 mallocs), and the table quotes them; `main`'s retains under 10,000 come from
+the harness comparison, which gates the same metric set as the thresholds, since retains depend on the metric selection
+(see [Baselines](#baselines)). Reads and writes are measured with ARC counting on, which taxes both sides — and
+the small encode cases most: under the runner's malloc interposer every extra malloc, retain and release is counted,
+which plausibly overstates the cost of this tree's small writes. That is a hypothesis; it was not isolated here.
+
+| Case | wall clock | mallocs | malloc bytes | retains |
+| --- | --- | --- | --- | --- |
+| `parse.session` | 369 µs → 83.6 µs | 8,099 → 1,009 | 470 K → 52.6 K | 6,500 → 2,077 |
+| `parse.sweep.1000.contiguous` | 25.4 ms → 3.84 ms | 571 K → 39.4 K | 31.9 M → 1.81 M | 511 K → 72.3 K |
+| `parse.sweep.1000.read-1448` | 26.0 ms → 3.98 ms | 582 K → 40.6 K | 32.5 M → 1.87 M | 526 K → 73.9 K |
+| `parse.sweep.1000.read-65536` | 25.2 ms → 3.83 ms | 571 K → 39.4 K | 31.8 M → 1.81 M | 511 K → 72.3 K |
+| `parse.bodystructure.200.read-1448` | 31.2 ms → 6.49 ms | 616 K → 55.6 K | 33.4 M → 3.11 M | 740 K → 114 K |
+| `parse.bodystructure.200.read-65536` | 25.3 ms → 5.04 ms | 508 K → 42.3 K | 27.5 M → 2.44 M | 588 K → 92.5 K |
+| `parse.literal-1MB.read-1448` | 185 µs → 121 µs | 2,471 → 762 | 1.73 M → 142 K | 3,922 → 4,392 |
+| `parse.literal-1MB.read-16384` | 54.4 → ~14.6 µs | 487 → 98 | 1.14 M → 12.1 K | 622 → 432 |
+| `parse.literal-1MB.read-65536` | 50.7 → ~6.08 µs | 342 → 48 | 1.14 M → 4,627 | 382 → 144 |
+| `parse.literal-4MB.read-1448` | 708 µs → 474 µs | 8,991 → 2,935 | 6.68 M → 414 K | 14.8 K → 17.4 K |
+| `parse.literal-4MB.read-65536` | 156 → ~14.5 µs | 487 → 98 | 4.29 M → 12.1 K | 622 → 432 |
+| `encode.commands.all` | ~11.4 → ~10.8 µs | 204 → 141 | 13.3 K → 14.2 K | 108 → 158 |
+| `encode.responses.session` | ~10.8 → ~11.9 µs | 114 → 122 | 16.8 K → 11.9 K | 90 → 202 |
+| `encode.responses.bodystructure.200` | 1.74 ms → 1.07 ms | 3,413 → 3,306 | 1.75 M → 774 K | 50.2 K → 32.0 K |
+| `encode.append.1MB` | ~12.2 → ~1.42 µs | 19 → 19 | 1.05 M → 1,706 | 11 → 27 |
+| `encode.append.4MB` | 49.4 → ~1.42 µs | 19 → 19 | 4.20 M → 1,706 | 11 → 27 |
+
+Findings:
+
+1. **Reads win by the same factor as for the `DispatchData` client.** Ordinary traffic — the session
+   preamble, a thousand-message sweep, two hundred body structures — costs **8–15× fewer allocations,
+   9–18× fewer allocated bytes and 4.4–6.6× less time**. The gap is the accumulator copy, the
+   parser's allocation work and the model together; this comparison does not separate them.
+2. **Payloads become O(1) in the payload on read and on `APPEND`.** A 4 MB literal at 64 K reads allocates
+   4.29 MB before and 12.1 KB after, in ~15 µs against ~156 µs (~11×). `APPEND` allocates 1,706 bytes for
+   1 MB and for 4 MB alike, against 1.05 MB and 4.20 MB. The `APPEND` win is the single copy `main`
+   makes, as above: ~12 → ~1.4 µs at 1 MB, ~49 → ~1.4 µs at 4 MB (9× and 35×). The same cases take 2.5× the retains
+   (11 → 27) and the same mallocs (19).
+3. **At MTU reads a large literal gains least.** 1 MB at 1448-byte reads is 121 µs against 185 µs
+   (−35%), and retains go *up* 12% (3,922 → 4,392; 4 MB: +18%): ~700 extractions each box a region and
+   take a reference, where `main` does one `memcpy` per read into a buffer it owns. The allocated bytes
+   still fall 12×.
+4. **Small-message encoding is a small win for commands and a small loss for the session preamble, with more retains.**
+   In five interleaved standalone pairs `encode.commands.all` was faster every time, by 3.5–9.1% (lowest p50 10.8 against 11.4 µs), and
+   `encode.responses.session` slower every time, by 9.2–12.2% (11.9 against 10.8 µs). Both differences are about 1 µs, and measured under the malloc interposer.
+   The counters: commands take 31% fewer mallocs (141 against 204) but 1.5× the retains (108 → 158) and 7% more
+   allocated bytes (14.2 K against 13.3 K); the session takes 7% more mallocs (122 against 114), 2.2× the retains (90 → 202)
+   and 29% fewer bytes. The retains are consistent with `IMAPOutputBuffer` and `IMAPBufferList` against `main` handing the encoder's `ByteBuffer` over as is.
+   The `DispatchData` client does not see this, because its `main` side also pays a conversion per chunk.
+5. **Heavy encoding wins.** `encode.responses.bodystructure.200` takes 39% less time (1.07 against 1.74 ms), with 2.3× fewer allocated
+   bytes and 36% fewer retains.
+
+The wall clock of `encode.append.*` is bimodal for the `DispatchData` client because of asynchronous
+deallocation. It is not here: harness and standalone p50 agree within ~6% (1.33 against 1.42 µs for the after side, 12.2 against 12.2 µs for `main`'s 1 MB `APPEND`),
+and the ARC counters of the write cases are exact, which is why they are gated.
+
 ## Adding a case
 
 Benchmark names must not contain spaces or slashes. `thresholds update` replaces both with `_` when
@@ -601,9 +712,9 @@ If the case is one you will want to profile, add a matching entry to the `scenar
 ### Known hazards
 
 - **The magnitude suffixes in `baseline compare` headers differ between cases.** On
-  `parse.responses.bodystructure.200`, `Retains (K)` prints `92` and `Time (wall clock) (μs)` prints
-  `5091`; on `parse.command.uid_fetch_headers`, `Retains` prints `44` and `Time (wall clock) (ns)` prints
-  `3501`. With `ordo-one/benchmark` 1.36.2 the suffixes were not even scale factors; with 1.38.1 they are.
+  `bytebuffer-client.parse.sweep.1000.read-1448`, `Retains (K)` prints `74` and `Time (wall clock) (μs)` prints
+  `4116`; on `bytebuffer-client.parse.literal-1MB.read-65536`, `Retains` prints `144` and `Time (wall clock) (ns)` prints
+  `6419`. With `ordo-one/benchmark` 1.36.2 the suffixes were not even scale factors; with 1.38.1 they are.
   Never compare or sum printed values across cases. Ratios within a case are exact; for absolutes use the
   threshold JSONs or a standalone run (see [Baselines](#baselines)).
 - **`thresholds update` writes every `--metric` you pass to every case, including ones that opted out.**

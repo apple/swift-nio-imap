@@ -13,16 +13,22 @@
 ##
 ##===----------------------------------------------------------------------===##
 #
-# Measures the `dispatch-client.*` cases against two libraries and prints the comparison: this working
-# tree, and a worktree pinned to the commit before the ByteBuffer migration. See
-# `Benchmarks/IMAPDispatchClient/DispatchClient.swift` for what the two configurations do.
+# Measures the `dispatch-client.*` and `bytebuffer-client.*` cases against two libraries and prints the
+# comparisons: this working tree, and a worktree pinned to the commit before the ByteBuffer migration.
+# See `Benchmarks/IMAPDispatchClient/DispatchClient.swift` and
+# `Benchmarks/IMAPByteBufferClient/ByteBufferClient.swift` for what the two configurations do.
 #
 # Run from `Examples/PerformanceTester`:
 #
 #     ./dev/compare-dispatch-client.sh
+#     TARGETS=bytebuffer ./dev/compare-dispatch-client.sh     # or `dispatch`; default is both
 #
-# Roughly ten minutes, most of it building the two libraries. Both configurations share this package's
-# `.benchmarkBaselines` directory, which is what lets `baseline compare` pair them up by case name.
+# Roughly seven minutes with warm builds, longer when building the two libraries. Both configurations share this
+# package's `.benchmarkBaselines` directory, which is what lets `baseline compare` pair them up by case
+# name. Baselines are `main-<phase>` / `branch-<phase>` for the dispatch client and
+# `bytebuffer-main-<phase>` / `bytebuffer-branch-<phase>` for the ByteBuffer client, so neither
+# overwrites the other. `FILTER` and `FILTER_ENCODE` override the case filter for every client run, so
+# pair them with `TARGETS`.
 
 set -euo pipefail
 
@@ -42,16 +48,16 @@ WORKTREE="${IMAP_MAIN_PATH:-$REPO_ROOT/.worktrees/pre-migration}"
 # that point the recorded numbers in `README.md` are what survives. That is the expected end state, not a
 # regression to fix.
 PRE_MIGRATION_COMMIT="${IMAP_PRE_MIGRATION_COMMIT:-6b1b196cd6cf0c9861671359656c19d67265b8e6}"
-# Filters are per phase; see the loop below.
 
 # Same metric selection for both sides of a comparison. Counters are only comparable between runs that
 # agree on it — the same case has reported five retains under the full set and three under a subset — so
 # each set is defined once and used twice rather than typed per invocation.
 #
-# Two sets, and the split is not cosmetic. The `encode.*` cases donate large regions to a `DispatchData`,
-# which frees on a background queue, so their ARC counters are noise. The cases opt out in their own
-# configuration, but a `--metric` on the command line overrides that — so the encode phase must not ask.
-# See the note in `Benchmarks/IMAPDispatchClient/IMAPDispatchClient.swift`.
+# Two sets, and the split is not cosmetic. The dispatch client's `encode.*` cases donate large regions to
+# a `DispatchData`, which frees on a background queue, so their ARC counters are noise. The cases opt
+# out in their own configuration, but a `--metric` on the command line overrides that — so that encode
+# phase must not ask. See the note in `Benchmarks/IMAPDispatchClient/IMAPDispatchClient.swift`. The
+# ByteBuffer client frees synchronously and gates ARC on writes too, so it uses the full set throughout.
 PARSE_METRICS=(
     --metric wallClock
     --metric mallocCountTotal
@@ -61,11 +67,21 @@ PARSE_METRICS=(
     --metric releaseCount
     --metric retainReleaseDelta
 )
-ENCODE_METRICS=(
+ENCODE_METRICS_DISPATCH=(
     --metric wallClock
     --metric mallocCountTotal
     --metric mallocBytesCount
 )
+
+# One entry per client: <SwiftPM target>:<case-name prefix>:<baseline-name prefix>:<encode metric set>.
+CLIENTS_DISPATCH="IMAPDispatchClient:dispatch-client::dispatch"
+CLIENTS_BYTEBUFFER="IMAPByteBufferClient:bytebuffer-client:bytebuffer-:full"
+case "${TARGETS:-both}" in
+    both) CLIENTS=("$CLIENTS_DISPATCH" "$CLIENTS_BYTEBUFFER") ;;
+    dispatch) CLIENTS=("$CLIENTS_DISPATCH") ;;
+    bytebuffer) CLIENTS=("$CLIENTS_BYTEBUFFER") ;;
+    *) echo "error: TARGETS must be both, dispatch or bytebuffer" >&2; exit 1 ;;
+esac
 
 cd "$PACKAGE_DIR"
 
@@ -87,39 +103,49 @@ fi
 
 # Separate scratch paths, so flipping the path dependency does not force a full rebuild of the other
 # configuration every time. The baselines are per-package, not per-scratch-path, so they still pair up.
-record() {  # record <baseline-name> <scratch> <filter> <metrics…>
-    local name="$1" scratch="$2" filter="$3"
-    shift 3
+record() {  # record <baseline-name> <scratch> <target> <filter> <metrics…>
+    local name="$1" scratch="$2" target="$3" filter="$4"
+    shift 4
     if [ "$scratch" = ".build-main" ]; then
         IMAP_IMPL=main IMAP_MAIN_PATH="$WORKTREE" \
             swift package --disable-sandbox --scratch-path "$scratch" \
-            benchmark baseline update "$name" --target IMAPDispatchClient --filter "$filter" "$@"
+            benchmark baseline update "$name" --target "$target" --filter "$filter" "$@"
     else
         swift package --disable-sandbox --scratch-path "$scratch" \
-            benchmark baseline update "$name" --target IMAPDispatchClient --filter "$filter" "$@"
+            benchmark baseline update "$name" --target "$target" --filter "$filter" "$@"
     fi
 }
 
-for phase in parse encode; do
-    if [ "$phase" = parse ]; then
-        filter="${FILTER:-dispatch-client.parse.*}"
-        metrics=("${PARSE_METRICS[@]}")
-    else
-        filter="${FILTER_ENCODE:-dispatch-client.encode.*}"
-        metrics=("${ENCODE_METRICS[@]}")
-    fi
+for client in "${CLIENTS[@]}"; do
+    IFS=: read -r target prefix baseline_prefix encode_set <<< "$client"
 
-    echo
-    echo "==> $phase: recording 'main-$phase' (pre-migration library)"
-    record "main-$phase" .build-main "$filter" "${metrics[@]}"
+    for phase in parse encode; do
+        if [ "$phase" = parse ]; then
+            filter="${FILTER:-$prefix.parse.*}"
+            metrics=("${PARSE_METRICS[@]}")
+        else
+            filter="${FILTER_ENCODE:-$prefix.encode.*}"
+            if [ "$encode_set" = dispatch ]; then
+                metrics=("${ENCODE_METRICS_DISPATCH[@]}")
+            else
+                metrics=("${PARSE_METRICS[@]}")
+            fi
+        fi
+        before="${baseline_prefix}main-$phase"
+        after="${baseline_prefix}branch-$phase"
 
-    echo
-    echo "==> $phase: recording 'branch-$phase' (this working tree)"
-    record "branch-$phase" .build-branch "$filter" "${metrics[@]}"
+        echo
+        echo "==> $target $phase: recording '$before' (pre-migration library)"
+        record "$before" .build-main "$target" "$filter" "${metrics[@]}"
 
-    echo
-    echo "==> $phase: main -> branch"
-    swift package --disable-sandbox --scratch-path .build-branch \
-        benchmark baseline compare "main-$phase" "branch-$phase" \
-        --target IMAPDispatchClient --filter "$filter" "${metrics[@]}"
+        echo
+        echo "==> $target $phase: recording '$after' (this working tree)"
+        record "$after" .build-branch "$target" "$filter" "${metrics[@]}"
+
+        echo
+        echo "==> $target $phase: main -> branch"
+        swift package --disable-sandbox --scratch-path .build-branch \
+            benchmark baseline compare "$before" "$after" \
+            --target "$target" --filter "$filter" "${metrics[@]}"
+    done
 done

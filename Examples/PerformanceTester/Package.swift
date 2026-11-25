@@ -17,12 +17,12 @@ import PackageDescription
 //
 // The default is this working tree. Setting `IMAP_IMPL=main` points the path dependency at a worktree
 // of the pre-migration library instead and defines `IMAP_LEGACY_BUFFERS`, which selects the
-// `ByteBuffer`-based half of the `IMAPDispatchClient` drivers. That is how one set of benchmark cases
-// produces before-and-after numbers for the same client: same case names, same corpora, two
-// libraries. See `dev/compare-dispatch-client.sh`.
+// `ByteBuffer`-based half of the `IMAPDispatchClient` and `IMAPByteBufferClient` drivers. That is how
+// one set of benchmark cases produces before-and-after numbers for the same client: same case names,
+// same corpora, two libraries. See `dev/compare-dispatch-client.sh`.
 //
-// Only `IMAPCorpus` and `IMAPDispatchClient` are declared in that configuration. The rest of the
-// suite names `IMAPOutputBuffer`, `IMAPBufferList` and the post-migration model, none of which exist
+// Only `IMAPCorpus`, `IMAPDispatchClient` and `IMAPByteBufferClient` are declared in that
+// configuration. The rest of the suite names `IMAPOutputBuffer`, `IMAPBufferList` and the post-migration model, none of which exist
 // on `main`, so it cannot compile there and there is nothing to gain by trying.
 let legacyImplementation = Context.environment["IMAP_IMPL"] == "main"
 let libraryPath =
@@ -50,6 +50,22 @@ var targets: [Target] = [
             .product(name: "Benchmark", package: "benchmark"),
         ],
         path: "Benchmarks/IMAPDispatchClient",
+        swiftSettings: legacyImplementation ? [.define("IMAP_LEGACY_BUFFERS")] : [],
+        plugins: [
+            .plugin(name: "BenchmarkPlugin", package: "benchmark")
+        ]
+    ),
+    // The same comparison for a client whose transport is `ByteBuffer` throughout, as a NIO `Channel`
+    // client's is. Same two-way split, same `IMAP_LEGACY_BUFFERS` switch.
+    .executableTarget(
+        name: "IMAPByteBufferClient",
+        dependencies: [
+            "IMAPCorpus",
+            .product(name: "NIOIMAP", package: "swift-nio-imap"),
+            .product(name: "NIO", package: "swift-nio"),
+            .product(name: "Benchmark", package: "benchmark"),
+        ],
+        path: "Benchmarks/IMAPByteBufferClient",
         swiftSettings: legacyImplementation ? [.define("IMAP_LEGACY_BUFFERS")] : [],
         plugins: [
             .plugin(name: "BenchmarkPlugin", package: "benchmark")
