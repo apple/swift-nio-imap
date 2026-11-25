@@ -193,6 +193,11 @@ struct SearchKeyTests {
             expected: .success(.gmailRaw("has:attachment in:unread"))
         ),
         ParseFixture.searchKey("X-GM-RAW vacation", expected: .success(.gmailRaw("vacation"))),
+        // Each `(` takes at least one of `.testTracker`'s 30 frames.
+        ParseFixture.searchKey(
+            String(repeating: "(", count: 30) + "ALL" + String(repeating: ")", count: 30),
+            expected: .failureThrowing(TooMuchRecursion.self)
+        ),
     ])
     func parse(_ fixture: ParseFixture<SearchKey>) {
         fixture.checkParsing()

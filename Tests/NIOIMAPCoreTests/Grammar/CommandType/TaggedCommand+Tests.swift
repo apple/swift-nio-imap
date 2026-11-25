@@ -24,6 +24,7 @@ struct TaggedCommandTests {
             ParseFixture.taggedCommand("1 CAPABILITY", expected: .success(.init(tag: "1", command: .capability))),
             ParseFixture.taggedCommand("a1 CAPABILITY", expected: .success(.init(tag: "a1", command: .capability))),
             ParseFixture.taggedCommand("(", "CAPABILITY", expected: .failure),
+            ParseFixture.taggedCommand("A1 ()", expected: .failureThrowing(BadCommand.self)),
             ParseFixture.taggedCommand("a CAPABILITY", "", expected: .incompleteMessage),
         ]
     )
@@ -55,7 +56,7 @@ struct TaggedCommandTests {
     @Test("parse tagged command throws bad command") func parseTaggedCommandThrowsBadCommand() {
         // Test that the parser error occurs when parsing the command name
         TestUtilities.withParseInput(for: "A1 ()\r\n") { buffer in
-            let error = errorThrown {
+            let error = parseErrorThrown {
                 try GrammarParser().parseTaggedCommand(buffer: &buffer, tracker: .testTracker)
             }
             if let badCommand = error as? BadCommand {
@@ -67,7 +68,7 @@ struct TaggedCommandTests {
 
         // Test that the parser error occurs when parsing a command component
         TestUtilities.withParseInput(for: "A2 ID aaaa\r\n") { buffer in
-            let error = errorThrown {
+            let error = parseErrorThrown {
                 try GrammarParser().parseTaggedCommand(buffer: &buffer, tracker: .testTracker)
             }
             if let badCommand = error as? BadCommand {
@@ -79,7 +80,7 @@ struct TaggedCommandTests {
 
         // Make sure we still throw incomplete messages
         TestUtilities.withParseInput(for: "A2 LOGIN") { buffer in
-            let error = errorThrown {
+            let error = parseErrorThrown {
                 try GrammarParser().parseTaggedCommand(buffer: &buffer, tracker: .testTracker)
             }
             #expect(error is IncompleteMessage)

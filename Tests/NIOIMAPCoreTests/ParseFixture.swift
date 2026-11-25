@@ -39,13 +39,18 @@ struct ParseFixture<T>: Sendable where T: Sendable {
         /// This is for parsers that don't save+restore on failure because they’re expected
         /// to only be used from within another parser that does so.
         case incompleteMessageIgnoringBufferModifications
-        /// The input is invalid.
+        /// The input is invalid. Should throw ``ParserError``.
         case failure
-        /// The input is invalid.
+        /// The input is invalid. Should throw an error of the given type.
+        case failureThrowing(any Error.Type)
+        /// The input is invalid. Should throw ``ParserError``.
         /// We don’t expect the buffer to remain unchanged.
         /// This is for parsers that don't save+restore on failure because they’re expected
         /// to only be used from within another parser that does so.
         case failureIgnoringBufferModifications
+        /// The input is invalid. Should throw an error of the given type.
+        /// We don’t expect the buffer to remain unchanged.
+        case failureIgnoringBufferModificationsThrowing(any Error.Type)
     }
 }
 
@@ -84,6 +89,22 @@ extension ParseFixture {
                     Issue.record(error, "Parsing should succeed", sourceLocation: sourceLocation)
                 }
             }
+            // The same input again, cut into regions, so grammar that mishandles a region boundary fails.
+            for cut in ParseInputFixture.splitPoints(byteCount: (input + terminator).utf8.count) {
+                ParseInputFixture.withSplitInput(
+                    input,
+                    terminator: terminator,
+                    cut: cut,
+                    sourceLocation: sourceLocation
+                ) { buffer in
+                    do {
+                        let parsed = try parser(&buffer, .testTracker)
+                        #expect(parsed == expectedValue, "Split at \(cut)", sourceLocation: sourceLocation)
+                    } catch {
+                        Issue.record(error, "Parsing should succeed; split at \(cut)", sourceLocation: sourceLocation)
+                    }
+                }
+            }
         case .incompleteMessage:
             expectFailure(
                 .initialCondition,
@@ -99,20 +120,28 @@ extension ParseFixture {
                 sourceLocation: sourceLocation
             )
         case .failure:
-            expectFailure(.initialCondition, nil, "Parsing should throw an error", sourceLocation: sourceLocation)
+            expectFailure(
+                .initialCondition,
+                ParserError.self,
+                "Should throw ParserError.",
+                sourceLocation: sourceLocation
+            )
+        case .failureThrowing(let errorType):
+            expectFailure(.initialCondition, errorType, "Should throw \(errorType).", sourceLocation: sourceLocation)
         case .failureIgnoringBufferModifications:
-            expectFailure(.ignore, nil, "Parsing should throw an error", sourceLocation: sourceLocation)
+            expectFailure(.ignore, ParserError.self, "Should throw ParserError.", sourceLocation: sourceLocation)
+        case .failureIgnoringBufferModificationsThrowing(let errorType):
+            expectFailure(.ignore, errorType, "Should throw \(errorType).", sourceLocation: sourceLocation)
         }
     }
 
-    /// Runs the parser and requires it to throw — an error of a particular type when `expectedError` is
-    /// given, and any error otherwise.
+    /// Runs the parser and requires it to throw an error of type `expectedError`.
     ///
     /// `#expect(throws:)` cannot wrap a parse: its closure would have to capture an `inout` value of a
     /// non-escapable type, which is exactly what a cursor is.
     private func expectFailure(
         _ finalBufferExpectation: ParseInputFixture.FinalBufferExpectation,
-        _ expectedError: Any.Type?,
+        _ expectedError: any Error.Type,
         _ comment: Comment,
         sourceLocation: SourceLocation
     ) {
@@ -122,17 +151,15 @@ extension ParseFixture {
             finalBufferExpectation: finalBufferExpectation,
             sourceLocation: sourceLocation
         ) { buffer in
-            guard let error = errorThrown(by: { try parser(&buffer, .testTracker) }) else {
+            guard let error = parseErrorThrown(by: { try parser(&buffer, .testTracker) }) else {
                 Issue.record(comment, sourceLocation: sourceLocation)
                 return
             }
-            if let expectedError {
-                #expect(
-                    type(of: error) == expectedError,
-                    comment,
-                    sourceLocation: sourceLocation
-                )
-            }
+            #expect(
+                type(of: error) == expectedError,
+                "\(comment) Got \(type(of: error)).",
+                sourceLocation: sourceLocation
+            )
         }
     }
 }
@@ -149,6 +176,11 @@ enum ParseInputFixture {
         case ignore
     }
 
+    /// Bytes before each region's visible bytes, so a read outside the region is caught.
+    static let leadingPadding = Array("hello".utf8)
+    /// Bytes after each region's visible bytes, so a read outside the region is caught.
+    static let trailingPadding = Array("hallo".utf8)
+
     /// Runs `body` with a cursor over `string + terminator`, then checks what it left unconsumed.
     ///
     /// The input is padded on both sides — bytes before the first visible byte and after the last —
@@ -162,8 +194,8 @@ enum ParseInputFixture {
         sourceLocation: SourceLocation,
         _ body: (inout ParseInput) -> Void
     ) {
-        let padded = Array("hello\(string)\(terminator)hallo".utf8)
-        let inputBuffer = padded[5..<(padded.count - 5)]
+        let padded = leadingPadding + Array((string + terminator).utf8) + trailingPadding
+        let inputBuffer = padded[leadingPadding.count..<(padded.count - trailingPadding.count)]
 
         inputBuffer.withParseInput { input in
             body(&input)
@@ -175,6 +207,52 @@ enum ParseInputFixture {
                 finalBufferExpectation == .terminatorOnly
                     ? "Terminator (and trailing) should remain in the input, nothing else."
                     : "The input should remain unchanged.",
+                sourceLocation: sourceLocation
+            )
+        }
+    }
+
+    /// Inputs up to this many bytes are split at every offset; longer ones only at a few.
+    ///
+    /// One parse per offset makes the cost quadratic in length: splitting the 11.6 KB BODYSTRUCTURE
+    /// fixture at every offset added ~2 s in total.
+    static let exhaustiveSplitByteLimit = 512
+
+    /// Offsets at which to cut an input of `byteCount` bytes into two regions.
+    ///
+    /// E.g. 4 bytes -> `[1, 2, 3]`. Above ``exhaustiveSplitByteLimit``: the first and last byte
+    /// on their own, and the middle.
+    static func splitPoints(byteCount: Int) -> [Int] {
+        guard byteCount > 1 else { return [] }
+        guard byteCount > exhaustiveSplitByteLimit else { return Array(1..<byteCount) }
+        return [1, byteCount / 2, byteCount - 1]
+    }
+
+    /// ``withInput(_:terminator:finalBufferExpectation:sourceLocation:_:)``, but over two regions,
+    /// before and after `cut`, expecting only the terminator to remain.
+    ///
+    /// Each region is padded like the contiguous input, so a read past a region's visible bytes is caught.
+    static func withSplitInput(
+        _ string: String,
+        terminator: String,
+        cut: Int,
+        sourceLocation: SourceLocation,
+        _ body: (inout ParseInput) -> Void
+    ) {
+        let bytes = Array((string + terminator).utf8)
+        let regions = [bytes[..<cut], bytes[cut...]].map { piece in
+            TestRegion(
+                owned: leadingPadding + piece + trailingPadding,
+                visible: leadingPadding.count..<(leadingPadding.count + piece.count)
+            )
+        }
+
+        ParseInputHarness.withInput(regions) { input in
+            body(&input)
+            let remaining = (try? input.extractBytes(length: input.remaining)) ?? []
+            #expect(
+                String(decoding: remaining, as: UTF8.self) == terminator,
+                "Terminator (and trailing) should remain in the input, nothing else. Split at \(cut).",
                 sourceLocation: sourceLocation
             )
         }
