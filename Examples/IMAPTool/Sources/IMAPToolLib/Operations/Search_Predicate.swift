@@ -186,19 +186,19 @@ extension SearchKey {
 
         // Text-based searches
         if let subject = predicate.subject {
-            keys.append(.subject(ByteBuffer(string: subject)))
+            keys.append(.subject(Array(subject.utf8)))
         }
         if let from = predicate.from {
-            keys.append(.from(ByteBuffer(string: from)))
+            keys.append(.from(Array(from.utf8)))
         }
         if let to = predicate.to {
-            keys.append(.to(ByteBuffer(string: to)))
+            keys.append(.to(Array(to.utf8)))
         }
         if let cc = predicate.cc {
-            keys.append(.cc(ByteBuffer(string: cc)))
+            keys.append(.cc(Array(cc.utf8)))
         }
         if let text = predicate.text {
-            keys.append(.text(ByteBuffer(string: text)))
+            keys.append(.text(Array(text.utf8)))
         }
 
         // Size-based searches

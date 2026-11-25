@@ -26,13 +26,10 @@ import Android
 let badOS = { fatalError("unsupported OS") }()
 #endif
 
-import struct NIO.ByteBuffer
-import struct NIO.ByteBufferView
-
 /// RFC 3501 §7.4.2 group markers, classified once.
 private enum AddressListToken {
     /// host NIL, mailbox = group name
-    case groupStart(EmailAddress, name: ByteBuffer)
+    case groupStart(EmailAddress, name: [UInt8])
     /// host NIL, mailbox NIL
     case groupEnd
     case mailbox(EmailAddress)
@@ -52,7 +49,7 @@ private enum AddressListToken {
 /// Group awaiting its end marker.
 private struct OpenGroup {
     var start: EmailAddress
-    var name: ByteBuffer
+    var name: [UInt8]
     var members: [EmailAddress] = []
 }
 
@@ -107,40 +104,39 @@ extension GrammarParser {
     }
 
     // reusable for a lot of the env-* types
-    func parseEnvelopeEmailAddresses(buffer: inout ParseBuffer, tracker: StackTracker) throws -> [EmailAddress] {
-        try PL.parseFixedString("(", buffer: &buffer, tracker: tracker)
-        let addresses = try PL.parseOneOrMore(buffer: &buffer, tracker: tracker) { buffer, tracker in
+    func parseEnvelopeEmailAddresses(buffer: inout ParseInput, tracker: StackTracker) throws -> [EmailAddress] {
+        try buffer.matchFixed("(")
+        let addresses = try buffer.parseOneOrMore(tracker: tracker) { buffer, tracker in
             try self.parseEmailAddress(buffer: &buffer, tracker: tracker)
         }
-        try PL.parseFixedString(")", buffer: &buffer, tracker: tracker)
+        try buffer.matchFixed(")")
         return addresses
     }
 
     func parseOptionalEnvelopeEmailAddresses(
-        buffer: inout ParseBuffer,
+        buffer: inout ParseInput,
         tracker: StackTracker
     ) throws -> [EmailAddressListElement] {
         func parseOptionalEnvelopeEmailAddresses_nil(
-            buffer: inout ParseBuffer,
+            buffer: inout ParseInput,
             tracker: StackTracker
         ) throws -> [EmailAddress] {
             try self.parseNil(buffer: &buffer, tracker: tracker)
             return []
         }
         func parseOptionalEnvelopeEmailAddresses_emptyList(
-            buffer: inout ParseBuffer,
+            buffer: inout ParseInput,
             tracker: StackTracker
         ) throws -> [EmailAddress] {
             // Some servers emit `()` instead of `NIL` for empty addr-list fields.
             // This is non-conformant per RFC 3501 but seen in practice.
-            try PL.parseFixedString("()", buffer: &buffer, tracker: tracker)
+            try buffer.matchFixed("()")
             return []
         }
-        let addresses = try PL.parseOneOf(
-            parseEnvelopeEmailAddresses,
-            parseOptionalEnvelopeEmailAddresses_nil,
-            parseOptionalEnvelopeEmailAddresses_emptyList,
-            buffer: &buffer,
+        let addresses = try buffer.parseOneOf(
+            { try parseEnvelopeEmailAddresses(buffer: &$0, tracker: $1) },
+            { try parseOptionalEnvelopeEmailAddresses_nil(buffer: &$0, tracker: $1) },
+            { try parseOptionalEnvelopeEmailAddresses_emptyList(buffer: &$0, tracker: $1) },
             tracker: tracker
         )
 
@@ -149,25 +145,25 @@ extension GrammarParser {
 
     // address         = "(" addr-name SP addr-adl SP addr-mailbox SP
     //                   addr-host ")"
-    func parseEmailAddress(buffer: inout ParseBuffer, tracker: StackTracker) throws -> EmailAddress {
-        try PL.composite(buffer: &buffer, tracker: tracker) { buffer, tracker -> EmailAddress in
-            try PL.parseOptional(buffer: &buffer, tracker: tracker, parser: PL.parseSpaces)
-            try PL.parseFixedString("(", buffer: &buffer, tracker: tracker)
+    func parseEmailAddress(buffer: inout ParseInput, tracker: StackTracker) throws -> EmailAddress {
+        try buffer.composite(tracker: tracker) { buffer, tracker -> EmailAddress in
+            try buffer.parseOptional(tracker: tracker, parser: { input, _ in try input.parseSpaces() })
+            try buffer.matchFixed("(")
             let name = try self.parseNString(buffer: &buffer, tracker: tracker)
-            try PL.parseFixedString(" ", buffer: &buffer, tracker: tracker)
+            try buffer.matchFixed(" ")
             let adl = try self.parseNString(buffer: &buffer, tracker: tracker)
-            try PL.parseFixedString(" ", buffer: &buffer, tracker: tracker)
+            try buffer.matchFixed(" ")
             let mailbox = try self.parseNString(buffer: &buffer, tracker: tracker)
-            try PL.parseFixedString(" ", buffer: &buffer, tracker: tracker)
+            try buffer.matchFixed(" ")
             let host = try self.parseNString(buffer: &buffer, tracker: tracker)
-            try PL.parseFixedString(")", buffer: &buffer, tracker: tracker)
+            try buffer.matchFixed(")")
             return EmailAddress(personName: name, sourceRoot: adl, mailbox: mailbox, host: host)
         }
     }
 
-    func parseMessageID(buffer: inout ParseBuffer, tracker: StackTracker) throws -> MessageID? {
+    func parseMessageID(buffer: inout ParseInput, tracker: StackTracker) throws -> MessageID? {
         if let parsed = try self.parseNString(buffer: &buffer, tracker: tracker) {
-            let string = try ParserLibrary.parseBufferAsUTF8(parsed)
+            let string = try decodeUTF8(parsed)
             return .init(string)
         }
         return nil
@@ -176,31 +172,31 @@ extension GrammarParser {
     // envelope        = "(" env-date SP env-subject SP env-from SP
     //                   env-sender SP env-reply-to SP env-to SP env-cc SP
     //                   env-bcc SP env-in-reply-to SP env-message-id ")"
-    func parseEnvelope(buffer: inout ParseBuffer, tracker: StackTracker) throws -> Envelope {
-        try PL.composite(buffer: &buffer, tracker: tracker) { buffer, tracker -> Envelope in
-            try PL.parseFixedString("(", buffer: &buffer, tracker: tracker)
+    func parseEnvelope(buffer: inout ParseInput, tracker: StackTracker) throws -> Envelope {
+        try buffer.composite(tracker: tracker) { buffer, tracker -> Envelope in
+            try buffer.matchFixed("(")
             let date = try self.parseNString(buffer: &buffer, tracker: tracker).flatMap {
-                InternetMessageDate(String(buffer: $0))
+                InternetMessageDate(String(decoding: $0, as: UTF8.self))
             }
-            try PL.parseSpaces(buffer: &buffer, tracker: tracker)
+            try buffer.parseSpaces()
             let subject = try self.parseNString(buffer: &buffer, tracker: tracker)
-            try PL.parseSpaces(buffer: &buffer, tracker: tracker)
+            try buffer.parseSpaces()
             let from = try self.parseOptionalEnvelopeEmailAddresses(buffer: &buffer, tracker: tracker)
-            try PL.parseSpaces(buffer: &buffer, tracker: tracker)
+            try buffer.parseSpaces()
             let sender = try self.parseOptionalEnvelopeEmailAddresses(buffer: &buffer, tracker: tracker)
-            try PL.parseSpaces(buffer: &buffer, tracker: tracker)
+            try buffer.parseSpaces()
             let replyTo = try self.parseOptionalEnvelopeEmailAddresses(buffer: &buffer, tracker: tracker)
-            try PL.parseSpaces(buffer: &buffer, tracker: tracker)
+            try buffer.parseSpaces()
             let to = try self.parseOptionalEnvelopeEmailAddresses(buffer: &buffer, tracker: tracker)
-            try PL.parseSpaces(buffer: &buffer, tracker: tracker)
+            try buffer.parseSpaces()
             let cc = try self.parseOptionalEnvelopeEmailAddresses(buffer: &buffer, tracker: tracker)
-            try PL.parseSpaces(buffer: &buffer, tracker: tracker)
+            try buffer.parseSpaces()
             let bcc = try self.parseOptionalEnvelopeEmailAddresses(buffer: &buffer, tracker: tracker)
-            try PL.parseSpaces(buffer: &buffer, tracker: tracker)
+            try buffer.parseSpaces()
             let inReplyTo = try self.parseMessageID(buffer: &buffer, tracker: tracker)
-            try PL.parseSpaces(buffer: &buffer, tracker: tracker)
+            try buffer.parseSpaces()
             let messageID = try self.parseMessageID(buffer: &buffer, tracker: tracker)
-            try PL.parseFixedString(")", buffer: &buffer, tracker: tracker)
+            try buffer.matchFixed(")")
             return Envelope(
                 date: date,
                 subject: subject,

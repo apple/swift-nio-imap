@@ -12,12 +12,10 @@
 //
 //===----------------------------------------------------------------------===//
 
-import struct NIO.ByteBuffer
-
 // MARK: - IMAP
 
 extension EncodeBuffer {
-    @discardableResult mutating func writeNString(_ string: ByteBuffer?) -> Int {
+    @discardableResult mutating func writeNString(_ string: [UInt8]?) -> Int {
         guard let string = string else {
             return self.writeNil()
         }

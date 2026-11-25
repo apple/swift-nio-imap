@@ -29,14 +29,14 @@ private enum MessageInfoTests {
                     MessageAttribute.envelope(
                         Envelope(
                             date: "Sat, 19 Oct 2024 03:36:04 +0000",
-                            subject: ByteBuffer(string: "Your Tripper Bus Ticket"),
+                            subject: Array("Your Tripper Bus Ticket".utf8),
                             from: [
                                 EmailAddressListElement.singleAddress(
                                     EmailAddress(
-                                        personName: ByteBuffer(string: "TripperBus"),
+                                        personName: Array("TripperBus".utf8),
                                         sourceRoot: nil,
-                                        mailbox: ByteBuffer(string: "noreply"),
-                                        host: ByteBuffer(string: "tripperbus.com")
+                                        mailbox: Array("noreply".utf8),
+                                        host: Array("tripperbus.com".utf8)
                                     )
                                 )
                             ],
@@ -45,10 +45,10 @@ private enum MessageInfoTests {
                             to: [
                                 EmailAddressListElement.singleAddress(
                                     EmailAddress(
-                                        personName: ByteBuffer(string: "Jacob Black"),
+                                        personName: Array("Jacob Black".utf8),
                                         sourceRoot: nil,
-                                        mailbox: ByteBuffer(string: "jacob.black.paid"),
-                                        host: ByteBuffer(string: "icloud.com")
+                                        mailbox: Array("jacob.black.paid".utf8),
+                                        host: Array("icloud.com".utf8)
                                     )
                                 )
                             ],

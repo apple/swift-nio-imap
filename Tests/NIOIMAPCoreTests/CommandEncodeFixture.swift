@@ -12,7 +12,6 @@
 //
 //===----------------------------------------------------------------------===//
 
-import NIO
 @_spi(NIOIMAPInternal) @testable import NIOIMAPCore
 import Testing
 
@@ -48,7 +47,6 @@ extension CommandEncodeFixture {
         sourceLocation: SourceLocation = #_sourceLocation
     ) {
         var encodeBuffer = CommandEncodeBuffer(
-            buffer: ByteBufferAllocator().buffer(capacity: 128),
             options: options,
             loggingMode: false
         )

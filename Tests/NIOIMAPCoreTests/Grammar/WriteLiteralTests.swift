@@ -12,12 +12,11 @@
 //
 //===----------------------------------------------------------------------===//
 
-import NIO
 @_spi(NIOIMAPInternal) @testable import NIOIMAPCore
 import Testing
 
-@Suite("ByteBuffer Literal Writing")
-struct ByteBufferWriteLiteralTests {
+@Suite("Literal Writing")
+struct WriteLiteralTests {
     @Test(
         "writeIMAPString with client buffers",
         arguments: [
@@ -76,7 +75,7 @@ struct ByteBufferWriteLiteralTests {
             ),
         ]
     )
-    func writeIMAPStringWithClientBuffers(_ fixture: EncodeFixture<ByteBuffer>) {
+    func writeIMAPStringWithClientBuffers(_ fixture: EncodeFixture<[UInt8]>) {
         fixture.checkEncoding()
     }
 
@@ -103,7 +102,7 @@ struct ByteBufferWriteLiteralTests {
             ),
         ]
     )
-    func writeIMAPStringWithServerBuffers(_ fixture: EncodeFixture<ByteBuffer>) {
+    func writeIMAPStringWithServerBuffers(_ fixture: EncodeFixture<[UInt8]>) {
         fixture.checkEncoding()
     }
 
@@ -114,7 +113,7 @@ struct ByteBufferWriteLiteralTests {
             EncodeFixture.literal8("abc", expectedStrings: ["~{3}\r\n", "abc"], options: .rfc3501),
         ]
     )
-    func writeLiteral8WithClientBuffers(_ fixture: EncodeFixture<ByteBuffer>) {
+    func writeLiteral8WithClientBuffers(_ fixture: EncodeFixture<[UInt8]>) {
         fixture.checkEncoding()
     }
 
@@ -122,11 +121,10 @@ struct ByteBufferWriteLiteralTests {
     func writeIMAPStringLoggingMode() {
         // quoted string in logging mode → "∅" (with enclosing quotes)
         var quotedBuffer = EncodeBuffer.serverEncodeBuffer(
-            buffer: ByteBufferAllocator().buffer(capacity: 128),
             options: ResponseEncodingOptions(),
             loggingMode: true
         )
-        _ = quotedBuffer.writeIMAPString(ByteBuffer(string: "hello"))
+        _ = quotedBuffer.writeIMAPString(Array("hello".utf8))
         var chunk = quotedBuffer.nextChunk()
         let quotedOutput = String(buffer: chunk.bytes)
         while chunk.waitForContinuation { chunk = quotedBuffer.nextChunk() }
@@ -136,11 +134,10 @@ struct ByteBufferWriteLiteralTests {
         var serverOptions = ResponseEncodingOptions()
         serverOptions.useQuotedString = false
         var serverLiteralBuffer = EncodeBuffer.serverEncodeBuffer(
-            buffer: ByteBufferAllocator().buffer(capacity: 128),
             options: serverOptions,
             loggingMode: true
         )
-        _ = serverLiteralBuffer.writeIMAPString(ByteBuffer(string: "hello"))
+        _ = serverLiteralBuffer.writeIMAPString(Array("hello".utf8))
         chunk = serverLiteralBuffer.nextChunk()
         let serverLiteralOutput = String(buffer: chunk.bytes)
         while chunk.waitForContinuation { chunk = serverLiteralBuffer.nextChunk() }
@@ -148,11 +145,10 @@ struct ByteBufferWriteLiteralTests {
 
         // client synchronizing literal in logging mode
         var clientSyncBuffer = EncodeBuffer.clientEncodeBuffer(
-            buffer: ByteBufferAllocator().buffer(capacity: 128),
             options: CommandEncodingOptions(useQuotedString: false, useSynchronizingLiteral: true),
             loggingMode: true
         )
-        _ = clientSyncBuffer.writeIMAPString(ByteBuffer(string: "hello"))
+        _ = clientSyncBuffer.writeIMAPString(Array("hello".utf8))
         chunk = clientSyncBuffer.nextChunk()
         let clientSyncFirstChunk = String(buffer: chunk.bytes)
         #expect(clientSyncFirstChunk == "{5}\r\n")
@@ -160,7 +156,6 @@ struct ByteBufferWriteLiteralTests {
 
         // client non-synchronizing literal in logging mode
         var clientNonSyncBuffer = EncodeBuffer.clientEncodeBuffer(
-            buffer: ByteBufferAllocator().buffer(capacity: 128),
             options: CommandEncodingOptions(
                 useQuotedString: false,
                 useSynchronizingLiteral: false,
@@ -168,7 +163,7 @@ struct ByteBufferWriteLiteralTests {
             ),
             loggingMode: true
         )
-        _ = clientNonSyncBuffer.writeIMAPString(ByteBuffer(string: "hello"))
+        _ = clientNonSyncBuffer.writeIMAPString(Array("hello".utf8))
         chunk = clientNonSyncBuffer.nextChunk()
         let clientNonSyncOutput = String(buffer: chunk.bytes)
         while chunk.waitForContinuation { chunk = clientNonSyncBuffer.nextChunk() }
@@ -178,14 +173,14 @@ struct ByteBufferWriteLiteralTests {
 
 // MARK: -
 
-extension EncodeFixture<ByteBuffer> {
+extension EncodeFixture<[UInt8]> {
     fileprivate static func imapStringClient(
         _ input: String,
         expectedStrings: [String],
         options: CommandEncodingOptions = CommandEncodingOptions()
     ) -> Self {
         EncodeFixture(
-            input: ByteBuffer(string: input),
+            input: Array(input.utf8),
             bufferKind: .client(options),
             expectedStrings: expectedStrings,
             encoder: { $0.writeIMAPString($1) }
@@ -193,7 +188,7 @@ extension EncodeFixture<ByteBuffer> {
     }
 
     fileprivate static func literal8(
-        _ input: ByteBuffer,
+        _ input: [UInt8],
         expectedStrings: [String],
         options: CommandEncodingOptions
     ) -> Self {
@@ -201,7 +196,7 @@ extension EncodeFixture<ByteBuffer> {
             input: input,
             bufferKind: .client(options),
             expectedStrings: expectedStrings,
-            encoder: { $0.writeLiteral8($1.readableBytesView) }
+            encoder: { $0.writeLiteral8($1) }
         )
     }
 
@@ -211,7 +206,7 @@ extension EncodeFixture<ByteBuffer> {
         options: ResponseEncodingOptions = ResponseEncodingOptions()
     ) -> Self {
         EncodeFixture(
-            input: ByteBuffer(string: input),
+            input: Array(input.utf8),
             bufferKind: .server(options),
             expectedString: expectedString,
             encoder: { $0.writeIMAPString($1) }

@@ -12,24 +12,21 @@
 //
 //===----------------------------------------------------------------------===//
 
-import NIO
 import NIOIMAP
-
-var buffer = ByteBufferAllocator().buffer(capacity: 1000)
 
 @_cdecl("LLVMFuzzerTestOneInput")
 @MainActor
 public func fuzzMe(data: UnsafePointer<CChar>, size: CInt) -> CInt {
-    buffer.clear()
-    buffer.writeBytes(UnsafeRawBufferPointer(start: UnsafeRawPointer(data), count: Int(size)))
+    var buffer = IMAPInputBuffer()
+    buffer.append(Array(UnsafeRawBufferPointer(start: UnsafeRawPointer(data), count: Int(size))))
     var parser = CommandParser()
     do {
-        var oldBytesRemaing = buffer.readableBytes
+        var oldBytesRemaing = buffer.count
         var newBytesRemaining = 0
         while newBytesRemaining < oldBytesRemaing {
-            oldBytesRemaing = buffer.readableBytes
+            oldBytesRemaing = buffer.count
             _ = try parser.parseCommandStream(buffer: &buffer)
-            newBytesRemaining = buffer.readableBytes
+            newBytesRemaining = buffer.count
         }
     } catch {
         // do nothing

@@ -12,7 +12,6 @@
 //
 //===----------------------------------------------------------------------===//
 
-import NIO
 @_spi(NIOIMAPInternal) @testable import NIOIMAPCore
 import Testing
 
@@ -132,9 +131,9 @@ struct ExtensionKeyTests {
     /// `==` ignores case, so round-trip tests can't catch a parser that changes it.
     @Test("parsing keeps case")
     func parseKeepsCase() throws {
-        var buffer = ParseBuffer(ByteBuffer(string: "x-gm:a "))
-        let parsed: ExtensionKey<SelectParameter> =
-            try GrammarParser().parseParameterName(buffer: &buffer, tracker: .testTracker)
+        let parsed: ExtensionKey<SelectParameter> = try TestUtilities.withParseInput(for: "x-gm:a ") { input in
+            try GrammarParser().parseParameterName(buffer: &input, tracker: .testTracker)
+        }
         #expect(String(parsed) == "x-gm:a")
     }
 

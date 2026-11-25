@@ -39,7 +39,7 @@ extension ConnectionProtocol {
 
 extension SearchKey {
     static func messageID(_ id: MessageID) -> SearchKey {
-        .header("message-id", ByteBuffer(string: String(id)))
+        .header("message-id", Array(String(id).utf8))
     }
 
     static func messageID(_ ids: some Sequence<MessageID>) -> SearchKey? {

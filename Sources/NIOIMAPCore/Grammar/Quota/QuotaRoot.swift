@@ -12,9 +12,6 @@
 //
 //===----------------------------------------------------------------------===//
 
-import struct NIO.ByteBuffer
-import struct NIO.ByteBufferView
-
 /// A named quota root that groups resource limits for one or more mailboxes (RFC 2087).
 ///
 /// **Requires server capability:** ``Capability/quota``
@@ -47,19 +44,19 @@ public struct QuotaRoot: Hashable, Sendable {
     ///
     /// Contains the UTF-8 encoded bytes of the quota root name. Can be converted to a `String`
     /// using the ``Swift/String/init(_:)-(QuotaRoot)`` initializer on String.
-    public var storage: ByteBuffer
+    public var storage: [UInt8]
 
     /// Creates a new `QuotaRoot` from a string.
     ///
     /// - parameter string: The quota root name as a string.
     public init(_ string: String) {
-        self.storage = ByteBuffer(ByteBufferView(string.utf8))
+        self.storage = Array(string.utf8)
     }
 
     /// Creates a new `QuotaRoot` from raw bytes.
     ///
-    /// - parameter bytes: The raw `ByteBuffer` containing the quota root name bytes.
-    public init(_ bytes: ByteBuffer) {
+    /// - parameter bytes: The raw `[UInt8]` containing the quota root name bytes.
+    public init(_ bytes: [UInt8]) {
         self.storage = bytes
     }
 }
@@ -71,7 +68,7 @@ extension String {
     ///
     /// - parameter other: The `QuotaRoot` to decode.
     public init?(_ other: QuotaRoot) {
-        guard let string = String(validatingUTF8Bytes: other.storage.readableBytesView) else {
+        guard let string = String(validatingUTF8Bytes: other.storage) else {
             return nil
         }
         self = string
@@ -84,7 +81,7 @@ extension QuotaRoot: CustomDebugStringConvertible {
     /// A human-readable representation of the root.
     public var debugDescription: String {
         // provide some debug information even if the buffer isn't valid UTF-8
-        String(self) ?? String(buffer: self.storage)
+        String(self) ?? String(decoding: self.storage, as: UTF8.self)
     }
 }
 

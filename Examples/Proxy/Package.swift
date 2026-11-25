@@ -7,7 +7,7 @@ import PackageDescription
 let package = Package(
     name: "imap-proxy-example",
     platforms: [
-        .macOS(.v15)
+        .macOS(.v26)
     ],
     dependencies: [
         .package(name: "swift-nio-imap", path: "../.."),

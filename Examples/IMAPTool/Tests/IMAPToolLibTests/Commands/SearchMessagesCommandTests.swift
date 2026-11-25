@@ -498,7 +498,7 @@ private enum SearchMessagesCommandTests {
         // Add various criteria
         searchKeys.append(.seen)
         searchKeys.append(.flagged)
-        let subjectBuffer = ByteBuffer(string: "test")
+        let subjectBuffer = Array("test".utf8)
         searchKeys.append(.subject(subjectBuffer))
 
         // Test single key

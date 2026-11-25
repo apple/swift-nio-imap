@@ -10,6 +10,8 @@ This is an **event-driven** interface. You work directly with the stream of prot
 
 NIOIMAP re-exports `NIOIMAPCore`, so the strongly-typed command and response values are available without a separate import.
 
+The handlers pass large payloads between `ByteBuffer`s and the parser and encoder without copying. To do the same when you drive the parser and encoder yourself, see the “Zero-copy with ByteBuffer and DispatchData” article in the `NIOIMAPCore` documentation.
+
 - Note: This is one of **two** interface styles this package offers, and neither is preferred over the other. If you'd rather treat each command as an awaitable unit of work — `let result = try await connection.send(...)` — see the `IMAPCommands` module, which provides a command-centric `async`/`await` client built on top of NIOIMAP. Both interfaces talk to the same server and share the same `NIOIMAPCore` command and response types; choose based on how your own code wants to be structured. See <doc:GettingStarted> for a side-by-side comparison.
 
 ### Layering

@@ -12,7 +12,6 @@
 //
 //===----------------------------------------------------------------------===//
 
-import NIO
 import Testing
 @_spi(NIOIMAPInternal) @testable import NIOIMAPCore
 

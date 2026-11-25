@@ -18,9 +18,7 @@ import NIO
 import Testing
 
 private func makeStateMachine() -> ClientStateMachine {
-    var stateMachine = ClientStateMachine(encodingOptions: .fixed(.rfc3501))
-    stateMachine.handlerAdded(ByteBufferAllocator())
-    return stateMachine
+    ClientStateMachine(encodingOptions: .fixed(.rfc3501))
 }
 
 struct ClientStateMachineTests {
@@ -175,7 +173,7 @@ struct ClientStateMachineTests {
     @Test("receiving untagged while expecting literal continuation request")
     func receivingUntaggedWhileExpectingLiteralContinuationRequest() {
         var stateMachine = makeStateMachine()
-        let command = TaggedCommand(tag: "A1", command: .select(MailboxName(ByteBuffer(string: "äÿ")), []))
+        let command = TaggedCommand(tag: "A1", command: .select(MailboxName("äÿ"), []))
 
         var result1: OutgoingChunk?
         #expect(throws: Never.self) { result1 = try stateMachine.sendCommand(.tagged(command))?.chunk }
@@ -217,7 +215,7 @@ struct ClientStateMachineTests {
         #expect(result!.bytes == "B2 EXPUNGE\r\n")
 
         // Now send a command that will drop us into "expecting literal Continuation Request":
-        let command = TaggedCommand(tag: "A1", command: .select(MailboxName(ByteBuffer(string: "äÿ")), []))
+        let command = TaggedCommand(tag: "A1", command: .select(MailboxName("äÿ"), []))
         #expect(throws: Never.self) { result = try stateMachine.sendCommand(.tagged(command))?.chunk }
         #expect(result!.bytes == "A1 SELECT {4}\r\n")
 
@@ -253,7 +251,7 @@ struct ClientStateMachineTests {
         var result: OutgoingChunk?
 
         // Send a command that will drop us into "expecting literal Continuation Request":
-        let command = TaggedCommand(tag: "A1", command: .select(MailboxName(ByteBuffer(string: "äÿ")), []))
+        let command = TaggedCommand(tag: "A1", command: .select(MailboxName("äÿ"), []))
         #expect(throws: Never.self) { result = try stateMachine.sendCommand(.tagged(command))?.chunk }
         #expect(result!.bytes == "A1 SELECT {4}\r\n")
 
@@ -990,7 +988,7 @@ extension ClientStateMachineTests {
     func invalidCommandForStateRedactsContinuationResponsePII() {
         // A continuation response can carry credentials (e.g. a SASL exchange), so neither the
         // raw bytes nor a plain rendering of them may appear in the error's description.
-        let error = InvalidCommandForState(.continuationResponse(ByteBuffer(string: "topsecretcredentials")))
+        let error = InvalidCommandForState(.continuationResponse("topsecretcredentials"))
 
         #expect("\(error)" == "InvalidCommandForState([28 bytes]\r\n)")
         #expect(String(reflecting: error) == "InvalidCommandForState([28 bytes]\r\n)")

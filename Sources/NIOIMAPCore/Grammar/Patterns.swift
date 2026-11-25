@@ -12,12 +12,10 @@
 //
 //===----------------------------------------------------------------------===//
 
-import struct NIO.ByteBuffer
-
 // MARK: - Encoding
 
 extension EncodeBuffer {
-    @discardableResult mutating func writePatterns(_ patterns: [ByteBuffer]) -> Int {
+    @discardableResult mutating func writePatterns(_ patterns: [[UInt8]]) -> Int {
         self.writeArray(patterns) { (pattern, self) in
             self.writeIMAPString(pattern)
         }
