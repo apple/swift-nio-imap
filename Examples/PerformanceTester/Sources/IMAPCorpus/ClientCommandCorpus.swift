@@ -14,10 +14,18 @@
 
 /// The commands a client sends in volume, **as wire text**.
 ///
-/// Text rather than model values, so the bytes do not depend on the encoder under measurement. The
-/// model values the encode cases need come from parsing this text with the parser being measured.
+/// This is a second command corpus, and it exists for one reason: ``CommandCorpus`` is written as
+/// model values, and every model value that carries bytes is spelled differently before and after the
+/// buffer migration — `MailboxName(Array("x".utf8))` against `MailboxName(ByteBuffer(string: "x"))`.
+/// A corpus of *text* names nothing the migration touched, so the same definition feeds a library
+/// built either way, and the `IMAPDispatchClient` before/after comparison is fed byte-identical input
+/// in both configurations. The model values its encode cases need come from parsing this text with
+/// whichever parser is being measured.
 ///
-/// Weighted towards `UID FETCH`, which is where a client spends its protocol budget.
+/// The list mirrors ``CommandCorpus/hot`` — what a real client sends in volume, weighted towards
+/// `UID FETCH`, which is where a client spends its protocol budget. It is deliberately *not* derived
+/// from that corpus by encoding it: that would make the bytes depend on the encoder under
+/// measurement, and the two configurations would no longer be comparing like with like.
 public enum ClientCommandCorpus {
     /// Every command, tagged, one per line, in the order a session sends them.
     ///

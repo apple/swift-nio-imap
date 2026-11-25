@@ -17,9 +17,13 @@ import PackageDescription
 //
 // The default is this working tree. Setting `IMAP_IMPL=main` points the path dependency at a worktree
 // of the pre-migration library instead and defines `IMAP_LEGACY_BUFFERS`, which selects the
-// `ByteBuffer`-based half of the `IMAPDispatchClient` drivers. That is how one set of benchmark cases
-// produces before-and-after numbers for the same client: same case names, same corpora, two
-// libraries.
+// `ByteBuffer`-based half of the `IMAPDispatchClient` and `IMAPByteBufferClient` drivers. That is how
+// one set of benchmark cases produces before-and-after numbers for the same client: same case names,
+// same corpora, two libraries. See `dev/compare-dispatch-client.sh`.
+//
+// Only `IMAPCorpus`, `IMAPDispatchClient` and `IMAPByteBufferClient` are declared in that
+// configuration. The rest of the suite names `IMAPOutputBuffer`, `IMAPBufferList` and the post-migration model, none of which exist
+// on `main`, so it cannot compile there and there is nothing to gain by trying.
 let legacyImplementation = Context.environment["IMAP_IMPL"] == "main"
 let libraryPath =
     legacyImplementation
@@ -28,7 +32,7 @@ let libraryPath =
 
 // Corpora, as wire bytes and wire text. Portable across both library versions on purpose: it names
 // no type the migration changed, so the two configurations are fed byte-identical input.
-let targets: [Target] = [
+var targets: [Target] = [
     .target(
         name: "IMAPCorpus",
         dependencies: [
@@ -51,7 +55,76 @@ let targets: [Target] = [
             .plugin(name: "BenchmarkPlugin", package: "benchmark")
         ]
     ),
+    // The same comparison for a client whose transport is `ByteBuffer` throughout, as a NIO `Channel`
+    // client's is. Same two-way split, same `IMAP_LEGACY_BUFFERS` switch.
+    .executableTarget(
+        name: "IMAPByteBufferClient",
+        dependencies: [
+            "IMAPCorpus",
+            .product(name: "NIOIMAP", package: "swift-nio-imap"),
+            .product(name: "NIO", package: "swift-nio"),
+            .product(name: "Benchmark", package: "benchmark"),
+        ],
+        path: "Benchmarks/IMAPByteBufferClient",
+        swiftSettings: legacyImplementation ? [.define("IMAP_LEGACY_BUFFERS")] : [],
+        plugins: [
+            .plugin(name: "BenchmarkPlugin", package: "benchmark")
+        ]
+    ),
 ]
+
+if !legacyImplementation {
+    targets += [
+        // Corpora and drivers shared by the benchmark targets. Deliberately has no dependency
+        // on `Benchmark`, so the same code can be driven from a plain executable or a test.
+        .target(
+            name: "IMAPBenchmarkSupport",
+            dependencies: [
+                "IMAPCorpus",
+                .product(name: "NIOIMAP", package: "swift-nio-imap"),
+                .product(name: "NIO", package: "swift-nio"),
+            ]
+        ),
+        // A plain executable that runs one corpus a chosen number of times, for profiling under
+        // Instruments. Not a benchmark target: it has no `Benchmark` dependency, so it runs outside
+        // the malloc interposer and takes its iteration count as an argument rather than from a time
+        // budget — both of which matter under the `Allocations` template.
+        .executableTarget(
+            name: "IMAPProfile",
+            dependencies: [
+                "IMAPBenchmarkSupport",
+                .product(name: "NIOIMAP", package: "swift-nio-imap"),
+                .product(name: "NIO", package: "swift-nio"),
+            ]
+        ),
+        .executableTarget(
+            name: "IMAPParsing",
+            dependencies: [
+                "IMAPBenchmarkSupport",
+                .product(name: "NIOIMAP", package: "swift-nio-imap"),
+                .product(name: "NIO", package: "swift-nio"),
+                .product(name: "Benchmark", package: "benchmark"),
+            ],
+            path: "Benchmarks/IMAPParsing",
+            plugins: [
+                .plugin(name: "BenchmarkPlugin", package: "benchmark")
+            ]
+        ),
+        .executableTarget(
+            name: "IMAPEncoding",
+            dependencies: [
+                "IMAPBenchmarkSupport",
+                .product(name: "NIOIMAP", package: "swift-nio-imap"),
+                .product(name: "NIO", package: "swift-nio"),
+                .product(name: "Benchmark", package: "benchmark"),
+            ],
+            path: "Benchmarks/IMAPEncoding",
+            plugins: [
+                .plugin(name: "BenchmarkPlugin", package: "benchmark")
+            ]
+        ),
+    ]
+}
 
 let package = Package(
     name: "imap-performance-tester-example",

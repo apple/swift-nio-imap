@@ -1,6 +1,11 @@
 .DS_Store
 /.build
 Examples/*/.build
+# Per-configuration scratch paths, so that the two halves of the IMAPDispatchClient comparison do not
+# rebuild each other every time the path dependency is flipped. See
+# Examples/PerformanceTester/dev/compare-dispatch-client.sh.
+Examples/*/.build-*
+# Where that script checks out its baseline, the pinned `PRE_MIGRATION_COMMIT`.
 /.worktrees
 /Packages
 /*.xcodeproj
