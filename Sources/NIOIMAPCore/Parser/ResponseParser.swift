@@ -505,7 +505,7 @@ extension ResponseParser {
             expected: .streamingQuoted(attributeCount: attributeCount),
             next: .attributeBytes(0, attributeCount: attributeCount),
             // `parseQuoted` unescapes into a fresh array when the string contains escapes, and it is
-            // bounded by `lineLengthLimit` either way, so these bytes are owned rather than referenced.
+            // bounded by the handler's buffer limit either way, so these bytes are owned rather than referenced.
             returnValue: .fetch(.streamingBytes(IMAPBuffer(quoted)))
         )
     }

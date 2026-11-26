@@ -483,7 +483,7 @@ extension ParseInput {
     /// Consumes and copies the next `length` bytes.
     ///
     /// Copying is the right answer for everything the parsed model keeps as a small field: those are
-    /// bounded by ``IMAPDefaults/lineLengthLimit`` and almost always far smaller, so owning them
+    /// bounded by the handler's buffer limit and almost always far smaller, so owning them
     /// outright beats pinning the whole input. Raw message payloads go through
     /// ``extractBuffer(upTo:)`` instead.
     @_lifetime(self: copy self)

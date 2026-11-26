@@ -266,8 +266,8 @@ extension IMAPBuffer {
     /// The parser decides whether to copy an extracted payload by a rule of its own, which also
     /// weighs how much memory a reference would keep alive.
     ///
-    /// - Note: This is not ``IMAPDefaults/lineLengthLimit``. That is a protocol and denial-of-service
-    ///   limit and stays at 8192; this is a performance trade-off and has nothing to do with it.
+    /// - Note: This is not ``IMAPDefaults/lineLengthLimit`` or ``IMAPDefaults/responseLineLengthLimit``.
+    ///   Those are protocol and denial-of-service limits; this is a performance trade-off.
     ///
     /// It is public so that an ``EncoderOutputBuffer`` of your own makes the same decision with the
     /// same number. It is a tuning value and may change between releases.

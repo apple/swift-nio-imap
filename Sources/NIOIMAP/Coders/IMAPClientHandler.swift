@@ -41,10 +41,17 @@ public final class IMAPClientHandler: ChannelDuplexHandler {
 
     private var state: ClientStateMachine
 
+    /// Creates a client handler.
+    ///
+    /// - Parameters:
+    ///   - encodingOptions: How to encode commands.
+    ///   - parserOptions: How to parse responses.
+    ///   - maximumBufferSize: The most unparsed bytes that may wait for a response to complete.
+    ///     Exceeding it fires `ByteToMessageDecoderError.PayloadTooLargeError`; every later read fails too.
     public init(
         encodingOptions: EncodingOptions = .automatic,
         parserOptions: ResponseParser.Options = ResponseParser.Options(),
-        maximumBufferSize: Int = IMAPDefaults.lineLengthLimit
+        maximumBufferSize: Int = IMAPDefaults.responseLineLengthLimit
     ) {
         self.state = .init(encodingOptions: encodingOptions)
         self.decoder = IMAPInputProcessor(

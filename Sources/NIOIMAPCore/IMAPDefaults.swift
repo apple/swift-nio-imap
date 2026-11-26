@@ -22,14 +22,20 @@
 /// - SeeAlso: [RFC 3501](https://datatracker.ietf.org/doc/html/rfc3501),
 ///   [RFC 7162 Section 4](https://datatracker.ietf.org/doc/html/rfc7162#section-4)
 public struct IMAPDefaults: Sendable {
-    /// The maximum recommended line length for IMAP protocol messages.
+    /// The maximum recommended length of a command line.
     ///
-    /// RFC 7162 Section 4 recommends that servers not send lines longer than 8192 bytes.
-    /// The maximum recommended length, though some implementations may enforce
-    /// stricter limits.
+    /// RFC 7162 Section 4 recommends that clients not send command lines longer than 8192 bytes,
+    /// and that servers accept at least that much.
     ///
     /// - SeeAlso: [RFC 7162 Section 4](https://datatracker.ietf.org/doc/html/rfc7162#section-4)
     public static let lineLengthLimit: Int = 8_192
+
+    /// The default maximum size of an unparsed response line on the client.
+    ///
+    /// No RFC limits response lines, and servers send long ones: 5,000 UIDs in a `SEARCH` result are
+    /// about 40 KB, a `BODYSTRUCTURE` for many attachments can be tens of KB. This still caps a runaway
+    /// response. Each read re-parses the line, so a larger limit costs time quadratically.
+    public static let responseLineLengthLimit: Int = 256 * 1024
 
     /// The default maximum size for protocol literals when no other limit is specified.
     ///

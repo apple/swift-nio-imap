@@ -1645,3 +1645,67 @@ extension IMAPClientHandlerTests.Helper {
         return buffer
     }
 }
+
+// MARK: - Large non-streamed responses
+
+extension IMAPClientHandlerTests {
+    /// Writes `text` in reads of `readSize` bytes and returns what came out, or the first error.
+    private func readResponses(_ text: String, readSize: Int) -> Result<[Response], any Error> {
+        let channel = EmbeddedChannel(handler: IMAPClientHandler())
+        defer { _ = try? channel.finish() }
+        let bytes = Array(text.utf8)
+        do {
+            for start in stride(from: 0, to: bytes.count, by: readSize) {
+                let end = min(start + readSize, bytes.count)
+                try channel.writeInbound(ByteBuffer(bytes: bytes[start..<end]))
+            }
+            var responses: [Response] = []
+            while let response = try channel.readInbound(as: Response.self) {
+                responses.append(response)
+            }
+            return .success(responses)
+        } catch {
+            return .failure(error)
+        }
+    }
+
+    @Test("BODYSTRUCTURE over 8 KiB arriving in several reads parses with the default limit")
+    func largeBodyStructure() throws {
+        let part = #"("TEXT" "PLAIN" ("CHARSET" "UTF-8") NIL NIL "7BIT" 1234 56 NIL NIL NIL NIL)"#
+        let bodyStructure = "(" + String(repeating: part, count: 200) + #" "MIXED")"#
+        #expect(bodyStructure.utf8.count > 13_000)
+        let responses = try readResponses("* 1 FETCH (BODYSTRUCTURE \(bodyStructure) UID 1)\r\n", readSize: 1_500).get()
+        #expect(responses.count == 4)
+        #expect(responses.first == .fetch(.start(1)))
+        #expect(responses.last == .fetch(.finish))
+        guard
+            case .fetch(.simpleAttribute(.body(.valid(.multipart(let multipart)), hasExtensionData: _))) =
+                responses.dropFirst().first
+        else {
+            Issue.record("expected BODYSTRUCTURE, got \(responses)")
+            return
+        }
+        #expect(multipart.parts.count == 200)
+    }
+
+    @Test("SEARCH over 8 KiB arriving in several reads parses with the default limit")
+    func largeSearch() throws {
+        let uids = (1...5_000).map { String(1_000_000 + $0 * 7) }.joined(separator: " ")
+        #expect(uids.utf8.count > 8_192)
+        let responses = try readResponses("* SEARCH \(uids)\r\n", readSize: 1_500).get()
+        #expect(responses.count == 1)
+        guard case .untagged(.mailboxData(.search(let found, _))) = responses.first else {
+            Issue.record("expected one SEARCH response, got \(responses)")
+            return
+        }
+        #expect(found.count == 5_000)
+    }
+
+    @Test("a response line over the default limit still fails")
+    func runawayResponseLine() {
+        let line = "* SEARCH " + String(repeating: "1 ", count: IMAPDefaults.responseLineLengthLimit / 2)
+        #expect(throws: ByteToMessageDecoderError.PayloadTooLargeError.self) {
+            try readResponses(line, readSize: line.utf8.count).get()
+        }
+    }
+}
